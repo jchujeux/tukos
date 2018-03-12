@@ -1,0 +1,166 @@
+define(["dojo/_base/declare", "dojo/on", "dojo/_base/array", "dojo/date/locale", "put-selector/put"],
+    function(declare, on, arrayUtil, dateLocale, put){
+        // module:
+        // ganttColumn
+        // summary:
+        // A dgrid column plugin that generates gantt chart time lines in a column.
+        function getColumnSetElement(/*DomNode*/ element){
+            // summary:
+            // Finds the column set parent element of a given cell.
+            // returns:
+            // DomNode?
+            //while((element = element.parentNode) && element.className !== "dgrid-column-set"){}
+            return element.parentNode.parentNode;
+        }
+        return function(column){
+            // summary:
+            // Updates a column definition with special rendering methods that generate a gantt style chart.
+            // column: Object
+            // A column definition with the following special keys:
+            // - start: Date|number
+            // The start date of the gantt chart's viewport, either as a Date object or in milliseconds
+            // since the Unix epoch.
+            // - end: Date|number
+            // The end date of the gantt chart's viewport, either as a Date object or in milliseconds
+            // since the Unix epoch.
+            // - scale: number
+            // The number of milliseconds that one pixel represents.
+            var dependencyRow,
+            firstCell;
+            column.renderCell = function(object, value, td){
+                // summary:
+                // Renders a task.
+                // object: Object
+                // An object representing a task with the following special keys:
+                // - start: Date|number
+                // The start time for the task, either as a Date object or in milliseconds since the
+                // Unix epoch.
+                // - end: Date|number
+                // The end time for the task, either as a Date object or in milliseconds since the
+                // Unix epoch.
+                // - completed: number
+                // The amount of the task that has been completed, between 0 and 1.
+                // - dependencies: any[]
+                // An array of data objects or data object identifiers that this task depends on.
+                // value: unused
+                // td: DomNode
+                cell = td.tagName === "TD" ? td : td.parentNode;    // IE < 8 receive the inner padding node, not the td directly
+                // Add empty content to the cell to avoid it collapsing in IE
+                td.innerHTML = "&nbsp;";
+                td.style.overflow = "hidden";
+                // Ensure the start time is always milliseconds since epoch, not a Date object
+                if (object.start != null && object.end != null){
+                    var chartStartTime = +column.start,
+                        chartTimeScale = column.scale,              // number of milliseconds per pixel rendered
+                        startObject = object.start.replace(" ", "T"),
+                        endObject   = object.end.replace(" ", "T");
+                    var objectStart = new Date(startObject);        // start position of the task bar for this task, in pixels
+                    var objectEnd = new Date(endObject);
+                    left = (objectStart - column.start) / chartTimeScale,
+                    // The width of the task bar for this task, in pixels
+                    width = (objectEnd - objectStart) / chartTimeScale;
+                    // Create the colored task bar representing the duration of a task
+                    var taskDiv = put(td, "div[style=position:relative]");
+                    var taskBar = put(taskDiv, "span.task-bar[style=left:" + left + "px;width:" + width + "px]");
+                    // Create the overlay for the amount of the task that has been completed
+                    var completed = object.completed == null ? 0 : object.completed;
+                    var completeBar = put(taskDiv, "span.completed-bar[style=left:" + left + "px;width:" + width * completed + "px]");
+                    // Save the location of the right-hand edge for drawing depedency lines later
+                    cell.finished = left + width;
+                    // This reference is stored
+                    firstCell = firstCell || td;
+                    var grid = column.grid;
+                    // Create arrows for each dependency, but only after all other rows have been rendered so that they
+                    // can be retrieved and measured properly
+                    setTimeout(function(){
+                        // First, create a special column set row (which contains elements that have synced horizontal scrolling) so that all the dependency lines can
+                        // be grouped together and will be properly scrolled horizontally along with the rest of the rows
+                        if(!dependencyRow){
+                            // This intermediate element is necessary for the dependency lines to render outside of the zero height dependency row;
+                            // the outer element has a height of zero, the inner element has height to accomodate all the lines
+                            dependencyRow = put(getColumnSetElement(firstCell), "-div.dependency-container");
+                            // Create the scrolling container for the gantt dependency arrows
+                            dependencyRow = put(dependencyRow, "div.dgrid-column-set.dependency-row[data-dgrid-column-set-id=1]");
+                            // Create the actual container for the dependency arrows inside the scrolling container
+                            // this will scroll within the .dependency-row
+                            dependencyRow = put(dependencyRow, "div.dependencies.dgrid-column-chart");
+                        }
+                        arrayUtil.forEach(object.dependencies, function(dependency){
+                            // This corresponds to the dependency DOM node, the starting point of the dependency line
+                            var cell = grid.cell(dependency, column.id).element;
+                            // create the horizontal line part of the arrow
+                            var hline = put(dependencyRow, "span.dep-horizontal-line");
+                            // we find the location of the starting cell and use that to place the horizontal line
+                            var top = getColumnSetElement(cell).offsetTop + 10;
+                            hline.style.top = top + "px";
+                            hline.style.left = cell.finished + 5 + "px";
+                            // the start variable is the starting point of the target dependent cell
+                            hline.style.width = left - cell.finished - 4 + "px";
+                            // now we create the vertical line and position it
+                            var vline = put(dependencyRow, "span.dep-vertical-line");
+                            vline.style.top = top + 2 + "px";
+                            vline.style.left = left + "px";
+                            var tdTop = getColumnSetElement(td).offsetTop - 5;
+                            vline.style.height = tdTop - getColumnSetElement(cell).offsetTop + "px";
+                            // now we create the arrow at the end of the line, position it correctly
+                            var arrow = put(dependencyRow, "span.ui-icon.down-arrow");
+                            arrow.style.top = tdTop + "px";
+                            arrow.style.left = left - 7 + "px";
+                        });
+                    }, 0);
+                    var none = "none";
+                }
+            };
+            column.renderHeaderCell = function(th){
+                // Creates a header cell that contains the dates corresponding to the time lines that are being rendered in the main content
+                // th: DomNode
+                th.classList.add('dgrid-column-chart');
+                var table = put(th, "table");
+
+                var dateRow = put(table, "tr");
+
+                //var startDate = column.start,
+                var startDate = new Date(column.start),
+                    startDay  = startDate.getDay(),
+                    endDate   = new Date(column.end),
+                    endDay    = endDate.getDay(),
+                    totalDays = Math.ceil((endDate - startDate)/86400000)+1,
+                    date      = startDate,
+                    daysLeft  = totalDays,
+                    weekDays  = 7,
+                    firstDay  = startDay;   
+
+                while (daysLeft > 0){
+                    var lastDay = Math.min(weekDays, daysLeft),
+                        daysSpan = lastDay - firstDay + 1;
+                    put(dateRow, "td[style=width:" + daysSpan * 86400000 / column.scale + "px]", {
+                        innerHTML: daysSpan > 4 ? dateLocale.format(date, {selector: "date"}) : "",
+                        colSpan: daysSpan
+                        });
+                    date = new Date(date.getTime() + daysSpan * 86400000); 
+                    daysLeft -= daysSpan;
+                    firstDay = 1;
+                }
+                    
+                var dayRow = put(table, "tr");
+                var daysOfWeek = dateLocale.getNames('days', 'narrow'), 
+                    day = startDay;    
+                
+                daysLeft = totalDays;
+                while (daysLeft > 0){                    
+                    var dayTd   = put(dayRow, "td");                   
+                    var daySpan = put(dayTd, "span[style=width:" + (86400000) / column.scale + "px]",{
+                        innerHTML: daysOfWeek[day].toLowerCase()
+                        });
+                    daysLeft -= 1;
+                    day += 1;
+                    if (day == 7){day = 0}
+                }
+
+            };
+            return column;
+        };
+        
+
+});
+

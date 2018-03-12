@@ -1,0 +1,119 @@
+.dijitAdditionalEditorIconTukosLinkDialog {
+	background-image: url(../icons/tukoslinkdialog.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+
+.dijitDisabled .dijitAdditionalEditorIconTukosLinkDialog {
+	background-image: url(../icons/tukoslinkdialogDisabled.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+
+.dijitAdditionalEditorIconInsertCheckbox {
+	background-image: url(../icons/insertCheckbox.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+
+.dijitDisabled .dijitAdditionalEditorIconInsertCheckbox {
+	background-image: url(../icons/insertCheckboxDisabled.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+.dijitAdditionalEditorIconInsertPageBreak {
+	background-image: url(../icons/insertPageBreak.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+
+.dijitDisabled .dijitAdditionalEditorIconInsertPageBreak {
+	background-image: url(../icons/insertPageBreakDisabled.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+.dijitAdditionalEditorIconInsertPage {
+	background-image: url(../icons/insertPage.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+
+.dijitDisabled .dijitAdditionalEditorIconInsertPage {
+	background-image: url(../icons/insertPageDisabled.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+.dijitAdditionalEditorIconInsertToPage {
+	background-image: url(../icons/insertToPage.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+
+.dijitDisabled .dijitAdditionalEditorIconInserToPage {
+	background-image: url(../icons/insertToPageDisabled.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+.dijitAdditionalEditorIconChoiceList {
+	background-image: url(../icons/choiceList.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+.dijitAdditionalEditorIconTemplateProcess {
+	background-image: url(../icons/templateprocess.png);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+.dijitAdditionalEditorIconFitWindow {
+	background-image: url(../icons/fitWindow.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+.dijitDisabled .dijitAdditionalEditorIconFitWindow {
+	background-image: url(../icons/fitWindow.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+.dijitAdditionalEditorIconTagEdit {
+	background-image: url(../icons/tagEdit.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+.dijitDisabled .dijitAdditionalEditorIconTagEdit {
+	background-image: url(../icons/tagEdit.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+

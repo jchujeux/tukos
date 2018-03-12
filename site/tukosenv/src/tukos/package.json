@@ -1,0 +1,7 @@
+{
+	"name": "tukos",
+	"author": "Jean-Claude Hujeux",
+	"version": "2.0",
+	"description": "The Ultimate Knowledge Organizational System",
+	"dojoBuild": "tukos.profile.js"
+}

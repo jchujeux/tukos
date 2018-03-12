@@ -1,0 +1,7 @@
+/* Editor Table selection buttons */
+.editorIconModifyTableSelection{ 	
+	background-image:url(images/tableSelectionIcons.png);
+	background-position:0px 0px;	}
+.dijitDisabled .editorIconModifyTableSelection{ 	
+	background-image:url(images/tableSelectionIcons.png);
+	background-position:-18px 0px;	}

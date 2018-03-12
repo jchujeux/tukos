@@ -1,0 +1,13 @@
+define(["dojo/_base/declare", "dijit/form/Button"], 
+    function(declare, Button){
+    return declare(Button, {
+        onClick: function(evt){
+            if (this.onClickAction){
+                if(!this.onClickFunction){
+                	this.onClickFunction = eval("function(evt){" + this.onClickAction + "}");
+                }
+                this.onClickFunction(evt);
+            }
+        }
+    });
+});

@@ -1,0 +1,10 @@
+{
+	"config": {
+		"vendor-dir": "/tukos/vendor"
+	},
+	"require": {
+		"google/apiclient": "^2.0",
+		"zf1/zend-console-getopt": "~1.12",
+		"phpoffice/phpspreadsheet": "1.0.0-beta"
+	}
+}
