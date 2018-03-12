@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "tukos-142721",
+  "private_key_id": "f090e7fe437e2d052a3a10d55b531b6e9c4290be",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDfHcJZkS55QN6Z\n9ho3TQFr4CsabW51ineuf0qVk2jeaPU9RbvDb+Oa/2GnLippGPlQyBTOTa+KFI3G\nCGN5++Xyyv/lWrWgQpLLMOtG354WtcV6e8fMylg18jQhJdzUgD0GrEcumDldZ57/\nG57eGPhNFpA5qeHcdpc9QpHR7idcVeJWXI2KdsG+zO1XUwTiGMnAA09YtnGcyMpI\nXuh0e6rXps73zH3emEZunAJ5I8SBx1/tprHKyNeBxwI6aXs4Y0F6A2WH/5gawDUc\ngm9wd8OSN924Nkj6c4/0qZer5kpTa8iwJoxpT8Zj2KvHuiOJ9QlCvFL24oM0FDv3\nQ6UvYqHRAgMBAAECggEAUxooe2fh4XPR9ZJ+rT5XWzDBnTRJQipy7WGoDBI9qyl4\nvnustdyE8ARTAQvm7AJLSlVbuoOg8FM7gxk4xASY31fQ/EJPCAQD3P65g0pi/Z5y\nkW5tOs/bDyzJUddiaxvgnw2n7ajxJOMli2tkPuEaCsxup6uo3o6lQkH7Qi/sJS19\nzjPBDcKkAp8KZcaGfpZXIDWhBbqGUyXSfA5lS+Y1+4WcUaalpO6gzT07+OoBmmIE\niN/rmODjTF+1V8830MOtIu3UwwhaL9DTdQNlL96TDo0jsdcPO1/s1LhDKAJYdVu1\nsH1G7itaQovWgAyd/JmTr1Y4LbgU1GLQROw4vfcPYQKBgQD5n9szl0yrLe4d3vU2\namaYrnatfvL0Uakj5WZLhi+Li/CUsRW335Wg+tNphCWPQWUx5YSrMLwf7sjp9ox4\nzGnIY3iVq5TzedbPd/fFTsQITWV2lH/CYJ1w/gi+RCVNYCm1SAwDmrD92zduOZ6G\n1segUIGXMrBu7rPHQsFh1TlJPQKBgQDk0JTzKAutQhPC+0MEwpwrwZBPl+gnNydk\nwc+XudgRmhQnyLT6GjuovyraSugoaSRV+tR56fr4amqUnCmHvTdO8WKl5uR0AbjD\nfJNIgC0P7uKdLoyV4xxn8x0wvgze6shODPpiw6W4uDibKvKALp6xZ8DfrR7RgK1H\nzOXLBD/8JQKBgQCca6JlOrrtTVO33h2UYqo1pKVzZGiD1qQBfV9Tlhs2+5Le6fSt\nCurtPB+8L/WFRjpOQP+YcmqALBY0Ha26iIUE7+gBCcrFoySLTyawugG3HiClZLqG\nKBqgUl9SMsuZJ9ga47G7lHSyLmsWo/6FihL/j1MVVsseSG/ZPiiF0KIcFQKBgQDX\n6gND2Bv8qAehzBuXmFRp7cNReBS3PJJNv502nUXIhk5SpFAyWSLGv22eg2TDDUQe\nZgyt5h7O3wwno5yE3AYe1iSyTEhzN1S0Ew+gMGNVT6RDkjNTFPYvGPgIkK3whDfz\nfsee/uOYhS3VLhea4WMaIL+d0ezs4LGiuTR1+FKwiQKBgFlBDXpCjpcuIrK7vZyV\n55SSwQJK6J9cFCS3PKWFoKCDMyGEzVxZODnvE7Ur2aiAKX4KNkL6zXDAbGlSkb1Y\n3hWPzfejo7y1Er07qXV4YIV2v4kMzuAlkkKakCnzYdaGMK3NyX7RGB2PBM7/QBhX\nRXkuVWr1DvXuiSAPrJchzWNN\n-----END PRIVATE KEY-----\n",
+  "client_email": "tukos-calendar@tukos-142721.iam.gserviceaccount.com",
+  "client_id": "102948356775785996815",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/tukos-calendar%40tukos-142721.iam.gserviceaccount.com"
+}

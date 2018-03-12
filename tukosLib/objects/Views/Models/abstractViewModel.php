@@ -1,0 +1,48 @@
+<?php
+
+namespace TukosLib\Objects\Views\Models;
+
+use TukosLib\Objects\Views\Models\ModelsAndViews;
+use TukosLib\Utils\Utilities as Utl;
+use TukosLib\TukosFramework as Tfk;
+
+abstract class AbstractViewModel extends ModelsAndViews{
+
+    function __construct($controller, $params=[]){
+        $this->controller = $controller;
+        $this->dialogue = $controller->dialogue;
+        $this->user     = $controller->user;
+        $this->objectsStore = $controller->objectsStore;
+        $this->view     = (empty($params['view'])  ? $controller->view : $params['view']);
+        $this->model    = (empty($params['model'])  ? $controller->model : $params['model']);
+    }
+
+    function modelToView($values, $modelToView, $multiRows){
+        return $this->convert($values, $this->view->dataWidgets, $modelToView, $multiRows, [], false); 
+    }
+
+    function viewToModel($values, $viewToModel, $multiRows){
+        return $this->convert($values, $this->view->dataWidgets, $viewToModel, $multiRows, [], false); 
+    }
+
+    public function initialize($modelToView, $init = []){
+        return $this->modelToView($this->model->initializeExtended($init), $modelToView, false);
+    }
+    public function duplicate($id, $modelToView){
+        return $this->modelToView($this->model->duplicateOneExtended($id, $this->view->allowedGetCols(), $this->view->jsonColsPathsView), $modelToView, false);
+    }
+
+    public function adjustedCols($colsRequired){
+        if($colsRequired === ['*']){
+            return $this->view->allowedGetCols();
+        }else{
+            foreach ($this->view->mustGetCols as $mustGetCol){
+                if (!in_array($mustGetCol, $colsRequired)){
+                    $colsRequired[] = $mustGetCol;
+                }
+            }
+            return  array_intersect($colsRequired, $this->view->allowedGetCols());
+        }
+    }
+}
+?>

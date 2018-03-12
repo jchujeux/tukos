@@ -1,0 +1,7 @@
+{
+	"name": "dojoFixes",
+	"author": "Jean-Claude Hujeux",
+	"version": "1.0",
+	"description": "dojo, dijit, dojox, dstore and dgrid fixes required for tukos",
+	"dojoBuild": "dojoFixes.profile.js"
+}

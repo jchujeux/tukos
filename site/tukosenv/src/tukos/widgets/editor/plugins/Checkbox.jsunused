@@ -1,0 +1,56 @@
+define([
+	"dojo/_base/declare",
+	"dojo/_base/lang", 
+            "dojo/string",
+    	"dijit/_editor/_Plugin",
+	"dijit/form/Button",
+            "tukos/hiutils", 
+            "tukos/PageManager",
+	"dojo/i18n!tukos/nls/messages"
+], function(declare, lang, string, _Plugin, Button, hiutils, Pmg, messages) {
+
+    var Checkbox = dojo.declare(_Plugin, {
+        htmlTemplate: "<span class=\"checkboxTemplate\" style=\"background-color:aliceblue;\"><span contenteditable=\"false\" onclick=\"this.innerHTML = (this.innerHTML == '☐' ? '☑' : '☐')\" style=\"cursor: pointer;\">☑</span>${selectedHtml}</span><span class=\"checkboxTemplateEnd\" contenteditable=\"false\">■</span>",
+    
+        iconClassPrefix: "dijitAdditionalEditorIcon",
+
+        _initButton: function(){
+            var ed = this.editor;
+            this.button = new dijit.form.Button({
+                label: messages.insertCheckbox,
+                showLabel: false,
+                iconClass: this.iconClassPrefix + " " + this.iconClassPrefix + "InsertCheckbox",
+                tabIndex: "-1",
+                onClick: dojo.hitch(this, "_insertCheckbox")
+            });
+        },
+
+        updateState: function(){
+            // Over-ride for button state control for disabled to work.
+            this.button.set("disabled", this.get("disabled"));
+        },
+
+        setEditor: function(editor){
+            // Over-ride for the setting of the editor.
+            this.editor = editor;
+            this._initButton();
+        },
+        
+        _insertCheckbox: function(){
+            var selection = this.editor.selection, selectedElement = selection.getSelectedElement();
+            if (selectedElement && (selectedElement.innerHTML === '☐' || selectedElement.innerHTML === '☑')){
+                hiutils.removeCheckbox(selectedElement.parentNode);
+            }else{
+                var selectedHtml = selection.getSelectedHtml()
+                this.editor.execCommand("inserthtml", string.substitute(this.htmlTemplate, {selectedHtml: selectedHtml === '' ? ' ? ' : selectedHtml}));
+            }
+        }
+    });
+
+    _Plugin.registry["Checkbox"] = function(){
+        return new Checkbox({command: "insertCheckbox"});
+    };
+
+    return Checkbox;
+
+});

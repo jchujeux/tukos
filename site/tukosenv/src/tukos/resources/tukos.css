@@ -1,0 +1,186 @@
+@import '../../dijit/themes/claro/claro.css';
+@import '../../dgrid/css/dgrid.css';
+@import '../../dojox/editor/plugins/resources/editorPlugins.css';
+@import '../../dojoFixes/dojox/editor/plugins/resources/editorPluginsTableSelection.css';
+@import '../../dojox/editor/plugins/resources/css/StatusBar.css';
+@import '../../dojox/editor/plugins/resources/css/FindReplace.css';
+@import '../../dojox/calendar/themes/claro/Calendar.css';
+@import '../../dojox/form/resources/UploaderFileList.css';
+@import '../../tukos/widgets/editor/plugins/resources/css/Tukos.css';
+/*@import '../../tukos/gantt.css';*/
+
+html,body{
+	height:100%;
+	margin:0;
+	padding:0}
+ 
+.pageOverlay {
+    top: 0;
+    left: 0;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 1001;
+    display: block;
+}
+
+#loadingOverlay {
+    background:  #fff url('../resources/images/loadingAnimation.gif') no-repeat 10px 23px;
+}
+
+.loadingMessage {
+    padding: 25px 40px;
+    color: #999;
+}
+
+#appLayout {
+    height: 100%;
+    width: 100%;
+}
+#leftCol {
+    width: 0em;
+}
+ 
+.claro .demoLayout .edgePanel {
+    background-color: #d0e9fc;
+}
+
+.claro .dijitAccordionContainer .dijitAccordionContainer-child {
+  /* this is affecting the child widget itself */
+
+  padding: 0px;
+}
+#viewsChart {
+    width: 300px;
+    height: 300px;
+}
+.tableContainer-table {
+    width: 100%;
+}
+.labelsAndValues-labelCellh {
+  background-color: #BEBEBE;
+  padding-left: 1px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  font-weight: 550;
+}
+
+.labelsAndValues-labelCellv {
+  background-color: #BEBEBE;
+  text-align:center;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  font-weight: 700;
+}
+
+.labelsAndValues-valueCell {
+
+  padding-left: 1px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  background-color: lightblue;
+}  
+
+
+.dgrid {
+    height: auto;
+}
+
+.dgrid, .dgrid-header-row, .dgrid-footer, .dgrid-header-col {
+    background-color: #BEBEBE;
+}
+
+.dgrid .dgrid-scroller {
+    position: relative;
+    max-height: 1100px;
+    overflow: auto;
+}
+
+.dgrid-row-odd { 
+	background-color: lightblue;
+}
+.dgrid-row-even { 
+	background-color: #DEEFF5;
+}
+
+.dgrid-row:hover {
+	background-color: #7997A1;
+}
+.dgrid-cell {
+    overflow: auto;
+    text-overflow: ellipsis;
+
+}
+.dgrid-filter-cell {
+	padding: 0px;
+	text-align: left;
+	overflow: hidden;
+	vertical-align: top;
+	border: 1px solid #ddd;
+	border-top-style: none;
+	
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-ms-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+th.dgrid-cell {
+    font-weight: 500;
+    text-align: center;
+}
+.dgrid-hider-menu {
+	width: 130px;
+}
+
+.dijitTableLayout {
+}
+
+.tukos-hider-toggle {
+	background-position: 0 -192px;
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+
+.tukos-hider-menu {
+	position: absolute;
+	top: 0;
+	right: 17px;
+	width: 184px;
+	background-color: #fff;
+	border: 1px solid black;
+	z-index: 99999;
+	padding: 4px;
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+
+.tukos-hider-menu-row {
+	position: relative;
+	padding: 2px;
+}
+.tukos-hider-menu-check {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	padding: 0;
+}
+.tukos-hider-menu-label {
+	display: block;
+	padding-left: 20px;
+}
+.tukos-right-arrow {
+	background-position: -32px -48px;
+}
+.tukos-left-arrow {
+	background-position: -96px -48px;
+}
+.tukos-right-superarrow {
+	background-position: -32px -160px;
+}
+.tukos-left-superarrow {
+	background-position: -48px -160px;
+}

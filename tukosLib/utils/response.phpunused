@@ -1,0 +1,42 @@
+<?php
+
+namespace TukosLib\Utils;
+
+use TukosLib\TukosFramework as Tfk;
+
+class Response {
+    function __construct(){
+        $this->content = null;
+    }
+
+   /*
+    * Examples: ['values' => ['feedback' => 'this is the feedback']]
+    *           ['values' => ['team'     => [['id' => '2345', 'name' => 'Dupond', 'days' => 5]]]
+    */
+    function set($content){
+        $this->content = $content;
+    }
+    
+    function add($content, $mode = 'appendnumerickeys', $delimiter=', '){
+        switch ($mode){
+            case 'appendnumerickeys':
+                $this->responseContent = Utl::array_merge_recursive_append_numeric_keys($this->responseContent, $content);
+                break;
+            case 'appendnumerickeysandvalues':
+                $this->responseContent = Utl::array_merge_recursive_append_numeric_keys_and_values($this->responseContent, $content, $delimiter);
+                break;
+            case 'replace':
+                $this->responseContent = Utl::array_merge_recursive_replace($this->responseContent, $content);
+                break;
+            default:
+                Tfk::debug_mode('error', 'view->addResponse - mode unknown - mode : ', $mode);
+        }
+    }
+    public function get(){
+        return $this->content;
+    }
+    public function reset(){
+        $this->content = null;
+    }
+}
+?>
