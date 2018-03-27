@@ -13,10 +13,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/when
             Pmg.tabs.request({object: (Pmg.objectName(value) || this.object), view: 'edit', action: 'tab', query: {id: value}});
         },
         showInNavigator: function(widget){
-            var value       = this.valueOf(widget['widgetName']),
-                treeHandle  = registry.byId('tukos_navigatortreehandle');
-            treeHandle.showItem({id: value, object: Pmg.objectName(value) || this.object});
-            Pmg.accordions.gotoPane('tukos_navigator');
+        	Pmg.showInNavigator(this.valueOf(widget['widgetName']));
         },
            
         changedValues: function(widgetsName){

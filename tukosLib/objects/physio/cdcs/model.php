@@ -16,13 +16,16 @@ class Model extends AbstractModel {
 	protected $sexOptions = ['male', 'female'];
 	protected $morphotypeOptions = ['endomorph', 'mesomorph', 'ectomorph'];
 	protected $avgStdQueryTemplate = 
-			"SELECT count('*') as countitems, AVG(`physiocdcs`.`cmj`) as avgcmj, STDDEV_SAMP(`physiocdcs`.`cmj`) as stdcmj, AVG(`physiocdcs`.`sj`) as avgsj, STDDEV_SAMP(`physiocdcs`.`sj`) as stdsj, " .
-				   "AVG(`physiocdcs`.`reactivity`) as avgreactivity, STDDEV_SAMP(`physiocdcs`.`reactivity`) as stdreactivity " .
-			"FROM `physiocdcs` " .
+			"SELECT count('*') as countitems, " .
+				"AVG(`physiocdcs`.`cmj`) as avgcmj, STDDEV_SAMP(`physiocdcs`.`cmj`) as stdcmj, " .
+				"AVG(`physiocdcs`.`sj`) as avgsj, STDDEV_SAMP(`physiocdcs`.`sj`) as stdsj, " .
+				"AVG(`physiocdcs`.`reactivity`) as avgreactivity, STDDEV_SAMP(`physiocdcs`.`reactivity`) as stdreactivity, " .
+				"AVG(`physiocdcs`.`stiffness`) as avgstiffness, STDDEV_SAMP(`physiocdcs`.`stiffness`) as stdstiffness " .
+				"FROM `physiocdcs` " .
 				"INNER JOIN `tukos` on `physiocdcs`.`id` = `tukos`.`id` " .
 				"INNER JOIN `people` on `tukos`.`parentid`= `people`.`id` " .
 			"WHERE `tukos`.`id` > 0 and `people`.`sex`='\${sex}' and `tukos`.`grade` <> 'TEMPLATE' and `physiocdcs`.`cmj` IS NOT NULL";
-	protected $computedCols = ['avgcmj', 'avgsj', 'avgreactivity', 'stdcmj', 'stdsj', 'stdreactivity', 'countitems'];
+	protected $computedCols = ['avgcmj', 'avgsj', 'avgreactivity', 'avgstiffness', 'stdcmj', 'stdsj', 'stdreactivity', 'stdstiffness', 'countitems'];
 	
 	
     function __construct($objectName, $translator=null){
@@ -33,6 +36,7 @@ class Model extends AbstractModel {
         	'cmj' => 'float default NULL',
         	'sj' => 'float default NULL',
         	'reactivity' => 'float default NULL',
+        	'stiffness' => 'float default NULL',
         	'sport' => 'longtext DEFAULT NULL',
         	'health' => 'longtext DEFAULT NULL',
 			'questionnairetime'  =>  'VARCHAR(20)  DEFAULT NULL',
@@ -97,7 +101,7 @@ class Model extends AbstractModel {
             $patientsModel = Tfk::$registry->get('objectsStore')->objectModel('physiopatients');
             $item = array_merge($item, $patientsModel->getOneExtended(['where' => ['id' => $item['parentid']], 'cols' => $this->patientCols]));
             if (!empty($item['sex'])){
-    			return array_merge($item, SUtl::$tukosModel->store->query(Utl::substitute($this->avgStdQueryTemplate, ['sex' => $item['sex']]))->fetch());
+    			return array_merge($item, SUtl::$store->query(Utl::substitute($this->avgStdQueryTemplate, ['sex' => $item['sex']]))->fetch());
             }else{
             	foreach($this->computedCols as $col){
             		$item[$col] = '';

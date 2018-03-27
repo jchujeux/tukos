@@ -7,7 +7,7 @@
         constructor: function(args){
         },
     	postCreate: function (){    
-    		this.widgetType = "TukosAccordion";
+    		this.widgetType = "TukosAccordionPane";
             this.inherited(arguments);
         },
         refresh: function(formContent){
@@ -22,24 +22,22 @@
             })
         },
         onShow: function(){
-        	console.log('TukosAccordion - onShow ');
+        	console.log('TukosAccordionPane - onShow ');
+        	this.createPane();
+        },
+        createPane: function(){
         	if (!this.form){
-        		//var self = this, theForm = this.form = this.formContent ? new ObjectPane(this.formContent) : new TukosPane(this.paneContent);
-        		//var self = this, title = this.title, loadingId = title + 'loadingOverlay';
-        		//this.set('title', '<div id="' + loadingId + '" class="loadingOverlay pageOverlay"><div class="loadingMessage">Loading ... </div></div>');
-        		//this.set('title', 'Loading ...');
         		if (this.formContent){
-                	this.accordionsManager.refresh('tab', [], false, this);
+                	this.accordionManager.refresh('tab', [], false, this);
                 }else{
                 	var self = this;
                 	this.form = new TukosPane(this.paneContent);
             		ready(function(){
-                        //domStyle.set(loadingId, 'display', 'none');
             			self.addChild(self.form);               
                         self.resize();
                     })
                 }
-        	}
+        	}       	
         },
         isObjectPane: function(){
         	return typeof(this.form.object) !== "undefined";

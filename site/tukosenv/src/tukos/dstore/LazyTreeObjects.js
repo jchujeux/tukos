@@ -39,16 +39,9 @@ define([
             var self    = this;
             Pmg.serverDialog(this.childrenUrlArgs(object.id)).then(
                 function(response){
-                    //arrayUtil.forEach(response.values, function(item){
                     response.items.forEach(function(item){
                         self.addSync(item);
                     });
-                    //return self.root.filter(self.getCollectionFilter().eq('parentid', object.id));
-/*
-                    var filter = new self.Filter();
-                    var childrenFilter = filter.eq('parentid', object.id);
-                    return self.root.filter(childrenFilter);
-*/
                 }
             );
             return self.root.filter(self.getCollectionFilter().eq('parentid', object.id));

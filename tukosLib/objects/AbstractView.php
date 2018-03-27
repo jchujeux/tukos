@@ -38,8 +38,6 @@ abstract class AbstractView extends ObjectTranslator{
             ), 
             'parentid'  => ViewUtils::objectSelectMulti($parentObjects, $this, $parentWidgetTitle),
             'name'      => ViewUtils::textBox($this, $nameWidgetTitle, [/*'atts' => ['edit' => ['style' => ['width' => '20em']]],*/ 'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]),
-            //'comments'  => ViewUtils::Editor($this, 'Comments / Details'),
-        	//'comments'  => ViewUtils::sharedEditor($this, 'Comments / Details', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'White', 'minHeight' => '5em']]]]),
         	'comments'  => ViewUtils::lazyEditor($this, 'Comments / Details'),
             'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             'grade' => ViewUtils::storeSelect('grade', $this, 'Grade', ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),

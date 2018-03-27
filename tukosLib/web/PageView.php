@@ -31,20 +31,20 @@ class PageView extends Translator{
             'contextTreeAtts' => array_merge($this->user->contextTreeAtts($this->tr), ['style' => ['width' => '15em', 'backgroundColor' => '#F8F8F8']]),
             'sortParam' => 'sort',
             'dialogueUrl' => Tfk::$registry->dialogueUrl,
-            'accordionsDescription' => [],
+            'accordionDescription' => [],
             'tabsDescription' => [],
-            
+    		'navigationTree' => 'navigationTree'
         ];
-    	$this->accordionsStoreData = [];
+    	$this->accordionStoreData = [];
 
     }
 
-    function addAccordion($description){
+    function addAccordionPane($description){
         if (empty($description)){
             return false;
         }else{
-            $this->pageManagerArgs['accordionsDescription'][] = $description;
-            $this->accordionsStoreData[] = ['id' => $description['id'], 'name' => $description['title']];
+            $this->pageManagerArgs['accordionDescription'][] = $description;
+            $this->accordionStoreData[] = ['id' => $description['id'], 'name' => $description['title']];
             return true;
         }
     }
@@ -190,7 +190,7 @@ class PageView extends Translator{
            					'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
            					//'name'  => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('panename')]]), false),
            					'name'  => Widgets::description(Widgets::storeSelect([
-           						'edit' => ['storeArgs' => ['data' => $this->accordionsStoreData], 'label' => $this->tr('panename')],
+           						'edit' => ['storeArgs' => ['data' => $this->accordionStoreData], 'label' => $this->tr('panename')],
            					]), false),
                          	'selected' => Widgets::description(Widgets::checkBox([
            						//'storeedit' => ['editOn' => 'click'], 

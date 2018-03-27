@@ -174,17 +174,6 @@ abstract class AbstractModel extends ObjectTranslator {
     			$atts['where'][] = ['opr' => 'NOT EXISTS', 'values' => 'SELECT 1 FROM tukos as t1 WHERE tukos.parentid = t1.id AND object="' . $this->tableName . '"'];
     		}
         }
-/*
-    	if (isset($atts['allDescendants'])){
-            $allDescendants = $atts['allDescendants'];
-            if ($allDescendants && isset($atts['range'])){
-                Tfk::error_message('info', 'combining range and allDescendants is not supported. Continuing at your own risks - atts: ', $atts);
-            }
-            unset($atts['allDescendants']);
-        }else{
-            $allDescendants = false;
-        }
-*/
 
         $values = $this->getItems($atts);
 

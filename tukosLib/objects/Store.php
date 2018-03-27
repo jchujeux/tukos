@@ -59,18 +59,25 @@ trait Store {
     
     protected function idColIdPath($idColId, $idCol){
         $path = [];
-        $tukosTable = $this->tukosModel->tableName();
         while ($idColId > 0){
-            $item    = $this->store->getOne(['table' => $tukosTable, 'where' => ['id' => $idColId], 'cols' => ['name', 'object']]);
-            $path[]  = ['id' => $idColId, 'name' => $item['name'], 'object' => $item['object']];
-            $idColId = $this->store->getOne(['table' => $item['object'], 'where' => ['id' => $idColId], 'cols' => [$idCol]])[$idCol];
+            $item    = SUtl::$tukosModel->getOne(['where' => ['id' => $idColId], 'cols' => ['id', 'name', 'object', $idColId]]);
+            $idColId = Utl::extractItem($idColId, $item);
+            $path[]  = $item;
         }
         $path[] = ['id' => '0', 'name' => '', 'object' => ''];
         return $path;    
     }
    
-    public function itemColPath($item, $idCol){/* $item = ['id' => $id, 'name' => $name, $idCol => $idColId, ...]*/
-        return array_merge([['id' => $item['id'], 'name' => $item['name'], 'object' => $item['object']]], $this->idColIdPath($item[$idCol], $idCol));
+    public function itemColPath($item, $idCol){
+        $path = [];
+    	while(!empty($item)){
+        	$idColId = Utl::extractItem($idCol, $item);
+        	$path[] = $item;
+        	$item = $idColId > 0 ? SUtl::$tukosModel->getOne(['where' => ['id' => $idColId], 'cols' => ['id', 'name', 'object', $idCol]]) : [];
+        }
+        $path[] = ['id' => '0', 'name' => '', 'object' => ''];
+        return $path;
+        //return array_merge([['id' => $item['id'], 'name' => $item['name'], 'object' => $item['object']]], $this->idColIdPath($item[$idCol], $idCol));
     }
 }
 ?>

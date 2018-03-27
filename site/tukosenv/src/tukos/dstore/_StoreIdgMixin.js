@@ -12,12 +12,6 @@ define([
             value.forEach(function(row){
                 row.idg = self.idgLast +=1;
             });
-/*
-            for (var row in value){
-                this.idgLast += 1;
-                value[row].idg = this.idgLast;
-            }
-*/
             this.inherited(arguments); 
         },
         addSync: function(object, options){

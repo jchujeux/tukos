@@ -26,25 +26,25 @@ class Page extends Translator{
         $pageView           = new PageView($this);
         $dialogueController = new Dialogue();
 
-        $isOkAccordions = true;
+        $isOkAccordion = true;
         $appConfig= Tfk::$registry->get('appConfig');
         $pageCustom = $this->user->pageCustomization();
         $panesCustomization = isset($pageCustom['panesConfig']) ? Utl::toAssociative($pageCustom['panesConfig'], 'name') : [];
-        foreach ($appConfig->accordions as $name => $accordionRequest){
-        	if ($this->user->isAllowed($request['object'], [])){
-	        	if ($accordionRequest['view'] === 'edit'){
-	            	$accordionDescription = ['formContent' => ['object' => $accordionRequest['object'], 'viewMode' => 'edit', 'action' => 'tab', 'query' => $accordionRequest['query']]];
+        foreach ($appConfig->accordion as $configRequest){
+        	if ($this->user->isAllowed($configRequest['object'], [])){
+	        	if ($configRequest['view'] === 'edit'){
+	            	$description = ['formContent' => ['object' => $configRequest['object'], 'viewMode' => 'edit', 'action' => 'tab', 'query' => $configRequest['query']]];
 	            }else{
-	            	$accordionDescription = $dialogueController->response($accordionRequest, [], true);
+	            	$description = $dialogueController->response($configRequest, [], true);
 	            }
-	            if (!empty($accordionRequest['title'])){
-	            	$accordionDescription['title'] = $this->tr($accordionRequest['title']);
+	            if (!empty($configRequest['title'])){
+	            	$description['title'] = $this->tr($configRequest['title']);
 	            }
-	            $id = $accordionDescription['id'] = $accordionRequest['id'];
+	            $id = $description['id'] = 'pane_' . $configRequest['pane'];
 	            if (isset($panesCustomization[$id]) && isset($panesCustomization[$id]['selected']) && $panesCustomization[$id]['selected'] === 'on'){
-	            	$accordionDescription['selected'] = true;
+	            	$description['selected'] = true;
 	            }
-	            $pageView->addAccordion($accordionDescription);
+	            $pageView->addAccordionPane($description);
         	}
         }
 
@@ -52,7 +52,7 @@ class Page extends Translator{
         $isOkTab = $pageView->addTab($dialogueController->response($request, $query));
         $pageView->setFocusedTab(0);
 
-        if ($isOkAccordions && $isOkTab){
+        if ($isOkAccordion && $isOkTab){
             Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
             $pageView->render($this->user->modulesMenuLayout());
         }
