@@ -1,7 +1,4 @@
 
-/*
- * Tukos tabs manager
- */
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready",  "dojo/on", "dojo/mouse", "tukos/_PanesManager", "tukos/TukosTab",  "dijit/registry", "dijit/Dialog", "dijit/Menu", "dijit/MenuItem", 
          "dijit/PopupMenuItem", "tukos/utils", "tukos/PageManager", "dojo/json", "dojo/i18n!tukos/nls/messages"], 
     function(declare, lang, dom, ready, on, mouse, _PanesManager, TukosTab, registry, Dialog, Menu, MenuItem, PopupMenuItem, utils, Pmg, JSON, messages ){

@@ -30,10 +30,6 @@ class Dialogue extends Translator{
     }
 
     function respond($request, $query, $ignoreUnallowed = false){
-        //Feedback::reset();
-        //$objectsStore = Tfk::$registry->get('objectsStore');
-        //$objectController = $objectsStore->objectController($request['object']);
-
         $response = $this->response($request, $query, $ignoreUnallowed);
         if ($response !== false){
         	$this->responseToDialogue($response);

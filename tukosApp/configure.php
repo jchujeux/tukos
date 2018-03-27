@@ -67,11 +67,11 @@ class Configure{
 
         $this->mailConfig = ['host' => 'localhost', 'software' => 'Mercury'];
         
-        $this->accordions = [
-            'ContextTree'       => ['object' => 'users'     , 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'userContext', 'id' => 'pane_userContext'],
-            'log'               => ['object' => 'users'     , 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'log', 'id' => 'pane_log'], 
-        	'calendar'			=> ['object' => 'calendars' , 'view' => 'edit', 'action' => 'Accordion', 'title' => 'calendar', 'id' => 'pane_calendar', 'query' => ['id' => 'calendarid', 'customviewid' => 'customviewid']],
-        	'NavigationTree'    => ['object' => 'navigation', 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'navigationTree', 'id' => 'pane_navigationTree'],
+        $this->accordion = [
+            ['object' => 'users'     , 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'userContext'],
+            ['object' => 'users'     , 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'log'], 
+        	['object' => 'calendars' , 'view' => 'edit', 'action' => 'Accordion', 'pane' => 'calendar', 'title' => 'calendar', 'query' => ['id' => 'calendarid', 'customviewid' => 'customviewid']],
+        	['object' => 'navigation', 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'navigationTree'],
         ];
 
         Tfk::$registry->set('configStore', function(){

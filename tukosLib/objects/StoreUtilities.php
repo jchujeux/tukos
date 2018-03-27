@@ -191,8 +191,7 @@ class StoreUtilities {
             $queryAtts['orderBy'] = self::transformOrderBy($queryAtts['orderBy'], $objectName);
         }
         $queryAtts['cols'] = self::transformCols($queryAtts['cols'], $objectName);
-        $queryAtts['where'][] = self::deleteFilter();        
-        $queryAtts['where'] = self::transformWhere($queryAtts['where'], $objectName);
+        $queryAtts['where'] = self::transformWhere(self::deletedFilter($queryAtts['where']), $objectName);
         if (!empty($queryAtts['groupBy'])){
             $queryAtts['groupBy'] = self::transformCols($queryAtts['groupBy'], $objectName);
         }
@@ -230,8 +229,9 @@ class StoreUtilities {
         return $queryAtts;
     }
   
-    public static function deleteFilter(){
-        return  ['col' => 'id', 'opr' => '>', 'values' => 0];
+    public static function deletedFilter($where){
+    	$where[] = ['col' => 'id', 'opr' => '>', 'values' => 0];
+    	return $where;
     }
 
     public static function colsPrefix($col, $objectName){

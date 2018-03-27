@@ -165,14 +165,14 @@ class UserInformation{
     * Add condition to the where clause for $store->getXXX so as 
     * not to retrieve values not in current user context as well as values with negative ids (considered deleted)
     */
-    function filterContext($where, $objectName, $tableName=''){// $tableName is needed in queries involving joins as contextid may then appear in different tables
+    function filterContext($where, $objectName='', $tableName=''){// $tableName is needed in queries involving joins as contextid may then appear in different tables
         $col = ($tableName === '' ? '' : $tableName . '.') . 'contextid';
         if (isset($where['contextpathid'])){
             $contextPathId = Utl::extractItem('contextpathid', $where);
-        }else{
+        }else if(!empty($objectName)){
             $contextPathId = $this->getContextId($objectName);
         }
-        if (!empty($fullPathIds = $this->contextModel->getFullPathIds($contextPathId))){
+        if (!empty($contextPathId) && !empty($fullPathIds = $this->contextModel->getFullPathIds($contextPathId))){
 	        $where[] = [['col' => $col, 'opr' => 'IN', 'values' => $fullPathIds],
 	                    ['col' => $col, 'opr' => 'IS NULL', 'values' => null, 'or' => true],// rows with null contextid are considered visible by all users
 	        ];
@@ -180,7 +180,7 @@ class UserInformation{
         return $where;  
     }
 
-    function filter($where, $objectName, $tableName=''){
+    function filter($where, $objectName='', $tableName=''){
         return $this->filterContext($this->filterPrivate($where, $tableName), $objectName, $tableName);
     }
 

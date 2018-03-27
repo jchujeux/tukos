@@ -121,6 +121,7 @@ define("tukos/nls/messages", { root:
     editinnewtab : "edit in new tab", 
     editinpopup : "edit in popup", 
     showinnavigator: "show in navigator",
+    children: "children",
     showhidefilters : "show/hide filters",
     insertrowbefore: "insert row before"   , 
     addrowatend: "add row at end"     , 

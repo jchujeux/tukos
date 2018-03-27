@@ -90,7 +90,7 @@ class View extends EditView{
 									'contents' => [
 										'row1' => [
 											'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
-											'widgets' => ['cmj', 'avgcmj', 'stdcmj','sj', 'avgsj', 'stdsj','reactivity', 'avgreactivity', 'stdreactivity'],
+											'widgets' => ['cmj', 'avgcmj', 'stdcmj','sj', 'avgsj', 'stdsj', 'reactivity', 'avgreactivity', 'stdreactivity', 'stiffness', 'avgstiffness', 'stdstiffness'],
 										],
 										'row2' => [
 											'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'widgetCellStyle' => ['textAlign' => 'right']],

@@ -22,29 +22,7 @@ class Get extends AbstractViewModel {
             return $this->view->user->getCustomView($this->view->objectName, $this->controller->request['view'], ['widgetsDescription']);
         }
     }
-/*
-    public function hiddenGridCols($widgetName, $query = false){
-        $customElements = $this->getElementsCustomization($query);
-        $hiddenCols = [];
-        if (isset($customElements[$widgetName]['atts']['columns'])){
-            foreach ($customElements[$widgetName]['atts']['columns'] as $col => $atts){
-                if (!empty($atts['hidden'])){
-                    $hiddenCols[] = $col;
-                }
-            }
-        }
-        return $hiddenCols;
-    }
-    
-    public function unHiddenGridCols($widgetName, $cols, $query = false){
-        $hiddenCols = $this->hiddenGridCols($widgetName, $query);
-        $parentidKey = array_search('parentid', $hiddenCols);
-        if ($parentidKey){
-            unset($hiddenCols[$parentidKey]);
-        }
-        return array_diff($cols, $hiddenCols);
-    }
-*/
+
     function getOne($query, $cols, $modelToView, $silent = false){
 
         $getOne = $this->modelGetOne;

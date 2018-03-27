@@ -14,8 +14,8 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                 return dojo.date.locale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
             };
             require(["tukos/StoresManager", "tukos/ObjectSelect", "tukos/NavigationMenu",
-                     "tukos/TabsManager", "tukos/AccordionsManager", "tukos/TabOnClick", "dojo/domReady!"], 
-            function(StoresManager, ObjectSelect, NavigationMenu, TabsManager, AccordionsManager, TabOnClick){
+                     "tukos/TabsManager", "tukos/AccordionManager", "tukos/TabOnClick", "dojo/domReady!"], 
+            function(StoresManager, ObjectSelect, NavigationMenu, TabsManager, AccordionManager, TabOnClick){
                 stores = new StoresManager();
                 var appLayout = new BorderContainer({design: 'sidebar'}, "appLayout");
 
@@ -25,7 +25,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                 //appLayout.addChild(leftPane);
                 var leftAccordion = new AccordionContainer({id: 'leftPanel', region: "left", 'class': "left", splitter: true, style: {width: leftPaneWidth, padding: "0px", display: (hideLeftPane ? "none" : "block")}});
                 appLayout.addChild(leftAccordion);
-                self.accordions   = new AccordionsManager({container: leftAccordion});
+                self.accordion   = new AccordionManager({container: leftAccordion});
 
                 var contentHeader = new ContentPane({id: 'tukosHeader', region: "top", 'class': "edgePanel", style: "padding: 0px;", content: obj.headerContent});
                 contentHeader.on('contextmenu', lang.hitch(self, self.contextMenuCallback));
@@ -42,7 +42,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                 tukosGlobal.pmr = self; // to make self.tabs.gotoTab visible in tukoslinkdialog
                 
                 var newPanesConfig = [];
-                obj.accordionsDescription.forEach(function(description, key){
+                obj.accordionDescription.forEach(function(description, key){
                 	var paneId = description['id'];//, paneConfig = panesConfig[key] || {};
                 	if (utils.empty(panesConfig)){
                 		newPanesConfig[key] = {rowId: key, name: paneId, present: 'YES'};
@@ -57,7 +57,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                 };
                 ready(function(){
                     if (!hideLeftPane){
-                    	self.lazyCreateAccordions();
+                    	self.lazyCreateAccordion();
                     }
                 	appLayout.startup();
                     var leftPaneButton = registry.byId('showHideLeftPane'), leftPaneMaxButton = registry.byId('showMaxLeftPane'), displayStatus = domStyle.get('leftPanel', 'display');
@@ -65,7 +65,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                     leftPaneButton.on('click', function(){
                         var displayStatus = domStyle.get('leftPanel', 'display');
                         if (displayStatus === 'none'){
-                        	self.lazyCreateAccordions();
+                        	self.lazyCreateAccordion();
                             ready(function(){
                             	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || pageCustomization.leftPaneWidth);
                             	domStyle.set('leftPanel', 'display', 'block');
@@ -89,7 +89,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                     leftPaneMaxButton.on('click', function(){
                         var displayStatus = domStyle.get('leftPanel', 'display');
                         if (displayStatus === 'none'){
-                        	self.lazyCreateAccordions();
+                        	self.lazyCreateAccordion();
                         	ready(function(){
 	                        	domStyle.set('leftPanel', 'width', '80%');
 	                        	isMaximized = true;
@@ -131,23 +131,57 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                 });
             });
         },
-        lazyCreateAccordions: function(){
-            if (!this.createdAccordions){
-            	var panesConfig = this.cache.pageCustomization.panesConfig || [], self = this, selectedAccordion;
-            	this.cache.accordionsDescription.forEach(function(description, key){
+        lazyCreateAccordion: function(ignoreSelected){
+            if (!this.createdAccordion){
+            	var panesConfig = this.cache.pageCustomization.panesConfig || [], self = this, selectedAccordionPane;
+            	this.cache.accordionDescription.forEach(function(description, key){
                 	var paneConfig = panesConfig[key] || {}, selected = paneConfig.selected;
                 	if (!(paneConfig.present === 'NO')){
-                		var pane = self.accordions.create(description);
-                    	if (selected === 'on'){
-                    		selectedAccordion = pane;
+                		var pane = self.accordion.create(description);
+                    	if (selected){
+                    		selectedAccordionPane = pane;
                     	}
                 	}
                 });  
-            	if (selectedAccordion){
-            		ready(function(){self.accordions.gotoPane(selectedAccordion);});
+            	if (!ignoreSelected && selectedAccordionPane){
+            		ready(function(){self.accordion.gotoPane(selectedAccordionPane);});
             	}
-            	this.createdAccordions = true;
+            	this.createdAccordion = true;
             }
+        },
+        showInNavigator: function(id){
+            if (domStyle.get('leftPanel', 'display') === 'none'){
+            	this.lazyCreateAccordion(true);
+                ready(lang.hitch(this, function(){
+                	var newPageCustomization = this.cache.newPageCustomization, leftPaneButton = registry.byId('showHideLeftPane'), leftPaneMaxButton = registry.byId('showMaxLeftPane');
+                	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || this.cache.pageCustomization.leftPaneWidth);
+                	domStyle.set('leftPanel', 'display', 'block');
+                	newPageCustomization.hideLeftPane = 'NO';
+                	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
+                	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
+                	this.setNavigationPane(id);
+                }));
+            }else{
+            	this.setNavigationPane(id);
+            }
+        },
+        setNavigationPane: function(id){
+            var navigatorPane = registry.byId('pane_navigationTree');
+            if (navigatorPane){
+            	if (!navigatorPane.form){
+            		navigatorPane.createPane();
+            		ready(lang.hitch(this, function(){
+                    	navigatorPane.form.getWidget('tree').showItem({id: id, object: this.objectName(id)});
+                    	this.accordion.gotoPane(navigatorPane);
+            		}));
+            	}else{
+                	navigatorPane.form.getWidget('tree').showItem({id: id, object: this.objectName(id)});
+                	this.accordion.gotoPane(navigatorPane);                		
+            	}
+            }else{
+            	console.log('case of navigator pane not present to be done');
+            }
+        	registry.byId('appLayout').resize();
         },
         contextMenuCallback: function(evt){
             evt.preventDefault();
@@ -205,7 +239,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         },
 
         refresh: function(tabOrAccordion, action, data, keepOptions){
-        	return this[tabOrAccordion.isAccordion()? 'accordions' : 'tabs'].refresh(action, data, keepOptions);
+        	return this[tabOrAccordion.isAccordion()? 'accordion' : 'tabs'].refresh(action, data, keepOptions);
         },
         
         loading: function(title, longMessage){
