@@ -411,7 +411,7 @@ class Utilities{
    /*
     * Transforms array [value1, value2, , ...], into array [['id' => value1, 'name' => $translator(value1), ...], ready to be consumed by dojo/store (Intended for tukos/storeSelect)
     */
-    public static function idsNamesStore($idsStore, $translator, $translationMode='ucfirstOnly'){
+    public static function idsNamesStore($idsStore, $translator, $translationMode='ucfirst'){
         $theStore = [];
         foreach ($idsStore as $key => $value){
             if (is_array($value)){

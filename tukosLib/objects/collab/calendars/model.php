@@ -31,7 +31,8 @@ class Model extends AbstractModel {
     public function initializeExtended($init = []){
     	$googleSource = Utl::extractItem('googleSource', $init);
     	if (empty($googleSource)){
-    		$googleSource = $this->user->getCustomView($this->objectName, 'edit', ['widgetsDescription', 'calendartab', 'atts', 'defaultCalendar']);
+    		$paneMode = isset($this->paneMode) ? $this->paneMode : 'tab';
+    		$googleSource = $this->user->getCustomView($this->objectName, 'edit', $paneMode, ['widgetsDescription', 'calendartab', 'atts', 'defaultCalendar']);
     	}
     	$tukosSource = Utl::extractItem('tukosSource', $init);
     	$id = 1;

@@ -5,8 +5,8 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
         decorate: function(widget){
 
             var self = this, menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
-            menuItemsArgs = utils.in_array(widgetName, this.objectIdCols) 
-                ? menuItemsArgs.concat([{atts: {label: messages.editinnewtab  , onClick: function(evt){self.editInNewTab(widget)}}}, {atts: {label: messages.showinnavigator, onClick: function(evt){self.showInNavigator(widget)}}}])
+            menuItemsArgs = (widgetName === 'id' || utils.in_array(widgetName, this.objectIdCols))
+                ? menuItemsArgs.concat(lang.hitch(this, wcutils.idColsContextMenuItems)(widget))
                 : menuItemsArgs;
             mutils.setContextMenu(widget,{atts: {targetNodeIds: [widget.domNode]}, items: menuItemsArgs});
 
@@ -136,6 +136,8 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
                 }                  
             }
         },
+
+
         markAsUnchanged: function(widgetsName){
             for (var i in widgetsName){
                 wutils.markAsUnchanged(widgetsName[i]);
@@ -287,7 +289,8 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
         completeUrlArgs: function(urlArgs){
             var form = this.form || this;
             urlArgs.object = urlArgs.object || form.object;
-            urlArgs.view = urlArgs.view || form.viewMode || 'noview';// 'novies' probably not needed
+            urlArgs.view = urlArgs.view || form.viewMode || 'noview';// 'noview' probably not needed
+            urlArgs.mode = urlArgs.mode || form.paneMode || 'nomode';// 'nomode' probably not needed
             if (urlArgs.query && urlArgs.query.id && urlArgs.query.id === true){
                 urlArgs.query.id = registry.byId(form.id + 'id').get('value');
             }

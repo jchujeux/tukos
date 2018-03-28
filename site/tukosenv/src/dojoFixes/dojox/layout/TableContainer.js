@@ -114,6 +114,12 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
                     }
                     //this.set('style', {height: this.table.clientHeight+'px'}); //JCH - to allow vertical scrolling of the parent pane (that needs to be aware of height != its own height)
                     this.set('style', {height: 'auto'}); 
+                    if (this.table.innerText === ''){
+                    	this.hiddenLabel = this.hiddenLabel || this.label;
+                    	this.label = '';
+                    }else{
+                    	this.label = this.label || this.hiddenLabel;
+                    }
                 }
             },
 
@@ -180,7 +186,7 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
 			if (child.hidden){
                 child.domNode.style.display = 'none';
             }else{
-                child.domNode.style.display = 'block';
+            	child.domNode.style.display = 'block';
                 var colspan = child.colspan || 1;
                 
                 if(colspan > 1) {

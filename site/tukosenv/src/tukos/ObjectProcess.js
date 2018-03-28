@@ -3,7 +3,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/mouse",  "dij
     return declare([Button], {
         postCreate: function(args){
             this.inherited(arguments);
-            var self = this;
+            var self = this, form = this.form;
             on(this, "click", function(evt){
                 evt.stopPropagation();
                 evt.preventDefault();
@@ -11,10 +11,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/mouse",  "dij
                 if (lang.hitch(self, self.processCondition)()){
                     self.valuesToSend = {};
                     (self.includeWidgets || []).forEach(function(widgetName){
-                    	self.valuesToSend[widgetName] = self.form.valueOf(widgetName);
-                    })
+                    	self.valuesToSend[widgetName] = form.valueOf(widgetName);
+                    });
                     if (self.allowSave){
-                        self.valuesToSend = lang.mixin(self.valuesToSend, self.form.changedValues());
+                        self.valuesToSend = lang.mixin(self.valuesToSend, form.changedValues());
                     }
                     theId = registry.byId(self.form.id + 'id').get('value');
                     if (self.allowSave || (theId != '' && !self.needToSaveBeforeProcess())){

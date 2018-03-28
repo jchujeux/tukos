@@ -6,10 +6,13 @@ define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom-attr", "dojo/on", "
         	args.storeArgs = args.storeArgs || {};
             args.storeArgs.view = args.storeArgs.view || 'noview';
             args.storeArgs.action = args.storeArgs.action || 'objectselect';
-            if (args.storeArgs.object || args.object){
+            //if (args.storeArgs.object || args.object){
                 args.storeArgs.object = args.storeArgs.object || args.object;
-                args.store = Pmg.store(args.storeArgs);
-            }
+            //}
+            //if (args.storeArgs.mode || args.mode){
+                args.storeArgs.mode = args.storeArgs.mode || args.mode || 'tab';
+            //}
+            args.store = Pmg.store(args.storeArgs);
 
         	declare.safeMixin(this, args);
         },

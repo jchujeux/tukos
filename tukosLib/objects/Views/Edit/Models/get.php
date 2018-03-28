@@ -24,6 +24,11 @@ class Get extends ViewsGetModel {
         	foreach ($this->view->dataWidgets as $col => $description){
         		$data['disabled'][$col] = (isset($description['atts']['edit']['disabled']) &&  $description['atts']['edit']['disabled']) ? true : false;
         	}
+
+            foreach ($this->view->dataWidgets as $col => $description){
+        		$data['readOnly'][$col] = (isset($description['atts']['edit']['readOnly']) &&  $description['atts']['edit']['readOnly']) ? true : false;
+            }
+
         	foreach ($this->view->subObjects as $col => $description){
         		$data['disabled'][$col] = (isset($description['atts']['disabled']) &&  $description['atts']['disabled']) ? true : false;
         	}
@@ -96,7 +101,7 @@ class Get extends ViewsGetModel {
 
         $response['readOnly'] = $this->setProtection($response['data']);
         if ($dupId){
-        	if (!empty($itemCustomization = $this->view->model->getItemCustomization(['id' => $dupId], ['edit']))){
+        	if (!empty($itemCustomization = $this->view->model->getItemCustomization(['id' => $dupId], ['edit', $this->paneMode]))){
         		$response['itemCustomization'] = $itemCustomization;
         	}
         }
@@ -104,16 +109,24 @@ class Get extends ViewsGetModel {
     }
     
     protected function mergeCustomization($response, $customMode, $itemId = null){
+/*
     	return Utl::array_merge_recursive_replace(
     		$response, 
     		isset($this->controller->customViewId)
     			? $this->getCustomView($this->controller->customViewId)
     			: ($customMode === 'object'
-    				? $this->view->user->getCustomView($this->view->objectName, 'edit', [])
-    				: $this->view->model->getCombinedCustomization(['id' => $itemId], 'edit', []))
+    				? $this->user->getCustomView($this->objectName, 'edit', $this->paneMode, [])
+    				: $this->model->getCombinedCustomization(['id' => $itemId], 'edit', $this->paneMode, []))
+    	);
+*/
+    	return Utl::array_merge_recursive_replace(
+    		$response, 
+    		$customMode === 'object'
+    				? $this->user->getCustomView($this->objectName, 'edit', $this->paneMode, [])
+    				: $this->model->getCombinedCustomization(['id' => $itemId], 'edit', $this->paneMode, [])
     	);
     }
-    
+/*    
     protected function getCustomView($customViewId){
     	$result = $this->objectsStore->objectModel('customviews')->getOne(['where' => ['id' => $customViewId], 'cols' => ['customization']], ['customization' => []]);
     	if (empty($result)){
@@ -123,7 +136,7 @@ class Get extends ViewsGetModel {
     		SUtl::addIdCol($customViewId);
     		return is_null($result['customization']) ? [] : $result['customization'];
     	}
-    	 
     }
+*/    	 
 }
 ?>

@@ -143,7 +143,7 @@ class View extends EditView{
             ]
         ];
         $this->actionWidgets['googlesync'] =  ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Googlesync'), 'allowSave' => true,
-        	'urlArgs' => ['query' => ['params' => json_encode(['process' => 'googleSynchronize', 'save' => true])]], 'includeWidgets' => ['googlecalid'],
+        	'urlArgs' => ['query' => ['params' => json_encode(['process' => 'googleSynchronize', 'save' => true])]], 'includeWidgets' => ['googlecalid', 'synchrostart', 'synchroend'],
         	'conditionDescription' =>
         		"var form = this.form, googlecalid = form.valueOf('googlecalid');\n" .
         		"if (typeof googlecalid === 'string' && googlecalid.length > 0){\n" .

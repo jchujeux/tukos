@@ -30,8 +30,8 @@ abstract class AbstractView extends ObjectTranslator{
         $this->dataWidgets = [
             'id' => ViewUtils::textBox($this, 'Id', [
                     'atts' => [
-                        'edit' =>  ['disabled' => true, 'style' => ['width' => ['9em']]],
-                        'storeedit' => ['width' => 110, 'onClickFilter' => ['id'], 'renderExpando' => true, 'formatter' => '', 'renderCell' => ''],
+                        'edit' =>  ['readOnly' => true, 'style' => ['width' => '9em', 'backgroundColor' => 'WhiteSmoke']],
+                        'storeedit' => ['width' => 110, 'onClickFilter' => ['id'], 'renderExpando' => true, 'formatter' => '', 'renderCell' => '', 'editOn' => 'dblClick'],
                         'overview'  => ['width' => 110, 'onClickFilter' => ['id']],
                     ]
                 ]
@@ -54,10 +54,10 @@ abstract class AbstractView extends ObjectTranslator{
                 'objToStoreEdit' => ['translate' => ['tr' => ['class' => $this]]],                        
                 'objToOverview' => ['translate' => ['tr' => ['class' => $this]]],                        
             ],
-            'updator'   => ViewUtils::objectSelect($this, 'Last edited by', 'users', ['atts' => ['edit' => ['placeHolder' => '', 'style' => ['width' => '10em'], 'disabled' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
-            'updated'   => ViewUtils::timeStampDataWidget($this, 'Last edit date', ['atts' => ['edit' => ['disabled' => true]]]),
-            'creator'   => ViewUtils::objectSelect($this, 'Created by', 'users', ['atts' => ['edit' => ['placeHolder' => '', 'style' => ['width' => '10em'], 'disabled' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
-            'created'   => ViewUtils::timeStampDataWidget($this, 'Creation date', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
+            'updator'   => ViewUtils::objectSelect($this, 'Last edited by', 'users', ['atts' => ['edit' => ['placeHolder' => '', 'style' => ['width' => '10em', 'backgroundColor' => 'WhiteSmoke'], 'readOnly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
+            'updated'   => ViewUtils::timeStampDataWidget($this, 'Last edit date', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'WhiteSmoke'], 'readOnly' => true]]]),
+            'creator'   => ViewUtils::objectSelect($this, 'Created by', 'users', ['atts' => ['edit' => ['placeHolder' => '', 'style' => ['width' => '10em', 'backgroundColor' => 'WhiteSmoke'], 'readOnly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
+            'created'   => ViewUtils::timeStampDataWidget($this, 'Creation date', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'WhiteSmoke'], 'readOnly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             
         ];
         if ($this->user->rights() === 'SUPERADMIN'){

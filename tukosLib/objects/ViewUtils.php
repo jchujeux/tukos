@@ -128,7 +128,7 @@ class ViewUtils{
         return Utl::array_merge_recursive_replace([
                 'type' => 'storeSelect',   
                 'atts' => ['edit' =>  ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr)], 'label' => $view->tr($label)]],
-                'objToOverview' => ['tr' => ['class' => $view, 'ucfirstOnly']],
+                'objToOverview' => ['tr' => ['class' => $view, 'ucfirst']],
                 'format' => ['type' => 'tr', 'class' => $view]
             ],
             $custom

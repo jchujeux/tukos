@@ -10,14 +10,14 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/when
 
         editInNewTab: function(widget){
             var value = this.valueOf(widget['widgetName']);
-            Pmg.tabs.request({object: (Pmg.objectName(value) || this.object), view: 'edit', action: 'tab', query: {id: value}});
+            Pmg.tabs.request({object: (Pmg.objectName(value) || this.object), view: 'edit', mode: 'tab', action: 'tab', query: {id: value}});
         },
         showInNavigator: function(widget){
         	Pmg.showInNavigator(this.valueOf(widget['widgetName']));
         },
            
         changedValues: function(widgetsName){
-            var changedValues = this.inherited(arguments), valueOf = this.valueOf;
+            var changedValues = this.inherited(arguments), valueOf = lang.hitch(this, this.valueOf);
             if (!utils.empty(changedValues) && valueOf('id') != ''){
                 this.sendOnSave.forEach(function(widgetName){
                 	var value = valueOf(widgetName);
@@ -31,13 +31,15 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/when
 
         serverDialog: function(urlArgs, data, emptyBeforeSet, defaultDoneMessage, markResponseIfChanged){
             var self = this, parent = this.parent, title = parent.get('title');
-            //Pmg.setFeedback(messages.actionDoing);
+            Pmg.setFeedback(messages.actionDoing);
             urlArgs.object = urlArgs.object || this.object;
             urlArgs.view = urlArgs.view || this.viewMode;
+            urlArgs.mode = urlArgs.mode || this.paneMode;
             urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: this.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
             parent.set('title', Pmg.loading(title, true));
             return all(data).then(lang.hitch(this, function(data){
                 return Pmg.serverDialog(urlArgs, {data: data}, defaultDoneMessage).then(lang.hitch(this, function(response){
+                //return Pmg.serverDialog(lang.hitch(self, self.completeUrlArgs(urlArgs)), {data: data}, defaultDoneMessage).then(lang.hitch(this, function(response){
 	                    if (response['data'] === false){
 	                        //Pmg.appendFeedback(messages.failedOperation);
 	                        parent.set('title', title);

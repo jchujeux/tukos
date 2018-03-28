@@ -14,7 +14,7 @@ class Tab extends AbstractAction{
     function response($query){
         $formContent         = $this->actionView->formContent((isset($this->view->customContentAtts['overview']) ? $this->view->customContentAtts['overview'] : []));
         return [
-            'title'       => ucfirst($this->view->tr($this->view->objectName)) . ' - ' . ucfirst($this->view->tr('overview')),
+            'title'       => empty($query['title']) ? ucfirst($this->view->tr($this->view->objectName)) . ' - ' . ucfirst($this->view->tr('overview')) : $query['title'],
             'closable'    => true,
             'focusOnOpen' => true,
             'style' => ['padding' => "0px"],

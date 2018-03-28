@@ -69,7 +69,7 @@ define (["dojo/_base/declare", "dojo/dom-construct", "dojo/mouse", "dijit/popup"
         },
         saveCustomContext: function(item){
             var self = this;
-            Pmg.serverDialog({object: 'users', view: 'noview', action: 'modulecontextsave'}, {data: {module: item.moduleName, contextid: item.contextSelect.get('value')}}, messages.actionDone).then(
+            Pmg.serverDialog({object: 'users', view: 'noview', mode: 'tab', action: 'modulecontextsave'}, {data: {module: item.moduleName, contextid: item.contextSelect.get('value')}}, messages.actionDone).then(
                 function(response){
                     item.context = response.contextid;
                 }

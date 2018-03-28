@@ -3,7 +3,7 @@ define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "dijit/focus"
     return declare("tukos.ObjectNew", Button, {
         postCreate: function(){
             this.inherited(arguments);
-            var self = this;
+            var self = this, form = self.form;
             //on(this, "click", function(evt){
             this.on("click", function(evt){
                 evt.stopPropagation();
@@ -12,7 +12,8 @@ define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "dijit/focus"
                 var setNewValues = function(){
                     var dropDown,
                         newAction = function(dupid){
-                        	self.form.serverDialog({action: 'edit', query: dupid ? {dupid: dupid} : {}}, [], self.form.get('dataElts'), messages.actionDone, true); 
+                        	form.resetChangedWidgets();
+                    		form.serverDialog({action: 'edit', query: dupid ? {dupid: dupid} : {}}, [], form.get('dataElts'), messages.actionDone, true); 
                         	popup.close(self.dropDown);
                     	},
                     	onNewAction = function(evt){
@@ -21,8 +22,7 @@ define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "dijit/focus"
                     	onTemplateAction = function(newValue){
                     		newAction(newValue);
                     	};
-                    
-                    dropDown = self.dropDown = self.dropDown || mutils.buildMenu(mutils.newObjectDropDownDescription(self.form.object, onNewAction, onTemplateAction));
+                    dropDown = self.dropDown = self.dropDown || mutils.buildMenu(mutils.newObjectMenuDescription(self.form.object, onNewAction, onTemplateAction));
                     dropDown.onBlur = function(){console.log('onBlur');popup.close(dropDown);};
                 	popup.open({/*parent: self, */popup: dropDown, around: self.domNode/*, onCancel: function(){console.log('onCancel'); popup.close(dropDown);}*/});
         			focusUtil.focus(dropDown.domNode);
@@ -32,7 +32,7 @@ define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "dijit/focus"
                 }else{
                     Pmg.setFeedback('');
                     var dialog = new DialogConfirm({title: messages.fieldsHaveBeenModified, content: messages.sureWantToForget, hasSkipCheckBox: false});
-                    dialog.show().then(function(){setTimeout(function(){setNewValues();}, 200)}, function(){Pmg.setFeedback(messages.newCancelled);});
+                    dialog.show().then(function(){setTimeout(function(){setNewValues();}, 400)}, function(){Pmg.setFeedback(messages.newCancelled);});
                 }
             });
         }

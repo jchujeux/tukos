@@ -9,7 +9,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
         constructor: function(args){
             if (args.storeType === 'LazyMemoryTreeObjects'){
                 args.storeArgs.childrenUrlArgs = function(parentId){
-                    return {object: args.form.object, view: args.form.viewMode, action: 'SubObject', query: {action: 'getChildren', subObjectWidget: args.widgetName, parentid: parentId, id: args.form.valueOf('id')}};
+                    return {object: args.form.object, view: args.form.viewMode, mode: args.form.paneMode, action: 'SubObject', query: {action: 'getChildren', subObjectWidget: args.widgetName, parentid: parentId, id: args.form.valueOf('id')}};
                 }
                 args.store = new LazyMemoryTreeObjects(args.storeArgs);
             }else{
@@ -27,13 +27,15 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
             var self = this;
             if (!this.disabled){
             	var addedItems = [
-            	    {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editInPopup)}},
-                    mutils.newObjectPopupMenuItemDescription(this.object, messages.addrow, lang.hitch(this, this.addRow), lang.hitch(this, this.getTemplate, 'addRow')),
-                    mutils.newObjectPopupMenuItemDescription(this.object, messages.addsubrow, lang.hitch(this, this.addSubRow, false), lang.hitch(this, this.getTemplate, 'addSubRow')),
-                    {atts: {label: messages.copyrow,   onClick: function(evt){self.copyRow(evt)}}}, 
-                    {atts: {label: messages.deleterow,   onClick: function(evt){self.deleteRow(false)}}},
-                    {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [{atts: {label: messages.deleteselection,   onClick: lang.hitch(this, this.deleteSelection)}}]}}
-                ];
+            	                    mutils.newObjectPopupMenuItemDescription(this.object, messages.addrow, lang.hitch(this, this.addRow), lang.hitch(this, this.getTemplate, 'addRow')),
+            	                    mutils.newObjectPopupMenuItemDescription(this.object, messages.addsubrow, lang.hitch(this, this.addSubRow, false), lang.hitch(this, this.getTemplate, 'addSubRow')),
+            	                    {atts: {label: messages.copyrow,   onClick: function(evt){self.copyRow(evt)}}}
+            	                ];
+            	this.contextMenuItems.canEdit = [
+            	            	    {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editInPopup)}},
+            	                    {atts: {label: messages.deleterow,   onClick: function(evt){self.deleteRow(false)}}},
+            	                    {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [{atts: {label: messages.deleteselection,   onClick: lang.hitch(this, this.deleteSelection)}}]}}
+            	                ];
                 this.contextMenuItems.row = this.contextMenuItems.row.concat(addedItems);
                 this.contextMenuItems.idCol = this.contextMenuItems.idCol.concat(addedItems);
                 this.contextMenuItems.header.push(mutils.newObjectPopupMenuItemDescription(this.object, messages.addrow, lang.hitch(this, this.addRow), lang.hitch(this, this.getTemplate, 'appendRow')));
@@ -60,7 +62,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
         getTemplate: function(mode, newValue){
         	if (newValue !== ''){
                 var self = this;
-        		Pmg.serverDialog({object: this.object, view: 'noview', action: 'getTemplate', query: {dupid: newValue}}, {}, messages.actionDone).then(
+        		Pmg.serverDialog({object: this.object, view: 'noview', mode: this.form.paneMode, action: 'getTemplate', query: {dupid: newValue}}, {}, messages.actionDone).then(
                         function (response){
                         	var newRow = response.data;
                         	newRow.grade = 'NORMAL';

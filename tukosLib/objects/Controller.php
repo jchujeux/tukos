@@ -31,9 +31,7 @@ class Controller extends ObjectTranslator{
 
     function response($request, $query, $ignoreUnallowed = false){
         $this->request = $request;
-        if (isset($query['customviewid'])){
-        	$this->customViewId = Utl::extractItem('customviewid', $query);
-        }
+        $this->paneMode = $request['mode'];
         $this->query = $query;
         if ($this->user->isAllowed($request['object'], $query)){
             try{

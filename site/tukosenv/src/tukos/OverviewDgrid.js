@@ -10,6 +10,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/string", "dgrid/extensio
             args.storeArgs.sortParam = args.storeArgs.sortParam || PageManager.getItem('sortParam');
             if (!args.storeArgs.target){
                args.storeArgs.object = args.object;
+               args.storeArgs.mode = args.form.mode || 'tab';
                args.storeArgs.target = PageManager.requestUrl(args.storeArgs);
             }
             args.store = new Request(args.storeArgs);
@@ -25,7 +26,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/string", "dgrid/extensio
         },
         postCreate: function(){
             this.inherited(arguments);
-            if (this.hasFilters){
+            if (this.hasFilters && this.hideServerFilters !== 'yes'){
             	this.showFilters();
             }
             this.dndSource.getObject = this.getObject;

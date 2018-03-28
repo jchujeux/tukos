@@ -7,7 +7,7 @@ use TukosLib\TukosFramework as Tfk;
 
 class CustomViewMore extends AbstractAction{
     function response($query){
-        $response['defaultCustomViewContent'] = $this->view->user->getCustomView($this->view->objectName, 'overview');
+        $response['defaultCustomViewContent'] = $this->user->getCustomView($this->objectName, 'overview', $this->paneMode);
         return $response;
     }
 }

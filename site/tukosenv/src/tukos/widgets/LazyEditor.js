@@ -10,20 +10,22 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			this.htmlContent = new HtmlContent({style: {width: '100%', height: this.editorToContentHeight(this.height) || "auto"}, value: this.value||''}, dojo.doc.createElement("div"));
 			this.addChild(this.htmlContent);
 			this.onClickHandle = this.on('click', this.onClickCallback);
-			this.onBlurHandle = this.on('blur', this.onBlurCallback);
+			this.onBlurHandle = this.on('blur', this.onBlurCallback);				
 		},
 		onClickCallback: function(){
-			console.log('entering onCLickCallback - this.id:' + this.id);
-			this.onClickHandle.remove();
-			console.log('just removed onClickHandle');
-			if (!editor){
-				when(WidgetsLoader.loadWidget('Editor'), lang.hitch(this, function(Editor){
-					editor = new Editor({style: {width: '100%'}}, dojo.doc.createElement("div"));
-					this.placeEditor();
+			if (!this.disabled && !this.readOnly){
+				console.log('entering onCLickCallback - this.id:' + this.id);
+				this.onClickHandle.remove();
+				console.log('just removed onClickHandle');
+				if (!editor){
+					when(WidgetsLoader.loadWidget('Editor'), lang.hitch(this, function(Editor){
+						editor = new Editor({style: {width: '100%'}}, dojo.doc.createElement("div"));
+						this.placeEditor();
 				}));
-			}else{
-				this.placeEditor();
-			}		
+				}else{
+					this.placeEditor();
+				}
+			}
 		},
 		
 		editorToContentHeight: function(editorHeight){
@@ -70,6 +72,13 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 					this.htmlContent.set('value', value);
 				}
 				this._set('value', value);
+			}
+		},
+		
+		_setStyleAttr: function(value){
+			this.inherited(arguments);
+			if (this.htmlContent){
+				this.htmlContent.set('style', value);
 			}
 		},
 		

@@ -26,8 +26,14 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on", "doj
             var refreshAction = function(){
                 var query = {};
                 if (!theForm){
-                	var custom = Pmg.getCustom();
-                	query = {id: custom[theFormContent.query.id], customviewid: custom[theFormContent.query.customviewid]};
+                	var paneId = currentPane.id, panesConfig = Pmg.getCustom().panesConfig, paneConfig;
+                	panesConfig.some(function(config){
+                		if (config.name === paneId){
+                			paneConfig = config;
+                			return true;
+                		}
+                	});
+                	query = {id: paneConfig.id};
                 }else{
 	            	if (theFormContent.viewMode === 'edit'){
 	                    var id = lang.hitch(theForm, theForm.valueOf)('id');
@@ -35,27 +41,25 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on", "doj
 	                    	query.id = id;
 	                    }
 	                }
-	                if (currentPane.isAccordion()){
-	                	query.customviewid = theForm.customviewid;
-	                }
                 }
-                //ready(function(){
-                	return Pmg.serverDialog({object: theFormContent.object, view: theFormContent.viewMode, action: action, query: query}, {data: data}, false).then(
-	                    function(response){
-	                        currentPane.refresh(response.formContent);
-	                        ready(function(){
-	                            (currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);
-	                            Pmg.setFeedback(response['feedback'], messages.tabRefreshed);
-	                            currentPane.resize();
-	                            currentPane.set('title', response.title || title);
-	                        });
-	                        return response;
-	                    },
-	                    function(error){
-	                    	currentPane.set('title', title);
-	                    }
-	                );
-                //});
+                if (theFormContent.viewMode === 'overview' && currentPane.isAccordion()){
+                	query.title = title;
+                }
+            	return Pmg.serverDialog({object: theFormContent.object, view: theFormContent.viewMode, mode: theFormContent.paneMode, action: action, query: query}, {data: data}, false).then(
+                    function(response){
+                        currentPane.refresh(response.formContent);
+                        ready(function(){
+                            (currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);
+                            Pmg.setFeedback(response['feedback'], messages.tabRefreshed);
+                            currentPane.resize();
+                            currentPane.set('title', response.title || title);
+                        });
+                        return response;
+                    },
+                    function(error){
+                    	currentPane.set('title', title);
+                    }
+                );
             }
             if (keepOptions || !theForm){
                 return refreshAction();

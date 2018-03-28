@@ -20,8 +20,8 @@ class CustomDelete extends Tab{
         }
         if (!empty($customizationToDelete['itemCustom'])){
             $toDelete = $customizationToDelete['itemCustom'];
-            $remainingItemCustomization = $this->model->deleteItemCustomization(['id' => $query['id']], ['edit' => $toDelete['items']]);
-            $response['itemCustom'] = isset($remainingItemCustomization['edit']) ? $remainingItemCustomization['edit'] : [];
+            $remainingItemCustomization = $this->model->deleteItemCustomization(['id' => $query['id']], ['edit' => [$this->paneMode => $toDelete['items']]]);
+            $response['itemCustom'] = isset($remainingItemCustomization['edit'][$this->paneMode]) ? $remainingItemCustomization['edit'][$this->paneMode] : [];
         }
         return array_merge( parent::response($query), ['customContent' => $response]);
     }

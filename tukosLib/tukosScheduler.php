@@ -18,7 +18,9 @@ Tfk::initialize('commandLine', $appName);
 
 $configure =  '\\' . $appName . '\\Configure';
 
-Tfk::$registry->set('appConfig', new $configure()); 
+Tfk::$registry->set('appConfig', new $configure());
+$appConfig = Tfk::$registry->get('appConfig');
+$appConfig->dataSource['dbname'] = Tfk::$registry->get('configStore')->getOne(['where' => [$appConfig->configSource['username_col'] => 'tukosscheduler'], 'cols' => ['targetdb'], 'table' => 'users'])['targetdb'];
 
 SUtl::instantiate();
 

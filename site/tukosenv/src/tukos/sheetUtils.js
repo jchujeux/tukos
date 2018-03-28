@@ -288,7 +288,6 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
         				}
         		}
         	});
-        	//lang.hitch(pane, pane.addCustom)(newCustomization, ['widgetsDescription', grid.widgetName, 'atts', 'columns'], 'itemCustomization');
         	lang.setObject(grid.itemCustomization + '.widgetsDescription.' + grid.widgetName + '.atts.columns.itemCustomization', newCustomization, pane);
         }
     }

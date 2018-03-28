@@ -13,7 +13,7 @@ class Get extends EditGetModel {
 
     protected function setProtection(&$data){
         if ($this->user->rights() !== 'SUPERADMIN' && !empty($data['value']['id']) && $data['value']['id'] === $this->user->id()){
-            $disabledCols = ['parentid', 'name', 'rights', 'modules', 'permissions', 'grade', 'contextid', 'targetdb'];
+            $disabledCols = ['parentid', 'name', 'rights', 'modules', 'environment', 'comments', 'permission', 'grade', 'contextid', 'targetdb'];
             foreach ($disabledCols as $col){
                 $data['disabled'][$col] = true;
             }

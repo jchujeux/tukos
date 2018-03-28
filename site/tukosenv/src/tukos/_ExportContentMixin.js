@@ -197,7 +197,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             setTimeout(lang.hitch(this, function(){
             	var form = this.exportDialog.pane.form;
                 lang.hitch(this, this.dataToProcess)().then(function(data){
-                    download.download({object: form.object, view: form.viewMode, action: 'process', query: {id: form.valueOf('id'), params: {process: 'fileContent', noget:  true}}}, {data: data});
+                    download.download({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'process', query: {id: form.valueOf('id'), params: {process: 'fileContent', noget:  true}}}, {data: data});
                 });           	
             }), 100);
         },

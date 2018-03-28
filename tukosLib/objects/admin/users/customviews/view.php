@@ -19,7 +19,8 @@ class View extends AbstractView {
         $customDataWidgets = [
             'vobject'     => ViewUtils::storeSelect('vobject', $this, 'Object'),
             'view'       => ViewUtils::storeSelect('view', $this, 'View'),
-            'customization' => ['type' => 'textArea',     'atts' => ['edit' =>  ['title' => $this->tr('Customization'), 'colspan' => '6' ]]],
+            'panemode'       => ViewUtils::storeSelect('panemode', $this, 'Pane mode'),
+        	'customization' => ['type' => 'textArea',     'atts' => ['edit' =>  ['title' => $this->tr('Customization'), 'colspan' => '6' ]]],
        ];
 
         $this->customize($customDataWidgets);

@@ -24,8 +24,8 @@ class PageView extends Translator{
         parent::__construct($controller->tr);
         $this->user = $controller->user;
         $this->dialogue = $controller->dialogue;
-    	$this->leftPaneShowButton = '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showHideLeftPane">' . $this->tr('showhideleftpane') . '</button>';
-    	$this->leftPaneShowMaxButton = '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showMaxLeftPane">' . $this->tr('showhideleftpane') . '</button>';
+    	$this->leftPaneButtons = '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showHideLeftPane">' . $this->tr('showhideleftpane') . '</button>'.
+    							 '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showMaxLeftPane">' . $this->tr('showhideleftpane') . '</button>';
     	$this->pageManagerArgs = [
 
             'contextTreeAtts' => array_merge($this->user->contextTreeAtts($this->tr), ['style' => ['width' => '15em', 'backgroundColor' => '#F8F8F8']]),
@@ -63,7 +63,7 @@ class PageView extends Translator{
     }
 
     private function onTriggerUrlArgs($object, $view){
-        return ['object' => $object, 'view' => $view, 'action' => 'tab'];
+        return ['object' => $object, 'view' => $view, 'mode' => 'tab', 'action' => 'tab'];
     }
 
     private function defaultModuleActions($object){
@@ -76,7 +76,7 @@ class PageView extends Translator{
                     'items' => [
                         ['type' => 'MenuItem', 'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'edit'),     'label' => $this->tr('default')]],
                         ['type' => 'PopupMenuItem',   'atts' => ['label' => $this->tr('fromtemplate')], 
-                         'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectatemplate'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'edit'), 'sendAsNew' => true, 'object' => $object, 'dropdownFilters' => ['grade' => 'TEMPLATE']], true),
+                         'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectatemplate'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'edit'), 'sendAsNew' => true, 'object' => $object, 'mode' => 'tab', 'dropdownFilters' => ['grade' => 'TEMPLATE']], true),
                         ]
                     ],
                 ],
@@ -85,7 +85,7 @@ class PageView extends Translator{
             'edit' => [
                 'type' => 'PopupMenuItem', 
                 'atts' => ['label' => $this->tr('edit')],
-                'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectanitem'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'edit'), 'object' => $object/*, 'dropdownFilters' => ['contextpathid' => '$moduleContextId']*/], true),
+                'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectanitem'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'edit'), 'object' => $object, 'mode' => 'tab'/*, 'dropdownFilters' => ['contextpathid' => '$moduleContextId']*/], true),
             ],
             'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'overview'), 'label' => $this->tr('overview')]],
             //'massedit' => ['type' => 'MenuItem',      'atts' => ['onTriggerUrlArgs' => $this->onTriggerUrlArgs($object, 'massedit'), 'label' => $this->tr('massedit')]],
@@ -111,7 +111,7 @@ class PageView extends Translator{
             SUtl::addIdCol($context);
         	$theDescription[$module]['atts']['context'] = $context;
         }
-        $theDescription[$module]['type'] = $layout['type'];//(isset($layout['type']) ? $layout['type'] : 'PopupMenuItem');
+        $theDescription[$module]['type'] = $layout['type'];
         if (isset($layout['popup'])){
         	$type = $layout['popup']['type'];
         	$theDescription[$module]['popup'] = Widgets::$type($layout['popup']['atts'], true);
@@ -172,9 +172,6 @@ class PageView extends Translator{
                                                     "setTimeout(function(){registry.byId('appLayout').resize();}, 100);" .
                                                     "return true;",
                     ]]]]])),
-                	'calendarid' => Widgets::objectSelect(Widgets::complete(
-                		['label' => $this->tr('calendar'), 'object' => 'calendars',]
-                	)),
                 	'leftPaneWidth' => Widgets::textBox(Widgets::complete(['label' => $this->tr('Leftpanewidth'), 'onWatchLocalAction' => 
                 			['value' => ['leftPaneWidth' => ['localActionStatus' => [
                 					'triggers' => ['user' => true],
@@ -211,8 +208,11 @@ class PageView extends Translator{
                          	'present' => Widgets::description(Widgets::storeSelect([
                          		'edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $this->tr)], 'label' => $this->tr('presentpane')]
                          	]), false),
-           				]])),
-                        'customviewid' => Widgets::objectSelect(Widgets::complete(['label' => $this->tr('Customviewid'), 'object' => 'customviews', 'dropdownFilters' => ['vobject' => 'calendars', 'view' => 'edit']])),
+		                	'id' => Widgets::description(Widgets::objectSelect([
+		                		'edit' => ['label' => $this->tr('id'), 'object' => 'calendars'], 
+		                		'storeedit' => ['canEdit' => '(function(item, cellValue){console.log("I am here");if(item.hasId){return true;}else{return false;}})']
+		                	]), false),
+                         ]])),
            				'cancel' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('close'), 'onClickAction' => 'this.pane.close();']],
                         'action' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('save'), 'onClickAction' => 
                         	"this.pane.serverAction( {object: 'users', view: 'noview', action: 'PageCustomSave'}, {'excludeWidgets': ['cancel', 'action']});this.pane.close();" 
@@ -223,7 +223,7 @@ class PageView extends Translator{
                     'contents' => [
                        'row1' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 100],
-                            'widgets' => ['hideLeftPane', 'calendarid', 'leftPaneWidth', 'panesConfig', 'customviewid'],
+                            'widgets' => ['hideLeftPane', 'leftPaneWidth', 'panesConfig'],
                         ],
                        'row2' => [
                             'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
@@ -256,13 +256,19 @@ class PageView extends Translator{
         $template->language = $translatorsStore = Tfk::$registry->get('translatorsStore')->getLanguage();
         $template->loadingMessage = $this->tr('Loading') . '...';
 
-        $this->pageManagerArgs['headerContent'] = "<table width='100%'><tr><td>" . $this->leftPaneShowButton . $this->leftPaneShowMaxButton . "<b>Tukos 2.0</b><span id='tukosHeaderLoading'></span></td><td align='center'>" . $this->tr('headerBanner') . " </td><td align='right'>" . $this->welcomeConnect(Tfk::$registry->pageUrl . 'auth/logout') .  "</td></table>";
+        $this->pageManagerArgs['headerContent'] = Utl::substitute(
+          	'<table width="100%"><tr><td> ${buttons}<b>Tukos 2.0</b><span id="tukosHeaderLoading"></span></td><td align="center"><b><i>${header} ${ownerorg}</i></b></td><td align="right">${welcome}</td></table>', [
+          		'buttons' => empty($this->pageManagerArgs['accordionDescription']) ? '' : $this->leftPaneButtons, 'header' => $this->tr(Tfk::$registry->appName . 'HeaderBanner', 'none'), 
+          		'ownerorg' => $this->tr('ownerorganization', 'none'), 'welcome' => $this->welcomeConnect(Tfk::$registry->pageUrl . 'auth/logout')]
+        );
         $this->pageManagerArgs['menuBarDescription'] = $this->menuBarDescription($modulesMenuLayout);
 
-        $this->pageManagerArgs['userEditUrl'] = ['object' => 'users', 'view' => 'edit', 'action' => 'tab', 'query' => ['id' => $this->user->id()]];
+        $this->pageManagerArgs['userEditUrl'] = ['object' => 'users', 'view' => 'edit', 'mode' => 'tab', 'action' => 'tab', 'query' => ['id' => $this->user->id()]];
 
         $this->pageManagerArgs['pageCustomization'] = $this->user->PageCustomization();
-        
+        if (isset($this->pageManagerArgs['pageCustomization']['panesConfig'])){
+        	SUtl::addItemsIdCols($this->pageManagerArgs['pageCustomization']['panesConfig'], ['id']);
+        }
         $this->pageManagerArgs['pageCustomDialogDescription'] = $this->pageCustomDialogDescription($this->pageManagerArgs['pageCustomization']);
 
         Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));

@@ -13,7 +13,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/ready", "diji
                 			 toProcess = action === 'reset' ? {} : (isItemsChange ? this.editableIdsToProcess(grid) : this.idsToProcess(grid)) ;
                 Pmg.setFeedback(self.actionStartMessage);
                 
-                if (action === 'reset'){
+                if (action === 'search'){
+                	lang.hitch(self, self.searchAction());
+                }else if(action === 'reset'){
                     if (self.dialogDescription){
                         if (self.tooltipDialog){
                             self.tooltipDialog.open({around: self.domNode});
@@ -28,7 +30,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/ready", "diji
                             });
                         }
                     }else{
-	                	lang.hitch(self, self.resetAction(action, queryParams, {}));
+	                	lang.hitch(self, self.resetAction());//JCH - action can probably be removed, 
                     }
                 }else if (toProcess.ids.length == 0){
                     var dialog = new DialogConfirm({title: messages.noRowSelectedNoAction + toProcess.warning, hasSkipCheckBox: false, hasCancelButton: false});
@@ -72,10 +74,24 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/ready", "diji
             });
         },
 
+        searchAction: function(data){
+            var form = this.form, grid = form.getWidget(this.grid), filter = {pattern: form.valueOf('pattern')}, contextpathid = form.valueOf('contextid'), id = form.valueOf('id');
+            if (id){
+            	filter.id = id;
+            }
+            if (contextpathid){
+            	filter.contextpathid = contextpathid
+            }
+            
+        	Pmg.setFeedback(messages.actionDoing);
+            grid.set('collection', grid.store.filter(filter));
+            Pmg.setFeedback(messages.actionDone);
+        },
+
         resetAction: function(options){
             var form = this.form, parent = form.parent, title = parent.get('title'), url = require.toUrl('tukos/resources/images/loadingAnimation.gif'), grid = form.getWidget(this.grid), queryParams = this.queryParams;
         	if (queryParams){
-                form.serverDialog({action: 'reset', query: {params: queryParams}}, options, [], messages.actionDone).then(function(response){
+                form.serverDialog({action: 'reset', query: {params: queryParams}}, options || {}, [], messages.actionDone).then(function(response){
             		response.feedback.pop();
                     Pmg.alert({title: messages[queryParams.process], content: response.feedback.join('<br>')});
                 	grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));

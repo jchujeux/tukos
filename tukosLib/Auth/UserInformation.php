@@ -37,7 +37,7 @@ class UserInformation{
         if (empty($this->userInfo)){
         	return false;
         }
-        $this->unallowedModules  = ($this->rights() === 'SUPERADMIN' || $this->userInfo['modules'] === null) ? [] : json_decode($this->userInfo['modules']);
+        $this->unallowedModules  = ($this->rights() === 'SUPERADMIN' || $this->userInfo['modules'] === null) ? [] : json_decode($this->userInfo['modules'], true);
         $this->allowedModules =  array_diff($this->objectModules, $this->unallowedModules);
 
         $this->ckey = $this->userInfo['password'];
@@ -181,7 +181,11 @@ class UserInformation{
     }
 
     function filter($where, $objectName='', $tableName=''){
-        return $this->filterContext($this->filterPrivate($where, $tableName), $objectName, $tableName);
+        if (isset($where['id']) && $where['id'] === $this->id()){
+        	return $where;//so that a user can always access his own item
+        }else{
+    		return $this->filterContext($this->filterPrivate($where, $tableName), $objectName, $tableName);
+        }
     }
 
     private function customViewIds(){
@@ -195,13 +199,13 @@ class UserInformation{
         }
         return $this->customViewIds;
     }
-    public function customViewId($objectName, $view){
+    public function customViewId($objectName, $view, $paneMode = 'tab'){
         $customViewIds = $this->customViewIds();
-        return Utl::drillDown($customViewIds, [$objectName, $view]);
+        return Utl::drillDown($customViewIds, [$objectName, $view, $paneMode]);
     }
     
-    public function getCustomView($objectName, $view, $keys = [], $notFoundValue=[]){
-        $customViewId = $this->customViewId($objectName, $view);
+    public function getCustomView($objectName, $view, $paneMode = 'tab', $keys = [], $notFoundValue=[]){
+        $customViewId = $this->customViewId($objectName, $view, $paneMode);
         if (empty($customViewId)){
                 return [];
         }else{
@@ -221,27 +225,27 @@ class UserInformation{
             }
         }
     }
-    function setCustomViewId($objectName, $view, $customViewId){
+    function setCustomViewId($objectName, $view, $paneMode, $customViewId){
         $this->objectsStore->objectModel('users')->updateOne(
-            ['customviewids' => [$objectName => [$view => $customViewId]]], 
+            ['customviewids' => [$objectName => [$view => [$paneMode => $customViewId]]]], 
             ['where' => ['id' => $this->id()]], 
             true, true
         );
         $customViewIds = $this->customViewIds();/* to make sure $this->customViewIds is initialized*/
-        $this->customViewIds = Utl::array_merge_recursive_replace($this->customViewIds, [$objectName => [$view => $customViewId]]);
+        $this->customViewIds = Utl::array_merge_recursive_replace($this->customViewIds, [$objectName => [$view => [$paneMode => $customViewId]]]);
     }
-    public function updateCustomView($objectName, $view, $newValues){
-        $customViewId = $this->customViewId($objectName, $view);
+    public function updateCustomView($objectName, $view, $paneMode, $newValues){
+        $customViewId = $this->customViewId($objectName, $view, $paneMode);
         if (empty($customViewId)){
             $result = $this->objectsStore->objectModel('customviews')->insert(
-                ['name' => 'new', 'vobject' => $objectName, 'view' => $view, 'customization' => $newValues], 
+                ['name' => 'new', 'vobject' => $objectName, 'view' => $view, 'panemode' => $paneMode, 'customization' => $newValues], 
                 true, true
             );
-            $this->setCustomViewId($objectName, $view, $result['id']);
+            $this->setCustomViewId($objectName, $view, $paneMode, $result['id']);
             return ['customviewid' => $result['id']];
         }else{
             $result = $this->objectsStore->objectModel('customviews')->updateOne(
-                ['vobject' => $objectName, 'view' => $view, 'customization' => $newValues], 
+                ['vobject' => $objectName, 'view' => $view, 'panemode' => $paneMode, 'customization' => $newValues], 
                 ['where' => ['id' => $customViewId]], 
                 true, true
             );

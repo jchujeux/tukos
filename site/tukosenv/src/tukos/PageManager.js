@@ -4,7 +4,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
     var stores,
         tabs,
         objectsTranslations = {}, objectsUntranslations = {},
-        urlTemplate = '${dialogueUrl}${object}/${view}/${action}';
+        urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
     return {
         initialize: function(obj) {
             this.cache = obj;
@@ -20,9 +20,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                 var appLayout = new BorderContainer({design: 'sidebar'}, "appLayout");
 
                 var pageCustomization = obj.pageCustomization || {}, hideLeftPane = pageCustomization.hideLeftPane === 'YES', leftPaneWidth = pageCustomization.leftPaneWidth || "12%", panesConfig = pageCustomization.panesConfig || [],
-                	newPageCustomization = obj.newPageCustomization = {};
-                //var leftPane = new ContentPane({id: 'leftPanel', region: "left", 'class': "left", splitter: true, style: {width: leftPaneWidth, padding: "0px", display: (hideLeftPane ? "none" : "block")}});
-                //appLayout.addChild(leftPane);
+                	newPageCustomization = obj.newPageCustomization = lang.clone(pageCustomization);;
                 var leftAccordion = new AccordionContainer({id: 'leftPanel', region: "left", 'class': "left", splitter: true, style: {width: leftPaneWidth, padding: "0px", display: (hideLeftPane ? "none" : "block")}});
                 appLayout.addChild(leftAccordion);
                 self.accordion   = new AccordionManager({container: leftAccordion});
@@ -41,12 +39,22 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                 tukosGlobal = {}; // at least in rich text editor plug-in I don't know how to avoid this
                 tukosGlobal.pmr = self; // to make self.tabs.gotoTab visible in tukoslinkdialog
                 
-                var newPanesConfig = [];
+                var newPanesConfig = [], rowId = 1;
                 obj.accordionDescription.forEach(function(description, key){
-                	var paneId = description['id'];//, paneConfig = panesConfig[key] || {};
-                	if (utils.empty(panesConfig)){
-                		newPanesConfig[key] = {rowId: key, name: paneId, present: 'YES'};
+                	var paneId = description['id'], paneConfigKey, newPaneConfig;
+                	panesConfig.some(function(paneConfig, key){
+                		if(paneConfig.name === paneId){
+                			paneConfigKey = key;
+                			return true;
+                		};
+                	});
+                	newPaneConfig = paneConfigKey ? panesConfig[paneConfigKey] : {name: paneId, present: 'YES'};
+                	if (description.config){
+                		newPaneConfig = lang.mixin(newPaneConfig, description.config);
                 	}
+                	newPaneConfig.rowId = rowId;
+                	newPanesConfig.push(newPaneConfig);
+                	rowId += 1;
                 });
                 if (newPanesConfig.length > 0){
                 	self.addCustom('panesConfig', newPanesConfig);
@@ -61,58 +69,60 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                     }
                 	appLayout.startup();
                     var leftPaneButton = registry.byId('showHideLeftPane'), leftPaneMaxButton = registry.byId('showMaxLeftPane'), displayStatus = domStyle.get('leftPanel', 'display');
-                    leftPaneButton.set("iconClass", displayStatus === 'none' ? "ui-icon tukos-right-arrow" : "ui-icon tukos-left-superarrow"), isMaximized = false;;
-                    leftPaneButton.on('click', function(){
-                        var displayStatus = domStyle.get('leftPanel', 'display');
-                        if (displayStatus === 'none'){
-                        	self.lazyCreateAccordion();
-                            ready(function(){
-                            	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || pageCustomization.leftPaneWidth);
-                            	domStyle.set('leftPanel', 'display', 'block');
-                            	newPageCustomization.hideLeftPane = 'NO';
-                            	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
+                    if (leftPaneButton){
+                        leftPaneButton.set("iconClass", displayStatus === 'none' ? "ui-icon tukos-right-arrow" : "ui-icon tukos-left-superarrow"), isMaximized = false;;
+                        leftPaneButton.on('click', function(){
+                            var displayStatus = domStyle.get('leftPanel', 'display');
+                            if (displayStatus === 'none'){
+                            	self.lazyCreateAccordion();
+                                ready(function(){
+                                	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || pageCustomization.leftPaneWidth);
+                                	domStyle.set('leftPanel', 'display', 'block');
+                                	newPageCustomization.hideLeftPane = 'NO';
+                                	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
+                                	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
+                                	registry.byId('appLayout').resize();
+                                });
+                            }else{
+                            	domStyle.set('leftPanel', 'display', 'none');
+                            	newPageCustomization.hideLeftPane = 'YES';
+                            	leftPaneButton.set("iconClass", "ui-icon tukos-right-arrow");
                             	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
+                            	ready(function(){
+                            		registry.byId('appLayout').resize();
+                                	registry.byId('centerPanel').resize(); 
+                            	});
+                            }
+                        });                    	
+                        leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
+                        leftPaneMaxButton.on('click', function(){
+                            var displayStatus = domStyle.get('leftPanel', 'display');
+                            if (displayStatus === 'none'){
+                            	self.lazyCreateAccordion();
+                            	ready(function(){
+    	                        	domStyle.set('leftPanel', 'width', '80%');
+    	                        	isMaximized = true;
+    	                        	domStyle.set('leftPanel', 'display', 'block');
+    	                        	newPageCustomization.hideLeftPane = 'NO';
+    	                        	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
+    	                        	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
+    	                        	registry.byId('appLayout').resize();
+                            	});
+                            }else{
+                            	if (isMaximized){
+                                	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || leftPaneWidth);                   		
+                                	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
+                                	isMaximized = false;
+                            	}else{
+                                	domStyle.set('leftPanel', 'width', '80%');                       		
+                                	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-superarrow");
+                                	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
+                                	isMaximized = true;
+                            	}
                             	registry.byId('appLayout').resize();
-                            });
-                        }else{
-                        	domStyle.set('leftPanel', 'display', 'none');
-                        	newPageCustomization.hideLeftPane = 'YES';
-                        	leftPaneButton.set("iconClass", "ui-icon tukos-right-arrow");
-                        	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-                        	ready(function(){
-                        		registry.byId('appLayout').resize();
-                            	registry.byId('centerPanel').resize(); 
-                        	});
-                        }
-                    });
-                    leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-                    leftPaneMaxButton.on('click', function(){
-                        var displayStatus = domStyle.get('leftPanel', 'display');
-                        if (displayStatus === 'none'){
-                        	self.lazyCreateAccordion();
-                        	ready(function(){
-	                        	domStyle.set('leftPanel', 'width', '80%');
-	                        	isMaximized = true;
-	                        	domStyle.set('leftPanel', 'display', 'block');
-	                        	newPageCustomization.hideLeftPane = 'NO';
-	                        	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
-	                        	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
-	                        	registry.byId('appLayout').resize();
-                        	});
-                        }else{
-                        	if (isMaximized){
-                            	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || leftPaneWidth);                   		
-                            	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-                            	isMaximized = false;
-                        	}else{
-                            	domStyle.set('leftPanel', 'width', '80%');                       		
-                            	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-superarrow");
-                            	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
-                            	isMaximized = true;
-                        	}
-                        	registry.byId('appLayout').resize();
-                        }
-                    });
+                            }
+                        });
+                    }
                     ready(function(){
                     	var leftSplitter = appLayout.getSplitter("left");
                         domStyle.set(dom.byId('loadingOverlay'), 'display', 'none');
@@ -122,7 +132,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                         		leftPaneWidthWidget.set('value', newWidth);
                         	}
                         	obj.newPageCustomization.width = newWidth;
-                        	console.log('splitter was called')
+                        	//console.log('splitter was called')
                         });
                     });
                     if (obj.focusedTab){
@@ -133,7 +143,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         },
         lazyCreateAccordion: function(ignoreSelected){
             if (!this.createdAccordion){
-            	var panesConfig = this.cache.pageCustomization.panesConfig || [], self = this, selectedAccordionPane;
+            	var panesConfig = this.cache.newPageCustomization.panesConfig || [], self = this, selectedAccordionPane;
             	this.cache.accordionDescription.forEach(function(description, key){
                 	var paneConfig = panesConfig[key] || {}, selected = paneConfig.selected;
                 	if (!(paneConfig.present === 'NO')){
@@ -165,6 +175,11 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
             	this.setNavigationPane(id);
             }
         },
+
+        mayHaveNavigator: function(){
+        	return registry.byId('showHideLeftPane');
+        },
+
         setNavigationPane: function(id){
             var navigatorPane = registry.byId('pane_navigationTree');
             if (navigatorPane){
@@ -214,7 +229,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
             return stores.get(args);
         },
         requestUrl: function(urlArgs){
-            return string.substitute(urlTemplate, {dialogueUrl: this.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
+            return string.substitute(urlTemplate, {dialogueUrl: this.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
         },
         openExternalUrl: function(url){//deprecated - to eliminate from existing editor content if present
             window.open(url);
@@ -303,7 +318,6 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
             		
             	}
             }
-            //(this.logWidget ||  (this.logWidget = registry.byId('tukos_loglog'))).set('value', this.logWidget.get('value') + (separator ? separator : '\n') +  newFeedback);
         },
         
         appendFeedback: function(serverFeedback, clientFeedback, beep){
@@ -443,8 +457,9 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         },
         
         getCustom: function(){
-        	var cache = this.cache;
-        	return utils.empty(cache.newPageCustomization) ? cache.pageCustomization : utils.mergeRecursive(lang.clone(cache.pageCustomization), cache.newPageCustomization);
+        	return this.cache.newPageCustomization;
+        	//var cache = this.cache;
+        	//return utils.empty(cache.newPageCustomization) ? cache.pageCustomization : utils.mergeRecursive(lang.clone(cache.pageCustomization), cache.newPageCustomization);
         	//return path === "" ? utils.mergeRecursive(lang.clone(cache.pageCustomization), cache.newPageCustomization) : utils.mergeRecursive(lang.clone(cache.pageCustomization[path]), cache.newPageCustomization[path] || {});
         }
     }

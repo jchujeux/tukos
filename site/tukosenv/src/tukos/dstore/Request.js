@@ -27,7 +27,7 @@ define([
 		},
 
         requestDialog: function(queryOptions){
-            var response = Pmg.serverDialog({object: this.object, view: this.view, action: this.action, query:  queryOptions ? {storeatts: queryOptions} : {}}, {}, '', true);
+            var response = Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query:  queryOptions ? {storeatts: queryOptions} : {}}, {}, '', true);
 			var collection = this;
 			return {
 				data: response.then(function (response) {
@@ -66,7 +66,7 @@ define([
 		filterOptions: function (queryOptions, filter) {
 			var type = filter.type;
 			var args = filter.args;
-			if (type === 'string' || type === 'and' || type === 'or'){
+			if (type === 'string' || type === 'or'){
 				console.log('type "' + type + '" is not supported yet in tukos/dstore/Request');
 			}else{
                 if (!queryOptions.where){
@@ -75,7 +75,10 @@ define([
                 }
                 if (type === 'eq'){
                     queryOptions.where[args[0]] = args[1];
-                }else{
+                }else if (type === 'and'){
+                	this.filterOptions(queryOptions, args[0]);
+                	this.filterOptions(queryOptions, args[1]);
+                }else{// JCH - this does not make sense !
                     queryOptions.where[this.filterNumericIndex] = {col: args[0], opr: type, values: args[1]};
                     this.filterNumericKey += 1;
                 }

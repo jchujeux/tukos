@@ -49,8 +49,8 @@ trait ItemCustomization {
         }
     }
 
-    public function getCombinedCustomization($where, $view, $keys){ 
-        return Utl::array_merge_recursive_replace($this->user->getCustomView($this->objectName, $view, $keys),   $this->getItemCustomization($where, array_merge([$view], $keys)));
+    public function getCombinedCustomization($where, $view, $paneMode, $keys){ 
+        return Utl::array_merge_recursive_replace($this->user->getCustomView($this->objectName, $view, $paneMode, $keys),   $this->getItemCustomization($where, array_merge([$view, $paneMode], $keys)));
     }
 }
 ?>
