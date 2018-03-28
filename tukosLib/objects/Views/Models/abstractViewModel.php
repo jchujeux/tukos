@@ -11,10 +11,12 @@ abstract class AbstractViewModel extends ModelsAndViews{
     function __construct($controller, $params=[]){
         $this->controller = $controller;
         $this->dialogue = $controller->dialogue;
+        $this->objectName = $this->controller->objectName;
         $this->user     = $controller->user;
         $this->objectsStore = $controller->objectsStore;
         $this->view     = (empty($params['view'])  ? $controller->view : $params['view']);
         $this->model    = (empty($params['model'])  ? $controller->model : $params['model']);
+        $this->paneMode = $controller->paneMode;
     }
 
     function modelToView($values, $modelToView, $multiRows){

@@ -10,14 +10,16 @@ use TukosLib\TukosFramework as Tfk;
 class Model extends AbstractModel {
 
     protected $viewOptions = ['edit', 'overview', 'massedit'];
+    protected $panemodeOptions = ['tab', 'accordion'];
 
     function __construct($objectName, $translator=null){
         $colsDefinition = [
-            'vobject'        =>  'VARCHAR(50)  DEFAULT NULL ',
+            'vobject'       =>  'VARCHAR(50)  DEFAULT NULL ',
             'view'          =>  "ENUM ('" . implode("','", $this->viewOptions) . "') ",
-            'customization' =>  'longtext DEFAULT NULL',
+            'panemode'      =>  "ENUM ('" . implode("','", $this->panemodeOptions) . "') ",
+        	'customization' =>  'longtext DEFAULT NULL',
         ];
-        parent::__construct($objectName, $translator, 'customviews', ['parentid' => ['users']], ['customization'], $colsDefinition, '', ['vobject', 'view'], [], ['name', 'vobject', 'view']);
+        parent::__construct($objectName, $translator, 'customviews', ['parentid' => ['users']], ['customization'], $colsDefinition, '', ['vobject', 'view', 'panemode'], [], ['name', 'vobject', 'view', 'panemode']);
         $this->vobjectOptions = $this->user->allowedModules();
     }
     public function deleteCustomization($where, $valuesToDelete){

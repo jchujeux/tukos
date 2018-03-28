@@ -26,7 +26,7 @@
                 }
             	var query = {one: true, storeatts: {where: {id: id}}};
                 if (this.params){query.params = this.params}
-            	return Pmg.serverDialog({object: this.object, view: this.view, action: this.action, query: query}).then(function(response){
+            	return Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query: query}).then(function(response){
                     return response.item;
                 });
             }
@@ -41,7 +41,7 @@
                 //var dfdQuery = lang.mixin(queryOptions ? {storeatts: queryOptions} : {}, options.params ? {params: options.params} : {});
                 var dfdQuery = lang.mixin(queryOptions ? {storeatts: queryOptions} : {}, params ? {params: params} : {});
 
-                var dfdResponse = Pmg.serverDialog({object: this.object, view: this.view, action: this.action, query: dfdQuery}, {}, '', true);
+                var dfdResponse = Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query: dfdQuery}, {}, '', true);
                 var self = this,
                     total = dfdResponse.then(function(response){
                         return response.total;

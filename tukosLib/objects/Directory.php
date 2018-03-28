@@ -3,7 +3,8 @@ namespace TukosLib\Objects;
 
 class Directory{
     private static $directory =  [
-        'users'             => 'admin\users',
+        'tukos' => 'tukos',
+    	'users'             => 'admin\users',
         'customviews'       => 'admin\users\customviews',
         'navigation'        => 'admin\users\navigation',
         'contexts'          => 'admin\contexts',
@@ -85,7 +86,7 @@ class Directory{
         return array_keys(self::$directory);
     }
     public static function getNativeObjs(){
-        return array_diff(array_keys(self::$directory), ['mailboxes', 'mailmessages']);
+        return array_diff(array_keys(self::$directory), ['tukos', 'mailboxes', 'mailmessages']);
     }
     public static function getDomains(){
         $domains = [];

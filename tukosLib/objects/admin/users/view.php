@@ -51,23 +51,8 @@ class View extends AbstractView {
         $this->customize($customDataWidgets, []/*$subObjects*/, ['get' => ['password'], 'grid' => ['password']]);
         
         $this->paneWidgets = [
-            'userContext' => [
-                'title'   => $this->tr('User Context'),
-                //'id'      => 'tukos_userContext',
-                'paneContent' => [
-            		'widgetsDescription' => ['contextid' => Widgets::contextTree(
-                    	array_merge($this->user->contextTreeAtts($this->tr), 
-                                ['title' => $this->tr('treetitle'),  'urlArgs'   => ['object' => 'users', 'view' => 'pane', 'action' => 'save'], 'userid' => $this->user->id()]
-                    	)
-                	)],
-                	'layout' => [ 'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false], 'widgets' => ['contextid' ]],
-                	'style' => ['padding' => "0px"], 'id' => 'tukos_userContext'
-                ],
-                'style' => ['padding' => '0px'],
-            ],
             'log' => [
                 'title' => $this->tr('Activitylog'),
-                //'id' => 'tukos_log',
                 	'paneContent' => [
             			'widgetsDescription' =>[ 'log' => Widgets::textArea(['title' => $this->tr('Activitylog'), 'style' => ['maxHeight' => '20em'], 'readonly' => true]),],
                 		'layout' => ['widgets' => ['log']],

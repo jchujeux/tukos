@@ -20,7 +20,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                                 defaultCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', dropdownFilters: {vobject: form.object, view: form.viewMode}, onChange: lang.hitch(this, this.defaultCustomViewChange)}},
                                 itemCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'itemCustomView'}}, 
                                 itemCustomViewLabel: {type: 'HtmlContent', atts: {style: {width: '180px'}, value: messages.itemCustomView}},
-                                itemCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', dropdownFilters: {vobject: form.object, view: form.viewMode}, onChange: lang.hitch(this, this.itemCustomViewChange)}},
+                                itemCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', mode: form.paneMode, dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, onChange: lang.hitch(this, this.itemCustomViewChange)}},
                                 itemCustomButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'itemCustom'}}, 
                                 itemCustomLabel: {type: 'HtmlContent', atts: {}},
                                 save: {type: 'TukosButton', atts: {label: messages.save, onClick: lang.hitch(this, this.saveCallback)}},
@@ -112,9 +112,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         }, 
 
         defaultCustomViewChange: function(newValue){
-            var targetPane = this.currentPane();
+            var targetPane = this.currentPane(), form = targetPane.form || targetPane;
+            form.customviewid = newValue;
         	Pmg.refresh(targetPane, 'tabdefaultcustomviewidsave', {customviewid: newValue}, {values: true, customization: true}).then(lang.hitch(this, function(){
-                var form = targetPane.form || targetPane, pane= targetPane.customDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
+                var pane= targetPane.customDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
                 paneGetWidget('defaultCustomViewButton').set('disabled', ((form.customviewid && form.customviewid !== '') ? false : true));
                 if (paneGetWidget('more').get('hidden')){
                 	this.moreCallback();
@@ -160,7 +161,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                     Pmg.tabs.refresh('tabitemcustomviewsave', {id: form.itemcustomviewid, vobject: form.object, view: form.viewMode, customization: form.customization}, {values: true});
                     break;
                 case 'itemCustom': 
-                    Pmg.tabs.refresh('tabsave', {custom: utils.assign({}, form.viewMode, form.customization)}, {values: true});
+                    Pmg.tabs.refresh('tabsave', {custom: utils.newObj([[form.viewMode, utils.newObj([[form.paneMode, form.customization]])]])}, {values: true});
                     break;
                 default:
                     close = false;
@@ -175,7 +176,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         moreCallback: function(){
             var targetPane = this.currentPane(), targetNode = this.currentPaneNode(), form = targetPane.form || targetPane, id = form.valueOf('id'),  customDialog = targetPane.customDialog, pane = customDialog.pane, getWidget = lang.hitch(pane, pane.getWidget);
             this.setVisibility({hideMore: false});
-            Pmg.serverDialog({object: form.object, view: form.viewMode, action: 'customviewmore', query: id ? {id: id} : {}}).then(
+            Pmg.serverDialog({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'customviewmore', query: id ? {id: id} : {}}).then(
                 function(response){
                     ['defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
                         var contentName = customSet + 'Content'

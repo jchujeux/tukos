@@ -10,16 +10,17 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         constructor: function(){
             this.contextMenuItems = {
                 row: [
-                    {atts: {label: messages.togglerowheight,                    onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}, 
-                    {atts: {label: messages.viewcellindialog,    onClick: lang.hitch(this, function(evt){this.viewCellInPopUpDialog(this);})}},
+                    {atts: {label: messages.togglerowheight, onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}, 
+                    {atts: {label: messages.viewcellindialog, onClick: lang.hitch(this, function(evt){this.viewCellInPopUpDialog(this);})}},
                     {atts: {label: messages.viewcellinwindow, onClick: lang.hitch(this, function(evt){this.viewInSeparateBrowserWindow(this);})}}
                  ],
-                 idCol: [
-                    {atts: {label: messages.editinnewtab,                      onClick: lang.hitch(this, function(evt){this.editInNewTab(this);})}},
-                    {atts: {label: messages.togglerowheight,                    onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}
-                 ],
+                 idCol: lang.hitch(this, wcutils.idColsContextMenuItems)(this).concat([{atts: {label: messages.togglerowheight, onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}])/*[
+                    {atts: {label: messages.editinnewtab, onClick: lang.hitch(this, function(evt){this.editInNewTab(this);})}},
+                    {atts: {label: messages.showinnavigator, onClick: lang.hitch(this, function(evt){this.showInNavigator(this);})}},
+                    {atts: {label: messages.togglerowheight, onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}
+                 ]*/,
                  header: [
-                    {atts: {label: messages.showhidefilters,                    onClick: lang.hitch(this, function(evt){this.showFilters();})}}
+                    {atts: {label: messages.showhidefilters, onClick: lang.hitch(this, function(evt){this.showFilters();})}}
                  ]
             };
         },
@@ -95,15 +96,11 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
             newWindow.document.close();
         },
 
-        /*
-         * if onClickFilter is set, requests item matching onClickFilter cols values from the grid's object (used for mail objects. Maybe can be eliminated in the future ?)
-         * else opens the tab ssociated to the id on the field.
-         */
         editInNewTab: function(grid){
             var field  = grid.clickedCell.column.field,
                 query = {};
             if (grid.clickedCell.column.onClickFilter){
-                var object  = grid.object,
+                var object  = grid.object === 'tukos' ? grid.cellValueOf('object') : grid.object,
                     fields = grid.clickedCell.column.onClickFilter;
                 for (var i in fields){
                     var field = fields[i];
@@ -120,8 +117,14 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                 }
             }
             if (!utils.empty(query)){
-                Pmg.tabs.request({object: object, view: 'edit', action: 'tab', query: query});
+                Pmg.tabs.request({object: object, view: 'edit', mode: 'tab', action: 'tab', query: query});
             }
+        },
+        showInNavigator: function(grid){
+        	var targetId = grid.cellValueOf(grid.clickedCell.column.field);
+        	if (targetId){
+        		Pmg.showInNavigator(targetId);
+        	}
         },
 
         clickedRowIdPropertyValue: function(){
@@ -146,18 +149,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
             var row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column;
             if (mouse.isRight(evt)){
                 var menuItems = lang.clone(this.contextMenuItems);
-/* was introduced for adding download to context menu for sub-documents, but it is broken: would need to include tukos/download in the dependency modules which is not clean and conflicts with minifying: to refactor when functionality needed(JCH 2017-08-13)
-                if (this.customContextMenu){
-                    if (!this.customMenuItems){
-                        eval('this.customMenuItems = ' + this.customContextMenu);
-                    }
-                    var customItems = this.customMenuItems();
-                    for (var context in customItems){
-                        menuItems[context] = customItems[context].concat(menuItems[context]);
-                    }
-                }
-*/
                 var colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';
+                if (menuItems.canEdit && row.data.canEdit !== false){
+                	menuItems[colItems] = menuItems[colItems].concat(menuItems.canEdit);
+                }
 
                 mutils.setContextMenu(this, {atts: {targetNodeIds: [this.domNode], selector: ".dgrid-row, .dgrid-header"},  items: menuItems[colItems].concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this))});
             }

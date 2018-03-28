@@ -170,6 +170,7 @@ define("tukos/nls/messages", { root:
     tagName: 'tag name',
     attribute: 'property',
     allowLocalFilters: 'allow local filters',
+    hideServerFilters: 'hide table filters',
     yes: 'yes',
     no: 'no',
     nofeedback: 'No feedback!',

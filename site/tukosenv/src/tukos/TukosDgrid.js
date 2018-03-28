@@ -62,19 +62,16 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             }));
             this.on("dgrid-columnstatechange", function(evt){
                 var grid = evt.grid, pane = grid.form;
-                //lang.hitch(pane, pane.addCustom)({'hidden': evt.hidden}, ['widgetsDescription', grid.widgetName, 'atts', 'columns', evt.column.field], grid.itemCustomization);
                 lang.setObject(grid.itemCustomization + '.widgetsDescription.' + grid.widgetName + '.atts.columns.' + evt.column.field + '.hidden', evt.hidden, pane);
             });
             this.on("dgrid-columnresize", function(evt){
                 if (evt.width != 'auto'){
                     var grid = evt.grid, pane = grid.form;
-                //lang.hitch(pane, pane.addCustom)({'width': evt.width}, ['widgetsDescription', grid.widgetName, 'atts', 'columns', grid.columns[evt.columnId].field], grid.itemCustomization);
                 lang.setObject(grid.itemCustomization + '.widgetsDescription.' + grid.widgetName + '.atts.columns.' + grid.columns[evt.columnId].field + '.width', evt.width, pane);
                 }
             });
             this.on("dgrid-sort", function(evt){
                 var grid = evt.grid, pane = grid.form;
-                 //lang.hitch(pane, pane.addCustom)(evt.sort, ['widgetsDescription', grid.widgetName, 'atts', 'sort'], grid.itemCustomization);
                  lang.setObject(grid.itemCustomization + '.widgetsDescription.' + grid.widgetName + '.atts.sort', evt.sort, pane);
             });
             this.on("dgrid-datachange", lang.hitch(this, function(evt){

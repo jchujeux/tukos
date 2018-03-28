@@ -32,9 +32,10 @@ class Page extends Translator{
         $panesCustomization = isset($pageCustom['panesConfig']) ? Utl::toAssociative($pageCustom['panesConfig'], 'name') : [];
         foreach ($appConfig->accordion as $configRequest){
         	if ($this->user->isAllowed($configRequest['object'], [])){
-	        	if ($configRequest['view'] === 'edit'){
-	            	$description = ['formContent' => ['object' => $configRequest['object'], 'viewMode' => 'edit', 'action' => 'tab', 'query' => $configRequest['query']]];
+	        	if (($view = $configRequest['view']) === 'edit' || $view === 'overview'){
+	            	$description = ['formContent' => ['object' => $configRequest['object'], 'viewMode' => $view, 'paneMode' => 'accordion', 'action' => 'tab']];
 	            }else{
+	            	$configRequest['mode'] = 'accordion';
 	            	$description = $dialogueController->response($configRequest, [], true);
 	            }
 	            if (!empty($configRequest['title'])){
@@ -44,11 +45,14 @@ class Page extends Translator{
 	            if (isset($panesCustomization[$id]) && isset($panesCustomization[$id]['selected']) && $panesCustomization[$id]['selected'] === 'on'){
 	            	$description['selected'] = true;
 	            }
+	            if (!empty($configRequest['config'])){
+	            	$description['config'] = $configRequest['config'];
+	            }
 	            $pageView->addAccordionPane($description);
         	}
         }
 
-        $request['action'] = 'tab';
+        $request['mode'] = $request['action'] = 'tab';
         $isOkTab = $pageView->addTab($dialogueController->response($request, $query));
         $pageView->setFocusedTab(0);
 

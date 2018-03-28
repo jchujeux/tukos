@@ -1,10 +1,10 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", "dojo/Deferred", "dojo/store/Cache", "dojo/store/Memory", "dojo/store/observable", "tukos/store/ActionRequest", "dijit/Tree",
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", "dojo/Deferred", "tukos/store/ActionRequest", "dijit/Tree",
          "dijit/tree/ObjectStoreModel", "dijit/tree/dndSource", "tukos/PageManager", "tukos/_WidgetsMixin", "tukos/utils", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, aspect, window, Deferred, Cache, Memory, Observable, ActionRequest, Tree, ObjectStoreModel, dndSource, Pmg, _TukosWidgetsMixin, utils, messages){
+    function(declare, lang, aspect, window, Deferred, ActionRequest, Tree, ObjectStoreModel, dndSource, Pmg, _TukosWidgetsMixin, utils, messages){
     return declare([Tree, _TukosWidgetsMixin], {
 
         constructor: function(args){
-        	var myStore = args.serverStore = new ActionRequest(args.storeArgs);//new Observable(serverStore);
+        	var myStore = args.serverStore = new ActionRequest(args.storeArgs);
         	myStore.tree = this;
         	myStore.getChildren = function(object){
         		var tree = this.tree, model = tree.model, parentType = object.type, parentid = parentType === 'object' ? object.parentid : object.id, contextPathId,
@@ -67,7 +67,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", 
        				newChildrenCache.then(lang.hitch(model, "onChildrenChange", newParent));
        				lang.hitch(model, "onChange", newParent)();
        			}
-       			//changedIds[id] = {initialParentId: oldParentId, currentParentId: newParentId};
        			lang.hitch(model, "onChange", obj)();
         		return obj;//not used anyway
         	}
@@ -81,7 +80,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", 
             this.inherited(arguments);
             this.on('click', function(item){
                 if (item.type == 'item'){
-                    Pmg.tabs.request({object: item.object, view: 'edit', action: 'tab', query: {id: item.id}});
+                    Pmg.tabs.request({object: item.object, view: 'edit', mode: 'tab', action: 'tab', query: {id: item.id}});
                 }else{
                     Pmg.setFeedback('No click action available on object folders');
                 }
@@ -94,7 +93,23 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", 
 
         getLabel: function(item){
             var content = item.children > 0 ? item.name + '(' + item.children + ' ' + messages.children + ')' : item.name, changesCache = this.model.changesCache, id = item.id;
-        	return changesCache.changedIds[id] || !utils.empty(changesCache.insertedChildren[id]) || !utils.empty(changesCache.removedChildren[id]) ? '<i>' + content + '</i>' : content;
+        	if (typeof item.canEdit === "undefined" || item.canEdit){
+                return changesCache.changedIds[id] || !utils.empty(changesCache.insertedChildren[id]) || !utils.empty(changesCache.removedChildren[id]) ? '<i>' + content + '</i>' : content;       		
+        	}else{
+        		return '<span style="color: Gray;">' + content + '</span>';
+        	}
+        },
+        
+        checkAcceptance: function(source, nodes){
+        	var canEdit = true;
+        	nodes.some(function(node){
+        		var canEditItem = dijit.registry.byId(node.id).item.canEdit;
+        		if (typeof canEditItem !== "undefined" && !canEditItem){
+        			canEdit = false;
+        			return true;
+        		}
+        	});
+        	return canEdit;
         },
         
         navigationPath: function(itemsPath){
@@ -112,7 +127,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", 
         
         showItem: function(item){
             var self = this;
-            Pmg.serverDialog({object: 'navigation', view: 'pane', action: 'get', query: {id: item.id, object:  item.object, params:{get: 'getPath'}}}).then(
+            Pmg.serverDialog({object: 'navigation', view: 'pane', 'mode': 'accordion', action: 'get', query: {id: item.id, object:  item.object, params:{get: 'getPath'}}}).then(
                 function(response){
                     self.set('paths', [self.navigationPath(response.path)]).then(
                         function(){
@@ -122,27 +137,24 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", 
                 }
             );
         },
-/*
-        setPaths: function(paths){
-            this.set('paths', paths);
-        },
-*/
         reset: function(){
         	var model = this.model, root = model.root;
         	this.dndController.selectNone();
         	this._itemNodesMap = {};
         	this.rootNode.state = "UNCHECKED";
         	this.rootNode.destroyRecursive();
-        	model.changesCache = {changedIds: [], removedChildren: [], insertedChildren: []};
+        	model.changesCache = {changedIds: {}, removedChildren: {}, insertedChildren: {}};
         	model.childrenCache = {};
         	this.tree._load();
         },
         save: function(){
         	var changesToSend = {}, index, parentid;
         	utils.forEach(this.model.changesCache.changedIds, function(change, id){
-        		changesToSend[id] = (index = (parentid = change.currentParentId).indexOf('@')) > -1 ? parentid.substring(index + 1) : parentid;
+        		//changesToSend[id] = (index = (parentid = change.currentParentId).indexOf('@')) > -1 ? parentid.substring(index + 1) : parentid;
+        		var currentParentId = change.currentParentId;
+        		changesToSend[id] = typeof currentParentId === 'string' && (index = (parentid = currentParentId).indexOf('@')) > -1 ? parentid.substring(index + 1) : currentParentId;
         	});
-            Pmg.serverDialog({object: 'navigation', view: 'pane', action: 'save', query: {}}, {data: changesToSend}).then(
+            Pmg.serverDialog({object: 'navigation', view: 'pane', mode: 'accordion', action: 'save', query: {}}, {data: changesToSend}).then(
                 lang.hitch(this, function(response){
                     this.reset();
                 }

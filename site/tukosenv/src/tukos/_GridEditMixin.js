@@ -28,11 +28,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             }
             this.addKeyHandler(86, pasteCellCallback);
             this.connectedWidgets = {};
-/*
-            utils.forEach(this.getEditorInstances(), function(widget){
-                widget = lang.mixin(widget, {valueOf: lang.hitch(widget, wutils.valueOf), setValueOf: lang.hitch(widget, wutils.setValueOf)});
-            });
-*/
             this.on("dgrid-editor-show", lang.hitch(this, function(evt){
                 var editor = evt.editor, column = evt.column;
                 editor.widgetType = column.widgetType;

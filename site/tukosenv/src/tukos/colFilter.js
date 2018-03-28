@@ -37,15 +37,9 @@ function(declare, lang, dct, Memory, Widget, TextBox, FilteringSelect, registry,
         
         onKeyDown: function(event){
 			if (event.keyCode === 13) {
-				//event.preventDefault();
 				var grid = this.grid;
 				this.onFilterChange(this);
-                //grid.form.serverDialog({action: 'reset', query: {}}, options, messages.actionDone).then(function(response){
-                //grid.store.userFilters = grid.userFilters();
 				grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
-                	//Pmg.setFeedback(messages.actionDone);
-                //});
-				console.log('was an enter');
 			}        	
         },
         

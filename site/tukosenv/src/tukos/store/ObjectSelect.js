@@ -25,7 +25,7 @@
                 if (namedId !== id){
                     return {id: id, name: namedId};//QueryResults({id: id, name: namedId});
                 }else{
-                    return Pmg.serverDialog({object: this.object, view: this.view, action: this.action, query: {one: true, storeatts: {where: {id: id}, cols: ['id', 'name']}}}).then(function(response){
+                    return Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query: {one: true, storeatts: {where: {id: id}, cols: ['id', 'name']}}}).then(function(response){
                         var obj = {};
                         obj[response.id] = {name: response.name, object: this.object};
                         Pmg.addExtendedIdsToCache(obj);
@@ -40,7 +40,7 @@
                 return QueryResults([]);
             }else{
                 var queryOptions = this.queryOptions(query, options);
-                var dfdResponse = Pmg.serverDialog({object: this.object, view: this.view, action: this.action, query: queryOptions ? {storeatts: queryOptions} : {}}, {}, '',  true);
+                var dfdResponse = Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query: queryOptions ? {storeatts: queryOptions} : {}}, {}, '',  true);
                 var self = this,
                     total = dfdResponse.then(function(response){
                         return response.total;

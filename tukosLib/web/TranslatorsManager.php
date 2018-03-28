@@ -92,7 +92,7 @@ class TranslatorsManager {
         $this->translatorPaths[$translatorName] = $setItemsPath;
         //$this->addSets($setItemsPath, $languageCol);
         return function($key) use ($setItemsPath, $languageCol){
-            $lckey = strtolower($key);
+            $lckey = mb_strtolower($key);
             $messages = $this->translatorsMessages[$languageCol];
             foreach ($setItemsPath as $setItem){
                 if (!isset($messages[$setItem])){
@@ -109,9 +109,13 @@ class TranslatorsManager {
         
     function transform($translation, $mode){
         switch ($mode){
-            case 'ucfirstOnly':
+            case 'ucfirst':
                 return ucfirst(mb_strtolower($translation));
                 break;
+            case 'ucwords':
+                return ucwords(mb_strtolower($translation));
+                break;
+            case 'none':
             default:
                 return $translation;
         }

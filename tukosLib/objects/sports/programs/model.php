@@ -75,7 +75,8 @@ class Model extends AbstractModel {
     
     public function loadChartData($item){
         if (isset($item['id'])){
-            $customAtts = $this->getCombinedCustomization(['id' => $item['id']], 'edit', ['widgetsDescription', 'loadchart', 'atts']);
+            $paneMode = isset($this->paneMode) ? $this->paneMode : 'tab';
+        	$customAtts = $this->getCombinedCustomization(['id' => $item['id']], 'edit', $paneMode, ['widgetsDescription', 'loadchart', 'atts']);
             $weekType = empty($customAtts['weektype']) ? 'weekoftheyear' : $customAtts['weektype'];
             $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
             $sessions = $sessionsModel->getAll(['where' => $this->user->filter(['parentid' => $item['id']], 'sptsessions'), 'orderBy' => ['startdate' => ' ASC'],  'cols' => ['startdate', 'duration', 'intensity', 'sport', 'stress']]);
@@ -141,7 +142,8 @@ class Model extends AbstractModel {
      }
      
      public function defaultLoadChart(){
-        $weekType = $this->user->getCustomView($this->objectName, 'edit', ['widgetsDescription', 'loadchart', 'atts', 'weektype']);
+    	$paneMode = isset($this->paneMode) ? $this->paneMode : 'tab';
+     	$weekType = $this->user->getCustomView($this->objectName, 'edit', $paneMode, ['widgetsDescription', 'loadchart', 'atts', 'weektype']);
         if (empty($weekType)){
             $weekType = 'weekoftheyear';
         }

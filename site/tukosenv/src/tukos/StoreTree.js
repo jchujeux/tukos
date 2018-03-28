@@ -2,8 +2,8 @@
  *  Provides a Tree widget field which data store is args.storeData, callable from ObjectPane.js
  *   
  */
-define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dijit/tree/dndSource", "tukos/PageManager", "dojo/domReady!"], 
-    function(declare, aspect, ObjectStoreModel, Tree, dndSource, Pmg){
+define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dijit/tree/dndSource", "tukos/PageManager", "tukos/utils", "dojo/domReady!"], 
+    function(declare, aspect, ObjectStoreModel, Tree, dndSource, Pmg, utils){
     return declare(Tree, {
         constructor: function(args){
             if (args.storeArgs && (args.storeArgs.action || args.storeArgs.target)){
@@ -24,9 +24,7 @@ define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "di
                     return originalPut.call(myStore, obj, options);
                 }
             });
-            //var theQuery = new Object;
-            //theQuery[myStore.idProperty] = args.root;
-            args.model = new ObjectStoreModel({store: myStore, query: {[myStore.idProperty]: args.root},
+            args.model = new ObjectStoreModel({store: myStore, query: utils.newObj([[myStore.idProperty, args.root]]),
                                                mayHaveChildren: function(object){
                                                     return (object.hasChildren != undefined ? object.hasChildren : myStore.getChildren(object).length > 0);
 					                           }

@@ -33,7 +33,7 @@ class View extends EditView{
                 ],
             ]
         ];
-        if ($this->view->dataWidgets['configstatus']){
+        if (isset($this->view->dataWidgets['configstatus'])){
             $this->dataLayout['contents']['row4']['widgets'][] = 'configstatus';
         }
          $this->actionWidgets['export']['atts']['dialogDescription'] = [

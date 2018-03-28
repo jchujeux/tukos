@@ -53,10 +53,11 @@ class Configure{
         $this->mailConfig = ['host' => 'localhost', 'software' => 'Mercury'];
         
         $this->accordion = [
-        		['object' => 'users'     , 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'userContext'],
-        		['object' => 'calendars' , 'view' => 'edit', 'action' => 'Accordion', 'pane' => 'calendar', 'title' => 'calendar', 'query' => ['id' => 'calendarid', 'customviewid' => 'customviewid']],
-        		['object' => 'users'     , 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'log'],
-        		['object' => 'navigation', 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'navigationTree'],
+        	['object' => 'help'     , 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'userContext'],
+        	['object' => 'calendars' , 'view' => 'edit', 'action' => 'Accordion', 'pane' => 'calendar', 'title' => 'calendar', 'config' => ['hasId' => true, 'hasCustomViewId'=> true]],
+        	['object' => 'tukos'     , 'view' => 'overview', 'action' => 'Accordion', 'pane' => 'search', 'title' => 'search', 'config' => ['hasCustomViewId' => true]],
+        	['object' => 'users'     , 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'log'],
+        	['object' => 'navigation', 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'navigationTree'],
         ];
         
         Tfk::$registry->set('configStore', function(){
@@ -99,6 +100,7 @@ class Configure{
     function setobjectModulesDefaultContextName($modulesLayout){
         static $depth = 0;
         static $contextName = 0;
+        $this->objectModulesDefaultContextName['tukos'] = 'tukos';
         $depth += 1;
         if (is_array($modulesLayout)){
             foreach($modulesLayout as $key => $layout){

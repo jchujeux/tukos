@@ -30,7 +30,8 @@ class Model extends AbstractModel {
         return parent::initialize(array_merge(['reference' => 'ABCAAAAMMJJXX', 'quotedate' => date('Y-m-d')], $init));
     }
     public function insert($values, $init = false, $jsonFilter = false, $reference = null){
-    	$refPrefix = $this->user->getCustomView($this->objectName, 'edit', ['widgetsDescription', 'export', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription', 'referenceprefix', 'atts', 'value']);
+    	$paneMode = isset($this->paneMode) ? $this->paneMode : 'tab';
+    	$refPrefix = $this->user->getCustomView($this->objectName, 'edit', $paneMode, ['widgetsDescription', 'export', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription', 'referenceprefix', 'atts', 'value']);
     	if (empty($refPrefix)){
     		$refPrefix = '';
     	}

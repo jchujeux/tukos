@@ -15,6 +15,9 @@ class View {
     function __construct($actionController){
         $this->controller = $actionController->controller;
     	$this->view = $actionController->view;
+    	$this->objectName = $actionController->objectName;
+    	$this->user = $actionController->user;
+    	$this->paneMode = $actionController->paneMode;
         if (isset($this->view->dataWidgets['configstatus'])){
             $this->_lastDataElts[] = 'configstatus';
         }
@@ -87,7 +90,8 @@ class View {
             'object'         => $this->view->objectName,
             'contextPaths'  => $this->view->user->customContextAncestorsPaths($this->view->objectName),
             'viewMode'      => 'edit',
-            'customviewid'  => isset($this->controller->customViewId) ? $this->controller->customViewId : $this->view->user->customViewId($this->view->objectName, 'edit'),
+        		'paneMode' => $this->paneMode,
+            'customviewid'  => $this->user->customViewId($this->objectName, 'edit', $this->paneMode),
             'postElts'      => $this->editPostCols(),
         	'sendOnSave'	=> $this->view->sendOnSave(),
         	'sendOnDelete'	=> $this->view->sendOnDelete(),

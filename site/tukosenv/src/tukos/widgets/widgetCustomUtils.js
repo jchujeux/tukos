@@ -2,7 +2,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
 
         var   sizeUnits = [{id: 'auto', name: 'auto'}, {id: '%', name: '%'}, {id: 'em', name: 'em'}, {id: 'px', name: 'px'}],
                 sizeConstraintUnits =  [{id: '%', name: '%'}, {id: 'em', name: 'em'}, {id: 'px', name: 'px'}],
-                localFiltersUnits = [{id: 'yes', name: messages.yes}, {id: 'no', name: messages.no}],
+                filtersUnits = [{id: 'yes', name: messages.yes}, {id: 'no', name: messages.no}],
 
                 stylewidth = {root: 'style', att: 'width', name: messages.width, units: sizeUnits},
                 minWidth = {root: 'style', att: 'minWidth', name: messages.minWidth, units: sizeConstraintUnits}, 
@@ -29,7 +29,8 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                 dgridCustomAtts = {
                     maxHeight: {att: 'maxHeight', name: messages.maxHeight, units: sizeConstraintUnits}, //minHeight: {att: 'minHeight', name: messages.minHeight, units: sizeConstraintUnits}, height: {att: 'height', name: messages.height, units: sizeConstraintUnits}, 
                     //minWidth: {att: 'minWidth', name: messages.minWidth, units: sizeConstraintUnits}, maxWidth: {att: 'maxWidth', name: messages.maxWidth, units: sizeConstraintUnits}, width: {att: 'width', name: messages.width, units: sizeConstraintUnits}, 
-                    allowLocalFilters: {att: 'allowLocalFilters', name: messages.allowLocalFilters, units: localFiltersUnits}
+                    allowLocalFilters: {att: 'allowLocalFilters', name: messages.allowLocalFilters, units: filtersUnits},
+                    hideServerFilters: {att: 'hideServerFilters', name: messages.hideServerFilters, units: filtersUnits}
                 },
 
                 widgetsCustomAtts = {
@@ -72,7 +73,14 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
     		var self = this, widgetType = column ? column.widgetType : widget.widgetType;
     		return (widgetsCustomAtts[widgetType] || widget.customizableAtts) ? [{atts: {label: messages.customizeWidget, onClick: function(evt){ lang.hitch(self, self.customDialogCallback)(widget, evt, column);}}}] : [];
     	},
-
+    	idColsContextMenuItems: function(widget){
+    		var self = this;
+    		if (Pmg.mayHaveNavigator()){
+    			return [{atts: {label: messages.editinnewtab  , onClick: function(evt){self.editInNewTab(widget)}}}, {atts: {label: messages.showinnavigator, onClick: function(evt){self.showInNavigator(widget)}}}];
+    		}else{
+    			return [{atts: {label: messages.editinnewtab  , onClick: function(evt){self.editInNewTab(widget)}}}];
+    		}
+    	},
         setWidgetTypeAtts: function(widget){
             var widgetType = widget.widgetType;
             if (!widgetTypesAtts[widgetType]){

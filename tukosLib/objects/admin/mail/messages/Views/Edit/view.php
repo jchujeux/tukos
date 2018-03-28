@@ -92,7 +92,7 @@ class View {
           'actionLayout'=> $this->actionLayout,
         ];
         $formContent =  Utl::array_merge_recursive_replace($defAtts, $atts);
-        return Utl::array_merge_recursive_replace($formContent, $this->view->user->getCustomView($this->view->objectName, 'edit'));
+        return Utl::array_merge_recursive_replace($formContent, $this->user->getCustomView($this->objectName, 'edit', $this->paneMode));
     } 
 }
 ?>

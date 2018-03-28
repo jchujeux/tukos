@@ -48,51 +48,6 @@ trait ItemsChildren {
         }
     }
 
-   /*
-    * Removes children items from $values, i.e. those items which 'parentid' is an 'id' of $values, and sets the 'hasChildren' flag to true for the corresponding parent item
-    */
-    protected function extractChildren(&$values){
-        $parentIds = array_column($values, 'parentid');
-        $ids       = array_column($values, 'id');
-        $childrenIds = array_intersect($parentIds, $ids);
-        foreach ($values as &$value){
-            $key = array_search($value['parentid'], $ids);
-            if ($key !== false && isset($values[$key])){
-                $values[$key]['hasChildren'] = true;
-                unset($value);
-            }
-        }
-    }
-   
-   /*
-    * Sets the 'hasChildren' flag to true for each item in $values that has 'children' matching $atts conditions
-    */
-/*
-    protected function setHasChildren(&$values, $atts, $extractChildren = true){
-        if ($extractChildren){
-            $this->extractChildren($values);
-        }
-        if (isset($atts['where']['parentid'])){//some items may have been filtered out which are children from an item in $values, so we need to look for more children into the store
-            unset($atts['where']['parentid']);
-            $idsToConsider = ($extractChildren 
-                ? array_filter(array_column($values, 'id'), function($value){return empty($value['hasChildren']);})
-                : array_column($values, 'id')
-            );
-            $atts['where'][] = ['col' => 'parentid', 'opr' =>     'IN', 'values' => $idsToConsider]; 
-            $atts['cols']    = ['parentid']; 
-            $atts['groupBy'] = ['parentid'];
-            $idsWithChildren = array_column($this->getAll($atts), 'parentid');
-            if (!empty($idsWithChildren)){
-                $idsWithChildren = array_flip($idsWithChildren);
-                foreach ($values as $key => &$value){
-                    if (isset($idsWithChildren[$value['id']])){
-                        $value['hasChildren'] = true;
-                    }
-                }
-            }
-        }
-    }
-*/
     protected function setHasChildren(&$values, $atts){
     	unset($atts['where']['parentid']);
     	$atts['where'][] = ['col' => 'parentid', 'opr' => 'IN', 'values' => array_column($values, 'id')];

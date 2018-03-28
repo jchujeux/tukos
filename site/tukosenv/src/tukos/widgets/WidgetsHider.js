@@ -49,7 +49,6 @@ function(declare, lang, dct, style, Widget, TooltipDialog, popup, JSON){
             if (!widget.hidden && typeof widget.resize === 'function'){
             	setTimeout(function(){widget.resize();}, 0);// for dgrid's noDataMessage not to overlap header
         	}
-            //lang.hitch(form, form.addCustom)({hidden: widget.hidden}, ['widgetsDescription', widgetName, 'atts']);
             lang.setObject((widget.itemCustomization || 'customization') + '.widgetsDescription.' + widget.widgetName + '.atts.hidden', widget.hidden, form);
         }
     });

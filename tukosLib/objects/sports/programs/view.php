@@ -15,7 +15,6 @@ class View extends AbstractView {
 	function __construct($objectName, $translator=null){
 		parent::__construct($objectName, $translator, 'Sportsman', 'Title');
 		$this->doNotEmpty = ['displayeddate'];
-		$this->sendOnSave = array_merge($this->sendOnSave, ['synchrostart', 'synchroend']);
 		
 		$this->setGridWidget('sptsessions', 'startdate', 'startdate');
 		$tVolume = $this->tr('volume'); $tStress = $this->tr('stress'); $tLoad = $this->tr('load'); $tIntensity = $this->tr('intensity'); $tWeekOfTheYear = $this->tr('weekoftheyear');

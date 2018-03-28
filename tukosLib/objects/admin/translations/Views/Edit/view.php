@@ -11,6 +11,7 @@ class View {
     function __construct($actionController){
         $this->controller = $actionController->controller;
     	$this->view = $actionController->view;
+    	$this->paneMode = $actionController->paneMode;
         $this->actionWidgets = [
                      'save' => ['type' => 'ObjectSave',         'atts' => ['label' => $this->view->tr('Save')]],                                                               
                   'delete'  => ['type' => 'ObjectDelete',       'atts' => ['label' => $this->view->tr('Delete')]],                                                               
@@ -55,7 +56,7 @@ class View {
             'object'         => $this->view->objectName,
             'contextPaths'  => $this->view->user->customContextAncestorsPaths($this->view->objectName),
             'viewMode'      => 'edit',
-            'customviewid'  => isset($this->controller->customViewId) ? $this->controller->customViewId : $this->view->user->customViewId($this->view->objectName, 'edit'),
+            'customviewid'  => $this->view->user->customViewId($this->view->objectName, 'edit', $this->paneMode),
             'postElts'      => $this->editPostCols(),
         	'sendOnSave'	=> $this->view->sendOnSave(),
         	'sendOnDelete'	=> $this->view->sendOnDelete(),

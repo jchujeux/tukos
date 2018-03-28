@@ -11,6 +11,9 @@ class View {
     function __construct($actionController){
         $this->view  = $actionController->view;
         $this->model = $actionController->model;
+        $this->user = $actionController->user;
+        $this->objectName = $actionController->objectName;
+        $this->paneMode = $actionController->paneMode;
 
         $this->view->dataWidgets['overview'] = [
             'type' => 'overviewDgrid', 
@@ -20,8 +23,8 @@ class View {
                 'colsDescription' => $this->view->widgetsDescription($this->view->gridCols(), false), 
                 'objectIdCols'    => array_values(array_intersect($this->view->gridCols(), $this->model->idCols)),
                 'sort'            => [['property' => 'updated', 'descending' => true]],
-                'storeArgs'       => ['view' => 'overview', 'action' => 'gridselect'],
-                'object'           => $this->view->objectName,
+                'storeArgs'       => ['view' => 'overview', 'mode' => 'nomode', 'action' => 'gridselect'],
+                'object'           => $this->objectName,
 				'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false],
             ]],
         ];
@@ -42,7 +45,7 @@ class View {
               'delete' => ['type' => 'OverviewAction',      'atts' => ['label' => $this->view->tr('Delete'), 'grid' => 'overview', 'serverAction' => 'delete']],
                'edit'  => Widgets::OverviewEdit([
                		'storeArgs' => ['object' => $this->view->objectName],    'placeHolder' => $this->view->tr('Select item to edit'), 'title' => $this->view->tr('Select item to edit'),
-               		'urlArgs' => ['action' => 'tab', 'view' => 'edit'], 'dropdownFilters' => ['contextpathid' => '$tabContextId'],
+               		'urlArgs' => ['action' => 'tab', 'view' => 'edit', 'mode' => 'tab'], 'dropdownFilters' => ['contextpathid' => '$tabContextId'],
                           ]),
         	'import'  => ['type' => 'SimpleUploader',     'atts' => ['label' => $this->view->tr('Import'), 'multiple' => false, 'uploadOnSelect' => true, 'grid' => 'overview', 'serverAction' => 'process', 'queryParams' => ['process' => 'importItems']]],
         	'export'  => ['type' => 'OverviewAction',     'atts' => ['label' => $this->view->tr('Export'), 'grid' => 'overview', 'serverAction' => 'process', 'queryParams' => ['process' => 'exportItems']]],
@@ -86,7 +89,8 @@ class View {
             'object'         => $this->view->objectName,
             'contextPaths'  => $this->view->user->customContextAncestorsPaths($this->view->objectName),
             'viewMode'      => 'overview',
-            'customviewid'  => $this->view->user->customViewId($this->view->objectName, 'overview'),
+        		'paneMode' => $this->paneMode,
+            'customviewid'  => $this->user->customViewId($this->objectName, 'overview', $this->paneMode),
             'widgetsDescription' => array_merge ($this->view->widgetsDescription($this->dataElements, true), $this->actionWidgets),                         
             'dataLayout'  => $this->dataLayout,
             'actionLayout'  => $this->actionLayout,
@@ -94,7 +98,7 @@ class View {
             'style' => ['padding' => '0px']
         ];
         $formContent =  Utl::array_merge_recursive_replace($defAtts, $atts);
-        return Utl::array_merge_recursive_replace($formContent, $this->view->user->getCustomView($this->view->objectName, 'overview'));
+        return Utl::array_merge_recursive_replace($formContent, $this->user->getCustomView($this->objectName, 'overview', $this->paneMode));
     } 
 }
 ?>

@@ -52,18 +52,21 @@ class Model extends AbstractModel{
     
     public function getOneExtended ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
     	$result = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
-    	$result['targetdb'] = $this->store->dbName;
+    	$result['targetdb'] = Tfk::$registry->get('configStore')->getOne(['where' => ['username' => $result['name']], 'table' => 'users', 'cols' => ['targetdb']])['targetdb'];
     	return $result;
     }
 
     public function insertExtended($values, $init=false, $jsonFilter = false){
-        if (empty($values['name']) || empty($values['password']) || empty($values['targetdb'])){
-        	Feedback::add($this->tr('neednamepasswordtargetdb'));
+        if (empty($values['name']) || empty($values['password'])){
+        	Feedback::add($this->tr('neednamepassword'));
         	return false;
         }else if (!empty($this->getOne(['where' => ['name' => $values['name']], 'cols' => ['name']]))){
         	Feedback::add($this->tr('useralreadyexists'));
         	return false;
         }else{
+        	if (empty($values['targetdb'])){
+        		$values['targetdb'] = Tfk::$registry->get('appConfig')->dataSource['dbname'];
+        	}
         	$authenticationInfo = Utl::getItems(['name', 'password', 'targetdb'], $values);
         	$authenticationInfo['username'] = $userName = Utl::extractItem('name', $authenticationInfo);
         	$configStore = Tfk::$registry->get('configStore');
@@ -79,33 +82,50 @@ class Model extends AbstractModel{
     	$authInfo = Utl::getItems(['name', 'password', 'targetdb'], $newValues);
     	$authUpdate = false;
     	if (!empty($authInfo)){
-    		$existingName = $this->getOne(['where' => ['id' => $newValues['id']], 'cols' => ['name']])['name'];
+    		$existingAuthInfo = $this->getOne(['where' => ['id' => $newValues['id']], 'cols' => ['name', 'password']]);
     		if (isset($authInfo['name'])){
-    			$newName = Utl::extractItem('name', $authInfo);
+    			$newName = Utl::getItem('name', $authInfo);
     		    if (empty($newName)){
     				Feedback::add($this->tr('blanknamenotallowed'));
     				return false;
-    			}else if ($newName !== $existingName){
+    			}else if ($newName !== $existingAuthInfo['name']){
     				$authInfo['username'] = $newName;
     			}
+    		}else{
+    			$newName = $existingAuthInfo['name'];
     		}
     	    if (isset($authInfo['password'])&& empty($authInfo['password'])){
     			Feedback::add($this->tr('emptypasswordnotallowed'));
     			return false;
     		}
     		if (isset($authInfo['targetdb'])){
-    			if(empty($targetDb = $authInfo['targetdb'])){
+    			$targetDb = Utl::getItem('targetdb', $authInfo);
+    			if(empty($targetDb)){
     				Feedback::add($this->tr('emptytargetdbnotallowed'));
     				return false;
     			}else{
     				$targetStore = new Store(array_merge(Tfk::$registry->get('appConfig')->dataSource, ['dbname' => $targetDb]));
-    				if (empty($targetStore->getOne(['table' => SUtl::$tukosTableName, 'where' => ['name' => $existingName, 'object' => 'users'], 'cols' => ['name']]))){
+    				if (empty($targetStore->getOne(['table' => SUtl::$tukosTableName, 'where' => ['name' => $newName, 'object' => 'users'], 'cols' => ['name']]))){
     					Feedback::add($this->tr('targetdbdoesnothaveusersitemforusername'));
     					return false;
     				}
     			}
     		}
-    		Tfk::$registry->get('configStore')->update($authInfo, ['table' => 'users', 'where' => ['username' => $existingName]]);
+    	    $configStore = Tfk::$registry->get('configStore');
+        	if (empty($configStore->getOne(['where' => ['username' => $newName], 'table' => 'users', 'cols' => ['username']]))){
+        	    if (empty($authInfo['targetdb'])){
+        			$authInfo['targetdb'] = Tfk::$registry->get('appConfig')->dataSource['dbname'];
+        		}
+        		if (empty($authInfo['username'])){
+        			$authInfo['username'] = $existingAuthInfo['name'];
+        		}
+        		if (empty($authInfo['password'])){
+        			$authInfo['password'] = $existingAuthInfo['password'];
+        		}
+        		$configStore->insert($authInfo, ['table' => 'users']);
+        	}else{
+        		$configStore->update($authInfo, ['table' => 'users', 'where' => ['username' => $newName]]);
+        	}
     		if (Utl::extractItem('password', $newValues, false)){
     			Feedback::add($this->tr('passwordupdated'));
     		}

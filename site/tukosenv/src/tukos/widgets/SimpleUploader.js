@@ -3,7 +3,7 @@ define (["dojo/_base/declare", "dojo/on", "dojo/aspect", "dijit/registry", "dojo
     return declare(Uploader, {
         postCreate: function(){
             var self = this, form = this.form;
-            this.url = Pmg.requestUrl({object: form.object, view: form.viewMode, action: self.serverAction, query: {params: self.queryParams}});
+            this.url = Pmg.requestUrl({object: form.object, view: form.viewMode, mode: form.paneMode, action: self.serverAction, query: {params: self.queryParams}});
             on(this, 'complete', function(evt){
                 Pmg.addFeedback(evt.feedback);
             	if (evt.outcome === 'success'){

@@ -19,7 +19,7 @@ class View extends AbstractView {
         				'reset' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('reset'), 'onClickAction' => 'this.pane.getWidget("tree").reset();']],
         				'save' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('save'), 'onClickAction' => 'this.pane.getWidget("tree").save();']],
         				'contextid' => Widgets::description($this->dataWidgets['contextid']),
-        				'tree' => Widgets::navigationTree(['id'    => 'tree', 'storeArgs' => ['object' => 'navigation', 'view' => 'pane', 'action' => 'get'], 'showRoot' => false])
+        				'tree' => Widgets::navigationTree(['id'    => 'tree', 'storeArgs' => ['object' => 'navigation', 'view' => 'pane', 'mode' => 'accordion', 'action' => 'get'], 'showRoot' => false])
         			],
         			'layout' => [
         				'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false], 

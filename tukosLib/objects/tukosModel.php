@@ -2,6 +2,7 @@
 namespace TukosLib\Objects;
 
 use TukosLib\Store\Store;
+use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Objects\Directory;
 use TukosLib\TukosFramework as Tfk;
 
@@ -66,10 +67,12 @@ class TukosModel {
     
     public function getOne($atts){
         $atts['table'] = $this->tableName;
+        $atts['where'] = SUtl::deletedFilter($atts['where']);
         return $this->store->getOne($atts);
     }
     public function getAll($atts){
         $atts['table'] = $this->tableName;
+        $atts['where'] = SUtl::deletedFilter($atts['where']);
         return $this->store->getAll($atts);
     }
     

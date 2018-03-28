@@ -23,6 +23,19 @@ define(["dojo/_base/lang", "dijit/Menu", "dijit/MenuItem", "dijit/PopupMenuItem"
         
         },
         
+        newObjectMenuDescription: function(objectName, onNewAction, onTemplateAction){
+        	return {
+            	type: 'Menu',
+            	items: [
+                    {atts: {label: messages.adefault,   onClick: onNewAction}},
+                    {type: 'PopupMenuItem', atts: {label: messages.fromtemplate}, popup: {
+                    	type: 'ObjectSelect', atts: {placeHolder: messages.selecttemplate, object: objectName, dropdownFilters: {grade: 'TEMPLATE'}, onChange: onTemplateAction}}
+                    }
+                ]
+        	}
+        
+        },
+        
         newObjectPopupMenuItemDescription: function(objectName, label, onNewAction, onTemplateAction){
         	return {type: 'PopupMenuItem', atts: {label: label}, popup: this.newObjectDropDownDescription(objectName, onNewAction, onTemplateAction)};
         },

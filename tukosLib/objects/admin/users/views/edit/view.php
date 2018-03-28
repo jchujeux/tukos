@@ -17,8 +17,8 @@ class View extends EditView{
             'widgets' => ['id', 'parentid', 'name', 'password', 'rights', 'language', 'environment', 'targetdb']
         ];
         $this->dataLayout['contents']['row2'] = [
-            'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['5%', '5%', '5%', '5%', '50%', '50%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
-            'widgets' => (isset($this->view->dataWidgets['worksheet']) ? ['modules', 'customviewids', 'customcontexts', 'pagecustom', 'worksheet', 'comments'] : ['modules', 'customviewids', 'customcontexts', 'pagecustom', 'comments']),
+            'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['10%', '20%', '10%', '30%', '30%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
+            'widgets' => ['modules', 'customviewids', 'customcontexts', 'pagecustom', 'comments'],
         ];
     }
 }

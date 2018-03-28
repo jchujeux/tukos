@@ -36,7 +36,7 @@ class Model extends ObjectTranslator {
     public function getItemCustomization($where, $keys){
         return [];
     }
-    public function getCombinedCustomization($where, $view, $keys){
+    public function getCombinedCustomization($where, $view, $paneMode, $keys){
         return [];
     }
    
