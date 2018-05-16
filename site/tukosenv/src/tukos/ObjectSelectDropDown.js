@@ -3,10 +3,10 @@
     Currently supported dropdown widgets:
     - StoreTree
 */
-define (["dojo/_base/declare", "dojo/on", "dijit/form/MappedTextBox", "dijit/_HasDropDown", "tukos/PageManager", "tukos/_WidgetsMixin", "tukos/StoreTree", "tukos/ObjectSelect",
-         "dojo/text!dijit/form/templates/DropDownBox.html"/*, "dojo/domReady!"*/], 
-    function(declare, on, MappedTextBox, _HasDropDown, Pmg, _WidgetsMixin, StoreTree, ObjectSelect, template){
-    return declare([MappedTextBox, _HasDropDown, _WidgetsMixin], {
+define (["dojo/_base/declare", "dojo/on", "dijit/form/MappedTextBox", "dijit/_HasDropDown", "tukos/PageManager", "tukos/StoreTree",
+         "dojo/text!dijit/form/templates/DropDownBox.html"], 
+    function(declare, on, MappedTextBox, _HasDropDown, Pmg, StoreTree, template){
+    return declare([MappedTextBox, _HasDropDown], {
         templateString: template,
         baseClass: "dijitTextBox dijitComboBox",
         cssStateNodes: {

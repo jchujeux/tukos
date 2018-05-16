@@ -1,8 +1,8 @@
 define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on", "dojo/store/Memory",  "dojo/store/Observable", "dojo/json", "dijit/registry", "dojox/calendar/Calendar",  "dojox/calendar/MonthColumnView", 
-         "dojox/calendar/Mouse", "dojox/calendar/Keyboard", /*"dojo/text!dojox/calendar/tests/CalendarMonthColumn.html",*/ "dojoFixes/dstore/legacy/DstoreAdapter", "tukos/_WidgetsMixin", "tukos/widgets/calendar/DnD", 
+         "dojox/calendar/Mouse", "dojox/calendar/Keyboard", /*"dojo/text!dojox/calendar/tests/CalendarMonthColumn.html",*/ "dojoFixes/dstore/legacy/DstoreAdapter", "tukos/widgets/calendar/DnD", 
          "tukos/widgets/calendar/VerticalRenderer", "tukos/utils", "tukos/dateutils", "tukos/menuUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, arrayUtil, lang, on, Memory, Observable, JSON, registry, Calendar, MonthColumnView, Mouse, Keyboard/*, template*/, DstoreAdapter, _WidgetsMixin, DnD, VerticalRenderer, utils, dutils, mutils, Pmg, messages){
-    return declare([Calendar, _WidgetsMixin, DnD], {
+    function(declare, arrayUtil, lang, on, Memory, Observable, JSON, registry, Calendar, MonthColumnView, Mouse, Keyboard/*, template*/, DstoreAdapter, DnD, VerticalRenderer, utils, dutils, mutils, Pmg, messages){
+    return declare([Calendar, DnD], {
         constructor: function(args){
             args.store=  Observable(new Memory({}));
         },

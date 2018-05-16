@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/_WidgetBase", "dijit/_FocusMixin", "tukos/_WidgetsMixin", "tukos/widgetUtils", "tukos/dateutils", "tukos/TukosDateBox", "dijit/form/TimeTextBox", "tukos/StoreSelect", "dijit/registry", "dojo/json"], 
-function(declare, lang, domstyle, Widget, _FocusMixin, _WidgetsMixin, wutils, dutils, DateTextBox, TimeTextBox, StoreSelect, registry, JSON){
-    return declare([Widget, _FocusMixin,  _WidgetsMixin], {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/_WidgetBase", "dijit/_FocusMixin", "tukos/widgetUtils", "tukos/dateutils", "tukos/TukosDateBox", "dijit/form/TimeTextBox", "tukos/StoreSelect", "dijit/registry", "dojo/json"], 
+function(declare, lang, domstyle, Widget, _FocusMixin, wutils, dutils, DateTextBox, TimeTextBox, StoreSelect, registry, JSON){
+    return declare([Widget, _FocusMixin], {
         postCreate: function(){
             this.inherited(arguments);
             var self = this;

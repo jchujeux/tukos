@@ -1,6 +1,6 @@
-define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom-attr", "dojo/on", "dojo/when", "dojo/Deferred", "dijit/form/FilteringSelect", "tukos/utils", "tukos/widgetUtils", "tukos/_WidgetsMixin", "tukos/PageManager", "dojo/json"/*, "dojo/domReady!"*/], 
-    function(declare, lang, domAttr, on, when, Deferred, FilteringSelect, utils, wutils, _WidgetsMixin, Pmg, JSON){
-    return declare([FilteringSelect, _WidgetsMixin], {
+define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom-attr", "dojo/on", "dojo/when", "dojo/Deferred", "dijit/form/FilteringSelect", "tukos/utils", "tukos/widgetUtils", "tukos/PageManager", "dojo/json"/*, "dojo/domReady!"*/], 
+    function(declare, lang, domAttr, on, when, Deferred, FilteringSelect, utils, wutils, Pmg, JSON){
+    return declare([FilteringSelect], {
         constructor: function(args){
             args.storeArgs = args.storeArgs || {};
             args.storeArgs.view = args.storeArgs.view || 'noview';

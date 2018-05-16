@@ -1,5 +1,5 @@
-define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry", "tukos/utils", "tukos/evalutils"], 
-	function(arrayUtil, lang, domstyle, registry, utils, eutils){
+define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry", "tukos/utils"/*, "tukos/evalutils"*/], 
+	function(arrayUtil, lang, domstyle, registry, utils/*, eutils*/){
     return {
 
         specialCharacters: '$@#',
@@ -122,7 +122,8 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                             subWidget.localActionFunctions = {};
                         }
                         if (utils.empty(subWidget.localActionFunctions[attr])){
-                            subWidget.localActionFunctions[attr] = eutils.eval(subWidget.onWatchLocalAction[attr], 'widget, oldValue, newValue');
+                            //subWidget.localActionFunctions[attr] = eutils.eval(subWidget.onWatchLocalAction[attr], 'widget, oldValue, newValue');
+                            subWidget.localActionFunctions[attr] = form.buildSubWidgetLocalActionFunction(subWidget.onWatchLocalAction[attr]);
                         }
                         subWidget.localActionFunctions[attr](widget, oldValue, value);
                     }

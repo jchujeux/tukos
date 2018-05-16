@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dijit/form/TextBox", "tukos/utils", "tukos/_WidgetsMixin"], 
-    function(declare, TextBox, utils, _WidgetsMixin){
-    return declare([TextBox, _WidgetsMixin], {
+define(["dojo/_base/declare", "dijit/form/TextBox", "tukos/utils"], 
+    function(declare, TextBox, utils){
+    return declare([TextBox], {
 
         _setValueAttr: function(value){
             value = utils.transform(value, this.formatType, this.formatOptions);

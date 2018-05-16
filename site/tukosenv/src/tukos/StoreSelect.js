@@ -2,9 +2,9 @@
  *  Provides a Select field which data store is args.storeData, callable from ObjectPane.js
  *   
  */
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dijit/form/FilteringSelect", "dojo/store/Memory", "tukos/widgetUtils",  "tukos/_WidgetsMixin"/*, "dojo/domReady!"*/], 
-    function(declare, arrayUtil, lang, FilteringSelect, Memory, widgetUtils, _WidgetsMixin){
-    return declare([FilteringSelect, _WidgetsMixin], {
+define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dijit/form/FilteringSelect", "dojo/store/Memory", "tukos/widgetUtils"], 
+    function(declare, arrayUtil, lang, FilteringSelect, Memory, widgetUtils){
+    return declare([FilteringSelect], {
         constructor: function(args){
             if (args.dropdownFilters){
                 args.storeData = args.storeArgs.data;

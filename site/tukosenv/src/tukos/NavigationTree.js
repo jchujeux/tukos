@@ -1,7 +1,7 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", "dojo/Deferred", "tukos/store/ActionRequest", "dijit/Tree",
-         "dijit/tree/ObjectStoreModel", "dijit/tree/dndSource", "tukos/PageManager", "tukos/_WidgetsMixin", "tukos/utils", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, aspect, window, Deferred, ActionRequest, Tree, ObjectStoreModel, dndSource, Pmg, _TukosWidgetsMixin, utils, messages){
-    return declare([Tree, _TukosWidgetsMixin], {
+         "dijit/tree/ObjectStoreModel", "dijit/tree/dndSource", "tukos/PageManager", "tukos/utils", "dojo/i18n!tukos/nls/messages"], 
+    function(declare, lang, aspect, window, Deferred, ActionRequest, Tree, ObjectStoreModel, dndSource, Pmg, utils, messages){
+    return declare([Tree], {
 
         constructor: function(args){
         	var myStore = args.serverStore = new ActionRequest(args.storeArgs);

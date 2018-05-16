@@ -33,11 +33,11 @@
 
         <script>
             <!-- Page layout -->
-            require(["tukos/PageManager"], 
-                function(PageManager){
-                    PageManager.initialize(<?= $this->__raw()->pageManagerArgs;?>);
-                	document.body.className += ' loaded';
-            });
+			require(["tukos/PageManager"], 
+            	function(PageManager){
+                	PageManager.initialize(<?= $this->__raw()->pageManagerArgs;?>);
+            		document.body.className += ' loaded';
+        	});
             </script>
     </body>
 </html>

@@ -3,9 +3,9 @@
  *   - usage: 
  */
 define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all", "dojo/ready", "dijit/registry", "dojo/request", 
-            "tukos/utils", "tukos/dateutils", "tukos/hiutils", "tukos/widgetUtils", "tukos/widgets/widgetCustomUtils", "tukos/_WidgetsMixin", "tukos/_TukosPaneMixin",
+            "tukos/utils", "tukos/dateutils", "tukos/hiutils", "tukos/widgetUtils", "tukos/widgets/widgetCustomUtils", "tukos/_TukosPaneMixin",
             "tukos/DialogConfirm", "tukos/PageManager", "dojo/json", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, when, all, ready, registry, request, utils, dutils, hiutils, wutils, wcutils, _WidgetsMixin, _TukosPaneMixin, DialogConfirm, Pmg, JSON, messages){
+    function(arrayUtil, declare, lang, when, all, ready, registry, request, utils, dutils, hiutils, wutils, wcutils, _TukosPaneMixin, DialogConfirm, Pmg, JSON, messages){
     return declare(_TukosPaneMixin, {
 
         editInNewTab: function(widget){

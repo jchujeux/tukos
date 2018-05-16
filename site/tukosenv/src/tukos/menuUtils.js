@@ -1,5 +1,5 @@
 define(["dojo/_base/lang", "dijit/Menu", "dijit/MenuItem", "dijit/PopupMenuItem", "dijit/PopupMenuBarItem", "dijit/DropDownMenu", "tukos/ObjectSelect", "dojo/i18n!tukos/nls/messages"], 
-	function(lang, Menu, MenuItem, PopupMenuItem, PopupMenuBarItem, DropDownMenu, ObjectSelect, messages){
+	function(lang, Menu, MenuItem, PopupMenuItem, PopupMenuBarItem, DropDownMenu, ObjectSelect, messages){//ObjectSelect required as may be instantiated. To be general could use WidgetsLoader instead
 	return {
 
         setContextMenu: function(widget, args){

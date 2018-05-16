@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dijit/form/CurrencyTextBox", "tukos/_WidgetsMixin", "dojo/json"], 
-    function(declare, CurrencyTextBox, _WidgetsMixin, JSON){
-    return declare([CurrencyTextBox, _WidgetsMixin], {
+define(["dojo/_base/declare", "dijit/form/CurrencyTextBox"], 
+    function(declare, CurrencyTextBox){
+    return declare([CurrencyTextBox], {
 
         _setValueAttr: function(value){
            if (typeof value === 'string' && value !== ''){

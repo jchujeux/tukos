@@ -252,6 +252,10 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
                 }
             }
         },
+        
+        buildSubWidgetLocalActionFunction(action){
+        	return eutils.eval(action, 'widget, oldValue, newValue')
+        },
 
         serverAction: function(urlArgs, options){
             var self = this, widgetsName, requestOptions= {};

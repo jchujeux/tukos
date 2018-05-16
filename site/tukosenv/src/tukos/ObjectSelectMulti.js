@@ -3,9 +3,9 @@
     - usage: 
 */
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuItem", "dijit/DropDownMenu", "dijit/form/MappedTextBox",
-         "dijit/_HasDropDown", "tukos/utils", "tukos/PageManager", "dijit/Tooltip", "dijit/form/TextBox",  "tukos/ObjectSelect",
+         "dijit/_HasDropDown", "tukos/utils", "tukos/PageManager", "dijit/Tooltip", "dijit/form/TextBox",  "tukos/widgets/WidgetsLoader",
          "dojo/text!dijit/form/templates/DropDownBox.html", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, on, PopupMenuItem, DropDownMenu, MappedTextBox, _HasDropDown, utils, Pmg, Tooltip, TextBox, ObjectSelect, template, messages){
+    function(declare, lang, on, PopupMenuItem, DropDownMenu, MappedTextBox, _HasDropDown, utils, Pmg, Tooltip, TextBox, widgetsLoader, template, messages){
     return declare([MappedTextBox, _HasDropDown], {
         templateString: template,
 		baseClass: "dijitTextBox dijitComboBox",
@@ -29,7 +29,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuIte
                 this.timeout = setTimeout(
                     function(){
                         if (self1.popup === self.emptyDropDown){
-                            self1.set('popup', new ObjectSelect(self1.objectSelectAtts));
+                            dojo.when(widgetsLoader.instantiate('ObjectSelect', self1.objectSelectAtts), function(theObjectSelect){
+                            	self1.set('popup', theObjectSelect);                            	
+                            });
+                        	//self1.set('popup', new ObjectSelect(self1.objectSelectAtts));
                         }
                     },
                     200

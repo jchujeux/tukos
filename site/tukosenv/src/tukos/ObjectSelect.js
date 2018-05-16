@@ -1,17 +1,13 @@
-define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom-attr", "dojo/on", "dojo/when", "dijit/form/FilteringSelect", "tukos/utils", "tukos/widgetUtils", "tukos/_WidgetsMixin", "tukos/PageManager", "dojo/json"], 
-    function(declare, lang, domAttr, on, when, FilteringSelect, utils, wutils, _WidgetsMixin, Pmg, JSON){
-    return declare([FilteringSelect, _WidgetsMixin], {
+define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom-attr", "dojo/on", "dojo/when", "dijit/form/FilteringSelect", "tukos/utils", "tukos/widgetUtils", "tukos/PageManager", "dojo/json"], 
+    function(declare, lang, domAttr, on, when, FilteringSelect, utils, wutils, Pmg, JSON){
+    return declare([FilteringSelect], {
         constructor: function(args){
 
         	args.storeArgs = args.storeArgs || {};
             args.storeArgs.view = args.storeArgs.view || 'noview';
             args.storeArgs.action = args.storeArgs.action || 'objectselect';
-            //if (args.storeArgs.object || args.object){
-                args.storeArgs.object = args.storeArgs.object || args.object;
-            //}
-            //if (args.storeArgs.mode || args.mode){
-                args.storeArgs.mode = args.storeArgs.mode || args.mode || 'tab';
-            //}
+            args.storeArgs.object = args.storeArgs.object || args.object;
+            args.storeArgs.mode = args.storeArgs.mode || args.mode || 'tab';
             args.store = Pmg.store(args.storeArgs);
 
         	declare.safeMixin(this, args);

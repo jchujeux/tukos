@@ -3,8 +3,8 @@
  *   - usage: 
  */
 define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all", "dojo/on", "dojo/when", "dojo/mouse", "dijit/registry", "dijit/focus", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/sheetUtils", 
-         "tukos/widgetUtils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/widgets/WidgetsLoader", "tukos/_WidgetsMixin", "tukos/PageManager", "tukos/TukosTooltipDialog", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, all, on, when, mouse, registry, focusUtil, utils, dutils, eutils, sutils, wutils, mutils, wcutils, WidgetsLoader, _WidgetsMixin, Pmg, TukosTooltipDialog, messages){
+         "tukos/widgetUtils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/widgets/WidgetsLoader", "tukos/PageManager", "tukos/TukosTooltipDialog", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+    function(arrayUtil, declare, lang, all, on, when, mouse, registry, focusUtil, utils, dutils, eutils, sutils, wutils, mutils, wcutils, WidgetsLoader, Pmg, TukosTooltipDialog, messages){
     var mixin = declare(null, {
 
         constructor: function(args){

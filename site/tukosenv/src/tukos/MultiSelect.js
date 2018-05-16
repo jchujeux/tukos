@@ -1,10 +1,6 @@
-/*
- *  Provides a Select field which data store is args.storeData, callable from ObjectPane.js
- *   
- */
-define (["dojo/_base/declare", "dijit/form/MultiSelect", "dojo/json", "tukos/_WidgetsMixin"/*, "dojo/domReady!"*/], 
-    function(declare, MultiSelect, JSON, _WidgetsMixin){
-    return declare([MultiSelect, _WidgetsMixin], {
+define (["dojo/_base/declare", "dijit/form/MultiSelect"], 
+    function(declare, MultiSelect){
+    return declare([MultiSelect], {
         postCreate: function(){
             this.inherited(arguments);    
             for (var  i in this.options){
