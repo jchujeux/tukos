@@ -12,8 +12,8 @@
 * @property {dojo.Deferred} dfd Deferred
 * @property {HTMLDivElement} buttonNode reference to div containing buttons
 */
-define(['dojo/_base/lang', 'dojo/_base/declare', 'dojo/_base/Deferred', 'dojo/dom-construct', 'dijit/Dialog', 'dijit/form/Button', 'dijit/form/CheckBox'/*, 'dojo/domReady!'*/], 
-    function(lang, declare, Deferred, construct, Dialog, Button, Checkbox) {
+define(['dojo/_base/lang', 'dojo/_base/declare', 'dojo/_base/Deferred', 'dojo/dom-construct', 'dijit/Dialog'], 
+    function(lang, declare, Deferred, construct, Dialog) {
     return declare(Dialog, {
         okButton: null, cancelButton: null, skipCheckBox: null, hasOkButton: true, hasCancelButton: true, hasSkipCheckBox: true, hasUnderlay: true, dfd: null, buttonNode: null,
         /**
@@ -29,20 +29,22 @@ define(['dojo/_base/lang', 'dojo/_base/declare', 'dojo/_base/Deferred', 'dojo/do
             this.inherited(arguments);            
             var label, div, remember = false;            
             div = construct.create('div', {className: 'dijitDialogPaneContent dialogConfirm'}, this.domNode, 'last');            
-            if (this.hasSkipCheckBox) {
-                this.skipCheckBox = new Checkbox({checked: false}, construct.create('div'));
-                div.appendChild(this.skipCheckBox.domNode);
-                label = construct.create('label', {'for': this.skipCheckBox.id, innerHTML: 'Remember my decision and do not ask again.<br/>'}, div);
-            }
-            if (this.hasOkButton) {
-                this.okButton = new Button({ label: 'OK', onClick: lang.hitch(this, function() {remember = this.hasSkipCheckBox ? this.skipCheckBox.get('checked') : false; this.hide(); this.dfd.resolve(remember);})}, construct.create('div'));
-                div.appendChild(this.okButton.domNode);
-            }
-            if (this.hasCancelButton) {
-                this.cancelButton = new Button({label: 'Cancel', onClick: lang.hitch(this, function() {remember = this.hasSkipCheckBox ? this.skipCheckBox.get('checked') : false; this.hide(); this.dfd.cancel(remember);})}, construct.create('div'));
-                div.appendChild(this.cancelButton.domNode);
-            }
-            this.buttonNode = div;
+            require(['dijit/form/Button', 'dijit/form/CheckBox'], lang.hitch(this, function(Button, Checkbox){
+                if (this.hasSkipCheckBox) {
+                    this.skipCheckBox = new Checkbox({checked: false}, construct.create('div'));
+                    div.appendChild(this.skipCheckBox.domNode);
+                    label = construct.create('label', {'for': this.skipCheckBox.id, innerHTML: 'Remember my decision and do not ask again.<br/>'}, div);
+                }
+                if (this.hasOkButton) {
+                    this.okButton = new Button({ label: 'OK', onClick: lang.hitch(this, function() {remember = this.hasSkipCheckBox ? this.skipCheckBox.get('checked') : false; this.hide(); this.dfd.resolve(remember);})}, construct.create('div'));
+                    div.appendChild(this.okButton.domNode);
+                }
+                if (this.hasCancelButton) {
+                    this.cancelButton = new Button({label: 'Cancel', onClick: lang.hitch(this, function() {remember = this.hasSkipCheckBox ? this.skipCheckBox.get('checked') : false; this.hide(); this.dfd.cancel(remember);})}, construct.create('div'));
+                    div.appendChild(this.cancelButton.domNode);
+                }
+                this.buttonNode = div;
+            }));
         },
 
         /**

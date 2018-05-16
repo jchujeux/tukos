@@ -1,7 +1,7 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/json", "dijit/Menu", "dijit/DropDownMenu", "dijit/MenuItem", "dijit/MenuBar", "dijit/MenuBarItem",
-         "dijit/PopupMenuBarItem", "dijit/PopupMenuItem", "dijit/popup", "tukos/_NavigationMenuContextMixin", "tukos/menuUtils", "tukos/PageManager", "tukos/ObjectSelect"], 
+         "dijit/PopupMenuBarItem", "dijit/PopupMenuItem", "dijit/popup", "tukos/_NavigationMenuContextMixin", "tukos/menuUtils", "tukos/PageManager"], 
     function(declare, lang, on, JSON, Menu, DropDownMenu, MenuItem, MenuBar, MenuBarItem, PopupMenuBarItem, PopupMenuItem, popup,
-             _NavigationMenuContextMixin, mutils, Pmg, ObjectSelect){
+             _NavigationMenuContextMixin, mutils, Pmg){
     return declare([MenuBar, _NavigationMenuContextMixin], {
 
         onClickMenuItem: function(evt){

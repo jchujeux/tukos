@@ -37,7 +37,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                     TextBox: width,  NumberTextBox: width,  CurrencyTextBox: width,  TimeTextBox: width /*constraints: {timePattern: 'HH:mm:ss', clickableIncrement: 'T00:15:00', visibleRange: 'T01:00:00'}*/, //CheckBox, 
                     TukosNumberBox: width, TukosCurrencyBox: width,
                     Textarea: heightConstraints,  //Select: {autoWidth: true/false, maxHeight, // not used //Button: "dijit/form/", // no need to customize
-                    TukosDateBox:widthConstraints,  TukosTimeBox:widthConstraints,  //Editor: {}, // no need to customize
+                    TukosDateBox:widthConstraints,  //Editor: {}, // no need to customize
                     FormattedTextBox: heightConstraints, MultiSelect: widthConstraints, 
                     StoreSelect: widthConstraints, ObjectSelect:  widthConstraints,  ObjectSelectMulti:  widthConstraints,  ObjectSelectDropDown: widthConstraints,
                     NumberUnitBox: width, DateTimeBox: width,  SimpleDgrid: dgridCustomAtts,  StoreDgrid: dgridCustomAtts, OverviewDgrid: dgridCustomAtts, 

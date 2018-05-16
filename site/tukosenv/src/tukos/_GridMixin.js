@@ -3,9 +3,9 @@
  *   - usage: 
  */
 define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/mouse", "dijit/registry", "dijit/Dialog", "tukos/utils", "tukos/widgetUtils", "tukos/menuUtils",
-         "tukos/widgets/widgetCustomUtils", "tukos/sheetUtils", "tukos/_WidgetsMixin", "tukos/widgets/ColorPicker", "tukos/PageManager", "dojo/number",  "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, dct, mouse, registry, Dialog, utils, wutils, mutils, wcutils, sutils, _WidgetsMixin, ColorPicker, Pmg, number, messages){
-    return declare([_WidgetsMixin], {
+         "tukos/widgets/widgetCustomUtils", "tukos/sheetUtils", "tukos/widgets/ColorPicker", "tukos/PageManager", "dojo/number",  "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+    function(arrayUtil, declare, lang, dct, mouse, registry, Dialog, utils, wutils, mutils, wcutils, sutils, ColorPicker, Pmg, number, messages){
+    return declare(null, {
 
         constructor: function(){
             this.contextMenuItems = {

@@ -1,8 +1,9 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/promise/all", "dojo/when", "tukos/utils", "tukos/_WidgetsExtend"], function(declare, lang, Deferred, all, when, utils, _WidgetsExtend){
-        return {
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/promise/all", "dojo/when", "tukos/utils"],
+		function(declare, lang, Deferred, all, when, utils){
+	return {
             widgetsPath: {
                 TextBox: "dijit/form/", NumberTextBox: "dijit/form/", CurrencyTextBox: "dijit/form/", CheckBox: "dijit/form/", TimeTextBox: "dijit/form/", Textarea: "dijit/form/", Select: "dijit/form/", Button: "dijit/form/",
-                DropDownButton: "dijit/form/", RadioButton: "dijit/form/", TukosDateBox: "tukos/", TukosTimeBox: "tukos/", Editor: "tukos/widgets/", LazyEditor: "tukos/widgets/", SharedEditor: "tukos/widgets/",
+                DropDownButton: "dijit/form/", RadioButton: "dijit/form/", TukosDateBox: "tukos/", Editor: "tukos/widgets/", LazyEditor: "tukos/widgets/", SharedEditor: "tukos/widgets/",
                 FormattedTextBox: "tukos/widgets/", MultiSelect: "tukos/", StoreSelect: "tukos/", ObjectSelect: "tukos/", ObjectSelectMulti: "tukos/", ObjectSelectDropDown: "tukos/",
                 TukosNumberBox: "tukos/", TukosCurrencyBox: "tukos/", NumberUnitBox: "tukos/", DateTimeBox: "tukos/", TukosButton: "tukos/widgets/", DropDownTextBox: "tukos/widgets/", ColorPickerTextBox: "tukos/widgets/",
                 RestSelect: "tukos/", ObjectExport: "tukos/", ObjectSave: "tukos/", ObjectReset: "tukos/", ObjectProcess: "tukos/", ObjectNew: "tukos/", ObjectEdit: "tukos/", ObjectDelete: "tukos/", ObjectDuplicate: "tukos/",
@@ -25,8 +26,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/p
             
             _instantiate: function(Widget, atts, optionalWidgetInstantiationCallback){// requires Widgets and its dependingWidgets to be loaded
                 var widget = new Widget(atts);
-                //widget = lang.mixin(widget, lang.hitch(widget, _WidgetsExtend));
-                widget = declare.safeMixin(widget, _WidgetsExtend);
                 if (optionalWidgetInstantiationCallback){
                     optionalWidgetInstantiationCallback(widget);
                 }
@@ -41,7 +40,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/p
                     if (location){
                         loadingWidget =  new Deferred();
                     	require([location], lang.hitch(this, function(Widget){
-                            this.loadedWidgets[widgetType] = Widget;// = lang.extend(Widget, _WidgetsExtend);
+                            this.loadedWidgets[widgetType] = Widget;
                             loadingWidget.resolve(Widget);
                         }));
                         return loadingWidget;

@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/_WidgetBase", "dijit/_FocusMixin", "dijit/form/NumberTextBox", "tukos/StoreSelect", "tukos/_WidgetsMixin", "tukos/widgetUtils", "dijit/registry", "dojo/json"], 
-function(declare, lang, domstyle, Widget, _FocusMixin, NumberTextBox, StoreSelect, _WidgetsMixin, wutils, registry, JSON){
-    return declare([Widget, _FocusMixin, _WidgetsMixin], {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/_WidgetBase", "dijit/_FocusMixin", "dijit/form/NumberTextBox", "tukos/StoreSelect", "tukos/widgetUtils", "dijit/registry", "dojo/json"], 
+function(declare, lang, domstyle, Widget, _FocusMixin, NumberTextBox, StoreSelect, wutils, registry, JSON){
+    return declare([Widget, _FocusMixin], {
         postCreate: function(){
             this.inherited(arguments);
             var self = this;

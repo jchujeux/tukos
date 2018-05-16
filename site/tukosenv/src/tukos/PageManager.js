@@ -1,11 +1,14 @@
-define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/registry", "dijit/Dialog", "dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane",
-        "dijit/layout/AccordionContainer", "dojo/json", "tukos/utils", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"],
-    function(ready, lang, dom, domStyle, string, request, registry, Dialog, BorderContainer, TabContainer, ContentPane, AccordionContainer, JSON, utils, messages){
+define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckboxMixin", "dijit/registry", "dojo/json", "tukos/utils",
+		"tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"],
+    function(ready, lang, dom, domStyle, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, utils, _WidgetsExtend, _WidgetsFormExtend, messages){
     var stores,
         tabs,
         objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
-    return {
+		lang.extend(_WidgetBase, _WidgetsExtend);//for this to work in all cases, no require for a widget should be made before this statement executes, above in PageManager, and in modules required in evalUtils (which _WidgetsExtend depends on)
+		lang.extend(_FormValueMixin, _WidgetsFormExtend);
+		lang.extend(_CheckboxMixin, _WidgetsFormExtend);
+		return {
         initialize: function(obj) {
             this.cache = obj;
             this.cache.extras = this.cache.extras || {};
@@ -13,9 +16,9 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
             Date.prototype.toJSON = function(){
                 return dojo.date.locale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
             };
-            require(["tukos/StoresManager", "tukos/ObjectSelect", "tukos/NavigationMenu",
+            require(["dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/layout/AccordionContainer", "tukos/StoresManager", "tukos/NavigationMenu",
                      "tukos/TabsManager", "tukos/AccordionManager", "tukos/TabOnClick", "dojo/domReady!"], 
-            function(StoresManager, ObjectSelect, NavigationMenu, TabsManager, AccordionManager, TabOnClick){
+            function(BorderContainer, TabContainer, ContentPane, AccordionContainer, StoresManager, NavigationMenu, TabsManager, AccordionManager, TabOnClick){
                 stores = new StoresManager();
                 var appLayout = new BorderContainer({design: 'sidebar'}, "appLayout");
 
@@ -329,24 +332,26 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         },
 
         alert: function(args, blurHandle){
-            if (!this.alertDialog){
-                var dialog = this.alertDialog = new Dialog(lang.mixin(args, {onBlur: function(evt){this.hide();}}));
-                this.alertDialog.onShow = function(){// hack to counter forcing to z-index 950 in dijit/dialog!!
-                    setTimeout(function(){
-                        domStyle.set(dialog.domNode, 'z-index', 10000);
-                    }, 100);
-                }
-            }else{
-                for (var att in args){
-                    this.alertDialog.set(att, args[att]);
-                }
-            }
-            if (blurHandle){
-                blurHandle.pause();
-                return this.alertDialog.show().then(function(response){blurHandle.resume();return response;});
-            }else{
-                return this.alertDialog.show();
-            }
+            require(["dijit/dialog", lang.hitch(this, function(dialog){
+	         	if (!this.alertDialog){
+	                var dialog = this.alertDialog = new Dialog(lang.mixin(args, {onBlur: function(evt){this.hide();}}));
+	                this.alertDialog.onShow = function(){// hack to counter forcing to z-index 950 in dijit/dialog!!
+	                    setTimeout(function(){
+	                        domStyle.set(dialog.domNode, 'z-index', 10000);
+	                    }, 100);
+	                }
+	            }else{
+	                for (var att in args){
+	                    this.alertDialog.set(att, args[att]);
+	                }
+	            }
+	            if (blurHandle){
+	                blurHandle.pause();
+	                return this.alertDialog.show().then(function(response){blurHandle.resume();return response;});
+	            }else{
+	                return this.alertDialog.show();
+	            }
+            })])
         },
 
         namedId: function(id){

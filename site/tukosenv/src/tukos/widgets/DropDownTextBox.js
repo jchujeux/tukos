@@ -1,6 +1,6 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dijit/form/MappedTextBox", "dijit/_HasDropDown", "tukos/_WidgetsMixin", "dojo/text!dijit/form/templates/DropDownBox.html"], 
-    function(declare, lang, TextBox, _HasDropDown, _WidgetsMixin, template){
-    return declare([TextBox, _HasDropDown, _WidgetsMixin], {
+define (["dojo/_base/declare", "dojo/_base/lang", "dijit/form/MappedTextBox", "dijit/_HasDropDown", "dojo/text!dijit/form/templates/DropDownBox.html"], 
+    function(declare, lang, TextBox, _HasDropDown, template){
+    return declare([TextBox, _HasDropDown], {
         templateString: template,
         baseClass: "dijitTextBox dijitComboBox",
         cssStateNodes: {

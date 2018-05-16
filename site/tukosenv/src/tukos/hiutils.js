@@ -1,11 +1,12 @@
-define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string", "dojo/when", "dojo/promise/all", "dijit/Menu", "dijit/MenuItem", "tukos/utils", "tukos/widgetUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-            function(lang, dct, dstyle, string, when, all, Menu, MenuItem, utils, wutils, Pmg, messages){
+define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string", "dojo/when", "dojo/promise/all"/*, "dijit/Menu", "dijit/MenuItem"*/, "tukos/utils", "tukos/widgetUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
+            function(lang, dct, dstyle, string, when, all/*, Menu, MenuItem*/, utils, wutils, Pmg, messages){
       var separator = '|';
       return {
       
     	  trimExt: function(string){
     		  return string.replace(/^[\s(&nbsp;)]+/g,'').replace(/[\s(&nbsp;)]+$/g,'');
     	  },
+/*
     	  contextMenu: function(menuArgs, itemsArgs){
             var theMenu = new Menu(menuArgs);
             for (var i in itemsArgs){
@@ -13,7 +14,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
             }
             return theMenu;
         },
-        
+*/        
         create: function(description, atNode){
             if (description){
                 if (description.tag){
