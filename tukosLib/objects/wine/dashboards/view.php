@@ -14,7 +14,6 @@ class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Cellar', 'Description');
-        $tableAtts = ['maxHeight' => '300px', 'minWidth' => '160px', 'columns' => ['qty' => ['label' => $this->tr('qty'), 'field' => 'qty', 'width' => 100]]];
         
         $customDataWidgets = [
             'inventorydate' => ['type' => 'tukosDateBox',  'atts' => ['edit' =>  ['title' => $this->tr('Dashboard date'), 'style' => ['width' => '10em']]]],
@@ -34,8 +33,8 @@ class View extends AbstractView {
         	'quantitypervintage'  => [
                 'type' => 'columnsChart',  
                 'atts' => ['edit' => [
-                	'title' => $this->tr('Quantities per vintage'), 'chartStyle' => ['width' => '1200px'], 'kwArgs' => ['sort'=> [['attribute' => 'vintage', 'descending' => 'true']]], 
-                	'series' => ['thePlot' => ['value' => ['y' => 'qty', 'text' => 'vintage']]], 'axes' => ['x' => ['labelCol' => 'vintage']]
+                	'title' => $this->tr('Quantities per vintage')/*, 'showTable' => 'yes', 'tableAtts' => $this->tableAtts('vintage')*/, 'chartStyle' => ['width' => '1200px'], 'kwArgs' => ['sort'=> [['attribute' => 'vintage', 'descending' => 'true']]], 
+                	'series' => ['thePlot' => ['value' => ['y' => 'qty', 'text' => 'vintage']]], 'axes' => ['x' => ['labelCol' => 'vintage'], 'y' => ['vertical' => true]]
                 ]]
         	],
 /*

@@ -14,7 +14,7 @@ use TukosLib\TukosFramework as Tfk;
 class Authentication{
     public function __construct(){
         $session = Tfk::$registry->get('session');
-        $segment = $session->getSegment('TukosAuth');
+        $segment = $session->getSegment(Tfk::$registry->appName/*'TukosAuth'*/);
         if (! isset($segment)) {/* No tukos session exists from this requester on this server */
             $segment->status = "NOTVALID";
             $session->regenerateId();
@@ -43,7 +43,7 @@ class Authentication{
             /*
              * receiving a tukosApp request. Check if authorized
              */
-            $segment = $this->session->getSegment('TukosAuth');
+            $segment = $this->session->getSegment(Tfk::$registry->appName/*'TukosAuth'*/);
             if ($segment->status !== 'VALID'){
         		SUtl::instantiate();
         		Tfk::setTranslator();
@@ -67,7 +67,7 @@ class Authentication{
             $dialogue->response->setStatusCode(401);
             //Feedback::add('username:' . $username . ' , 'password: ' . $password');
         }else{/* Authentication succeeded: update session information, prepare $user global variable and redirect to the url initially requested */            
-            $segment = $this->session->getSegment('TukosAuth');
+            $segment = $this->session->getSegment(Tfk::$registry->appName/*'TukosAuth'*/);
             $segment->username = $username;
             $segment->targetDb = $targetDb;
             $segment->status = 'VALID'; 

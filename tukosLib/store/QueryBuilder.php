@@ -79,7 +79,7 @@ class QueryBuilder{
             if (is_string($key)){
                 $this->simpleWhere($query, $key, $condition);
             }else{//is a complex syntax
-                $this->complexWhere($query, $condition);
+                $query->where($this->complexWhere($query, $condition));
             }
         }
     }
@@ -87,30 +87,53 @@ class QueryBuilder{
     function simpleWhere($query, $col, $value){
         $query->where($col . ' = :' . $this->bindKey($query, $value));
     }
-    
-    function complexWhere($query, $conditions, $leftParen='', $rightParen=''){
+/*    
+    function complexWhere($query, $conditions, $leftParen='', $rightParen='', $isOr= false){
         if (is_string($conditions)){// is a plain where condition
             $query->where($conditions);
         }else{
+            $isOr = Utl::extractItem('.or', $conditions);
             reset($conditions);
             $firstKey = key($conditions);
             if (is_string($firstKey)){//reached an elementary condition
-                if (is_array($conditions[$firstKey])){
-                    $this->complexWhereElement($query, $this->complexWhereElementCondition($firstKey, $conditions[$firstKey]), $leftParen, $rightParen);
-                }else{
-                    $this->complexWhereElement($query, $conditions, $leftParen, $rightParen);
-                }
+                $this->complexWhereElement($query, $conditions, $leftParen, $rightParent);
+
             }else{// is a nested condition
                 end($conditions);
                 $lastKey = key($conditions);
                 foreach ($conditions as $key => $condition){
-                    $this->complexWhere($query, $condition, ($key === $firstKey ? '(' : ''), ($key === $lastKey ? ')' : ''));
+                    $this->complexWhere($query, $condition, ($key === $firstKey ? '(' : ''), ($key === $lastKey ? ')' : ''), $isOr);
                 }
             }
         }
     }
+*/    
+    function complexWhere($query, $conditions){
+        if (is_string($conditions)){
+            return $conditions;
+        }else{
+            reset($conditions);
+            if (is_string($firstKey = key($conditions))){
+                return $this->complexWhereElement($query, $conditions);
+            }else{
+                $andOr = Utl::extractItem('.or', $conditions) ? ' OR ' : ' AND ';
+                $whereString = '(';
+                $prefix = '';
+                foreach ($conditions as $key => $condition){
+                    $newWhere = $this->complexWhere($query, $condition);
+                    if (is_string($newWhere)){
+                        $whereString .= $prefix . $newWhere;
+                    }else{
+                        $whereString .= (is_null($localOr = $newWhere[0]) ? $prefix : ($localOr ? ' OR ' : ' AND ')) . $newWhere[1];
+                    }
+                    $prefix = $andOr;
+                }
+                return $whereString . ')';
+            }
+        }
+    }
     
-    function complexWhereElement($query, $condition, $leftParen, $rightParen){
+    function complexWhereElement($query, $condition/*, $leftParen, $rightParen*/){
         $col = Utl::getItem('col', $condition, '');
         $opr = $condition['opr'];
         $values = Utl::getItem('values', $condition);
@@ -138,8 +161,13 @@ class QueryBuilder{
                 }
                 break;
         }
-        $andorwhere = ((isset($condition['or']) && $condition['or'] === true) ? 'orWhere' : 'where');
-        $query->$andorwhere($leftParen . $whereString . $rightParen);        
+        //$andorwhere = ((isset($condition['or']) && $condition['or'] === true) ? 'orWhere' : 'where');
+        //$query->$andorwhere($leftParen . $whereString . $rightParen);
+        if ($or = Utl::getItem('or', $condition) === null){
+            return $whereString;
+        }else{
+            return [Utl::getItem('or', $condition), $whereString];
+        }
     }
     
     function groupBy($query, $groupBy){

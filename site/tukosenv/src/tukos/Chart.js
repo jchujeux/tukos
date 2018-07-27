@@ -111,7 +111,9 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
                 		dst.set(tableNode, {display: "block", minWidth: this.tableAtts.minWidth});
                 		this.tableWidget.renderArray(value.store);
                 	}else{
-                		dst.set(tableNode, {display: "none"});
+                		if (tableNode){
+                    		dst.set(tableNode, {display: "none"});               			
+                		}
                 	}
                 	for (var axisName in value.axes){
                             chart.addAxis(axisName, utils.mergeRecursive(this.axes[axisName], value.axes[axisName]));

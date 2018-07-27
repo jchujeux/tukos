@@ -34,7 +34,7 @@ class TukosFramework{
         require __DIR__ . '\registry.php';
         self::$registry = new Registry($mode);
         if ($mode === 'commandLine'){
-            self::$registry->appName = $appName;
+            self::$registry->appName = strtolower($appName);
         }
         self::$osName = php_uname('s');
         self::$mode = $mode;

@@ -253,7 +253,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
             }
         },
         
-        buildSubWidgetLocalActionFunction(action){
+        buildSubWidgetLocalActionFunction: function(action){
         	return eutils.eval(action, 'widget, oldValue, newValue')
         },
 

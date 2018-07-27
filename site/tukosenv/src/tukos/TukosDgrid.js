@@ -184,9 +184,9 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
         userFilters: function(){
         	var columnsCustomization = lang.getObject('widgetsDescription.' + this.widgetName + '.atts.columns', false, this.form.customization) || {}, userFilters = {};
         	utils.forEach(this.columns, function(column, field){
-        		if ((columnsCustomization[field] || {}).filter){
+        		if (((columnsCustomization[field] || {}).filter||{})[0]){
         			userFilters[field] = columnsCustomization[field].filter;
-        		}else if (column.filter){
+        		}else if ((column.filter || {})[0]){
         			userFilters[field] = column.filter;
         		}
         	});
