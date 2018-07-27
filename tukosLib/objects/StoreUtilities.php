@@ -297,13 +297,18 @@ class StoreUtilities {
     }
     
     public static function longFilter($col, $shortFilter){
-    	if (!empty($shortFilter[1])){
-    		return ['col' => $col, 'opr' => $shortFilter[0], 'values' => $shortFilter[1]];
+    	$opr = $shortFilter[0];
+        if (!empty($shortFilter[1])){
+    		$values = $shortFilter[1];
+    		if ($opr === 'RLIKE' && strpos($values, '~') !== false){
+    		    return array_map(function($value) use ($col, $opr){return  ['col' => $col, 'opr' =>  $opr, 'values' =>  $value];}, explode('~', $values));
+    		}else{
+    	        return ['col' => $col, 'opr' => $opr, 'values' => $shortFilter[1]];
+    		}
     	}else{
-    		return [['col' => $col, 'opr' => $shortFilter[0], 'values' => ''], ['col' => $col, 'opr' => 'IS NULL', 'values' => null, 'or' => true]];
+    		return [['col' => $col, 'opr' => $opr, 'values' => ''], ['col' => $col, 'opr' => 'IS NULL', 'values' => null, 'or' => true]];
     		
     	}
-    	return ['col' => $col, 'opr' => $shortFilter[0], 'values' => isset($shortFilter[1]) ? $shortFilter[1] : ''];
     }
     
     public static function transformItem($item, $objectName, &$queryAtts){

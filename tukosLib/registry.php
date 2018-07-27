@@ -62,7 +62,7 @@ class Registry{
         // get the route based on the path and server
         $this->route = $map->match($this->inComingUriPath, $_SERVER);
         if ($this->route && $this->route->values['application']){
-            $this->appName = $this->route->values['application'];
+            $this->appName = strtolower($this->route->values['application']);
             if (isset($this->route->values['controller'])){
                 $this->controller = $this->route->values['controller'];
             }else{

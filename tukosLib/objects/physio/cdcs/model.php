@@ -13,6 +13,7 @@ class Model extends AbstractModel {
 	use Questionnaire;
 	
 	public $patientCols = ['age', 'weight', 'height', 'imc', 'morphotype', 'sex', 'profession'];
+	public $noGridCols = ['avgcmj', 'stdcmj', 'avgsj', 'stdsj', 'avgreactivity', 'stdreactivity', 'avgstiffness', 'stdstiffness', 'countitems', 'countitemslabel'];
 	protected $sexOptions = ['male', 'female'];
 	protected $morphotypeOptions = ['endomorph', 'mesomorph', 'ectomorph'];
 	protected $avgStdQueryTemplate = 

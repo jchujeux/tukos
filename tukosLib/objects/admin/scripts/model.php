@@ -85,8 +85,6 @@ class Model extends AbstractModel {
                     if (!strpos($parameters, '--parentid')){
                     	$parameters .= ' --parentid ' . $scriptInfo['id'];
                     }
-                    //$replace = ['/^ *([^ ]*)(.*)/' => '${1} --app ' . ucfirst(Tfk::$registry->appName) . ' ${2}', '/([^\\b])@id([^\\b]|$)/' => '${1}' . $scriptInfo['id'] . '${2}', '/([^w])@parentid([^w])/' => '${1}' . $scriptInfo['parentid'] . '${2}'];
-                    //$script = new $scriptName($scriptInfo['id'], preg_replace(array_keys($replace), array_values($replace), $scriptInfo['parameters']), $scriptInfo['runmode']);
                     $replace = [
                     	'/^ *([^ ]*)(.*)/' => function($matches){return $matches[1] . ' --app ' . ucfirst(Tfk::$registry->appName). ' ' . $matches[2];},
                     	'/([^\\b])@(\w*)([^\\b]|$)/' => function($matches) use ($scriptInfo){return ' ' . $scriptInfo[$matches[2]];}

@@ -5,7 +5,7 @@ define(["dojo/_base/kernel", "dojox/html/entities", "dojo/_base/array", "dojo/_b
     var htmlEntitiesMapping = [["\u0026","amp"], ["\u0022","quot"],["\u003C","lt"], ["\u003E","gt"],["\u00A0","nbsp"]];
 
     return {
-          prettyPrint: function(html/*String*/, indentBy /*Integer?*/, maxLineLength /*Integer?*/, map/*Array?*/, /*boolean*/ xhtml, extraInlineTags){
+          prettyPrint: function(nodeOrHtml/*String or dom node*/, indentBy /*Integer?*/, maxLineLength /*Integer?*/, map/*Array?*/, /*boolean*/ xhtml, extraInlineTags){
             // summary:
             //    Function for providing a 'pretty print' version of HTML content from the provided string.
             // html: String
@@ -33,7 +33,17 @@ define(["dojo/_base/kernel", "dojox/html/entities", "dojo/_base/array", "dojo/_b
           
             //Build the content outside of the editor so we can walk via DOM and build a 'pretty' output.
             var contentDiv = Window.doc.createElement("div");
-            contentDiv.innerHTML = html;
+            if (typeof nodeOrHtml === 'string'){
+                contentDiv.innerHTML = nodeOrHtml;
+            }else{
+            	if (nodeOrHtml.id === 'dijitEditorBody' || nodeOrHtml.tagName === 'TD'){
+            		nodeOrHtml.childNodes.forEach(function(node){
+            			contentDiv.appendChild(node.cloneNode(true));
+            		});
+            	}else{
+            		contentDiv.appendChild(nodeOrHtml.cloneNode(true));
+            	}
+            }
           
             // Use the entity encode/decode functions, they cache on the map, so it won't multiprocess a map.
             var encode = Entities.encode, decode = Entities.decode;

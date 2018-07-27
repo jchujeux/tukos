@@ -14,7 +14,21 @@ define(["dojo/dom-style", "dojo/_base/lang", "dojo/when", "dijit/registry", "tuk
 
         nameToFunction: function(name){
             return name.replace(new RegExp(this.functionNamePattern), function(match, p1, p2, p3){
-                return (p1 === '.'  ? '' : (typeof window[p2] === 'function' ? '' : (typeof this[p2] === 'function' ? 'this.' : (typeof utils[p2] ? 'utils.' : (typeof dutils[p2] === 'function' ? 'dutils.' : (typeof wutils[p2] === 'function' ? 'wutils.' : ''))))))+p1 + p2 +  p3;
+                var name = p1 + p2;
+            	return (p1 === '.'  
+                	? '' 
+                	: (typeof window[name] === 'function'
+                		? '' 
+                		: (typeof this[name] === 'function'
+                			? 'this.'
+                			: (typeof utils[name] === 'function'
+                				? 'utils.'
+                				: (typeof dutils[name] === 'function'
+                					? 'dutils.'
+                					: (typeof Math[name] === 'function'
+                						? 'Math.' 
+                						: ''
+                	)))))) + p1 + p2 +  p3;
             });
         }
     }

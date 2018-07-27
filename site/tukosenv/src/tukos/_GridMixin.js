@@ -14,11 +14,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                     {atts: {label: messages.viewcellindialog, onClick: lang.hitch(this, function(evt){this.viewCellInPopUpDialog(this);})}},
                     {atts: {label: messages.viewcellinwindow, onClick: lang.hitch(this, function(evt){this.viewInSeparateBrowserWindow(this);})}}
                  ],
-                 idCol: lang.hitch(this, wcutils.idColsContextMenuItems)(this).concat([{atts: {label: messages.togglerowheight, onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}])/*[
-                    {atts: {label: messages.editinnewtab, onClick: lang.hitch(this, function(evt){this.editInNewTab(this);})}},
-                    {atts: {label: messages.showinnavigator, onClick: lang.hitch(this, function(evt){this.showInNavigator(this);})}},
-                    {atts: {label: messages.togglerowheight, onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}
-                 ]*/,
+                 idCol: lang.hitch(this, wcutils.idColsContextMenuItems)(this).concat([{atts: {label: messages.togglerowheight, onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}]),
                  header: [
                     {atts: {label: messages.showhidefilters, onClick: lang.hitch(this, function(evt){this.showFilters();})}}
                  ]
@@ -150,7 +146,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
             if (mouse.isRight(evt)){
                 var menuItems = lang.clone(this.contextMenuItems);
                 var colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';
-                if (menuItems.canEdit && row.data.canEdit !== false){
+                if (colItems !== 'header' && menuItems.canEdit && row.data.canEdit !== false){
                 	menuItems[colItems] = menuItems[colItems].concat(menuItems.canEdit);
                 }
 

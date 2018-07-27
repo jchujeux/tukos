@@ -44,9 +44,12 @@ function(declare, lang, dct, domStyle, string, JSON, htmlFormat, TooltipDialog, 
         },
 
 	    srcInsert: function(){
-	    	var pane = this.srcDialog.pane, valueOf = lang.hitch(pane, pane.valueOf), content = valueOf('content');
+	    	var pane = this.srcDialog.pane, valueOf = lang.hitch(pane, pane.valueOf), content = valueOf('content'), editor = this.editor, selection = editor.selection, selected = selection.getSelectedElement();
 	    	if (content){
-		    	this.editor.execCommand('inserthtml', content);
+		    	//if (selected && selected.parentNode.childNodes.length === 1){
+		    		selection.remove();	    		
+		    	//}
+	    		editor.execCommand('inserthtml', content);
 	    	}
 	    },
 
@@ -58,8 +61,15 @@ function(declare, lang, dct, domStyle, string, JSON, htmlFormat, TooltipDialog, 
         srcAncestor: function(){
         	var pane = this.srcDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), tagName = paneGetWidget('ancestor').get('value'),
         		selection = this.editor.selection, ancestorElement = tagName ? selection.getAncestorElement(tagName) : selection.getParentElement();
-        	selection.selectElement(ancestorElement);
-        	paneGetWidget('content').set('value', htmlFormat.prettyPrint(ancestorElement.outerHTML, 2));
+    
+        	if (ancestorElement.id === 'dijitEditorBody' || ancestorElement.tagName === 'TD'){
+        		selection.selectElementChildren(ancestorElement);
+        	}else{
+            	selection.selectElement(ancestorElement);       		
+        	}
+    
+        	paneGetWidget('content').set('value', htmlFormat.prettyPrint(ancestorElement/*.outerHTML*/, 2));
+        	//paneGetWidget('content').set('value', ancestorElement.outerHTML);
         }      
     });
 });

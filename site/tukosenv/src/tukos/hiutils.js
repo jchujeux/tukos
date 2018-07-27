@@ -6,15 +6,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
     	  trimExt: function(string){
     		  return string.replace(/^[\s(&nbsp;)]+/g,'').replace(/[\s(&nbsp;)]+$/g,'');
     	  },
-/*
-    	  contextMenu: function(menuArgs, itemsArgs){
-            var theMenu = new Menu(menuArgs);
-            for (var i in itemsArgs){
-                theMenu.addChild(new MenuItem(itemsArgs[i]));
-            }
-            return theMenu;
-        },
-*/        
+
         create: function(description, atNode){
             if (description){
                 if (description.tag){
@@ -93,7 +85,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         	if (content){
             	return when(content, lang.hitch(this, function(content){
 	                try {
-	                	var newContent = this._inProcess(content, ['checkboxTemplate'], ['menuTemplate',  'visualTag', 'colorContentTemplate', 'choiceListTemplate']);
+	                	var newContent = this._inProcess(content, ['checkboxTemplate'], ['menuTemplate',  'visualTag', 'colorContentTemplate', 'choiceListTemplate', 'checkboxTemplateEnd']);
 	                    if (newContent){
 		                	return when(this.substituteParams(newContent, panes), lang.hitch(this, function(newNewContent){
 		                        var newContent = this._inProcess(newNewContent, ['autocheckbox']);
@@ -114,18 +106,14 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
 	        	return content;
 	        }
         },
-/*        
-        menuTemplateNode: function(node){
-            node.parentNode.removeChild(node);
-        },
-*/        
+
         checkboxTemplateNode: function(node){
             if (!node.childNodes[0].innerText){
-            	throw messages.errorcheckboxmalformed;
+            	throw messages.errorcheckboxmalformed + ': ' + node.outerHTML;
             }else if (node.childNodes[0].innerText.trim() === "☑"){
                 lang.hitch(this, this.removeCheckbox)(node);
             }else{
-                var nestedCheckboxes = Array.apply(null, node.getElementsByClassName('checkboxTemplate'));
+                /*var nestedCheckboxes = Array.apply(null, node.getElementsByClassName('checkboxTemplate'));
                 nestedCheckboxes.forEach(function(nestedElement){
                     checkboxedNodes.some(function(node, i){
                         if (node === nestedElement){
@@ -133,17 +121,13 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
                             return true;
                         }
                     });
-                });
+                });*/
                 this.removeCheckboxAndNode(node);
             }
         	
         }, 
-/*
-        choiceListTemplateNode: function(node){
-        	this.promoteChildNodes(node);
-        },
-        
-*/        autocheckboxNode: function(node){
+
+        autocheckboxNode: function(node){
         	if (node.innerText.search('\\${') !== -1){
         		return;
         	}else{
@@ -227,18 +211,22 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         
         removeCheckbox: function(node){
             var parentNode = node.parentNode;
+/*
             if ((node.nextElementSibling || {}).className === "checkboxTemplateEnd"){
                 parentNode.removeChild(node.nextElementSibling);
             }
+*/
             node.removeChild(node.childNodes[0]);
             this.promoteChildNodes(node);
         },
         
         removeCheckboxAndNode: function(node){
             var parentNode = node.parentNode;
+/*
             if ((node.nextSibling || {}).className === "checkboxTemplateEnd"){
                 parentNode.removeChild(node.nextSibling);
             }
+*/
             parentNode.removeChild(node);
             //console.log('I am here');
             if (parentNode.innerHTML === ''){

@@ -12,7 +12,7 @@ Tfk::initialize('interactive');
 
 if (Tfk::$registry->route) {
     if (Tfk::$registry->appName){
-         $application = strtolower(Tfk::$registry->appName);
+         $application = Tfk::$registry->appName;
          $applicationClass = ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus'];
          if (in_array($application, array_keys($applicationClass))){
             $appName = $applicationClass[$application];

@@ -1,4 +1,4 @@
-define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckboxMixin", "dijit/registry", "dojo/json", "tukos/utils",
+define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", "dojo/json", "tukos/utils",
 		"tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"],
     function(ready, lang, dom, domStyle, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, utils, _WidgetsExtend, _WidgetsFormExtend, messages){
     var stores,
@@ -332,10 +332,10 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         },
 
         alert: function(args, blurHandle){
-            require(["dijit/dialog", lang.hitch(this, function(dialog){
+            require(["dijit/Dialog"], lang.hitch(this, function(Dialog){
 	         	if (!this.alertDialog){
 	                var dialog = this.alertDialog = new Dialog(lang.mixin(args, {onBlur: function(evt){this.hide();}}));
-	                this.alertDialog.onShow = function(){// hack to counter forcing to z-index 950 in dijit/dialog!!
+	                this.alertDialog.onShow = function(){// hack to counter forcing to z-index 950 in dijit/Dialog!!
 	                    setTimeout(function(){
 	                        domStyle.set(dialog.domNode, 'z-index', 10000);
 	                    }, 100);
@@ -351,7 +351,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
 	            }else{
 	                return this.alertDialog.show();
 	            }
-            })])
+            }))
         },
 
         namedId: function(id){

@@ -150,10 +150,10 @@ class ViewUtils{
                       'storeedit' => ['width' => 85,  'formatType' => 'datetime'],
                        'overview' => ['width' => 85,  'formatType' => 'datetime'],
                 ],
-                'objToEdit'        => ['toUTC' => []], 'editToObj'         => ['fromUTC' => []],
-                'objToStoreEdit'   => ['toUTC' => []], 'storeEditToObj'    => ['fromUTC' => []],
-                'objToOverview'    => ['toUTC' => []], 'overviewToObj'     => ['fromUTC' => []],
-        		'editToObj' => ['blankToNull' => ['class' => self::utl]], 'storeEditToObj' => ['blankToNull' => ['class' => self::utl]], 'overviewToObj' => ['blankToNull' => ['class' => self::utl]], 
+             'objToEdit'        => ['toUTC' => []], 'editToObj'         => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
+             'objToStoreEdit'   => ['toUTC' => []], 'storeEditToObj'    => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
+             'objToOverview'    => ['toUTC' => []], 'overviewToObj'     => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
+        	//	'editToObj' => ['blankToNull' => ['class' => self::utl]], 'storeEditToObj' => ['blankToNull' => ['class' => self::utl]], 'overviewToObj' => ['blankToNull' => ['class' => self::utl]], 
          ],
             $custom
         );
@@ -165,10 +165,10 @@ class ViewUtils{
                       'storeedit' => ['width' => 85,  'formatType' => 'datetime'],
                        'overview' => ['width' => 85,  'formatType' => 'datetime'],
                 ],
-                'objToEdit'        => ['toUTC' => []], 'editToObj'         => ['fromUTC' => []],
-                'objToStoreEdit'   => ['toUTC' => []], 'storeEditToObj'    => ['fromUTC' => []],
-                'objToOverview'    => ['toUTC' => []], 'overviewToObj'     => ['fromUTC' => []],
-        		'editToObj' => ['blankToNull' => ['class' => self::utl]], 'storeEditToObj' => ['blankToNull' => ['class' => self::utl]], 'overviewToObj' => ['blankToNull' => ['class' => self::utl]], 
+             'objToEdit'        => ['toUTC' => []], 'editToObj'         => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
+             'objToStoreEdit'   => ['toUTC' => []], 'storeEditToObj'    => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
+             'objToOverview'    => ['toUTC' => []], 'overviewToObj'     => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
+        	//	'editToObj' => ['blankToNull' => ['class' => self::utl]], 'storeEditToObj' => ['blankToNull' => ['class' => self::utl]], 'overviewToObj' => ['blankToNull' => ['class' => self::utl]], 
          ],
             $custom
         );

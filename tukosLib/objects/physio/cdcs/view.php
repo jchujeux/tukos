@@ -110,7 +110,7 @@ class View extends AbstractView {
 					'allDescendants' => true,
 			],
 		];
-		$this->customize($customDataWidgets, $subObjects, ['grid' => $this->model->patientCols, 'get' => $this->model->patientCols, 'post' => $this->model->patientCols]);
+		$this->customize($customDataWidgets, $subObjects, ['grid' => array_merge($this->model->patientCols, $this->model->noGridCols), 'get' => $this->model->patientCols, 'post' => $this->model->patientCols]);
     }    
 }
 ?>
