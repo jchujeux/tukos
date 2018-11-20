@@ -86,7 +86,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
         },
         
         createTableWidget: function(){
-        	this.tableWidget = new this.chartClasses['ReadonlyGrid'](lang.mixin(this.tableAtts, {hidden: this.showTable !== 'yes', form: this.form}), this.tableNode);
+        	this.tableWidget = new this.chartClasses['ReadonlyGrid'](lang.mixin(this.tableAtts, {hidden: this.showTable !== 'yes', form: this.form, collection: new DMemory({data: []})}), this.tableNode);
         	this.tableWidget.customizationPath = this.itemCustomization || 'customization' + '.widgetsDescription.' + this.widgetName + '.atts.tableAtts.';
             this.tableWidget.on("dgrid-columnstatechange", lang.hitch(this, function(evt){
                 setTimeout(lang.hitch(this, function(){this.set('value', this.value);}), 100);
@@ -109,7 +109,9 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
                     		lang.hitch(this, this.createTableWidget)();
                     	}
                 		dst.set(tableNode, {display: "block", minWidth: this.tableAtts.minWidth});
-                		this.tableWidget.renderArray(value.store);
+                		//this.tableWidget.renderArray(value.store);
+                		this.tableWidget.collection.setData(value.store);
+                		this.tableWidget.refresh();
                 	}else{
                 		if (tableNode){
                     		dst.set(tableNode, {display: "none"});               			

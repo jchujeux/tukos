@@ -262,9 +262,9 @@ class StoreUtilities {
         return $transformedCols;
     }
 
-    public static function transformWhere($where, $objectName){
+    public static function transformWhere($where, $objectName, $noPrefix = false){
         $transformedWhere = [];
-        $colWhere = function($key) use ($objectName){
+        $colWhere = $noPrefix ? function($key){return $key;} : function($key) use ($objectName){
             return self::colsPrefix($key, $objectName) . $key;
         };
         foreach ($where as $key => $condition){

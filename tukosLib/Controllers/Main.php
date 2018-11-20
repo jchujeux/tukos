@@ -35,9 +35,9 @@ class Main{
 	            $storeProfiles = Tfk::$registry->get('store')->getProfiles();
 	            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
 	            file_put_contents('/tukosstoreprofiles.html', $storeProfilesOutput);
-	            //$storeProfiles = Tfk::$registry->get('configStore')->getProfiles();
-	            //$storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
-	            //file_put_contents('/tukosconfigstoreprofiles.html', $storeProfilesOutput);
+	            $storeProfiles = Tfk::$registry->get('configStore')->getProfiles();
+	            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
+	            file_put_contents('/tukosconfigstoreprofiles.html', $storeProfilesOutput);
             }else{
             	Tfk::debug_mode('log', Tfk::tr('usersitemdoesnotexistforusername'));
             }

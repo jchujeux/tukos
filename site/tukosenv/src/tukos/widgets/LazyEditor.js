@@ -7,11 +7,13 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 		},
 		postCreate: function(){
 			this.inherited(arguments);
-			this.htmlContent = new HtmlContent({style: {width: '100%', height: this.editorToContentHeight(this.height) || "auto"}, value: this.value||''}, dojo.doc.createElement("div"));
+    		this.htmlContent = new HtmlContent({style: {width: '100%', height: this.editorToContentHeight(this.height) || "auto"}, value: this.value || ''});           	
 			this.addChild(this.htmlContent);
 			this.onClickHandle = this.on('click', this.onClickCallback);
-			this.onBlurHandle = this.on('blur', this.onBlurCallback);				
+			this.onBlurHandle = this.on('blur', this.onBlurCallback);	
+			this.viewSource = false;
 		},
+		
 		onClickCallback: function(){
 			if (!this.disabled && !this.readOnly){
 				console.log('entering onCLickCallback - this.id:' + this.id);
@@ -20,6 +22,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 				if (!editor){
 					when(WidgetsLoader.loadWidget('Editor'), lang.hitch(this, function(Editor){
 						editor = new Editor({style: {width: '100%'}}, dojo.doc.createElement("div"));
+						editor.startup();//JCH: needed for OverviewDgrid editor instantiation in colValues
 						this.placeEditor();
 				}));
 				}else{
@@ -36,7 +39,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			return contentHeight ? (parseInt(contentHeight) - 78) + 'px' : undefined;
 		},
 
-		placeEditor: function(unhide){
+		placeEditor: function(){
 			console.log('calling placeEditor');
 			var htmlContent = this.htmlContent, height = this.contentToEditorHeight(htmlContent.get('style').height);
 			editor.widgetName = this.widgetName;
@@ -50,29 +53,37 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			editor.set('value', htmlContent.get('value'));
 			this.removeChild(htmlContent);
 			this.addChild(editor);
+			if (this.viewSource !== editor.isInViewSource()){
+				editor.toggle();
+			}
 		},
 		
 		onBlurCallback: function(){
 			console.log('calling onBlurCallback');
 			var htmlContent = this.htmlContent;
-			if (editor && this.getIndexOfChild(editor) > -1/* && editor.isFullscreen !== true*/){//case where focus not via onClick, e.g. onDrop
-				htmlContent.set('style', {height: this.editorToContentHeight(editor.get('height'))});
-				this.set('serverValue', editor.get('serverValue'));
-				this.set('value', editor.get('value'));
-				this.removeChild(editor);
-				this.addChild(htmlContent);
-				this.resize();
-				this.onClickHandle = this.on('click', this.onClickCallback);
-			}
+			setTimeout(lang.hitch(this, function(){// to let time for editor html onblur to completre before getting the resulting html, e.g. in expressions.onBlur
+			//ready(lang.hitch(this, function(){// to let time for editor html onblur to completre before getting the resulting html, e.g. in expressions.onBlur
+				if (editor && this.getIndexOfChild(editor) > -1/* && editor.isFullscreen !== true*/){//case where focus not via onClick, e.g. onDrop
+					htmlContent.set('style', {height: this.editorToContentHeight(editor.get('height'))});
+					this.set('serverValue', editor.get('serverValue'));
+					this.set('value', editor.get('value'));
+					this.viewSource = editor.isInViewSource();
+					this.removeChild(editor);
+					this.addChild(htmlContent);
+					this.resize();
+					this.onClickHandle = this.on('click', this.onClickCallback);
+				}
+			//}));
+			}), 100)
 		},
 		
 		_setValueAttr: function(value){
-			if (value !== this.value){
+			//if (value !== this.value){
 				if (this.htmlContent){
 					this.htmlContent.set('value', value);
 				}
 				this._set('value', value);
-			}
+			//}
 		},
 		
 		_setStyleAttr: function(value){

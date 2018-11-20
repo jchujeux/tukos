@@ -79,34 +79,7 @@ define(["dojo", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nl
         },
 
         in_array: function(needle, haystack/*, argStrict*/) {
-          //  discuss at: http://phpjs.org/functions/in_array/
-          // original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-          // improved by: vlado houba
-          // improved by: Jonas Sciangula Street (Joni2Back)
-        
           return haystack && haystack.indexOf(needle) > -1;
-/*
-        	var key = '',
-            strict = !! argStrict;
-        
-          //we prevent the double check (strict && arr[key] === ndl) || (!strict && arr[key] == ndl)
-          //in just one for, in order to improve the performance 
-          //deciding wich type of comparation will do before walk array
-          if (strict) {
-            for (var key in haystack) {
-              if (haystack[key] === needle) {
-                return true;
-              }
-            }
-          } else {
-            for (var key in haystack) {
-              if (haystack[key] == needle) {
-                return true;
-              }
-            }
-          }        
-          return false;
-*/
         },
         
         array_diff: function(array1, array2) {
@@ -114,7 +87,6 @@ define(["dojo", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nl
             return array2.indexOf(elm) === -1;
           })
         },
-        
         array_flip: function(input){
         	var key, result = {};
         	for (key in input){
@@ -124,7 +96,11 @@ define(["dojo", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nl
         	}
         	return result;
         },
-
+        array_unique_push: function(newValue, array){
+        	if (!this.in_array(newValue)){
+        		array.push(newValue);
+        	}
+        },
         array_unique_merge: function(array1, array2){
             array2.forEach(function(value){
                 if (this.in_array(array1, value)){
@@ -135,7 +111,6 @@ define(["dojo", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nl
             });
             return array1;
         },
-        
         merge: function (target, source){//Use the returned value to be sure to get the modified value in all cases
             this.wasModified = false;
             if (typeof target === 'object' && typeof source === 'object'){
@@ -249,7 +224,20 @@ define(["dojo", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nl
             }
             return value;
         }, 
-
+        alphabet: function(position){//from position in alphabet to 'C' (for position == 3) or 'AC' (for position == 29 = 26 + 3), etc.
+        	if (position > 26){
+        		return String.fromCharCode(Math.trunc(position/26)+64, (position % 26) + 64);
+        	}else{
+            	return String.fromCharCode(position+64);    		
+        	}
+        },
+        fromAlphabet: function(label){
+        	var result = 0;
+        	for (var i = 0; i < label.length; i++){
+        		result += label.charCodeAt(i) - 64;
+        	};
+        	return result;
+        },
         join: function(objectOrString, valueSeparator, keyObjectSeparator){
             if (objectOrString && typeof objectOrString === 'object'){
                 valueSeparator = valueSeparator || '&';

@@ -3,6 +3,7 @@ namespace TukosLib\Objects\Admin\Translations;
 
 use TukosLib\Objects\ObjectTranslator;
 use TukosLib\Objects\Directory;
+use TukosLib\Objects\StoreUtilities as SUtl;
 
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Feedback;
@@ -20,10 +21,11 @@ class Model extends ObjectTranslator {
         $this->user  = Tfk::$registry->get('user');
         $this->allCols = ['id', 'name', 'setname', 'en_us', 'fr_fr', 'es_es'];        
         $this->extendedNameCols = ['name'];        
-        $this->setNameOptions = array_merge(['tukosApp', 'tukosLib', 'countrycodes'], Directory::getDomains());
+        $this->setNameOptions = array_merge(['tukosApp', 'tukosLib', 'countrycodes'], Directory::getDomains(), ['page']);
 		$this->store = Tfk::$registry->get('configStore');
 		$this->idCols = $this->idColsObjects = [];
 		$this->user->forceContextId($objectName, $this->user->contextModel->getRootId());
+		$this->colsToTranslate = [];
     }
     
     public function initialize($init=[]){
@@ -45,10 +47,6 @@ class Model extends ObjectTranslator {
         return $this->$name;
     }
    
-    public function hasUpdateRights($item){
-    	return $this->user->rights() === "SUPERADMIN";
-    }
-    
     public function translateOne($item){
     	return $item;
     }
@@ -69,6 +67,7 @@ class Model extends ObjectTranslator {
     public function getAll($atts){
     	Utl::extractItem('allDescendants', $atts);
     	$atts['table'] = $this->objectName;
+    	$atts['where'] = SUtl::transformWhere($atts['where'], 'translations', true);
     	$result = $this->store->getAll($atts);
     	$this->foundRows = $this->store->foundRows();
     	return $result;

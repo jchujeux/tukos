@@ -1,5 +1,5 @@
 /*
- * Read-only store to suppport tukos action requests using the storeAtts aproach
+ * Read-only store to suppport tukos action requests using the storeatts aproach
  */
  define(["dojo/_base/lang", 'dojo/_base/array', "dojo/json", "dojo/_base/declare", "dojo/store/util/QueryResults", "tukos/PageManager", "tukos/utils"
 ], function(lang, arrayUtil, JSON, declare, QueryResults, Pmg, utils /*=====, Store =====*/){

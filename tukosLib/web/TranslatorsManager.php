@@ -30,15 +30,24 @@ class TranslatorsManager {
     function getTranslationsTable(){
         return $this->translationsTable;
     }     
-    private function getSetMessages($setItem, $languageCol){
-    	return Tfk::$registry->get('configStore')->getAll(['table' => 'translations', 'where' => ['setname' => $setItem], 'cols' => ['name', $languageCol]]);
+    public function getSetMessages($setItem, $languageCol = null){
+        if (! $languageCol){
+            $languageCol = $this->getLanguageCol();
+        }
+        return array_column(Tfk::$registry->get('configStore')->getAll(['table' => 'translations', 'where' => ['setname' => $setItem], 'cols' => ['name', $languageCol]]), $languageCol, 'name');
+    }
+    public function getSetsMessages($setItems, $languageCol = null){
+        if (! $languageCol){
+            $languageCol = $this->getLanguageCol();
+        }
+        return array_column(Tfk::$registry->get('configStore')->getAll(['table' => 'translations', 'where' => ['col' => 'setname', 'opr' => 'IN', 'values' => $setItems], 'cols' => ['name', $languageCol]]), $languageCol, 'name');
     }
     
     private function addSet($setItem, $languageCol){
         if (!isset($this->translatorsMessages[$languageCol])){;
            $this->translatorsMessages[$languageCol] = [];
         }
-        return $this->translatorsMessages[$languageCol][$setItem] = array_change_key_case(array_filter(array_column($this->getSetMessages($setItem, $languageCol), $languageCol, 'name')));
+        return $this->translatorsMessages[$languageCol][$setItem] = array_change_key_case(array_filter($this->getSetMessages($setItem, $languageCol)));
     }
       
     function translator($translatorName, $setsPath, $language = null){/* returns a translator callback - usage: $translator->translate('myMessage'); */        

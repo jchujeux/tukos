@@ -21,8 +21,8 @@ trait ItemJsonCols {
     protected function jsonEncode(&$values, $jsonFilter){
         $colsToProcess = array_intersect(array_keys($values), $this->jsonCols);
         foreach ($colsToProcess as $col){
-            if (!is_string($values[$col])){
-                if ($jsonFilter){
+            if (is_array($values[$col])){
+                if ($jsonFilter || Utl::getItem($col, $this->jsonColsFilters)){
                     $values[$col] = Utl::array_filter_recursive($values[$col],  function($value){
                             return (!empty($value)) || $value === 0; //$value !== '' || ;//(!empty($value));
                     });

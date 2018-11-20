@@ -3,7 +3,7 @@
 namespace TukosLib\Objects\Collab\Calendars;
 
 use TukosLib\Objects\AbstractModel;
-use TukosLib\Objects\Collab\Calendars\Google;
+use TukosLib\Google\Calendar;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
@@ -83,7 +83,7 @@ class Model extends AbstractModel {
     	$calendarIdName = function($item){
     		return ['id' => $item->getId(), 'name' => $item->getSummary(), 'backgroundColor' => $item->getBackgroundColor()];
     	};
-    	return Google::getCalendarsList($calendarIdName);
+    	return Calendar::getCalendarsList($calendarIdName);
     }
 
     function calendarsSelect($query = []){
@@ -92,14 +92,14 @@ class Model extends AbstractModel {
     		$name = $item->getSummary();
     		return ['id' => $id, 'name' => $name . ' (' . $id . ')'];
     	};
-    	return array_merge([['id' => '', 'name' => '']], Google::getCalendarsList($calendarIdName));
+    	return array_merge([['id' => '', 'name' => '']], Calendar::getCalendarsList($calendarIdName));
     }
     function calendarSelect($query){
     	$calendarId = $query['where']['id'];
     	if (empty($calendarId)){
     		return ['id' => '', 'name' => ''];
     	}else{
-    		return ['id' => $calendarId, 'name' => Google::getCalendar($calendarId)->getSummary() . ' (' . $calendarId . ')'];
+    		return ['id' => $calendarId, 'name' => Calendar::getCalendar($calendarId)->getSummary() . ' (' . $calendarId . ')'];
     	}
     }
     

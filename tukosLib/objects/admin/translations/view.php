@@ -25,11 +25,11 @@ class View extends AbstractView {
                     ]
                 ]
             ), 
-            'name'      => ViewUtils::textBox($this, 'Translation key', ['storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]),
+            'name'      => ViewUtils::textArea($this, 'Translation key', ['storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]),
         	'setname'  => ViewUtils::storeSelect('setName', $this, 'Translation set'),
-            'en_us'    => ViewUtils::textBox($this, 'English'),
-            'fr_fr'    => ViewUtils::textBox($this, 'French'),
-            'es_es'    => ViewUtils::textBox($this, 'Spanish'),
+            'en_us'    => ViewUtils::textArea($this, 'English'),
+            'fr_fr'    => ViewUtils::textArea($this, 'French'),
+            'es_es'    => ViewUtils::textArea($this, 'Spanish'),
         ];
         $this->defaultDataWidgetsElts = array_keys($this->dataWidgets);
         $this->responseContent = null;

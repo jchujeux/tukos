@@ -153,9 +153,8 @@ class PageView extends Translator{
     }
 
     function welcomeConnect($logoutUrl){
-        $theContent = $this->tr('Welcome') . ', <span id="pageusername" style="text-decoration:underline; color:blue; cursor:pointer">' .
-                      $this->user->username() . '</span> <a href="' . $logoutUrl . '" />' . $this->tr('logout') . '</a>';
-        return $theContent;
+        return $this->tr('Welcome') . ', <span id="pageusername" style="text-decoration:underline; color:blue; cursor:pointer">' .
+               $this->user->username() . '</span> <a href="' . $logoutUrl . '" />' . $this->tr('logout') . '</a>';
     }
     
     private function pageCustomDialogDescription($customValues){
@@ -213,6 +212,12 @@ class PageView extends Translator{
 		                		'storeedit' => ['canEdit' => '(function(item, cellValue){console.log("I am here");if(item.hasId){return true;}else{return false;}})']
 		                	]), false),
                          ]])),
+           		       'fieldsMaxSize' => Widgets::textBox(Widgets::complete(['label' => $this->tr('Fieldsmaxsize'), 'onWatchLocalAction' =>
+               		        ['value' => ['maxFieldsSize' => ['localActionStatus' => [
+               		            'triggers' => ['user' => true],
+               		            'action' => "Pmg.addCustom('fieldsmaxsize', newValue); return true;"
+               		        ]]]]
+               		    ])),
            				'cancel' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('close'), 'onClickAction' => 'this.pane.close();']],
                         'action' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('save'), 'onClickAction' => 
                         	"this.pane.serverAction( {object: 'users', view: 'noview', action: 'PageCustomSave'}, {'excludeWidgets': ['cancel', 'action']});this.pane.close();" 
@@ -223,7 +228,7 @@ class PageView extends Translator{
                     'contents' => [
                        'row1' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 100],
-                            'widgets' => ['hideLeftPane', 'leftPaneWidth', 'panesConfig'],
+                            'widgets' => ['hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize'],
                         ],
                        'row2' => [
                             'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
@@ -272,7 +277,9 @@ class PageView extends Translator{
         $this->pageManagerArgs['pageCustomDialogDescription'] = $this->pageCustomDialogDescription($this->pageManagerArgs['pageCustomization']);
 
         Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
-        $this->pageManagerArgs = array_merge($this->pageManagerArgs, array_filter(['feedback' => Feedback::get(), 'extendedIds' => SUtl::translatedExtendedIdCols()]), ['extras' => Tfk::getExtras()]);
+        $this->pageManagerArgs = array_merge($this->pageManagerArgs, ['extras' => Tfk::getExtras()],
+            array_filter(['feedback' => Feedback::get(), 'extendedIds' => SUtl::translatedExtendedIdCols(), 'messages' => Tfk::$registry->get('translatorsStore')->getSetMessages('page')])
+        );
 
         $template->pageManagerArgs = json_encode($this->pageManagerArgs);
         

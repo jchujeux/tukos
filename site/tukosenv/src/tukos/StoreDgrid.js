@@ -62,7 +62,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
         getTemplate: function(mode, newValue){
         	if (newValue !== ''){
                 var self = this;
-        		Pmg.serverDialog({object: this.object, view: 'noview', mode: this.form.paneMode, action: 'getTemplate', query: {dupid: newValue}}, {}, messages.actionDone).then(
+        		Pmg.serverDialog({object: this.object, view: 'noview', mode: this.form.paneMode, action: 'get', query: {params: {actionModel: 'getTemplate'}, dupid: newValue}}, {}, messages.actionDone).then(
                         function (response){
                         	var newRow = response.data;
                         	newRow.grade = 'NORMAL';
@@ -127,7 +127,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
             if (!this.clickedRow.data['hasChildren']){
                 this.clickedRow.data['hasChildren'] = true;
                 this.store.putSync(this.clickedRow.data, {overwrite: true});
-                //this.updateDirty(this.clickedRow.data.idg, 'hasChildren', true);
             }
         },
 

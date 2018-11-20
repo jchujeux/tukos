@@ -53,7 +53,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuIte
                     this.inherited(arguments);
                 }else{
 	                var _arguments = arguments;
-                	Pmg.serverDialog({action: 'getObjectModules', view: 'noview', mode: this.form.paneMode, object: this.form.object, query: {contextpathid: this.form.tabContextId(), contextid: self.form.valueOf('id')}}, [], [], messages.actionDone).then(
+                	Pmg.serverDialog({action: 'get', view: 'noview', mode: this.form.paneMode, object: this.form.object, 
+                					  query: {params: {actionModel: 'getObjectModules'}, actioncontextpathid: this.form.tabContextId(), contextid: self.form.valueOf('id')}}, [], [], messages.actionDone).then(
 	                	function(response){
 	                        var items = response.modules;
 	                		for (var i in items){

@@ -24,7 +24,7 @@ trait Storage {
     protected $_filesTableColsDefinition = array(
      'id'       =>  'mediumint(8) unsigned NOT NULL auto_increment',
      'fileid'   =>  "mediumint(8) unsigned NOT NULL default '0'",
-     'content'  =>  'blob NOT NULL',
+     'content'  =>  'longblob NOT NULL',
      );
     protected $_filesTableKeysDefinition ="PRIMARY KEY (`ID`), KEY  (`fileid`)";
   

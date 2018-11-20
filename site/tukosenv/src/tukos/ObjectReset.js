@@ -28,7 +28,7 @@ define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dojo/dom-form", "dijit/fo
             on(this, "click", function(evt){
                 evt.stopPropagation();
                 evt.preventDefault();
-                self.resetDialogue();
+                setTimeout(self.resetDialogue, 100);
             });
         }
     });

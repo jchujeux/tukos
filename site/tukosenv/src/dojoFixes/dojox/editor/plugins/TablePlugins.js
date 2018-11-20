@@ -8,10 +8,14 @@ define([
     "dojo/dom-construct",
 	"dojo/dom-attr",
 	"dojo/dom-style",
+	"dojo/dom-class",
+	"dojo/keys",
 	"dijit/_editor/_Plugin",
 	"dijit/_WidgetBase",
+	"tukos/expressions",
+	"tukos/PageManager",
 	"dojo/i18n!dojoFixes/dojox/editor/plugins/nls/TableDialog"
-], function(declare, array, lang, Color, aspect, ready, dct, domAttr, domStyle, _Plugin, _WidgetBase, messages) {
+], function(declare, array, lang, Color, aspect, ready, dct, domAttr, domStyle, dcl, keys, _Plugin, _WidgetBase, expressions, Pmg, messages) {
 
     dojo.experimental("dojox.editor.plugins.TablePlugins");
 
@@ -20,7 +24,7 @@ define([
         //  A global object that handles common tasks for all the plugins. Since there are several plugins that are all calling common methods, it's preferable that they call a centralized location
         // that either has a set variable or a timeout to only repeat code-heavy calls when necessary.
         //
-	tablesConnected:false, currentlyAvailable: false, alwaysAvailable:false, availableCurrentlySet:false, initialized:false, tableData: null, shiftKeyDown:false, editorDomNode: null, undoEnabled: true,  refCount: 0,
+	tablesConnected:false, currentlyAvailable: false, alwaysAvailable:false, availableCurrentlySet:false, initialized:false, tableData: null, editorDomNode: null, undoEnabled: true,  refCount: 0,
 	
     doMixins: function(){
         dojo.mixin(this.editor,{
@@ -179,15 +183,15 @@ define([
 	
     _prepareTable: function(tbl){
         // For IE's sake, we are adding IDs to the TDs if none is there We go ahead and use it for other code for convenience
-        var tds = this.editor.query("td", tbl);
-        console.log("prep:", tds, tbl);
-        //if(!tds[0].id){
+        var tds = this.editor.query("td", tbl), timeStamp = this.getTimeStamp();
+        //console.log("prep:", tds, tbl);
+        if(!tds[0].id){
             tds.forEach(function(td, i){
-                if(!td.id){
-                    td.id = "tdid"+i+this.getTimeStamp();
-                }
+                //if(!td.id){
+                    td.id = "tdid"+i+'_'+timeStamp;
+                //}
             }, this);
-        //}
+        }
         return tds;
     },
 	
@@ -235,6 +239,7 @@ define([
             this.cnKeyDn = dojo.connect(node, "onkeydown", this, "onKeyDown");
             this.cnKeyUp = dojo.connect(node, "onkeyup", this, "onKeyUp");
             this._myListeners.push(dojo.connect(node, "onkeypress", this, "onKeyUp"));
+            this._prepareTable();
         }
     },
 	
@@ -243,49 +248,145 @@ define([
         dojo.disconnect(this.cnKeyUp);
         this.tablesConnected = false;
     },
+    shiftKeyDown: function(keyboardEvent){
+    	return keyboardEvent.shiftKey;
+    },
+    isCommandKey: function(keyboardEvent){
+    	return keyboardEvent.ctrlKey || keyboardEvent.altKey || keyboardEvent.metaKey;
+    },
 	
     onKeyDown: function(evt){
         var key = evt.keyCode;
-        if(key == 16){ this.shiftKeyDown = true;}
-        if(key == 9) {
-            var o = this.getTableInfo();
-            // modifying the o.tdIndex in the tableData directly, because we may save it
-            // FIXME: tabTo is a global
-            o.tdIndex = (this.shiftKeyDown) ? o.tdIndex-1 : tabTo = o.tdIndex+1;
-            if(o.tdIndex>=0 && o.tdIndex<o.tds.length){
-                this.editor.selectElement(o.tds[o.tdIndex]);
-                // we know we are still within a table, so block the need to run the method
-                this.currentlyAvailable = true;
-                this._tempAvailability(true);
-                this._tempStoreTableData(true);
-                this.stopEvent = true;
-            }else{ //tabbed out of table
-                this.stopEvent = false;
-                this.onDisplayChanged();
-            }
-            if(this.stopEvent) {
-                dojo.stopEvent(evt);
-            }
+        switch (key){
+        	case keys.SHIFT	: 
+        	case keys.CTRL  :
+        	case keys.ALT   :
+        	case keys.META  : 
+        	break;
+        	case keys.TAB	: 
+        		var o = this.getTableInfo();
+	            // modifying the o.tdIndex in the tableData directly, because we may save it
+	            // FIXME: tabTo is a global
+	            o.tdIndex = this.shiftKeyDown(evt) ? o.tdIndex-1 : tabTo = o.tdIndex+1;
+	            if(o.tdIndex>=0 && o.tdIndex<o.tds.length){
+	                this.editor.selectElement(o.tds[o.tdIndex]);
+	                // we know we are still within a table, so block the need to run the method
+	                this.currentlyAvailable = true;
+	                this._tempAvailability(true);
+	                this._tempStoreTableData(true);
+	                this.stopEvent = true;
+	            }else{ //tabbed out of table
+	                this.stopEvent = false;
+	                this.onDisplayChanged();
+	            }
+	              if(this.stopEvent) {
+	                dojo.stopEvent(evt);
+	            }
+	            break;
+        	case keys.RIGHT_ARROW:
+	  			  this.rightOrLeftCell(evt, true);
+	  			  break;
+        	case keys.LEFT_ARROW:
+	  			  this.rightOrLeftCell(evt, false);
+	  			  break;
+        	case keys.DOWN_ARROW:
+	  			this.upOrDownCell(evt, true);
+	  			break;
+        	case keys.UP_ARROW:
+	  			this.upOrDownCell(evt, false);
+	  			break;
+        	case keys.ESCAPE:
+        	case keys.ENTER:
+        		break;
+        	default:
+	  			if (!this.isCommandKey(evt)){
+	        		var selectedElement = this.editor.selection.getSelectedElement(), node;
+		  			if (selectedElement && selectedElement.tagName === 'TD' && expressions.isExpression(node = selectedElement.children[0])){
+		  				this.editor.begEdit();
+		  				expressions.onClick(node);
+		  			}	
+		  			console.log('TablePlusIns: - key: ' + key);
+	  			}
         }
     },
 	
+    rightOrLeftCell: function(evt, right){
+		  var editor = this.editor, selectedElement = editor.selection.getSelectedElement();
+		  if (selectedElement && selectedElement.tagName === 'TD'){
+			var previousOrNext = right ? 'nextElementSibling' : 'previousElementSibling', nextSelected = selectedElement[previousOrNext];
+			evt.stopPropagation();
+			evt.preventDefault();
+			if (!nextSelected){
+				var newRow = selectedElement.parentNode[previousOrNext];
+				if (newRow){
+					editor.selectElement(newRow.children[right ? 0 : newRow.children.length - 1]);
+				}else{
+					Pmg.addFeedback(Pmg.message(right ? 'end of table' : 'beginning of table'), '', true);
+				}
+			}else{
+				editor.selectElement(nextSelected);
+			}
+		  }
+  },
+  upOrDownCell: function(evt, down){
+	  var editor = this.editor, selectedElement = editor.selection.getSelectedElement();
+	  if (selectedElement && selectedElement.tagName === 'TD'){
+		  var temp = selectedElement.id.slice(4).split('_'), sTdIndex = temp[0], tableTimeStamp = temp[1],
+		      tableInfo = this.getTableInfo(), cols = tableInfo.cols, rows = tableInfo.rows, sRow = Math.trunc(sTdIndex/cols), sCol = sTdIndex % cols;
+		  if (down){
+			  if (sRow+1 === rows){
+				  if (sCol+1 === cols){
+					  Pmg.addFeedback(Pmg.message('end of table'), '', true);
+				  }else{
+					  tRow = 0;
+					  tCol = sCol + 1;
+				  }
+			  }else{
+				  tRow = sRow + 1;
+				  tCol = sCol;
+			  }
+		  }else{
+			  if (sRow === 0){
+				  if (sCol === 0){
+					  Pmg.addFeedback(Pmg.message('beginning of table'), '', true);
+				  }else{
+					  tRow = rows-1;
+					  tCol = sCol - 1;
+				  }
+			  }else{
+				  tRow = sRow -1;
+				  tCol = sCol;
+			  }
+		  }
+		  evt.stopPropagation();
+		  evt.preventDefault();
+		  editor.selectElement(editor.byId('tdid' + (tCol + tRow * cols) + '_' + tableTimeStamp));
+	  }
+  	},
     onKeyUp: function(evt){
         var key = evt.keyCode;
-        if(key == 16){ this.shiftKeyDown = false;}
-        if(key == 37 || key == 38 || key == 39 || key == 40 ){
-            // user can arrow or tab out of table - need to recheck
-            this.onDisplayChanged();
+        switch (key){
+	    	case keys.SHIFT	: 
+	    	case keys.CTRL  :
+	    	case keys.ALT   : 
+	    		//evt.preventDefault();
+	    	case keys.META  : 
+	    		break;
+	    	case keys.RIGHT_ARROW:
+	    	case keys.LEFT_ARROW :
+	    	case keys.DOWN_ARROW :
+	    	case keys.UP_ARROW   : 
+	    		this.onDisplayChanged(); break;
+	    	case keys.TAB : 
+	    		if (this.stopEvent){dojo.stopEvent(evt);}; break;
         }
-        if(key == 9 && this.stopEvent){ dojo.stopEvent(evt);}
     },
-	
     onDisplayChanged: function(){
         this.currentlyAvailable = false;
         this._tempStoreTableData(false);
         this._tempAvailability(false);
         this.checkAvailable();
     },
-
     uninitialize: function(editor){
         // Function to handle cleaning up of connects and such.  It only finally destroys everything once all 'references' to it have gone.  As in all plugins that called init on it destroyed their refs in their cleanup calls.
         if(this.editor == editor){
@@ -355,14 +456,110 @@ var TablePlugins = declare("dojox.editor.plugins.TablePlugins", _Plugin, {
         getTableInfo: function(forceNewData){
             return this.editor._tablePluginHandler.getTableInfo(forceNewData);
         },
-/*
-        _makeTitle: function(str){
-            // Uses the commandName to get the localized Title
-            this._strings = dojo.i18n.getLocalization("dojox.editor.plugins", "TableDialog");
-            var title = this._strings[str+"Title"] || this._strings[str+"Label"] || str;
-            return title;
+        prepareTable: function(){
+            if (this.getTableInfo){
+                this.tableInfo = this.getTableInfo(true);
+                this.table = this.tableInfo.tbl;
+                if (this.pane){
+                	this.pane.table = this.table;
+                }
+            }
+            if (this.getSelectedCells){
+                this.selectedTds = this.getSelectedCells();
+            }
         },
-*/
+        getSelectedCells: function(){
+            var cells = [];
+            var tbl = this.getTableInfo().tbl;
+            this.editor._tablePluginHandler._prepareTable(tbl);
+            var e = this.editor;
+            // Lets do this the way IE originally was (Looking up ids).  Walking the selection is inconsistent in the browsers (and painful), so going by ids is simpler.
+            //var text = e._sCall("getSelectedHtml", [null]);
+            var text = e.selection.getSelectedHtml([null]);
+            var str = text.match(/id="*\w*"*/g);
+            dojo.forEach(str, function(a){
+                var id = a.substring(3, a.length);
+                if(id.charAt(0) == "\"" && id.charAt(id.length - 1) == "\""){
+                    id = id.substring(1, id.length - 1);
+                }
+                var node = e.byId(id);
+                if(node && node.tagName.toLowerCase() == "td"){
+                    cells.push(node);
+                }
+            }, this);
+            if(!cells.length){// May just be in a cell (cursor point, or selection in a cell), so look upwards. for a cell container.
+                var sel = dijit.range.getSelection(e.window);
+                if(sel.rangeCount){
+                    var r = sel.getRangeAt(0);
+                    var node = r.startContainer;
+                    while(node && node != e.editNode && node != e.document){
+                        if(node.nodeType === 1){
+                            var tg = node.tagName ? node.tagName.toLowerCase() : "";
+                            if(tg === "td"){
+                                return [node];
+                            }
+                        }
+                        node = node.parentNode;
+                    }
+                }
+            }
+            return cells;
+        },
+	    copySelected: function(){
+	    	this.lastSelectedTds = this.selectedTds;
+	    },
+	    emptySelected: function(){
+	    	var table = this.table, isWorksheet = dcl.contains(table, 'tukosWorksheet');
+	    	this.lastSelectedTds = [];
+	    	this.selectedTds.forEach(function(td){
+	    		if (isWorksheet){
+	    			expressions.setExpression(td.children[0], '');
+	    		}else{
+	    			td.innerHTML = '';
+	    		}
+	    	});
+	    },
+	    pasteAtSelected(){
+	    	var table = this.table, isWorksheet = dcl.contains(table, 'tukosWorksheet'), lastSelectedTds = this.lastSelectedTds, tableInfo = this.tableInfo, cols = tableInfo.cols, rows = tableInfo.rows;
+	    	if (lastSelectedTds){
+	        	var	temp = lastSelectedTds[0].id.slice(4).split('_'), sourceTdIndex = temp[0], tableTimeStamp = temp[1], sourceRow = Math.trunc(sourceTdIndex/cols), sourceCol = sourceTdIndex % cols, selectedTds = this.selectedTds,
+	        		targetTdIndex = selectedTds[0].id.slice(4).split('_')[0], targetRow = Math.trunc(targetTdIndex/cols), targetCol = targetTdIndex % cols, rowOffset = targetRow - sourceRow, colOffset = targetCol - sourceCol,
+	        		tdIdOffset = targetTdIndex - sourceTdIndex, tTdId, e = this.editor, targetLastPastedTd, tRow, tCol,
+	        		targetLastTdIndex = selectedTds[selectedTds.length-1].id.slice(4).split('_')[0], lastTargetRow = Math.trunc(targetLastTdIndex/cols), targetRows = lastTargetRow - targetRow + 1, lastTargetCol = targetLastTdIndex % cols, 
+	        		targetCols = lastTargetCol - targetCol + 1, continuePaste = true;
+	    		while(continuePaste){
+	            	lastSelectedTds.forEach(function(sTd, sTdIndex){
+	        			var sTdIndex = sTd.id.slice(4).split('_')[0], tTd;
+	        			tRow = Math.trunc(sTdIndex/cols) + rowOffset;
+	        			tCol = sTdIndex % cols + colOffset;
+	        			if (tRow < rows && tCol < cols){
+	        				targetLastPastedTd = parseInt(sTdIndex) + tdIdOffset;
+	        				tTdId = 'tdid' + targetLastPastedTd + '_' + tableTimeStamp;
+	        				tTd = e.byId(tTdId);
+	        				if (isWorksheet){
+	        					var sExpression = sTd.children[0], tExpression = tTd.children[0];
+	        					expressions.copyExpression(sExpression, tExpression, rowOffset, colOffset);
+	        				}else{
+	            				tTd.innerHTML = sTd.innerHTML;
+	        				}
+	        				domAttr.set(tTd, 'style', domAttr.get(sTd, 'style'));
+	        			}
+	        		});
+	            	if (tCol < lastTargetCol){
+	            		colOffset = tCol - sourceCol + 1;
+	            		tdIdOffset = colOffset + rowOffset * cols;
+	            	}else if (tRow < lastTargetRow){
+	            		colOffset = targetCol - sourceCol;
+	            		rowOffset = tRow + 1 - sourceRow;
+	            		tdIdOffset = colOffset + rowOffset * cols;
+	            	}else{
+	            		continuePaste = false;
+	            	}
+	        	}
+	    	}else{
+	    		Pmg.addFeedback(Pmg.message('no cells selected'), '', true);
+	    	}
+	    },
         updateState: function(){
             // Over-ride for button state control for disabled to work.
             if(this.button){
@@ -401,10 +598,11 @@ var InsertTable = declare("dojox.editor.plugins.InsertTable", TablePlugins, {
 var ModifyTable = declare("dojox.editor.plugins.ModifyTable", TablePlugins, {
         _initButton: function(){
             this.inherited(arguments);
-            var editor = this.editor, getTableInfo = lang.hitch(this, this.getTableInfo);
+            var editor = this.editor, getTableInfo = this.getTableInfo, prepareTable = this.prepareTable;
             this.button.loadDropDown = function(callback){
                 require(["dojoFixes/dojox/editor/plugins/_EditorModifyTableDialog"], lang.hitch(this, function(ModifyTableDialog){
-                    var dropDown = this.dropDown = new ModifyTableDialog({editor: editor, getTableInfo: getTableInfo}); 
+                    var dropDown = this.dropDown = new ModifyTableDialog({editor: editor, getTableInfo: getTableInfo, prepareTable: prepareTable});
+                    //dropDown = lang.mixin(dropDown, {editor: editor, getTableInfo: getTableInfo, prepareTable: prepareTable}); 
                     ready(function(){
                         dropDown.startup();
                         callback();
@@ -418,10 +616,15 @@ var ModifyTableSelection = declare("dojox.editor.plugins.ModifyTableSelection", 
 
         _initButton: function(){
             this.inherited(arguments);
-            var editor = this.editor, getTableInfo = lang.hitch(this, this.getTableInfo);
+            //var editor = this.editor, getTableInfo = lang.hitch(this, this.getTableInfo), getSelectedCells = lang.hitch(this, this.getSelectedCells), prepareTable = lang.hitch(this, this.prepareTable),
+        	//copySelected = lang.hitch(this, this.copySelected), emptySelected = lang.hitch(this, this.emptySelected), pasteAtSelected = lang.hitch(this, this.pasteAtSelected);
+            var editor = this.editor, getTableInfo = this.getTableInfo, getSelectedCells = this.getSelectedCells, prepareTable = this.prepareTable,
+        		copySelected = this.copySelected, emptySelected = this.emptySelected, pasteAtSelected = this.pasteAtSelected;
             this.button.loadDropDown = function(callback){
                 require(["dojoFixes/dojox/editor/plugins/_EditorModifyTableSelectionDialog"], lang.hitch(this, function(ModifyTableSelectionDialog){
-                    var dropDown = this.dropDown = new ModifyTableSelectionDialog({editor: editor, getTableInfo: getTableInfo}); 
+                    var dropDown = this.dropDown = new ModifyTableSelectionDialog({copySelected: copySelected, emptySelected: emptySelected, pasteAtSelected: pasteAtSelected});
+                    dropDown = lang.mixin(dropDown, {
+                    	editor: editor, getTableInfo: getTableInfo, getSelectedCells: getSelectedCells, prepareTable: prepareTable}); 
                     ready(function(){
                         dropDown.startup();
                         callback();

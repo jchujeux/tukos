@@ -36,7 +36,7 @@ define(["dojo/_base/kernel", "dojox/html/entities", "dojo/_base/array", "dojo/_b
             if (typeof nodeOrHtml === 'string'){
                 contentDiv.innerHTML = nodeOrHtml;
             }else{
-            	if (nodeOrHtml.id === 'dijitEditorBody' || nodeOrHtml.tagName === 'TD'){
+            	if (nodeOrHtml.id === 'dijitEditorBody'/* || nodeOrHtml.tagName === 'TD'*/){
             		nodeOrHtml.childNodes.forEach(function(node){
             			contentDiv.appendChild(node.cloneNode(true));
             		});

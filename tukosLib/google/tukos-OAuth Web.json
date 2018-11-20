@@ -1,0 +1,10 @@
+{
+	"type": "authorized_user",
+	"client_id":"722055405701-ov5pgiu7mhgns58l5ri3ig0nci99a9ts.apps.googleusercontent.com",
+	"project_id":"tukos-142721",
+	"auth_uri":"https://accounts.google.com/o/oauth2/auth",
+	"token_uri":"https://www.googleapis.com/oauth2/v3/token",
+	"auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs",
+	"client_secret":"0ozAq71m-lbrL-YsupTbl-wX",
+	"redirect_uris":["https://script.google.com/oauthcallback"]
+}

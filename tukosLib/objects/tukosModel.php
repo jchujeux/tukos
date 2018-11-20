@@ -30,7 +30,8 @@ class TukosModel {
 
     protected $_keysDefinition ="PRIMARY KEY (`ID`), KEY (`parentid`), KEY(`object`), KEY (`contextid`), KEY (`creator`), KEY (`updator`), KEY (`permission`), KEY (`grade`)";
     public $_textColumns = ['char', 'varc', 'long', 'text'];
-
+    public $_largeColumns = ['medi', 'long'];
+    
     function __construct () {
         Tfk::$registry->set('store', function(){
             return new Store(Tfk::$registry->get('appConfig')->dataSource);
@@ -46,6 +47,8 @@ class TukosModel {
             }
         }
         $this->textColumns = array_keys(array_filter($this->_colsDefinition, function($def){return in_array(strtolower(substr($def, 0, 4)), $this->_textColumns);}));
+        //$this->maxSizeCols = array_keys(array_filter($this->_colsDefinition, function($def){return in_array(strtolower(substr($def, 0, 4)), $this->_largeColumns);}));
+        $this->maxSizeCols = ['comments'];
         $this->allCols = array_keys($this->_colsDefinition);
         $this->sharedObjectCols = array_diff($this->allCols, ['object']);
         $this->idColsObjects = ['parentid' => [$this->tableName], 'contextid' => ['contexts'], 'creator' =>['users'], 'updator' => ['users']];

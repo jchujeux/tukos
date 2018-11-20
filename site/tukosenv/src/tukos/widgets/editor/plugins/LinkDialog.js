@@ -53,7 +53,7 @@ define([
 
         tukosHtmlTemplate: "<a nohref style=\"cursor:pointer;color:blue;text-decoration:underline\"" +
 			" target=\"_blank\"" +
-            "onClick=\"event.stopImmediatePropagation();parent.tukosGlobal.pmr.editorGotoUrl('${urlInput}', event)\" style=\"cursor:pointer;color:blue;text-decoration:underline\"" +
+            "onClick=\"event.stopImmediatePropagation();parent.tukos.Pmg.editorGotoUrl('${urlInput}', event)\" style=\"cursor:pointer;color:blue;text-decoration:underline\"" +
 			">${textInput}</a>&nbsp;",
 
 		// tag: [protected] String

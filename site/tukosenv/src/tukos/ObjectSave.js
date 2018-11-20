@@ -7,18 +7,22 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dojo/d
             on(this, "click", function(evt){
                 evt.stopPropagation();
                 evt.preventDefault();
-                var changedValues = form.changedValues();
-                if (form.itemCustomization){
-                    changedValues['custom'] = utils.assign({}, form.viewMode, form.itemCustomization);
-                    delete form.itemCustomization;
-            	}
-                if (utils.empty(changedValues)){
-                    Pmg.setFeedback(messages.noChangeToSubmit);
-                }else{
-                    Pmg.setFeedback(messages.actionDoing);
-                    self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'save'), query: self.urlArgs ? lang.mixin({id: form.valueOf('id')}, self.urlArgs.query) : {id: form.valueOf('id')}}, changedValues, form.get('dataElts'), messages.actionDone); 
-                }
-            });
+                setTimeout(function(){
+                    var changedValues = form.changedValues();
+                    console.log('object save just got changedValues');
+                    if (form.itemCustomization){
+                        //changedValues['custom'] = utils.assign({}, form.viewMode, form.itemCustomization);
+                        lang.setObject('custom.' + form.viewMode + '.' + form.paneMode, form.itemCustomization, changedValues);
+                        delete form.itemCustomization;
+                	}
+                    if (utils.empty(changedValues)){
+                        Pmg.setFeedback(messages.noChangeToSubmit);
+                    }else{
+                        Pmg.setFeedback(messages.actionDoing);
+                        self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'save'), query: self.urlArgs ? lang.mixin({id: form.valueOf('id')}, self.urlArgs.query) : {id: form.valueOf('id')}}, changedValues, form.get('dataElts'), messages.actionDone); 
+                    }
+                }, 100);
+           });
         }
     });
 });

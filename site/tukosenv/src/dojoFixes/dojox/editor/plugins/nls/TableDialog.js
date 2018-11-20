@@ -6,7 +6,7 @@ define({ root:
           modifyTableSelectionTitle: "Modify Cells Selection", 
 	rows: "Rows:",
 	columns: "Columns:",
-	align: "Horizontal Align:",
+	textAlign: "Horizontal Align:",
 	verticalAlign: "Vertical Align:",
 	cellPadding: "Cell Padding:",
 	cellSpacing: "Cell Spacing:",

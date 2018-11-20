@@ -20,6 +20,19 @@ class Dialogue extends Translator{
         $objectController = $objectsStore->objectController($request['object']);
         if (isset($query['storeatts'])){
             $query['storeatts'] = json_decode($query['storeatts'], true);
+            if (!empty($query['storeatts']['where'])){
+                $colsToUntranslate = array_intersect($objectController->model->colsToTranslate, array_keys($query['storeatts']['where']));//assumes there is not a ['col' => ..., 'opr' => ..., 'value' => ...] condition
+                if (!empty($colsToUntranslate)){
+                    $utr = Tfk::$registry->get('translatorsStore')->untranslator($objectController->objectName, $objectController->translationSetsPath);
+                }
+                foreach ($colsToUntranslate as $col){
+                    if (is_array($query['storeatts']['where'][$col])){
+                        $query['storeatts']['where'][$col][1] = $utr($query['storeatts']['where'][$col][1]);
+                    }else{
+                        $query['storeatts']['where'][$col] = $utr($query['storeatts']['where'][$col]);
+                    }
+                }
+            }
         }
         if (!empty($query['params'])){
             $query['params'] = json_decode($query['params'], true);

@@ -65,16 +65,20 @@ abstract class AbstractModel extends ObjectTranslator {
         
         $this->absentOptionalCols = array_diff(self::optionalCols, $optionalCols);
         $this->jsonCols = array_merge(array_intersect(['worksheet', 'custom'], $optionalCols), $jsonCols);
+        $this->jsonColsFilters = ['worksheet' => true];
         
         $this->textColumns = array_merge(
             array_diff($this->tukosModel->textColumns, $this->absentOptionalCols),
             array_keys(array_filter($colsDefinition, function($def){return in_array(strtolower(substr($def, 0, 4)), $this->tukosModel->_textColumns);}))
+            );
+        $this->maxSizeCols = array_merge(
+            array_diff($this->tukosModel->maxSizeCols, $this->absentOptionalCols),
+            array_diff(array_keys(array_filter($colsDefinition, function($def){return in_array(strtolower(substr($def, 0, 4)), $this->tukosModel->_largeColumns);})), $jsonCols)
         );
-
+        
         $this->objectCols = array_keys($colsDefinition);
         $this->allCols = array_merge(array_diff($this->tukosModel->sharedObjectCols, $this->absentOptionalCols), $this->objectCols);
         $this->colsToTranslate = array_merge(['permission', 'grade', 'configstatus'], $colsToTranslate);
-        
     }
     
     public function setUseItemsCache($newValue){
@@ -193,6 +197,14 @@ abstract class AbstractModel extends ObjectTranslator {
     }
     
     public function getAllExtended($atts){
+        if ($atts['cols'] !== '*'){
+            if (!empty($fieldsMaxSize = $this->user->fieldsMaxSize())){
+                $presentMaxSizeCols = array_intersect($atts['cols'], $this->maxSizeCols);
+                foreach ($presentMaxSizeCols as $key => $col){
+                    $atts['cols'][$key] = 'if(length(' . $col . ') > ' . $fieldsMaxSize . ', concat("#tukos{id:", tukos.id, ",object:' . $this->objectName . ',col:' . $col . '}"),' . $col . ') ' . $col;
+                }
+            }
+        }
         $items = $this->getAll($atts);
         $this->addItemsIdCols($items);
         return $items;
@@ -213,7 +225,7 @@ abstract class AbstractModel extends ObjectTranslator {
     }
     
     public function completeUpdateAtts($values, $atts){
-        if (empty($atts) || empty($atts['where'])){
+        if ((empty($atts) || empty($atts['where'])) && !empty($values['id'])){
             $atts['where'] = ['id' => $values['id']];
         }
         $defCols = ['id', 'updator', 'updated'];
@@ -264,7 +276,7 @@ abstract class AbstractModel extends ObjectTranslator {
                 Feedback::add([[$this->tr('theuser') => $oldValues['updator']], ['updatedat' => $oldValues['updated']], ['afteryouredit' => null]]);
                 return false;
             }
-            if ($this->hasUpdateRights($oldValues)){
+            if ($this->user->hasUpdateRights($oldValues)){
                 return $this->_update($oldValues, $newValues, $jsonFilter);
             }else{
                 Feedback::add($this->tr('Noupdaterightsfor') . ' ' . $oldValues['id']);
@@ -274,14 +286,53 @@ abstract class AbstractModel extends ObjectTranslator {
     }
     
     public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false){
-    	return $this->updateOne($newValues, $atts, $insertIfNoOld, $jsonFilter);
+        $this->processLargeCols($newValues);
+        return $this->updateOne($newValues, $atts, $insertIfNoOld, $jsonFilter);
     }
     
-    public function hasUpdateRights($item){
-        return $this->user->rights() === "SUPERADMIN" || $item['updator'] === $this->user->id() || $item['permission'] === 'PU';
+    public function processLargeCols(&$newValues){
+        $presentMaxSizeCols = array_intersect($this->maxSizeCols, array_keys($newValues));
+        $colsToGet = []; $colsToProcess = [];
+        foreach($presentMaxSizeCols as $presentMaxSizeCol){
+            $matches = [];
+            $outcome = preg_match_all("/#tukos{id:([^,]*),object:([^,]*),col:([^}]*)}/", $newValues[$presentMaxSizeCol], $matches, PREG_SET_ORDER);
+            if (!empty($matches)){
+                $colsToProcess[] = $presentMaxSizeCol;
+                foreach ($matches as $match){
+                    $id = $match[1]; $object = $match[2];  $col = $match[3];
+                    if (!isset($colsToGet[$object])){
+                        $colsToGet[$object] = [$col => [$id]];
+                    }else if (!isset($colsToGet[$object][$col])){
+                        $colsToGet[$object][$col] = [$id];
+                    }else{
+                        $colsToGet[$object][$col][] = $id;
+                    }
+                }
+            }
+        }
+        if (!empty($colsToGet)){
+            $objectsStore = Tfk::$registry->get('objectsStore');
+            $results = [];
+            foreach($colsToGet as $object => $cols){
+                $results[$object] = [];
+                foreach($cols as $col => $ids){
+                    $results[$object][$col] = Utl::toAssociative($objectsStore->objectModel($object)->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => array_unique($ids)]], 'cols' => ['id', $col]]), 'id');
+                }
+            }
+            foreach ($colsToProcess as $col){
+                $newValues[$col] = preg_replace_callback("/#tukos{id:([^,]*),object:([^,]*),col:([^}]*)}/", function($matches) use ($results){
+                    return $results[$matches[2]][$matches[3]][$matches[1]][$matches[3]];
+                },
+                $newValues[$col]
+                );
+            }
+        }
+        
     }
+    
 
     public function updateAll ($newValues, $atts=[]){
+        $atts['where'] = $this->user->filterContext($this->user->filterReadOnly($atts['where']));
         $atts = $this->completeUpdateAtts($newValues, $atts);
         $oldValuesArray = $this->getAll($atts);
 
@@ -413,6 +464,7 @@ abstract class AbstractModel extends ObjectTranslator {
         if ($init){
             $values = array_merge($this->initializeExtended(), $values);
         }
+        $this->processLargeCols($values);
         return $this->insert($values, false, $jsonFilter);        
     }
 
@@ -440,7 +492,7 @@ abstract class AbstractModel extends ObjectTranslator {
     
     public function delete ($where, $item = []){
         $old = $this->getOne(['where' => $where, 'cols' => ['id', 'updator', 'permission', 'updated']]);
-        if ($this->hasUpdateRights($old)){
+        if ($this->user->hasUpdateRights($old)){
             if ($updated = Utl::getItem('updated', $item)){
                 if ($old['updated'] > $updated){
                     Feedback::add([[$this->tr('theuser') => $old['updator']], ['updatedat' => $old['updated']], ['afteryouredit' => null]]);

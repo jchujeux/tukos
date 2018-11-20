@@ -32,8 +32,6 @@ class Authentication{
                     break;
                 case 'logout':
                     $this->session->destroy();
-                    //$welcomeUrl = Tfk::$registry->pageUrl . 'help/edit?storeatts=' . json_encode(['where' => ['name' => ['like',  '%welcome%']]]); 
-                    //$dialogue->response->headers->set("Location",  $welcomeUrl);
                     $dialogue->response->headers->set("Location",  $_SERVER['HTTP_REFERER']);
                     $login = new LoginPage(Tfk::$registry->pageUrl);
                     break;
@@ -43,7 +41,7 @@ class Authentication{
             /*
              * receiving a tukosApp request. Check if authorized
              */
-            $segment = $this->session->getSegment(Tfk::$registry->appName/*'TukosAuth'*/);
+            $segment = $this->session->getSegment(Tfk::$registry->appName);
             if ($segment->status !== 'VALID'){
         		SUtl::instantiate();
         		Tfk::setTranslator();
@@ -74,7 +72,6 @@ class Authentication{
             $this->session->regenerateId();
             $dialogue->response->setContent(Tfk::tr('SUCCESSFULAUTHENTICATION'));
         }
-        //return $userid;
     }
 } 
 ?>

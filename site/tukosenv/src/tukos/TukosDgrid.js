@@ -11,6 +11,9 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             for (var i in args.columns){
                 this.setColArgsFunctions(args.columns[i]);
             }
+            if (this.mayHaveFilters){
+            	 this.contextMenuItems.header.push({atts: {label: messages.showhidefilters, onClick: lang.hitch(this, function(evt){this.showFilters();})}}); 
+            }
         },
         setColArgsFunctions: function(colArgs){
             ['formatter', 'get', 'renderCell', 'canEdit'].forEach(
@@ -24,6 +27,9 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             if (colArgs.filter){
             	this.hasFilters = true;
             }
+            if (colArgs.rowsFilters){
+            	this.mayHaveFilters = true;
+            }
         },
         postCreate: function(){
             var grid = this, pane = grid.form;
@@ -36,7 +42,7 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             };
             this.addKeyHandler(67, copyCellCallback);
             this.keepScrollPosition = true;
-            this.noDataMessage =  messages.noDataMessage;
+            this.noDataMessage =  this.noDataMessage || messages.noDataMessage;
             this.inherited(arguments);
             this.set('maxHeight', this.maxHeight);
             //this.filterWidgets = {};
@@ -56,6 +62,7 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             }); 
 */
             this.on("dgrid-cellfocusin", lang.hitch(this, function(evt){
+            //this.on(".dgrid-header .dgrid-cell: focusin", lang.hitch(this, function(evt){
             	console.log('dgrid-cellfocusin triggered');
                 this.clickedRow = this.row(evt);
             	this.clickedCell = this.cell(evt);
@@ -84,10 +91,10 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
                     this.onDataChangeLocalAction(this.getEditorInstance(column.field) || evt.cell.element.widget || evt.cell.element.input, evt.value);
                     this.isNotUserEdit += -1;
 
-                    this.formulaCache = {};
+                    //this.formulaCache = {};
                 }
             }));
-/*
+
             this.on("keydown", function(event){
             	switch (event.keyCode){
             		case keys.RIGHT_ARROW:
@@ -95,7 +102,7 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             		default:
             	}
             });
-*/
+
             this.on(".dgrid-row:mousedown, .dgrid-header:mousedown", lang.hitch(this, this.mouseDownCallback));
         },
 
@@ -122,6 +129,7 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             }
             var localActionFunctions = widget.localDataChangeActionFunctions;
             if (!utils.empty(localActionFunctions)){
+            	this.noRefreshOnUpdateDirty = true;
             	for (var widgetName in localActionFunctions){
                     var targetWidget = this.getEditorInstance(widgetName) || this.cell(this.clickedRowIdPropertyValue(), widgetName).element.widget;
                     var widgetActionFunctions =  localActionFunctions[widgetName];
@@ -134,6 +142,7 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
                         }));
                     }
                 }
+            	this.noRefreshOnUpdateDirty = false;
                 setTimeout(lang.hitch(this, this.refresh), 0);
             }
         },
@@ -165,7 +174,8 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
                 filtersRow = dct.create('tr', {'class': 'dgrid-filter-row'}, headerTable);
                 utils.forEach(grid.columns, function(column, i){
                     var colId = column.field;
-                    var td  = dct.create('td', {'class': "dgrid-filter-cell dgrid-column-" + i + " field-" + colId}, filtersRow);
+                    var td  = dct.create('td', {class: "dgrid-filter-cell dgrid-column-" + i + " field-" + colId}, filtersRow);
+                    td.columnId = colId;
                     if (column.rowsFilters){
                         var filter = new colFilter({onFilterChange: onFilterChange, grid: grid, col: colId, filters: column.rowsFilters, oprAtts: {style: 'width: 7em;'}, entryAtts: {style: 'width: 7em;'}}, td);
                         if (column.filter){

@@ -49,7 +49,8 @@ function(declare, lang, dct, style, Widget, TooltipDialog, popup, JSON){
             if (!widget.hidden && typeof widget.resize === 'function'){
             	setTimeout(function(){widget.resize();}, 0);// for dgrid's noDataMessage not to overlap header
         	}
-            lang.setObject((widget.itemCustomization || 'customization') + '.widgetsDescription.' + widget.widgetName + '.atts.hidden', widget.hidden, form);
+            //lang.setObject((widget.itemCustomization || 'customization') + '.widgetsDescription.' + widget.widgetName + '.atts.hidden', widget.hidden, form);
+            lang.setObject('customization.widgetsDescription.' + widget.widgetName + '.atts.hidden', widget.hidden, form);
         }
     });
 }); 

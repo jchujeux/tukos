@@ -20,7 +20,7 @@ class Get extends ViewsGetModel {
     }
 
     protected function setProtection(&$data){
-        if (empty($data['value']['id']) || $this->model->hasUpdateRights($data['value'])){
+        if (empty($data['value']['id']) || $this->user->hasUpdateRights($data['value'])){
         	foreach ($this->view->dataWidgets as $col => $description){
         		$data['disabled'][$col] = (isset($description['atts']['edit']['disabled']) &&  $description['atts']['edit']['disabled']) ? true : false;
         	}
@@ -109,16 +109,6 @@ class Get extends ViewsGetModel {
     }
     
     protected function mergeCustomization($response, $customMode, $itemId = null){
-/*
-    	return Utl::array_merge_recursive_replace(
-    		$response, 
-    		isset($this->controller->customViewId)
-    			? $this->getCustomView($this->controller->customViewId)
-    			: ($customMode === 'object'
-    				? $this->user->getCustomView($this->objectName, 'edit', $this->paneMode, [])
-    				: $this->model->getCombinedCustomization(['id' => $itemId], 'edit', $this->paneMode, []))
-    	);
-*/
     	return Utl::array_merge_recursive_replace(
     		$response, 
     		$customMode === 'object'
@@ -126,17 +116,5 @@ class Get extends ViewsGetModel {
     				: $this->model->getCombinedCustomization(['id' => $itemId], 'edit', $this->paneMode, [])
     	);
     }
-/*    
-    protected function getCustomView($customViewId){
-    	$result = $this->objectsStore->objectModel('customviews')->getOne(['where' => ['id' => $customViewId], 'cols' => ['customization']], ['customization' => []]);
-    	if (empty($result)){
-    		Feedback::add(Tfk::tr('CustomViewNotFound' . ' - id: ' . $customViewId));
-    		return [];
-    	}else{
-    		SUtl::addIdCol($customViewId);
-    		return is_null($result['customization']) ? [] : $result['customization'];
-    	}
-    }
-*/    	 
 }
 ?>

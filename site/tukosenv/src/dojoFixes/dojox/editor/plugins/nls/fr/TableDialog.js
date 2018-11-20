@@ -5,7 +5,7 @@ define(
            modifyTableSelectionTitle: "Modification d'une sélection de cellules", 
 	rows: "Rangées :",
 	columns: "Colonnes :",
-	align: "Alignement horizontal :",
+	textAlign: "Alignement horizontal :",
 	verticalAlign: "Alignement vertical :",
 	cellPadding: "Remplissage des cellules :",
 	cellSpacing: "Espacement des cellules :",
