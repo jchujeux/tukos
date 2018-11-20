@@ -13,13 +13,12 @@ function(declare, lang, dct, domStyle, ready, string, JSON, _Plugin, Button, Men
         numberOfPages: '<span class="numberofpages" style="background-color: #F3F5F6">NN</span>&nbsp'},
 
 	    inserterOptions = utils.objectKeys(inserters);
-      
         
     var Inserter = dojo.declare([_Plugin, _ColorContentInserter, _ChoiceListInserter, _HtmlSourceInserter], {
     
         iconClassPrefix: "dijitAdditionalEditorIcon",
         
-        visualTag: '<span class="visualTag" style="background-color:lightgrey">¤</span>',
+        visualTag: hiutils.visualTag(),
 
         _initButton: function(){
             var editor = this.editor, createDropDown = lang.hitch(this, this._createDropDown);//, option = this.option;
@@ -28,12 +27,7 @@ function(declare, lang, dct, domStyle, ready, string, JSON, _Plugin, Button, Men
                 showLabel: false,
                 iconClass: this.iconClassPrefix + " " + this.iconClassPrefix + "InsertPageBreak",
                 tabIndex: "-1",
-                loadDropDown: function(callback){
-                	this.dropDown = createDropDown();
-                	ready(function(){
-                		callback();
-                	});
-                }
+                loadDropDown: lang.hitch(this, "_loadDropDown"),
             });
         },
 
@@ -47,17 +41,19 @@ function(declare, lang, dct, domStyle, ready, string, JSON, _Plugin, Button, Men
             this._initButton();
         },
         
-        _createDropDown: function(){
-        	var dropDown = new Menu(), editor = this.editor, insert = this._insert;
-        	inserterOptions.forEach(function(option){
-        		dropDown.addChild(new MenuItem({label: messages[option], onClick: function(){insert(option, editor);}}));
-        	});
-            dropDown.addChild(new PopupMenuItem({label: messages.colorcontentinserter, popup: lang.hitch(this, this.colorContentInserter)()}));
-            dropDown.addChild(new PopupMenuItem({label: messages.choicelistinserter, popup: lang.hitch(this, this.choiceListInserter)()}));
-            dropDown.addChild(new PopupMenuItem({label: messages.htmlSource, popup: lang.hitch(this, this.htmlSourceInserter)()}));
-        	return dropDown;
+        _loadDropDown: function(callback){
+        	require(["tukos/widgets/editor/plugins/_ExpressionInserter"], lang.hitch(this, function(ExpressionInserter){
+        		var dropDown = (this.dropDown = this.button.dropDown = new Menu()), editor = this.editor, insert = this._insert, expression = new ExpressionInserter({inserter: this});
+            	inserterOptions.forEach(function(option){
+            		dropDown.addChild(new MenuItem({label: messages[option], onClick: function(){insert(option, editor);}}));
+            	});
+                dropDown.addChild(new PopupMenuItem({label: messages.colorcontentinserter, popup: lang.hitch(this, this.colorContentInserter)()}));
+                dropDown.addChild(new PopupMenuItem({label: messages.choicelistinserter, popup: lang.hitch(this, this.choiceListInserter)()}));
+                dropDown.addChild(new PopupMenuItem({label: messages.htmlSource, popup: lang.hitch(this, this.htmlSourceInserter)()}));
+                dropDown.addChild(new PopupMenuItem({label: Pmg.message('expression'), popup: lang.hitch(expression, expression.inserterDialog)()}));
+                callback();
+        	}));
         },
-
         _insert: function(option, editor){
             var htmlTemplate = inserters[option], match = htmlTemplate.match(/<([^ ]*)/);
             if (match){

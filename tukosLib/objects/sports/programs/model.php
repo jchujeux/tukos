@@ -8,7 +8,7 @@ namespace TukosLib\Objects\Sports\Programs;
 use TukosLib\Objects\Sports\Sports;
 use TukosLib\Objects\Sports\AbstractModel;
 use TukosLib\Objects\Sports\Programs\Questionnaire;
-use TukosLib\Objects\Collab\Calendars\Google;
+use TukosLib\Google\Calendar;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
@@ -285,7 +285,7 @@ class Model extends AbstractModel {
 	        	}
 	        	return null;
 	        };
-			Google::getEventsList([$calId, array_filter(['singleEvents' => true, 'timeMin' => Dutl::toUTC($minTimeToSync), 'timeMax' => Dutl::toUTC(date('Y-m-d', strtotime($maxTimeToSync . ' + 1 day')))])], $callback);
+			Calendar::getEventsList([$calId, array_filter(['singleEvents' => true, 'timeMin' => Dutl::toUTC($minTimeToSync), 'timeMax' => Dutl::toUTC(date('Y-m-d', strtotime($maxTimeToSync . ' + 1 day')))])], $callback);
 	        $updatedEvents = [];
 	        $updated = 0;
 	        $created = 0;
@@ -293,21 +293,21 @@ class Model extends AbstractModel {
 	        foreach($sessionsToSync as $session){
 	        	$eventDescription = ['start' => ['date' => $session['startdate']], 'end' => ['date' => $session['startdate']], 'summary' => $session['name'], 'description' => $this->googleDescription($session)];
 	        	if (!empty($intensity = $session['intensity'])){
-	        		$eventDescription['colorId'] = Google::getEventColorId(Sports::$colorNameToHex[Sports::$intensityColorsMap[$intensity]]);
+	        		$eventDescription['colorId'] = Calendar::getEventColorId(Sports::$colorNameToHex[Sports::$intensityColorsMap[$intensity]]);
 	        	}
 	        	if ((!$googleEventId = Utl::getItem('googleid', $session)) || empty($existingGoogleEvents[$googleEventId])){
-	        		$event = Google::createEvent($calId, $eventDescription);
+	        		$event = Calendar::createEvent($calId, $eventDescription);
 	        		$created += 1;
 	        		$sessionsModel->updateOne(['id' => $session['id'], 'googleid' => $event->getId()]);
 	        	}else{
 	        		try {
 	        			if ($eventDescription != $existingGoogleEvents[$googleEventId]){
-	        				Google::updateEvent($calId, $googleEventId, $eventDescription);
+	        				Calendar::updateEvent($calId, $googleEventId, $eventDescription);
 	        				$updated += 1;
 	        			}
 	        			$updatedEvents[] = $googleEventId;
 	        		} catch (\Exception $e) {
-	        			$event = Google::createEvent($calId, $eventDescription);
+	        			$event = Calendar::createEvent($calId, $eventDescription);
 	        			$created +=1;
 	        			$sessionsModel->updateOne(['id' => $session['id'], 'googleid' => $event->getId()]);
 	        		}
@@ -315,7 +315,7 @@ class Model extends AbstractModel {
 	        }
 	        $eventsToDelete = array_diff(array_keys($existingGoogleEvents), $updatedEvents);
 	        foreach ($eventsToDelete as $eventId){
-	        	Google::deleteEvent($calId, $eventId);
+	        	Calendar::deleteEvent($calId, $eventId);
 	        	$deleted +=1;
 	        }
 	        //Feedback::add($this->tr('nbsessionssynchronized') . ': ' . count($sessionsToSync));
@@ -327,22 +327,22 @@ class Model extends AbstractModel {
     
     public function createCalendar($query, $atts){
     	$newName = $atts['newname'];
-    	$newCalendarId = Google::createCalendar(['summary' => $newName, 'description' => ''], $atts['newacl'])->getId();
+    	$newCalendarId = Calendar::createCalendar(['summary' => $newName, 'description' => ''], $atts['newacl'])->getId();
     	Feedback::add($this->tr('new calendar id: ' . $newCalendarId));
 		Tfk::addExtra($newCalendarId, ['name' => $newName, 'label' => $newName . ' (' . $newCalendarId . ')']);
     	return ['googlecalid' => $newCalendarId];
     }
 	public function updateAcl($query, $atts){
-		return ['acl' => (array) Google::updateRules($atts)];
+		return ['acl' => (array) Calendar::updateRules($atts)];
 	}
     public function deleteCalendar($query, $atts){
-    	Google::deleteCalendar($atts['googlecalid']);
+    	Calendar::deleteCalendar($atts['googlecalid']);
     	$this->updateOne(['id' => $query['id'], 'googlecalid' => null, 'lastsynctime' => null]);
     	Feedback::add($this->tr('deleted calendar: ' . $atts['googlecalid']));
     	return [];
     }
     public function calendarAcl($query, $atts){
-    	return ['acl' => (array) Google::getRules([$atts['googlecalid']])];
+    	return ['acl' => (array) Calendar::getRules([$atts['googlecalid']])];
     }
     
     public function googleDescription($session){

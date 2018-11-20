@@ -10,8 +10,10 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
 		lang.extend(_CheckboxMixin, _WidgetsFormExtend);
 		return {
         initialize: function(obj) {
+            tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
             this.cache = obj;
             this.cache.extras = this.cache.extras || {};
+            this.cache.messages = this.cache.messages || {};
             var self = this;
             Date.prototype.toJSON = function(){
                 return dojo.date.locale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
@@ -38,10 +40,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
 
                 self.tabs = new TabsManager({container: contentTabs});
                 var userTabLink = new TabOnClick({url: obj.userEditUrl}, "pageusername");
-                
-                tukosGlobal = {}; // at least in rich text editor plug-in I don't know how to avoid this
-                tukosGlobal.pmr = self; // to make self.tabs.gotoTab visible in tukoslinkdialog
-                
+                       
                 var newPanesConfig = [], rowId = 1;
                 obj.accordionDescription.forEach(function(description, key){
                 	var paneId = description['id'], paneConfigKey, newPaneConfig;
@@ -85,6 +84,9 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                                 	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
                                 	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
                                 	registry.byId('appLayout').resize();
+                                	//ready(function(){//to get the comments / details column in the search accordion to display
+                                		registry.byId('leftPanel').resize();
+                                	//})
                                 });
                             }else{
                             	domStyle.set('leftPanel', 'display', 'none');
@@ -110,6 +112,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
     	                        	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
     	                        	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
     	                        	registry.byId('appLayout').resize();
+    	                        	registry.byId('leftPanel').resize();
                             	});
                             }else{
                             	if (isMaximized){
@@ -123,6 +126,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                                 	isMaximized = true;
                             	}
                             	registry.byId('appLayout').resize();
+                            	registry.byId('centerPanel').resize();
                             }
                         });
                     }
@@ -378,6 +382,9 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         },
         nameExtra: function(id){
         	return (id ? (this.cache.extras[id] && this.cache.extras[id].name ? this.cache.extras[id].name : id) : '');
+        },
+        message: function(key){
+        	return this.cache.messages[key] || key;
         },
         serverTranslations: function(expressions, actionModel){
                 var self = this, results = {}, actionModel = actionModel || 'getTranslations';

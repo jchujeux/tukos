@@ -16,7 +16,7 @@ class ObjectTranslator extends Translator{
             $domainTranslatorName = Directory::getObjDomain($objectName);
             $modelClass = 'TukosLib\\Objects\\' . Directory::getObjDir($objectName) . '\\Model';
             $objectTranslationSets = $modelClass::translationSets();
-            parent::__construct($translatorsStore->$translateOrUntranslate($objectName, array_merge([Tfk::$registry->appName], $objectTranslationSets, [$domainTranslatorName, 'tukosLib'])));
+            parent::__construct($translatorsStore->$translateOrUntranslate($objectName, $this->translationSetsPath = array_merge([Tfk::$registry->appName], $objectTranslationSets, [$domainTranslatorName, 'tukosLib'])));
         }else{
             parent::__construct($translator);
         }

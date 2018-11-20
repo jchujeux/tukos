@@ -9,6 +9,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
 
         constructor: function(args){
             if (args.newColumnArgs){
+                args.newColumnArgs.input = lang.clone(args.newColumnArgs)
             	this.setColArgsFunctions(args.newColumnArgs);
             }
             this.deleted = [];
@@ -23,7 +24,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 var copiedCell = Pmg.getCopiedCell();
                 if (evt.ctrlKey && copiedCell){
                     this.setCellValueOf(sutils.pasteCell(copiedCell, sutils.copyCell(this.clickedCell)));
-                    this.refresh({keepScrollPosition: true});
+                    //this.refresh({keepScrollPosition: true});
                 }
             }
             this.addKeyHandler(86, pasteCellCallback);
@@ -31,11 +32,15 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             this.on("dgrid-editor-show", lang.hitch(this, function(evt){
                 var editor = evt.editor, column = evt.column;
                 editor.widgetType = column.widgetType;
+/*
                 if (editor.widgetType === 'TextBox'){
                 	var style = editor.get('style') || {}, length = editor.get('value').length;
-                    style.width = Math.min(400, Math.max(column.width, Math.ceil(length*8))) + "px";// assuming here 1 em is roughly 8 px
+                    style.width = Math.min(600, Math.max(column.width, Math.ceil(length*10))) + "px";// assuming here 10px will allow to fit most characters
                     editor.set('style', style);
+                //}else if (editor.widgetType === 'TukosTextarea'){
+                	//editor.autoExpand(editor.domNode);
                 }
+*/
                 if (!editor.contextMenu){
                     mutils.setContextMenu(editor,{
                         atts: {targetNodeIds: [editor.domNode]}, 
@@ -103,11 +108,16 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         },
         
         updateDirty: function(idPropertyValue, field, value){
+            var collection = this.collection, grid = this;
             this.inherited(arguments);
-            var collection = this.collection;
             collection.get(idPropertyValue).then(function(item){
                 item[field] = value;
-                collection.put(item);                    	
+                //collection.put(item);
+                if (!grid.noRefreshOnUpdateDirty){
+                    //grid.refresh({keepScrollPosition: true});
+                	//grid.refreshCell(grid(idPropertyValue, field));
+                	sutils.refreshFormulaCells(grid);
+                }
             });
             if (!this.isNotUserEdit){
             	if (this.onChangeNotify){
@@ -140,12 +150,13 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         },
 
         offsetRowsId: function(fromRowId, increment){
-            var self = this, newRows = {};
+            var self = this, newRows = {}, noRefresh = this.noRefreshOnUpdateDirty;
             this.collection.forEach(function(object){
                 if (object.rowId >= fromRowId){
                     newRows[object.rowId] = object.rowId + increment;
                 }
             });
+            this.noRefreshOnUpdateDirty = true;
             sutils.updateRowReferences(this, newRows);
             this.collection.forEach(function(object){
                 if (object.rowId >= fromRowId){
@@ -154,6 +165,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                     self.updateDirty(object.idg, 'rowId', object.rowId);
                 }
             });
+            this.noRefreshOnUpdateDirty = noRefresh;
         },
         
         lastRowId: function(){
@@ -167,6 +179,8 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         },
 
         createNewRow: function(item, currentRowData, where){
+            var noRefresh = this.noRefreshOnUpdateDirty;
+        	this.noRefreshOnUpdateDirty = true;
             if ('rowId' in this.columns && where !== undefined){
                 if (where === 'before'){
                     //item.rowId = currentRowData.rowId;
@@ -191,6 +205,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 }
             }
             this.isNotUserEdit += -1;
+            this.noRefreshOnUpdateDirty = noRefresh;
         },
         
         addRow: function(where, item){
@@ -198,13 +213,16 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             this.prepareInitRow(init);
             item = utils.merge(init, item||{});
             this.createNewRow(item, (where === 'before' ? this.clickedRow.data : {}), where);
-            this.refresh({keepScrollPosition: true});
+            if (!this.noRefreshOnUpdateDirty){
+            	this.refresh({keepScrollPosition: true});
+            }
             return item;
         },
         
         updateRow: function(item){
-        	var idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {};
+        	var idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {}, noRefresh = this.noRefreshOnUpdateDirty;
         	this.isNotUserEdit += 1;
+        	this.noRefreshOnUpdateDirty = true;
         	utils.forEach(item, lang.hitch(this, function(value, col){
         		if (value !== storeItem[col] && col !== 'connectedIds'){
         			this.updateDirty(idPropertyValue, col, value);
@@ -216,7 +234,11 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         		}
         		this.notifyWidgets({action: 'update', item: item});
         	}
-            this.isNotUserEdit += -1;
+            this.noRefreshOnUpdateDirty = noRefresh;
+        	if (!noRefresh){
+                this.refresh({keepScrollPosition: true});
+        	}
+        	this.isNotUserEdit += -1;
         },
 
         copyItem: function(item){
@@ -230,7 +252,8 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         copyRow: function(evt){
             var numberOfCopies = 1, self = this;
             var applyCallback = function(){
-                var numberOfCopies = parseInt(this.pane.valueOf('copies') || '1'), incrementFrom = this.pane.valueOf('incrementfrom');
+                var numberOfCopies = parseInt(this.pane.valueOf('copies') || '1'), incrementFrom = this.pane.valueOf('incrementfrom') , noRefresh = self.noRefreshOnUpdateDirty;
+                self.noRefreshOnUpdateDirty = true;
                 this.pane.close();
                 var data = self.clickedRowValues(), name = data.name || '';;
                 if (incrementFrom && 'name' in self.columns){
@@ -258,6 +281,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                     });
                 	self.addRow(undefined, item);
                 }
+                this.noRefreshOnUpdateDirty = noRefresh;
+                if (!noRefresh){
+                    this.refresh({keepScrollPosition: true});
+                }
             };
             var dialog = new TukosTooltipDialog({paneDescription: {
                     widgetsDescription: {
@@ -284,7 +311,9 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         },
 
         deleteRowItem: function(item){
-            if (item.id != undefined && (this.initialId ? item.id <= this.maxServerId : true)){
+            var noRefresh = this.noRefreshOnUpdateDirty;
+            this.noRefreshOnUpdateDirty = true;
+        	if (item.id != undefined && (this.initialId ? item.id <= this.maxServerId : true)){
                 var toSendOnDelete = {id: item.id, '~delete': true};
             	if (this.sendOnDelete){
             		this.sendOnDelete.forEach(function(col){
@@ -303,11 +332,14 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             }
             this.collection.removeSync(idgToDelete);
             this.deleteDirty(idgToDelete);
+            this.noRefreshOnUpdateDirty = noRefresh;
         },
         
         moveRow: function(itemToMove, currentRowData, where){
             if ('rowId' in this.columns){
-                this.offsetRowsId(itemToMove.rowId, -1);
+                var noRefresh = this.noRefreshOnUpdateDirty;
+            	this.noRefreshOnUpdateDirty = true;
+            	this.offsetRowsId(itemToMove.rowId, -1);
                 if (where === 'before'){
                     targetRowId = currentRowData.rowId;
                     this.offsetRowsId(targetRowId, 1);
@@ -316,6 +348,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                     itemToMove.rowId = this.lastRowId()+1;
                 }
                 this.collection.putSync(itemToMove, (where === 'before' ? {beforeId: currentRowData.idg, overwrite: true}: {}));
+                this.noRefreshOnUpdateDirty = noRefresh;
                 this.updateDirty(itemToMove.idg, 'rowId', itemToMove.rowId);
             } 
         },
@@ -385,7 +418,9 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         },
 
         _setValue: function(value){
-            this.formulaCache = {};
+        	var noRefresh = this.noRefreshOnUpdateDirty;
+        	this.noRefreshOnUpdateDirty = true;
+        	this.formulaCache = {};
             if (value == ''){//the Memory store needs to be emptied
                 this.store.setData([]); 
                 this.dirty = {};
@@ -425,12 +460,14 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             });
             this.maxId = this.maxServerId = maxId;
             this.deleted = [];
+            this.noRefreshOnUpdateDirty = noRefresh;
             this.set('collection', this.store.getRootCollection());
             this.setSummary();
         },
 
         _setDuplicate: function(value){
-            var data = this.collection.fetchSync({});
+            var data = this.collection.fetchSync({}), noRefresh = this.noRefreshOnUpdateDirty;
+            this.noRefreshOnUpdateDirty = true;
             data.forEach(function(item){
                 item['id'] = null;
                 for (var col in item){
@@ -440,6 +477,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 }
                 this.collection.putSync({idg: item.idg});
             });
+            this.noRefreshOnUpdateDirty = noRefresh;
         },
 
         getObject: function(node){
@@ -489,7 +527,8 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         },
 
         onDropExternal: function (sourceSource, nodes, copy, targetItem) {
-            var tGrid = this.grid, sGrid = sourceSource.grid;
+            var tGrid = this.grid, sGrid = sourceSource.grid, noRefresh = this.noRefreshOnUpdateDirty;
+            this.noRefreshOnUpdateDirty = true;
         	if (tGrid.onDropCondition){
             	if (!tGrid.onDropConditionFunction){
             		tGrid.onDropConditionFunction = eutils.eval(tGrid.onDropCondition);
@@ -551,7 +590,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 sGrid.setSummary();
             } 
             tGrid.setSummary();
-            tGrid.refresh({keepScrollPosition: true});
+            this.noRefreshOnUpdateDirty = noRefresh;
+            if (!noRefresh){
+                tGrid.refresh({keepScrollPosition: true});           	
+            }
             setTimeout(
                 function(){
                     tGrid.layoutHandle.resize();
@@ -659,7 +701,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
 	                if ((idPropertyValue && this.store.getSync(idPropertyValue))|| action === 'update'){//transform into an update
 	                	item[this.collection.idProperty] = idPropertyValue;
 	                	this.updateRow(item);
-	                	this.refresh({keepScrollPosition: true});
 	                }else{
 	                    if (action === 'create' && item !== undefined){
 	                        this.store.addSync(item);

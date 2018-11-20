@@ -147,6 +147,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
         },
 
         begEdit: function(){
+        	this.editor.begEdit();
+        },
+        endEdit: function(){
+        	this.editor.endEdit();
+        },
+/*
+        begEdit: function(){
             if(this.editor.customUndo){
                 this.editor.beginEditing();
             }else{
@@ -165,7 +172,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
             }
             this.editor.onDisplayChanged();
         },
-       
+*/       
         unitAttValue: function(attName){
             return {
                 get: function(node){

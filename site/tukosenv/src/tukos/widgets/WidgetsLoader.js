@@ -3,14 +3,14 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/p
 	return {
             widgetsPath: {
                 TextBox: "dijit/form/", NumberTextBox: "dijit/form/", CurrencyTextBox: "dijit/form/", CheckBox: "dijit/form/", TimeTextBox: "dijit/form/", Textarea: "dijit/form/", Select: "dijit/form/", Button: "dijit/form/",
-                DropDownButton: "dijit/form/", RadioButton: "dijit/form/", TukosDateBox: "tukos/", Editor: "tukos/widgets/", LazyEditor: "tukos/widgets/", SharedEditor: "tukos/widgets/",
+                DropDownButton: "dijit/form/", RadioButton: "dijit/form/", TukosDateBox: "tukos/", Editor: "tukos/widgets/", LazyEditor: "tukos/widgets/",
                 FormattedTextBox: "tukos/widgets/", MultiSelect: "tukos/", StoreSelect: "tukos/", ObjectSelect: "tukos/", ObjectSelectMulti: "tukos/", ObjectSelectDropDown: "tukos/",
                 TukosNumberBox: "tukos/", TukosCurrencyBox: "tukos/", NumberUnitBox: "tukos/", DateTimeBox: "tukos/", TukosButton: "tukos/widgets/", DropDownTextBox: "tukos/widgets/", ColorPickerTextBox: "tukos/widgets/",
                 RestSelect: "tukos/", ObjectExport: "tukos/", ObjectSave: "tukos/", ObjectReset: "tukos/", ObjectProcess: "tukos/", ObjectNew: "tukos/", ObjectEdit: "tukos/", ObjectDelete: "tukos/", ObjectDuplicate: "tukos/",
-                ObjectCalendar: "tukos/", ObjectFieldClear: "tukos/", OverviewAction: "tukos/", OverviewEdit: "tukos/",  SimpleDgrid: "tukos/",  StoreDgrid: "tukos/", OverviewDgrid: "tukos/",
+                ObjectCalendar: "tukos/", ObjectFieldClear: "tukos/", OverviewAction: "tukos/", OverviewEdit: "tukos/",  TukosDgrid: "tukos/", SimpleDgrid: "tukos/",  StoreDgrid: "tukos/", OverviewDgrid: "tukos/", ReadonlyGrid: "tukos/",
                 ContextTree: "tukos/", NavigationTree: "tukos/", PieChart: "tukos/", ColumnsChart: "tukos/", Chart: "tukos/", 
                 SimpleUploader: "tukos/widgets/", Uploader: "tukos/widgets/", Downloader: "tukos/widgets/", StoreCalendar: "tukos/widgets/calendar/", widgetsHider: "tukos/widgets/", HorizontalLinearGauge: "tukos/widgets/dgauges/",
-                ObjectEditor: "tukos/widgets/", HtmlContent: "tukos/widgets/", StoreComboBox: "tukos/",
+                ObjectEditor: "tukos/widgets/", HtmlContent: "tukos/widgets/", StoreComboBox: "tukos/", TukosTextarea: "tukos/widgets/",
                 MobileTextBox: "dojox/mobile/textbox*", MobileButton: "dojox/mobile/Button*"
             },
             

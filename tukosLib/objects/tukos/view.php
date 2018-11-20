@@ -4,6 +4,7 @@ namespace TukosLib\Objects\Tukos;
 use TukosLib\Objects\AbstractView;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Objects\ViewUtils;
+use TukosLib\Objects\Directory;
 use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
@@ -12,10 +13,15 @@ class View extends AbstractView {
         parent::__construct($objectName, $translator, 'Parent', 'Description');
         $customDataWidgets = [
             'name' => ['atts' => ['edit' => ['style' => ['width' => '30em']]]],
+/*
             'object' => ViewUtils::textBox($this, 'Object', [
-            		'atts' => ['edit' => ['style' => ['width' => '20em']], 'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]],
-                	'objToOverview' => ['translate' => ['tr' => ['class' => $this]]],                        
-        	])
+                'atts' => ['edit' => ['style' => ['width' => '20em']], 'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]],
+                'objToOverview' => ['translate' => ['tr' => ['class' => $this]]],
+            ])
+*/
+            'object' => ViewUtils::textBox($this, 'Object', [
+                'atts' => ['overview'  => ['editorArgs' => ['storeArgs' => ['data' => Utl::idsNamesStore(Directory::getObjs(), $this->tr)]], 'renderCell' => 'renderStoreValue']],
+            ])
         ];
         $this->customize($customDataWidgets);
     }

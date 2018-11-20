@@ -79,8 +79,8 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
         },
     
         parseCell: function(grid, field, rowId){
-            var idProperty = grid.idPropertyOf('rowId', parseInt(rowId));
-            return this.evalFormula(grid, grid.cellValueOf(field, idProperty), field, idProperty, true);
+            var idProperty = grid.idPropertyOf('rowId', parseInt(rowId)), result = this._evalFormula(grid, field, idProperty, true);
+            return result === '' ? "''" : ' ' + result;
         },
     
         widgetsToValue: function(grid, formula){
@@ -96,24 +96,29 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
             grid.formulaCache[idProperty][field] = '%inprocess%';
             return this.cellsToValue(grid, this.cellRangesToArray(grid, this.widgetsToValue(grid, this.RCtoRelative(formula, field, idProperty))));
         },
-            
+        _evalFormula: function(grid, field, idProperty, needsStringDelimiters){
+        	return this.evalFormula(grid, grid.cellValueOf(field, idProperty), field, idProperty, needsStringDelimiters);
+        },
         evalFormula: function(grid, formulaOrValue, field, idProperty, needsStringDelimiters){
-            if (formulaOrValue == undefined){
-                return '';
+            var noRefresh = grid.noRefreshOnUpdateDirty, returnValue;
+            grid.noRefreshOnUpdateDirty = true;
+        	if (formulaOrValue == undefined){
+                returnValue = '';
             }else if (typeof formulaOrValue === 'string' && formulaOrValue.charAt(0) === '='){
                 try{
                     if (!grid.formulaCache[idProperty]){
                         grid.formulaCache[idProperty] = {};
                     }
-                    return grid.formulaCache[idProperty][field] || (grid.formulaCache[idProperty][field] = eutils.eval(eutils.nameToFunction(this.parseFormula(grid, formulaOrValue.slice(1), field, idProperty))));
+                    returnValue = grid.formulaCache[idProperty][field] || (grid.formulaCache[idProperty][field] = eutils.eval(eutils.nameToFunction(this.parseFormula(grid, formulaOrValue.slice(1), field, idProperty))));
                 }catch(err){
-                    return '%' + err;
+                	returnValue = '%' + err;
                 }
             }else{
-                return (needsStringDelimiters && typeof formulaOrValue === 'string' && isNaN(formulaOrValue) ? '"' + formulaOrValue + '"' : formulaOrValue);
+                returnValue = (needsStringDelimiters && typeof formulaOrValue === 'string' && isNaN(formulaOrValue) ? '"' + formulaOrValue + '"' : formulaOrValue);
             }
+            grid.noRefreshOnUpdateDirty = noRefresh;
+            return returnValue;
         },
-
         formulaesMap: function(grid, callback){
             for (var idProperty in grid.formulaCache){
                 var formulaesInRow = grid.formulaCache[idProperty];
@@ -122,12 +127,26 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
                 }
             }
         },
+        
+        refreshFormulaCells: function(grid){
+        	grid.formulaCache = {}, self = this;;
+        	utils.forEach(grid._rowIdToObject, function(row){
+        		var idPropertyValue = row[grid.collection.idProperty];
+        		utils.forEach(grid.columns, function(column){
+        			var field = column.field, formulaOrValue = grid.cellValueOf(field, idPropertyValue)
+        			if (typeof formulaOrValue === 'string' && formulaOrValue.charAt(0)=== '='){
+            			//self.evalFormula(grid, formulaOrValue, field, idPropertyValue);
+            			grid.refreshCell(grid.cell(idPropertyValue, field));        				
+        			}
+        		});
+        	});
+        },
 
         updateRowReferences: function(grid, newRows){
-            var rowPattern = "([a-zA-Z]+)(" + Object.keys(newRows).join('|') + ")([$]?)([^\\d])";
+            var rowPattern = "([$]?[a-zA-Z]+)([$]?" + Object.keys(newRows).join('|') + ")([^\\d]?)";
             var formulaUpdate = function(grid, field, idProperty){
-                var callback = function(match, p1, p2, p3, p4){
-                    return p1 + newRows[p2] + p3 + p4;
+                var callback = function(match, p1, p2, p3){
+                    return p1 + newRows[p2] + p3;
                 }      
                 var formula = grid.cellValueOf(field, idProperty);
                 var newFormula = formula.replace(new RegExp(rowPattern, 'g'), callback);
@@ -155,7 +174,9 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
         },
 
         insertColumn: function(grid, currentColumn){
-            var columns = grid.get('columns'), newColumn = grid.newColumnArgs, newColumns = {}, oldFields = {}, newFields = {}, currentField = currentColumn.field, newField, columnIsInserted = false, pane = grid.form;
+            var columns = grid.get('columns'), newColumn = grid.newColumnArgs, newColumns = {}, oldFields = {}, newFields = {}, currentField = currentColumn.field, newField, columnIsInserted = false, pane = grid.form,
+            	noRefresh = grid.noRefreshOnUpdateDirty;
+            grid.noRefreshOnUpdateDirty = true;
             for (var field in columns){
                 if (! columnIsInserted){
                     newColumns[field] = columns[field];
@@ -180,10 +201,13 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
             grid.formulaCache = {};
             this.updateCustomizationForColumns(grid, oldFields);
             grid.set('columns', newColumns);
+            grid.noRefreshOnUpdateDirty = noRefresh;
         }, 
 
         deleteColumn: function(grid, currentColumn){
-            var columns = grid.get('columns'), newColumns = {}, oldFields = {}, newFields = {}, currentField = currentColumn.field, columnIsDeleted = false, lastField, pane = grid.form;
+            var columns = grid.get('columns'), newColumns = {}, oldFields = {}, newFields = {}, currentField = currentColumn.field, columnIsDeleted = false, lastField, pane = grid.form,
+            	noRefresh = grid.noRefreshOnUpdateDirty;
+            grid.noRefreshOnUpdateDirty = true;
             for (var field in columns){
                 if (!columnIsDeleted){
                     if (field !== currentField){
@@ -207,6 +231,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
             this.updateCustomizationForColumns(grid, oldFields);
             grid.formulaCache = {};
             grid.set('columns', newColumns);
+            grid.noRefreshOnUpdateDirty = noRefresh;
         },    
 
 
@@ -214,7 +239,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
             var dirty = grid.dirty, data = grid.store.fetchSync(), idProperty = grid.store.idProperty;
             var newDirty = {};
             data.forEach(function(rowData){
-                var id = rowData[idProperty], newRowDirty = newDirty[id] = {}, rowDirty = dirty[id] || {};
+                var id = rowData[idProperty], newRowDirty = {}, rowDirty = dirty[id] || {};
                 var valueOf = function(field){
                         return (typeof rowDirty[field] !== "undefined" ? rowDirty[field] : rowData[field]);                    
                 }
@@ -223,21 +248,14 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
                 	switch (oldField) {
                     	case '*-': 
 	                        if (typeof oldValue !== "undefined"){
-	                            newRowDirty[field] = '~delete';
+	                            newRowDirty[field] = '';//'~delete';
 	                        }
 	                        break;
-/*
-                    	case '*+':
-                    		if (typeof oldValue !== "undefined"){
-                    			newRowDirty[field] = '~delete';
-                    		}
-                    		break;
-*/
                     	default:
                             var newValue = valueOf(oldField);
 	                        if (typeof newValue === "undefined"){
 	                        	if (typeof oldValue !== "undefined"){
-	                        		newRowDirty[field] = '~delete';
+	                        		newRowDirty[field] = '';//~delete';
 	                        	}
 	                        }else if (newValue !== oldValue){
 	                            newRowDirty[field] = newValue;
@@ -253,6 +271,9 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
                 for (field in oldFields){
                     var oldField = oldFields[field];
                     setNewDirty(field, oldField);
+                }
+                if (!utils.empty(newRowDirty)){
+                	newDirty[id] = newRowDirty;
                 }
             });
             wutils.markAsChanged(grid, 'noStyle');
@@ -288,7 +309,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
         				}
         		}
         	});
-        	lang.setObject(grid.itemCustomization + '.widgetsDescription.' + grid.widgetName + '.atts.columns.itemCustomization', newCustomization, pane);
+        	lang.setObject(grid.itemCustomization + '.widgetsDescription.' + grid.widgetName + '.atts.columns', newCustomization, pane);
         }
     }
 });

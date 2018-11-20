@@ -2,9 +2,9 @@
  *  tukos grids  mixin for dynamic widget information handling and cell rendering (widgets values and attributes that may be modified by the user or the server)
  *   - usage: 
  */
-define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/mouse", "dijit/registry", "dijit/Dialog", "tukos/utils", "tukos/widgetUtils", "tukos/menuUtils",
+define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/dom-construct", "dojo/dom-style", "dojo/mouse", "dijit/registry", "dijit/Dialog", "tukos/utils", "tukos/widgetUtils", "tukos/menuUtils",
          "tukos/widgets/widgetCustomUtils", "tukos/sheetUtils", "tukos/widgets/ColorPicker", "tukos/PageManager", "dojo/number",  "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, dct, mouse, registry, Dialog, utils, wutils, mutils, wcutils, sutils, ColorPicker, Pmg, number, messages){
+    function(arrayUtil, declare, lang, on, dct, dst, mouse, registry, Dialog, utils, wutils, mutils, wcutils, sutils, ColorPicker, Pmg, number, messages){
     return declare(null, {
 
         constructor: function(){
@@ -15,9 +15,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                     {atts: {label: messages.viewcellinwindow, onClick: lang.hitch(this, function(evt){this.viewInSeparateBrowserWindow(this);})}}
                  ],
                  idCol: lang.hitch(this, wcutils.idColsContextMenuItems)(this).concat([{atts: {label: messages.togglerowheight, onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}]),
-                 header: [
-                    {atts: {label: messages.showhidefilters, onClick: lang.hitch(this, function(evt){this.showFilters();})}}
-                 ]
+                 header: []
             };
         },
 
@@ -37,8 +35,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
         
         renderStoreValue: function(object, value, node){
-            //console.log('renderStoreValue: - this.id: ' + this.id);
-            //return this.grid._renderContent(this, object, value ? this.editorArgs.store.get(value).name : value);
             return this.grid._renderContent(this, object, value ? utils.find(this.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value);
         },
         
@@ -52,32 +48,51 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         renderContent: function(object, value, node){
-            var grid = this.grid, row =grid.row(object);
+            var grid = this.grid, row = grid.row(object);
             var result = ((value === undefined || value === null) ? "" : sutils.evalFormula(grid, value, this.field, row.data.idg));
             result = utils.transform(result, this.formatType, this.formatOptions);
             return grid._renderContent(this, object, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {});
         },
         
         _renderContent: function(column, storeRow, innerHTML, styleAtts){
-            var row =this.row(storeRow),
-                rowHeight = (this.rowHeights[row.id] ? this.rowHeights[row.id] : column.minHeightFormatter);
-            var atts = {style: lang.mixin({maxHeight: rowHeight, overflow: 'auto'}, styleAtts)}; 
-            var rowId =  storeRow[this.collection.idProperty];
-            if (this.dirty[rowId] && typeof this.dirty[rowId][column.field] !== 'undefined' && !atts.style.backgroundColor){
+            var row =this.row(storeRow), rowHeight = (this.rowHeights[row.id] ? this.rowHeights[row.id] : column.minHeightFormatter), atts = {style: lang.mixin({maxHeight: rowHeight, overflow: 'auto'}, styleAtts)},
+            	rowId =  storeRow[this.collection.idProperty], node;
+            //if (this.dirty[rowId] && typeof this.dirty[rowId][column.field] !== 'undefined' && !atts.style.backgroundColor){
+            if (((this.dirty[rowId] || {})[column.field] || '~').charAt(0) !== '~' && !atts.style.backgroundColor){
                 atts.style.backgroundColor =  wutils.changeColor;
             }
             if(! innerHTML || ! /\S/.test(innerHTML) || innerHTML === '~delete'){
                 innerHTML = '<p> ';
             }
             atts.innerHTML= innerHTML;
-            return dct.create('div', atts);
+            node = dct.create('div', atts);
+            if(typeof innerHTML === "string" && innerHTML.substring(0, 7) === '#tukos{'){
+            	dst.set(node, {textDecoration: "underline", color: "blue", cursor: "pointer"});
+            	node.innerHTML = messages.loadOnClick;
+            	node.onClickHandler = on(node, 'click', lang.hitch(this, this.loadContentOnClick));
+            }
+            return node;
+        },
+        
+        loadContentOnClick: function(evt){
+        	var clickedCell = this.clickedCell, field = clickedCell.column.field, data = clickedCell.row.data, source = RegExp("#tukos{id:([^,]*),object:([^,]*),col:([^}]*)}", "g").exec(data[field]), targetCol = source[3],
+        		node = evt.currentTarget;
+			evt.stopPropagation();
+			evt.preventDefault();
+			node.onClickHandler.remove();
+			dst.set(node, {textDecoration: "", color: "", cursor: ""});
+			Pmg.serverDialog({object: source[2], view: 'noview', mode: 'nomode', action: 'RestSelect', query: {one: true, params: {getOne: 'getOne'}, storeatts: {cols: [targetCol], where: {id: source[1]}}}}).then(lang.hitch(this, function(response){
+        		node.innerHTML = data[field] = response.item[targetCol];	
+        	}));
+        	console.log('here implement load on click');
+        	
         },
 
         toggleFormatterRowHeight: function(grid){
             var row = grid.clickedCell.row,
                 column = grid.clickedCell.column;
             grid.rowHeights[row.id] = (grid.rowHeights[row.id] == column.maxHeightFormatter ? column.minHeightFormatter : column.maxHeightFormatter); 
-            grid.refresh();
+            grid.refresh({keepScrollPosition: true});
         },
         viewCellInPopUpDialog: function(grid){
             var myDialog = new Dialog({title: "extended view"});
@@ -142,7 +157,8 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         mouseDownCallback: function(evt){
-            var row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column;
+            console.log('mousedowncallback');
+        	var row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column, clickedColumn = this.clickedColumn = this.column(evt);
             if (mouse.isRight(evt)){
                 var menuItems = lang.clone(this.contextMenuItems);
                 var colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';

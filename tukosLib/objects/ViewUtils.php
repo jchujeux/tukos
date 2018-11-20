@@ -83,16 +83,6 @@ class ViewUtils{
                 ],
                 $custom);
     }
-    static public function sharedEditor($view, $label, $custom=[]){
-    	return Utl::array_merge_recursive_replace([
-    			'type' => 'sharedEditor',
-    			'atts' => ['edit' =>  ['label' => $view->tr($label), 'height' => '100%']],
-    			'objToEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
-    			'objToStoreEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
-    	],
-    			$custom);
-    }
-
     static public function lazyEditor($view, $label, $custom=[]){
     	return Utl::array_merge_recursive_replace([
     			'type' => 'lazyEditor',

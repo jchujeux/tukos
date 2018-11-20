@@ -49,6 +49,9 @@ class UserInformation{
         Tfk::setEnvironment($this->userInfo['environment']);
         Tfk::setTranslator($this->language);
         $this->contextModel = $this->objectsStore->objectModel('contexts', null);/* here and not in __construct  as else creates infinite loop recursion */
+        //$this->pageCustomization = array_merge(['fieldsMaxSize' => 100000], json_decode($this->userInfo['pagecustom'], true));
+        $this->pageCustomization = array_merge(['fieldsMaxSize' => 100000], empty($pageCustom = $this->userInfo['pagecustom']) ? [] : json_decode($pageCustom, true));
+        
         return true;
     }
 
@@ -161,6 +164,14 @@ class UserInformation{
         }
         return $where;  
     }
+    function filterReadOnly($where, $tableName = ''){
+        if ($this->rights()!== "SUPERADMIN"){
+            $permissionCol = ($tableName === '' ? '' : $tableName . '.') . 'permission';
+            $updatorCol = ($tableName === '' ? '' : $tableName . '.') . 'updator';
+            $where[] =[['col' => $permissionCol, 'opr' => '=', 'values' => 'PU'], ['col' => $updatorCol, 'opr' => '=', 'values' => $this->id(), 'or' => true]];
+        }
+        return $where;
+    }
    /*
     * Add condition to the where clause for $store->getXXX so as 
     * not to retrieve values not in current user context as well as values with negative ids (considered deleted)
@@ -188,6 +199,9 @@ class UserInformation{
         }
     }
 
+    public function hasUpdateRights($item){
+        return $this->rights() === "SUPERADMIN" || $item['updator'] === $this->id() || $item['permission'] === 'PU' || item['id'] === $this->id();
+    }
     private function customViewIds(){
         if (!property_exists($this, 'customViewIds')){
             if (!empty($this->userInfo['customviewids'])){
@@ -253,12 +267,16 @@ class UserInformation{
         }
     }
     public function pageCustomization(){
-        return empty($this->userInfo['pagecustom']) ? [] : json_decode($this->userInfo['pagecustom'], true);
+        return $this->pageCustomization;//empty($this->userInfo['pagecustom']) ? [] : json_decode($this->userInfo['pagecustom'], true);
     }
     public function updateUserInfo($pageCustom){
-        $this->userInfo['pagecustom'] = json_encode(empty($this->userInfo['pagecustom']) ? $pageCustom : array_merge(json_decode($this->userInfo['pagecustom'], true), $pageCustom));
-        $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => $this->userInfo['pagecustom']], ['where' => ['id' => $this->id()]]);
+        //$this->userInfo['pagecustom'] = json_encode(empty($this->userInfo['pagecustom']) ? $pageCustom : array_merge(json_decode($this->userInfo['pagecustom'], true), $pageCustom));
+        $this->pageCustomization = array_merge($this->pageCustomization, $pageCustom);
+        $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => json_encode($this->pageCustomization)], ['where' => ['id' => $this->id()]]);
         return [Tfk::tr('serveractiondone')];
+    }
+    public function fieldsMaxSize(){
+        return intval($this->pageCustomization['fieldsMaxSize']);
     }
 }
 ?>

@@ -46,9 +46,6 @@ class Model extends AbstractModel{
         
     	return parent::initialize(array_merge(['rights' => 'ENDUSER', 'targetdb' => Tfk::$registry->get('appConfig')->dataSource['dbname']], $init));
     }    
-    public function hasUpdateRights($item){
-        return $item['id'] === $this->user->id() || parent::hasUpdateRights($item);
-    }
     
     public function getOneExtended ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
     	$result = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
@@ -74,7 +71,7 @@ class Model extends AbstractModel{
         		$configStore->insert($authenticationInfo, ['table' => 'users']);
         	}
         	Utl::extractItem('targetdb', $values);
-        	return $this->insert($values, false, $jsonFilter);
+        	return parent::insertExtended($values, false, $jsonFilter);
         }
     }
 

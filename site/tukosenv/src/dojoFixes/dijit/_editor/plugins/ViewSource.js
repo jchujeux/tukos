@@ -99,6 +99,10 @@ define([
 			// editor: Object
 			//		The editor object to attach the print capability to.
 			this.editor = editor;
+			editor.toggle = lang.hitch(this, this.toggle);
+			editor.isInViewSource = function(){
+				return editor._sourceQueryCommandEnabled ? true : false;
+			}
 			this._initButton();
 
 			this.editor.addKeyHandler(keys.F12, true, true, lang.hitch(this, function(e){

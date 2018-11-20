@@ -8,38 +8,40 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/mouse",  "dij
                 evt.stopPropagation();
                 evt.preventDefault();
 
-                if (lang.hitch(self, self.processCondition)()){
-                    self.valuesToSend = {};
-                    (self.includeWidgets || []).forEach(function(widgetName){
-                    	self.valuesToSend[widgetName] = form.valueOf(widgetName);
-                    });
-                    if (self.allowSave){
-                        self.valuesToSend = lang.mixin(self.valuesToSend, form.changedValues());
-                    }
-                    theId = registry.byId(self.form.id + 'id').get('value');
-                    if (self.allowSave || (theId != '' && !self.needToSaveBeforeProcess())){
-                        if (self.dialogDescription){
-                            if (self.tooltipDialog){
-                                self.tooltipDialog.open({around: self.domNode});
-                            }else{
-                                require(["tukos/TukosTooltipDialog"], function(TukosTooltipDialog){
-                                    self.dialogDescription.paneDescription.attachedWidget = self;
-                                    self.dialogDescription.paneDescription.form = self.form;
-                                    self.dialogDescription.paneDescription.tabContextId = lang.hitch(self.form, self.form.tabContextId);
-                                    self.tooltipDialog = new TukosTooltipDialog(self.dialogDescription);
-                                    //on(self.tooltipDialog, 'blur', self.tooltipDialog.close);
+                setTimeout(function(){
+                    if (lang.hitch(self, self.processCondition)()){
+                        self.valuesToSend = {};
+                        (self.includeWidgets || []).forEach(function(widgetName){
+                        	self.valuesToSend[widgetName] = form.valueOf(widgetName);
+                        });
+                        if (self.allowSave){
+                            self.valuesToSend = lang.mixin(self.valuesToSend, form.changedValues());
+                        }
+                        theId = registry.byId(self.form.id + 'id').get('value');
+                        if (self.allowSave || (theId != '' && !self.needToSaveBeforeProcess())){
+                            if (self.dialogDescription){
+                                if (self.tooltipDialog){
                                     self.tooltipDialog.open({around: self.domNode});
-                                });
+                                }else{
+                                    require(["tukos/TukosTooltipDialog"], function(TukosTooltipDialog){
+                                        self.dialogDescription.paneDescription.attachedWidget = self;
+                                        self.dialogDescription.paneDescription.form = self.form;
+                                        self.dialogDescription.paneDescription.tabContextId = lang.hitch(self.form, self.form.tabContextId);
+                                        self.tooltipDialog = new TukosTooltipDialog(self.dialogDescription);
+                                        //on(self.tooltipDialog, 'blur', self.tooltipDialog.close);
+                                        self.tooltipDialog.open({around: self.domNode});
+                                    });
+                                }
+                            }else{
+                                this.doProcess(theId, self.urlArgs);
                             }
                         }else{
-                            this.doProcess(theId, self.urlArgs);
+                            var dialog = new DialogConfirm({title: messages.newOrFieldsHaveBeenModified, content: messages.saveOrReloadFirst, hasSkipCheckBox: false});
+                            dialog.show().then(function(){Pmg.setFeedback(messages.actionCancelled);},
+                                               function(){Pmg.setFeedback(messages.actionCancelled);});/* user pressed Cancel: no action */
                         }
-                    }else{
-                        var dialog = new DialogConfirm({title: messages.newOrFieldsHaveBeenModified, content: messages.saveOrReloadFirst, hasSkipCheckBox: false});
-                        dialog.show().then(function(){Pmg.setFeedback(messages.actionCancelled);},
-                                           function(){Pmg.setFeedback(messages.actionCancelled);});/* user pressed Cancel: no action */
-                    }
-                }
+                    }                	
+                }, 100);
             });
         },
         

@@ -1,9 +1,9 @@
 <?php
-namespace TukosLib\Objects\Collab\Calendars;
+namespace TukosLib\Google;
 
 use TukosLib\Google\Client;
 use TukosLib\Utils\Utilities as Utl;
-class Google{
+class Calendar{
     private static $service = null, $googleColors, $calendarColors, $eventColors, $calendarsList, $calendarsById;
 	public static function getService(){
 		if (is_null(self::$service)){

@@ -9,8 +9,6 @@ use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
-use TukosLib\Objects\UsersContexts\Object as UsersContexts;
-use TukosLib\Objects\UsersContexts\View as UsersContextsView;
 use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {

@@ -1,6 +1,6 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dgrid/Grid", "dgrid/extensions/DijitRegistry", "dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer"], 
-function(declare, lang, Grid, DijitRegistry, Hider, Resizer){
-    return declare([Grid, DijitRegistry, Hider, Resizer], {
+define (["dojo/_base/declare", "dojo/_base/lang", "dgrid/OnDemandGrid", "dgrid/selector", "dgrid/extensions/DijitRegistry", "dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer"], 
+function(declare, lang, Grid, Selector, DijitRegistry, Hider, Resizer){
+    return declare([Grid, DijitRegistry, Hider, Resizer, Selector], {
         postCreate: function(){
             this.inherited(arguments);
             if (this.maxHeight){

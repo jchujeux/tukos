@@ -47,12 +47,12 @@ trait  GridWidgets{
     }
 
     public static function sheetGrid($atts, $editOnly = true){
-         $colDescription = self::description(['type' => 'textBox', 'atts' => ['storeedit' => ['width' => 50, 'editOn' => 'click']]], false);
+         $colDescription = self::description(['type' => 'tukosTextArea', 'atts' => ['storeedit' => ['width' => 50, 'editOn' => 'click, keypress', 'editorArgs' => ['rows' => 1, 'style' => ['height' => '15px']]]]], false);
         if ($editOnly){
             $defAtts = [
                'objectIdCols' => [], 
                 'columns' => ['rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'cannotDelete' => true]],
-                'sort'  => [['property' => 'rowId', 'descending' => false]], 'itemCustomization' => 'itemCustomization',
+            'sort'  => [['property' => 'rowId', 'descending' => false]], 'itemCustomization' => 'itemCustomization',
                 'columnsEdit' => true, 'newColumnArgs' => array_merge(self::colGridAtts($colDescription, null, 'storeedit'), ['sortable' => false]), 'defaultColsNumber' => 10
             ];
             $fieldOrd = ord('A'); 
@@ -140,7 +140,7 @@ trait  GridWidgets{
                 if (isset($atts['placeHolder'])){
                 		$atts['editorArgs']['placeHolder'] = Utl::extractItem('placeHolder', $atts);
                 }
-                $atts['editor'] = ($type === 'SharedEditor' || $type === 'LazyEditor') ? 'Editor' : $type;
+                $atts['editor'] = ($type === 'LazyEditor') ? 'Editor' : $type;
                 $atts['widgetType'] = $atts['editor'];
                 $atts['canEdit'] = (!empty($element['atts'][$mode]['canEdit']) ? $element['atts'][$mode]['canEdit'] : 'canEditRow');
             }

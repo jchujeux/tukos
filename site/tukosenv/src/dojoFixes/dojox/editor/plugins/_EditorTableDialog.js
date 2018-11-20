@@ -1,7 +1,8 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-style", "dojo/dom-construct", "dojo/ready", "dojo/on", "tukos/utils", "tukos/TukosTooltipDialog", "dijit/ColorPalette", "dojo/i18n!dojoFixes/dojox/editor/plugins/nls/TableDialog"], 
-    function(declare, lang, domAttr, domStyle, dct, ready, on, utils, TukosTooltipDialog, colorPicker, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-style", "dojo/dom-construct", "dojo/ready", "dojo/on", "tukos/utils", "tukos/TukosTooltipDialog", "dijit/ColorPalette", "tukos/PageManager",
+		 "dojo/i18n!dojoFixes/dojox/editor/plugins/nls/TableDialog"], 
+    function(declare, lang, domAttr, domStyle, dct, ready, on, utils, TukosTooltipDialog, colorPicker, Pmg, messages){
 
-    var editableAtts = ['backgroundColor', 'borderColor', 'align', 'verticalAlign', 'width', 'border', 'cellPadding', 'cellSpacing'],
+    var editableAtts = ['backgroundColor', 'borderColor', 'textAlign', 'verticalAlign', 'width', 'border', 'cellPadding', 'cellSpacing'],
         widthUnits = [{id: '', name: ''}, {id: 'auto', name: 'auto'}, {id: '%', name: '%'}, {id: 'em', name: 'em'}, {id: 'px', name: 'px'}];
 
     return declare(TukosTooltipDialog, {
@@ -14,12 +15,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
             }
             this.onOpen = lang.hitch(this, function(){
                 this.begEdit();
-                if (this.getTableInfo){
-                    this.tableInfo = this.getTableInfo(true);
-                    this.table = this.pane.table = this.tableInfo.tbl;
-                }
-                if (this.getSelectedCells){
-                    this.selectedTds = this.getSelectedCells(this.table);
+                if (this.prepareTable){
+                    this.prepareTable();                	
                 }
                 this.openDialog();
                 dijit.TooltipDialog.prototype.onOpen.apply(this, arguments);
@@ -37,7 +34,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 attWidgetsDescription = {
                     backgroundColor: {type: 'DropDownButton', atts: {iconClass: "dijitEditorIcon dijitEditorIconHiliteColor", loadDropDown: function(callback){(this.dropDown = backgroundColorPicker).startup(); callback();}, attValueModule: styleAttValue}},
                     borderColor: {type: 'DropDownButton', atts: {iconClass: "dijitEditorIcon dijitEditorIconHiliteColor", loadDropDown: function(callback){(this.dropDown = borderColorPicker).startup(); callback();}, attValueModule: styleAttValue}},
-                    align: {type: 'StoreSelect', atts: {style: {width: '10em'}, storeArgs: {data: [{id: '', name:''}, {id: 'default', name: messages['default']}, {id: 'left', name: messages.left}, {id: 'center', name: messages.center}, {id: 'right', name: messages.right}]}, attValueModule: domAttValue}},
+                    textAlign: {type: 'StoreSelect', atts: {style: {width: '10em'}, storeArgs: {data: [{id: '', name:''}, {id: 'default', name: messages['default']}, {id: 'left', name: messages.left}, {id: 'center', name: messages.center}, {id: 'right', name: messages.right}]}, attValueModule: styleAttValue}},
                     verticalAlign: {type: 'StoreSelect', atts: {style: {width: '10em'}, storeArgs: {data: [{id: '', name: ''}, {id: 'top', name: messages.top}, {id: 'middle', name: messages.middle}, {id: 'bottom', name: messages.bottom}]}, attValueModule: styleAttValue}},
                     width: {type: 'NumberUnitBox', atts: {number: {style: {width: '3em'}}, unit: {style: {width: '5em'}, storeArgs: {data:widthUnits}}, attValueModule: widthAttValue}}, 
                     border: {type: 'TextBox', atts: {style: {width: '5em'}, attValueModule: domAttValue}},
@@ -49,14 +46,14 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 widgetsDescription[att + 'Label'] = {type: 'HtmlContent', atts: {value: messages[att], style: {textAlign: 'right', whiteSpace: 'nowrap'}}};
                 widgetsDescription[att + 'CheckBox'] = {type: 'CheckBox', atts: {checked: true}};
                 widgetsDescription[att] = attWidgetsDescription[att];
-                widgetsDescription[att]['atts'].onChange = function(){console.log('I am activated');this.pane.getWidget(att+ 'CheckBox').set('checked', true)};
+                widgetsDescription[att]['atts'].onChange = function(){this.pane.getWidget(att+ 'CheckBox').set('checked', true)};
                 widgetsAttsArray.push(att + 'Label', att + 'CheckBox', att);
             });
             widgetsDescription['selectAllToggleLabel'] = {type: 'HtmlContent', atts: {value: messages.selectAllToggle, style: {textAlign: 'right', whiteSpace: 'nowrap', fontStyle: 'italic'}}};
             widgetsDescription['selectAllToggleCheckBox'] = {type: 'CheckBox', atts: {checked: false, onWatchLocalAction: lang.hitch(this, this.selectAllToggleWatch)()}};
             widgetsAttsArray.push('selectAllToggleLabel', 'selectAllToggleCheckBox');
             actions.forEach(lang.hitch(this, function(action){
-                widgetsDescription[action] = {type: 'TukosButton', atts: {label: messages[action], onClick: lang.hitch(this, this[action])}};
+                widgetsDescription[action] = {type: 'TukosButton', atts: {label: messages[action] || Pmg.message(action), onClick: lang.hitch(this, this[action])}};
             }));
             return {
                 paneDescription: {

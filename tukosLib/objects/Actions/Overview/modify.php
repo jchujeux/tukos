@@ -14,7 +14,13 @@ class Modify extends AbstractAction{
     }
     function response($query){
         $received = $this->dialogue->getValues();
-        $result = $this->model->updateAll($received['values'], ['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $received['ids']]]]);
+        if ($received['ids'] === true){
+            $where = array_merge($this->user->getCustomView($this->objectName, 'overview', $this->paneMode, ['data', 'filters', 'overview']), $query['storeatts']['where']);
+            $where['contextpathid'] = $query['contextpathid'];
+        }else{
+            $where = [['col' => 'id', 'opr' => 'IN', 'values' => $received['ids']]];
+        }
+        $result = $this->model->updateAll($received['values'], ['where' => $where]);
         Feedback::add($this->view->tr('DoneModified'));
         if ($result === 0){$this->dialogue->response->setStatusCode(404);}
         //return ['data' => $this->actionModel->get()];

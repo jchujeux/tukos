@@ -8,7 +8,7 @@ namespace TukosLib\Objects\Collab\Calendars\Entries;
 use TukosLib\Objects\AbstractModel;
 use TukosLib\Objects\ItemsCache;
 use TukosLib\Objects\StoreUtilities as SUtl;
-use TukosLib\Objects\Collab\Calendars\Google;
+use TukosLib\Google\Calendar;
 use TukosLib\Utils\DateTimeUtilities as Dutl;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
@@ -97,7 +97,7 @@ class Model extends AbstractModel {
 									}
 								}
 							}
-							$result = array_merge($result, array_filter(Google::getEventsList([$source['googleid'], $optionalArgs], $callback)));
+							$result = array_merge($result, array_filter(Calendar::getEventsList([$source['googleid'], $optionalArgs], $callback)));
 		    			}
 	    			}
 	    		}
@@ -125,17 +125,7 @@ class Model extends AbstractModel {
     }
     
     public function insertGoogleEvent($values){
-/*
-    	$eventProperties = ['start' => ['dateTime' => Dutl::toUTC($values['startdatetime'])], 'end' => ['dateTime' => Dutl::toUTC($values['enddatetime'])], 'summary' => $values['name'], 
-    						'description' => Utl::extractItem('comments', $values, '')];
-    	if (!empty($values['backgroundcolor'])){
-    		$eventProperties['colorId'] = Google::getEventColorId($values['backgroundcolor']);
-    	}
-    	$this->setExtendedProperties($eventProperties, $values);
-    	$event = Google::createEvent($values['googlecalid'], $eventProperties);
-    	return $this->googleEventToCalendarEntry($event, $values['googlecalid']);
-*/
-    	return $this->googleEventToCalendarEntry(Google::createEvent($values['googlecalid'], $this->calendarEntryToGoogleEvent($values)), $values['googlecalid']);
+    	return $this->googleEventToCalendarEntry(Calendar::createEvent($values['googlecalid'], $this->calendarEntryToGoogleEvent($values)), $values['googlecalid']);
     }
     
 	public static function setExtendedProperties(&$eventProperties, $values){
@@ -159,7 +149,7 @@ class Model extends AbstractModel {
 	}
     
     public function getGoogleEvent($calId, $id, $rogooglecalid = true){
-    	return ItemsCache::insert($this->googleEventToCalendarEntry(Google::getEvent($calId, $id), $calId, $rogooglecalid));
+    	return ItemsCache::insert($this->googleEventToCalendarEntry(Calendar::getEvent($calId, $id), $calId, $rogooglecalid));
     }
 
     protected function isTukosEvent($id){
@@ -183,15 +173,15 @@ class Model extends AbstractModel {
     			$googleEvent = $this->getGoogleEvent($calId, $id, false);
     			Utl::extractItems(['id', 'startdatetime', 'enddatetime'], $googleEvent);
     			$inserted = parent::insert(array_merge($googleEvent, $newValues), true);
-    			Google::deleteEvent($calId, $id);
+    			Calendar::deleteEvent($calId, $id);
     			return $inserted;
     		}else if ($newValues['googlecalid'] != $calId){//move event to a different google calendar
     			$event = $this->getGoogleEvent($calId, $id);
     			$newEvent = $this->insertGoogleEvent($newValues);
-    			Google::deleteEvent($calId, $id);
+    			Calendar::deleteEvent($calId, $id);
     			return $newEvent;
     		}else{
-    			return Google::updateEvent($newValues['googlecalid'], $id, $this->calendarEntryToGoogleEvent($newValues));
+    			return Calendar::updateEvent($newValues['googlecalid'], $id, $this->calendarEntryToGoogleEvent($newValues));
     		}
     	}
     }
@@ -200,7 +190,7 @@ class Model extends AbstractModel {
     	if ($this->isTukosEvent($where['id'])){
     		return parent::delete($where, $item);
     	}else{
-    		Google::deleteEvent($item['rogooglecalid'], $where['id']);
+    		Calendar::deleteEvent($item['rogooglecalid'], $where['id']);
     		return $where['id'];
     	}
     }
@@ -237,7 +227,7 @@ class Model extends AbstractModel {
 	    	}
 	    	$result = array_merge(
 	    		['id' => $event->getId(), 'name' => $event->getSummary(), 'googlecalid' => $calId, 'comments' => $event->getDescription(), 'created' => Dutl::toUTC($event->getCreated()), 'startdatetime' => Dutl::toUTC($start),
-	    		 'enddatetime' => Dutl::toUTC($end), 'duration' => $duration, 'backgroundcolor' => Google::eventBackgroundColor($event, $calId), 'allday' => $allDay],
+	    		 'enddatetime' => Dutl::toUTC($end), 'duration' => $duration, 'backgroundcolor' => Calendar::eventBackgroundColor($event, $calId), 'allday' => $allDay],
 	    		$extendedValues
 	    	);
 	    	if ($rogooglecalid){
@@ -251,7 +241,7 @@ class Model extends AbstractModel {
     			Utl::getItem('allday', $item) === 'YES' 
     				? ['startdatetime' => ['start' => ['date' => ['TukosLib\Utils\DateTimeUtilities', 'toUserDate']]], 'enddatetime' => ['end' => ['date' => ['TukosLib\Utils\DateTimeUtilities', 'toUserDate']]]]
     				: ['startdatetime' => ['start' => ['dateTime' => ['TukosLib\Utils\DateTimeUtilities', 'toUTC']]], 'enddatetime' => ['end' => ['dateTime' => ['TukosLib\Utils\DateTimeUtilities', 'toUTC']]]],
-    			['name' => 'summary', 'comments' => 'description', 'backgroundcolor' => ['colorId' => ['TukosLib\Objects\Collab\Calendars\Google', 'getEventColorId']]]
+    			['name' => 'summary', 'comments' => 'description', 'backgroundcolor' => ['colorId' => ['TukosLib\Google\Calendar', 'getEventColorId']]]
     	);
     	$valuesToProcess = array_intersect_key($item, $tukosToGoogle);
     	$eventProperties = [];

@@ -1,6 +1,6 @@
 <?php
 
-namespace TukosLib\Objects\Actions\Noview;
+namespace TukosLib\Objects\Actions\Overview;
 
 use TukosLib\Objects\Actions\AbstractAction;
 

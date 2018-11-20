@@ -48,7 +48,7 @@ class View {
                     'widgets' => array_values(array_diff(array_merge($this->_firstDataElts, $this->view->addedDataWidgetsElts), $this->view->_exceptionCols['edit'])),
                 ],
                 'row2' => [
-                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['30%', '70%']],
+                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['30%', '70%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
                     'widgets' => (isset($this->view->dataWidgets['worksheet']) ? ['worksheet', 'comments'] : ['comments']),
                 ],
                 'row3' => [

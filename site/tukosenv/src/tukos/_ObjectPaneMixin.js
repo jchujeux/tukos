@@ -2,10 +2,10 @@
  *  ObjectPane mixin for dynamic widget information handling (widgets values and attributes that may be modified by the user or the server)
  *   - usage: 
  */
-define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all", "dojo/ready", "dijit/registry", "dojo/request", 
-            "tukos/utils", "tukos/dateutils", "tukos/hiutils", "tukos/widgetUtils", "tukos/widgets/widgetCustomUtils", "tukos/_TukosPaneMixin",
+define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when", "dojo/promise/all", "dojo/ready", "dijit/registry", "dojo/request", 
+            "tukos/utils", "tukos/dateutils", "tukos/widgetUtils", "tukos/widgets/widgetCustomUtils", "tukos/_TukosPaneMixin",
             "tukos/DialogConfirm", "tukos/PageManager", "dojo/json", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, when, all, ready, registry, request, utils, dutils, hiutils, wutils, wcutils, _TukosPaneMixin, DialogConfirm, Pmg, JSON, messages){
+    function(arrayUtil, declare, lang, dcl, when, all, ready, registry, request, utils, dutils, wutils, wcutils, _TukosPaneMixin, DialogConfirm, Pmg, JSON, messages){
     return declare(_TukosPaneMixin, {
 
         editInNewTab: function(widget){
@@ -50,7 +50,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/when
 	                            this.watchOnChange = true;
 	                            this.markIfChanged = (markResponseIfChanged  ? true : false);
 	                            return when(self.setWidgets(response['data']), lang.hitch(this, function(){
-	                                if (response['title'] && hiutils.hasClass(this.domNode.parentNode, 'dijitTabPane')){
+	                                if (response['title'] && dcl.contains(this.domNode.parentNode, 'dijitTabPane')){
 	                                    Pmg.tabs.setCurrentTabTitle(response['title']);
 	                                }else{
 	                                	parent.set('title', title);

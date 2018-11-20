@@ -7,12 +7,13 @@ define([
 	'dojo/dom-class',
 	'dojo/on',
 	'dojo/has',
+	'dojo/keys',
 	'dojo/query',
 	'dgrid/Grid',
 	'tukos/widgets/WidgetsLoader',
-	'tukos/widgetUtils',
+	//'tukos/widgetUtils',
 	'dojo/_base/sniff'
-], function (declare, lang, Deferred, when, domConstruct, domClass, on, has, query, Grid, WidgetsLoader, wutils) {
+], function (declare, lang, Deferred, when, domConstruct, domClass, on, has, keys, query, Grid, WidgetsLoader/*, wutils*/) {
 
 	return declare(null, {
 		constructor: function () {
@@ -50,10 +51,13 @@ define([
 		getEditorInstance: function(colId){
 			var col = this._editorInstancesColumns[colId];
 			return this._editorInstances[colId] || (col 
-				? (this._editorInstances[colId] = when(WidgetsLoader.loadWidget(col.column.editor), lang.hitch(this, function(editor){
+				? (this._editorInstances[colId] = typeof col.column.editor === 'string'
+					? when(WidgetsLoader.loadWidget(col.column.editor), lang.hitch(this, function(editor){
 						col.column.editor = editor;
 						return this._createSharedEditor(col.column, col.originalRenderCell);
-					})))
+					  }))
+					: this._createSharedEditor(col.column, col.originalRenderCell)
+				  )
 				: col);
 		},
 		
@@ -243,7 +247,8 @@ define([
 				}
 
 				// initially render content in non-edit mode
-				return originalRenderCell.call(column, object, value, cell, options);
+				//return originalRenderCell.call(column, object, value, cell, options);
+				return lang.hitch(this, originalRenderCell)(object, value, cell, options);
 
 			} : function (object, value, cell, options) {
 				// always-on: create editor immediately upon rendering each cell
@@ -320,7 +325,10 @@ define([
 					dirty = this.dirty && this.dirty[row.id];
 					value = (dirty && field in dirty) ? dirty[field] :
 						column.get ? column.get(row.data) : row.data[field];
-					// Check to see if the cell can be edited
+					if (typeof value === "undefined"){
+						value = '';
+					}
+						// Check to see if the cell can be edited
 					if (!column.canEdit || column.canEdit(cell.row.data, value)) {
 						dfd = new Deferred();
 						when(this.getEditorInstance(column.id), function(editor){
@@ -366,6 +374,9 @@ define([
 
 			var editor;
 
+			if (typeof value === "undefined"){
+				value = '';
+			}
 			if (column.editor) {
 				if (cell.column.editOn && this._activeCell === cell.element) {
 					editor = this.getEditorInstance(cell.column.id);
@@ -610,6 +621,7 @@ define([
 			}
 
 			function onblur() {
+				console.log('Editor onBlur');
 				var parentNode = node.parentNode,
 					options = { alreadyHooked: true },
 					cell = self.cell(node);
@@ -646,16 +658,17 @@ define([
 				// Contains logic for reacting to enter/escape keypresses to save/cancel edits.
 				// Calls `focusNode.blur()` in cases where field should be dismissed.
 				var key = evt.keyCode || evt.which;
-
-				if (key === 27) {
-					// Escape: revert + dismiss
-					reset();
-					self._activeValue = cmp._dgridLastValue;
-					blur();
-				}
-				else if (key === 13 && column.dismissOnEnter !== false) {
-					// Enter: dismiss
-					blur();
+				switch (key){
+					case keys.ESCAPE: 	
+						reset();
+						self._activeValue = cmp._dgridLastValue;
+						blur();
+						break;
+					case keys.ENTER:
+						if ((column.dismissOnEnter !== false) || !evt.shiftKey){
+							blur();
+							break;
+						}
 				}
 			}
 
@@ -665,7 +678,7 @@ define([
 			// hook up blur handler, but don't activate until widget is activated
 			(column._editorBlurHandle = on.pausable(cmp, 'blur', onblur)).pause();
 			this._editorColumnListeners.push(column._editorBlurHandle);
-			cmp = lang.mixin(cmp, {valueOf: lang.hitch(cmp, wutils.valueOf), setValueOf: lang.hitch(cmp, wutils.setValueOf)});
+			//cmp = lang.mixin(cmp, {valueOf: lang.hitch(cmp, wutils.valueOf), setValueOf: lang.hitch(cmp, wutils.setValueOf)});
 
 			return cmp;
 		},
@@ -745,9 +758,17 @@ define([
 					if (on.emit(cellElement, 'dgrid-datachange', eventObject)) {
 						if (this.updateDirty) {
 							// for OnDemandGrid: update dirty data, and save if autoSave is true
+							//var noRefresh = this.noRefreshOnUpdateDirty;
+		                    //this.noRefreshOnUpdateDirty = true;
 							this.updateDirty(row.id, column.field, value);
 							// perform auto-save (if applicable) in next tick to avoid
 							// unintentional mishaps due to order of handler execution
+		                    //this.noRefreshOnUpdateDirty = noRefresh;
+		                    //var deselect = this.deselectOnRefresh;
+		                    //this.deselectOnRefresh = false;
+		                    //this.refreshCell();
+		                    //this.deselectOnRefresh = deselect;
+		                    //this.focus(cellElement);
 							if (column.autoSave) {
 								setTimeout(function () {
 									self._trackError('save');

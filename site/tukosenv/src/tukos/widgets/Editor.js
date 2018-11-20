@@ -2,19 +2,20 @@
  *  loads plugins required by tukos & a few enhancements
  */
 define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/dom", "dojo/dom-style", "dojo/mouse", "dojo/when", "dijit/Editor",  "dijit/_editor/RichText",
-         "tukos/widgets/editor/ShortCutKeys", "tukos/PageManager",
+         "tukos/widgets/editor/ShortCutKeys", "tukos/PageManager", "tukos/expressions",
          "dijit/_editor/plugins/FontChoice", "dijit/_editor/plugins/TextColor", "tukos/widgets/editor/plugins/LinkDialog",  "dojoFixes/dijit/_editor/plugins/FullScreen",
          "dijit/_editor/plugins/Print"/*, "dojoFixes/dijit/_editor/plugins/AlwaysShowToolbar"*/, "dojoFixes/dijit/_editor/plugins/ViewSource",
          "dojox/editor/plugins/StatusBar", "dojox/editor/plugins/FindReplace", 
          "dojoFixes/dojox/editor/plugins/TablePlugins", "tukos/utils", "tukos/hiutils", "tukos/menuUtils", "tukos/widgets/editor/plugins/TukosLinkDialog",
          "tukos/widgets/editor/plugins/TemplateProcess","tukos/widgets/editor/plugins/Inserter","tukos/widgets/editor/plugins/SelectionEditor","tukos/widgets/editor/plugins/FitImage"/*, "dojoFixes/dojox/editor/plugins/ResizeTableColumn"*/, "dojo/domReady!"], 
-    function(declare, array, connect, lang, Deferred, dom, domStyle, mouse, when, Editor, RichText, ShortCutKeys, PageManager, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
+    function(declare, array, connect, lang, Deferred, dom, domStyle, mouse, when, Editor, RichText, ShortCutKeys, PageManager, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
     		 TablePlugins, utils, hiutils, mutils, TukosLinkDialog, TemplateProcess, Inserter, SelectionEditor, FitImage){
-    return declare([Editor, ShortCutKeys], {
+    tukos.expressions = expressions;
+	return declare([Editor, ShortCutKeys], {
 
     	constructor: function(args){
             args.plugins = ['undo', 'redo'/*, 'cut','copy','paste'*/,'|','bold','italic','underline','strikethrough','subscript','superscript','removeFormat','|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent',
-                            'justifyLeft', 'justifyCenter', 'justifyRight','justifyFull', 'insertHorizontalRule'];
+                            'justifyLeft', 'justifyCenter', 'justifyRight','justifyFull', 'insertHorizontalRule'/*, 'EnterKeyHandling'*/];
             args.extraPlugins = args.extraPlugins ||  
                 ['fontName', 'fontSize', 'formatBlock', 'foreColor', 'hiliteColor', 'createLink', 'unlink', 'insertImage', 'fullScreen', {name: 'viewSource', stripScripts: false}, 'TukosLinkDialog'/*, 'ChoiceList', 'TemplateProcess'*/, 
                  /*'alwaysShowToolbar', */'statusBar', 'insertTable', 'modifyTable'/*,   'resizeTableColumn'*/, 'modifyTableSelection', 'Inserter', 'print', 'FindReplace', 'SelectionEditor', 'FitImage'];
@@ -22,38 +23,148 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
                 args.extraPlugins = args.extraPlugins.concat(args.optionalPlugins);
             }
         },
-
         changeStyle: function(property, value){
             this.document.body.style[property] = value;
         },
-
         postCreate: function(){
             this.inherited(arguments);
             this.contentDomPostFilters = [];//jch: don't eliminate empty nodes at end, makes life of the end-user more difficult
             this.watch('value',  lang.hitch(this, function(name, oldValue, newValue){
                 if (hiutils.hasUntranslation(newValue)){
-                    //console.log('watch - has untranslation old: ' + oldValue);
-                    //console.log('newValue: ' + newValue);
                     this.serverValueDeferred = new Deferred();
                     when(hiutils.untranslateParams(newValue, this), lang.hitch(this, function(newValue){
-                        //console.log('watch - untranslatioin completed - newValue: ' + newValue);
                     	this.serverValue = newValue;
                         this.serverValueDeferred.resolve(newValue);
                     }));
                 }else if (hiutils.hasTranslation(newValue)){
-                    //console.log('watch - has translation and no unstranslation: ' + newValue);
                     this.serverValue = newValue;
                     delete this.serverValueDeferred;
                 }else{
-                    //console.log('watch - deleting serverValue for: ' + this.id);
                     delete this.serverValue;
                     delete this.serverValueDeferred;
                 }
             }));
             this.addShortCutKeys();
+    		['bold', 'italic', 'underline', 'strikethrough'].forEach(lang.hitch(this, function(command){
+    			this['_' + command + 'Impl'] = lang.hitch(this, function(){
+          			var selection = this.selection, selectedElement = selection.getSelectedElement(), selectedHtml = selection.getSelectedHtml(), editor = this,
+      					commandStyleAtts = {bold: ['fontWeight', 'bold'], italic: ['fontStyle', 'italic'], underline: ['textDecoration', 'underline'], 'strikethrough': ['textDecoration', 'lineThrough']},
+      					att = commandStyleAtts[command][0], value = commandStyleAtts[command][1];
+	      			if (selectedElement && selectedElement.tagName === 'TD'){
+	      				domStyle.set(selectedElement, att, selectedElement.style[att] === value ? '' : value);
+	      			}else{
+	      				if (!this.prepareModifyTableSelection(function(){
+	      					var selectedTds = this.selectedTds;
+	      					if (selectedTds.length > 1){
+	      						selectedTds.forEach(function(td){
+	      		      				domStyle.set(td, att, td.style[att] === value ? '' : value);
+	      						});
+	      					}else{
+	      						editor.document.execCommand(command, false);
+	      					}
+	      				})){
+	      					editor.document.execCommand(command, false);
+	      				}
+	      			}
+				});
+    		}));
+    	    tukos.onTdClick = lang.hitch(this, function(td){
+    	    	//evt.stopPropagation();
+    	    	if (this.focused){
+    	    		this.selectElement(td);
+    	    	}
+    	    });
+    	    tukos.onTdDblClick = lang.hitch(this, function(td){
+    	    	if (this.focused){
+    	    		this.begEdit();
+    	    		expressions.onClick(td.children[0]);
+    	    	}
+    	    });
+    	    tukos.onExpClick = lang.hitch(this, function(expression){
+    	    	if (this.focused){
+    	    		this.begEdit();
+    	    		expressions.onClick(expression);
+    	    	}
+    	    });
+    	    tukos.onExpBlur = lang.hitch(this, function(expression){
+    	    	expressions.onBlur(expression);
+	    		this.endEdit();
+    	    });
+        },
+		execCommand: function(command, argument){
+			var returnValue, editorFocused;
+			if(this.customUndo && (command == 'undo' || command == 'redo')){
+				return this[command]();
+			}else{
+				if(this.customUndo){
+					this.endEditing();
+					this._beginEditing();
+				}
+				editorFocused = this.focused;
+				//focus() is required for IE to work
+				//In addition, focus() makes sure after the execution of
+				//the command, the editor receives the focus as expected
+				if(this.focused){
+					// put focus back in the iframe, unless focus has somehow been shifted out of the editor completely
+					//this.focus();
+				}
+	
+				command = this._normalizeCommand(command, argument);
+	
+				if(argument !== undefined){
+					if(command === "heading"){
+						throw new Error("unimplemented");
+					}else if(command === "formatblock" && (has("ie") || has("trident"))){
+						// See http://stackoverflow.com/questions/10741831/execcommand-formatblock-headings-in-ie.
+						// Not necessary on Edge though.
+						argument = '<' + argument + '>';
+					}
+				}
+	
+				//Check to see if we have any over-rides for commands, they will be functions on this
+				//widget of the form _commandImpl.  If we don't, fall through to the basic native
+				//exec command of the browser.
+				var implFunc = "_" + command + "Impl";
+				if(this[implFunc]){
+					returnValue = this[implFunc](argument);
+				}else{
+					argument = arguments.length > 1 ? argument : null;
+					if(argument || command !== "createlink"){
+						returnValue = this.document.execCommand(command, false, argument);
+					}
+				}
+	
+				if(editorFocused){
+					// put focus back in the iframe, unless focus has somehow been shifted out of the editor completely
+					this.focus();
+				}
+				this.onDisplayChanged();
+				if(this.customUndo){
+					this._endEditing();
+				}
+				return returnValue;
+			}
+		},
+        begEdit: function(){
+            if(this.customUndo){
+                this.beginEditing();
+            }else{
+                this.valBeforeUndo = this.getValue();                   
+            }
         },
 
-        setValue: function(value){
+        endEdit: function(){
+            if(this.customUndo){
+                this.endEditing();
+            }else{
+                // This code ALMOST works for undo - It seems to only work for one step back in history however
+                var afterUndo = this.getValue();
+                 this.setValue(this.valBeforeUndo);
+                this.replaceValue(afterUndo);
+            }
+            this.onDisplayChanged();
+        },
+		setValue: function(value){
 			if(!this.isLoaded){
 				// try again after the editor is finished loading
 				this.onLoadDeferred.then(lang.hitch(this, function(){
@@ -85,14 +196,14 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
 
         _getValueAttr: function(){
                var value = this.inherited(arguments);
-               return value ? value.replace(/<span><\/span>|colspan="1"|rowspan="1"|id="tdid\d+"/g, '').replace(/[\n\t ]+/g, ' ') : value;
+               //return value ? value.replace(/<span><\/span>|colspan="1"|rowspan="1"|id="tdid\d+_\d+"/g, '').replace(/[\n\t ]+/g, ' ') : value;
+               return value ? value.replace(/<span><\/span>|colspan="1"|rowspan="1"/g, '').replace(/[\n\t ]+/g, ' ') : value;
         },
 
         _getServerValueAttr: function(){
             var deferred = this.serverValueDeferred;
             return (deferred ? (deferred.isResolved() ? this.serverValue : deferred) : this.serverValue);
         },
-        
         startup: function(){
             //var self = this;
         	if (this.style && typeof this.style === 'object'){// richtext only supports string notation
@@ -133,8 +244,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
             }
             RichText.prototype.destroy.apply(this, arguments);
         },
-
-        pasteHtmlAtCaret: function(html, selectPastedContent) {// found here: http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div/6691294#6691294
+		pasteHtmlAtCaret: function(html, selectPastedContent) {// found here: http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div/6691294#6691294
             var sel = dijit.range.getSelection(this.window), range = sel.getRangeAt(0);
             range.deleteContents();
             var el = document.createElement("div");
