@@ -70,7 +70,7 @@ class Authentication{
             $segment->targetDb = $targetDb;
             $segment->status = 'VALID'; 
             $this->session->regenerateId();
-            $dialogue->response->setContent(Tfk::tr('SUCCESSFULAUTHENTICATION'));
+            $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(Tfk::tr('SUCCESSFULAUTHENTICATION')));
         }
     }
 } 

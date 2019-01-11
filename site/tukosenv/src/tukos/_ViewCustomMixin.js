@@ -1,7 +1,7 @@
 define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/on", "dojo/ready", "dijit/registry", "dijit/popup", 
-         "dijit/form/Button", "dijit/form/RadioButton", "dijit/form/TextBox", "dojo/request", "dojo/when", "tukos/utils", "tukos/hiutils", "tukos/TukosTooltipDialog", 
+         "dijit/form/Button", "dijit/form/RadioButton", "dijit/form/TextBox", "dojo/request", "dojo/when", "tukos/utils", "tukos/TukosTooltipDialog", 
          "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, dct, on, ready, registry, popup, Button, RadioButton, TextBox, request, when, utils, hiutils, TukosTooltipDialog, Pmg, messages){
+    function(arrayUtil, declare, lang, dct, on, ready, registry, popup, Button, RadioButton, TextBox, request, when, utils, TukosTooltipDialog, Pmg, messages){
     return declare(null, {
         
         openCustomDialog: function(){

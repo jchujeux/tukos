@@ -62,7 +62,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			console.log('calling onBlurCallback');
 			var htmlContent = this.htmlContent;
 			setTimeout(lang.hitch(this, function(){// to let time for editor html onblur to completre before getting the resulting html, e.g. in expressions.onBlur
-			//ready(lang.hitch(this, function(){// to let time for editor html onblur to completre before getting the resulting html, e.g. in expressions.onBlur
 				if (editor && this.getIndexOfChild(editor) > -1/* && editor.isFullscreen !== true*/){//case where focus not via onClick, e.g. onDrop
 					htmlContent.set('style', {height: this.editorToContentHeight(editor.get('height'))});
 					this.set('serverValue', editor.get('serverValue'));
@@ -73,17 +72,14 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 					this.resize();
 					this.onClickHandle = this.on('click', this.onClickCallback);
 				}
-			//}));
 			}), 100)
 		},
 		
 		_setValueAttr: function(value){
-			//if (value !== this.value){
-				if (this.htmlContent){
-					this.htmlContent.set('value', value);
-				}
-				this._set('value', value);
-			//}
+			if (this.htmlContent){
+				this.htmlContent.set('value', value);
+			}
+			this._set('value', value);
 		},
 		
 		_setStyleAttr: function(value){

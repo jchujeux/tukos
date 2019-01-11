@@ -3,7 +3,6 @@
 namespace TukosLib\Controllers;
 
 use TukosLib\Web\PageView;
-use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Controllers\Dialogue;
 use TukosLib\Utils\Translator;
 use TukosLib\Utils\Feedback;

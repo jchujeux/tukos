@@ -1,50 +1,38 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-style", "dojo/dom-class", "dojo/dom-construct", "dojo/string", "tukos/utils", "tukos/expressions", "tukos/PageManager",
-		 "dojoFixes/dojox/editor/plugins/_EditorTableDialog", "dojo/i18n!dojoFixes/dojox/editor/plugins/nls/TableDialog"], 
-    function(declare, lang, domAttr, domStyle, dcl, dct, string, utils, expressions, Pmg, EditorTableDialog, messages){
+		 "tukos/widgets/editor/plugins/_TagEditDialog"], 
+    function(declare, lang, domAttr, domStyle, dcl, dct, string, utils, expressions, Pmg, TagEditDialog){
 
-    var actions = ['insertBefore', 'insertAfter', 'apply', 'remove', 'close', 'insertRowBefore', 'insertRowAfter', 'deleteRow', 'insertColBefore', 'insertColAfter', 'deleteCol'];
+    var actions = ['insertBefore', 'insertAfter', 'apply', 'close', 'insertRowBefore', 'insertRowAfter', 'deleteRow', 'insertColBefore', 'insertColAfter', 'deleteCol'];
 
-    return declare(EditorTableDialog, {
+    return declare(TagEditDialog, {
        
         dialogAtts: function(){
             var actionsRow = {
                 tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'},
                 contents: {
-                        col1: {tableAtts: {cols: 2,   customClass: 'labelsAndValues', showLabels: false, label: messages.insertLineBreak}, widgets: ['insertBefore', 'insertAfter']},
-                        col2: {tableAtts: {cols: 2,   customClass: 'labelsAndValues', showLabels: false, label: messages.forSelectedAtts, style: {verticalAlign: 'top'}}, widgets: ['apply', 'remove']},
+                        col1: {tableAtts: {cols: 2,   customClass: 'labelsAndValues', showLabels: false, label: Pmg.message('insertLineBreak')}, widgets: ['insertBefore', 'insertAfter']},
+                        col2: {tableAtts: {cols: 2,   customClass: 'labelsAndValues', showLabels: false, label: '', style: {verticalAlign: 'top'}}, widgets: ['apply']},
                         col3: {tableAtts: {cols: 1,   customClass: 'labelsAndValues', showLabels: false, style: {verticalAlign: 'top'}}, widgets: ['close']}
                     }
                 },
                 extraWidgetsDescription = {
-                    rowLabel: {type: 'HtmlContent', atts: {style: {backgroundColor: '#BEBEBE', fontWeight: 700, whiteSpace: 'nowrap'}, value: messages.forCurrentRow}},
-                    colLabel: {type: 'HtmlContent', atts: {style: {backgroundColor: '#BEBEBE', fontWeight: 700, whiteSpace: 'nowrap'}, value: messages.forCurrentCol}},
-            		isWorksheet: {type: 'CheckBox', atts: {title: Pmg.message('is worksheet'), disabled: true}, attValueModule: domAttr},
+                    rowLabel: {type: 'HtmlContent', atts: {style: {backgroundColor: '#BEBEBE', fontWeight: 700, whiteSpace: 'nowrap'}, value: Pmg.message('forCurrentRow')}},
+                    colLabel: {type: 'HtmlContent', atts: {style: {backgroundColor: '#BEBEBE', fontWeight: 700, whiteSpace: 'nowrap'}, value: Pmg.message('forCurrentCol')}},
+            		isWorksheet: {type: 'CheckBox', atts: {title: Pmg.message('is worksheet'), hidden: true, disabled: true}, attValueModule: domAttr},
             		sheetName: {type: 'TextBox', atts: {title: Pmg.message('sheetName'), style: {width: '10em'}, hidden: true, disabled: true}, attValueModule: domAttr},
                 },
                 headerRowLayout = {theRow: {
-                	tableAtts: {cols: 2, customClass: 'labelsAndValues', label: messages.modifyTableTitle, showLabels: false},
+                	tableAtts: {cols: 2, customClass: 'labelsAndValues', label: Pmg.message('modifyTable'), showLabels: false},
                 	contents: {
                 		col1: {tableAtts: {cols: 4, customClass: 'labelsAndValues', showLabels: false}, widgets: ['rowLabel', 'insertRowBefore', 'insertRowAfter', 'deleteRow', 'colLabel', 'insertColBefore', 'insertColAfter', 'deleteCol']},
                 		col2: {tableAtts: {cols: 2, customClass: 'labelsandValues', showLabels: true}, widgets: ['isWorksheet', 'sheetName']}
                 	}
                 }};
-            return this._dialogAtts(extraWidgetsDescription, headerRowLayout, actions, actionsRow, ['verticalAlign']);
-        },
-        
-        onChangeWorksheetCheckBox: function(checked){
-        	this.pane.getWidget('sheetName').set('hidden', !checked);
-        	this.pane.resize();
+            return this._dialogAtts(extraWidgetsDescription, headerRowLayout, actions, actionsRow, this.editableAtts);
         },
         openDialog: function(){
-            var table = this.table, activeAttWidgets = this.activeAttWidgets, pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), paneSetWidgets = lang.hitch(pane, pane.setWidgets);
-            activeAttWidgets.forEach(function(att){
-                var attWidget = paneGetWidget(att), attValue = attWidget.attValueModule.get(table, att);
-                attWidget.set('value', attValue);
-                if (att === 'backgroundColor' || att === 'borderColor'){
-                    domStyle.set(attWidget.iconNode, att, attValue);
-                }
-                 paneGetWidget(att + 'CheckBox').set('checked', utils.empty(attValue) ? false : true);
-            });
+            var table = this.table, pane = this.pane/*, paneGetWidget = lang.hitch(pane, pane.getWidget)*/, paneSetWidgets = lang.hitch(pane, pane.setWidgets);
+            this.inherited(arguments);
             if (dcl.contains(table, 'tukosWorksheet')){
             	var tableInfo = this.tableInfo, disabledRowValue = tableInfo.trIndex === 0 ? true : false, disabledColValue = tableInfo.colIndex === 0 ? true : false;
             	paneSetWidgets({checked: {isWorksheet: true}, value: {sheetName: table.id}, hidden: {sheetName: false}, 
@@ -52,30 +40,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
             }else{
             	paneSetWidgets({checked: {isWorksheet: false}, hidden: {sheetName: true}, disabled: {insertRowBefore: false, insertColBefore: false, deleteRow: false, deleteCol: false}});
             }
+            return true;
         },
-        
-        apply: function(){
-            var table = this.table, activeAttWidgets = this.activeAttWidgets, pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
-            activeAttWidgets.forEach(function(att){
-                if (paneGetWidget(att + 'CheckBox').checked){
-                    var attWidget = paneGetWidget(att);
-                    attWidget.attValueModule.set(table, att, attWidget.get('value'));
-                }
-            });
-        },
-        
-        remove: function(){
-            var table = this.table, activeAttWidgets = this.activeAttWidgets, pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
-            activeAttWidgets.forEach(function(att){
-                var checkBox = paneGetWidget(att + 'CheckBox');
-                if (checkBox.checked){
-                    paneGetWidget(att).attValueModule.remove(table, att);
-                    checkBox.set('checked', false);
-                }
-            });
-        },
-        
-    
        insertBefore: function(){
             dct.place(dct.create("br"), this.table, 'before');
             this.close();
@@ -117,15 +83,12 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
             tableInfo.tds[0].id = '';
             this.editor._tablePluginHandler._prepareTable(table);
         },
-
         insertRowBefore: function(){
             this.insertRow();
         },
-        
         insertRowAfter: function(){
             this.insertRow(true);
         },
-        
         insertCol: function(after){
             var tableInfo = this.tableInfo, colIndex = tableInfo.colIndex + (after ? 1 : 0), cell, table = this.table, isWorksheet = dcl.contains(table, 'tukosWorksheet'),
         	sheetName = table.id, template = expressions.template();
@@ -160,15 +123,12 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
             tableInfo.tds[0].id = '';
             this.editor._tablePluginHandler._prepareTable(table);
         },
-
         insertColBefore: function(){
             this.insertCol();
         },
-
         insertColAfter: function(){
             this.insertCol(true);
         },
-        
         deleteRow: function(){
             var tableInfo = this.tableInfo;
         	if (tableInfo.rows > 1){
@@ -191,7 +151,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 this.editor._tablePluginHandler._prepareTable(table);
             }
         },
-        
         deleteCol: function(){
             var tableInfo = this.tableInfo, cols = tableInfo.cols;
         	if (cols > 1){
@@ -219,6 +178,5 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 this.editor._tablePluginHandler._prepareTable(table);
             }
         }
-
     });
 });

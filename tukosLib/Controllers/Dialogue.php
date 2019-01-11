@@ -56,7 +56,7 @@ class Dialogue extends Translator{
         Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
     	$response = json_encode(array_merge($response, array_filter(['feedback' => Feedback::get(), 'extendedIds' => SUtl::translatedExtendedIdCols()]), ['extras' => Tfk::getExtras()]));
         if ($response){
-            $this->dialogue->response->setContent($response);
+            $this->dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations($response));
         }else{
             Tfk::debug_mode('error', 'AbstractController->responseToDialogue - json_encoding error: ', json_last_error());
         }

@@ -10,9 +10,10 @@ define([
 	"dojo/string", // string.substitute
 	"dijit/_editor/_Plugin",
 	"dijit/form/DropDownButton",
-	"dijit/_editor/range"
+	"dijit/_editor/range",
+	"tukos/PageManager"
 ], function(require, declare, domAttr, keys, lang, on, has, query, string,
-	_Plugin, DropDownButton, rangeapi){
+	_Plugin, DropDownButton, rangeapi, Pmg){
 
 	// module:
 	//		dijit/_editor/plugins/LinkDialog
@@ -77,7 +78,7 @@ define([
 			"<input data-dojo-type='dijit.form.ValidationTextBox' required='true' " +
 				"id='${id}_urlInput' name='urlInput' data-dojo-props='intermediateChanges:true'/>",
 			"</td></tr><tr><td>",
-			"<label for='${id}_textInput'>${text}</label>",
+			"<label for='${id}_textInput'>${description}</label>",
 			"</td><td>",
 			"<input data-dojo-type='dijit.form.ValidationTextBox' required='true' id='${id}_textInput' " +
 				"name='textInput' data-dojo-props='intermediateChanges:true'/>",
@@ -89,8 +90,8 @@ define([
 			"<option value='tukos'>${tukos}</option>",
 			"</select>",
 			"</td></tr><tr><td colspan='2'>",
-			"<button data-dojo-type='dijit.form.Button' type='submit' id='${id}_setButton'>${set}</button>",
-			"<button data-dojo-type='dijit.form.Button' type='button' id='${id}_cancelButton'>${buttonCancel}</button>",
+			"<button data-dojo-type='dijit.form.Button' type='submit' id='${id}_setButton'>${apply}</button>",
+			"<button data-dojo-type='dijit.form.Button' type='button' id='${id}_cancelButton'>${cancel}</button>",
 			"</td></tr></table>"
 		].join(""),
 
@@ -112,16 +113,11 @@ define([
 				"dijit/form/Select", // used by template
 				"dijit/form/ValidationTextBox", // used by template
 				"dojo/i18n!dijit/nls/common",
-				"dojo/i18n!tukos/widgets/editor/plugins/nls/LinkDialog"
-			], lang.hitch(this, function(i18n, TooltipDialog, registry, Button, Select, ValidationTextBox, Common, messages){
-				var _this = this;
+			], lang.hitch(this, function(i18n, TooltipDialog, registry, Button, Select, ValidationTextBox, Common){
+				var _this = this, messages = Pmg.messages(['createLink', 'insertImage', 'url', 'description', 'target', 'apply', 'tukos', 'standard', 'cancel']);
 				this.tag = this.command == 'insertImage' ? 'img' : 'a';
-/*
-				var messages = lang.delegate(i18n.getLocalization("dijit", "common", this.lang),
-					i18n.getLocalization("dijit._editor", LinkDialog, this.lang));
-*/
-                                        var dropDown = (this.dropDown = this.button.dropDown = new TooltipDialog({
-					title: messages[this.command + "Title"],
+                var dropDown = (this.dropDown = this.button.dropDown = new TooltipDialog({
+					title: messages[this.command],
 					ownerDocument: this.editor.ownerDocument,
 					dir: this.editor.dir,
 					execute: lang.hitch(this, "setValue"),
@@ -459,15 +455,15 @@ define([
 			"<input dojoType='dijit.form.ValidationTextBox' regExp='${urlRegExp}' " +
 				"required='true' id='${id}_urlInput' name='urlInput' data-dojo-props='intermediateChanges:true'/>",
 			"</td></tr><tr><td>",
-			"<label for='${id}_textInput'>${text}</label>",
+			"<label for='${id}_textInput'>${description}</label>",
 			"</td><td>",
 			"<input data-dojo-type='dijit.form.ValidationTextBox' required='false' id='${id}_textInput' " +
 				"name='textInput' data-dojo-props='intermediateChanges:true'/>",
 			"</td></tr><tr><td>",
 			"</td><td>",
 			"</td></tr><tr><td colspan='2'>",
-			"<button data-dojo-type='dijit.form.Button' type='submit' id='${id}_setButton'>${set}</button>",
-			"<button data-dojo-type='dijit.form.Button' type='button' id='${id}_cancelButton'>${buttonCancel}</button>",
+			"<button data-dojo-type='dijit.form.Button' type='submit' id='${id}_setButton'>${apply}</button>",
+			"<button data-dojo-type='dijit.form.Button' type='button' id='${id}_cancelButton'>${cancel}</button>",
 			"</td></tr></table>"
 		].join(""),
 

@@ -13,12 +13,13 @@ define([
 	"dijit/_editor/_Plugin",
 	"dijit/_WidgetBase",
 	"tukos/expressions",
-	"tukos/PageManager",
-	"dojo/i18n!dojoFixes/dojox/editor/plugins/nls/TableDialog"
-], function(declare, array, lang, Color, aspect, ready, dct, domAttr, domStyle, dcl, keys, _Plugin, _WidgetBase, expressions, Pmg, messages) {
+	"tukos/PageManager"
+], function(declare, array, lang, Color, aspect, ready, dct, domAttr, domStyle, dcl, keys, _Plugin, _WidgetBase, expressions, Pmg) {
 
     dojo.experimental("dojox.editor.plugins.TablePlugins");
 
+    var tableAtts = ['backgroundColor', 'borderColor', 'textAlign', 'width', 'border', 'cellPadding', 'cellSpacing'],
+    	cellAtts = tableAtts.concat('verticalAlign');
     var TableHandler = declare(_Plugin, {
         // summary:
         //  A global object that handles common tasks for all the plugins. Since there are several plugins that are all calling common methods, it's preferable that they call a centralized location
@@ -51,7 +52,6 @@ define([
     initialize: function(editor){
         // Initialize the global handler upon a plugin's first instance of setEditor
         this.refCount++;
-        editor.customUndo = true;
        if(this.initialized){
          return;
         }else{
@@ -90,18 +90,18 @@ define([
                 // tableData is set for a short amount of time, so that all plugins get the same return without doing the method over
                 return this.tableData;
             }else{
-                var tr, trs, td, tds, tbl, cols, tdIndex, trIndex, o;
+                var tr, trs, td, tds=[], tbl, cols, tdIndex, trIndex, o;
                 td = this.editor.getAncestorElement("td");
                 if(td){ tr = td.parentNode; }
                 tbl = this.editor.getAncestorElement("table");
                 if(tbl){
-                    tds = dojo.query("td", tbl);
+                    trs = Array.apply(null, tbl.children[0].children);
+                    trs.forEach(function(r, i){
+                        tds = tds.concat(Array.apply(null, r.children));
+                    	if(tr==r){trIndex = i;}
+                    });
                     tds.forEach(function(d, i){
                         if(td==d){tdIndex = i;}
-                    });
-                    trs = dojo.query("tr", tbl);
-                    trs.forEach(function(r, i){
-                        if(tr==r){trIndex = i;}
                     });
                     cols = tds.length/trs.length;           
                     o = {
@@ -183,16 +183,16 @@ define([
 	
     _prepareTable: function(tbl){
         // For IE's sake, we are adding IDs to the TDs if none is there We go ahead and use it for other code for convenience
-        var tds = this.editor.query("td", tbl), timeStamp = this.getTimeStamp();
-        //console.log("prep:", tds, tbl);
-        if(!tds[0].id){
-            tds.forEach(function(td, i){
-                //if(!td.id){
-                    td.id = "tdid"+i+'_'+timeStamp;
-                //}
-            }, this);
+        var trs = Array.apply(null, tbl.children[0].children), i = 0, timeStamp = this.getTimeStamp();
+        if (!trs[0].children[0].id){
+            trs.forEach(function(r){
+                var tds = Array.apply(null, r.children);
+                tds.forEach(function(td){
+                	td.id = "tdid"+i+'_'+timeStamp;
+                	i++;
+                });
+            });
         }
-        return tds;
     },
 	
     getTimeStamp: function(){
@@ -239,7 +239,7 @@ define([
             this.cnKeyDn = dojo.connect(node, "onkeydown", this, "onKeyDown");
             this.cnKeyUp = dojo.connect(node, "onkeyup", this, "onKeyUp");
             this._myListeners.push(dojo.connect(node, "onkeypress", this, "onKeyUp"));
-            this._prepareTable();
+            this._prepareTable(this.editor.getAncestorElement('table'));
         }
     },
 	
@@ -305,7 +305,7 @@ define([
 		  				this.editor.begEdit();
 		  				expressions.onClick(node);
 		  			}	
-		  			console.log('TablePlusIns: - key: ' + key);
+		  			//console.log('TablePlusIns: - key: ' + key);
 	  			}
         }
     },
@@ -321,7 +321,7 @@ define([
 				if (newRow){
 					editor.selectElement(newRow.children[right ? 0 : newRow.children.length - 1]);
 				}else{
-					Pmg.addFeedback(Pmg.message(right ? 'end of table' : 'beginning of table'), '', true);
+					Pmg.addFeedback(Pmg.message(right ? 'endoftable' : 'beginningoftable'), '', true);
 				}
 			}else{
 				editor.selectElement(nextSelected);
@@ -415,7 +415,7 @@ var TablePlugins = declare("dojox.editor.plugins.TablePlugins", _Plugin, {
         
         onDisplayChanged: function(withinTable){
             // subscribed to from the global object's publish method
-                        if(!this.alwaysAvailable){
+            if(!this.alwaysAvailable){
                 this.available = withinTable;
                 this.button.set('disabled', !this.available);
             }
@@ -423,7 +423,6 @@ var TablePlugins = declare("dojox.editor.plugins.TablePlugins", _Plugin, {
         
         setEditor: function(editor){
             this.editor = editor;
-            this.editor.customUndo = true;
             this.inherited(arguments);
             this._availableTopic = dojo.subscribe(this.editor.id + "_tablePlugins", this, "onDisplayChanged");
             this.onEditorLoaded();
@@ -447,7 +446,7 @@ var TablePlugins = declare("dojox.editor.plugins.TablePlugins", _Plugin, {
         
         _initButton: function(){
             this.command = this.name;
-            this.label = this.editor.commands[this.command] = messages[this.command + "Title"];//this._makeTitle(this.command);
+            this.label = this.editor.commands[this.command] = Pmg.message(this.command);
             this.inherited(arguments);
             delete this.command;
             this.onDisplayChanged(false);
@@ -457,18 +456,20 @@ var TablePlugins = declare("dojox.editor.plugins.TablePlugins", _Plugin, {
             return this.editor._tablePluginHandler.getTableInfo(forceNewData);
         },
         prepareTable: function(){
-            if (this.getTableInfo){
-                this.tableInfo = this.getTableInfo(true);
-                this.table = this.tableInfo.tbl;
-                if (this.pane){
-                	this.pane.table = this.table;
-                }
+            this.tableInfo = this.getTableInfo(true);
+            this.table = this.tableInfo.tbl;
+            if (this.pane){
+            	this.pane.table = this.table;
             }
             if (this.getSelectedCells){
                 this.selectedTds = this.getSelectedCells();
             }
         },
-        getSelectedCells: function(){
+        onChangeWorksheetCheckBox: function(checked){
+        	this.pane.getWidget('sheetName').set('hidden', !checked);
+        	this.pane.resize();
+        },
+       getSelectedCells: function(){
             var cells = [];
             var tbl = this.getTableInfo().tbl;
             this.editor._tablePluginHandler._prepareTable(tbl);
@@ -557,7 +558,7 @@ var TablePlugins = declare("dojox.editor.plugins.TablePlugins", _Plugin, {
 	            	}
 	        	}
 	    	}else{
-	    		Pmg.addFeedback(Pmg.message('no cells selected'), '', true);
+	    		Pmg.addFeedback(Pmg.message('nocellselected'), '', true);
 	    	}
 	    },
         updateState: function(){
@@ -583,10 +584,10 @@ var InsertTable = declare("dojox.editor.plugins.InsertTable", TablePlugins, {
         alwaysAvailable: true,
         _initButton: function(){
             this.inherited(arguments);
-            var editor = this.editor;
+            var editor = this.editor, onChangeWorksheetCheckBox = this.onChangeWorksheetCheckBox;
             this.button.loadDropDown = function(callback){
-                require(["dojoFixes/dojox/editor/plugins/_EditorInsertTableDialog"], lang.hitch(this, function(InsertTableDialog){
-                    var dropDown = (this.dropDown = new InsertTableDialog({editor: editor}));
+                require(["tukos/widgets/editor/plugins/_EditorInsertTableDialog"], lang.hitch(this, function(InsertTableDialog){
+                    var dropDown = (this.dropDown = new InsertTableDialog({editor: editor, button: this,isInsert: true, onChangeWorksheetCheckBox: onChangeWorksheetCheckBox, editableAtts: tableAtts}));
                     ready(function(){
                         dropDown.startup();
                         callback();
@@ -598,11 +599,10 @@ var InsertTable = declare("dojox.editor.plugins.InsertTable", TablePlugins, {
 var ModifyTable = declare("dojox.editor.plugins.ModifyTable", TablePlugins, {
         _initButton: function(){
             this.inherited(arguments);
-            var editor = this.editor, getTableInfo = this.getTableInfo, prepareTable = this.prepareTable;
+            var editor = this.editor, getTableInfo = this.getTableInfo, prepareTable = this.prepareTable, onChangeWorksheetCheckBox = this.onChangeWorksheetCheckBox;
             this.button.loadDropDown = function(callback){
-                require(["dojoFixes/dojox/editor/plugins/_EditorModifyTableDialog"], lang.hitch(this, function(ModifyTableDialog){
-                    var dropDown = this.dropDown = new ModifyTableDialog({editor: editor, getTableInfo: getTableInfo, prepareTable: prepareTable});
-                    //dropDown = lang.mixin(dropDown, {editor: editor, getTableInfo: getTableInfo, prepareTable: prepareTable}); 
+                require(["tukos/widgets/editor/plugins/_EditorModifyTableDialog"], lang.hitch(this, function(ModifyTableDialog){
+                    var dropDown = this.dropDown = new ModifyTableDialog({editor: editor, button: this, getTableInfo: getTableInfo, prepareTable: prepareTable, editableAtts: tableAtts});
                     ready(function(){
                         dropDown.startup();
                         callback();
@@ -616,15 +616,13 @@ var ModifyTableSelection = declare("dojox.editor.plugins.ModifyTableSelection", 
 
         _initButton: function(){
             this.inherited(arguments);
-            //var editor = this.editor, getTableInfo = lang.hitch(this, this.getTableInfo), getSelectedCells = lang.hitch(this, this.getSelectedCells), prepareTable = lang.hitch(this, this.prepareTable),
-        	//copySelected = lang.hitch(this, this.copySelected), emptySelected = lang.hitch(this, this.emptySelected), pasteAtSelected = lang.hitch(this, this.pasteAtSelected);
-            var editor = this.editor, getTableInfo = this.getTableInfo, getSelectedCells = this.getSelectedCells, prepareTable = this.prepareTable,
+            var editor = this.editor, getTableInfo = this.getTableInfo, getSelectedCells = this.getSelectedCells, prepareTable = this.prepareTable, onChangeWorksheetCheckBox = this.onChangeWorksheetCheckBox
         		copySelected = this.copySelected, emptySelected = this.emptySelected, pasteAtSelected = this.pasteAtSelected;
             this.button.loadDropDown = function(callback){
-                require(["dojoFixes/dojox/editor/plugins/_EditorModifyTableSelectionDialog"], lang.hitch(this, function(ModifyTableSelectionDialog){
-                    var dropDown = this.dropDown = new ModifyTableSelectionDialog({copySelected: copySelected, emptySelected: emptySelected, pasteAtSelected: pasteAtSelected});
+                require(["tukos/widgets/editor/plugins/_EditorModifyTableSelectionDialog"], lang.hitch(this, function(ModifyTableSelectionDialog){
+                    var dropDown = this.dropDown = new ModifyTableSelectionDialog({editor: editor, button: this, copySelected: copySelected, emptySelected: emptySelected, pasteAtSelected: pasteAtSelected, editableAtts: cellAtts});
                     dropDown = lang.mixin(dropDown, {
-                    	editor: editor, getTableInfo: getTableInfo, getSelectedCells: getSelectedCells, prepareTable: prepareTable}); 
+                    	getTableInfo: getTableInfo, getSelectedCells: getSelectedCells, prepareTable: prepareTable}); 
                     ready(function(){
                         dropDown.startup();
                         callback();

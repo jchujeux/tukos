@@ -5,7 +5,6 @@
         <title>Testing tukos forms</title>
  
         <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dijit/themes/claro/claro.css" media="screen">
-        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojox/image/resources/Lightbox.css" media="screen">
 
     </head>
     <body class="claro">
@@ -21,10 +20,49 @@
 </p>
 <blockquote>
   We start with a simple input element:
-  <textarea style="height: 18px;">
-  </textarea>
-  and a clickable checkbox:&nbsp; <span class="clickablecheckbox" contenteditable="false" onclick="this.innerHTML = (this.innerHTML == '☐' ? '☑' : '☐')" style="cursor: pointer;">☑</span>
+  <textarea id="f_myTextArea" class="tukosFormElement" placeholder="enter your input here" style="height: 18px;"></textarea>
+  and a clickable checkbox:&nbsp; <span class="clickablecheckbox" contenteditable="false" onclick="this.innerHTML = (this.innerHTML == '☐' ? '☑' : '☐')" style="cursor: pointer;">☑</span> and an input box: <input placeholder="enter your input"></input>
   <br> 
+  A dijit Textara now:
+  <textarea id="textarea2" name="textarea2" data-dojo-type="dijit/form/Textarea" placeholder="enter the data" style="width:200px;">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</textarea>
+<br>
+  <textarea class="tukosContainer tukosWidget" data-dojo-type="dijit/form/SimpleTextarea" data-dojo-props="placeholder:'enter data here';" data-widgetid="MyTextarea" id="MyTextarea" title="Il faut dire que dans la vie faut pas s'en faire moi je n'men fais pas" style="height: 50em; width: 80%;"></textarea><p>
+Then a dijit slider widget:
+<div class="tukosContainer" style="width: 400px;background-color: transparent;" title="Il fait beau aujour'dhui">
+	<input data-widgetid="w_mySlider" class="tukosWidget" type="range" value="3" data-dojo-type="dijit/form/HorizontalSlider" data-dojo-props="minimum: 0, maximum: 5, showButtons: false, discreteValues: 6"></input>
+	<div data-dojo-type="dijit/form/HorizontalRule" data-dojo-props="container: 'bottomDecoration',	count: 6" style="height: 5px; margin: 0 12px;"></div>
+	<ol data-dojo-type="dijit/form/HorizontalRuleLabels" data-dojo-props="container: 'bottomDecoration'" style="height: 2em; margin: 0 12px; font-weight: bold;color: inherit;">
+		<li>0</li><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li>
+	</ol>
+</div>
+<p>
+<div class="tukosContainer tukosWidget" data-dojo-type="dijit/InlineEditBox" style="width: 400px;border:1px solid;border-color:#b5bcc7;" width="400px" data-dojo-props="editor:'dijit/Editor', renderAsHtml:true, autoSave:false, editorParams:{value: 'hello', height: '', extraPlugins: ['dijit._editor.plugins.AlwaysShowToolbar']}"></div>
+<p>
+<div data-dojo-type="dijit/Editor" style="width: 400px;"></div>
+<p>
+
+<p>
+<input type="text" name="firstname" value="testing testing"
+    data-dojo-type="dijit/form/TextBox"
+    data-dojo-props="trim:true, propercase:true" id="firstname" />
+<p>
+Now, radio buttons: 
+<table class="tukosContainer tukosWidget" data-dojo-type="tukos/widgets/RadioButtons" id="drink" style="width: 70%;text-align: center; background-color: green; color: blue">
+	<tr><td>Coffee</td><td>Whiskey</td></tr>
+	<tr><td><input type="radio" data-dojo-type="dijit/form/RadioButton" name="drink" value="coffee"/></td><td><input type="radio" data-dojo-type="dijit/form/RadioButton" name="drink" value="whisky"/></td></tr>
+</table>
+<table class="tukosContainer tukosWidget" data-dojo-type="tukos/widgets/RadioButtons" id="drink1" style="width: 200px;text-align: center">
+	<tr><td>Coffee</td><td><input type="radio" data-dojo-type="dijit/form/RadioButton" name="drink" value="coffee"/></td><td>Whiskey</td><td><input type="radio" data-dojo-type="dijit/form/RadioButton" name="drink" value="whisky"/></td></tr>
+</table>
+<table class="tukosContainer tukosWidget" data-dojo-type="tukos/widgets/RadioButtons" id="drink2" style="width: 200px;text-align: center">
+	<tr><td>Coffee</td><td><input type="radio" data-dojo-type="dijit/form/RadioButton" name="drink" value="coffee"/></td></tr><tr><td>Whiskey</td><td><input type="radio" data-dojo-type="dijit/form/RadioButton" name="drink" value="whisky"/></td></tr>
+</table>
+<p>
+ <div style="text-align: center;"><table class="tukosContainer tukosWidget" id="MyRadioButtons" data-widgetid="MyRadioButtons" data-widget-type="RadioButtons" data-params='{"type":"RadioButtons","name":"MyRadioButtons","numCols":"3","orientation":"vert","values":"thé,café,vin,whisky"}'style="width: 100%; background-color: transparent; color: inherited;" data-dojo-type="tukos/widgets/RadioButtons"><tbody><tr><td style="width:33.333333333333336%;"><table style="margin:auto;"><tbody><tr><td>thé</td></tr><tr><td><input type="radio" data-dojo-type="dijit/form/RadioButton" name="MyRadioButtons" value="thé"/></td></tr></tbody></table></td><td style="width:33.333333333333336%;"><table><tbody><tr><td>café</td></tr><tr><td><input type="radio" data-dojo-type="dijit/form/RadioButton" name="MyRadioButtons" value="café"/></td></tr></tbody></table></td><td style="width:33.333333333333336%;"><table><tbody><tr><td>vin</td></tr><tr><td><input type="radio" data-dojo-type="dijit/form/RadioButton" name="MyRadioButtons" value="vin"/></td></tr></tbody></table></td></tr><tr><td style="width:33.333333333333336%;"><table><tbody><tr><td>whisky</td></tr><tr><td><input type="radio" data-dojo-type="dijit/form/RadioButton" name="MyRadioButtons" value="whisky"/></td></tr></tbody></table></td></tr></tbody></table></div>
+ <p>
+And now the save and load buttons: <p>
+<button id='saveTukosForm' data-dojo-type="dijit/form/Button" type="button" data-dojo-props="onClick: saveForm">Save</button>
+<input multiple="false" type="file" data-dojo-type="dojox/form/Uploader" label="Reload" data-dojo-props="uploadOnSelect: false, url:'dummy', onChange: loadForm"/>
   <br>
 </blockquote>
 <b>Closing Considerations</b>:
@@ -32,6 +70,7 @@
 <blockquote>
   &lt;Enter your text here&gt;
 </blockquote>
+
 <p>
 Source: cet excellent <a href="http://www.velomath.fr/velo_equation.htm" onclick="parent.tukos.Pmg.gotoExternalUrl('http://www.velomath.fr/velo_equation.htm')" style="color:blue; cursor:pointer; text-decoration:underline;" target="_blank">article </a>qui &quot;met le vélo en équations&quot;:
 <br>
@@ -90,7 +129,7 @@ Quelques indications sur les ordres de grandeur et facteurs importants (glanés 
           <span style="display: inline;">Paramètres </span>
         </div>
         </td><td id="tdid13_1542197008999" onclick="parent.tukos.onTdClick(this);" ondblclick="parent.tukos.onTdDblClick(this);" style="font-weight: bold; text-align: center;">
-        <div class="tukosExpression" id="e_simulations!C1" onclick="parent.tukos.onExpClick(this);" style="display: inline;" title="simulations!C1">
+        <div class="tukosExpression" id="e_simulations!B1" onclick="parent.tukos.onExpClick(this);" style="display: inline;" title="simulations!C1">
           <textarea onblur="parent.tukos.onExpBlur(this);" onclick="event.stopPropagation();" style="display: none; height: 18px;">
           </textarea>
           <span style="display: inline;">Référence</span>
@@ -870,8 +909,8 @@ Quelques indications sur les ordres de grandeur et facteurs importants (glanés 
         </script>
         <script src="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojo/dojo.js"></script>
 		<script>
-		    require(['tukos/expressions', 'tukos/PageManager'], function (expressions, Pmg) {
-				tukos = {Pmg: Pmg};
+		    require(['tukos/expressions', 'tukos/tukosForms', 'tukos/PageManager', 'dojo/parser', 'dijit/Editor', 'dijit/_editor/plugins/AlwaysShowToolbar'], function (expressions, tukosForms, Pmg, parser) {
+						tukos = {Pmg: Pmg};
 	    	    tukos.onTdClick = function(td){
 	    	    	expressions.onClick(td.children[0]);
 	    	    };
@@ -884,6 +923,14 @@ Quelques indications sur les ordres de grandeur et facteurs importants (glanés 
 	    	    tukos.onExpBlur = function(expression){
 	    	    	expressions.onBlur(expression);
 	    	    };
+	    	    parser.parse();
+	    	    console.log('done loading the page');
+	    	    saveForm = function(evt){
+		       	  tukosForms.saveForm('testtukosforms.json');		   			   		
+		    	  }
+	    	    loadForm = function(evt){
+		       	  tukosForms.loadForm(this._files[0]);		   			   		
+		    	  }
 	    	});
 		</script>
 

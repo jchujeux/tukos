@@ -7,8 +7,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/re
             this.widgetsName = [];
             this.changedWidgets = {};
             this.userChangedWidgets = {};
-
-            if (this.layout && !this.lazyLoading){
+            if (this.layout){
             	this.loadPane();
             }
 
@@ -18,6 +17,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/re
         		this._started = false;
         		this.loadPane();
         		this.startup();
+        		Pmg.setFeedback('JC: in TukosPane, onShow and was not loaded!');
             }
         },
         
@@ -38,8 +38,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/re
                     }
                 }
             }));
-            this.isLoaded = true;
-        	
+            this.isLoaded = true;     	
         }
     }); 
 });

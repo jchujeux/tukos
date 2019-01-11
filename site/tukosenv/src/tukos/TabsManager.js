@@ -58,12 +58,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready",  "do
 
         request: function(urlArgs){
             var self = this, tukosHeaderLoading = dom.byId('tukosHeaderLoading');            
-            //Pmg.setFeedback(messages.actionDoing);
     		tukosHeaderLoading.innerHTML = Pmg.loading('', true);
             return Pmg.serverDialog(urlArgs, {}, false).then(
                 function(response){
                     var theNewTab = self.create(response);
-                    //Pmg.appendFeedback(messages.actionDone);
                     if (response.focusOnOpen){
                         ready(function(){
                             self.container.selectChild(theNewTab);

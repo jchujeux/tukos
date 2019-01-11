@@ -1,33 +1,35 @@
 /*
  *  loads plugins required by tukos & a few enhancements
  */
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/dom", "dojo/dom-style", "dojo/mouse", "dojo/when", "dijit/Editor",  "dijit/_editor/RichText",
+define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/has", "dojo/dom", "dojo/dom-style", "dojo/mouse", "dojo/when", "dijit/Editor",  "dijit/_editor/RichText",
          "tukos/widgets/editor/ShortCutKeys", "tukos/PageManager", "tukos/expressions",
          "dijit/_editor/plugins/FontChoice", "dijit/_editor/plugins/TextColor", "tukos/widgets/editor/plugins/LinkDialog",  "dojoFixes/dijit/_editor/plugins/FullScreen",
-         "dijit/_editor/plugins/Print"/*, "dojoFixes/dijit/_editor/plugins/AlwaysShowToolbar"*/, "dojoFixes/dijit/_editor/plugins/ViewSource",
+         "dijit/_editor/plugins/Print", "dojoFixes/dijit/_editor/plugins/ViewSource",
          "dojox/editor/plugins/StatusBar", "dojox/editor/plugins/FindReplace", 
-         "dojoFixes/dojox/editor/plugins/TablePlugins", "tukos/utils", "tukos/hiutils", "tukos/menuUtils", "tukos/widgets/editor/plugins/TukosLinkDialog",
-         "tukos/widgets/editor/plugins/TemplateProcess","tukos/widgets/editor/plugins/Inserter","tukos/widgets/editor/plugins/SelectionEditor","tukos/widgets/editor/plugins/FitImage"/*, "dojoFixes/dojox/editor/plugins/ResizeTableColumn"*/, "dojo/domReady!"], 
-    function(declare, array, connect, lang, Deferred, dom, domStyle, mouse, when, Editor, RichText, ShortCutKeys, PageManager, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
-    		 TablePlugins, utils, hiutils, mutils, TukosLinkDialog, TemplateProcess, Inserter, SelectionEditor, FitImage){
-    tukos.expressions = expressions;
+         "tukos/widgets/editor/plugins/TablePlugins", "tukos/utils", "tukos/hiutils", "tukos/menuUtils", "tukos/widgets/editor/plugins/TukosLinkDialog",
+         "tukos/widgets/editor/plugins/TemplateProcess","tukos/widgets/editor/plugins/Inserter","tukos/widgets/editor/plugins/SelectionEditor","tukos/widgets/editor/plugins/FitImage",
+         "tukos/StoreComboBox", "dojo/domReady!"], 
+    function(declare, array, connect, lang, Deferred, has, dom, domStyle, mouse, when, Editor, RichText, ShortCutKeys, PageManager, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
+    		 TablePlugins, utils, hiutils, mutils, TukosLinkDialog, TemplateProcess, Inserter, SelectionEditor, FitImage, StoreComboBox){
 	return declare([Editor, ShortCutKeys], {
 
     	constructor: function(args){
-            args.plugins = ['undo', 'redo'/*, 'cut','copy','paste'*/,'|','bold','italic','underline','strikethrough','subscript','superscript','removeFormat','|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent',
+            args.plugins = ['undo', 'redo','|','bold','italic','underline','strikethrough','subscript','superscript','removeFormat','|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent',
                             'justifyLeft', 'justifyCenter', 'justifyRight','justifyFull', 'insertHorizontalRule'/*, 'EnterKeyHandling'*/];
             args.extraPlugins = args.extraPlugins ||  
                 ['fontName', 'fontSize', 'formatBlock', 'foreColor', 'hiliteColor', 'createLink', 'unlink', 'insertImage', 'fullScreen', {name: 'viewSource', stripScripts: false}, 'TukosLinkDialog'/*, 'ChoiceList', 'TemplateProcess'*/, 
-                 /*'alwaysShowToolbar', */'statusBar', 'insertTable', 'modifyTable'/*,   'resizeTableColumn'*/, 'modifyTableSelection', 'Inserter', 'print', 'FindReplace', 'SelectionEditor', 'FitImage'];
+                 'statusBar', 'insertTable', 'modifyTable', 'modifyTableSelection', 'Inserter', 'print', 'FindReplace', 'SelectionEditor', 'FitImage'];
             if (args.optionalPlugins){
                 args.extraPlugins = args.extraPlugins.concat(args.optionalPlugins);
             }
+            args.styleSheets = require.toUrl('dijit/themes/claro/claro.css');
         },
         changeStyle: function(property, value){
             this.document.body.style[property] = value;
         },
         postCreate: function(){
             this.inherited(arguments);
+            this.customUndo = true;
             this.contentDomPostFilters = [];//jch: don't eliminate empty nodes at end, makes life of the end-user more difficult
             this.watch('value',  lang.hitch(this, function(name, oldValue, newValue){
                 if (hiutils.hasUntranslation(newValue)){
@@ -68,6 +70,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
 	      			}
 				});
     		}));
+    	    tukos.expressions = expressions;
     	    tukos.onTdClick = lang.hitch(this, function(td){
     	    	//evt.stopPropagation();
     	    	if (this.focused){
@@ -93,13 +96,11 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
         },
 		execCommand: function(command, argument){
 			var returnValue, editorFocused;
-			if(this.customUndo && (command == 'undo' || command == 'redo')){
+			if(command == 'undo' || command == 'redo'){
 				return this[command]();
 			}else{
-				if(this.customUndo){
-					this.endEditing();
-					this._beginEditing();
-				}
+				this.endEditing();
+				this._beginEditing();
 				editorFocused = this.focused;
 				//focus() is required for IE to work
 				//In addition, focus() makes sure after the execution of
@@ -139,29 +140,16 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
 					this.focus();
 				}
 				this.onDisplayChanged();
-				if(this.customUndo){
-					this._endEditing();
-				}
+				this._endEditing();
 				return returnValue;
 			}
 		},
         begEdit: function(){
-            if(this.customUndo){
-                this.beginEditing();
-            }else{
-                this.valBeforeUndo = this.getValue();                   
-            }
+            this.beginEditing();
         },
 
         endEdit: function(){
-            if(this.customUndo){
-                this.endEditing();
-            }else{
-                // This code ALMOST works for undo - It seems to only work for one step back in history however
-                var afterUndo = this.getValue();
-                 this.setValue(this.valBeforeUndo);
-                this.replaceValue(afterUndo);
-            }
+            this.endEditing();
             this.onDisplayChanged();
         },
 		setValue: function(value){
@@ -172,32 +160,25 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
 				}));
 				return;
 			}
-            //console.log('setValue - id: ' + this.id + ' value: ' + value); //console.log('setValue - serverValue: ' + this.serverValue);
             if (hiutils.hasTranslation(value)){
                 this.serverValue = value;
                 var _arguments = arguments;
-                //console.log('setValue - has translations');
                 when(hiutils.translateParams(value, this), lang.hitch(this, function(newValue){
                     value = newValue;
-                    //console.log('setValue: before inherited - value: ' + value);
                     this.inherited(_arguments);
-                    //console.log('setValue l 57:editor setter was called for ' + this.id);
                 }));
             }else{
                 if (!hiutils.hasUntranslation(value)){
-                    //console.log('setValue l 60 - deleting serverValue for: ' + this.id);
                     delete this.serverValue;
                     delete this.serverValueDeferred;
                 }
                 this.inherited(arguments);
             }
-            //console.log('leaving setValue - ' + value);
         },
 
         _getValueAttr: function(){
-               var value = this.inherited(arguments);
-               //return value ? value.replace(/<span><\/span>|colspan="1"|rowspan="1"|id="tdid\d+_\d+"/g, '').replace(/[\n\t ]+/g, ' ') : value;
-               return value ? value.replace(/<span><\/span>|colspan="1"|rowspan="1"/g, '').replace(/[\n\t ]+/g, ' ') : value;
+               var value = this.inherited(arguments), forceSpace = this.isInViewSource && this.isInViewSource() ? '' : '&nbsp;';
+               return value ? forceSpace + value.replace(/<span><\/span>|colspan="1"|rowspan="1"/g, '').replace(/[\n\t ]+/g, ' ').trim() + forceSpace : value;
         },
 
         _getServerValueAttr: function(){
@@ -205,7 +186,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
             return (deferred ? (deferred.isResolved() ? this.serverValue : deferred) : this.serverValue);
         },
         startup: function(){
-            //var self = this;
         	if (this.style && typeof this.style === 'object'){// richtext only supports string notation
                 var style = this.style, changeStyle = lang.hitch(this, this.changeStyle);
                 delete this.style;
@@ -226,7 +206,12 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
             this.statusBar.resizeHandle.on ('resize', lang.hitch(this, function(evt){
                 var newHeight = this.height = domStyle.get(this.editingArea, 'height') + "px";
             	lang.setObject((this.itemCustomization || 'customization') + '.widgetsDescription.' + this.widgetName + '.atts.height', newHeight, this.pane);
-                //this.layoutHandle.resize();
+            }));
+        },
+        onLoad: function(html){
+        	this.inherited(arguments);
+            this.onLoadDeferred.then(lang.hitch(this, function(){
+            	this.editNode.className = 'claro';
             }));
         },
 

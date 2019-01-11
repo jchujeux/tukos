@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/hiutils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, hiutils, Pmg, messages) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
+function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, Pmg, messages) {
     var templateType = 'colorContent', templateClass = templateType + 'Template', instanceClass = templateType + 'Instance', templateIdPrefix = templateType + '_',
 		inserterCell = '<div class="' + instanceClass + '" style="display: inline;"><textarea onblur="${textAreaBlurAction}" style="display: inline; height: 20px">${placeHolder}</textarea><span ondblclick="${spanClickAction}" style="display: none;"></span></div> ',
 		spanClickAction = "var inserter=this; while((inserter=inserter.parentNode) && inserter.className!='" + instanceClass + "');var textArea=inserter.children[0];" +

@@ -1,6 +1,6 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on", "dojo/mouse", "tukos/TukosTab",  "dijit/registry", "dijit/Dialog", "dijit/Menu", "dijit/MenuItem", 
-         "dijit/PopupMenuItem", "tukos/utils", "tukos/PageManager", "tukos/_ViewCustomMixin", "dojo/json", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, ready, on, mouse, TukosTab, registry, Dialog, Menu, MenuItem, PopupMenuItem, utils, Pmg, _ViewCustomMixin, JSON, messages ){
+         "tukos/utils", "tukos/PageManager", "tukos/_ViewCustomMixin", "dojo/json", "dojo/i18n!tukos/nls/messages"], 
+    function(declare, lang, ready, on, mouse, TukosTab, registry, Dialog, Menu, MenuItem, utils, Pmg, _ViewCustomMixin, JSON, messages ){
     return declare([ _ViewCustomMixin], {
 
     	constructor: function(args){
@@ -21,8 +21,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on", "doj
 
         refresh: function(action, data, keepOptions, currentPane){
             var currentPane = currentPane || this.currentPane(), theForm = currentPane.form, theFormContent = currentPane.formContent, changesToRestore = (keepOptions ? theForm.keepChanges(keepOptions) : {});
-    		var title = currentPane.get('title');
-            currentPane.set('title', Pmg.loading(title, true));
             var refreshAction = function(){
                 var query = {};
                 if (!theForm){
@@ -43,21 +41,17 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on", "doj
 	                }
                 }
                 if (theFormContent.viewMode === 'overview' && currentPane.isAccordion()){
-                	query.title = title;
+                	query.title = currentPane.get('title');
                 }
-            	return Pmg.serverDialog({object: theFormContent.object, view: theFormContent.viewMode, mode: theFormContent.paneMode, action: action, query: query}, {data: data}, false).then(
+            	return Pmg.serverDialog({object: theFormContent.object, view: theFormContent.viewMode, mode: theFormContent.paneMode, action: action, query: query}, {data: data}, {widget: currentPane, att: 'title', defaultFeedback: false}).then(
                     function(response){
                         currentPane.refresh(response.formContent);
                         ready(function(){
                             (currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);
                             Pmg.setFeedback(response['feedback'], messages.tabRefreshed);
                             currentPane.resize();
-                            currentPane.set('title', response.title || title);
                         });
                         return response;
-                    },
-                    function(error){
-                    	currentPane.set('title', title);
                     }
                 );
             }

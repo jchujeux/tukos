@@ -28,7 +28,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/mouse",  "dij
                                         self.dialogDescription.paneDescription.form = self.form;
                                         self.dialogDescription.paneDescription.tabContextId = lang.hitch(self.form, self.form.tabContextId);
                                         self.tooltipDialog = new TukosTooltipDialog(self.dialogDescription);
-                                        //on(self.tooltipDialog, 'blur', self.tooltipDialog.close);
                                         self.tooltipDialog.open({around: self.domNode});
                                     });
                                 }

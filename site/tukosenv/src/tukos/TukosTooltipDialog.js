@@ -5,9 +5,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/TooltipDia
             var self = this;
             this.pane = new TukosPane(this.paneDescription);
             this.pane.scrollOnFocus = false;
-            this.pane.close = this.close = function(){
-                popup.close(self)
-            };
+            this.pane.close = lang.hitch(this, this.close);
             this.set('content', this.pane);
         },
          open: function(kwArgs){
@@ -17,6 +15,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/TooltipDia
                 focus.focus(this.domNode);
                 return this.pane.openAction(this.paneDescription.onOpenAction);
             }));
+        },
+        close: function(){
+        	popup.close(this);
         }
     });
 });

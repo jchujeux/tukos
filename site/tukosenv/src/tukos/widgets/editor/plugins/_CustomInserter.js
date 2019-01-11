@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/hiutils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, hiutils, Pmg, messages) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
+function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, Pmg, messages) {
     var inserterCell = '<div class="inserterCell" style="display: inline;"><textarea onblur="${textAreaBlurAction}" style="display: inline; height: 20px">${placeHolder}</textarea><span ondblclick="${spanClickAction}" style="display: none;"></span></div> ',
     spanClickAction = "var inserter=this; while((inserter=inserter.parentNode) && inserter.className!='inserterCell');var textArea=inserter.children[0];" +
     				  "this.style.display='none'; textArea.style.display='inline';textArea.focus();textArea.value=this.innerHTML",
@@ -83,14 +83,14 @@ function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, hiuti
 	    cirInsert: function(){
 	    	var inserter = this.widgetsToInserter(), colorSetter = this.cirColorSetter(inserter), selectedElement = this.editor.selection.getSelectedElement();
 	    	if (selectedElement){
-	    		placeHolder = hiutils.trimExt(selectedElement.innerHTML || selectedElement.textContent) || inserter.placeHolder || messages.entervalue;
+	    		placeHolder = utils.trimExt(selectedElement.innerHTML || selectedElement.textContent) || inserter.placeHolder || messages.entervalue;
 	    	}else{
-    			var selectedHtml = hiutils.trimExt(this.editor.selection.getSelectedHtml());
+    			var selectedHtml = utils.trimExt(this.editor.selection.getSelectedHtml());
 	    		if (selectedHtml){
 	    			placeHolder = selectedHtml;
 	    		}else{
 	    			var parent = this.editor.selection.getParentElement();
-	    			placeHolder = hiutils.trimExt(parent.innerHTML) || inserter.placeHolder || messages.entervalue;
+	    			placeHolder = utils.trimExt(parent.innerHTML) || inserter.placeHolder || messages.entervalue;
 	    			parent.innerHTML = '';
 	    		}
     		}

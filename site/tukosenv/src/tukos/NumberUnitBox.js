@@ -34,7 +34,7 @@ function(declare, lang, domstyle, Widget, _FocusMixin, NumberTextBox, StoreSelec
         _setValueAttr: function(value){
             this._set("value", value);
             if (typeof this.value == 'string' && this.value != ''){
-                var values = JSON.parse(this.value);
+                var values = this.concat ? value.match(/(\d*)(.*)/).splice(1, 2) : JSON.parse(this.value);
                 if (this.numberField){
                     this.numberField.set('value', values[0], arguments[1]);
                 }
@@ -47,7 +47,7 @@ function(declare, lang, domstyle, Widget, _FocusMixin, NumberTextBox, StoreSelec
             }
         },
         _getValueAttr: function(){
-            return JSON.stringify([this.numberField.get('value'), this.unitField.get('value')]);
+            return this.concat ? this.numberField.get('value') + this.unitField.get('value') : JSON.stringify([this.numberField.get('value'), this.unitField.get('value')]);
         },
         _setDisabledAttr: function(value){
             this.inherited(arguments);

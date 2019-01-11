@@ -17,8 +17,7 @@ define([
 	"dojo/_base/declare",
 	"dojo/string",
     "tukos/PageManager",
-	"dojo/i18n!tukos/widgets/editor/plugins/nls/TukosLinkDialog"
-], function(dojo, dijit, dojox, domAttr, _Plugin, registry, range, lang, on, has, TooltipDialog, ValidationTextBox, Select, Button, DropDownButton, declare, string, PageManager, messages) {
+], function(dojo, dijit, dojox, domAttr, _Plugin, registry, range, lang, on, has, TooltipDialog, ValidationTextBox, Select, Button, DropDownButton, declare, string, Pmg) {
 
     var TukosLinkDialog = dojo.declare(_Plugin, {
         // summary:
@@ -48,23 +47,23 @@ define([
         //		Template for contents of TooltipDialog to pick URL
         _template: [
             "<table role='presentation'>", 
-            "<tr><td><label for='${id}_tukosIdInput'>${tukosId}</label></td>",
+            "<tr><td><label for='${id}_tukosIdInput'>id</label></td>",
                 "<td><input dojoType='dijit.form.ValidationTextBox' required='false' " + "id='${id}_tukosIdInput' name='tukosIdInput' intermediateChanges='true'>",
             "</td></tr>",
-            "<tr><td><label for='${id}_tukosObjectInput'>${tukosObject}</label></td>",
+            "<tr><td><label for='${id}_tukosObjectInput'>${object}</label></td>",
                 "<td><input dojoType='dijit.form.ValidationTextBox' required='true' id='${id}_tukosObjectInput' " + "name='tukosObjectInput' intermediateChanges='true'>",
             "</td></tr>",
-            "<tr><td><label for='${id}_tukosViewInput'>${tukosView}</label></td>",
+            "<tr><td><label for='${id}_tukosViewInput'>${view}</label></td>",
             "<td><select id='${id}_tukosViewInput' name='tukosViewInput' data-dojo-type='dijit.form.Select'>",
                 "<option selected='selected' value='edit'>${edit}</option>",
                 "<option value='overview'>${overview}</option>",
                 "</select>",
             "</td></tr>",
-            "<tr><td><label for='${id}_textInput'>${text}</label></td>",
+            "<tr><td><label for='${id}_textInput'>${description}</label></td>",
                 "<td><input dojoType='dijit.form.ValidationTextBox' required='true' id='${id}_textInput' " + "name='textInput' intermediateChanges='true'>",
             "</td></tr>",
             "<tr><td colspan='2'>",
-            "<button dojoType='dijit.form.Button' type='submit' id='${id}_setButton'>${set}</button>",
+            "<button dojoType='dijit.form.Button' type='submit' id='${id}_setButton'>${apply}</button>",
             "<button dojoType='dijit.form.Button' type='button' id='${id}_cancelButton'>${cancel}</button>",
             "</td></tr></table>"
         ].join(""),
@@ -72,11 +71,11 @@ define([
         _initButton: function(){
             // summary:
             //		Override _Plugin._initButton() to initialize DropDownButton and TooltipDialog.
-            var _this = this;
+            var _this = this, messages = Pmg.messages(['createTukosLink', 'object', 'view', 'description', 'edit', 'overview', 'apply', 'cancel']);
     
             // Build the dropdown dialog we'll use for the button
             var dropDown = (this.dropDown = new dijit.TooltipDialog({
-                title: messages["title"],
+                title: messages["createTukosLink"],
                 execute: dojo.hitch(this, "setValue"),
                 onOpen: function(){
                     _this._onOpenDialog();
@@ -88,7 +87,7 @@ define([
             }));
     
             this.button = new dijit.form.DropDownButton({
-                label: messages["TukosLinkDialog"],
+                label: messages["createTukosLink"],
                 showLabel: false,
                 iconClass: this.iconClassPrefix + " " + this.iconClassPrefix + "TukosLinkDialog",
                 tabIndex: "-1",

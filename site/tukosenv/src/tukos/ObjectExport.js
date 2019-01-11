@@ -1,12 +1,18 @@
-define (["dojo/_base/declare", "dojo/on", "dojo/dom-form", "dijit/form/Button", "dijit/registry", "tukos/utils", "tukos/DialogConfirm", "tukos/_ExportContentMixin",
-         "tukos/PageManager",  "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, on, domForm, Button, registry, utils, DialogConfirm, _ExportContentMixin, Pmg, messages){
-    return declare([Button, _ExportContentMixin], {
+define (["dojo/_base/declare", "dojo/_base/lang", "dijit/form/DropDownButton",  "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+    function(declare, lang, Button, messages){
+    return declare([Button], {
         postCreate: function(){
-            this.inherited(arguments);
-            on(this, "click", function(evt){
-                this.openExportDialog();
-            });
+        	this.inherited(arguments);
+            this.dropDownPosition = ['below-centered'];
+        	this.loadDropDown = function(callback){
+                require(["tukos/ExportContentDialog", "dojo/ready"], lang.hitch(this, function(ExportContentDialog, ready){
+                    var dropDown = this.dropDown = new ExportContentDialog({form: this.form, dialogDescription: this.dialogDescription});
+                    ready(function(){
+                        dropDown.startup();
+                        callback();
+                    });
+                }));
+            };
         }
     });
 });

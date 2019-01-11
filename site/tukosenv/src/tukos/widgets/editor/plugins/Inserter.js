@@ -10,7 +10,7 @@ function(declare, lang, dct, domStyle, ready, string, JSON, _Plugin, Button, Men
 		checkboxTemplate: "<span class=\"checkboxTemplate\" style=\"background-color:aliceblue;\"><span contenteditable=\"false\" onclick=\"this.innerHTML = (this.innerHTML == '☐' ? '☑' : '☐')\" style=\"cursor: pointer;\">☑</span>${selectedHtml}</span><span class=\"checkboxTemplateEnd\" contenteditable=\"false\">■</span>",
 		pageBreak: '&nbsp;<div class="pagebreak" style="width: 100%; height: 20px; border-bottom: 1px solid black; text-align: center"><span style="font-size: 20px; background-color: #F3F5F6; padding: 0 10px;">' + messages.pageBreak + '</span></div>&nbsp;',
         pageNumber: '<span class="pagenumber" style="background-color: #F3F5F6;">xx</span>&nbsp;',
-        numberOfPages: '<span class="numberofpages" style="background-color: #F3F5F6">NN</span>&nbsp'},
+        numberOfPages: '<span class="numberofpages" style="background-color: #F3F5F6">NN</span>&nbsp;'},
 
 	    inserterOptions = utils.objectKeys(inserters);
         
@@ -18,7 +18,7 @@ function(declare, lang, dct, domStyle, ready, string, JSON, _Plugin, Button, Men
     
         iconClassPrefix: "dijitAdditionalEditorIcon",
         
-        visualTag: hiutils.visualTag(),
+        visualTag: utils.visualTag(),
 
         _initButton: function(){
             var editor = this.editor, createDropDown = lang.hitch(this, this._createDropDown);//, option = this.option;
@@ -42,16 +42,19 @@ function(declare, lang, dct, domStyle, ready, string, JSON, _Plugin, Button, Men
         },
         
         _loadDropDown: function(callback){
-        	require(["tukos/widgets/editor/plugins/_ExpressionInserter"], lang.hitch(this, function(ExpressionInserter){
-        		var dropDown = (this.dropDown = this.button.dropDown = new Menu()), editor = this.editor, insert = this._insert, expression = new ExpressionInserter({inserter: this});
+        	require(["tukos/widgets/editor/plugins/_ExpressionInserter", "tukos/widgets/editor/plugins/WidgetEditor"], 
+        			lang.hitch(this, function(ExpressionInserter, WidgetEditor){
+        		var dropDown = (this.dropDown = this.button.dropDown = new Menu()), editor = this.editor, insert = this._insert, expression = new ExpressionInserter({inserter: this}),
+        			widgetEditor = new WidgetEditor({editor: editor, button: this.button});
             	inserterOptions.forEach(function(option){
             		dropDown.addChild(new MenuItem({label: messages[option], onClick: function(){insert(option, editor);}}));
             	});
                 dropDown.addChild(new PopupMenuItem({label: messages.colorcontentinserter, popup: lang.hitch(this, this.colorContentInserter)()}));
                 dropDown.addChild(new PopupMenuItem({label: messages.choicelistinserter, popup: lang.hitch(this, this.choiceListInserter)()}));
                 dropDown.addChild(new PopupMenuItem({label: messages.htmlSource, popup: lang.hitch(this, this.htmlSourceInserter)()}));
-                dropDown.addChild(new PopupMenuItem({label: Pmg.message('expression'), popup: lang.hitch(expression, expression.inserterDialog)()}));
-                callback();
+                dropDown.addChild(new PopupMenuItem({label: Pmg.message('expressionEditor'), popup: lang.hitch(expression, expression.inserterDialog)()}));
+                dropDown.addChild(new PopupMenuItem({label: Pmg.message('widgetEditor'), popup: lang.hitch(widgetEditor, widgetEditor.inserterDialog)()}));
+            	ready(callback);
         	}));
         },
         _insert: function(option, editor){

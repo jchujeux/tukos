@@ -266,16 +266,20 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         
         loading: function(title, longMessage){
         	var url = require.toUrl('tukos/resources/images/loadingAnimation.gif');
-        	return title + '&nbsp' + '<img alt="Embedded Image" src="' + url + '"/> ' + (longMessage ? (messages.loading + ' ...') : '');
+        	return title + '&nbsp;' + '<img alt="Embedded Image" src="' + url + '"/> ' + (longMessage ? (messages.loading + ' ...') : '');
         },
         
-        serverDialog: function(urlArgs, options, defaultFeedback, returnDeferred){//if returnDeferred is true, the returnedDfD.response.getHeader() will be available to extract header information
+        serverDialog: function(urlArgs, options, feedback, returnDeferred){//if returnDeferred is true, the returnedDfD.response.getHeader() will be available to extract header information
             //this.setFeedback(messages.actionDoing);
-            var self = this;
+            var self = this, objectFeedback = typeof feedback === 'object', defaultFeedback = objectFeedback ? feedback.defaultFeedback : feedback;
             options = lang.mixin({method: 'POST', timeout: 180000, handleAs: 'json'},  options);
             if (options.data){
                 options.data = JSON.stringify(options.data);
                 options.method = 'POST';
+            }
+            if (objectFeedback){
+            	var widget= feedback.widget, get = lang.hitch(widget, widget.get), set = lang.hitch(widget, widget.set), att = feedback.att, attValue = get(att);
+            	set(att, this.loading(attValue, feedback.longMessage));
             }
             var dfdOrPromise = request(this.requestUrl(urlArgs), options, returnDeferred);
             dfdOrPromise.then(
@@ -287,10 +291,16 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                     if (defaultFeedback !== false){
                         self.addFeedback(response['feedback'], defaultFeedback);
                     }
+                    if (objectFeedback){
+                    	set(att, attValue);
+                    }
                     return response;
                 },
                 function(error){
                     self.addFeedback(messages.failedOperation + '\n Server message is: ' + error.message);
+                    if (objectFeedback){
+                    	set(att, attValue);
+                    }
                     return error;
                 }
             );
@@ -386,6 +396,20 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         message: function(key){
         	return this.cache.messages[key] || key;
         },
+        messages: function(keys){
+        	var result = {}, messages = this.cache.messages;
+        	keys.forEach(function(key){
+        		result[key] = messages[key] || key;
+        	});
+        	return result;
+        },
+    	messageStoreData: function(ids){
+    		var store = [{id: '', name: ''}], messages = this.cache.messages;
+    		ids.forEach(function(id){
+    			store.push({id: id, name: messages[id] || id});
+    		})
+    		return store;
+    	},
         serverTranslations: function(expressions, actionModel){
                 var self = this, results = {}, actionModel = actionModel || 'getTranslations';
                 return this.serverDialog({object: 'users', view: 'noview', action: 'get', query:{params: {actionModel: actionModel}}}, {data: expressions}, messages.actionDone).then(function (response){

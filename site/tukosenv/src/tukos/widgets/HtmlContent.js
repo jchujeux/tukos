@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/dom-construct", "dijit/_WidgetBase", "tukos/hiutils",  "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, on, dct, Widget, hiutils, Pmg, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/dom-construct", "dijit/_WidgetBase",  "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
+    function(declare, lang, on, dct, Widget, Pmg, messages){
     return declare([Widget], {
         postCreate: function(){
             this.inherited(arguments);
