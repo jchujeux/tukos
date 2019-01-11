@@ -1,6 +1,7 @@
 <?php
 namespace TukosLib\Web;
 
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk; 
 
 class TranslatorsManager {
@@ -49,25 +50,25 @@ class TranslatorsManager {
         }
         return $this->translatorsMessages[$languageCol][$setItem] = array_change_key_case(array_filter($this->getSetMessages($setItem, $languageCol)));
     }
-      
-    function translator($translatorName, $setsPath, $language = null){/* returns a translator callback - usage: $translator->translate('myMessage'); */        
+/*      
+    function translator($translatorName, $setsPath, $language = null){// returns a translator callback - usage: $translator->translate('myMessage'); 
         if (! $language){
             $language = $this->getLanguage();
         }
         $languageCol = str_replace('-', '_', strtolower($language));
-    	if (!isset($this->translatorsMessages[$languageCol])){
-    		$this->translatorsMessages[$languageCol] = [];
-    	}
+        if (!isset($this->translatorsMessages[$languageCol])){
+            $this->translatorsMessages[$languageCol] = [];
+        }
         $setItemsPath = [];
         foreach ($setsPath as $setName){
             $setItemsPath[] = strtolower($setName);
         }
         $this->translatorPaths[$translatorName] = $setItemsPath;
-        $theTranslator = function($key, $mode = null) use ($setItemsPath, $languageCol){
+        return function($key, $mode = null) use ($setItemsPath, $languageCol){
             $lckey = strtolower($key);
             foreach ($setItemsPath as $setItem){
                 $messages = $this->translatorsMessages[$languageCol];
-            	if (!isset($messages[$setItem])){
+                if (!isset($messages[$setItem])){
                     $messages[$setItem] = $this->addSet($setItem, $languageCol);
                 }
                 $messages = $messages[$setItem];
@@ -77,29 +78,77 @@ class TranslatorsManager {
                         return $this->transform($translation, $mode);
                     }else if (strtoupper($key) === $key){
                         return mb_strtoupper($translation);
-                    }else if(ctype_upper($key[0])/* && ctype_lower($translation[0])*/){
+                    }else if(ctype_upper($key[0])/* && ctype_lower($translation[0])*//*){
                         return mb_strtoupper(mb_substr($translation, 0, 1)) . mb_substr($translation, 1);
                     }else{
                         return $translation;
                     }
-                }                    
+                }
             }
             return $key;
         };
-        return $theTranslator;
-    } 
-
+    }
+*/
+    function translator($translatorName, $setsPath){
+        $this->translatorPaths[$translatorName] = $setsPath;//array_map("strtolower", $setsPath);
+        return function($key, $mode = null) use ($translatorName){
+            return '#{' . implode('|', [$key, $mode, $translatorName]) . '}';
+        };
+    }
+    
+    function substituteTranslations($template){
+        $names = []; $setNames = []; $pattern = "/[#]{([^}]*)}/";
+        preg_match_all($pattern, $template, $matches);
+        if (!empty($matches)){
+            $matches[1] = array_unique($matches[1]);
+            array_walk($matches[1], function($placeHolder, $key) use (&$names, &$setNames){
+                list($name, $mode, $translatorName) = explode('|', $placeHolder);
+                $names[$name] = true;
+                $setNames = array_unique(array_merge($setNames, $this->translatorPaths[$translatorName]));
+            });
+            $names = array_keys($names);
+            $languageCol = $this->getLanguageCol();
+            $translations = Utl::toAssociativeGrouped(Tfk::$registry->get('configStore')->getAll([
+                'table' => 'translations', 
+                'where' => [['col' => 'setname', 'opr' => 'IN', 'values' => $setNames], ['col' => 'name', 'opr' => 'IN', 'values' => $names]], 
+                'cols' => ['name', 'setname', $languageCol]]), 'name', true);
+            array_walk($translations, function(&$translation, $name) use ($languageCol){
+                $translation = array_column($translation, $languageCol, 'setname');
+            });
+            $translations = array_change_key_case(array_filter($translations));
+            return preg_replace_callback($pattern, function($match) use ($translations){
+                list($name, $mode, $translatorName) = explode('|', $match[1]);
+                $translatedName = (empty($nameTranslations = Utl::getItem(strtolower($name), $translations))|| empty($activeSets = array_intersect($this->translatorPaths[$translatorName], array_keys($nameTranslations)))) 
+                    ? $name 
+                    : $nameTranslations[reset($activeSets)];
+                if (!empty($mode)){
+                    return $this->transform($translatedName, $mode);
+                }else if (strtoupper($name) === $name){
+                    return mb_strtoupper($translatedName);
+                }else if(ctype_upper($name[0])){
+                    return mb_strtoupper(mb_substr($translatedName, 0, 1)) . mb_substr($translatedName, 1);
+                }else{
+                    return $translatedName;
+                }
+            }, $template);
+        }else{
+            return $template;
+        }
+    }
+    
     function untranslator($translatorName, $setsPath, $language = null){/* returns a translator callback - usage: $translator->translate('myMessage'); */        
         if (! $language){
             $language = $this->getLanguage();
         }
         $languageCol = str_replace('-', '_', strtolower($language));
+        if (!isset($this->translatorsMessages[$languageCol])){
+            $this->translatorsMessages[$languageCol] = [];
+        }
         $setItemsPath = [];
         foreach ($setsPath as $setName){
             $setItemsPath[] = strtolower($setName);
         }
         $this->translatorPaths[$translatorName] = $setItemsPath;
-        //$this->addSets($setItemsPath, $languageCol);
         return function($key) use ($setItemsPath, $languageCol){
             $lckey = mb_strtolower($key);
             $messages = $this->translatorsMessages[$languageCol];

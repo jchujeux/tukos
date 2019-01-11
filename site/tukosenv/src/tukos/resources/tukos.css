@@ -1,7 +1,6 @@
 @import '../../dijit/themes/claro/claro.css';
 @import '../../dgrid/css/dgrid.css';
 @import '../../dojox/editor/plugins/resources/editorPlugins.css';
-@import '../../dojoFixes/dojox/editor/plugins/resources/editorPluginsTableSelection.css';
 @import '../../dojox/editor/plugins/resources/css/StatusBar.css';
 @import '../../dojox/editor/plugins/resources/css/FindReplace.css';
 @import '../../dojox/calendar/themes/claro/Calendar.css';

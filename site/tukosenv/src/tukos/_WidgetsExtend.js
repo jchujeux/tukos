@@ -16,15 +16,11 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
             return lang.hitch(this, wutils.setValueOf)(name, value);
         },
         _setReadOnlyAttr: function(newValue){
-        	//this.inherited(arguments);
-        	//this.readOnly = newValue;
         	this._set('readOnly', newValue);
         	if (newValue){
-        		//domStyle.set(this.domNode, 'backgroundColor', 'WhiteSmoke');
         		this.defaultBackgroundColor = this.defaultBackgroundColor || this.get('style').backgroundColor;
         		this.set('style', {backgroundColor: 'WhiteSmoke'});
         	}else{
-        		//domStyle.set(this.domNode, 'backgroundColor', '');
         		if (this.defaultBackgroundColor){
         			this.set('style', {backgroundColor: this.defaultBackgroundColor});
         		}

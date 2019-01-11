@@ -69,7 +69,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
     		var children = expression.children;
     		return children.length === 4 ? expression.children[2] : expression.children[1];
     	},
-    	setExpression: function(expression, value){
+    	setValue: function(expression, value){
     		var textArea = this.textArea(expression), span = this.span(expression);
     		textArea.innerHTML = textArea.value = '';
     		expression.removeAttribute('data-formulaCache');
@@ -85,18 +85,33 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
 			textArea.innerHTML = textArea.value = formula;
 			span.innerHTML = this.eval(expression);		
     	},
+    	setExpression: function(expression, content){
+    		var textArea = this.textArea(expression), span = this.span(expression);
+    		if (content.formula){
+				textArea.innerHTML = textArea.value = content.formula;
+				dcl.toggle(expression, 'tukosFormula', true)
+    			if (content.value){
+    				expression.setAttribute('data-formulaCache', content.value);
+    				span.innerHTML = content.value;
+    			}else{
+    				expression.removeAttribute('data-formulaCache');
+    				span.innerHTML = this.eval(expression);
+    			}
+    		}else{
+    			this.setValue(expression, content.value);
+    		}
+    	},
     	copyExpression: function(source, target, rowOffset, colOffset){
     		if (this.isFormula(source)){
     			var formula = this.formulaOf(source), targetFormula = formula;
     			if (rowOffset || colOffset){
         			targetFormula = formula.replace(cellReferenceRegExp, function(match, pre, colDollar, col, rowDollar, row){
-        				//return pre + p1 + (p1 != '$' && colOffset != 0 ? utils.alphabet(utils.fromAlphabet(p2)+colOffset) : p2) + p3 + (p3 != '$' ? parseInt(p4) + rowOffset : p4);
         				return pre + colDollar + (colDollar === '$' || colOffset === 0 ? col : utils.alphabet(utils.fromAlphabet(col)+colOffset)) + rowDollar + (rowDollar === '$' ? row : parseInt(row) + rowOffset);
         			});
     			}
     			this.setFormula(target, targetFormula);
     		}else{
-    			this.setExpression(target, this.valueOf(source));
+    			this.setValue(target, this.valueOf(source));
     		}
     	},
     	valueOf: function(expression){
@@ -143,7 +158,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
 	    		if ((newValue || ' ').charAt(0) === '='){
 	    			this.setFormula(expression, newValue)
 	    		}else{
-	    			this.setExpression(expression, newValue);
+	    			this.setValue(expression, newValue);
 	    		}
     		}
     		lastKeyDown = undefined;

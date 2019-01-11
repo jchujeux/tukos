@@ -10,20 +10,20 @@ class Utilities{
     	return  ($value === '' ? null : $value);
     }
     
-    public static function extractItem($atKey, &$fromArray, $absentValue = null){
+    public static function extractItem($atKey, &$fromArray, $absentValue = null, $emptyValue = 'nochange'){
         if (array_key_exists($atKey, $fromArray)){
             $item = $fromArray[$atKey];
             unset($fromArray[$atKey]);
-            return $item;
+            return !empty($item) || $emptyValue === 'nochange' ? $item : $emptyValue;
         }else{
 			return $absentValue;
         }
     }
-    public static function extractItems($atKeys, &$fromArray, $ignoreAbsent = true){
+    public static function extractItems($atKeys, &$fromArray, $excludeAbsent = true, $absentValue = null, $emptyValue = 'nochange'){
         $result = [];
-        $keys = ($ignoreAbsent ? array_intersect($atKeys, array_keys($fromArray)) : $atKeys);
+        $keys = ($excludeAbsent ? array_intersect($atKeys, array_keys($fromArray)) : $atKeys);
         foreach ($keys as $key){
-            $result[$key] = self::extractItem($key, $fromArray);
+            $result[$key] = self::extractItem($key, $fromArray, $absentValue, $emptyValue);
         }
         return $result;
     }
@@ -33,11 +33,12 @@ class Utilities{
         		: $absentValue;
     }
 
-    public static function getItems($atKeys, $fromArray, $ignoreAbsent = true){
+    public static function getItems($atKeys, $fromArray, $excludeAbsent = true, $absentValue = null, $emptyValue = 'nochange'){
         $result = [];
-        $keys = ($ignoreAbsent ? array_intersect($atKeys, array_keys($fromArray)) : $atKeys);
+        $keys = ($excludeAbsent ? array_intersect($atKeys, array_keys($fromArray)) : $atKeys);
         foreach ($keys as $key){
-            $result[$key] = $fromArray[$key];
+            $result[$key] = self::getItem($key, $fromArray, $absentValue, $emptyValue);
+            //$result[$key] = $fromArray[$key];
         }
         return $result;
     }
@@ -400,8 +401,10 @@ class Utilities{
     	if (is_array($numericArray)){
     		$result = [];
     		foreach ($numericArray as $value){
-    			$keyValue = self::extractItem($keyName, $value);
-    			$result[$keyValue][] = ($scalarIfSingle && count($value) === 1) ? array_pop($value) : $value;
+    			$keyValue = self::extractItem($keyName, $value, 'absent');
+    			if ($keyValue !== 'absent'){
+    			     $result[$keyValue][] = ($scalarIfSingle && count($value) === 1) ? array_pop($value) : $value;
+    			}
     		}
     		return $result;
     	}else{

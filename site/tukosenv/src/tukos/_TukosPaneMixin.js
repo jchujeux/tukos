@@ -239,7 +239,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
         },
         
         buildLocalActionFunctions: function(localActionFunctions, actionDescriptions){
-            //var myEval = lang.hitch(this, eutils.eval);
             for (var widgetName in actionDescriptions){
                 localActionFunctions[widgetName] = {};
                 var description = actionDescriptions[widgetName];

@@ -1,6 +1,6 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/dom-class", "dojo/string", "dojo/json", "dojoFixes/dojox/html/format", "tukos/TukosTooltipDialog", "tukos/utils",
-		"tukos/expressions", "tukos/PageManager"], 
-function(declare, lang, dct, domStyle, dcl, string, JSON, htmlFormat, TooltipDialog, utils, expressions, Pmg) {
+		"tukos/tukosWidgets", "tukos/PageManager"], 
+function(declare, lang, dct, domStyle, dcl, string, JSON, htmlFormat, TooltipDialog, utils, tukosWidgets, Pmg) {
 	return declare(null, {
 
 		constructor: function(args){
@@ -11,8 +11,8 @@ function(declare, lang, dct, domStyle, dcl, string, JSON, htmlFormat, TooltipDia
         },
         dialogDescription: function(){
             var widgetsDescription = {
-                    value: {type: 'TextBox', atts: {label: Pmg.message('valueorformula'), style: {width: '30em'}}},
-                    name: {type: 'TextBox', atts:{label: Pmg.message('expressionname')}}
+                    value: {type: 'Textarea', atts: {label: Pmg.message('widgetcontent'), style: {width: '50em', maxHeight: '20em'}}},
+                    name: {type: 'TextBox', atts:{label: Pmg.message('widgetname')}}
             };
             ['insertReplace', 'remove', 'close'].forEach(lang.hitch(this, function(action){
                     widgetsDescription[action] = {type: 'TukosButton', atts: {label: Pmg.message(action), onClick: lang.hitch(this, this[action])}};
@@ -30,12 +30,12 @@ function(declare, lang, dct, domStyle, dcl, string, JSON, htmlFormat, TooltipDia
                 },
                 onOpen: lang.hitch(this, function(){
                     var pane = this.dialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), nameWidget = paneGetWidget('name'), valueWidget = paneGetWidget('value'), selection = this.inserter.editor.selection,
-                        expression = selection.getSelectedElement() || selection.getParentElement();
-                    while((!dcl.contains(expression, 'tukosExpression')) && (expression = expression.parentNode));
-                    if (expression){
-                    	nameWidget.set('value', expression.id.slice(2));
-                    	valueWidget.set('value', expressions.formulaOf(expression)) || expressions.valueOf(expression);
-                    	selection.selectElement(expression);
+                        widgetContainer = selection.getSelectedElement() || selection.getParentElement();
+                    while((!dcl.contains(widgetContainer, 'tukosContainer')) && (widgetContainer = widgetContainer.parentNode));
+                    if (widgetContainer){
+                    	nameWidget.set('value', widgetContainer.getAttribute('data-widgetId'));
+                    	valueWidget.set('value', widgetContainer.getAttribute('data-params'));
+                    	selection.selectElement(widgetContainer);
                     }else{
                         nameWidget.set('value', '');
                         valueWidget.set('value', selection ? selection.getSelectedHtml() : '');                    	
@@ -44,22 +44,18 @@ function(declare, lang, dct, domStyle, dcl, string, JSON, htmlFormat, TooltipDia
             };
         },
 	    insertReplace: function(){
-	    	var pane = this.dialog.pane, valueOf = lang.hitch(pane, pane.valueOf), name = valueOf('name'), value = valueOf('value'), inserter = this.inserter, editor = inserter.editor, selection = editor.selection,
-	    		formula = '', expression;
-	    	if (name){
+	    	var pane = this.dialog.pane, valueOf = lang.hitch(pane, pane.valueOf), value = JSON.parse(valueOf('value')), inserter = this.inserter, editor = inserter.editor, selection = editor.selection,
+	    		tukosWidget;
+	    	if (value.name){
 		    	selection.remove();	    		
-	    		if (value.trim().charAt(0) === '='){
-	    			formula = value.trim();
-	    			value = '';
-	    		}
-		    	editor.pasteHtmlAtCaret(string.substitute(expressions.template(), {name: name, value: value, formula: formula, visualPreTag: inserter.visualTag, visualPostTag: inserter.visualTag}), true);
-		    	expressions.onClick(selection.getSelectedElement());
+		    	tukosWidgets.targetHTML(value).then(function(html){
+		    		editor.pasteHtmlAtCaret(html, true);
+		    	})
 	    	}
 	    },
         remove: function(){
-        	var editor = this.inserter.editor, selection = editor.selection, value = expressions.valueOf(selection.getSelectedElement());
+        	var editor = this.inserter.editor, selection = editor.selection;
         	selection.remove();
-	    	editor.execCommand('inserthtml', value);
         },
         close: function(){
         	this.inserter.close();

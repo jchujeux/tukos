@@ -20,46 +20,38 @@ function(declare, lang, ready, _Plugin, Button, _TagEditDialog, messages) {
                 }
             });
         },
-
         updateState: function(){
             // Over-ride for button state control for disabled to work.
             this.button.set("disabled", this.get("disabled"));
         },
-
         setEditor: function(editor){
             this.editor = editor;
             this._initButton();
         },
-        
         _createDropDown: function(){
         	var dropDown = this.dropDown = new _TagEditDialog({
-                editor: this.editor,
+                editor: this.editor, button: this.button,
         		dialogAtts: function(){
                     return this._dialogAtts(
                     	{tagname: {type: 'TextBox', atts: {title: messages.tagName, style: {width: '10em'}, disabled: true}}}, 
                     	{headerRow: {tableAtts: {cols: 1, customClass: 'labelsAndValues', label: messages.tagEditor, showLabels: true, orientation: 'horiz'}, widgets: ['tagname']}}, 
-                    	['apply', 'remove', 'close'], {tableAtts: {cols: 3,   customClass: 'labelsAndValues', showLabels: false}, widgets: ['apply', 'remove', 'close']},
+                    	['apply', 'close'], {tableAtts: {cols: 3,   customClass: 'labelsAndValues', showLabels: false}, widgets: ['apply', 'close']},
                     	['width', 'height', 'display', 'margin']);
                 }
         	});
         	dropDown.openDialog = this.openDialog;
         	return dropDown;
         },
-
-	    
         openDialog: function(){
-        	this.inherited(arguments);
-            var target = this.target, pane = this.pane;
-            pane.getWidget('tagname').set('value', target.tagName);
+        	if (this.inherited(arguments)){
+                var target = this.target, pane = this.pane;
+                pane.getWidget('tagname').set('value', target.tagName);
+                return true;       		
+        	}else{
+        		return false;
+        	};
         },
-        
-        close: function(){
-	    	popup.close(this.dropDown);
-	    }
-
     });
 	_Plugin.registry['SelectionEditor'] = function(){return new SelectionEditor({})};
-	
     return SelectionEditor;
-
 });

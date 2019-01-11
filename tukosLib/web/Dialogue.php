@@ -5,7 +5,6 @@ use TukosLib\TukosFramework as Tfk;
 use Aura\Web\Context;
 use Aura\Http\Manager\factory as HttpFactory;
 
-use TukosLib\Utils\Utilities as Utl;
 
 class Dialogue {
     protected $http;
@@ -85,7 +84,7 @@ class Dialogue {
     }
 
     public function sendResponse(){
-        $this->http->send($this->response);    
+        $this->http->send($this->response);
     }
 }
 ?>

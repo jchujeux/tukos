@@ -40,42 +40,6 @@ class View extends AbstractView {
     	]];
     	 
         $this->customize($this->customDataWidgets(), $this->subObjects(), ['grid' => ['calendar', 'sources', 'displayeddate'], 'get' => ['displayeddate'], 'post' => ['displayeddate', 'sessionsentries']], ['sources' => []]);
-/*
-        $this->paneWidgets = Utl::array_merge_recursive_replace([
-            'calendar' => [
-            	'title'   => $this->tr('Calendar'),
-                'id'      => 'tukos_calendar',
-                'widgetsDescription' => $this->widgetsDescription(['parentid', 'periodstart', 'periodend', 'displayeddate', 'calendar', 'sources']),
-            	'subObjects' => $this->subObjects(),
-                'layout' => [
-                	//'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false], 'widgets' => ['parentid', 'calendar', 'sources', 'calendarsentries', 'sessionsentries' ]
-					'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false,  'content' => ''],
-					'contents' => [
-						'row1' => [
-							'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 75],
-							'contents' => [
-								'col1' => ['tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => ['parentid', 'periodstart', 'periodend', 'displayeddate']],
-								'col2' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => ['sources']],
-							]
-						],
-						'row2' => [
-							'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => [ 'calendar'],
-						],
-						'row3' => [
-							'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0'],
-							'widgets' => ['templates', 'calendarsentries', 'sessionsentries'],
-						],
-					]
-                ],
-                'style' => ['padding' => '0px', 'overflow' => 'auto'], 'lazyLoading' => true,
-            	'widgetsHider' => true, 'widgetsHiderArgs' => ['span' => true, 'style' => ['position' => 'relative', 'float' => 'right'], 'place' => ['refNode' => 'tukos_calendar_button_title', 'where' => 'after']],
-            ]],
-        	['calendar' => [
-        	 	'widgetsDescription' => ['calendar' => ['atts' => ['style' => ['width' => '700px']]], 'sources' => ['atts' => ['style' => ['width' => '400px']]]],
-        		'subObjects' => ['templates' => ['atts' => ['style' => ['width' => '400px']]],'calendarsentries' => ['atts' => ['style' => ['width' => '400px']]],'sessionsentries' => ['atts' => ['style' => ['width' => '400px']]]],
-        	]]
-        );
-*/
     }    
 
     protected function subObjects(){

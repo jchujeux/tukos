@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "dojoFixes/dojox/html/format", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/hiutils",
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "dojoFixes/dojox/html/format", "tukos/TukosTooltipDialog", "tukos/utils",
         "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-function(declare, lang, dct, domStyle, string, JSON, htmlFormat, TooltipDialog, utils, hiutils, Pmg, messages) {
+function(declare, lang, dct, domStyle, string, JSON, htmlFormat, TooltipDialog, utils, Pmg, messages) {
 
 	return declare(null, {
 
@@ -50,8 +50,8 @@ function(declare, lang, dct, domStyle, string, JSON, htmlFormat, TooltipDialog, 
 		    		dct.place(content, selected, 'replace');
 		    	}else{
 	    			selection.remove();	    		
-		    		editor.execCommand('inserthtml', content);
-		    		
+		    		//editor.execCommand('inserthtml', content);
+		    		editor.pasteHtmlAtCaret(content, true);
 		    	}
 	    	}
 	    },

@@ -23,8 +23,7 @@ class LoginPage{
         
         $finder = $template->getTemplateFinder();
         $finder->setPaths([dirname(__FILE__)]);
-        
-        $dialogue->response->setContent ($template->fetch(Tfk::$registry->isMobile ? 'MobileLoginTemplate.php' : 'loginTemplate.php'));
+        $dialogue->response->setContent (Tfk::$registry->get('translatorsStore')->substituteTranslations($template->fetch(Tfk::$registry->isMobile ? 'MobileLoginTemplate.php' : 'loginTemplate.php')));
     }
 }
 

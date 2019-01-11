@@ -254,10 +254,10 @@ define([
 					// Restore all the plugin buttons state.
 					ed.queryCommandEnabled = ed._sourceQueryCommandEnabled;
 					if(!this._readOnly){
-                                                            ed.beginEditing();
-                                                            ed.set("value", sourceArea.getSourceValue());
-                                                            ed.endEditing();
-                                                        }
+                        ed.beginEditing();
+                        ed.set("value", sourceArea.getSourceValue());
+                        ed.endEditing();
+                    }
 
 					array.forEach(edPlugins, function(p){
 						// Turn back on any plugins we turned off.
@@ -383,11 +383,11 @@ define([
 				}
 			};
 
-                                sourceArea.getSourceValue = function(){
-                                    return self._filter(sourceArea.initialValue === sourceArea.value 
-                                        ? sourceArea.initialHtml 
-                                        : sourceArea.value.replace(/<span><\/span>|colspan="1"|rowspan="1"|id="tdid\d+"/g, '').replace(/[\n\t ]+/g, ' '));
-                                };
+            sourceArea.getSourceValue = function(){
+                return self._filter(sourceArea.initialValue === sourceArea.value 
+                    ? sourceArea.initialHtml 
+                    : sourceArea.value.replace(/<span><\/span>|colspan="1"|rowspan="1"/g, '').replace(/[\n\t ]+/g, ' '));
+            };
 
 
 			var i, p;

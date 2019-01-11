@@ -286,7 +286,7 @@ class PageView extends Translator{
         $finder = $template->getTemplateFinder();
         $finder->setPaths([dirname(__FILE__)]);
         
-        $this->dialogue->response->setContent ($template->fetch('PageTemplate.php'));
+        $this->dialogue->response->setContent (Tfk::$registry->get('translatorsStore')->substituteTranslations($template->fetch('PageTemplate.php')));
     }
 }
 ?>

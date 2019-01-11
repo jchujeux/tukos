@@ -1,29 +1,29 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all", "dojo/ready", "dojo/when", "tukos/utils", "tukos/hiutils", "tukos/TukosTooltipDialog", "tukos/Download",  "tukos/PageManager", "dojo/json", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
     function(declare, lang, on, all, ready, when, utils, hiutils, TukosTooltipDialog, download, Pmg, JSON, messages){
-    return declare(null, {
-        openExportDialog: function(){
-            var self = this, form = this.form, exportDialog = this.exportDialog;
-            if (this.form.viewMode === 'edit'){
-                if (exportDialog){
-                    this.openDialog();
-                }else{
-                    exportDialog = this.exportDialog = new TukosTooltipDialog(this.dialogAtts(form));
-                    exportDialog.pane.blurCallback = on.pausable(exportDialog, 'blur', exportDialog.close);
-                    var pane = exportDialog.pane;
-                    pane = lang.mixin(pane, {attachedWidget: this, previewContent: lang.hitch(this, this.previewContent), tabContextId: lang.hitch(form, form.tabContextId)});
-                    ready(function(){
-                        lang.hitch(self, self.openDialog)();
-                    });
-                }
-            }else{
-                console.log('export content not supported for this view: ' + self.form.viewMode);
-            }
+    return declare(TukosTooltipDialog, {
+        postCreate: function(){
+            var form = this.form;
+        	lang.mixin(this, this._dialogAtts(form));
+            this.inherited(arguments);
+            lang.mixin(this.pane, {attachedWidget: this, previewContent: lang.hitch(this, this.previewContent), tabContextId: lang.hitch(form, form.tabContextId)});
+        	this.onOpen = lang.hitch(this, function(){
+        		var pane = this.pane, _arguments = arguments;
+        		this.setVisibility();
+        		when(this.previewContent(), lang.hitch(this, function(){
+            		pane.watchOnChange = true;
+            		dijit.TooltipDialog.prototype.onOpen.apply(this, _arguments);
+            		ready(function(){
+            			pane.resize();
+            		});
+            	}));
+        	});
+        	this.blurCallback = on.pausable(this, 'blur', this.close);
         },
-        
-        dialogAtts: function(form){
+        _dialogAtts: function(form){
             var onWatch = lang.hitch(this, this.onWatchLocalAction), onWatchCheckBox =  lang.hitch(this, this.onWatchCheckBoxLocalAction);
             var description = {paneDescription: {form: form, widgetsDescription: {
-                    exportas: {type: 'StoreSelect', atts: {label: messages.exportoption, value: 'email', storeArgs: {data: [{id: 'email', name: messages.email}, {id: 'file', name: messages.file}]}, onWatchLocalAction: onWatch('exportas', this.exportAsWatchAction), value: 'email'}},
+                	exportas: {type: 'StoreSelect', atts: {label: messages.exportoption, value: 'email', storeArgs: {data: [{id: 'email', name: messages.email}, {id: 'file', name: messages.file}]}, onWatchLocalAction: onWatch('exportas', this.exportAsWatchAction), value: 'email'}},
+                	formatas: {type: 'StoreSelect', atts: {label: Pmg.message('formatOptions'), value: 'pdf', storeArgs: {data: [{id: 'pdf', name: 'pdf'}, {id: 'html', name: 'html'}]}, onWatchLocalAction: onWatch('formatas', this.exportAsWatchAction), value: 'pdf'}},
                     filename: {type: 'TextBox', atts: {label: messages.filename, style: {width: '30em'}, onWatchLocalAction: onWatch('filename')}},
                     orientation: {type: 'StoreSelect', atts: {label: messages.orientation, value: 'portrait', storeArgs: {data: [{id: 'portrait', name: messages.portrait}, {id: 'landscape', name: messages.landscape}]}, onWatchLocalAction: onWatch('orientation')}},
                     smartshrinking: {type: 'StoreSelect', atts: {label: messages.smartshrinking, value: 'on', storeArgs: {data: [{id: 'on', name: messages.on}, {id: 'off', name: messages.off}]}, onWatchLocalAction: onWatch('smartshrinking')}},
@@ -31,11 +31,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
                     contentmargin: {type: 'TukosNumberBox', atts: {label: messages.contentmargin, style: {width: '3em'}, onWatchLocalAction: onWatch('contentmargin')}},
                     marginoffset: {type: 'TukosNumberBox', atts: {label: messages.marginoffset, style: {width: '3em'}, onWatchLocalAction: onWatch('marginoffset')}},
                     margincoef: {type: 'TukosNumberBox', atts: {label: messages.margincoef, style: {width: '3em'}, onWatchLocalAction: onWatch('margincoef')}},
-                    
                     headerfooter: {type: 'CheckBox', atts: {label:messages.headerfooter, checked: false, onWatchLocalAction: onWatchCheckBox('headerfooter', this.headerFooterWatchAction)}},
                     coverpage: {type: 'CheckBox', atts: {label:messages.coverpage, checked: false, onWatchLocalAction: onWatchCheckBox('coverpage', this.coverPageWatchAction)}},
                     fileheader: {type: 'HtmlContent', atts: {label: messages.fileheader, disabled: true, style: {minHeight: '100px', backgroundColor: 'Snow'}}},
-                    //content: {type: 'LazyEditor', atts: {label: messages.content, height: '450px', disabled: true}},
                     content: {type: 'HtmlContent', atts: {label: messages.content, disabled: true, style: {minHeight: '250px', maxHeight: '600px', overflow: "auto", backgroundColor: 'Snow'}}},
                     filefooter: {type: 'HtmlContent', atts: {label: messages.filefooter, disabled: true, style: {minHeight: '100px', backgroundColor: 'Snow'}}},
                     filecover: {type: 'HtmlContent', atts: {label: messages.filecover, disabled: true, style: {minHeight: '100px', maxHeight: '450px', overflow: "auto", backgroundColor: 'Snow'}}},
@@ -61,12 +59,12 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
                     tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 150},
                     contents: {
                         headerRow: {tableAtts: {cols: 1, customClass: 'labelsAndValues',showLabels: true, orientation: 'vert'}, contents: {title: {tableAtts: {cols: 1, customClass: 'labelsAndValues', label: messages.exportTitle}}}},
-                        row0: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: true},  widgets: ['exportas', 'sendas']},
+                        row0: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: true},  widgets: ['exportas', 'formatas', 'sendas']},
                         row1: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: true},  widgets: ['from', 'to', 'cc']},
                         row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true},  widgets: ['subject']},
                         row3: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['header']},
                         row4: {tableAtts: {cols: 6, customClass: 'labelsAndValues', showLabels: true}, widgets: ['headerfooter', 'coverpage', 'filename', 'orientation', 'smartshrinking', 'zoom','contentmargin', 'marginoffset', 'margincoef']},
-                        row6: {tableAtts: {cols: 4, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100}, widgets: ['close',  'sendemail', 'savefile']},
+                        row6: {tableAtts: {cols: 4, customClass: 'labelsAndValues', showLabels: false, widgetWidths: ['33%', '33%', '34%']}, widgets: ['close',  'sendemail', 'savefile']},
                         row7: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['fileheader', 'filecover', 'content', 'filefooter']},
                         row5: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['fileheadertemplate', 'template', 'filefootertemplate','filecovertemplate']}
                 }},
@@ -79,19 +77,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
                 return description;
             }
         },
-
-        openDialog: function(){
-            var exportDialog = this.exportDialog, pane = exportDialog.pane;
-            pane.watchOnChange = false;
-            when(exportDialog.open({around: this.domNode, orient: ['below-centered']}), lang.hitch(this, function(){
-                this.setVisibility();
-                when(this.previewContent(), function(){
-                    pane.watchOnChange = true;
-                	pane.resize();
-                });
-            }));
-        },
-
         _watchAction: function(sWidget, tWidget, newValue, att){
             var pane = sWidget.pane, newCustom = {}, watchOnChange = pane.watchOnChange;
             when(pane.valueOf(sWidget.widgetName), function(value){
@@ -101,32 +86,27 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
                 }
             });
         },
-
         watchAction: function(sWidget, tWidget, newValue){
             this._watchAction(sWidget, tWidget, newValue, 'value');
             return true;
         },
-        
         watchCheckBoxAction: function(sWidget, tWidget, newValue){
             this._watchAction(sWidget, tWidget, newValue, 'checked');
         },
-
         onWatchLocalAction: function(widgetName, watchAction){
             var watchArgs = {value: {}};
             watchArgs.value[widgetName] = {localActionStatus: lang.hitch(this, watchAction || this.watchAction)};
             return watchArgs;
         },
-
         onWatchCheckBoxLocalAction: function(widgetName, watchAction){
             var watchArgs = {checked: {}};
             watchArgs.checked[widgetName] = {localActionStatus: lang.hitch(this, watchAction || this.watchCheckBoxAction)};
             return watchArgs;
         },
-        
         exportAsWatchAction: function(sWidget, tWidget, newValue){
             this.watchAction(sWidget, tWidget, newValue);
             this.setVisibility();
-            this.exportDialog.resize();
+            this.resize();
             return true;
         },
         sendAsWatchAction: function(sWidget, tWidget, newValue){
@@ -135,13 +115,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             ['filename', 'orientation', 'smartshrinking', 'zoom', 'headerfooter', 'pagecover'].forEach(function(name){
                 paneGetWidget(name).set('hidden', !self.hasAttachment);
             });
-            this.exportDialog.resize();
+            this.setVisibility();
+            this.resize();
             return true;
         },
-
         templateWatchAction: function(sWidget, tWidget, newValue){
             this.watchAction(sWidget, tWidget, newValue);
-            var pane = this.exportDialog.pane, form = this.form;
+            var pane = this.pane, form = this.form;
             when(pane.valueOf(sWidget.widgetName), function(newValue){
                 when(hiutils.processTemplate(newValue, {'@': form, '§': pane}), function(newValue){
                     tWidget.set('value', newValue || '');
@@ -149,7 +129,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             });
             return true;
         },
-
         headerFooterWatchAction: function(sWidget, tWidget, newValue){
             this.watchCheckBoxAction(sWidget, tWidget, newValue);
             var pane = sWidget.pane, paneGetWidget = lang.hitch(pane, sWidget.pane.getWidget);
@@ -158,7 +137,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             });
             pane.resize();
         },
-
         coverPageWatchAction: function(sWidget, tWidget, newValue){
             this.watchCheckBoxAction(sWidget, tWidget, newValue);
             var pane = sWidget.pane, paneGetWidget = lang.hitch(pane, sWidget.pane.getWidget);
@@ -167,9 +145,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             });
             pane.resize();
         },
-
         previewContent: function(){
-            var pane = this.exportDialog.pane, form = this.form;
+            var pane = this.pane, form = this.form;
             return when(hiutils.processTemplate(pane.valueOf('filecovertemplate'), {'@': form, '§': pane}), function(newContent){
                 pane.getWidget('filecover').set('value', newContent || '');
                 return when(hiutils.processTemplate(pane.valueOf('fileheadertemplate'), {'@': form, '§': pane}), function(newContent){
@@ -183,48 +160,47 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
                 });
             });
         },
-        
         sendEmail: function(){ 
             setTimeout(lang.hitch(this, function(){
-	            var form = this.exportDialog.pane.form;
+	            var form = this.form, widget = this.pane.getWidget('sendemail');
 	            lang.hitch(this, this.dataToProcess)().then(function(data){
-	                Pmg.serverDialog(lang.hitch(form, form.completeUrlArgs)({action: 'process', query: {id: true, params: {process: 'sendContent', noget:  true}}}), {data: data, timeout: 32000});
+	                Pmg.setFeedback(Pmg.message('sendingemail'));
+	            	Pmg.serverDialog(lang.hitch(form, form.completeUrlArgs)({action: 'process', query: {id: true, params: {process: 'sendContent', noget:  true}}}), {data: data, timeout: 32000},{widget: widget, att: 'label'});
 	            });
             }), 100);
         },
-
         saveFile: function(){ 
             setTimeout(lang.hitch(this, function(){
-            	var form = this.exportDialog.pane.form;
+            	var form = this.pane.form;
                 lang.hitch(this, this.dataToProcess)().then(function(data){
-                    download.download({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'process', query: {id: form.valueOf('id'), params: {process: 'fileContent', noget:  true}}}, {data: data});
+                    Pmg.setFeedback(Pmg.message('savingfile'));
+                	download.download({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'process', query: {id: form.valueOf('id'), params: {process: 'fileContent', noget:  true}}}, {data: data});
                 });           	
             }), 100);
         },
-        
         dataToProcess: function(){
-            var pane = this.exportDialog.pane, 
+            var pane = this.pane, targetFormat = pane.getWidget('formatas').get('value');
                   valuesToPostProcess = (['content'].concat(pane.getWidget('headerfooter').get('checked') ? ['fileheader', 'filefooter'] : [])).concat(pane.getWidget('coverpage').get('checked') ? ['filecover'] : []);
-            valuesToSend = ['from', 'to', 'cc', 'subject', 'header', 'sendas', 'filename', 'orientation', 'smartshrinking', 'zoom', 'contentmargin', 'marginoffset', 'margincoef'].concat(valuesToPostProcess);
+            valuesToSend = ['from', 'to', 'cc', 'subject', 'header', 'sendas', 'formatas', 'filename', 'orientation', 'smartshrinking', 'zoom', 'contentmargin', 'marginoffset', 'margincoef'].concat(valuesToPostProcess);
             var data = pane.widgetsValue(valuesToSend);
             valuesToPostProcess.forEach(function(widgetName){
-                data[widgetName] = hiutils.postProcess(data[widgetName])
+                data[widgetName] = hiutils.postProcess(data[widgetName], targetFormat);
             });
             return all(data);
         },
-        
         setVisibility: function(){
-            var  pane = this.exportDialog.pane,
-                    paneGetWidget = lang.hitch(pane, pane.getWidget),
-                    exportOption = paneGetWidget('exportas').get('value');
-            var hideEmail = (exportOption === 'email' ? false : true);
+            var  pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), exportOption = paneGetWidget('exportas').get('value'),  formatOption = paneGetWidget('formatas').get('value'),
+            	hideEmail = (exportOption === 'email' ? false : true), hidePdfAtts = (formatOption === 'pdf' ? false : true);
             ['from', 'to', 'cc', 'subject', 'header', 'sendas', 'sendemail'].forEach(function(widgetName){
                 paneGetWidget(widgetName).set('hidden', hideEmail);
             });
             paneGetWidget('savefile').set('hidden', !hideEmail);
             var hasFileName = hideEmail || this.hasAttachment(paneGetWidget('sendas').get('value')), hasHeadersAndFooters = paneGetWidget('headerfooter').get('checked'), hasCoverPage = paneGetWidget('coverpage').get('checked');
-            ['filename', 'orientation',  'smartshrinking', 'zoom', 'headerfooter', 'coverpage'].forEach(function(widgetName){
+            ['filename', 'headerfooter', 'coverpage'].forEach(function(widgetName){
                 paneGetWidget(widgetName).set('hidden', !hasFileName);
+            });
+            ['orientation',  'smartshrinking', 'zoom', ,'contentmargin', 'marginoffset', 'margincoef'].forEach(function(widgetName){
+                paneGetWidget(widgetName).set('hidden', !hasFileName || hidePdfAtts);            	
             });
             ['fileheader', 'filefooter', 'fileheadertemplate', 'filefootertemplate'].forEach(function(widgetName){
                 paneGetWidget(widgetName).set('hidden', !hasFileName || !hasHeadersAndFooters);
@@ -236,6 +212,5 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
         hasAttachment: function(sendAsValue){
             return ['asattachment', 'bodyandattachment'].indexOf(sendAsValue) !== -1;
         }
-        
     });
 });

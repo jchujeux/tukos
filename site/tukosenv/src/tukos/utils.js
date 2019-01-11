@@ -2,6 +2,12 @@ define(["dojo", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nl
     return {
         wasModified: false, previousUniqueIds: [],
         
+        visualTag: function(){
+        	return '<span class="visualTag" style="background-color:lightgrey">¤</span>';
+        },
+        trimExt: function(string){
+  		  return string.replace(/^[\s(&nbsp;)]+/g,'').replace(/[\s(&nbsp;)]+$/g,'');
+        },
         newObj: function(sourceArray){
         	var result = {};
         	sourceArray.forEach(function(item){
@@ -175,6 +181,13 @@ define(["dojo", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nl
             }
         }, 
 
+    	storeData: function(ids){
+    		var store = [{id: '', name: ''}];
+    		ids.forEach(function(id){
+    			store.push({id: id, name: id});
+    		})
+    		return store;
+    	},
         transform: function(value, formatType, formatOptions){
             if ((typeof value == 'string' && value != '') || typeof value === 'number'){
                 switch (formatType){

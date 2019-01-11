@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/hiutils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, hiutils, Pmg, messages) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
+function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, Pmg, messages) {
 
 	var templateType = 'choiceList', templateClass = templateType + 'Template', instanceClass = templateType + 'Instance', templateIdPrefix = templateType + '_',
 		cltTemplate = "<span class=\"" + instanceClass + "\" contextmenu=\"" + templateIdPrefix + "${cltName}\" onmousedown=\"getElementById('dijitEditorBody').selectedChoiceSpan=this\">${selection}</span>",
@@ -39,9 +39,9 @@ function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, hiuti
                     layout: {
                         tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'},
                         contents: {
-                        	row1: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: true}, widgets: ['cltName', 'colorParentLabel', 'colorParentCheckBox']},
-                        	row2: {tableAtts: {cols: 3, showLabels: false}, widgets: widgetsList},
-                        	row3: {tableAtts: {cols: 4, showLabels: false}, widgets: ['cltSave', 'cltInsert', 'remove', 'close']}
+                        	row1: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: false}, widgets: ['cltName', 'colorParentLabel', 'colorParentCheckBox']},
+                        	row2: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: false}, widgets: widgetsList},
+                        	row3: {tableAtts: {cols: 4, customClass: 'labelsAndValues', showLabels: false}, widgets: ['cltSave', 'cltInsert', 'remove', 'close']}
                         }
                     }
                 },

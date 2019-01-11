@@ -1,34 +1,8 @@
-define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string", "dojo/when", "dojo/promise/all", "tukos/utils", "tukos/widgetUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"],
-  function(lang, dct, dstyle, string, when, all, utils, wutils, Pmg, messages){
-	var separator = '|', visualTag = '<span class="visualTag" style="background-color:lightgrey">¤</span>';
-
+define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string", "dojo/when", "dojo/promise/all", "tukos/utils", "tukos/tukosWidgets", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"],
+  function(lang, dct, dstyle, string, when, all, utils, tukosWidgets, Pmg, messages){
+	var separator = '|';
     return {
       
-    trimExt: function(string){
-    		  return string.replace(/^[\s(&nbsp;)]+/g,'').replace(/[\s(&nbsp;)]+$/g,'');
-    },
-    visualTag: function(){
-    	return visualTag;
-    },
-    /*
-    create: function(description, atNode){
-        if (description){
-            if (description.tag){
-                var result = dct.create(description.tag, description.atts || null, atNode);
-                this.create(description.children, result);
-            }else if (description.node){
-                atNode.appendChild(description.node);
-            }else if (typeof description === "object"){
-                for (var item in description){
-                    this.create(description[item], atNode);
-                }
-            }
-            return result;
-        }else{
-            return undefined;
-        }
-    },
-*/    
     objectTable: function(object, hasCheckboxes, selectedLeaves, atts){
         var checkboxPath = [],
                 keyToHtml = lang.hitch(this, function(key){
@@ -78,12 +52,10 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         addTableRows(object, selectedLeaves);
         return table;  
     },
-
     getSelectedSpan: function(selectedHtml){
         var result = /<span .*id="([2-9a-z]*Span)/g.exec(selectedHtml);
         return (result && result[1]) || undefined;
     },
-
     processTemplate: function(content, panes){
         //console.log('calling processTemplate: ' + content);
     	if (content){
@@ -110,27 +82,15 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         	return content;
         }
     },
-
     checkboxTemplateNode: function(node){
         if (!node.childNodes[0].innerText){
         	throw messages.errorcheckboxmalformed + ': ' + node.outerHTML;
         }else if (node.childNodes[0].innerText.trim() === "☑"){
             lang.hitch(this, this.removeCheckbox)(node);
         }else{
-            /*var nestedCheckboxes = Array.apply(null, node.getElementsByClassName('checkboxTemplate'));
-            nestedCheckboxes.forEach(function(nestedElement){
-                checkboxedNodes.some(function(node, i){
-                    if (node === nestedElement){
-                        delete checkboxedNodes[i];
-                        return true;
-                    }
-                });
-            });*/
             this.removeCheckboxAndNode(node);
         }
-    	
     }, 
-
     autocheckboxNode: function(node){
     	if (node.innerText.search('\\${') !== -1){
     		return;
@@ -145,7 +105,6 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         	 parentNode.removeChild(node);
     	}
     },
-    
     removeNodes: function(fromNode, classes){
 		classes.forEach(function(className){
 			var nodes = Array.apply(null, fromNode.getElementsByClassName(className));
@@ -159,11 +118,9 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
             }
 		});
     },
-
-    postProcess: function(content){
-    	return this._inProcess(content, ['pagebreak', 'pagenumber', 'numberofpages']);
+    postProcess: function(content, targetFormat){
+    	return this._inProcess(content, targetFormat === 'html' ? ['pagebreak', 'pagenumber', 'numberofpages', 'tukosContainer'] : ['pagebreak', 'pagenumber', 'numberofpages']);
     },
-
     pagebreakNode: function(node){
         var parentNode = node.parentNode;
         parentNode.insertBefore(dct.create('p', {style: {pageBreakAfter: 'always'}}), node); 
@@ -179,7 +136,21 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         parentNode.insertBefore(dct.create('span', {'class': "topage"}), node); 
         parentNode.removeChild(node);
     },
-
+    tukosContainerNode: function(node){
+        dct.place(tukosWidgets.targetToSource(node), node, 'replace');
+    },
+    setUniqueAtt: function(fromNode, forClassName, att){
+		var nodes = Array.apply(null, fromNode.getElementsByClassName(forClassName)), attValuesCounter = {};
+		nodes.forEach(function(node){
+			var attValue = node.getAttribute(att), counter = attValuesCounter[attValue];
+			if (counter){
+				node.setAttribute(att, attValue + counter);
+				attValuesCounter[attValue] += 1;
+			}else{
+				attValuesCounter[attValue] = 1;
+			}
+		});
+    },
     _inProcess: function(content, classesName, classesToRemove){
         var el = document.createElement('html');
         el.innerHTML = '<html><head><title>titleTest</title></head><body>' + content + '</body></html>';
@@ -187,6 +158,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         if (body.innerHTML === 'undefined'){
             return '';
         }else{
+        	this.setUniqueAtt(body, 'tukosContainer', 'data-widgetid');
         	classesName.forEach(lang.hitch(this, function(className){
         		var nodes = Array.apply(null, body.getElementsByClassName(className));
                 while (true){
@@ -203,8 +175,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         	}
         }
         return body.innerHTML;
-    },
-    
+    },   
     promoteChildNodes: function(node){
         var parentNode = node.parentNode, childNodes = Array.apply(null, node.childNodes);
         childNodes.forEach(function(childNode){

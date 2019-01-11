@@ -30,18 +30,15 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         serverDialog: function(urlArgs, data, emptyBeforeSet, defaultDoneMessage, markResponseIfChanged){
-            var self = this, parent = this.parent, title = parent.get('title');
+            var self = this;
             Pmg.setFeedback(messages.actionDoing);
             urlArgs.object = urlArgs.object || this.object;
             urlArgs.view = urlArgs.view || this.viewMode;
             urlArgs.mode = urlArgs.mode || this.paneMode;
             urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: this.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
-            parent.set('title', Pmg.loading(title, true));
             return all(data).then(lang.hitch(this, function(data){
-                return Pmg.serverDialog(urlArgs, {data: data}, defaultDoneMessage).then(lang.hitch(this, function(response){
-                //return Pmg.serverDialog(lang.hitch(self, self.completeUrlArgs(urlArgs)), {data: data}, defaultDoneMessage).then(lang.hitch(this, function(response){
+                return Pmg.serverDialog(urlArgs, {data: data}, {widget: this.parent, att: 'title', defaultMessage: defaultDoneMessage}).then(lang.hitch(this, function(response){
 	                    if (response['data'] === false){
-	                        //Pmg.appendFeedback(messages.failedOperation);
 	                        parent.set('title', title);
 	                    }else if(response['data'] !== undefined){
 	                        this.markIfChanged = self.watchOnChange = false;
@@ -52,8 +49,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
 	                            return when(self.setWidgets(response['data']), lang.hitch(this, function(){
 	                                if (response['title'] && dcl.contains(this.domNode.parentNode, 'dijitTabPane')){
 	                                    Pmg.tabs.setCurrentTabTitle(response['title']);
-	                                }else{
-	                                	parent.set('title', title);
 	                                }
 	                                if (!this.markIfChanged){
 	                                    this.resetChangedWidgets();
@@ -67,14 +62,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
 	                            }));
 	                        }));
 	                    }else{
-	                        parent.set('title', title);
 	                    	this.resetChangedWidgets();
 	                        return response;
 	                    }
-	                }),
-	                function (error){
-	                	parent.set('title', title);
-	                }
+	                })
                 );
             }));
         }, 
