@@ -1,4 +1,4 @@
-define(["dojo/_base/declare", "dojo/dom-style", "dijit/ColorPalette", "dijit/form/button", "tukos/PageManager"], 
+define(["dojo/_base/declare", "dojo/dom-style", "dijit/ColorPalette", "dijit/form/Button", "tukos/PageManager"], 
 function(declare, dst, ColorPalette, Button, Pmg){
 
 	return declare([ColorPalette], {

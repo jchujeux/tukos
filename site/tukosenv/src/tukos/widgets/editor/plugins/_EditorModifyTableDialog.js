@@ -19,7 +19,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                     rowLabel: {type: 'HtmlContent', atts: {style: {backgroundColor: '#BEBEBE', fontWeight: 700, whiteSpace: 'nowrap'}, value: Pmg.message('forCurrentRow')}},
                     colLabel: {type: 'HtmlContent', atts: {style: {backgroundColor: '#BEBEBE', fontWeight: 700, whiteSpace: 'nowrap'}, value: Pmg.message('forCurrentCol')}},
             		isWorksheet: {type: 'CheckBox', atts: {title: Pmg.message('is worksheet'), hidden: true, disabled: true}, attValueModule: domAttr},
-            		sheetName: {type: 'TextBox', atts: {title: Pmg.message('sheetName'), style: {width: '10em'}, hidden: true, disabled: true}, attValueModule: domAttr},
+            		sheetName: {type: 'TextBox', atts: {title: Pmg.message('sheetName'), style: {width: '10em'}, hidden: true, disabled: true}, attValueModule: domAttr}
                 },
                 headerRowLayout = {theRow: {
                 	tableAtts: {cols: 2, customClass: 'labelsAndValues', label: Pmg.message('modifyTable'), showLabels: false},

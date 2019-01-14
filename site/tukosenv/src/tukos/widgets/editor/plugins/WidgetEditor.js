@@ -26,7 +26,7 @@ function(declare, lang, dct, domStyle, dcl, string, _TagEditDialog, utils, hiuti
 	        				increment: {type: 'TextBox', atts: {label: Pmg.message('increment'), style: {width: '5em'}}},
 	        				min: {type: 'TextBox', atts: {label: Pmg.message('min'), style: {width: '5em'}}},
 	        				max: {type: 'TextBox', atts: {label: Pmg.message('max'), style: {width: '5em'}}},
-	        				digits: {type: 'TextBox', atts: {label: Pmg.message('digits'), style: {width: '5em'}}},
+	        				digits: {type: 'TextBox', atts: {label: Pmg.message('digits'), style: {width: '5em'}}}
 	        			},
                     	{headerRow: {tableAtts: {cols: 6, customClass: 'labelsAndValues', label: Pmg.message('widgetEditor'), showLabels: true, orientation: 'vert'}, widgets: extraWidgets}},
                     	['insert', 'replace', 'remove', 'close'], {tableAtts: {cols: 4,   customClass: 'labelsAndValues', showLabels: false}, widgets: ['insert'/*, 'replace'*/, 'remove', 'close']},
@@ -36,7 +36,7 @@ function(declare, lang, dct, domStyle, dcl, string, _TagEditDialog, utils, hiuti
         		openDialog: function(){
                     var pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), selection = this.editor.selection, widgetContainer = selection.getSelectedElement() || selection.getParentElement(), 
                     	paramsValues, defaultParams, nameWidget = paneGetWidget('name');
-                    while((!dcl.contains(widgetContainer, 'tukosContainer')) && (widgetContainer = widgetContainer.parentNode));
+                    while((!dcl.contains(widgetContainer, 'tukosContainer')) && (widgetContainer = widgetContainer.parentNode)){};
                     if (widgetContainer){
                     	paramsValues = tukosWidgets.getParams(widgetContainer);
                     	defaultParams = this.presentParams = tukosWidgets.defaultParams(paramsValues['type']);
@@ -87,7 +87,7 @@ function(declare, lang, dct, domStyle, dcl, string, _TagEditDialog, utils, hiuti
                 remove: function(){
                 	var editor = this.editor, selection = editor.selection;
                 	selection.remove();
-                },
+                }
         	}));
         }
     });

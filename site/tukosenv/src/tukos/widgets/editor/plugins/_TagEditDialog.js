@@ -100,7 +100,7 @@ define (
                 }
             };
         },
-        attWidgetsDescription(attName){
+        attWidgetsDescription: function(attName){
         	return this[description[attName]](attName);
         },
         colorDescription: function(attName){

@@ -16,7 +16,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 },
                 extraWidgetsDescription = {
                     	isWorksheet: {type: 'CheckBox', atts: {title: Pmg.message('is worksheet'), hidden: true, disabled: true}, attValueModule: domAttr},
-                    	sheetName: {type: 'TextBox', atts: {title: Pmg.message('sheetName'), style: {width: '10em'}, hidden: true, disabled: true}, attValueModule: domAttr},
+                    	sheetName: {type: 'TextBox', atts: {title: Pmg.message('sheetName'), style: {width: '10em'}, hidden: true, disabled: true}, attValueModule: domAttr}
                 },
                 headerRowLayout = {headerRow: {
                 	tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, label: Pmg.message('modifyTableSelection')},

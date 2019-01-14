@@ -62,7 +62,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
             		colValuesRow = dct.create('tr', {'class': 'dgrid-colvalues-row'}, headerTable);
                     utils.forEach(grid.columns, function(column, i){
                         var field = column.field, td;
-                    	grid.colValueParentNodes[field]  = td = dct.create('td', {class: "dgrid-colvalues-cell dgrid-column-" + i + " field-" + field}, colValuesRow);
+                    	grid.colValueParentNodes[field]  = td = dct.create('td', {className: "dgrid-colvalues-cell dgrid-column-" + i + " field-" + field}, colValuesRow);
                     	td.columnId = field;
                     	if (field !== clickedField && grid.colValueWidgetsDescription[field]){
                         	td.onClickHandler = on(td, 'click', lang.hitch(grid, grid.instantiateColValueWidget, grid, field));                    		

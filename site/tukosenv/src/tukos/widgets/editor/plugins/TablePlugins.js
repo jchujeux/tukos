@@ -520,7 +520,7 @@ var TablePlugins = declare("dojox.editor.plugins.TablePlugins", _Plugin, {
 	    		}
 	    	});
 	    },
-	    pasteAtSelected(){
+	    pasteAtSelected: function(){
 	    	var table = this.table, isWorksheet = dcl.contains(table, 'tukosWorksheet'), lastSelectedTds = this.lastSelectedTds, tableInfo = this.tableInfo, cols = tableInfo.cols, rows = tableInfo.rows;
 	    	if (lastSelectedTds){
 	        	var	temp = lastSelectedTds[0].id.slice(4).split('_'), sourceTdIndex = temp[0], tableTimeStamp = temp[1], sourceRow = Math.trunc(sourceTdIndex/cols), sourceCol = sourceTdIndex % cols, selectedTds = this.selectedTds,

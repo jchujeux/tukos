@@ -10,7 +10,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
             		rows: {type: 'TukosNumberBox', atts: {title: Pmg.message('rows'), style: {width: '5em'}}, attValueModule: domAttr}, 
             		columns: {type: 'TukosNumberBox', atts: {title: Pmg.message('columns'), style: {width: '5em'}}, attValueModule: domAttr},
             		isWorksheet: {type: 'CheckBox', atts: {title: Pmg.message('is worksheet'), checked: false, onChange: lang.hitch(this, this.onChangeWorksheetCheckBox)}, attValueModule: domAttr},
-            		sheetName: {type: 'TextBox', atts: {title: Pmg.message('sheetName'), style: {width: '10em'}, hidden: true}, attValueModule: domAttr},
+            		sheetName: {type: 'TextBox', atts: {title: Pmg.message('sheetName'), style: {width: '10em'}, hidden: true}, attValueModule: domAttr}
             	},
                 headerRowLayout = {linesAndRowsRow: {tableAtts: {cols: 4, customClass: 'labelsAndValues', label: Pmg.message('insertTable'), showLabels: true, orientation: 'horiz'}, widgets: ['rows', 'columns', 'isWorksheet', 'sheetName']}};
             return this._dialogAtts(headerRowWidgetsDescription, headerRowLayout,  actions, actionsRowLayout, this.editableAtts);

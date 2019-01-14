@@ -16,7 +16,7 @@ define([
 	"dijit/form/DropDownButton",
 	"dojo/_base/declare",
 	"dojo/string",
-    "tukos/PageManager",
+    "tukos/PageManager"
 ], function(dojo, dijit, dojox, domAttr, _Plugin, registry, range, lang, on, has, TooltipDialog, ValidationTextBox, Select, Button, DropDownButton, declare, string, Pmg) {
 
     var TukosLinkDialog = dojo.declare(_Plugin, {

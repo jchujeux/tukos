@@ -253,9 +253,13 @@ class PageView extends Translator{
 
     function render($modulesMenuLayout){
         $template = new Template(new EscaperFactory, new TemplateFinder, new HelperLocator);
-        
-        $template->jsTukosDir = Tfk::jsFullDir('tukos');
-        $template->dojoDir = Tfk::jsFullDir('');
+        $packagesLocation = ['dojo', 'dijit', 'dojox', 'dstore', 'dgrid', 'tukos', 'dojoFixes', 'redips'];
+        array_walk($packagesLocation, function(&$module){
+            $module = '{"name":"' . $module . '","location":"' . Tfk::moduleLocation($module) . '"}';
+        });
+        $template->packagesString = '[' . implode(',', $packagesLocation) . ']';
+        $template->jsTukosDir = Tfk::moduleLocation('tukos');//jsFullDir('tukos');
+        $template->dojoDir = Tfk::dojoBaseLocation();//jsFullDir('');
         $template->dojoFixesDir = Tfk::jsFullDir('dojoFixes');
         $template->redipsDir = Tfk::jsFullDir('redips');
         $template->language = $translatorsStore = Tfk::$registry->get('translatorsStore')->getLanguage();
