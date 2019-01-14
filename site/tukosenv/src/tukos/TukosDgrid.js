@@ -1,11 +1,12 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/keys", "dojo/on", "dojo/when", "dojo/query", "dojo/request", "dojo/aspect", "dojo/dom-style",
          "dgrid/OnDemandGrid", "tukos/_GridMixin", "tukos/_GridSummaryMixin", "dgrid/Selection", "dgrid/Keyboard", "dgrid/Selector", "dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer", 
          "dgrid/extensions/DijitRegistry", "tukos/dgrid/Editor", "tukos/utils", "tukos/widgetUtils", "tukos/evalutils"/*, "tukos/dgrid/lazytree"*/, "dgrid/Tree"/*, "tukos/ganttColumn"*/,"tukos/colFilter", 
-         "dijit/Menu", "dijit/MenuItem", "dijit/registry", "tukos/PageManager", "tukos/sheetUtils", "tukos/DialogConfirm", "dojo/json", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+         "dijit/Menu", "dijit/MenuItem", "dijit/registry", "tukos/PageManager", "tukos/sheetUtils", "tukos/DialogConfirm", "dojo/json", "dojo/i18n!tukos/nls/messages"/*, "dojo/domReady!"*/], 
 function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
          Grid, _GridMixin, _GridSummaryMixin, Selection, Keyboard, selector, Hider, Resizer, DijitRegistry, editor, utils, wutils, eutils, tree/*, ganttColumn*/,colFilter, 
          Menu, MenuItem, registry, Pmg, sutils, DialogConfirm, JSON, messages){
-    return declare([Grid, editor, tree, selector, Selection, Keyboard, Hider, Resizer, DijitRegistry, _GridMixin, _GridSummaryMixin], {
+    
+	return declare([Grid, editor, tree, selector, Selection, Keyboard, Hider, Resizer, DijitRegistry, _GridMixin, _GridSummaryMixin], {
 
         constructor: function(args){
             for (var i in args.columns){
@@ -174,7 +175,7 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
                 filtersRow = dct.create('tr', {'class': 'dgrid-filter-row'}, headerTable);
                 utils.forEach(grid.columns, function(column, i){
                     var colId = column.field;
-                    var td  = dct.create('td', {class: "dgrid-filter-cell dgrid-column-" + i + " field-" + colId}, filtersRow);
+                    var td  = dct.create('td', {className: "dgrid-filter-cell dgrid-column-" + i + " field-" + colId}, filtersRow);
                     td.columnId = colId;
                     if (column.rowsFilters){
                         var filter = new colFilter({onFilterChange: onFilterChange, grid: grid, col: colId, filters: column.rowsFilters, oprAtts: {style: 'width: 7em;'}, entryAtts: {style: 'width: 7em;'}}, td);

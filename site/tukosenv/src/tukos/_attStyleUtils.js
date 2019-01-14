@@ -1,4 +1,4 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-style", "dojo/dom-construct", "dojo/ready", "dojo/on", "tukos/utils", "tukos/TukosTooltipDialog", "dijit/ColorPalette", 
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-style", "dojo/dom-construct", "dojo/ready", "dojo/on", "tukos/utils", "tukos/TukosTooltipDialog", "dijit/ColorPalette"],
     function(declare, lang, domAttr, domStyle, dct, ready, on, utils, TukosTooltipDialog, colorPicker){
 
     var sizeUnits = [{id: '', name: ''}, {id: 'auto', name: 'auto'}, {id: '%', name: '%'}, {id: 'em', name: 'em'}, {id: 'px', name: 'px'}];

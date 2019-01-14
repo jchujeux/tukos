@@ -31,7 +31,7 @@ function(declare, lang, dct, domStyle, dcl, string, JSON, htmlFormat, TooltipDia
                 onOpen: lang.hitch(this, function(){
                     var pane = this.dialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), nameWidget = paneGetWidget('name'), valueWidget = paneGetWidget('value'), selection = this.inserter.editor.selection,
                         expression = selection.getSelectedElement() || selection.getParentElement();
-                    while((!dcl.contains(expression, 'tukosExpression')) && (expression = expression.parentNode));
+                    while((!dcl.contains(expression, 'tukosExpression')) && (expression = expression.parentNode)){};
                     if (expression){
                     	nameWidget.set('value', expression.id.slice(2));
                     	valueWidget.set('value', expressions.formulaOf(expression)) || expressions.valueOf(expression);

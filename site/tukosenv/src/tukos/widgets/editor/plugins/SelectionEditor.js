@@ -50,7 +50,7 @@ function(declare, lang, ready, _Plugin, Button, _TagEditDialog, messages) {
         	}else{
         		return false;
         	};
-        },
+        }
     });
 	_Plugin.registry['SelectionEditor'] = function(){return new SelectionEditor({})};
     return SelectionEditor;

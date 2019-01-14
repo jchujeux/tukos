@@ -19,7 +19,7 @@ trait ContentExporter {
 					"var y = document.getElementsByClassName(x[i]);" .
 					"for (var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];" .
 		"}}</script>";
-	protected $tukosFormsHeader = '<title>${title}</title><link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dijit/themes/claro/claro.css" media="screen">';
+	protected $tukosFormsHeader = '<title>${title}</title><link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.14.2/dijit/themes/claro/claro.css" media="screen">';
 	protected $tukosFormsBodyScripts = '
 <script>var dojoConfig ={
             baseUrl: "", isDebug: false, async: true, locale: "en-en",
@@ -27,7 +27,7 @@ trait ContentExporter {
             packages: [{"name": "tukos", "location": "http://localhost/tukos/tukosenv/src/tukos"}]
         };
 </script>
-<script src="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojo/dojo.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/dojo/1.14.2/dojo/dojo.js"></script>
 <script>
     require(["tukos/expressions", "tukos/tukosForms", "tukos/PageManager", "dojo/parser", "dijit/Editor", "dijit/_editor/plugins/AlwaysShowToolbar"], function (expressions, tukosForms, Pmg, parser) {
 				tukos = {Pmg: Pmg};

@@ -3,6 +3,13 @@
     <head>
         <meta charset="utf-8">
         <title>Tukos 2.0</title>
+        <link rel="stylesheet" href="<?= $this->dojoDir ?>dijit/themes/claro/claro.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoDir ?>dgrid/css/dgrid.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoDir ?>dojox/editor/plugins/resources/editorPlugins.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoDir ?>dojox/editor/plugins/resources/css/StatusBar.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoDir ?>dojox/editor/plugins/resources/css/FindReplace.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoDir ?>dojox/calendar/themes/claro/Calendar.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoDir ?>dojox/form/resources/UploaderFileList.css" media="screen">
         <link rel="stylesheet" href="<?= $this->jsTukosDir ?>/resources/tukos.css" media="screen">
     </head>
     <body class="claro">
@@ -16,15 +23,10 @@
         <!-- load dojo and provide config via data attribute -->
 
         <script>var dojoConfig ={
-                    baseUrl: "", isDebug: false, async: true, locale: "<?= $this->language ?>",
+                    //baseUrl: "", isDebug: false, 
+                    async: true, locale: "<?= $this->language ?>",
         			selectorEngine: 'lite',
-        			tlmSiblingOfDojo: false,
-                    packages: [{"name": "dojo", "location": "<?= $this->dojoDir ?>dojo"},   {"name": "dijit", "location": "<?= $this->dojoDir ?>dijit"},  
-                               {"name": "dojox", "location": "<?= $this->dojoDir ?>dojox"}, {"name": "dstore", "location": "<?= $this->dojoDir ?>dstore"},
-                               {"name": "dgrid", "location": "<?= $this->dojoDir ?>dgrid"},
-                               {"name": "tukos", "location": "<?= $this->jsTukosDir ?>"}, {"name": "dojoFixes", "location": "<?= $this->dojoFixesDir ?>"},
-                               {"name": "redips", "location": "<?= $this->redipsDir ?>"},
-                    ],
+					packages: <?= $this->__raw()->packagesString ?>,
                     map: {'dojo' : {'dojo/dnd/Selector': "dojoFixes/dojo/dnd/Selector"},/* '*': {'dojo/dnd/common': 'dojoFixes/dojo/dnd/common'}, */'dijit/Menu': {'dijit/popup': 'dojoFixes/dijit/popup'}},
                     //transparentColor: [255,255,255,0]
                 };

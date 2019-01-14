@@ -112,7 +112,7 @@ define([
 				"dijit/form/Button", // used by template
 				"dijit/form/Select", // used by template
 				"dijit/form/ValidationTextBox", // used by template
-				"dojo/i18n!dijit/nls/common",
+				"dojo/i18n!dijit/nls/common"
 			], lang.hitch(this, function(i18n, TooltipDialog, registry, Button, Select, ValidationTextBox, Common){
 				var _this = this, messages = Pmg.messages(['createLink', 'insertImage', 'url', 'description', 'target', 'apply', 'tukos', 'standard', 'cancel']);
 				this.tag = this.command == 'insertImage' ? 'img' : 'a';

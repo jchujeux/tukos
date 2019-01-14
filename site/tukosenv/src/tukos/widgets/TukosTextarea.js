@@ -26,6 +26,6 @@ define(["dojo/_base/declare", "dijit/form/SimpleTextarea"],
         	if (!this.disabled){
         		this.autoExpand(this.domNode);
         	}
-        },
+        }
     });
 });

@@ -27,7 +27,7 @@ function(declare, lang, dct, domStyle, ready, string, JSON, _Plugin, Button, Men
                 showLabel: false,
                 iconClass: this.iconClassPrefix + " " + this.iconClassPrefix + "InsertPageBreak",
                 tabIndex: "-1",
-                loadDropDown: lang.hitch(this, "_loadDropDown"),
+                loadDropDown: lang.hitch(this, "_loadDropDown")
             });
         },
 

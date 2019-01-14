@@ -23,15 +23,24 @@ class TukosFramework{
     const backupBinDir = '/xampp/mysql/bin/';
 
     const tukosSite = '/tukos/site/';
+    const dojoModules = ['dojo', 'dijit', 'dojox', 'dstore', 'dgrid'];
 
     const publicDir = '/tukos/'; // this is the beginnning of the url path, i.e. '/tukos/' is aliased with '/tukos/site/' in apache config
     
-    public static $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment; 
+    public static $phpRoot, $phpTukosDir, $phpVendorDir, $vendorDir = [],
+                  $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment, $tukosBaseLocation, $dojoBaseLocation; 
   
     public static function initialize ($mode, $appName = null){
         self::$startMicroTime = microtime(true);
+        self::$phpRoot = getenv('tukosPhpRoot');
+        self::$phpTukosDir = self::$phpRoot . '/tukos/';
+        self::$phpVendorDir = self::$phpTukosDir . 'vendor/';
+        $vendorDirs = ['aura' => 'auraphp-system-1.0.0/', 'auraV2' => 'aura-2.1.0', 'pear' => '', 'zend' => 'zf1/zend-console-getopt/library/'];
+        array_walk($vendorDirs, function($vendorDir, $module){
+            self::$vendorDir[$module] = self::$phpVendorDir . $vendorDir;
+        });
         mb_internal_encoding('UTF-8');
-        require __DIR__ . '\registry.php';
+        require __DIR__ . '/registry.php';
         self::$registry = new Registry($mode);
         if ($mode === 'commandLine'){
             self::$registry->appName = strtolower($appName);
@@ -42,9 +51,22 @@ class TukosFramework{
     
     public static function setEnvironment($environment){
     	self::$environment = $environment;
+    	self::$tukosBaseLocation = self::publicDir . 'tukosenv/' . (empty(self::$environment) || self::$environment === 'production' ? 'release/' : 'src/');
+    	self::$dojoBaseLocation = getenv('dojoBaseLocation');
+    	if (empty(self::$dojoBaseLocation)){
+    	    self::$dojoBaseLocation = self::$tukosBaseLocation;
+    	}
     }
     public static function jsFullDir($dir){
     	return self::publicDir . 'tukosenv/' . (empty(self::$environment) || self::$environment === 'production' ? 'release/' : 'src/') . $dir;
+    }
+    
+    public static function moduleLocation($module){
+        return (in_array($module, self::dojoModules) ? self::$dojoBaseLocation : self::$tukosBaseLocation) . $module;
+    }
+    
+    public static function dojoBaseLocation(){
+        return empty(self::$dojoBaseLocation) ? self::publicDir . 'tukosenv/' . 'release/' : self::$dojoBaseLocation;
     }
     
     public static function isWindows(){

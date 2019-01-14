@@ -105,10 +105,10 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
 				//focus() is required for IE to work
 				//In addition, focus() makes sure after the execution of
 				//the command, the editor receives the focus as expected
-				if(this.focused){
+				//if(this.focused){
 					// put focus back in the iframe, unless focus has somehow been shifted out of the editor completely
 					//this.focus();
-				}
+				//}
 	
 				command = this._normalizeCommand(command, argument);
 	

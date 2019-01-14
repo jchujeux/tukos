@@ -31,7 +31,7 @@ function(declare, lang, dct, domStyle, dcl, string, JSON, htmlFormat, TooltipDia
                 onOpen: lang.hitch(this, function(){
                     var pane = this.dialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), nameWidget = paneGetWidget('name'), valueWidget = paneGetWidget('value'), selection = this.inserter.editor.selection,
                         widgetContainer = selection.getSelectedElement() || selection.getParentElement();
-                    while((!dcl.contains(widgetContainer, 'tukosContainer')) && (widgetContainer = widgetContainer.parentNode));
+                    while((!dcl.contains(widgetContainer, 'tukosContainer')) && (widgetContainer = widgetContainer.parentNode)){};
                     if (widgetContainer){
                     	nameWidget.set('value', widgetContainer.getAttribute('data-widgetId'));
                     	valueWidget.set('value', widgetContainer.getAttribute('data-params'));
