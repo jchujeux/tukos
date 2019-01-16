@@ -14,7 +14,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on", "doj
                     this.contextMenu.destroyRecursive();
                 }
                 this.contextMenu = new Menu({targetNodeIds:[evt.target]});
-                this.contextMenu.addChild(new MenuItem({label: messages.refresh, onClick: function(evt){self.refresh('tab', []);}}));
+                this.contextMenu.addChild(new MenuItem({label: messages.refresh, onClick: function(evt){self.refresh('Tab', []);}}));
                 this.contextMenu.addChild(new MenuItem({label: messages.customization, onClick: lang.hitch(this, this.openCustomDialog)}));
             }
         },
@@ -33,14 +33,14 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on", "doj
                 	});
                 	query = {id: paneConfig.id};
                 }else{
-	            	if (theFormContent.viewMode === 'edit'){
+	            	if (theFormContent.viewMode === 'Edit'){
 	                    var id = lang.hitch(theForm, theForm.valueOf)('id');
 	                    if (id){
 	                    	query.id = id;
 	                    }
 	                }
                 }
-                if (theFormContent.viewMode === 'overview' && currentPane.isAccordion()){
+                if (theFormContent.viewMode === 'Overview' && currentPane.isAccordion()){
                 	query.title = currentPane.get('title');
                 }
             	return Pmg.serverDialog({object: theFormContent.object, view: theFormContent.viewMode, mode: theFormContent.paneMode, action: action, query: query}, {data: data}, {widget: currentPane, att: 'title', defaultFeedback: false}).then(

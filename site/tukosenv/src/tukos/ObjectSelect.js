@@ -4,10 +4,10 @@ define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom-attr", "dojo/on", "
         constructor: function(args){
 
         	args.storeArgs = args.storeArgs || {};
-            args.storeArgs.view = args.storeArgs.view || 'noview';
-            args.storeArgs.action = args.storeArgs.action || 'objectselect';
+            args.storeArgs.view = args.storeArgs.view || 'NoView';
+            args.storeArgs.action = args.storeArgs.action || 'ObjectSelect';
             args.storeArgs.object = args.storeArgs.object || args.object;
-            args.storeArgs.mode = args.storeArgs.mode || args.mode || 'tab';
+            args.storeArgs.mode = args.storeArgs.mode || args.mode || 'Tab';
             args.store = Pmg.store(args.storeArgs);
 
         	declare.safeMixin(this, args);

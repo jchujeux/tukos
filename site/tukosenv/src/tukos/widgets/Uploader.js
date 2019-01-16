@@ -6,7 +6,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/dom-construct", "dojo/d
             var table = dct.create('table', {}, this.domNode);
             var tr = dct.create('tr', {}, table);
             var uploadSelectorNode  = dct.create('td', {}, tr);
-            this.uploaderAtts.url = Pmg.requestUrl({object: 'documents', view: 'noview', action: 'upload'});
+            this.uploaderAtts.url = Pmg.requestUrl({object: 'documents', view: 'NoView', action: 'Upload'});
             this.uploadSelector = new Uploader(this.uploaderAtts);
             on(this.uploadSelector, 'complete', function(evt){
                 self.uploadButton.set('style', 'display: none;');
@@ -23,7 +23,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/dom-construct", "dojo/d
                 if ((theId == '') || self.form.hasChanged()){
                     var dialog = new tukos.DialogConfirm({title: messages.newOrFieldsHaveBeenModified, content: messages.saveOrReloadFirst, hasSkipCheckBox: false});
                     dialog.show().then(function(){Pmg.setFeedback(messages.actionCancelled);},
-                                       function(){Pmg.setFeedback(messages.actionCancelled);});/* user pressed Cancel: no action */
+                                       function(){Pmg.setFeedback(messages.actionCancelled);});
                 }else{
                     if (this.subFiles){
                         var theName = dijit.registry.byId(self.form.id + 'name').get('value');

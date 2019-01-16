@@ -20,7 +20,7 @@ define (["dojo/cookie", "dojo/request/iframe", "tukos/PageManager"],
             rowData = this.row(evt).data;
             if (rowData.id > 0 && rowData.size > 0){
                 var onClickCallBack = function(evt){
-                    this.download({object: 'documents', view: 'noview', action: 'download', query: {id: rowData.id}});
+                    this.download({object: 'documents', view: 'NoView', action: 'Download', query: {id: rowData.id}});
                 }
                 return {row: [{label: "download", onClick: onClickCallback}], idCol:  [{label: "download", onClick: onClickCallBack}]};
             }else{

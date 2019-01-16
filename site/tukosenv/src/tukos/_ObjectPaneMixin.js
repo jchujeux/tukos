@@ -10,7 +10,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
 
         editInNewTab: function(widget){
             var value = this.valueOf(widget['widgetName']);
-            Pmg.tabs.request({object: (Pmg.objectName(value) || this.object), view: 'edit', mode: 'tab', action: 'tab', query: {id: value}});
+            Pmg.tabs.request({object: (Pmg.objectName(value) || this.object), view: 'Edit', mode: 'Tab', action: 'Tab', query: {id: value}});
         },
         showInNavigator: function(widget){
         	Pmg.showInNavigator(this.valueOf(widget['widgetName']));
@@ -87,7 +87,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         widgetWatchServerAction: function(widget, actionDescriptions, newValue){
-            var url = {action:  'process', query: {widget: widget.widgetName}};
+            var url = {action:  'Process', query: {widget: widget.widgetName}};
             if (actionDescriptions.urlArgs){
                 url = utils.mergeRecursive(url, actionDescriptions.urlArgs);
             }

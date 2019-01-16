@@ -19,7 +19,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dojo/d
                         Pmg.setFeedback(messages.noChangeToSubmit);
                     }else{
                         Pmg.setFeedback(messages.actionDoing);
-                        self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'save'), query: self.urlArgs ? lang.mixin({id: form.valueOf('id')}, self.urlArgs.query) : {id: form.valueOf('id')}}, changedValues, form.get('dataElts'), messages.actionDone); 
+                        self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Save'), query: self.urlArgs ? lang.mixin({id: form.valueOf('id')}, self.urlArgs.query) : {id: form.valueOf('id')}}, changedValues, form.get('dataElts'), messages.actionDone); 
                     }
                 }, 100);
            });

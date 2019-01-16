@@ -25,7 +25,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dojo/d
                     var setDuplicate = function(){
                         var changedValues = form.changedValues();
                         form.resetChangedWidgets();
-                        form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'edit'), query: {dupid: idValue}}, [], form.get('dataElts'), messages.actionDone, true).then(
+                        form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Edit'), query: {dupid: idValue}}, [], form.get('dataElts'), messages.actionDone, true).then(
                             function(response){
                                 form.setValueOf('id', '');
                                 if (response.itemCustomization){

@@ -236,7 +236,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
             return stores.get(args);
         },
         requestUrl: function(urlArgs){
-            return string.substitute(urlTemplate, {dialogueUrl: this.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
+            return string.substitute(urlTemplate, {dialogueUrl: this.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
         },
         openExternalUrl: function(url){//deprecated - to eliminate from existing editor content if present
             window.open(url);
@@ -411,15 +411,15 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
     		return store;
     	},
         serverTranslations: function(expressions, actionModel){
-                var self = this, results = {}, actionModel = actionModel || 'getTranslations';
-                return this.serverDialog({object: 'users', view: 'noview', action: 'get', query:{params: {actionModel: actionModel}}}, {data: expressions}, messages.actionDone).then(function (response){
+                var self = this, results = {}, actionModel = actionModel || 'GetTranslations';
+                return this.serverDialog({object: 'users', view: 'NoView', action: 'Get', query:{params: {actionModel: actionModel}}}, {data: expressions}, messages.actionDone).then(function (response){
                         utils.forEach(response.data, function(translations, objectName){
                             var objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {});
                             results[objectName] = {};
                             utils.forEach(translations, function(translation, expression){
                                 objectTranslations[expression] = translation;
-                                objectUntranslations[translation/*.toLowerCase()*/] = expression;
-                                if (actionModel === 'getTranslations'){
+                                objectUntranslations[translation] = expression;
+                                if (actionModel === 'GetTranslations'){
                                     results[objectName][expression] = translation;
                                 }else{
                                     results[objectName][translation/*.toLowerCase()*/] = expression;
@@ -451,7 +451,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         },
 
         _getWidgetNameTranslation: function(widgetName, objectName, form){
-            var form = form || this.tabs.objectPane(objectName, 'edit'), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}),
+            var form = form || this.tabs.objectPane(objectName, 'Edit'), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}),
                    translation = undefined;
             if (form){
                 var widget = form.getWidget(widgetName);
@@ -468,7 +468,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         },
 
         _getWidgetNameUntranslation: function(translatedWidgetName, objectName, form){
-            var form = form || this.tabs.objectPane(objectName, 'edit'), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}),
+            var form = form || this.tabs.objectPane(objectName, 'Edit'), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}),
                   untranslation = undefined;
             if (form){
                 form.widgetsName.some(function(widgetName){
@@ -494,9 +494,6 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         
         getCustom: function(){
         	return this.cache.newPageCustomization;
-        	//var cache = this.cache;
-        	//return utils.empty(cache.newPageCustomization) ? cache.pageCustomization : utils.mergeRecursive(lang.clone(cache.pageCustomization), cache.newPageCustomization);
-        	//return path === "" ? utils.mergeRecursive(lang.clone(cache.pageCustomization), cache.newPageCustomization) : utils.mergeRecursive(lang.clone(cache.pageCustomization[path]), cache.newPageCustomization[path] || {});
         }
     }
 });

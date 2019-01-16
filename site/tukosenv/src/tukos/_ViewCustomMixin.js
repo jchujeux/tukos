@@ -67,7 +67,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         setVisibility: function(args){
-            var  targetPane = this.currentPane(), form = targetPane.form || targetPane, pane = targetPane.customDialog.pane, viewMode = form.viewMode, isOverview = (viewMode === 'overview' || targetPane.isAccordion()), isReadOnly = form.readOnly;
+            var  targetPane = this.currentPane(), form = targetPane.form || targetPane, pane = targetPane.customDialog.pane, viewMode = form.viewMode, isOverview = (viewMode === 'Overview' || targetPane.isAccordion()), isReadOnly = form.readOnly;
                     paneGetWidget = lang.hitch(pane, pane.getWidget);
             paneGetWidget('defaultCustomView').set('value',  form.customviewid ? form.customviewid : '', false);
             paneGetWidget('itemCustomView').set('value',  form.itemcustomviewid ? form.itemcustomviewid : '', false);
@@ -129,7 +129,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         itemCustomViewChange: function(newValue){
             var form = this.currentPane().form, custom = {};
             custom[form.viewMode] = {itemcustomviewid: newValue};
-            Pmg.tabs.refresh('tabsave', {id: lang.hitch(form, form.valueOf)('id'), custom: custom}, {values: true, customization: true}).then(lang.hitch(this, function(){
+            Pmg.tabs.refresh('TabSave', {id: lang.hitch(form, form.valueOf)('id'), custom: custom}, {values: true, customization: true}).then(lang.hitch(this, function(){
                 var targetPane = this.currentPane(), form = targetPane.form || targetPane, pane = targetPane.customDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
                 paneGetWidget('itemCustomViewButton').set('disabled', ((form.itemcustomviewid && form.itemcustomviewid !== '') ? false : true));
                 if (paneGetWidget('more').get('hidden')){
@@ -140,7 +140,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
 
         newCustomView: function(){
             var targetPane = this.currentPane(), form = targetPane.form, object = form.object, view = form.viewMode;
-            Pmg.tabs.request({object: 'customviews', view:  'edit', action: 'tab'}).then(
+            Pmg.tabs.request({object: 'customviews', view:  'Edit', action: 'Tab'}).then(
                 function(){
                     ready(function(){
                         var targetPane = Pmg.tabs.currentPane(), form = targetPane.form;
@@ -158,10 +158,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                     Pmg.refresh(targetPane, 'tabdefaultcustomviewsave', form.customization, {values: true});
                     break;
                 case 'itemCustomView': 
-                    Pmg.tabs.refresh('tabitemcustomviewsave', {id: form.itemcustomviewid, vobject: form.object, view: form.viewMode, customization: form.customization}, {values: true});
+                    Pmg.tabs.refresh('TabItemCustomViewSave', {id: form.itemcustomviewid, vobject: form.object, view: form.viewMode.toLowerCase(), customization: form.customization}, {values: true});
                     break;
                 case 'itemCustom': 
-                    Pmg.tabs.refresh('tabsave', {custom: utils.newObj([[form.viewMode, utils.newObj([[form.paneMode, form.customization]])]])}, {values: true});
+                    Pmg.tabs.refresh('TabSave', {custom: utils.newObj([[form.viewMode.toLowerCase(), utils.newObj([[form.paneMode.toLowerCase(), form.customization]])]])}, {values: true});
                     break;
                 default:
                     close = false;
@@ -176,7 +176,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         moreCallback: function(){
             var targetPane = this.currentPane(), targetNode = this.currentPaneNode(), form = targetPane.form || targetPane, id = form.valueOf('id'),  customDialog = targetPane.customDialog, pane = customDialog.pane, getWidget = lang.hitch(pane, pane.getWidget);
             this.setVisibility({hideMore: false});
-            Pmg.serverDialog({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'customviewmore', query: id ? {id: id} : {}}).then(
+            Pmg.serverDialog({object: form.object, view: form.viewMode.toLowerCase(), mode: form.paneMode.toLowerCase(), action: 'CustomViewMore', query: id ? {id: id} : {}}).then(
                 function(response){
                     ['defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
                         var contentName = customSet + 'Content'
@@ -215,7 +215,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
             }else{
                 if (toDelete.defaultCustomView){toDelete.defaultCustomView.viewId = form.customviewid;}
                 if (toDelete.itemCustomView){toDelete.itemCustomView.viewId = form.itemcustomviewid;}                   
-                Pmg.tabs.refresh('customdelete', toDelete, {values: true, customization: true}).then(
+                Pmg.tabs.refresh('CustomDelete', toDelete, {values: true, customization: true}).then(
                     function(response){
                         //console.log('in delectecallback response');
                         var customContent = response.customContent;

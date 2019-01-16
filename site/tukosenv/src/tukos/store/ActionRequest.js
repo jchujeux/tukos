@@ -16,8 +16,6 @@
 
         get: function(id, options){// options is not used here. Remove ? (in JsonRest used for headers)
             if (typeof id == "undefined" || !id || id == 0){
-                //console.log('Store/ActionRequest::get - id is empty');
-                //return QueryResults([]);
                 return {id: '', name: ''};
             }else{
                 var item = Pmg.getExtra(id);
@@ -34,11 +32,9 @@
     
         query: function(query, options){
             if (!query || query == {}){
-                //console.log('Store/ActionRequest::query - query is empty');
                 return QueryResults([]);
             }else{
                 var queryOptions = this.queryOptions(query, options), params = this.params || options.params;
-                //var dfdQuery = lang.mixin(queryOptions ? {storeatts: queryOptions} : {}, options.params ? {params: options.params} : {});
                 var dfdQuery = lang.mixin(queryOptions ? {storeatts: queryOptions} : {}, params ? {params: params} : {});
 
                 var dfdResponse = Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query: dfdQuery}, {}, '', true);

@@ -165,7 +165,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
 	            var form = this.form, widget = this.pane.getWidget('sendemail');
 	            lang.hitch(this, this.dataToProcess)().then(function(data){
 	                Pmg.setFeedback(Pmg.message('sendingemail'));
-	            	Pmg.serverDialog(lang.hitch(form, form.completeUrlArgs)({action: 'process', query: {id: true, params: {process: 'sendContent', noget:  true}}}), {data: data, timeout: 32000},{widget: widget, att: 'label'});
+	            	Pmg.serverDialog(lang.hitch(form, form.completeUrlArgs)({action: 'Process', query: {id: true, params: {process: 'sendContent', noget:  true}}}), {data: data, timeout: 32000},{widget: widget, att: 'label'});
 	            });
             }), 100);
         },

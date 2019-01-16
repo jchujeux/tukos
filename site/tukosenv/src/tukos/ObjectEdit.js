@@ -10,7 +10,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/ObjectSelect", "dijit/r
 
                 if (! (item.id == '')){// this test is needed due to fact that this.reset() fires the 'change' event again :-(.
                     var setEditValues = function(){
-                        form.serverDialog(lang.mixin(self.urlArgs || {action: 'edit'}, {query: {id: item.id}}), [], self.form.get('dataElts'), messages.actionDone); 
+                        form.serverDialog(lang.mixin(self.urlArgs || {action: 'Edit'}, {query: {id: item.id}}), [], self.form.get('dataElts'), messages.actionDone); 
                     }
                     if(!form.hasChanged()){
                         setEditValues();

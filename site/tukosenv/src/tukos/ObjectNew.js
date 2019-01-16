@@ -13,7 +13,7 @@ define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "dijit/focus"
                     var dropDown,
                         newAction = function(dupid){
                         	form.resetChangedWidgets();
-                    		form.serverDialog({action: 'edit', query: dupid ? {dupid: dupid} : {}}, [], form.get('dataElts'), messages.actionDone, true); 
+                    		form.serverDialog({action: 'Edit', query: dupid ? {dupid: dupid} : {}}, [], form.get('dataElts'), messages.actionDone, true); 
                         	popup.close(self.dropDown);
                     	},
                     	onNewAction = function(evt){

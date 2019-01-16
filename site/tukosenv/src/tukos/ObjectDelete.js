@@ -26,7 +26,7 @@ define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dojo/dom-form", "dijit/fo
                             if (updatedWidget){
                                 postValues['updated'] = updatedWidget.get('value');
                             }
-                            self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'delete')}, postValues, self.form.get('postElts'), messages.actionDone); 
+                            self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Delete')}, postValues, self.form.get('postElts'), messages.actionDone); 
                         },
                         function(){Pmg.setFeedback(messages.actionCancelled);});/* user pressed Cancel: no action */
                 }

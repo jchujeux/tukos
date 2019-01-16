@@ -87,7 +87,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready",  "do
                     return;
                 }
             }
-            target.action = target.action || 'tab';
+            target.action = target.action || 'Tab';
             this.request(target);
         }, 
         setCurrentTabTitle: function(newTitle){ 

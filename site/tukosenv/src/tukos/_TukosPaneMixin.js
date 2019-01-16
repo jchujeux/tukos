@@ -292,8 +292,8 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
         completeUrlArgs: function(urlArgs){
             var form = this.form || this;
             urlArgs.object = urlArgs.object || form.object;
-            urlArgs.view = urlArgs.view || form.viewMode || 'noview';// 'noview' probably not needed
-            urlArgs.mode = urlArgs.mode || form.paneMode || 'nomode';// 'nomode' probably not needed
+            urlArgs.view = urlArgs.view || form.viewMode || 'NoView';
+            urlArgs.mode = urlArgs.mode || form.paneMode || 'NoMode';
             if (urlArgs.query && urlArgs.query.id && urlArgs.query.id === true){
                 urlArgs.query.id = registry.byId(form.id + 'id').get('value');
             }

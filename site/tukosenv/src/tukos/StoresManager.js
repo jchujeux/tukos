@@ -15,7 +15,7 @@ define (["dojo/_base/declare", "dojo/string", "dojo/store/Memory", "dojo/store/C
             var action = args.action;
         	if (action || args.target){
                 var theStore = args.target = (args.target || Pmg.requestUrl(args));
-                if (action === 'objectselect'){
+                if (action === 'ObjectSelect'){
                 	if (theStore in this.stores){
                         return this.stores[theStore].myStore;
                     }
@@ -24,7 +24,7 @@ define (["dojo/_base/declare", "dojo/string", "dojo/store/Memory", "dojo/store/C
                     this.i += 1;               	
                 }
                 args.sortParam = args.sortParam || Pmg.getItem('sortParam');
-                this.stores[theStore] = {myStore: new Observable(new (action === 'objectselect' ? ObjectSelectStore : ActionRequestStore)(args))};
+                this.stores[theStore] = {myStore: new Observable(new (action === 'ObjectSelect' ? ObjectSelectStore : ActionRequestStore)(args))};
                 return this.stores[theStore].myStore;
             }else{
                 var theStore = 'target' + this.i;
