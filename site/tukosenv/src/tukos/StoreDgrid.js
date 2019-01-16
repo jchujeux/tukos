@@ -62,7 +62,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
         getTemplate: function(mode, newValue){
         	if (newValue !== ''){
                 var self = this;
-        		Pmg.serverDialog({object: this.object, view: 'noview', mode: this.form.paneMode, action: 'get', query: {params: {actionModel: 'getTemplate'}, dupid: newValue}}, {}, messages.actionDone).then(
+        		Pmg.serverDialog({object: this.object, view: 'NoView', mode: this.form.paneMode, action: 'Get', query: {params: {actionModel: 'GetTemplate'}, dupid: newValue}}, {}, messages.actionDone).then(
                         function (response){
                         	var newRow = response.data;
                         	newRow.grade = 'NORMAL';

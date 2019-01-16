@@ -13,8 +13,7 @@ define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "tukos/menuUt
                 evt.preventDefault();
         		var id = this.form.valueOf('id');
         		if (id){
-        			Pmg.tabs.request({object: 'calendars', view: 'edit', action: 'tab', query: {contextpathid: self.form.tabContextId(), storeatts: {where: {parentid: id}, init: {googleSource: self.defaultCalendar || '', tukosSource: id, contextid: self.form.tabContextId()}}}});        			
-                    //Pmg.tabs.gotoTab({object: 'calendars', view: 'edit', action: 'tab', query: {parentid: id, calendar: self.defaultCalendar}});        			
+        			Pmg.tabs.request({object: 'calendars', view: 'Edit', action: 'Tab', query: {contextpathid: self.form.tabContextId(), storeatts: {where: {parentid: id}, init: {googleSource: self.defaultCalendar || '', tukosSource: id, contextid: self.form.tabContextId()}}}});        			
         		}else{
                     var dialog = new DialogConfirm({title: messages.newNoCalendar, content: messages.mustSaveFirst, hasSkipCheckBox: false});
                     dialog.show().then(function(){Pmg.setFeedback(messages.actionCancelled);},

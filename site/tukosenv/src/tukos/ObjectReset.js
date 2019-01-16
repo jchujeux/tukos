@@ -13,7 +13,7 @@ define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dojo/dom-form", "dijit/fo
                 var setResetValues = function(){
                     var theId = self.form.valueOf('id');
                     Pmg.setFeedback(messages.actionDoing);
-                    return self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'reset'), query: theId == '' ? {} : {id: theId}}, [], self.form.get('dataElts')/*, messages.actionDone*/); 
+                    return self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Reset'), query: theId == '' ? {} : {id: theId}}, [], self.form.get('dataElts')/*, messages.actionDone*/); 
                 }
                 if (!self.form.hasChanged()){
                     return setResetValues();

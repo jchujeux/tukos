@@ -3,8 +3,8 @@ define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom-attr", "dojo/on", "
     return declare([FilteringSelect], {
         constructor: function(args){
             args.storeArgs = args.storeArgs || {};
-            args.storeArgs.view = args.storeArgs.view || 'noview';
-            args.storeArgs.action = args.storeArgs.action || 'restselect';
+            args.storeArgs.view = args.storeArgs.view || 'NoView';
+            args.storeArgs.action = args.storeArgs.action || 'RestSelect';
             args.storeArgs.object = args.storeArgs.object || args.object || 'noObject';
             args.store = Pmg.store(args.storeArgs);
         },

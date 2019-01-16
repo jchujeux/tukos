@@ -28,7 +28,7 @@
         createPane: function(){
         	if (!this.form){
         		if (this.formContent){
-                	this.accordionManager.refresh('tab', [], false, this);
+                	this.accordionManager.refresh('Tab', [], false, this);
                 }else{
                 	var self = this;
                 	this.form = new TukosPane(this.paneContent);

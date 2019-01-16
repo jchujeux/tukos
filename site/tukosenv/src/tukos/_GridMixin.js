@@ -80,7 +80,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 			evt.preventDefault();
 			node.onClickHandler.remove();
 			dst.set(node, {textDecoration: "", color: "", cursor: ""});
-			Pmg.serverDialog({object: source[2], view: 'noview', mode: 'nomode', action: 'RestSelect', query: {one: true, params: {getOne: 'getOne'}, storeatts: {cols: [targetCol], where: {id: source[1]}}}}).then(lang.hitch(this, function(response){
+			Pmg.serverDialog({object: source[2], view: 'NoView', mode: 'NoMode', action: 'RestSelect', query: {one: true, params: {getOne: 'getOne'}, storeatts: {cols: [targetCol], where: {id: source[1]}}}}).then(lang.hitch(this, function(response){
         		node.innerHTML = data[field] = response.item[targetCol];	
         	}));
         	console.log('here implement load on click');
@@ -127,7 +127,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                 }
             }
             if (!utils.empty(query)){
-                Pmg.tabs.request({object: object, view: 'edit', mode: 'tab', action: 'tab', query: query});
+                Pmg.tabs.request({object: object, view: 'Edit', mode: 'Tab', action: 'Tab', query: query});
             }
         },
         showInNavigator: function(grid){

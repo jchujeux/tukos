@@ -11,13 +11,13 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
                 evt.stopPropagation();
                 evt.preventDefault();
 
-                var action = self.serverAction, isItemsChange = utils.in_array(action, ['modify', 'delete']), needsRevert = this.needsRevert || isItemsChange || action === 'duplicate', queryParams = self.queryParams;
-                toProcess = action === 'reset' ? {} : (isItemsChange ? this.editableIdsToProcess(grid) : this.idsToProcess(grid)) ;
+                var action = self.serverAction, isItemsChange = utils.in_array(action, ['Modify', 'Delete']), needsRevert = this.needsRevert || isItemsChange || action === 'Duplicate', queryParams = self.queryParams;
+                toProcess = action === 'Reset' ? {} : (isItemsChange ? this.editableIdsToProcess(grid) : this.idsToProcess(grid)) ;
                 Pmg.setFeedback(self.actionStartMessage);
                 
-                if (action === 'search'){
+                if (action === 'Search'){
                 	lang.hitch(self, self.searchAction());
-                }else if(action === 'reset'){
+                }else if(action === 'Reset'){
                     if (self.dialogDescription){
                         if (self.tooltipDialog){
                             self.tooltipDialog.open({around: self.domNode});
@@ -41,7 +41,7 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
                         function(){Pmg.setFeedback(messages.noActionDone);}
                     );                                 
                 }else{
-                    if (action === 'modify'){
+                    if (action === 'Modify'){
                     	if (utils.empty(grid.modify.values)){
 	                    	var dialog = new DialogConfirm({title: messages.noModifySelectedNoAction, hasSkipCheckBox: false, hasCancelButton: false});
 	                        dialog.show().then(
@@ -121,7 +121,7 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
                         var dialog = new DialogConfirm({title: messages['overview' + action] + toProcess.ids.length + messages.entries + toProcess.warning, content: messages.sureWantToContinue, hasSkipCheckBox: false});
                         dialog.show().then(
                             function(){
-                            	if(action === "process" && (queryParams || {}).process === "exportItems"){
+                            	if(action === "Process" && (queryParams || {}).process === "exportItems"){
                                     var visibleCols = [];
                                 	utils.forEach(grid.columns, function(column){
                                     	if (!column.hidden){
@@ -163,7 +163,7 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
         resetAction: function(options){
             var form = this.form, parent = form.parent, title = parent.get('title'), url = require.toUrl('tukos/resources/images/loadingAnimation.gif'), grid = form.getWidget(this.grid), queryParams = this.queryParams;
         	if (queryParams){
-                form.serverDialog({action: 'reset', query: {params: queryParams}}, options || {}, [], messages.actionDone).then(function(response){
+                form.serverDialog({action: 'Reset', query: {params: queryParams}}, options || {}, [], messages.actionDone).then(function(response){
             		response.feedback.pop();
                     Pmg.alert({title: messages[queryParams.process], content: response.feedback.join('<br>')});
                 	grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));

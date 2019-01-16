@@ -80,7 +80,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", 
             this.inherited(arguments);
             this.on('click', function(item){
                 if (item.type == 'item'){
-                    Pmg.tabs.request({object: item.object, view: 'edit', mode: 'tab', action: 'tab', query: {id: item.id}});
+                    Pmg.tabs.request({object: item.object, view: 'Edit', mode: 'Tab', action: 'Tab', query: {id: item.id}});
                 }else{
                     Pmg.setFeedback('No click action available on object folders');
                 }
@@ -127,7 +127,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", 
         
         showItem: function(item){
             var self = this;
-            Pmg.serverDialog({object: 'navigation', view: 'pane', 'mode': 'accordion', action: 'get', query: {id: item.id, object:  item.object, params:{get: 'getPath'}}}).then(
+            Pmg.serverDialog({object: 'navigation', view: 'Pane', 'mode': 'Accordion', action: 'Get', query: {id: item.id, object:  item.object, params:{get: 'getPath'}}}).then(
                 function(response){
                     self.set('paths', [self.navigationPath(response.path)]).then(
                         function(){
@@ -154,7 +154,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", 
         		var currentParentId = change.currentParentId;
         		changesToSend[id] = typeof currentParentId === 'string' && (index = (parentid = currentParentId).indexOf('@')) > -1 ? parentid.substring(index + 1) : currentParentId;
         	});
-            Pmg.serverDialog({object: 'navigation', view: 'pane', mode: 'accordion', action: 'save', query: {}}, {data: changesToSend}).then(
+            Pmg.serverDialog({object: 'navigation', view: 'Pane', mode: 'Accordion', action: 'Save', query: {}}, {data: changesToSend}).then(
                 lang.hitch(this, function(response){
                     this.reset();
                 }

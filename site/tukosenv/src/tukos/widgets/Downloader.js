@@ -13,8 +13,7 @@ define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dojo/cookie", "dijit/form
                         function(){self.setFeeedback(messages.resetCancelled);}
                     );
                 }else{
-                    //download.download({object: 'documents', view: 'noview', action: 'download'}, idValue);
-                    download.download({object: 'documents', view: 'noview', action: 'download', query: {id: idValue}});
+                    download.download({object: 'documents', view: 'NoView', action: 'Download', query: {id: idValue}});
                 }
             });
         }

@@ -46,7 +46,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/mouse",  "dij
         
         doProcess: function(theId, urlArgs){
             Pmg.setFeedback(messages.actionDoing);
-            this.form.serverDialog({action:(urlArgs && urlArgs.action ? urlArgs.action : 'process'), query:urlArgs ? lang.mixin({id: theId}, urlArgs.query) : {id: theId}}, this.valuesToSend, this.form.get('postElts'), messages.actionDone); 
+            this.form.serverDialog({action:(urlArgs && urlArgs.action ? urlArgs.action : 'Process'), query:urlArgs ? lang.mixin({id: theId}, urlArgs.query) : {id: theId}}, this.valuesToSend, this.form.get('postElts'), messages.actionDone); 
         },
 
         needToSaveBeforeProcess: function(){

@@ -78,7 +78,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
 		editInTab: function(){
 			var item = this.selectedItem;
             var grid = this.getGrid();
-            Pmg.tabs.gotoTab({object: grid.object, view: 'edit', query: {id: item.objectId, googlecalid: item.googlecalid}});
+            Pmg.tabs.gotoTab({object: grid.object, view: 'Edit', query: {id: item.objectId, googlecalid: item.googlecalid}});
 		},
 		
 		editSelectedItem: function(evt){

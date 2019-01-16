@@ -247,7 +247,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         });
         return all(result).then(function(result){
             if (!utils.empty(items)){
-                return Pmg.serverDialog({object: 'users', view: 'noview', mode: 'tab', action: 'get', query: {params: {actionModel: 'getItems'}}}, {data: {items: items, objects: objects}}, messages.actionDone).then(
+                return Pmg.serverDialog({object: 'users', view: 'NoView', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'getItems'}}}, {data: {items: items, objects: objects}}, messages.actionDone).then(
                     function (response){
                         var itemsResults = response.data;
                         utils.forEach(panes, function(pane, paneKey){

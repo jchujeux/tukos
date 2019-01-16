@@ -10,7 +10,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
             args.storeArgs.sortParam = args.storeArgs.sortParam || Pmg.getItem('sortParam');
             if (!args.storeArgs.target){
                args.storeArgs.object = args.object;
-               args.storeArgs.mode = args.form.mode || 'tab';
+               args.storeArgs.mode = args.form.mode || 'Tab';
                args.storeArgs.target = Pmg.requestUrl(args.storeArgs);
             }
             args.store = new Request(args.storeArgs);
@@ -56,7 +56,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
         showColValues: function(){
             var grid = this, pane = grid.form, headerTable = grid.headerNode.firstChild, colValuesRow = query('.dgrid-colvalues-row', headerTable), clickedField = grid.clickedColumn.field;
             if (!colValuesRow.length > 0){
-                Pmg.serverDialog({object: grid.object, view: 'overview', mode: 'tab', action: 'get', query: {params: {actionModel: 'getColsWidgetDescription'}}}).then(function(response){
+                Pmg.serverDialog({object: grid.object, view: 'Overview', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'getColsWidgetDescription'}}}).then(function(response){
             		grid.colValueWidgetsDescription = response.widgetsDescription;
             		grid.colValueParentNodes = {}, grid.colValueWidgets = {};
             		colValuesRow = dct.create('tr', {'class': 'dgrid-colvalues-row'}, headerTable);
