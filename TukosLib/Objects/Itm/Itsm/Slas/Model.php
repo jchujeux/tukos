@@ -16,13 +16,8 @@ class Model extends AbstractModel {
             'enddate'           => 'date NULL DEFAULT NULL',
             'itsystem'          => 'INT(11) DEFAULT NULL',
         ];
-        $keysDefinition = ', KEY (`deliverymgr`, `customerrep`, `itsystem`)';
 
-        parent::__construct(
-            $objectName, $translator, 'itslas',
-            ['parentid' => ['organizations'], 'deliverymgr' => ['people'], 'customerrep' => ['people'], 'itsystem' => ['itsystems']],
-            [], $colsDefinition, $keysDefinition
-        );
+        parent::__construct($objectName, $translator, 'itslas', ['parentid' => ['organizations'], 'deliverymgr' => ['people'], 'customerrep' => ['people'], 'itsystem' => ['itsystems']], [], $colsDefinition);
     }
 }
 ?>

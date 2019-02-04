@@ -21,7 +21,7 @@ class Model extends AbstractModel {
             'otherexams' => 'longtext DEFAULT NULL',
 
         ];
-        parent::__construct($objectName, $translator, 'physioprescriptions', ['parentid' => ['physiopatients'], 'prescriptor' => ['people']], [], $colsDefinition, '', ['quantitative', 'physiobefore'], ['worksheet', 'custom'], ['name', 'parentid', 'prescriptiondate']);
+        parent::__construct($objectName, $translator, 'physioprescriptions', ['parentid' => ['physiopatients'], 'prescriptor' => ['people']], [], $colsDefinition, [], ['quantitative', 'physiobefore'], ['worksheet', 'custom'], ['name', 'parentid', 'prescriptiondate']);
     }    
     public function getPrescriptorChanged($atts){
         $peopleModel = Tfk::$registry->get('objectsStore')->objectModel('people');

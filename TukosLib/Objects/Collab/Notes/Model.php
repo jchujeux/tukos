@@ -12,14 +12,9 @@ use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {
 
-
     function __construct($objectName, $translator=null){
         $colsDefinition = [];
-        parent::__construct(
-            $objectName, $translator, 'notes',
-            ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()],
-            [], $colsDefinition, '', [], ['custom', 'worksheet']
-        );
+        parent::__construct($objectName, $translator, 'notes', ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], [], $colsDefinition, [], [], ['custom', 'worksheet']);
     }
 }
 ?>

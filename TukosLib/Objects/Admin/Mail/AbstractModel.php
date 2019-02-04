@@ -1,8 +1,4 @@
 <?php
-/*
- *
- * class for the mail account tukos object
- */
 namespace TukosLib\Objects\Admin\Mail;
 
 use TukosLib\Objects\ObjectTranslator;

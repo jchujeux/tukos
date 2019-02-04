@@ -133,7 +133,7 @@ class View extends AbstractView {
 					'timeMode' => 'duration', 'moveEnabled' => true,
 					'customization' => ['items' => [
 						 'style' => ['backgroundColor' => ['field' => 'intensity', 'map' => Sports::$intensityColorsMap, 'defaultValue' => 'Peru']],
-						 'img'   => ['field' => 'sport', 'map' => Sports::$sportImagesMap, 'imagesDir' => Tfk::jsFullDir('tukos') . '/images/'],
+						 'img'   => ['field' => 'sport', 'map' => Sports::$sportImagesMap, 'imagesDir' => Tfk::moduleLocation('tukos') . '/images/'],
 						 'ruler' => ['field' => 'stress', 'map' => Sports::$stressOptions, 'atts' => ['minimum' => 0, 'maximum' => 4, 'showButtons' => false, 'discreteValues' => 5]],
 					]],
 					'onChangeNotify' => [$this->gridWidgetName => [

@@ -18,27 +18,33 @@ class TukosFramework{
     const phpDetachedCommand = 'start /Dx: /xampp/php/php '; // so that runs in a separate ms-dos windows (detached)
     const htmlToPdfCommand = '/wkhtmltopdf/bin/wkhtmltopdf ';
     //const tukosUsersFiles = '/jch/tukosusersfiles/';
-    const tukosTmpDir = '/tukos/tmp/';
+    //const tukosTmpDir = '/tukos/tmp/';
     const mailServerFolder = '/Xampp/MercuryMail/';
     const backupBinDir = '/xampp/mysql/bin/';
 
     const tukosSite = '/tukos/site/';
-    const dojoModules = ['dojo', 'dijit', 'dojox', 'dstore', 'dgrid'];
+    const dojoModules = ['dojo', 'dijit', 'dojox'];
 
     const publicDir = '/tukos/'; // this is the beginnning of the url path, i.e. '/tukos/' is aliased with '/tukos/site/' in apache config
     
-    public static $phpRoot, $phpTukosDir, $phpVendorDir, $vendorDir = [],
+    public static $phpRoot, $phpTukosDir, $phpVendorDir, $vendorDir = [], $tukosTmpDir,
                   $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment, $tukosBaseLocation, $dojoBaseLocation; 
   
     public static function initialize ($mode, $appName = null){
         self::$startMicroTime = microtime(true);
         self::$phpRoot = getenv('tukosPhpRoot');
+        self::$dojoBaseLocation = getenv('dojoBaseLocation');
+        self::$tukosTmpDir = getenv('tukosTmpDir');
         self::$phpTukosDir = self::$phpRoot . '/tukos/';
         self::$phpVendorDir = self::$phpTukosDir . 'vendor/';
-        $vendorDirs = ['aura' => 'auraphp-system-1.0.0/', 'auraV2' => 'aura-2.1.0', 'pear' => '', 'zend' => 'zf1/zend-console-getopt/library/'];
+        $vendorDirs = ['aura' => 'auraphp-system-1.0.0/', 'auraV2' => 'Aura-2.1.0', 'pear' => '', 'zend' => 'zf1/zend-console-getopt/library/'];
         array_walk($vendorDirs, function($vendorDir, $module){
             self::$vendorDir[$module] = self::$phpVendorDir . $vendorDir;
         });
+        self::$tukosBaseLocation = self::publicDir . 'tukosenv/release';
+        if (empty(self::$dojoBaseLocation)){
+            self::$dojoBaseLocation = self::$tukosBaseLocation;
+        }
         mb_internal_encoding('UTF-8');
         require __DIR__ . '/Registry.php';
         self::$registry = new Registry($mode);
@@ -52,13 +58,6 @@ class TukosFramework{
     public static function setEnvironment($environment){
     	self::$environment = $environment;
     	self::$tukosBaseLocation = self::publicDir . 'tukosenv/' . (empty(self::$environment) || self::$environment === 'production' ? 'release/' : 'src/');
-    	self::$dojoBaseLocation = getenv('dojoBaseLocation');
-    	if (empty(self::$dojoBaseLocation)){
-    	    self::$dojoBaseLocation = self::$tukosBaseLocation;
-    	}
-    }
-    public static function jsFullDir($dir){
-    	return self::publicDir . 'tukosenv/' . (empty(self::$environment) || self::$environment === 'production' ? 'release/' : 'src/') . $dir;
     }
     
     public static function moduleLocation($module){
@@ -68,7 +67,7 @@ class TukosFramework{
     public static function dojoBaseLocation(){
         return empty(self::$dojoBaseLocation) ? self::publicDir . 'tukosenv/' . 'release/' : self::$dojoBaseLocation;
     }
-    
+       
     public static function isWindows(){
     	return self::$osName[0] === 'W';
     }

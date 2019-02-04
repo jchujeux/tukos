@@ -17,14 +17,7 @@ class Model extends AbstractModel {
         $colsDefinition = [
             'language' =>  "ENUM ('" . implode("','", $this->languageOptions) . "')",
         ];
-        $keysDefinition = ' KEY (`language`)';
-
-        parent::__construct(
-            $objectName, $translator, 'help',
-            ['parentid' => ['help']
-            ], 
-            [], $colsDefinition, $keysDefinition, []
-        );
+        parent::__construct($objectName, $translator, 'help', ['parentid' => ['help']], [], $colsDefinition, [['language']]);
     }
 }
 ?>

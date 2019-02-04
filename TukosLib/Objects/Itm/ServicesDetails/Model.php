@@ -14,9 +14,9 @@ class Model extends AbstractModel {
                             'protocol'  => 'VARCHAR(80)  DEFAULT NULL',
                             'product'   => 'VARCHAR(80)  DEFAULT NULL',
                             'version'   => 'VARCHAR(80)  DEFAULT NULL',
-                            'timescanned' => "timestamp NULL DEFAULT NULL",
+                            'timescanned' => "timestamp",
                             ];
-        parent::__construct($objectName, $translator, 'servicesdetails', ['parentid' => ['hosts']], [], $colsDefinition, '');
+        parent::__construct($objectName, $translator, 'servicesdetails', ['parentid' => ['hosts']], [], $colsDefinition);
     }
 }
 ?>

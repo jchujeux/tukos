@@ -22,7 +22,7 @@
 			</table>
 		</form>
 		<!-- load dojo and provide config via data attribute -->
-            <script src="<?= $this->dojoDir ?>dojo/dojo.js" daja-dojo-config="async: true"></script>
+            <script src="<?= $this->dojoBaseDir ?>dojo/dojo.js" daja-dojo-config="async: true"></script>
 		    <script>
 			require(["dojo/dom", "dojo/on", "dojo/request", "dojo/dom-form", "dojo/domReady!"],
 				function(dom, on, request, domForm){

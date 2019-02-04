@@ -19,12 +19,11 @@ class Model extends AbstractModel {
             'incidentssla'   => 'VARCHAR(2048)  DEFAULT NULL',
             'incidentswf' => 'VARCHAR(2048)  DEFAULT NULL',
         ];
-        $keysDefinition = ' KEY (`deliverymgr`, `customerrep`, `itsystem`)';
 
         parent::__construct(
             $objectName, $translator, 'itsvcdescs',
             ['parentid' => ['organizations'], 'deliverymgr' => ['people'], 'customerrep' => ['people'], 'itsystem' => ['itsystems']],
-            ['supportgroups', 'incidentssla', 'incidentswf'], $colsDefinition, $keysDefinition
+            ['supportgroups', 'incidentssla', 'incidentswf'], $colsDefinition
         );
         $this->gridsIdCols =  ['supportgroups' => ['team', 'period'], 'incidentssla' => ['sla'], 'incidentswf' => ['assignedto'], ];
     }

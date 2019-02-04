@@ -15,7 +15,7 @@ class Model extends AbstractModel {
         $colsDefinition =  [
             'reference' => 'VARCHAR(50)  DEFAULT NULL',
             'quotedate' => 'date NULL DEFAULT NULL',
-            'items'  => 'longtext ',
+            'items'  => 'longtext',
         	'discountpc' => "DECIMAL (5, 4)",
         	'discountwt' => "DECIMAL (5, 2)",
         	'pricewot'   => "DECIMAL (5, 2)",
@@ -23,7 +23,7 @@ class Model extends AbstractModel {
             'downpay' => "DECIMAL (5, 2)",
             'status' =>  'VARCHAR(50)  DEFAULT NULL',
         ];
-        parent::__construct($objectName, $translator, 'bustrackquotes', ['parentid' => ['bustrackcustomers']], ['items'], $colsDefinition, '', ['status'], ['worksheet', 'custom', 'history'], ['name', 'parentid', 'reference']);
+        parent::__construct($objectName, $translator, 'bustrackquotes', ['parentid' => ['bustrackcustomers']], ['items'], $colsDefinition, [], ['status'], ['worksheet', 'custom', 'history'], ['name', 'parentid', 'reference']);
     }    
 
     function initialize($init=[]){

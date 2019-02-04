@@ -20,7 +20,6 @@ class View extends AbstractView {
         foreach ($modules as $module){
             $moduleOptions[$module] = $this->tr($module);
         }
-
         $customDataWidgets = [
             'password'   => ViewUtils::textBox($this, 'Password', ['atts' => ['edit' =>  ['type' => 'password']], 'editToObj' => ['md5' => []]]),
             'rights'     => ViewUtils::storeSelect('rights', $this, 'Rights'),

@@ -14,14 +14,14 @@ class Model extends AbstractModel{
 
     function __construct($objectName, $translator=null){
         $colsDefinition = [
-                'id'  =>  'VARCHAR(50) ',
+                'id'  =>  'VARCHAR(50)',
           'parentid'  =>  'INT(11)',
-              'name'  =>  'VARCHAR(50) ',
-             'Nmsgs'  =>  'INT(11) ',
-            'Recent'  =>  'INT(11) ',
-            'Unread'  =>  'INT(11) ',
-           'Deleted'  =>  'INT(11) ',
-              'Size'  =>  'INT(11) ',
+              'name'  =>  'VARCHAR(50)',
+             'Nmsgs'  =>  'INT(11)',
+            'Recent'  =>  'INT(11)',
+            'Unread'  =>  'INT(11)',
+           'Deleted'  =>  'INT(11)',
+              'Size'  =>  'INT(11)',
         ];
 
         $this->accountIdCol   = 'parentid';

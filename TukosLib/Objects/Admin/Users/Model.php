@@ -13,22 +13,22 @@ class Model extends AbstractModel{
     protected $rightsOptions = ['SUPERADMIN', 'ADMIN', 'ENDUSER'];
     protected $environmentOptions = ['production', 'development'];
     
-    public static $colsDefinition = [
+    public static $_colsDefinition = [
             'password'      =>  'VARCHAR(255)  DEFAULT NULL',
             'rights'        =>  'VARCHAR(80) DEFAULT NULL',
             'modules'       =>  'VARCHAR(2048) DEFAULT NULL',
             'language'      =>  "VARCHAR(80) DEFAULT NULL",
             'environment'   =>  "VARCHAR(80) DEFAULT NULL",
-            //'targetdb'   =>  "VARCHAR(50) DEFAULT NULL",
     		'customviewids' =>  'longtext DEFAULT NULL',
             'customcontexts'=>  'longtext DEFAULT NULL',
             'pagecustom'=>  'longtext DEFAULT NULL',
     ];
+    public static $_colsIndexes = [];
     
     function __construct($objectName, $translator=null){
         $this->languageOptions = Tfk::$registry->get('appConfig')->languages['supported'];
 
-        parent::__construct($objectName, $translator, 'users', ['parentid' => ['people']], ['modules', 'customviewids', 'customcontexts', 'pagecustom'], self::$colsDefinition, '', ['rights', 'modules', 'language']);
+        parent::__construct($objectName, $translator, 'users', ['parentid' => ['people']], ['modules', 'customviewids', 'customcontexts', 'pagecustom'], self::$_colsDefinition, self::$_colsIndexes, ['rights', 'modules', 'language']);
 
         switch ($this->user->rights()){
             case 'SUPERADMIN': 
@@ -98,21 +98,16 @@ class Model extends AbstractModel{
     		if (isset($authInfo['targetdb'])){
     			$targetDb = Utl::getItem('targetdb', $authInfo);
     			if(empty($targetDb)){
-    				Feedback::add($this->tr('emptytargetdbnotallowed'));
-    				return false;
-    			}else{
-    				$targetStore = new Store(array_merge(Tfk::$registry->get('appConfig')->dataSource, ['dbname' => $targetDb]));
-    				if (empty($targetStore->getOne(['table' => SUtl::$tukosTableName, 'where' => ['name' => $newName, 'object' => 'users'], 'cols' => ['name']]))){
-    					Feedback::add($this->tr('targetdbdoesnothaveusersitemforusername'));
-    					return false;
-    				}
+    			    $targetDb = Tfk::$registry->get('appConfig')->dataSource['dbname'];
     			}
+    			$targetStore = new Store(array_merge(Tfk::$registry->get('appConfig')->dataSource, ['dbname' => $targetDb]));
+				if (empty($targetStore->getOne(['table' => SUtl::$tukosTableName, 'where' => ['name' => $newName, 'object' => 'users'], 'cols' => ['name']]))){
+					Feedback::add($this->tr('targetdbdoesnothaveusersitemforusername'));
+					return false;
+				}
     		}
     	    $configStore = Tfk::$registry->get('configStore');
         	if (empty($configStore->getOne(['where' => ['username' => $newName], 'table' => 'users', 'cols' => ['username']]))){
-        	    if (empty($authInfo['targetdb'])){
-        			$authInfo['targetdb'] = Tfk::$registry->get('appConfig')->dataSource['dbname'];
-        		}
         		if (empty($authInfo['username'])){
         			$authInfo['username'] = $existingAuthInfo['name'];
         		}
@@ -126,7 +121,7 @@ class Model extends AbstractModel{
     		if (Utl::extractItem('password', $newValues, false)){
     			Feedback::add($this->tr('passwordupdated'));
     		}
-    		if (Utl::extractItem('targetdb', $newValues, false)){
+    		if (Utl::extractItem('targetdb', $newValues, false) !== false){
     			Feedback::add($this->tr('reauthenticatefornewtargetdb'));
     		}
     		$authUpdate = true;

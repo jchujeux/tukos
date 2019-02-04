@@ -3,20 +3,20 @@
     <head>
         <meta charset="utf-8">
         <title>Tukos 2.0</title>
-        <link rel="stylesheet" href="<?= $this->dojoDir ?>dijit/themes/claro/claro.css" media="screen">
-        <link rel="stylesheet" href="<?= $this->dojoDir ?>dgrid/css/dgrid.css" media="screen">
-        <link rel="stylesheet" href="<?= $this->dojoDir ?>dojox/editor/plugins/resources/editorPlugins.css" media="screen">
-        <link rel="stylesheet" href="<?= $this->dojoDir ?>dojox/editor/plugins/resources/css/StatusBar.css" media="screen">
-        <link rel="stylesheet" href="<?= $this->dojoDir ?>dojox/editor/plugins/resources/css/FindReplace.css" media="screen">
-        <link rel="stylesheet" href="<?= $this->dojoDir ?>dojox/calendar/themes/claro/Calendar.css" media="screen">
-        <link rel="stylesheet" href="<?= $this->dojoDir ?>dojox/form/resources/UploaderFileList.css" media="screen">
-        <link rel="stylesheet" href="<?= $this->jsTukosDir ?>/resources/tukos.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoBaseDir ?>dijit/themes/claro/claro.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dgridDir ?>/css/dgrid.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoBaseDir ?>dojox/editor/plugins/resources/editorPlugins.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoBaseDir ?>dojox/editor/plugins/resources/css/StatusBar.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoBaseDir ?>dojox/editor/plugins/resources/css/FindReplace.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoBaseDir ?>dojox/calendar/themes/claro/Calendar.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoBaseDir ?>dojox/form/resources/UploaderFileList.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->tukosDir ?>/resources/tukos.css" media="screen">
     </head>
     <body class="claro">
 		<div id="loadingOverlay" class="loadingOverlay pageOverlay">
 			<div class="loadingMessage"><?= $this->loadingMessage ?></div>
 		</div>
-        <audio id="beep" src="<?= $this->jsTukosDir ?>/sounds/beep.wav"></audio>
+        <audio id="beep" src="<?= $this->tukosDir ?>/sounds/beep.wav"></audio>
         <div id="appLayout" class="demoLayout" >
         </div>
 
@@ -31,7 +31,7 @@
                     //transparentColor: [255,255,255,0]
                 };
         </script>
-        <script src="<?= $this->dojoDir ?>dojo/dojo.js"></script>
+        <script src="<?= $this->dojoBaseDir ?>dojo/dojo.js"></script>
 
         <script>
             <!-- Page layout -->

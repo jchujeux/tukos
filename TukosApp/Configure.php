@@ -24,9 +24,9 @@ class Configure{
         $this->appDir  = dirname(__FILE__);
         $key =  'XZK@w0kw' . getenv('MYSQL_ENV_VAR');
         $this->ckey = MD5($key);
-        $this->dataSource = ['datastore' => 'mysql', 'host'   => '127.0.0.1', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname'   => 'tukos20'];
-        $this->filesStore = ['datastore' => 'mysql', 'host'   => '127.0.0.1', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname'   => 'tukos20files'];
-        $this->configSource = ['datastore' => 'mysql', 'host'   => '127.0.0.1', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname' => 'tukosconfig', 'authstore'    => 'sql',	'table' => 'users', 'username_col' => 'username', 'password_col' => 'password'];
+        $this->dataSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname'   => 'tukos20'];
+        $this->filesStore = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname'   => 'tukos20files'];
+        $this->configSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname' => 'tukosconfig', 'authstore'    => 'sql',	'table' => 'users', 'username_col' => 'username', 'password_col' => 'password'];
         $this->languages = ['default' => 'en-us', 'supported' => ['en-us', 'fr-fr', 'es-es']];
 
         $this->modulesMenuLayout = [

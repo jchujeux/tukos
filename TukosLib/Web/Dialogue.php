@@ -3,7 +3,7 @@ namespace TukosLib\Web;
 
 use TukosLib\TukosFramework as Tfk;
 use Aura\Web\Context;
-use Aura\Http\Manager\factory as HttpFactory;
+use Aura\Http\Manager\Factory as HttpFactory;
 
 
 class Dialogue {

@@ -21,44 +21,40 @@ class Authentication{
         }
         $this->session = $session;
     }
-
     public function isAuthenticated($dialogue, $request){
-        if ($request['object'] === 'auth'){
-        	SUtl::instantiate();
-        	Tfk::setTranslator();
-        	switch ($request['view']){
-                case 'loginValidation':
-                    $this->checkCredentials($dialogue);
-                    break;
-                case 'logout':
-                    $this->session->destroy();
-                    $dialogue->response->headers->set("Location",  $_SERVER['HTTP_REFERER']);
-                    $login = new LoginPage(Tfk::$registry->pageUrl);
-                    break;
-            }
-            return false;
-        }else{
-            /*
-             * receiving a tukosApp request. Check if authorized
-             */
-            $segment = $this->session->getSegment(Tfk::$registry->appName);
-            if ($segment->status !== 'VALID'){
-        		SUtl::instantiate();
-        		Tfk::setTranslator();
-            	$login = new LoginPage(Tfk::$registry->pageUrl);
-                return false;
-            }else{
-                $this->session->commit();
-                if (isset($segment->targetDb)){
-                	Tfk::$registry->get('appConfig')->dataSource['dbname'] = $segment->targetDb;
+        switch ($request['object']){
+            case 'auth':
+                switch ($request['view']){
+                    case 'loginValidation':
+                        $this->checkUserCredentials($dialogue);
+                        break;
+                    case 'logout':
+                        $this->session->destroy();
+                        $dialogue->response->headers->set("Location",  $_SERVER['HTTP_REFERER']);
+                        $login = new LoginPage(Tfk::$registry->pageUrl);
+                        break;
                 }
-                return $segment->username; // user credentials are OK
-            }
+                return false;
+            case 'backoffice':
+                //return $this->checkBackOfficeCredentials($dialogue);
+                return 'tukosBackOffice';
+            default:// receiving a tukos application request check if authorized
+                $segment = $this->session->getSegment(Tfk::$registry->appName);
+                if ($segment->status !== 'VALID'){
+                    //SUtl::instantiate();
+                    //Tfk::setTranslator();
+                    $login = new LoginPage(Tfk::$registry->pageUrl);
+                    return false;
+                }else{
+                    $this->session->commit();
+                    if (isset($segment->targetDb)){
+                        Tfk::$registry->get('appConfig')->dataSource['dbname'] = $segment->targetDb;
+                    }
+                    return $segment->username;
+                }
         }
     }
-    
-    public function checkCredentials ($dialogue){
-
+    public function checkUserCredentials ($dialogue){
     	$username = $dialogue->context->getPost('username');
         $targetDb = Tfk::$registry->get('verifyUser')->targetDb($username, MD5($dialogue->context->getPost('password')));
         if ($targetDb === false){/* Authentication failed: notify user via http response */
@@ -73,5 +69,14 @@ class Authentication{
             $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(Tfk::tr('SUCCESSFULAUTHENTICATION')));
         }
     }
+    public function checkBackOfficeCredentials($dialogue){
+        $username = $dialogue->context->getPost('username');
+        if (empty(Tfk::$registry->get('verifyUser')->getUser($username, $dialogue->context->getPost('password')))){
+            return false;
+        }else{
+            return $username;
+        }
+    }
+    
 } 
 ?>

@@ -30,10 +30,7 @@ class Model extends AbstractModel {
         	'backgroundcolor' => 'VARCHAR(10) DEFAULT NULL',
         ];
         parent::__construct(
-            $objectName, $translator, 'calendarsentries',
-            ['parentid' => Tfk::$registry->get('user')->allowedModules()], 
-            ['participants'], $colsDefinition, ''
-        );
+            $objectName, $translator, 'calendarsentries', ['parentid' => Tfk::$registry->get('user')->allowedModules()], ['participants'], $colsDefinition);
         $this->gridsIdCols =  ['participants' => ['participants']];
     }   
     function initialize($init=[]){

@@ -107,6 +107,7 @@ class TranslatorsManager {
                 $setNames = array_unique(array_merge($setNames, $this->translatorPaths[$translatorName]));
             });
             $names = array_keys($names);
+/*
             $languageCol = $this->getLanguageCol();
             $translations = Utl::toAssociativeGrouped(Tfk::$registry->get('configStore')->getAll([
                 'table' => 'translations', 
@@ -116,6 +117,8 @@ class TranslatorsManager {
                 $translation = array_column($translation, $languageCol, 'setname');
             });
             $translations = array_change_key_case(array_filter($translations));
+*/
+            $translations = $this->_getTranslations($names, $setNames);
             return preg_replace_callback($pattern, function($match) use ($translations){
                 list($name, $mode, $translatorName) = explode('|', $match[1]);
                 $translatedName = (empty($nameTranslations = Utl::getItem(strtolower($name), $translations))|| empty($activeSets = array_intersect($this->translatorPaths[$translatorName], array_keys($nameTranslations)))) 
@@ -135,7 +138,24 @@ class TranslatorsManager {
             return $template;
         }
     }
-    
+    function getTranslations($names, $translatorName){
+        $translationValues = $this->_getTranslations($names, $this->translatorPaths[$translatorName]);
+        foreach($names as $name){
+            $translations[$name] = ($value = Utl::getItem($name, $translationValues)) === null ? $name : reset($value); 
+        }
+        return $translations;
+    }
+    function _getTranslations($names, $setNames){
+        $languageCol = $this->getLanguageCol();
+        $translations = Utl::toAssociativeGrouped(Tfk::$registry->get('configStore')->getAll([
+            'table' => 'translations',
+            'where' => [['col' => 'setname', 'opr' => 'IN', 'values' => $setNames], ['col' => 'name', 'opr' => 'IN', 'values' => $names]],
+            'cols' => ['name', 'setname', $languageCol]]), 'name', true);
+        array_walk($translations, function(&$translation, $name) use ($languageCol){
+            $translation = array_column($translation, $languageCol, 'setname');
+        });
+        return array_change_key_case(array_filter($translations));
+    }
     function untranslator($translatorName, $setsPath, $language = null){/* returns a translator callback - usage: $translator->translate('myMessage'); */        
         if (! $language){
             $language = $this->getLanguage();

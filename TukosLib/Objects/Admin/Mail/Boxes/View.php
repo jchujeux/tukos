@@ -19,7 +19,8 @@ class View extends ObjectTranslator{
         $this->objectName = $objectName;
         $this->model = Tfk::$registry->get('objectsStore')->objectModel($this->objectName, $this->tr);
         $this->user  = Tfk::$registry->get('user');
-
+        $this->sendOnSave = $this->sendOnDelete = [];
+        
         $this->dataWidgets = [
             'id' => ViewUtils::textBox($this, 'Id', [
                     'atts' => [
@@ -91,6 +92,13 @@ class View extends ObjectTranslator{
         return  ['parentid', 'name', 'Nmsgs', 'Recent', 'Unread', 'Deleted', 'Size'];
     }                            
 
+    function sendOnSave(){
+        return $this->sendOnSave;
+    }
+    
+    function sendOnDelete(){
+        return $this->sendOnDelete;
+    }
     function gridCols(){
         return  ['id', 'parentid', 'name', 'Nmsgs', 'Recent', 'Unread'];
     }                            

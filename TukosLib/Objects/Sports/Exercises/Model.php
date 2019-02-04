@@ -17,7 +17,7 @@ class Model extends AbstractModel {
             'protocol' =>  'longtext DEFAULT NULL',
         ];
         parent::__construct(
-            $objectName, $translator, 'sptexercises',  ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], [], $colsDefinition, '', [], ['custom']
+            $objectName, $translator, 'sptexercises',  ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], [], $colsDefinition, [], [], ['custom']
         );
     }   
 }

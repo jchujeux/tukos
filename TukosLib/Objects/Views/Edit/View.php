@@ -12,12 +12,12 @@ class View {
     protected $_firstDataElts = ['id', 'parentid', 'name'];
     protected $_lastDataElts  = ['permission', 'grade', 'contextid', 'updated', 'updator', 'created', 'creator'];
 
-    function __construct($actionController){
-        $this->controller = $actionController->controller;
-    	$this->view = $actionController->view;
-    	$this->objectName = $actionController->objectName;
-    	$this->user = $actionController->user;
-    	$this->paneMode = $actionController->paneMode;
+    function __construct($controller){
+        $this->controller = $controller;
+    	$this->view = $controller->view;
+    	$this->objectName = $controller->objectName;
+    	$this->user = $controller->user;
+    	$this->paneMode = $controller->paneMode;
         if (isset($this->view->dataWidgets['configstatus'])){
             $this->_lastDataElts[] = 'configstatus';
         }

@@ -34,13 +34,13 @@ class Store {
 		return isset($this->tableList) ? $this->tableList : $this->tableList = $this->hook->fetchTableList();
 	}
 	
-    public function createTable($tableName, $colsDefinition, $keysDefinition){
-        $tableDescription = "(";
-        foreach ($colsDefinition as $col => $def){
-            $tableDescription .= "`" . $col . "` " . $def . ',';
+    public function createTable($tableName, $colsDefinition, $colsIndexes = []){
+        $tableDescription = "(" . implode(",", array_map(function($col, $definition){return "`$col` $definition";}, array_keys($colsDefinition), array_values($colsDefinition)));
+        if (!empty($colsIndexes)){
+            $tableDescription .= ", INDEX(" . implode("), INDEX(", array_map(function($colsIndex){return implode(",", array_map(function($col){return "`$col`";}, $colsIndex));}, $colsIndexes)) . ")";
         }
-        $tableDescription = (empty($keysDefinition) ? substr($tableDescription, 0, -1) : $tableDescription . $keysDefinition) .  ') ROW_FORMAT=COMPRESSED ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;';
-        $stmt = $this->hook->query("CREATE TABLE `" . $tableName . "`" . $tableDescription, []);
+        $tableDescription .= ") ROW_FORMAT=COMPRESSED ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+        $stmt = $this->hook->query("CREATE TABLE `$tableName`" . $tableDescription, []);
         if (isset($this->tableList)){
         	$this->tableList[] = $tableName;
         }
@@ -48,11 +48,6 @@ class Store {
 
     public function tableExists($tableName){
         return in_array($tableName, $this->tableList());
-    }
-    public function createTableIfNotExists($tableName, $colsDefinition, $keysDefinition){
-        if (!in_array($tableName, $this->tableList())){
-            $this->createTable($tableName, $colsDefinition, $keysDefinition);
-        }
     }
 
     public function deleteTable($tableName){

@@ -12,7 +12,7 @@
         dojoConfig = {
             async: true,
             parseOnLoad: false,
-            packages: [{"name": "tukos", "location": "<?= $this->jsTukosDir ?>"}]
+            packages: [{"name": "tukos", "location": "<?= $this->tukosDir ?>"}]
         };
     </script>
     <!-- dojo bootstrap -->

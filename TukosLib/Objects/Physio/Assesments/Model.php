@@ -15,7 +15,7 @@ class Model extends AbstractModel {
             'assesmentdate' => 'date NULL DEFAULT NULL',
             'assesment' => 'longtext DEFAULT NULL',
         ];
-        parent::__construct($objectName, $translator, 'physioassesments', ['parentid' => ['physioprescriptions'], 'physiotherapist' => ['people']], [], $colsDefinition, '', ['assesmenttype'], ['worksheet', 'custom']);
+        parent::__construct($objectName, $translator, 'physioassesments', ['parentid' => ['physioprescriptions'], 'physiotherapist' => ['people']], [], $colsDefinition, [], ['assesmenttype'], ['worksheet', 'custom']);
     }    
     function initialize($init=[]){
         return parent::initialize(array_merge(['assesmentdate' => date('Y-m-d')], $init));

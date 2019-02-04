@@ -18,7 +18,7 @@ class Model extends AbstractModel {
                             'color'         => "ENUM ('" . implode("','", Wine::$colorOptions) . "')",
                             'sugar'         => "ENUM ('" . implode("','", Wine::$sugarOptions) . "')",
         ];
-        parent::__construct($objectName, $translator, 'wines', ['parentid' => ['wineappellations'], 'bottledby' => ['organizations']], [], $colsDefinition, '', ['grading', 'grape', 'category', 'color', 'sugar']);
+        parent::__construct($objectName, $translator, 'wines', ['parentid' => ['wineappellations'], 'bottledby' => ['organizations']], [], $colsDefinition, [], ['grading', 'grape', 'category', 'color', 'sugar']);
     }
 }
 ?>

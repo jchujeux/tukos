@@ -8,29 +8,24 @@ class Model extends AbstractModel {
 
     function __construct($objectName, $translator=null){
         $colsDefinition = [
-            'startdate'       => 'VARCHAR(30)  DEFAULT NULL',
-            'duration'         => 'VARCHAR(30)  DEFAULT NULL',
-            'intensity'        =>  "ENUM ('" . implode("','", Sports::$intensityOptions) . "') ",
-            'stress'            =>  "ENUM ('" . implode("','", Sports::$stressOptions) . "') ",
-            'sport'              =>  "ENUM ('" . implode("','", Sports::$sportOptions) . "') ",
-            'warmup'          =>  'longtext ',
-            'mainactivity'    =>  'longtext ',
-            'warmdown'     =>  'longtext ',
-/*
-        	'level1filter' => 'VARCHAR(30)  DEFAULT NULL',
-            'level2filter' => 'VARCHAR(30)  DEFAULT NULL',
-            'level3filter' =>  'VARCHAR(30)  DEFAULT NULL',
-*/
+            'startdate'  => 'VARCHAR(30)  DEFAULT NULL',
+            'duration'   => 'VARCHAR(30)  DEFAULT NULL',
+            'intensity'  =>  "ENUM ('" . implode("','", Sports::$intensityOptions) . "')",
+            'stress'     =>  "ENUM ('" . implode("','", Sports::$stressOptions) . "')",
+            'sport'      =>  "ENUM ('" . implode("','", Sports::$sportOptions) . "')",
+            'warmup'     =>  'longtext',
+            'mainactivity' =>  'longtext',
+            'warmdown'     =>  'longtext',
         	'sessionid' => 'VARCHAR(10) DEFAULT NULL',
-        		'sportsman' => 'INT(11) DEFAULT NULL', 
+        	'sportsman' => 'INT(11) DEFAULT NULL', 
         	'difficulty' => 'VARCHAR(10) DEFAULT NULL',
-        	'warmupdetails'          =>  'longtext ',
-            'mainactivitydetails'    =>  'longtext ',
-            'warmdowndetails'     =>  'longtext ',
+        	'warmupdetails' =>  'longtext',
+            'mainactivitydetails' =>  'longtext',
+            'warmdowndetails'     =>  'longtext',
         		'googleid' => 'VARCHAR(255) DEFAULT NULL',
         ];
         parent::__construct(
-            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, '', ['intensity', 'stress', 'sport', 'difficulty'], ['worksheet', 'custom']
+            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, [], ['intensity', 'stress', 'sport', 'difficulty'], ['worksheet', 'custom']
         );
     }   
     function initialize($init=[]){

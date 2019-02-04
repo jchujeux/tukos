@@ -5,7 +5,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             var form = this.form;
         	lang.mixin(this, this._dialogAtts(form));
             this.inherited(arguments);
-            lang.mixin(this.pane, {attachedWidget: this, previewContent: lang.hitch(this, this.previewContent), tabContextId: lang.hitch(form, form.tabContextId)});
+            lang.mixin(this.pane, {attachedWidget: this.attachedWidget, previewContent: lang.hitch(this, this.previewContent), tabContextId: lang.hitch(form, form.tabContextId)});
         	this.onOpen = lang.hitch(this, function(){
         		var pane = this.pane, _arguments = arguments;
         		this.setVisibility();
@@ -22,11 +22,16 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
         _dialogAtts: function(form){
             var onWatch = lang.hitch(this, this.onWatchLocalAction), onWatchCheckBox =  lang.hitch(this, this.onWatchCheckBoxLocalAction);
             var description = {paneDescription: {form: form, widgetsDescription: {
-                	exportas: {type: 'StoreSelect', atts: {label: messages.exportoption, value: 'email', storeArgs: {data: [{id: 'email', name: messages.email}, {id: 'file', name: messages.file}]}, onWatchLocalAction: onWatch('exportas', this.exportAsWatchAction), value: 'email'}},
-                	formatas: {type: 'StoreSelect', atts: {label: Pmg.message('formatOptions'), value: 'pdf', storeArgs: {data: [{id: 'pdf', name: 'pdf'}, {id: 'html', name: 'html'}]}, onWatchLocalAction: onWatch('formatas', this.exportAsWatchAction), value: 'pdf'}},
+                	exportas: {type: 'StoreSelect', atts: {label: messages.exportoption, value: 'email', storeArgs: {data: [{id: 'email', name: messages.email}, {id: 'file', name: messages.file}]}, 
+                										   onWatchLocalAction: onWatch('exportas', this.exportAsWatchAction), value: 'email'}},
+                	formatas: {type: 'StoreSelect', atts: {label: Pmg.message('formatOptions'), value: 'pdf', storeArgs: {data: [{id:'pdf', name:'pdf'}, 
+                			{id:'html', name:'html'}, {id:'txt',name: Pmg.message('text')}, {id: 'html2text', name: Pmg.message('html2text')},{id:'tukosform', name:Pmg.message('tukosform')}, {id: 'json', name: 'json'}]}, 
+                		onWatchLocalAction: onWatch('formatas'), value: 'pdf'}},
                     filename: {type: 'TextBox', atts: {label: messages.filename, style: {width: '30em'}, onWatchLocalAction: onWatch('filename')}},
-                    orientation: {type: 'StoreSelect', atts: {label: messages.orientation, value: 'portrait', storeArgs: {data: [{id: 'portrait', name: messages.portrait}, {id: 'landscape', name: messages.landscape}]}, onWatchLocalAction: onWatch('orientation')}},
-                    smartshrinking: {type: 'StoreSelect', atts: {label: messages.smartshrinking, value: 'on', storeArgs: {data: [{id: 'on', name: messages.on}, {id: 'off', name: messages.off}]}, onWatchLocalAction: onWatch('smartshrinking')}},
+                    orientation: {type: 'StoreSelect', atts: {label: messages.orientation, value: 'portrait', storeArgs: {data: [{id: 'portrait', name: messages.portrait}, {id: 'landscape', name: messages.landscape}]},
+                    	onWatchLocalAction: onWatch('orientation')}},
+                    smartshrinking: {type: 'StoreSelect', atts: {label: messages.smartshrinking, value: 'on', storeArgs: {data: [{id: 'on', name: messages.on}, {id: 'off', name: messages.off}]},
+                    	onWatchLocalAction: onWatch('smartshrinking')}},
                     zoom: {type: 'TukosNumberBox', atts: {label: messages.zoom, style: {width: '3em'},  value: 100, onWatchLocalAction: onWatch('zoom')}},
                     contentmargin: {type: 'TukosNumberBox', atts: {label: messages.contentmargin, style: {width: '3em'}, onWatchLocalAction: onWatch('contentmargin')}},
                     marginoffset: {type: 'TukosNumberBox', atts: {label: messages.marginoffset, style: {width: '3em'}, onWatchLocalAction: onWatch('marginoffset')}},
@@ -47,9 +52,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
                         storeArgs: {data: [{id: 'asattachment', name: messages.asattachment}, {id: 'appendtobody', name: messages.appendtobody}, {id: 'bodyandattachment', name: messages.bodyandattachment}]},
                         onWatchLocalAction: onWatch('sendas', this.sendAsWatchAction)
                     }},
-                    fileheadertemplate: {type: 'LazyEditor', atts: {label: messages.fileheadertemplate, height: '100px', style: {backgroundColor: 'White'}, onWatchLocalAction: onWatch('fileheader', this.templateWatchAction)/*, optionalPlugins: ['Page', 'ToPage']*/}},
+                    fileheadertemplate: {type: 'LazyEditor', atts: {label: messages.fileheadertemplate, height: '100px', style: {backgroundColor: 'White'}, onWatchLocalAction: onWatch('fileheader', this.templateWatchAction)}},
                     template: {type: 'LazyEditor', atts: {label: messages.template, height: '130px', style: {backgroundColor: 'White'}, onWatchLocalAction: onWatch('content', this.templateWatchAction)}},
-                    filefootertemplate: {type: 'LazyEditor', atts: {label: messages.filefootertemplate, height: '100px', style: {backgroundColor: 'White'}, onWatchLocalAction: onWatch('filefooter', this.templateWatchAction)/*, optionalPlugins: ['Page', 'ToPage']*/}},
+                    filefootertemplate: {type: 'LazyEditor', atts: {label: messages.filefootertemplate, height: '100px', style: {backgroundColor: 'White'}, onWatchLocalAction: onWatch('filefooter', this.templateWatchAction)}},
                     filecovertemplate: {type: 'LazyEditor', atts: {label: messages.filecovertemplate, height: '100px', style: {backgroundColor: 'White'}, onWatchLocalAction: onWatch('coverpage', this.templateWatchAction)}},
                     close: {type: 'TukosButton', atts: {label: messages.close, onClick: function(){this.pane.close();}}},
                     sendemail: {type: 'TukosButton', atts: {label: messages.sendemail, onClick: lang.hitch(this, this.sendEmail)}},

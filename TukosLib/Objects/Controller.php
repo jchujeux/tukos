@@ -36,7 +36,7 @@ class Controller extends ObjectTranslator{
         if ($this->user->isAllowed($request['object'], $query)){
             try{
                 $action = $this->objectsStore->objectAction($this, $request);
-                $this->view->request = $request;
+                //$this->view->request = $request;
                 return $action->response($query);
             }
             catch (TukosException $e){

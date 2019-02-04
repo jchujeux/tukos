@@ -9,7 +9,12 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
 		lang.extend(_FormValueMixin, _WidgetsFormExtend);
 		lang.extend(_CheckboxMixin, _WidgetsFormExtend);
 		return {
-        initialize: function(obj) {
+		  initializeTukosForm(obj){
+            tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
+            this.cache = obj;
+            this.cache.messages = this.cache.messages || {};				
+		  },
+		  initialize: function(obj) {
             tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
             this.cache = obj;
             this.cache.extras = this.cache.extras || {};
@@ -271,13 +276,13 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         
         serverDialog: function(urlArgs, options, feedback, returnDeferred){//if returnDeferred is true, the returnedDfD.response.getHeader() will be available to extract header information
             //this.setFeedback(messages.actionDoing);
-            var self = this, objectFeedback = typeof feedback === 'object', defaultFeedback = objectFeedback ? feedback.defaultFeedback : feedback;
+            var self = this, isObjectFeedback = typeof feedback === 'object', defaultFeedback = isObjectFeedback ? feedback.defaultFeedback : feedback;
             options = lang.mixin({method: 'POST', timeout: 180000, handleAs: 'json'},  options);
             if (options.data){
                 options.data = JSON.stringify(options.data);
                 options.method = 'POST';
             }
-            if (objectFeedback){
+            if (isObjectFeedback){
             	var widget= feedback.widget, get = lang.hitch(widget, widget.get), set = lang.hitch(widget, widget.set), att = feedback.att, attValue = get(att);
             	set(att, this.loading(attValue, feedback.longMessage));
             }
@@ -291,14 +296,14 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                     if (defaultFeedback !== false){
                         self.addFeedback(response['feedback'], defaultFeedback);
                     }
-                    if (objectFeedback){
+                    if (isObjectFeedback){
                     	set(att, attValue);
                     }
                     return response;
                 },
                 function(error){
                     self.addFeedback(messages.failedOperation + '\n Server message is: ' + error.message);
-                    if (objectFeedback){
+                    if (isObjectFeedback){
                     	set(att, attValue);
                     }
                     return error;

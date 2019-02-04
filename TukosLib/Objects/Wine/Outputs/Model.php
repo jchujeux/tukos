@@ -13,10 +13,10 @@ use TukosLib\TukosFramework as Tfk;
 class Model extends AbstractModel {
     function __construct($objectName, $translator=null){
         $colsDefinition = [ 'stockid'  => 'INT(11) NOT NULL',
-                            'exitdate' => "date NOT NULL DEFAULT '0000-00-00'",
+                            'exitdate' => "date",
                               'status' => "ENUM ('" . implode("','", Wine::$statusOptions) . "')",
                             'quantity' => 'INT(11) NOT NULL',];
-        parent::__construct($objectName, $translator, 'wineoutputs', ['parentid' => ['winecellars'], 'stockid' => ['winestock']], [], $colsDefinition, ' KEY (`stockid`)', ['status']);
+        parent::__construct($objectName, $translator, 'wineoutputs', ['parentid' => ['winecellars'], 'stockid' => ['winestock']], [], $colsDefinition, [['stockid']], ['status']);
     }
     
     function initialize($init=[]){

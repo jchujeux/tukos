@@ -1,10 +1,42 @@
 /*
  * Source: https://thiscouldbebetter.wordpress.com/2012/12/18/loading-editing-and-saving-a-text-file-in-html5-using-javascrip/
  */
-define (["dijit/registry", "tukos/expressions"], 
-    function(registry, expressions){
+define (["dijit/registry", "tukos/expressions", "dojo/request", "tukos/PageManager"], 
+    function(registry, expressions, request, Pmg){
 	return {
-	    saveForm: function(saveWidget){
+	    saveForm: function(widget){
+	   		var textToSaveAsBlob = new Blob([JSON.stringify({content: this.contentToProcess()})], {type:"text/plain"}), textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+			var downloadLink = document.createElement("a");
+			downloadLink.download = document.title + ".json";
+			downloadLink.innerHTML = "Download File";
+			downloadLink.href = textToSaveAsURL;
+				var destroyClickedElement= function(event){
+					document.body.removeChild(event.target);widget.set('label', label);
+			};
+			downloadLink.onclick = destroyClickedElement;
+			downloadLink.style.display = "none";
+			document.body.appendChild(downloadLink);
+			downloadLink.click();  		
+	    },
+	    sendFormMail: function(widget){
+        	var data = JSON.parse(widget.domNode.parentNode.getAttribute('data-params')), label = widget.get('label');
+        	widget.set('label', Pmg.loading(label));
+        	data.content = this.contentToProcess();
+	    	request("https://localhost/tukos/index20.php/tukosApp/Dialogue/backoffice/NoView/NoMode/SendEmail", 
+        			{method: 'POST', handleAs: 'json', data: data}).then(
+        		function(response){
+        			console.log('the response is: ' + response);
+        			widget.set('label', label + '... ' + Pmg.message('sent'));
+        			setTimeout(function(){widget.set('label', label);}, 1000);
+        		},
+        		function(error){
+        			widget.set('label', label + '... ' + Pmg.message('error'));
+        			setTimeout(function(){widget.set('label', label);}, 300);
+        			console.log('the error is: ', error);
+        		}
+        	);
+	    },
+	    contentToProcess: function(){
 			var theExpressions = Array.apply(null, document.getElementsByClassName('tukosExpression')), expressionsValues = {};
 			theExpressions.forEach(function(expression){
 				expressionsValues[expression.id] = {formula: expressions.formulaOf(expression), value: expressions.valueOf(expression)};
@@ -19,24 +51,14 @@ define (["dijit/registry", "tukos/expressions"],
 	   		formElements.forEach(function(formElement){
 	   			formElementsValues[formElement.id] = formElement.value;
 			});
-	   		var textToSave = JSON.stringify({expressions: expressionsValues, widgets: widgetsValues, formElements: formElementsValues});
-	   		var textToSaveAsBlob = new Blob([textToSave], {type:"text/plain"});
-			var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-			var downloadLink = document.createElement("a");
-			downloadLink.download = document.title + ".json";
-			downloadLink.innerHTML = "Download File";
-			downloadLink.href = textToSaveAsURL;
-				var destroyClickedElement= function(event){document.body.removeChild(event.target);};
-			downloadLink.onclick = destroyClickedElement;
-			downloadLink.style.display = "none";
-			document.body.appendChild(downloadLink);
-			downloadLink.click();  		
+	   		return JSON.stringify({expressions: expressionsValues, widgets: widgetsValues, formElements: formElementsValues});
+	    	
 	    },
-	    loadForm: function(loadWidget){
+	    loadForm: function(widget){
 	    	var fileReader = new FileReader();
     	    fileReader.onload = function(fileLoadedEvent){
-    	        var loadedContent = JSON.parse(fileLoadedEvent.target.result), expressionsValues = loadedContent.expressions, widgetsValues = loadedContent.widgets, formElementsValues = loadedContent.formElements;
-    			var theExpressions = Array.apply(null, document.getElementsByClassName('tukosExpression'));
+    	        var loadedAtts = JSON.parse(fileLoadedEvent.target.result), loadedContent = JSON.parse(loadedAtts.content), expressionsValues = loadedContent.expressions, widgetsValues = loadedContent.widgets, 
+    	        	formElementsValues = loadedContent.formElements, theExpressions = Array.apply(null, document.getElementsByClassName('tukosExpression'));
     			theExpressions.forEach(function(expression){
     				expressions.setExpression(expression, expressionsValues[expression.id]);
     			});
@@ -51,7 +73,7 @@ define (["dijit/registry", "tukos/expressions"],
     	   			formElement.value = formElementsValues[formElement.id];
     			});
     	    };
-    	    fileReader.readAsText(loadWidget._files[0], "UTF-8");
+    	    fileReader.readAsText(widget._files[0], "UTF-8");
 	    }
     }
 });

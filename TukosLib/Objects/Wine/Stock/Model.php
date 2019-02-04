@@ -18,7 +18,7 @@ class Model extends AbstractModel {
                             'format'        => "ENUM('" . implode("','", Wine::$formatOptions) . "')",
                             'quantity'      => 'INT(11) NOT NULL',];
 
-        parent::__construct($objectName, $translator, 'winestock', ['parentid' => ['wines'], 'cellarid' => ['winecellars']], [], $colsDefinition, ' KEY (`cellarid`)', ['laydown', 'format']);
+        parent::__construct($objectName, $translator, 'winestock', ['parentid' => ['wines'], 'cellarid' => ['winecellars']], [], $colsDefinition, [['cellarid']], ['laydown', 'format']);
     }
 
 

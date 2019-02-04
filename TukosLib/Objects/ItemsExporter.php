@@ -2,18 +2,19 @@
 namespace TukosLib\Objects;
 
 use TukosLib\Utils\Feedback;
+use TukosLib\Utils\HttpUtilities;
 use TukosLib\TukosFramework as Tfk;
 
 trait ItemsExporter{
 
 	public function exportItems($query, $atts){		
-		return $this->downloadFile($this->buildFile($atts), 'plain/txt', $query['downloadtoken']);
+		return HttpUtilities::downloadFile($this->buildItemsFile($atts), 'plain/txt', $query['downloadtoken']);
 	}
 
-	public function buildFile($atts){
+	public function buildItemsFile($atts){
 		$idsToExport = json_decode($atts['ids'], true);
 		$visibleCols = json_decode($atts['visibleCols'], true);
-		$fileName = Tfk::tukosTmpDir . uniqId() . '.txt';
+		$fileName = Tfk::$tukosTmpDir . uniqId() . '.txt';
 		$colsToDownload = array_diff(isset($visibleCols['id']) ? $visibleCols : array_merge($visibleCols, ['id']), ['0', 'created', 'creator', 'updated', 'updator']);
 		$items = $this->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $idsToExport]], 'cols' => $colsToDownload]);
 		if (!empty($items)){
@@ -45,26 +46,6 @@ trait ItemsExporter{
 			Feedback::add($this->tr('itemsnotfound'));
 		}
 		return $fileName;
-	}
-
-	public function downloadFile($fileName, $contentType, $downloadToken){
-		if ($fileHandle = fopen($fileName, 'r')){
-			header("Content-Type: " . $contentType);
-			header("Content-length:" . filesize($fileName));
-			header("Content-Disposition: attachment; filename=" . basename($fileName));
-			header("Content-Description: PHP Generated Data");
-			setcookie('downloadtoken', $downloadToken, 0, '/');		  
-			while (!feof($fileHandle)){
-				$buffer = fread($fileHandle, 2048);
-				echo $buffer;
-			}
-			fclose($fileHandle);
-			unlink($fileName);
-			return false;
-		}else{
-			Feedback::add($this->tr('errorgeneratingfile'));
-			return [];
-		}
 	}
 }
 ?>

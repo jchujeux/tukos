@@ -32,15 +32,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             this.on("dgrid-editor-show", lang.hitch(this, function(evt){
                 var editor = evt.editor, column = evt.column;
                 editor.widgetType = column.widgetType;
-/*
-                if (editor.widgetType === 'TextBox'){
-                	var style = editor.get('style') || {}, length = editor.get('value').length;
-                    style.width = Math.min(600, Math.max(column.width, Math.ceil(length*10))) + "px";// assuming here 10px will allow to fit most characters
-                    editor.set('style', style);
-                //}else if (editor.widgetType === 'TukosTextarea'){
-                	//editor.autoExpand(editor.domNode);
-                }
-*/
                 if (!editor.contextMenu){
                     mutils.setContextMenu(editor,{
                         atts: {targetNodeIds: [editor.domNode]}, 

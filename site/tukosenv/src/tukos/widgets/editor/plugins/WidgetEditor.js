@@ -2,7 +2,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
 		"tukos/tukosWidgets", "tukos/PageManager"], 
 function(declare, lang, dct, domStyle, dcl, string, _TagEditDialog, utils, hiutils, tukosWidgets, Pmg) {
 	var attWidgets = ['backgroundColor', 'color', 'width', 'height', 'placeHolder'],
-		extraWidgets = ['name', 'type', 'value', 'topics', 'values', 'numCols', 'orientation', 'uniquechoice', 'increment', 'min', 'max', 'digits'],
+		extraWidgets = ['type', 'name', 'uniquechoice', 'numCols', 'increment', 'min', 'max', 'digits', 'value', 'topics', 'values', 'orientation', 'to', 'subject', 'subjectPrepend', 'body', 'filename'],
 		paramWidgets = extraWidgets.concat(attWidgets);
 	return declare(null, {
 
@@ -16,20 +16,26 @@ function(declare, lang, dct, domStyle, dcl, string, _TagEditDialog, utils, hiuti
         			return this._dialogAtts({
         					name: {type: 'StoreComboBox', atts: {label: Pmg.message('name'), storeArgs: {}, onChange: lang.hitch(this, this.onNameChange)}},
         					//name: {type: 'TextBox', atts: {label: Pmg.message('name')}},
-	        				type: {type: 'StoreSelect', atts: {label: Pmg.message('widgetType'), style: {width: '10em'}, storeArgs: {data: Pmg.messageStoreData(tukosWidgets.widgetTypes())}, onChange: lang.hitch(this, this.onTypeChange)}},
-	        				value: {type: 'TextBox', atts: {label: Pmg.message('initialvalue'), style: {width: '5em'}}},
-	       				 	topics: {type: 'TextBox', atts: {label: Pmg.message('topics'), style: {width: '10em'}}},
-	       				 	values: {type: 'TextBox', atts: {label: Pmg.message('values'), style: {width: '10em'}}},
-	        				numCols: {type: 'TextBox', atts: {label: Pmg.message('numCols'), style: {width: '5em'}}},
+	        				type: {type: 'StoreSelect', atts: {label: Pmg.message('widgetType'), style: {width: '15em'}, storeArgs: {data: Pmg.messageStoreData(tukosWidgets.widgetTypes())}, onChange: lang.hitch(this, this.onTypeChange)}},
+	        				value: {type: 'TukosTextarea', atts: {label: Pmg.message('initialvalue'), style: {width: '5em', height: '1em'}}},
+	       				 	topics: {type: 'TukosTextarea', atts: {label: Pmg.message('topics'), style: {width: '15em', height: '1em'}}},
+	       				 	values: {type: 'TukosTextarea', atts: {label: Pmg.message('values'), style: {width: '15em', height: '1em'}}},
+	        				numCols: {type: 'TextBox', atts: {label: Pmg.message('numCols'), style: {width: '3em'}}},
 	        				orientation: this.storeSelectDescription(Pmg.message('orientation'), Pmg.messageStoreData(['vertical', 'horizontal'])),
 	        				uniquechoice: {type: 'CheckBox', atts: {label: Pmg.message('uniquechoice')}},
 	        				increment: {type: 'TextBox', atts: {label: Pmg.message('increment'), style: {width: '5em'}}},
-	        				min: {type: 'TextBox', atts: {label: Pmg.message('min'), style: {width: '5em'}}},
-	        				max: {type: 'TextBox', atts: {label: Pmg.message('max'), style: {width: '5em'}}},
-	        				digits: {type: 'TextBox', atts: {label: Pmg.message('digits'), style: {width: '5em'}}}
+	        				min: {type: 'TextBox', atts: {label: Pmg.message('min'), style: {width: '3em'}}},
+	        				max: {type: 'TextBox', atts: {label: Pmg.message('max'), style: {width: '3em'}}},
+	        				digits: {type: 'TextBox', atts: {label: Pmg.message('digits'), style: {width: '3em'}}},
+	                        //from: {type: 'ObjectSelect', atts: {label: Pmg.message('from'), object: 'mailaccounts', dropdownFilters: {contextpathid: this.editor.pane.tabContextId()}}},
+	       				 	to: {type: 'TukosTextarea', atts: {label: Pmg.message('to'), style: {width: '15em', height: '1em'}}},
+	       				 	subject: {type: 'TukosTextarea', atts: {label: Pmg.message('subject'), style: {width: '15em', height: '1em'}}},
+	       				 	subjectPrepend: {type: 'TukosTextarea', atts: {label: Pmg.message('subjectPrepend'), style: {width: '15em', height: '1em'}}},
+	       				 	body: {type: 'TukosTextarea', atts: {label: Pmg.message('body'), style: {width: '15em', height: '1em'}}},
+	       				 	filename: {type: 'TukosTextarea', atts: {label: Pmg.message('filename'), style: {width: '15em', height: '1em'}}}
 	        			},
-                    	{headerRow: {tableAtts: {cols: 6, customClass: 'labelsAndValues', label: Pmg.message('widgetEditor'), showLabels: true, orientation: 'vert'}, widgets: extraWidgets}},
-                    	['insert', 'replace', 'remove', 'close'], {tableAtts: {cols: 4,   customClass: 'labelsAndValues', showLabels: false}, widgets: ['insert'/*, 'replace'*/, 'remove', 'close']},
+                    	{headerRow: {tableAtts: {cols: 4, customClass: 'labelsAndValues', label: Pmg.message('widgetEditor'), showLabels: true, orientation: 'vert'}, widgets: extraWidgets}},
+                    	['insert'/*, 'replace'*/, 'remove', 'close'], {tableAtts: {cols: 4,   customClass: 'labelsAndValues', showLabels: false}, widgets: ['insert'/*, 'replace'*/, 'remove', 'close']},
                     	attWidgets
         			);
         		},

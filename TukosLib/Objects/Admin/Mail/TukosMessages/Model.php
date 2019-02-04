@@ -15,21 +15,15 @@ class Model extends AbstractModel{
     function __construct($objectName, $translator=null){
         $colsDefinition = [
             'accountid'  => 'INT(11) DEFAULT NULL',
-            'sender'     => 'VARCHAR(512) ',
+            'sender'     => 'VARCHAR(512)',
             'tos'        => 'VARCHAR(2048)',
             'ccs'        => 'VARCHAR(2048)',
             'bccs'       => 'VARCHAR(2048)',
-            'status'     => "ENUM ('" . implode("','", $this->statusOptions) . "') ",
-            'statusdate' => "timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ",
+            'status'     => "ENUM ('" . implode("','", $this->statusOptions) . "')",
+            'statusdate' => "timestamp",
             'smtpserverid'=>'INT(11) DEFAULT NULL',
         ];
-        parent::__construct(
-            $objectName, $translator, 'mailtukosmessages', [
-                'parentid' => Tfk::$registry->get('user')->allowedNativeObjects(), 
-                'accountid' => ['mailaccounts'], 'smtpserverid' => ['mailsmtps'],
-            ],
-            [], $colsDefinition, '', ['status']
-        );
+        parent::__construct($objectName, $translator, 'mailtukosmessages', ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects(), 'accountid' => ['mailaccounts'], 'smtpserverid' => ['mailsmtps']], [], $colsDefinition, [], ['status']);
         $this->getAccountsModel();
     }
 

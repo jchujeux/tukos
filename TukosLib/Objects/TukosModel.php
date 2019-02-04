@@ -5,20 +5,21 @@ use TukosLib\Store\Store;
 use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Objects\Directory;
 use TukosLib\TukosFramework as Tfk;
+use TukosLib\Objects\Admin\Users\Model as UserModel;
 
 class TukosModel {
 
     protected $_nextIdTable = 'id';
     protected $tableName = 'tukos';
     protected $_colsDefinition = [
-        'id'           =>  'INT(11) NOT NULL',
+        'id'           =>  'INT(11) NOT NULL PRIMARY KEY',
         'parentid'     =>  "INT(11) NOT NULL DEFAULT '0'",
         'object'       =>  "VARCHAR(80)",
         'name'         =>  "VARCHAR(255) DEFAULT ''",
         'contextid'    =>  'INT(11) NOT NULL',
         'comments'     =>  'longtext',
-        'created'      =>  "timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'",
-        'updated'      =>  "timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'",
+        'created'      =>  "timestamp",
+        'updated'      =>  "timestamp",
         'creator'      =>  'INT(11) NOT NULL',
         'updator'      =>  'INT(11) NOT NULL',
         'permission'   =>  "ENUM ('NOTDEFINED', 'PR', 'RO', 'PU', 'ACL')",
@@ -27,8 +28,9 @@ class TukosModel {
         'custom'       =>  'longtext',
         'history'      =>  'longtext',
     ];
+    protected $_colsIndexes =   [['parentid', 'object'], ['object'], ['updator'], ['contextid']];
+        
 
-    protected $_keysDefinition ="PRIMARY KEY (`ID`), KEY (`parentid`), KEY(`object`), KEY (`contextid`), KEY (`creator`), KEY (`updator`), KEY (`permission`), KEY (`grade`)";
     public $_textColumns = ['char', 'varc', 'long', 'text'];
     public $_largeColumns = ['medi', 'long'];
     
@@ -38,16 +40,19 @@ class TukosModel {
         }); 
     	$this->store  = Tfk::$registry->get('store');
         if (!$this->store->tableExists($this->tableName)){
-            $this->store->createTable($this->tableName, $this->_colsDefinition, $this->_keysDefinition);
-            $this->store->insert(['id' => 0, 'name' => 'tukos', 'object' => 'users', 'contextid' => 1], ['table' => $this->tableName]);
-            $this->store->insert(['id' => 1, 'name' => 'tukos', 'object' => 'contexts'], ['table' => $this->tableName]);
-            $this->store->createTable($this->_nextIdTable, ['id' => 'INT(11)', 'configrange' => 'VARCHAR(20)', 'nextid' => 'INT(11)', 'updated' => 'datetime'], 'PRIMARY KEY (`configrange`)');
+            $now = date('Y-m-d H:i:s');
+            $this->store->createTable($this->tableName, $this->_colsDefinition, $this->_colsIndexes);
+            $this->store->insert(['id' => 2, 'name' => 'tukos', 'object' => 'users', 'contextid' => 1, 'created' => $now, 'updated' => $now, 'creator' => 2, 'updator' => 2], ['table' => $this->tableName]);
+            require __DIR__.'/Admin/Users/Model.php';
+            $this->store->createTable('users', array_merge([ 'id'  =>  'INT(11) NOT NULL PRIMARY KEY'], UserModel::$_colsDefinition), UserModel::$_colsIndexes);
+            $this->store->insert(['id' => 2, 'rights' => 'SUPERADMIN'], ['table' => 'users']);
+            $this->store->insert(['id' => 1, 'name' => 'tukos', 'object' => 'contexts', 'created' => $now, 'updated' => $now, 'creator' => 2, 'updator' => 2], ['table' => $this->tableName]);
+            $this->store->createTable($this->_nextIdTable, [/*'id' => 'INT(11)', */'configrange' => 'VARCHAR(20) PRIMARY KEY', 'nextid' => 'INT(11)', 'updated' => 'datetime']);
             forEach (Directory::configStatusRange() as $status => $range){
             	$this->store->insert(['configrange' => $status, 'nextid' => $range, 'updated' => date('Y-m-d H:i:s')], ['table' => $this->_nextIdTable]);
             }
         }
         $this->textColumns = array_keys(array_filter($this->_colsDefinition, function($def){return in_array(strtolower(substr($def, 0, 4)), $this->_textColumns);}));
-        //$this->maxSizeCols = array_keys(array_filter($this->_colsDefinition, function($def){return in_array(strtolower(substr($def, 0, 4)), $this->_largeColumns);}));
         $this->maxSizeCols = ['comments'];
         $this->allCols = array_keys($this->_colsDefinition);
         $this->sharedObjectCols = array_diff($this->allCols, ['object']);

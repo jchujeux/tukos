@@ -14,12 +14,12 @@ class Model extends AbstractModel {
 
     function __construct($objectName, $translator=null){
         $colsDefinition = [
-            'vobject'       =>  'VARCHAR(50)  DEFAULT NULL ',
-            'view'          =>  "ENUM ('" . implode("','", $this->viewOptions) . "') ",
-            'panemode'      =>  "ENUM ('" . implode("','", $this->panemodeOptions) . "') ",
-        	'customization' =>  'longtext DEFAULT NULL',
+            'vobject'       =>  'VARCHAR(50)  DEFAULT NULL',
+            'view'          =>  "ENUM ('" . implode("','", $this->viewOptions) . "')",
+            'panemode'      =>  "ENUM ('" . implode("','", $this->panemodeOptions) . "')",
+        	'customization' =>  'longtext DEFAULT NULL'
         ];
-        parent::__construct($objectName, $translator, 'customviews', ['parentid' => ['users']], ['customization'], $colsDefinition, '', ['vobject', 'view', 'panemode'], [], ['name', 'vobject', 'view', 'panemode']);
+        parent::__construct($objectName, $translator, 'customviews', ['parentid' => ['users']], ['customization'], $colsDefinition, [], ['vobject', 'view', 'panemode'], [], ['name', 'vobject', 'view', 'panemode']);
         $this->vobjectOptions = $this->user->allowedModules();
     }
     public function deleteCustomization($where, $valuesToDelete){

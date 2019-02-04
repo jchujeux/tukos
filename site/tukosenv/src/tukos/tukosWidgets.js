@@ -18,19 +18,27 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
 				'<div class="tukosWidget" value="${value}" style="width: ${width};border:1px solid;border-color:#b5bcc7;" width="${width}"' +
 				'data-dojo-type="dijit/InlineEditBox" data-dojo-props="editor:\'dijit/Editor\', renderAsHtml:true, autoSave:false, editorParams:{height: \'\', extraPlugins: [\'dijit/_editor/plugins/AlwaysShowToolbar\']}"></div>',
 			Checkbox: '<input class="tukosWidget" data-dojo-type="dijit/form/CheckBox" value="ok" />',
-			SaveButton: '<button data-dojo-type="dijit/form/Button" type="button" ><span>${name}</span><script type="dojo/on" data-dojo-event="click">var tukosForms=require("tukos/tukosForms");tukosForms.saveForm();</script></button>',
+			SendMailButton: 
+				'<button data-dojo-type="dijit/form/Button" type="button" ><span>${name}</span>' +
+					'<script type="dojo/on" data-dojo-event="click">var tukosForms=require("tukos/tukosForms");tukosForms.sendFormMail(this);</script>' +
+				'</button>',
+			SendFileButton: 
+				'<button data-dojo-type="dijit/form/Button" type="button" ><span>${name}</span>' +
+					'<script type="dojo/on" data-dojo-event="click">var tukosForms=require("tukos/tukosForms");tukosForms.sendFormFile(this);</script>' +
+				'</button>',
+			SaveButton: '<button data-dojo-type="dijit/form/Button" type="button" ><span>${name}</span><script type="dojo/on" data-dojo-event="click">var tukosForms=require("tukos/tukosForms");tukosForms.saveForm(this);</script></button>',
 			ReloadButton: 
 				'<button data-widgetid="${name}" multiple="false" type="file" data-dojo-type="dojox/form/Uploader" label="${name}" data-dojo-props="uploadOnSelect: false, url:\'dummy\'">' +
 					'<script type="dojo/on" data-dojo-event="change">var tukosForms=require("tukos/tukosForms");tukosForms.loadForm(this);</script>' +
 				'</button>',
-			//RadioButtons:'<table class="tukosWidget" value="${value}" style="width: ${width}; background-color: ${backgroundColor}; color: ${color};" data-dojo-type="tukos/widgets/RadioButtons"><tbody>${radioTrs}</tbody></table>',
 			MultiCheckInput:'<table class="tukosWidget" value="${value}" uniquechoice="${uniquechoice}" style="width: ${width}; background-color: ${backgroundColor}; color: ${color};" ' +
 			 'data-dojo-type="tukos/widgets/MultiCheckInput"><tbody>${inputTrs}</tbody></table>',
 			MultiGridCheckInput:'<table class="tukosWidget" uniquechoice="${uniquechoice}" style="width: ${width}; background-color: ${backgroundColor}; color: ${color};" ' +
 			 'data-dojo-type="tukos/widgets/MultiGridCheckInput"><tbody>${inputTrs}</tbody></table>',
 			DateTextBox: '<input class="tukosWidget" type="text" value="${value}"  style="width: ${width}; background-color: ${backgroundColor}; color: ${color};" data-dojo-type="dijit/form/DateTextBox" />',
 			TimeTextBox: '<input class="tukosWidget" type="text" value="${value}"  style="width: ${width}; background-color: ${backgroundColor}; color: ${color};" data-dojo-type="dijit/form/TimeTextBox" />',
-			NumberSpinner: '<input class="tukosWidget" value="${value}" style="width: ${width}; background-color: ${backgroundColor}; color: ${color};" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="smallDelta:${increment}, constraints:{min:${min},max:${max},places:${digits}}" />',
+			NumberSpinner: '<input class="tukosWidget" value="${value}" style="width: ${width}; background-color: ${backgroundColor}; color: ${color};" data-dojo-type="dijit/form/NumberSpinner" ' +
+				'data-dojo-props="smallDelta:${increment}, constraints:{min:${min},max:${max},places:${digits}}" />',
 			Select: '<select class="tukosWidget" data-dojo-type="dijit/form/Select">${options}</select>'
 		},
 		widgetParams = {// all widgets include 'name' and 'type', so concatenated in this.widgetParams(widgetType)
@@ -42,12 +50,11 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
 			TimeTextBox: ['width', 'backgroundColor', 'color', 'value'], 
 			NumberSpinner: ['width', 'backgroundColor', 'color', 'value', 'increment', 'min', 'max', 'digits'],
 			Checkbox: [],
-			//RadioButtons: ['width', 'backgroundColor', 'color', 'value', 'values', 'numCols', 'orientation'],
 			MultiCheckInput: ['width', 'backgroundColor', 'color', 'value', 'values', 'numCols', 'orientation', 'uniquechoice'],
 			MultiGridCheckInput: ['width', 'backgroundColor', 'color', 'values', 'topics', 'uniquechoice'],
 			Select: ['width', 'values'],
 			Slider:  ['width', 'color', 'value', 'values'],
-			 SaveButton: [],	ReloadButton: []
+			SendMailButton: ['subject', 'body', 'to', 'filename', 'subjectPrepend'], SendFileButton: ['filename'], SaveButton: [],	ReloadButton: []
 		},
 		defaultParams = {width: '100%'};
 			
@@ -86,22 +93,6 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
     				if (!params.value){
     					params.value = values[0];
     				}
-    				break;
-    			case 'RadioButtons':
-    				var values = params.values.split(','), length = values.length, numCols = params.numCols || length, labelOrientation = params.orientation, name = params.name, cellTemplate, radioTrs = '<tr>', col = 1,
-    					radioTemplate = '<input type="radio" data-dojo-type="dijit/form/RadioButton" name="${name}" value="${value}"/>';
-    				//delete params.values; delete params.numCols, delete params.orientation;
-    				cellTemplate = '<td style="width:' + 100/numCols + '%;margin: auto;"><table style="margin: auto;text-align: center"><tbody><tr><td>${label}</td>' + (labelOrientation === 'vertical' ? '</tr><tr>' : '') + 
-    							   '<td>' + radioTemplate + '</td></tr></tbody></table></td>';
-    				values.forEach(function(value, i){
-    					if (col > numCols){
-    						radioTrs += '</tr><tr>';
-    						col = 1;
-    					}
-    					radioTrs += string.substitute(cellTemplate, {name: name, label: value, value: value});
-    					col += 1;
-    				});
-    				params.radioTrs = radioTrs + '</tr>';
     				break;
     			case 'MultiCheckInput':
     				var values = params.values.split(','), length = values.length, numCols = params.numCols || length, labelOrientation = params.orientation, name = params.name, cellTemplate, inputTrs = '<tr>', col = 1,

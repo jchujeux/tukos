@@ -14,14 +14,16 @@ class Main{
     function __construct($request, $query){
 
         $dialogue = Tfk::$registry->get('dialogue');
-
+        //SUtl::instantiate();
+        Tfk::setTranslator();
+        
         $username = Tfk::$registry->get('Authentication')->isAuthenticated($dialogue, $request);
         if ($username !== false){/* Proceed only if user is authorized */
         	SUtl::instantiate();
-        	Tfk::setTranslator();
+        	//Tfk::setTranslator();
             $user = Tfk::$registry->get('user');
             if ($user->setUser(['name' => $username])){/* so as $user has the proper rights and other initialization information*/
-	            $streamsStore = Tfk::$registry->get('streamsStore');
+	            //$streamsStore = Tfk::$registry->get('streamsStore');
 	            try{
 	                $controllerClass = 'TukosLib\\Controllers\\' . $request['controller'];
 	                $controller = new $controllerClass();
@@ -31,13 +33,15 @@ class Main{
 	            }catch(\Exception $e){
 	                Tfk::debug_mode('log', 'an exception occured while responding to your request: ', $e->getMessage());
 	            }            
-	            $streamsStore->waitOnStreams();
+	            if ($streamsStore = Tfk::$registry->isInstantiated('streamsStore')){
+	                Tfk::$registry->get('streamsStore')->waitOnStreams();
+	            }
 	            $storeProfiles = Tfk::$registry->get('store')->getProfiles();
 	            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
-	            file_put_contents('/tukosstoreprofiles.html', $storeProfilesOutput);
+	            file_put_contents(Tfk::$tukosTmpDir . '/tukosstoreprofiles.html', $storeProfilesOutput);
 	            $storeProfiles = Tfk::$registry->get('configStore')->getProfiles();
 	            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
-	            file_put_contents('/tukosconfigstoreprofiles.html', $storeProfilesOutput);
+	            file_put_contents(Tfk::$tukosTmpDir . '/tukosconfigstoreprofiles.html', $storeProfilesOutput);
             }else{
             	Tfk::debug_mode('log', Tfk::tr('usersitemdoesnotexistforusername'));
             }

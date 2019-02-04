@@ -12,8 +12,7 @@ class LoginPage{
         $dialogue = Tfk::$registry->get('dialogue');
         $template = new Template(new EscaperFactory, new TemplateFinder, new HelperLocator);
         $template->requestUrl = $pageUrl . 'auth/loginValidation';
-        $template->dojoDir = Tfk::dojoBaseLocation();//jsFullDir('');
-        //$template->jsTukosDir = Tfk::jsFullDir('tukos');//Tfk::jsTukosDir;
+        $template->dojoBaseDir = Tfk::dojoBaseLocation();
         $template->error = Tfk::tr('AUTHENTICATIONFAILED');
         $template->username = Tfk::tr('username');
         $template->password = Tfk::tr('password');

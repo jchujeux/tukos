@@ -26,7 +26,7 @@ class Model extends AbstractModel{
             'smtpuser'  =>  'VARCHAR(255)  DEFAULT NULL ',
             'smtppwd'   =>  'VARCHAR(255)  DEFAULT NULL ',
         ];
-        parent::__construct($objectName, $translator, 'mailsmtps', ['parentid' => ['organizations', 'itsystems', 'people']], [], $colsDefinition, '', ['security', 'auth']);
+        parent::__construct($objectName, $translator, 'mailsmtps', ['parentid' => ['organizations', 'itsystems', 'people']], [], $colsDefinition, [], ['security', 'auth']);
         $this->mailer = false;
     }
     public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){

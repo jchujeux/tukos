@@ -90,7 +90,7 @@ class Model extends AbstractModel {
 			'snack' => 'VARCHAR(255) DEFAULT NULL',
 			'foodrace' => 'VARCHAR(255) DEFAULT NULL',
         ];
-        parent::__construct($objectName, $translator, 'physiocdcs', ['parentid' => ['physiopatients'], 'physiotherapist' => ['people']], [], $colsDefinition, '', [], ['custom'], ['name', 'parentid', 'cdcdate']);
+        parent::__construct($objectName, $translator, 'physiocdcs', ['parentid' => ['physiopatients'], 'physiotherapist' => ['people']], [], $colsDefinition, [], [], ['custom'], ['name', 'parentid', 'cdcdate']);
     }    
     function initialize($init=[]){
         return parent::initialize(array_merge(['cdcdate' => date('Y-m-d')], $init));
