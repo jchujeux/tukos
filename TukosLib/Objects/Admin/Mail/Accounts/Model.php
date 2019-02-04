@@ -22,7 +22,7 @@ class Model extends AbstractModel {
                          'mailserverid'  => 'INT(11) DEFAULT NULL',
                          'draftsfolder'  => 'VARCHAR(255)  DEFAULT NULL ',
         ];
-        parent::__construct($objectName, $translator, 'mailaccounts', ['parentid' => ['users'], 'smtpserverid' => ['mailsmtps'], 'mailserverid' => ['mailservers']], [], $colsDefinition, '');
+        parent::__construct($objectName, $translator, 'mailaccounts', ['parentid' => ['users'], 'smtpserverid' => ['mailsmtps'], 'mailserverid' => ['mailservers']], [], $colsDefinition);
         $this->openedAccounts = [];
 
         $this->mailConfig = Tfk::$registry->get('appConfig')->mailConfig;
@@ -41,7 +41,7 @@ class Model extends AbstractModel {
       if (in_array('password', $atts['cols']) && !in_array('privacy', $atts['cols'])){
       	$atts['cols'][] = 'privacy';
       }
-    	$result = $this->getOne($atts);
+      $result = $this->getOne($atts);
       if (!empty($result['password'])){
         $result['password'] = $this->user->decrypt($result['password'], $result['privacy']);
       }

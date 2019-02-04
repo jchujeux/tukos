@@ -14,12 +14,12 @@ class Model extends AbstractModel {
         $colsDefinition =  ['ip'            => 'VARCHAR(80)  DEFAULT NULL',
                             'macid'         => 'INT(11) NOT NULL',
                             'hostid'        => 'INT(11) NOT NULL',
-                            'firstconnect'  =>  "timestamp NULL DEFAULT NULL",
-                            'lastconnect'   =>  "timestamp NULL DEFAULT NULL",
+                            'firstconnect'  =>  "timestamp",
+                            'lastconnect'   =>  "timestamp",
                             'trust'         =>  "ENUM ('" . implode("','", Itm::$trustOptions) . "')",
                             'reason'        => 'VARCHAR(80)  DEFAULT NULL',
                             ];
-        parent::__construct($objectName, $translator, 'connexions', ['parentid' => ['networks'], 'hostid' => ['hosts'], 'macid' => ['macaddresses']], [], $colsDefinition, '', ['trust']);
+        parent::__construct($objectName, $translator, 'connexions', ['parentid' => ['networks'], 'hostid' => ['hosts'], 'macid' => ['macaddresses']], [], $colsDefinition, [], ['trust']);
     }
     private function discoverOne($networkId, $ip, $mac, $vendor, $timeStamp){
         $objectsStore = Tfk::$registry->get('objectsStore');

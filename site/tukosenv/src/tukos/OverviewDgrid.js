@@ -35,6 +35,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
             this.modify = {values: {}, displayedValues: {}};
             this.contextMenuItems.header.push({atts: {label: messages.showhidetargetvalues  , onClick: lang.hitch(this, function(evt){this.showColValues();})}});
         },
+        resize: function(){
+			this.inherited(arguments);
+        	var style = this.bodyNode.style;
+			style.maxHeight = (parseInt(this.parentContentPane.domNode.style.height) - parseInt(style.marginTop) - parseInt(style.marginBottom)- 2) + 'px';
+        },
         allowSelect: function(row){
             if (typeof row.id == 'undefined'){//is the header rather than a data row (?)
                 return true;

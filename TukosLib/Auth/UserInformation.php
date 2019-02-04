@@ -30,16 +30,20 @@ class UserInformation{
         $tk = SUtl::$tukosTableName;
         $tu = 'users';
         $this->userInfo = SUtl::$store->getOne([/*can't use Users\Model here as AbstractModel relies on $this->userInfo */
-            'table' => $tu, 'join' => [['inner', $tk,  $tk . '.id = ' . $tu . '.id']], 
+            'table' => $tu, 'join' => [['inner', $tk,  $tk . '.id = ' . $tu . '.id']],
             'where' => SUtl::transformWhere($where, $tu),
             'cols'  => SUtl::transformCols(['id', 'parentid', 'name', 'password', 'rights', 'modules', 'contextid', 'language', 'environment', 'customviewids', 'customcontexts', 'pagecustom'], $tu)
         ]);
         if (empty($this->userInfo)){
-        	return false;
+            return false;
         }
         $this->unallowedModules  = ($this->rights() === 'SUPERADMIN' || $this->userInfo['modules'] === null) ? [] : json_decode($this->userInfo['modules'], true);
-        $this->allowedModules =  array_diff($this->objectModules, $this->unallowedModules);
-
+        if ($where['name'] === 'tukosBackOffice'){
+            $this->allowedModules = ['contexts', 'backoffice'];
+        }else{
+            $this->allowedModules =  array_diff($this->objectModules, $this->unallowedModules);
+        }
+        
         $this->ckey = $this->userInfo['password'];
         $translatorsStore = Tfk::$registry->get('translatorsStore');
         if (isset($this->userInfo['language'])){
@@ -49,9 +53,7 @@ class UserInformation{
         Tfk::setEnvironment($this->userInfo['environment']);
         Tfk::setTranslator($this->language);
         $this->contextModel = $this->objectsStore->objectModel('contexts', null);/* here and not in __construct  as else creates infinite loop recursion */
-        //$this->pageCustomization = array_merge(['fieldsMaxSize' => 100000], json_decode($this->userInfo['pagecustom'], true));
         $this->pageCustomization = array_merge(['fieldsMaxSize' => 100000], empty($pageCustom = $this->userInfo['pagecustom']) ? [] : json_decode($pageCustom, true));
-        
         return true;
     }
 
@@ -90,6 +92,7 @@ class UserInformation{
         return array_intersect($this->allowedModules, directory::getNativeObjs());
     }
     public function isAllowed($module, $query){
+        $module = strtolower($module);
         if ($module === 'users' && isset($query['id']) && $query['id'] === $this->id()){
             return true;
         }else{
@@ -100,7 +103,7 @@ class UserInformation{
         return $this->unallowedModules;
     }
     public function isUnallowed($module){
-        return in_array($module, $this->unallowedModules);
+        return in_array(strtolower($module), $this->unallowedModules);
     }
 
     public function contextTreeAtts($tr){
@@ -200,7 +203,7 @@ class UserInformation{
     }
 
     public function hasUpdateRights($item){
-        return $this->rights() === "SUPERADMIN" || $item['updator'] === $this->id() || $item['permission'] === 'PU' || item['id'] === $this->id();
+        return $this->rights() === "SUPERADMIN" || $item['updator'] === $this->id() || $item['permission'] === 'PU' || $item['id'] === $this->id();
     }
     private function customViewIds(){
         if (!property_exists($this, 'customViewIds')){

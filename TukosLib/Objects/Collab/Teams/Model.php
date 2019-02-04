@@ -16,11 +16,7 @@ class Model extends AbstractModel {
             'emailcontact' =>  'VARCHAR(50) DEFAULT NULL',
             'telcontact'   =>  'VARCHAR(20) DEFAULT NULL',
         ];
-        parent::__construct(
-            $objectName, $translator, 'teams',
-            ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects(), 'leader' => ['people']], 
-            [], $colsDefinition, ''
-        );
+        parent::__construct($objectName, $translator, 'teams', ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects(), 'leader' => ['people']], [], $colsDefinition);
     }   
 }
 ?>

@@ -10,11 +10,7 @@ class Model extends AbstractModel {
         $colsDefinition = [
             'templatetype'  => 'VARCHAR(30)  DEFAULT NULL',
         ];
-        parent::__construct(
-            $objectName, $translator, 'physiotemplates',
-            ['parentid' => ['people', 'organizations', 'physioassesments', 'physiocdcs', 'physiotemplates']], 
-            [], $colsDefinition, '', ['templatetype']
-        );
+        parent::__construct($objectName, $translator, 'physiotemplates', ['parentid' => ['people', 'organizations', 'physioassesments', 'physiocdcs', 'physiotemplates']], [], $colsDefinition, [], ['templatetype']);
     }   
 }
 ?>

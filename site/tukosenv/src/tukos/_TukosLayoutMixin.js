@@ -38,6 +38,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/Deferred", "dojo/promise
 	                }
 	                dojo.when(instantiatingWidget, lang.hitch(this, function(widget){
 	                    widget.layoutHandle = this;
+	                    widget.parentContentPane = fromParent;
 	                    this.decorate(widget);
 	                 }));
                 }else{

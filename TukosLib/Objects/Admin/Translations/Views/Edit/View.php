@@ -8,10 +8,10 @@ use TukosLib\Utils\Widgets;
 class View {
 
 
-    function __construct($actionController){
-        $this->controller = $actionController->controller;
-    	$this->view = $actionController->view;
-    	$this->paneMode = $actionController->paneMode;
+    function __construct($controller){
+        $this->controller = $controller;
+    	$this->view = $controller->view;
+    	$this->paneMode = $controller->paneMode;
         $this->actionWidgets = [
                      'save' => ['type' => 'ObjectSave',         'atts' => ['label' => $this->view->tr('Save')]],                                                               
                   'delete'  => ['type' => 'ObjectDelete',       'atts' => ['label' => $this->view->tr('Delete')]],                                                               

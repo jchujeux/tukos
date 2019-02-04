@@ -20,11 +20,7 @@ class Model extends AbstractModel {
                             'backuptype'            =>  "ENUM ('" . implode("','", $this->backupOptions) . "') ",
                             'filename'              =>  'VARCHAR(255) DEFAULT NULL ',
                           ];
-        parent::__construct(
-            $objectName, $translator, 'healthtables',
-            ['parentid' => ['users', 'scripts', 'health']], 
-            [], $colsDefinition, ''
-        );
+        parent::__construct($objectName, $translator, 'healthtables', ['parentid' => ['users', 'scripts', 'health']], [], $colsDefinition);
     }   
 }
 ?>

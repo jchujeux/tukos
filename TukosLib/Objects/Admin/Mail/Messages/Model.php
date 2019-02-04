@@ -6,8 +6,6 @@
 namespace TukosLib\Objects\Admin\Mail\Messages;
 
 use TukosLib\Objects\Admin\Mail\AbstractModel;
-use TukosLib\Objects\Admin\Mail\Messages\Builder as MessageBuilder;
-use TukosLib\Objects\Admin\Mail\Messages\Sender as MailSender;
 use TukosLib\Objects\Admin\Mail\Messages\Drafter as MailDrafter;
 use TukosLib\Objects\Admin\Mail\Messages\Getter as MailGetter;
 
@@ -18,24 +16,24 @@ class Model extends AbstractModel{
 
     function __construct($objectName, $translator=null){
         $colsDefinition = [
-                'id'  =>  'VARCHAR(50) ',
-         'parentid'  =>  'INT(11) ',
-       'mailboxname'  =>  'VARCHAR(50) ',
-           'name'  =>  'VARCHAR(512) ',
-              'from'  =>  'VARCHAR(512) ',
-                'to'  =>  'VARCHAR(512) ',
-              'date'  =>  'VARCHAR(50) ',
-              'size'  =>  'INT(11) ',
-               'uid'  =>  'INT(11) ',
-             'msgno'  =>  'INT(11) ',
-            'recent'  =>  'INT(11) ',
-           'flagged'  =>  'INT(11) ',
-          'answered'  =>  'INT(11) ',
-           'deleted'  =>  'INT(11) ',
-              'seen'  =>  'INT(11) ',
-             'draft'  =>  'INT(11) ',
-             'udate'  =>  'INT(11) ',
-              'body'  =>  'longtext ',
+                'id'  =>  'VARCHAR(50)',
+         'parentid'  =>  'INT(11)',
+       'mailboxname'  =>  'VARCHAR(50)',
+           'name'  =>  'VARCHAR(512)',
+              'from'  =>  'VARCHAR(512)',
+                'to'  =>  'VARCHAR(512)',
+              'date'  =>  'VARCHAR(50)',
+              'size'  =>  'INT(11)',
+               'uid'  =>  'INT(11)',
+             'msgno'  =>  'INT(11)',
+            'recent'  =>  'INT(11)',
+           'flagged'  =>  'INT(11)',
+          'answered'  =>  'INT(11)',
+           'deleted'  =>  'INT(11)',
+              'seen'  =>  'INT(11)',
+             'draft'  =>  'INT(11)',
+             'udate'  =>  'INT(11)',
+              'body'  =>  'longtext',
         ];
 
         $this->accountIdCol   = 'parentid';

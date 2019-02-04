@@ -19,7 +19,7 @@ class Model extends AbstractModel {
                             'countdeletedids'       =>  'INT(11)',
                             'countaffectedtables'   =>  'INT(11)',
                           ];
-        parent::__construct($objectName, $translator, 'health', ['parentid' => ['users', 'scripts']], [], $colsDefinition, '');
+        parent::__construct($objectName, $translator, 'health', ['parentid' => ['users', 'scripts']], [], $colsDefinition);
     }   
 }
 ?>

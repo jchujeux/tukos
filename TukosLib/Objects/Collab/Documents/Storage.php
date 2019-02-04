@@ -15,19 +15,16 @@ trait Storage {
 
     protected $_nextFileIdTableName = 'nextFileidTable';
     protected $_nextFileIdTableColsDefinition = array(
-     'nextid'   =>  'mediumint(8) unsigned NOT NULL auto_increment',
-     'updated'  =>  "timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ",
+     'nextid'   =>  'mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY',
+     'updated'  =>  "timestamp",
      );
-    protected $_nextFileIdTableKeysDefinition = "PRIMARY KEY(`NEXTID`)";
 
     protected $_filesTableName = 'filescontent';
     protected $_filesTableColsDefinition = array(
-     'id'       =>  'mediumint(8) unsigned NOT NULL auto_increment',
+     'id'       =>  'mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY',
      'fileid'   =>  "mediumint(8) unsigned NOT NULL default '0'",
      'content'  =>  'longblob NOT NULL',
      );
-    protected $_filesTableKeysDefinition ="PRIMARY KEY (`ID`), KEY  (`fileid`)";
-  
 
     function constructStorage() {
         
@@ -37,9 +34,9 @@ trait Storage {
             $this->filesStore = new Store($appConfig->filesStore);
     
             if (!$this->filesStore->tableExists($this->_filesTableName)){
-                $this->filesStore->createTable($this->_nextFileIdTableName, $this->_nextFileIdTableColsDefinition, $this->_nextFileIdTableKeysDefinition);
+                $this->filesStore->createTable($this->_nextFileIdTableName, $this->_nextFileIdTableColsDefinition);
                 $this->filesStore->insert(['nextid' => 0, 'updated' => date('Y-m-d H:i:s')], ['table' => $this->_nextFileIdTableName]);
-                $this->filesStore->createTable($this->_filesTableName, $this->_filesTableColsDefinition, $this->_filesTableKeysDefinition);
+                $this->filesStore->createTable($this->_filesTableName, $this->_filesTableColsDefinition, [['fileid']]);
             }
         }
     }

@@ -19,7 +19,7 @@ class Model extends AbstractModel {
         	'details'          =>  'longtext ',
         ];
         parent::__construct(
-            $objectName, $translator, 'sptsessionsstages',['parentid' => ['sptsessionsstages']], [], $colsDefinition, '', ['statetype', 'intensity', 'stress', 'sport'], ['custom']
+            $objectName, $translator, 'sptsessionsstages',['parentid' => ['sptsessionsstages']], [], $colsDefinition, [], ['statetype', 'intensity', 'stress', 'sport'], ['custom']
         );
     }   
 }

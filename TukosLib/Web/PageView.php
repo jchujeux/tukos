@@ -74,9 +74,9 @@ class PageView extends Translator{
                  'popup' => [
                     'type'  => 'DropDownMenu',
                     'items' => [
-                        ['type' => 'MenuItem', 'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'edit'),     'label' => $this->tr('default')]],
+                        ['type' => 'MenuItem', 'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'Edit'),     'label' => $this->tr('default')]],
                         ['type' => 'PopupMenuItem',   'atts' => ['label' => $this->tr('fromtemplate')], 
-                         'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectatemplate'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'edit'), 'sendAsNew' => true, 'object' => $object, 'mode' => 'Tab', 'dropdownFilters' => ['grade' => 'TEMPLATE']], true),
+                         'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectatemplate'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'Edit'), 'sendAsNew' => true, 'object' => $object, 'mode' => 'Tab', 'dropdownFilters' => ['grade' => 'TEMPLATE']], true),
                         ]
                     ],
                 ],
@@ -85,9 +85,9 @@ class PageView extends Translator{
             'edit' => [
                 'type' => 'PopupMenuItem', 
                 'atts' => ['label' => $this->tr('edit')],
-                'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectanitem'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'edit'), 'object' => $object, 'mode' => 'Tab'], true),
+                'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectanitem'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'Edit'), 'object' => $object, 'mode' => 'Tab'], true),
             ],
-            'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'overview'), 'label' => $this->tr('overview')]],
+            'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'Overview'), 'label' => $this->tr('overview')]],
             //'massedit' => ['type' => 'MenuItem',      'atts' => ['onTriggerUrlArgs' => $this->onTriggerUrlArgs($object, 'massedit'), 'label' => $this->tr('massedit')]],
         ];
     }
@@ -258,10 +258,9 @@ class PageView extends Translator{
             $module = '{"name":"' . $module . '","location":"' . Tfk::moduleLocation($module) . '"}';
         });
         $template->packagesString = '[' . implode(',', $packagesLocation) . ']';
-        $template->jsTukosDir = Tfk::moduleLocation('tukos');//jsFullDir('tukos');
-        $template->dojoDir = Tfk::dojoBaseLocation();//jsFullDir('');
-        $template->dojoFixesDir = Tfk::jsFullDir('dojoFixes');
-        $template->redipsDir = Tfk::jsFullDir('redips');
+        $template->tukosDir = Tfk::moduleLocation('tukos');
+        $template->dgridDir = Tfk::moduleLocation('dgrid');
+        $template->dojoBaseDir = Tfk::dojoBaseLocation();
         $template->language = $translatorsStore = Tfk::$registry->get('translatorsStore')->getLanguage();
         $template->loadingMessage = $this->tr('Loading') . '...';
 

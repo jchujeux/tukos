@@ -19,8 +19,8 @@ use TukosLib\Objects\Store;
 use TukosLib\Objects\ItemsCache;
 use TukosLib\Objects\ItemCustomization;
 use TukosLib\Objects\ContentExporter;
-use TukosLib\Objects\itemsExporter;
-use TukosLib\Objects\itemsImporter;
+use TukosLib\Objects\ItemsExporter;
+use TukosLib\Objects\ItemsImporter;
 use TukosLib\Utils\Utilities as Utl;
 
 use TukosLib\TukosFramework as Tfk;
@@ -40,7 +40,7 @@ abstract class AbstractModel extends ObjectTranslator {
         return [];
     }
     
-    function __construct ($objectName, $translator, $tableName, $idColsObjects, $jsonCols, $colsDefinition, $keysDefinition, $colsToTranslate = [], $optionalCols=['custom'], $extendedNameCols = ['name']) {
+    function __construct ($objectName, $translator, $tableName, $idColsObjects, $jsonCols, $colsDefinition, $colsIndexes = [], $colsToTranslate = [], $optionalCols=['custom'], $extendedNameCols = ['name']) {
     	$this->configStatusOptions = array_keys(Directory::configStatusRange());
     	$this->store  = Tfk::$registry->get('store');
         $this->user  = Tfk::$registry->get('user');
@@ -54,9 +54,9 @@ abstract class AbstractModel extends ObjectTranslator {
         $this->objectIdCols = array_diff($this->idCols, $this->tukosModel->idCols);
         $this->gridsIdCols = [];
         
-        $this->colsDescription = empty($colsDefinition) ? [] : array_merge([ 'id'  =>  'INT(11) NOT NULL '], $colsDefinition);
+        $this->colsDescription = empty($colsDefinition) ? [] : array_merge([ 'id'  =>  'INT(11) NOT NULL PRIMARY KEY'], $colsDefinition);
         if (!$this->store->tableExists($this->tableName) && !empty($colsDefinition)){
-            $this->store->createTable($this->tableName, $this->colsDescription, 'PRIMARY KEY (`ID`)' . (empty($keysDefinition) ? '' : ',' . $keysDefinition));
+            $this->store->createTable($this->tableName, $this->colsDescription, $colsIndexes);
         }
                     
         $this->extendedNameCols = $extendedNameCols;

@@ -9,7 +9,7 @@ class Model extends AbstractModel {
     $colsDefinition =  ['output'    =>  'longtext  DEFAULT NULL ',
                         'errors'    =>  'longtext  DEFAULT NULL ',
                        ];
-        parent::__construct($objectName, $translator, 'scriptsoutputs', ['parentid' => ['users', 'scripts']], [], $colsDefinition, '');
+        parent::__construct($objectName, $translator, 'scriptsoutputs', ['parentid' => ['users', 'scripts']], [], $colsDefinition);
     }    
 }
 ?>

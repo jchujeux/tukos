@@ -13,11 +13,7 @@ use TukosLib\TukosFramework as Tfk;
 class Model extends AbstractModel {
     function __construct($objectName, $translator=null){
         $colsDefinition = [];
-        parent::__construct(
-            $objectName, $translator, 'navigation',
-            ['parentid' => ['users']], 
-            [], $colsDefinition, ''
-        );
+        parent::__construct($objectName, $translator, 'navigation', ['parentid' => ['users']], [], $colsDefinition);
     }   
 }
 ?>

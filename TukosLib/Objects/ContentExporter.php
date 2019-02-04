@@ -3,6 +3,8 @@ namespace TukosLib\Objects;
 
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Utils\HttpUtilities;
+use Html2Text\Html2Text;
 use TukosLib\TukosFramework as Tfk;
 
 trait ContentExporter {
@@ -19,19 +21,19 @@ trait ContentExporter {
 					"var y = document.getElementsByClassName(x[i]);" .
 					"for (var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];" .
 		"}}</script>";
-	protected $tukosFormsHeader = '<title>${title}</title><link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.14.2/dijit/themes/claro/claro.css" media="screen">';
+	protected $tukosFormsHeader = '<title>${title}</title><link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dijit/themes/claro/claro.css" media="screen">';
 	protected $tukosFormsBodyScripts = '
 <script>var dojoConfig ={
             baseUrl: "", isDebug: false, async: true, locale: "en-en",
             //],
-            packages: [{"name": "tukos", "location": "http://localhost/tukos/tukosenv/src/tukos"}]
+            packages: [{"name": "tukos", "location": "https://localhost/tukos/tukosenv/src/tukos"}]
         };
 </script>
-<script src="https://ajax.googleapis.com/ajax/libs/dojo/1.14.2/dojo/dojo.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojo/dojo.js"></script>
 <script>
     require(["tukos/expressions", "tukos/tukosForms", "tukos/PageManager", "dojo/parser", "dijit/Editor", "dijit/_editor/plugins/AlwaysShowToolbar"], function (expressions, tukosForms, Pmg, parser) {
-				tukos = {Pmg: Pmg};
-	    tukos.onTdClick = function(td){
+        Pmg.initializeTukosForm(${tukosFormConfig});    
+        tukos.onTdClick = function(td){
 	    	expressions.onClick(td.children[0]);
 	    };
 	    tukos.onTdDblClick = function(td){
@@ -47,8 +49,8 @@ trait ContentExporter {
 	});
 </script>';
 
-	function sendContent($query, $atts){
-		if (empty($atts['from']) || empty($atts['to'])){
+	function sendContent($query, $atts, $where = []){
+		if ((empty($atts['from']) && empty($where)) || empty($atts['to'])){
 			Feedback::add($this->tr('missingfromorto'));
 			return [];
 		}else{
@@ -58,7 +60,7 @@ trait ContentExporter {
 			}
 			$mailArgs['body'] = (empty($atts['header']) ? '' : $atts['header']);
 			$objectsStore =  Tfk::$registry->get('objectsStore');
-			$accountInfo = $objectsStore->objectModel('mailaccounts')->getAccountInfo(['where' => ['id' => $atts['from']], 'cols' => ['name', 'eaddress', 'username', 'password', 'privacy', 'smtpserverid']]);
+			$accountInfo = $objectsStore->objectModel('mailaccounts')->getAccountInfo(['where' => empty($where) ? ['id' => $atts['from']] : $where, 'cols' => ['name', 'eaddress', 'username', 'password', 'smtpserverid']]);
 			$mailArgs['from'] = $accountInfo['name'] . ' <' . $accountInfo['eaddress'] . '>';
 			$mailArgs['username'] = $accountInfo['username'];
 			$mailArgs['password'] = $accountInfo['password'];
@@ -68,8 +70,11 @@ trait ContentExporter {
 				$mailArgs['body'] .= $atts['content'];
 			}
 			if ($atts['sendas'] !== 'apppendtobdy'){
-				$tmpFileName = $this->buildTargetFile($atts);
-				$mailArgs['attachments'] = [$tmpFileName];
+			    if($tmpFileName = $this->buildTargetFile($atts)){
+			        $mailArgs['attachments'] = [$tmpFileName];
+			    }else{
+			        return [];
+			    }
 			}
 			$smtpModel->send($accountInfo['smtpserverid'], $mailArgs, true);
 
@@ -80,100 +85,94 @@ trait ContentExporter {
 		}
 	}
 	function fileContent($query, $atts){
-		$tmpFileName = $this->buildTargetFile($atts);
-		if ($fileHandle = fopen($tmpFileName, 'r')){
-			header("Content-Type: application/pdf");
-			header("Content-length:" . filesize($tmpFileName));
-			header("Content-Disposition: attachment; filename=" . basename($tmpFileName));
-			header("Content-Description: PHP Generated Data");
-			setcookie('downloadtoken', $query['downloadtoken'], 0, '/');		  
-			while (!feof($fileHandle)){
-				$buffer = fread($fileHandle, 2048);
-				echo $buffer;
-			}
-			fclose($fileHandle);
-			unlink($tmpFileName);
-			return [];
-		}else{
-			Feedback::add($this->tr('errorgeneratingfile'));
-			return [];
+		$contentTypes = ['txt' => 'text/plain', 'html' => 'text/html', 'html2text' => 'text/plain', 'tukosform' => 'text/html', 'json' => 'plain/text', 'pdf' => 'application/pdf'];
+		if (($tmpFileName = $this->buildTargetFile($atts))){
+		    return HttpUtilities::downloadFile($tmpFileName, $contentTypes[$atts['formatas']], $query['downloadtoken']);
 		}
 	}
-	function buildTargetFile($atts, $dir = Tfk::tukosTmpDir){
+	function buildTargetFile($atts){
 		$fileName = empty($atts['filename']) ? uniqId() : str_replace(' ', '_',$atts['filename']);
-		$dirFileName = $dir . $fileName;
-		if ($atts['formatas'] === 'html'){
-		    $tmpHtmFileName = $dirFileName . ".htm";
-		    $this->buildHtmlFile($tmpHtmFileName, implode('', Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)), Utl::substitute($this->tukosFormsHeader, ['title' => $fileName]), '', null, $this->tukosFormsBodyScripts);
-		    return $tmpHtmFileName;
-		}else{
-		    $contentFileName =  $dirFileName . 'body.htm';
-		    $this->buildHtmlFile($contentFileName, $atts['content'], $this->tukosFormsHeader);
-		    $htmlToPdfOptions = ' ';
-		    //$headerDivHeight = null;
-		    $bodyAtts = 'style="margin:0; padding: 0;" onload="subst()"';
-		    $headerDivAtts = null;
-		    if (!empty($atts['contentmargin'])){
-		        $htmlToPdfOptions = '--margin-top ' . $atts['contentmargin'] . ' ';
-		        $offset = !empty($atts['marginoffset']) ? $atts['marginoffset'] : 30;
-		        $coef = !empty($atts['margincoef']) ? $atts['margincoef'] : 1.3;
-		        //$headerDivHeight = intval($offset + $coef * ($atts['contentmargin'] - $offset));
-		        $headerDivOptions = 'style="height:' . intval($offset + $coef * ($atts['contentmargin'] - $offset)) . 'mm;overflow:hidden;"';
-		    }
-		    if ($atts['orientation'] === 'landscape'){
-		        $htmlToPdfOptions .= '-O landscape ';
-		    }
-		    if ($atts['smartshrinking'] === 'off'){
-		        $htmlToPdfOptions .= '--disable-smart-shrinking ';
-		    }
-		    if ($atts['zoom'] != 100){
-		        $zoomValue = floatval($atts['zoom'])/100;
-		        $htmlToPdfOptions .= '--zoom ' . $zoomValue . ' ';
-		    }
-		    if (!empty($atts['fileheader'])){
-		        $headerFileName = $dirFileName . 'header.htm';
-		        //$this->buildHtmlFile($headerFileName, $atts['fileheader'], $this->htmlHeaderScript, $headerDivHeight);
-		        $this->buildHtmlFile($headerFileName, $atts['fileheader'], $this->htmlHeaderScript, $bodyAtts, $headerDivAtts);
-		        $htmlToPdfOptions .= '--header-html ' . $headerFileName . ' ';
-		    }
-		    if (!empty($atts['filefooter'])){
-		        $footerFileName = $dirFileName . 'footer.htm';
-		        //$this->buildHtmlFile($footerFileName, $atts['filefooter'], $this->htmlHeaderScript);
-		        $this->buildHtmlFile($footerFileName, $atts['filefooter'], $this->htmlHeaderScript, $bodyAtts, '');
-		        $htmlToPdfOptions .= '--footer-html ' . $footerFileName . ' ';
-		    }
-		    if (!empty($atts['filecover'])){
-		        $coverFileName = $dirFileName . 'cover.htm';
-		        //$this->buildHtmlFile($coverFileName, $atts['filecover']);
-		        $this->buildHtmlFile($coverFileName, $atts['filecover']);
-		        $htmlToPdfOptions .= $coverFileName . ' ';
-		    }
-		    $tmpPdfFileName = $dirFileName . '.pdf';
-		    $streamsStore = Tfk::$registry->get('streamsStore');
-		    if ($streamsStore->startStream('htmltopdf', Tfk::htmlToPdfCommand . $htmlToPdfOptions . $contentFileName . ' ' . $tmpPdfFileName, false)){
-		        $streamsStore->waitOnStream('htmltopdf', false, 'forget');
-		    }
-		    unlink($contentFileName);
-		    if (!empty($atts['fileheader'])){unlink($headerFileName);}
-		    if (!empty($atts['filefooter'])){unlink($footerFileName);}
-		    if (!empty($atts['filecover'])){unlink($coverFileName);}
-		    return $tmpPdfFileName;
+		$dirFileName = Tfk::$tukosTmpDir . $fileName;
+		switch($atts['formatas']){
+		    case 'txt':
+		        return $this->buildFile($dirFileName .'.txt', implode('', Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)));
+		    case 'html':
+		        return $this->buildHtmlFile($dirFileName . '.htm', implode('', Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)));
+		    case 'html2text':
+		        return $this->buildHtml2TextFile($dirFileName .'.txt', implode('', Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)));
+		    case 'tukosform':
+		        return $this->buildHtmlFile($dirFileName . '.htm', $atts['content'],//implode('', Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)),
+		          Utl::substitute($this->tukosFormsHeader, ['title' => $fileName]), '', null,
+		          Utl::substitute($this->tukosFormsBodyScripts, ['tukosFormConfig' => json_encode(['messages' => Tfk::$registry->get('translatorsStore')->getTranslations(['sent'], $this->objectName)])]));
+		    case 'json':
+		        return $this->buildFile($dirFileName .'.json', json_encode(Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)));
+		    case 'pdf':
+		        return $this->buildPdfFile($dirFileName, $atts);
+		    default:
+		        Feedback::add($this->tr('unsupportedformatas'));
+		        return false;
 		}
+	}
+	function buildFile($fileName, $content){
+	    $htmlHandle = fopen($fileName, "w");
+	    fwrite($htmlHandle, $content);
+	    fclose($htmlHandle);
+	    return $fileName;
 	}
 	function buildHtmlFile($fileName, $content, $htmlHeader = '', $bodyAtts = '', $bodyDivAtts = null, $bodyScripts = ''){
-	//function buildHtmlFile($fileName, $content, $htmlHeaderScript = '', $headerDivHeight = null){
-	    $htmlHandle = fopen($fileName, "w");
-/*
-		if (!empty($htmlHeaderScript)){
-			$styleOptions = isset($headerDivHeight) ? 'style="height:' . $headerDivHeight . 'mm;overflow:hidden;"' : '';
-			fwrite($htmlHandle, '<!DOCTYPE HTML><html ><meta charset="utf-8"><head><meta charset="utf-8">' . $htmlHeaderScript . '</head><body class="claro" style="margin:0; padding: 0;" onload="subst()"><div ' . $styleOptions . '>' . $content . '</div></body></html>');
-		}else{
-			fwrite($htmlHandle, '<!DOCTYPE HTML><html ><meta charset="utf-8"><head><meta charset="utf-8"></head><body class="claro">' . $content . '</body></html>');
-		}
-*/
-		fwrite($htmlHandle, '<!DOCTYPE HTML><html ><head><meta charset="utf-8">' . $htmlHeader . '</head><body class="claro" ' . $bodyAtts . '>' . 
-		                     (isset($bodyDivAtts) ? '<div ' . $bodyDivAtts . '>' : '') . $content . (isset($bodyDivAtts) ? '</div>' : '') . $bodyScripts . '</body></html>');
-		fclose($htmlHandle);
+	    return $this->buildFile($fileName, '<!DOCTYPE HTML><html ><head><meta charset="utf-8">' . $htmlHeader . '</head><body class="claro" ' . $bodyAtts . '>' .
+	        (isset($bodyDivAtts) ? '<div ' . $bodyDivAtts . '>' : '') . $content . (isset($bodyDivAtts) ? '</div>' : '') . $bodyScripts . '</body></html>');
+	}
+	function buildHtml2TextFile($fileName, $content){
+	    return $this->buildFile($fileName, Html2Text::convert($content));
+	}
+	function buildPdfFile($dirFileName, $atts){
+	    $contentFileName =  $dirFileName . 'body.htm';
+	    $this->buildHtmlFile($contentFileName, $atts['content'], $this->tukosFormsHeader);
+	    $htmlToPdfOptions = ' ';
+	    $bodyAtts = 'style="margin:0; padding: 0;" onload="subst()"';
+	    $headerDivAtts = null;
+	    if (!empty($atts['contentmargin'])){
+	        $htmlToPdfOptions = '--margin-top ' . $atts['contentmargin'] . ' ';
+	        $offset = !empty($atts['marginoffset']) ? $atts['marginoffset'] : 30;
+	        $coef = !empty($atts['margincoef']) ? $atts['margincoef'] : 1.3;
+	        $headerDivOptions = 'style="height:' . intval($offset + $coef * ($atts['contentmargin'] - $offset)) . 'mm;overflow:hidden;"';
+	    }
+	    if ($atts['orientation'] === 'landscape'){
+	        $htmlToPdfOptions .= '-O landscape ';
+	    }
+	    if ($atts['smartshrinking'] === 'off'){
+	        $htmlToPdfOptions .= '--disable-smart-shrinking ';
+	    }
+	    if ($atts['zoom'] != 100){
+	        $zoomValue = floatval($atts['zoom'])/100;
+	        $htmlToPdfOptions .= '--zoom ' . $zoomValue . ' ';
+	    }
+	    if (!empty($atts['fileheader'])){
+	        $headerFileName = $dirFileName . 'header.htm';
+	        $this->buildHtmlFile($headerFileName, $atts['fileheader'], $this->htmlHeaderScript, $bodyAtts, $headerDivAtts);
+	        $htmlToPdfOptions .= '--header-html ' . $headerFileName . ' ';
+	    }
+	    if (!empty($atts['filefooter'])){
+	        $footerFileName = $dirFileName . 'footer.htm';
+	        $this->buildHtmlFile($footerFileName, $atts['filefooter'], $this->htmlHeaderScript, $bodyAtts, '');
+	        $htmlToPdfOptions .= '--footer-html ' . $footerFileName . ' ';
+	    }
+	    if (!empty($atts['filecover'])){
+	        $coverFileName = $dirFileName . 'cover.htm';
+	        $this->buildHtmlFile($coverFileName, $atts['filecover']);
+	        $htmlToPdfOptions .= $coverFileName . ' ';
+	    }
+	    $tmpPdfFileName = $dirFileName . '.pdf';
+	    $streamsStore = Tfk::$registry->get('streamsStore');
+	    if ($streamsStore->startStream('htmltopdf', Tfk::htmlToPdfCommand . $htmlToPdfOptions . $contentFileName . ' ' . $tmpPdfFileName, false)){
+	        $streamsStore->waitOnStream('htmltopdf', false, 'forget');
+	    }
+	    unlink($contentFileName);
+	    if (!empty($atts['fileheader'])){unlink($headerFileName);}
+	    if (!empty($atts['filefooter'])){unlink($footerFileName);}
+	    if (!empty($atts['filecover'])){unlink($coverFileName);}
+	    return $tmpPdfFileName;
 	}
 }
 ?>

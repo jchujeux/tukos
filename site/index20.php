@@ -6,7 +6,7 @@
 
 use TukosLib\TukosFramework as Tfk;
 
-require getenv('tukosPhpRoot') . '/tukos/tukosLib/tukosFramework.php';
+require getenv('tukosPhpRoot') . '/tukos/TukosLib/TukosFramework.php';
 
 Tfk::initialize('interactive');
 
@@ -16,7 +16,7 @@ if (Tfk::$registry->route) {
          $applicationClass = ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus'];
          if (in_array($application, array_keys($applicationClass))){
             $appName = $applicationClass[$application];
-            $configure = $appName . '\\configure';
+            $configure = $appName . '\\Configure';
             $mainController = '\\TukosLib\\Controllers\\Main';
 
             Tfk::$registry->set('appConfig', new $configure()); 

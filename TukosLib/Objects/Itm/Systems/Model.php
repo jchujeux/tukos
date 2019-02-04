@@ -14,13 +14,8 @@ class Model extends AbstractModel {
             'version'=>  "VARCHAR(255) DEFAULT '' ",
             'status' =>  "ENUM ('" . implode("','", Itm::$ciStatusOptions) . "') ",
         ];
-        $keysDefinition = ' KEY (`citype`, `status`)';
 
-        parent::__construct(
-            $objectName, $translator, 'itsystems',
-            ['parentid' => ['itsystems', 'organizations', 'people']], 
-            [], $colsDefinition, $keysDefinition, ['citype', 'status']
-        );
+        parent::__construct($objectName, $translator, 'itsystems', ['parentid' => ['itsystems', 'organizations', 'people']], [], $colsDefinition, [], ['citype', 'status']);
     }
 }
 ?>

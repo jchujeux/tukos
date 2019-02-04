@@ -14,17 +14,13 @@ class Model extends AbstractModel {
 	
 	function __construct($objectName, $translator=null){
         $colsDefinition = [
-        		'sources' =>  'longtext ',
+        		'sources' =>  'longtext',
         		'periodstart' => 'VARCHAR(20) DEFAULT NULL',
         		'periodend'   => 'VARCHAR(20) DEFAULT NULL',
         		'weeksbefore'   => 'INT(11) DEFAULT NULL',
         		'weeksafter'   => 'INT(11) DEFAULT NULL',
         ];
-        parent::__construct(
-            $objectName, $translator, 'calendars',
-            	['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()],
-        		['sources'], $colsDefinition, '', [], ['worksheet', 'custom']
-        );
+        parent::__construct($objectName, $translator, 'calendars', ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], ['sources'], $colsDefinition, [], [], ['worksheet', 'custom']);
         $this->gridsIdCols = ['sources' => ['tukosparent']];
     }
 

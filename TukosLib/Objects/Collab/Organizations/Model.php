@@ -9,7 +9,7 @@ class Model extends AbstractModel {
     
         $colsDefinition = ['segment' =>  'VARCHAR(50)  DEFAULT NULL',
                               'logo' =>  'VARCHAR(150)  DEFAULT NULL',];
-        parent::__construct($objectName, $translator, 'organizations', ['parentid' => ['organizations']], [], $colsDefinition, '', ['segment']);
+        parent::__construct($objectName, $translator, 'organizations', ['parentid' => ['organizations']], [], $colsDefinition, [], ['segment']);
     }
 }
 ?>

@@ -1,11 +1,7 @@
 <?php
-/**
- *
- */
 namespace TukosLib\Objects;
 
 use TukosLib\Utils\Translator;
-use TukosLib\Objects\Directory;
 
 use TukosLib\TukosFramework as Tfk;
 

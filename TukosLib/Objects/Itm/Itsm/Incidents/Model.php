@@ -14,22 +14,21 @@ class Model extends AbstractModel {
     function __construct($objectName, $translator=null){
         $colsDefinition = [
             'notifiedby'        => 'INT(11) DEFAULT NULL',
-            'notifiedvia'       => "ENUM ('" . implode("','", Itm::$notifiedViaOptions) . "') ",
-            'callbackmethod'    => "ENUM ('" . implode("','", Itm::$callbackOptions) . "') ",
-            'urgency'           => "ENUM ('" . implode("','", Itm::$urgencyOptions) . "') ",
-            'impact'            => "ENUM ('" . implode("','", Itm::$impactOptions) . "') ",
-            'priority'          => "ENUM ('" . implode("','", Itm::$priorityOptions) . "') ",
-            'escalationlevel'   => "ENUM ('" . implode("','", $this->escalationLevelOptions) . "') ",
-            'category'          => "ENUM ('" . implode("','", Itm::$categoryOptions) . "') ",
-            'progress'          => "ENUM ('" . implode("','", Itm::$incidentsProgressOptions) . "') ",
+            'notifiedvia'       => "ENUM ('" . implode("','", Itm::$notifiedViaOptions) . "')",
+            'callbackmethod'    => "ENUM ('" . implode("','", Itm::$callbackOptions) . "')",
+            'urgency'           => "ENUM ('" . implode("','", Itm::$urgencyOptions) . "')",
+            'impact'            => "ENUM ('" . implode("','", Itm::$impactOptions) . "')",
+            'priority'          => "ENUM ('" . implode("','", Itm::$priorityOptions) . "')",
+            'escalationlevel'   => "ENUM ('" . implode("','", $this->escalationLevelOptions) . "')",
+            'category'          => "ENUM ('" . implode("','", Itm::$categoryOptions) . "')",
+            'progress'          => "ENUM ('" . implode("','", Itm::$incidentsProgressOptions) . "')",
             'assignedto'        => 'INT(11) DEFAULT NULL',
         ];
-        $keysDefinition = ' KEY (`notifiedby`, `notifiedvia`, `urgency`, `impact`, `priority`, `escalationlevel`, `category`, `progress`, `assignedto`)';
 
         parent::__construct(
             $objectName, $translator, 'itincidents',
             ['parentid' => ['itsvcdescs'], 'notifiedby' => ['people'], 'assignedto' => ['teams']],
-            [], $colsDefinition, $keysDefinition, ['notifiedvia', 'callbackmethod', 'urgency', 'impact', 'priority', 'escalationlevel', 'category', 'progress'],
+            [], $colsDefinition, [['notifiedby', 'assignedto']], ['notifiedvia', 'callbackmethod', 'urgency', 'impact', 'priority', 'escalationlevel', 'category', 'progress'],
         	['custom', 'history']
         );
     }

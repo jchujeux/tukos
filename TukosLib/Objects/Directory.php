@@ -3,8 +3,9 @@ namespace TukosLib\Objects;
 
 class Directory{
     private static $directory =  [
-        'tukos' => 'tukos',
-    	'users'             => 'Admin\users',
+        'tukos'             => 'Tukos',
+        'backoffice'        => 'BackOffice',
+    	'users'             => 'Admin\Users',
         'customviews'       => 'Admin\Users\CustomViews',
         'navigation'        => 'Admin\Users\Navigation',
         'contexts'          => 'Admin\Contexts',
@@ -70,17 +71,17 @@ class Directory{
         'bustrackinvoices' => 'BusTrack\Invoices',
         'help'              => 'Help',
         ];
-    private static $configStatusRange = ['tukos' => 2, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'users' => 10001];
+    private static $configStatusRange = ['tukos' => 3, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'users' => 10001];
     
     public static function configStatusRange(){
     	return self::$configStatusRange;
     }
     
     public static function getObjDir($object){
-        return self::$directory[$object];
+        return self::$directory[strtolower($object)];
     }
     public static function getObjDomain($object){
-        return explode('\\', self::$directory[$object], 2)[0];
+        return strtolower(explode('\\', self::$directory[strtolower($object)], 2)[0]);
     }
     public static function getObjs(){
         return array_keys(self::$directory);
@@ -91,7 +92,7 @@ class Directory{
     public static function getDomains(){
         $domains = [];
         foreach (self::$directory as $objDir){
-            $domains[] = explode('\\', $objDir, 2)[0];
+            $domains[] = strtolower(explode('\\', $objDir, 2)[0]);
         }
         return array_unique($domains);
     }

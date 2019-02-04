@@ -25,8 +25,8 @@ class StreamsManager{
     * Launches a new command
     */ 
     public function startStream($id, $cmd, $scriptObj = true){
-        //$desc = [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => ["file", Tfk::tukosTmpDir . $id . "streamerror.txt", 'a']];
-        $desc = [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => $scriptObj ? ["pipe", "w"] : ["file", Tfk::tukosTmpDir . $id . "streamerror.txt", 'a']];
+        //$desc = [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => ["file", Tfk::$tukosTmpDir . $id . "streamerror.txt", 'a']];
+        $desc = [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => $scriptObj ? ["pipe", "w"] : ["file", Tfk::$tukosTmpDir . $id . "streamerror.txt", 'a']];
         if (empty($this->process[$id])){
             $this->process[$id]['resource'] = proc_open($cmd, $desc, $pipes);
             if ($scriptObj){

@@ -19,7 +19,7 @@ class Model extends AbstractModel {
                             'trust'         =>  "ENUM ('" . implode("','", Itm::$trustOptions) . "')",
                             'reason'        => 'VARCHAR(80)  DEFAULT NULL',
                             ];
-        parent::__construct($objectName, $translator, 'macaddresses', ['parentid' => ['hosts']], [], $colsDefinition, '', ['trust']);
+        parent::__construct($objectName, $translator, 'macaddresses', ['parentid' => ['hosts']], [], $colsDefinition, [], ['trust']);
     }
 
     /*

@@ -119,7 +119,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
 		});
     },
     postProcess: function(content, targetFormat){
-    	return this._inProcess(content, targetFormat === 'html' ? ['pagebreak', 'pagenumber', 'numberofpages', 'tukosContainer'] : ['pagebreak', 'pagenumber', 'numberofpages']);
+    	return this._inProcess(content, targetFormat === 'tukosform' ? ['pagebreak', 'pagenumber', 'numberofpages', 'tukosContainer'] : ['pagebreak', 'pagenumber', 'numberofpages']);
     },
     pagebreakNode: function(node){
         var parentNode = node.parentNode;

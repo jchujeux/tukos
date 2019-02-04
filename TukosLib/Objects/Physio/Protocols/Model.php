@@ -11,12 +11,12 @@ use TukosLib\TukosFramework as Tfk;
 class Model extends CalendarsModel {
 	function __construct($objectName, $translator=null){
         $colsDefinition = [
-        		'sources' =>  'longtext ',
-        		'sessions' =>  'longtext ',
+        		'sources' =>  'longtext',
+        		'sessions' =>  'longtext',
         		'periodstart' => 'VARCHAR(20) DEFAULT NULL',
         		'periodend'   => 'VARCHAR(20) DEFAULT NULL'
         ];
-        AbstractModel::__construct($objectName, $translator, 'physioprotocols', ['parentid' => ['physioprescriptions']], ['sources', 'sessions'], $colsDefinition, '', ['custom']);
+        AbstractModel::__construct($objectName, $translator, 'physioprotocols', ['parentid' => ['physioprescriptions']], ['sources', 'sessions'], $colsDefinition, [], [], ['custom']);
         $this->gridsIdCols = ['sources' => ['tukosparent']];
     }
 }

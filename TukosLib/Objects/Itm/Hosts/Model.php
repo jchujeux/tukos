@@ -13,12 +13,12 @@ class Model extends AbstractModel {
     function __construct($objectName, $translator=null){
         $colsDefinition =  ['osfamily'      => "ENUM ('" . implode("','", Itm::$osFamilyOptions) . "')",
                             'hosttype'      => "ENUM ('" . implode("','", Itm::$hostTypeOptions) . "')",
-                            'lastinvscan'   =>  "timestamp NULL DEFAULT NULL",
-                            'lastsecscan'   =>  "timestamp NULL DEFAULT NULL",
+                            'lastinvscan'   =>  "timestamp",
+                            'lastsecscan'   =>  "timestamp",
                             'trust'         =>  "ENUM ('" . implode("','", Itm::$trustOptions) . "')",
                             'reason'        => 'VARCHAR(80)  DEFAULT NULL',
                             ];
-        parent::__construct($objectName, $translator, 'hosts', ['parentid' => ['organizations']], [], $colsDefinition, '', ['osfamily', 'hosttype', 'trust']);
+        parent::__construct($objectName, $translator, 'hosts', ['parentid' => ['organizations']], [], $colsDefinition, [], ['osfamily', 'hosttype', 'trust']);
         $this->objectsStore = Tfk::$registry->get('objectsStore');
     }
 

@@ -37,11 +37,7 @@ class Model extends AbstractModel {
         	'synchnextmonday' => "ENUM ('" . implode("','", $this->synchnextmondayOptions) . "') DEFAULT NULL",
 			'questionnairetime'  =>  'VARCHAR(20)  DEFAULT NULL',
         ];
-        parent::__construct(
-            $objectName, $translator, 'sptprograms',
-            ['parentid' => ['sptathletes']],
-            [], $colsDefinition, '', [], ['worksheet', 'custom']
-        );
+        parent::__construct($objectName, $translator, 'sptprograms', ['parentid' => ['sptathletes']], [], $colsDefinition, [], [], ['worksheet', 'custom']);
         $this->afterGoogleSync = false;
     }
 

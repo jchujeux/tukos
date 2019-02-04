@@ -12,20 +12,19 @@ class Model extends AbstractModel {
     function __construct($objectName, $translator=null){
         $this->indicatorValueOptions = Itm::$priorityOptions;
         $colsDefinition = [
-            'itsmprocess'    => "ENUM ('" . implode("','", Itm::$ItsmProcessOptions) . "') ",
-            'indicator'      => "ENUM ('" . implode("','", Itm::$indicatorOptions) . "') ",
-            'indicatorvalue' => "VARCHAR(80) DEFAULT '' ",
+            'itsmprocess'    => "ENUM ('" . implode("','", Itm::$ItsmProcessOptions) . "')",
+            'indicator'      => "ENUM ('" . implode("','", Itm::$indicatorOptions) . "')",
+            'indicatorvalue' => "VARCHAR(80) DEFAULT ''",
             'response'       => 'VARCHAR(80)  DEFAULT NULL',
             'resolution'     => 'VARCHAR(80)  DEFAULT NULL',
             'closure'        => 'VARCHAR(80)  DEFAULT NULL',
             'svcperiodsid'   => 'INT(11) DEFAULT NULL',
         ];
-        $keysDefinition = ' KEY (`itsmprocess`, `indicator`, `svcperiodsid`)';
 
         parent::__construct(
             $objectName, $translator, 'itslatargets',
             ['parentid' => ['itsvcdescs'], 'svcperiodsid' => ['calendarsentries']],
-            [], $colsDefinition, $keysDefinition, ['itsmprocess', 'indicator', 'indicatorvalue']
+            [], $colsDefinition, [], ['itsmprocess', 'indicator', 'indicatorvalue']
         );
     }
 }

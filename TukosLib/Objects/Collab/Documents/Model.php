@@ -15,17 +15,13 @@ class Model extends AbstractModel {
     use Storage;
 
     function __construct($objectName, $translator=null){
-        $colsDefinition = [ 'mdate' =>  "timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'",
+        $colsDefinition = [ 'mdate' =>  "timestamp",
                             'type'  =>  "VARCHAR(60) default null",
                             'size'  =>  "BIGINT(20)  unsigned default null",
                             'sha1'  =>  "CHAR(40)",
                           'fileid'  =>  "mediumint(8) unsigned NOT NULL default '0'",
         ];
-        parent::__construct(
-            $objectName, $translator, 'documents',
-            ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], 
-            [], $colsDefinition, ' KEY (`sha1`)'
-        );
+        parent::__construct($objectName, $translator, 'documents', ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], [], $colsDefinition, [['sha1']]);
         //$this->constructStorage();
     }
     

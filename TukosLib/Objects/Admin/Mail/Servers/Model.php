@@ -15,15 +15,15 @@ class Model extends AbstractModel{
 
     function __construct($objectName, $translator=null){
         $colsDefinition = [ 
-            'hostname'  =>  'VARCHAR(255)  DEFAULT NULL ',
-            'protocol'  =>  "ENUM ('" . implode("','", $this->protocolOptions) . "') ",
-            'port'      =>  "ENUM ('" . implode("','", $this->portOptions) . "') ",
-            'security'  =>  "ENUM ('" . implode("','", $this->securityOptions) . "') ",
-            'auth'      =>  "ENUM ('" . implode("','", $this->authOptions) . "') ",
-            'software'  =>  "ENUM ('" . implode("','", $this->softwareOptions) . "') ",
-            'adminpwd'  =>  'VARCHAR(255)  DEFAULT NULL ',
+            'hostname'  =>  'VARCHAR(255)  DEFAULT NULL',
+            'protocol'  =>  "ENUM ('" . implode("','", $this->protocolOptions) . "')",
+            'port'      =>  "ENUM ('" . implode("','", $this->portOptions) . "')",
+            'security'  =>  "ENUM ('" . implode("','", $this->securityOptions) . "')",
+            'auth'      =>  "ENUM ('" . implode("','", $this->authOptions) . "')",
+            'software'  =>  "ENUM ('" . implode("','", $this->softwareOptions) . "')",
+            'adminpwd'  =>  'VARCHAR(255)  DEFAULT NULL',
         ];
-        parent::__construct($objectName, $translator, 'mailservers', ['parentid' => ['organizations', 'itsystems', 'people']], [], $colsDefinition, '', ['security', 'auth', 'software']);
+        parent::__construct($objectName, $translator, 'mailservers', ['parentid' => ['organizations', 'itsystems', 'people']], [], $colsDefinition, [], ['security', 'auth', 'software']);
     }
     public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
         $result = parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue);

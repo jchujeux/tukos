@@ -15,7 +15,7 @@ class Model extends AbstractModel {
                             'signaturecmd'  =>  'VARCHAR(255)  DEFAULT NULL',//the nmap command the output of which should contain the network signature
                             'signature'     =>  'VARCHAR(255)  DEFAULT NULL',//a regular search expression identifying the signature, e.g. the Mac address of a known host
                             ];
-        parent::__construct($objectName, $translator, 'networks', ['parentid' => ['organizations']], [], $colsDefinition, '');
+        parent::__construct($objectName, $translator, 'networks', ['parentid' => ['organizations']], [], $colsDefinition);
         $this->streamsStore = Tfk::$registry->get('streamsStore');
     }
 

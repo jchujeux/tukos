@@ -18,12 +18,11 @@ class Model extends AbstractModel {
                             'end'           =>  'date NULL DEFAULT NULL',
                             'mendays'       =>  'FLOAT DEFAULT NULL',
                             'completed'     =>  'FLOAT DEFAULT NULL',];
-        $keysDefinition = ' KEY (`responsible`), KEY (`accountable`), KEY (`consulted`), KEY (`informed`)';
 
         parent::__construct(
             $objectName, $translator, 'tasks', 
             ['parentid' => ['users', 'people', 'organizations', 'tasks', 'itincidents'], 'responsible' => ['people'], 'accountable' => ['people'], 'consulted' => ['people'], 'informed' => ['people']],
-             [], $colsDefinition, $keysDefinition);
+             [], $colsDefinition, [['responsible', 'accountable', 'consulted', 'informed']]);
     }
     function initialize($init=[]){
         return parent::initialize(array_merge($this->initVals, $init));

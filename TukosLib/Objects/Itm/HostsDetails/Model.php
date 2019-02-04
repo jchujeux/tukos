@@ -18,10 +18,10 @@ class Model extends AbstractModel {
                             'osfamily'      => 'VARCHAR(80)  DEFAULT NULL',/* from nmap parser with default index*/
                             'osgen'         => 'VARCHAR(80)  DEFAULT NULL',/* from nmap parser with default index*/
                             'accuracy'      => 'INT(11)',
-                            'upsince'       => "timestamp NULL DEFAULT NULL",
-                            'timescanned'   => "timestamp NULL DEFAULT NULL",
+                            'upsince'       => "timestamp",
+                            'timescanned'   => "timestamp",
                             ];
-        parent::__construct($objectName, $translator, 'hostsdetails', ['parentid' => ['hosts']], [], $colsDefinition, '', ['status']);
+        parent::__construct($objectName, $translator, 'hostsdetails', ['parentid' => ['hosts']], [], $colsDefinition, [], ['status']);
     }
 
     public function getOSClass($host){

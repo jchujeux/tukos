@@ -8,12 +8,12 @@ use TukosLib\TukosFramework as Tfk;
 
 class View {
 
-    function __construct($actionController){
-        $this->view  = $actionController->view;
-        $this->model = $actionController->model;
-        $this->user = $actionController->user;
-        $this->objectName = $actionController->objectName;
-        $this->paneMode = $actionController->paneMode;
+    function __construct($controller){
+        $this->view  = $controller->view;
+        $this->model = $controller->model;
+        $this->user = $controller->user;
+        $this->objectName = $controller->objectName;
+        $this->paneMode = $controller->paneMode;
 
         $this->view->dataWidgets['overview'] = [
             'type' => 'overviewDgrid', 
