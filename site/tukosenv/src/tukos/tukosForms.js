@@ -22,11 +22,13 @@ define (["dijit/registry", "tukos/expressions", "dojo/request", "tukos/PageManag
         	var data = JSON.parse(widget.domNode.parentNode.getAttribute('data-params')), label = widget.get('label');
         	widget.set('label', Pmg.loading(label));
         	data.content = this.contentToProcess();
-	    	request("https://localhost/tukos/index20.php/tukosApp/Dialogue/backoffice/NoView/NoMode/SendEmail", 
+	    	//request("https://localhost/tukos/index20.php/tukosApp/Dialogue/backoffice/NoView/NoMode/SendEmail", 
+	    	request("https://" + Pmg.getItem('tukosFormsDomainName') + "/tukos/index20.php/tukosApp/Dialogue/backoffice/NoView/NoMode/SendEmail", 
         			{method: 'POST', handleAs: 'json', data: data}).then(
         		function(response){
         			console.log('the response is: ' + response);
-        			widget.set('label', label + '... ' + Pmg.message('sent'));
+        			//widget.set('label', label + '... ' + Pmg.message('sent'));
+        			widget.set('label', label + '... ' + response.feedback[0]);
         			setTimeout(function(){widget.set('label', label);}, 1000);
         		},
         		function(error){
