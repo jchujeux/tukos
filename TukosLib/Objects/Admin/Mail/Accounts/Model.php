@@ -53,18 +53,20 @@ class Model extends AbstractModel {
             return $this->openedAccounts[$id];
         }else{
             $openingAccount = $this->getAccountInfo(['where' => ['id' => $id], 'cols' => ['id', 'name', 'eaddress', 'username', 'password', 'privacy', 'mailserverid', 'smtpserverid']]);
-            $objectsStore = Tfk::$registry->get('objectsStore');
-            $serverObj  = $objectsStore->objectModel('mailservers');
-            $openingAccount['mailboxPath'] = $serverObj->mailboxPath($openingAccount['mailserverid']);
-            $openingAccount['handle']      = @imap_open($openingAccount['mailboxPath'], $openingAccount['username'], $openingAccount['password'], OP_HALFOPEN | OP_SILENT);
-            if ($openingAccount['handle']){
-                $this->openedAccounts[$id] = $openingAccount;
-            }else{
-                Feedback::add('CouldNotOpenAccount', $id);
-                $this->openedAccounts[$id] = false;
+            if (!empty($openingAccount['mailserverid'])){
+                $objectsStore = Tfk::$registry->get('objectsStore');
+                $serverObj  = $objectsStore->objectModel('mailservers');
+                $openingAccount['mailboxPath'] = $serverObj->mailboxPath($openingAccount['mailserverid']);
+                $openingAccount['handle']      = @imap_open($openingAccount['mailboxPath'], $openingAccount['username'], $openingAccount['password'], OP_HALFOPEN | OP_SILENT);
+                if ($openingAccount['handle']){
+                    $this->openedAccounts[$id] = $openingAccount;
+                }else{
+                    Feedback::add('CouldNotOpenAccount', $id);
+                    $this->openedAccounts[$id] = false;
+                    imap_errors();
+                    imap_alerts();
+                }
             }
-            imap_errors();
-            imap_alerts();
         }
         return $this->openedAccounts[$id];
     }

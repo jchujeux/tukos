@@ -28,12 +28,16 @@ class TukosFramework{
     const publicDir = '/tukos/'; // this is the beginnning of the url path, i.e. '/tukos/' is aliased with '/tukos/site/' in apache config
     
     public static $phpRoot, $phpTukosDir, $phpVendorDir, $vendorDir = [], $tukosTmpDir,
-                  $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment, $tukosBaseLocation, $dojoBaseLocation; 
+                  $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment, $tukosBaseLocation, $dojoBaseLocation, $tukosFormsDojoBaseLocation, $dojoCdnBaseLocation, $tukosFormsTukosBaseLocation, 
+                  $tukosDomainName, $tukosFormsDomainName; 
   
     public static function initialize ($mode, $appName = null){
         self::$startMicroTime = microtime(true);
         self::$phpRoot = getenv('tukosPhpRoot');
         self::$dojoBaseLocation = getenv('dojoBaseLocation');
+        self::$tukosFormsDojoBaseLocation = self::$dojoCdnBaseLocation = getenv('dojoCdnBaseLocation');
+        self::$tukosFormsDomainName = self::$tukosDomainName = getenv('tukosDomainName');
+        self::$tukosFormsTukosBaseLocation = 'https://' . self::$tukosDomainName . '/tukos/tukosenv/release/';
         self::$tukosTmpDir = getenv('tukosTmpDir');
         self::$phpTukosDir = self::$phpRoot . '/tukos/';
         self::$phpVendorDir = self::$phpTukosDir . 'vendor/';
@@ -42,9 +46,6 @@ class TukosFramework{
             self::$vendorDir[$module] = self::$phpVendorDir . $vendorDir;
         });
         self::$tukosBaseLocation = self::publicDir . 'tukosenv/release';
-        if (empty(self::$dojoBaseLocation)){
-            self::$dojoBaseLocation = self::$tukosBaseLocation;
-        }
         mb_internal_encoding('UTF-8');
         require __DIR__ . '/Registry.php';
         self::$registry = new Registry($mode);
@@ -56,8 +57,14 @@ class TukosFramework{
     }
     
     public static function setEnvironment($environment){
-    	self::$environment = $environment;
+    	self::$environment = empty($environment) ? 'production' : $environment;
     	self::$tukosBaseLocation = self::publicDir . 'tukosenv/' . (empty(self::$environment) || self::$environment === 'production' ? 'release/' : 'src/');
+    	if (self::$environment === 'development'){
+    	    self::$tukosBaseLocation = self::publicDir . "tukosenv/src/";
+            self::$tukosFormsTukosBaseLocation = self::$tukosBaseLocation;
+            self::$tukosFormsDojoBaseLocation = self::$tukosBaseLocation;
+            self::$tukosFormsDomainName = 'localhost';
+    	}
     }
     
     public static function moduleLocation($module){

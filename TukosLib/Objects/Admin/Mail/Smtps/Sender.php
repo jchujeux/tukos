@@ -1,7 +1,7 @@
 <?php
 namespace TukosLib\Objects\Admin\Mail\Smtps;
 
-use PHPMailer\PhpMailer;
+use PHPMailer\PHPMailer;
 use Html2Text\Html2Text;
 use TukosLib\Utils\Utilities as Utl;
 
@@ -66,6 +66,10 @@ class Sender{
         }
         $this->mailer->SMTPOptions = ['ssl' => ['verify_peer' => false, 'verify_peer_name' => false, 'allow_self_signed' => true]];// inserted although unsafe due to TDS desktop generating ssl error
         return $this->mailer->send();
+    }
+    
+    function getErrorInfo(){
+        return $this->mailer->ErrorInfo;
     }
 
     function addAddresses($addresses, $method){

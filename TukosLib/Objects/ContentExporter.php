@@ -10,7 +10,7 @@ use TukosLib\TukosFramework as Tfk;
 trait ContentExporter {
 	protected $sendingOptions = ['appendtobody', 'asattachment'];
 	protected $fileName;
-	public $htmlHeaderScript = 
+	protected $htmlHeaderScript = 
 		"<script>function subst() {" .
 			"var vars={};var x=window.location.search.substring(1).split('&');" .
 			"for (var i in x) {" .
@@ -21,15 +21,15 @@ trait ContentExporter {
 					"var y = document.getElementsByClassName(x[i]);" .
 					"for (var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];" .
 		"}}</script>";
-	protected $tukosFormsHeader = '<title>${title}</title><link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dijit/themes/claro/claro.css" media="screen">';
+	protected $tukosFormsHeader = '<title>${title}</title><link rel="stylesheet" href="${dojoBaseLocation}dijit/themes/claro/claro.css" media="screen">';
 	protected $tukosFormsBodyScripts = '
 <script>var dojoConfig ={
             baseUrl: "", isDebug: false, async: true, locale: "en-en",
-            //],
-            packages: [{"name": "tukos", "location": "https://localhost/tukos/tukosenv/src/tukos"}]
+            packages: [{"name": "dojo", "location": "${dojoBaseLocation}dojo"}, {"name": "dijit", "location": "${dojoBaseLocation}dijit"}, {"name": "dojox", "location": "${dojoBaseLocation}dojox"}, 
+                      {"name": "tukos", "location": "${tukosBaseLocation}tukos"}]
         };
 </script>
-<script src="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojo/dojo.js"></script>
+<script src="${dojoBaseLocation}dojo/dojo.js"></script>
 <script>
     require(["tukos/expressions", "tukos/tukosForms", "tukos/PageManager", "dojo/parser", "dijit/Editor", "dijit/_editor/plugins/AlwaysShowToolbar"], function (expressions, tukosForms, Pmg, parser) {
         Pmg.initializeTukosForm(${tukosFormConfig});    
@@ -102,8 +102,12 @@ trait ContentExporter {
 		        return $this->buildHtml2TextFile($dirFileName .'.txt', implode('', Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)));
 		    case 'tukosform':
 		        return $this->buildHtmlFile($dirFileName . '.htm', $atts['content'],//implode('', Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)),
-		          Utl::substitute($this->tukosFormsHeader, ['title' => $fileName]), '', null,
-		          Utl::substitute($this->tukosFormsBodyScripts, ['tukosFormConfig' => json_encode(['messages' => Tfk::$registry->get('translatorsStore')->getTranslations(['sent'], $this->objectName)])]));
+		          Utl::substitute($this->tukosFormsHeader, ['title' => $fileName, 'dojoBaseLocation' => Tfk::$tukosFormsDojoBaseLocation]), '', null,
+		          Utl::substitute($this->tukosFormsBodyScripts, [
+		              'dojoBaseLocation' => Tfk::$tukosFormsDojoBaseLocation,
+		              'tukosBaseLocation' => Tfk::$tukosFormsTukosBaseLocation,
+		              'tukosFormConfig' => json_encode(['tukosFormsDomainName' => Tfk::$tukosFormsDomainName, 'messages' => Tfk::$registry->get('translatorsStore')->getTranslations(['sent'], $this->objectName)])
+		          ]));
 		    case 'json':
 		        return $this->buildFile($dirFileName .'.json', json_encode(Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)));
 		    case 'pdf':

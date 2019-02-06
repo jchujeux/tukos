@@ -31,6 +31,7 @@ class Authentication{
                     case 'logout':
                         $this->session->destroy();
                         $dialogue->response->headers->set("Location",  $_SERVER['HTTP_REFERER']);
+                        $dialogue->response->setStatusCode(302);
                         $login = new LoginPage(Tfk::$registry->pageUrl);
                         break;
                 }

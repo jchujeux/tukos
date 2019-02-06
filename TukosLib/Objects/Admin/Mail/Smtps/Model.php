@@ -56,7 +56,7 @@ class Model extends AbstractModel{
         if ($success){
             Feedback::add($this->tr('Mailsent'));
         }else{
-            Feedback::add($this->tr('Mailcouldnotbesent'));
+            Feedback::add($this->tr('Mailcouldnotbesent') . ': ' . $this->sender->getErrorInfo());
         }
         return $success;
     }
