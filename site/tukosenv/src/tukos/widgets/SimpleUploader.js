@@ -7,7 +7,7 @@ define (["dojo/_base/declare", "dojo/on", "dojo/aspect", "dijit/registry", "dojo
             on(this, 'complete', function(evt){
                 Pmg.addFeedback(evt.feedback);
             	if (evt.outcome === 'success'){
-                    form.serverDialog({action: 'reset'}, [], [], messages.actionDone).then(function(response){
+                    form.serverDialog({action: 'Reset'}, [], [], messages.actionDone).then(function(response){
                     	if (self.grid){
                     		grid = form.getWidget(self.grid)
                         	grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));

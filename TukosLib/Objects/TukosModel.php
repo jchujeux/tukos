@@ -3,7 +3,6 @@ namespace TukosLib\Objects;
 
 use TukosLib\Store\Store;
 use TukosLib\Objects\StoreUtilities as SUtl;
-use TukosLib\Objects\Directory;
 use TukosLib\TukosFramework as Tfk;
 use TukosLib\Objects\Admin\Users\Model as UserModel;
 
@@ -39,6 +38,7 @@ class TukosModel {
             return new Store(Tfk::$registry->get('appConfig')->dataSource);
         }); 
     	$this->store  = Tfk::$registry->get('store');
+    	$this->colsDescription = $this->_colsDefinition;
         if (!$this->store->tableExists($this->tableName)){
             $now = date('Y-m-d H:i:s');
             $this->store->createTable($this->tableName, $this->_colsDefinition, $this->_colsIndexes);

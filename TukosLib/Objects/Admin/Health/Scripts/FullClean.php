@@ -5,10 +5,6 @@
  */
 namespace TukosLib\Objects\Admin\Health\Scripts;
 
-use TukosLib\Utils\Utilities as Utl;
-
-use Zend\Console\Getopt;
-
 use TukosLib\Objects\Directory;
 use TukosLib\TukosFramework as Tfk;
 
@@ -29,7 +25,7 @@ class FullClean {
             if ($options->deleteDelay){
                 $deleteBefore = (new \DateTime)->sub(new \DateInterval($options->deleteDelay))->format('Y-m-d H:i:s');
             }
-            $objectsToConsider = Directory::getObjs();
+            $objectsToConsider = Directory::getNativeObjs();
             $totalDeleted = 0;
             foreach ($objectsToConsider as $objectName){
             	$idsToDelete = [];
@@ -40,6 +36,12 @@ class FullClean {
             		]);
             		$stmt = $store->query("DELETE tukos, $objectName FROM tukos INNER JOIN $objectName ON tukos.id = - $objectName.id WHERE tukos.id < 0 AND tukos.object = '$objectName' AND tukos.updated < '$deleteBefore'");
             		$countDeleted = $stmt->rowCount();
+            		$orphanIdsToDelete = $store->query("SELECT id FROM $objectName WHERE NOT EXISTS (SELECT NULL from tukos WHERE tukos.id = $objectName.id)")->fetchAll(\PDO::FETCH_COLUMN, 0);
+            		if (!empty($orphanIdsToDelete)){
+            		    $countOrphanDeleted = $store->query("DELETE FROM $objectName WHERE NOT EXISTS (SELECT NULL from tukos WHERE tukos.id = $objectName.id)")->rowCount();
+            		    echo "\r\nFullClean - $countOrphanDeleted removed ids in table $objectName : they were not found in tukos: ". implode(', ', $orphanIdsToDelete);
+            		    
+            		}
             	}
             	$idsToDelete = array_merge($idsToDelete, $store->getAll(['table' => 'tukos', 'cols' => ['id'],
             			'where' => [['col' => 'id', 'opr' => '<', 'values' => 0], 'object' => $objectName, ['col' => 'updated' , 'opr' => '<', 'values' => $deleteBefore]]
@@ -48,14 +50,14 @@ class FullClean {
             	$countDeleted += $stmt->rowCount();
                 if ($countDeleted){
                 	$totalDeleted += $countDeleted;
-                	echo "\nFullClean - $countDeleted removed ids in table $tableName: " . implode(', ', array_column($idsToDelete, 'id'));
+                	echo "\r\nFullClean - $countDeleted removed ids in table $objectName: " . implode(', ', array_column($idsToDelete, 'id'));
                 }
             }
             if ($totalDeleted === 0){
                	echo "FullClean - no item had to be removed";
             }
-        }catch(Getopt_exception $e){
-            Tfk::debug_mode('log', 'an exception occured while parsing command aguments in DeepClean: ', $e->getUsageMessage());
+        }catch(\Zend_Console_Getopt_Exception $e){
+            Tfk::debug_mode('log', 'an exception occured while parsing command aguments in FullClean: ', $e->getUsageMessage());
         }
     }
 }

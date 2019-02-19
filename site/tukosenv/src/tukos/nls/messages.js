@@ -238,7 +238,6 @@ define("tukos/nls/messages", { root:
         remove: "remove",
         define        : 'Set',
         entermodify : 'Enter new value for column items (will apply to selected rows at next modify action): <p>',
-        noDataMessage: 'Right-click on the header, then click "Add Row" to create a new entry',
         entertargetvalue: 'enter target value', 
         questionnaires: 'Questionnaires import',
 

@@ -38,7 +38,7 @@ abstract class AbstractView extends ObjectTranslator{
             ), 
             'parentid'  => ViewUtils::objectSelectMulti($parentObjects, $this, $parentWidgetTitle),
             'name'      => ViewUtils::textBox($this, $nameWidgetTitle, [/*'atts' => ['edit' => ['style' => ['width' => '20em']]],*/ 'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]),
-        	'comments'  => ViewUtils::lazyEditor($this, 'Comments / Details'),
+            'comments'  => ViewUtils::lazyEditor($this, 'CommentsDetails', ['atts' => ['edit' => ['height' => '400px']]]),
             'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             'grade' => ViewUtils::storeSelect('grade', $this, 'Grade', ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             'contextid'  => [
@@ -61,7 +61,7 @@ abstract class AbstractView extends ObjectTranslator{
             
         ];
         if ($this->user->rights() === 'SUPERADMIN'){
-            $this->dataWidgets['configstatus'] = ViewUtils::storeSelect('configStatus', $this, 'Config Status', ['atts' => ['edit' => ['hidden' => true]]]);
+            $this->dataWidgets['configstatus'] = ViewUtils::storeSelect('configStatus', $this, 'Config Status', ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]);
         }
         $this->defaultDataWidgetsElts = array_keys($this->dataWidgets);
         $this->responseContent = null;
@@ -103,6 +103,7 @@ abstract class AbstractView extends ObjectTranslator{
 
         if (in_array('history', $this->model->allCols)){
             $historyGridCols = array_diff($this->gridCols(), ['created', 'creator', 'history']);
+/*
             $this->dataWidgets['history'] = [
                 'type' => 'storeDgrid', 
                 'atts' => ['edit' => [
@@ -114,6 +115,18 @@ abstract class AbstractView extends ObjectTranslator{
                     ]
                 ],
             ];
+*/
+            $this->dataWidgets['history'] = [
+                'type' => 'simpleDgrid',
+                'atts' => ['edit' =>[
+                    'label'           => $this->tr('history'),
+                    'colsDescription' => $this->widgetsDescription($historyGridCols, false),
+                    'objectIdCols'    => array_values(array_intersect($historyGridCols, $this->model->idCols)),
+                    'gridMode' => 'overview',
+                    'maxHeight' => '300px', 'colspan' => 1, 'disabled' => true,
+                ]],
+            ];
+            
             $this->_exceptionCols['grid'][] = 'history';
             $this->_exceptionCols['post'][] = 'history';
         }
@@ -171,10 +184,10 @@ abstract class AbstractView extends ObjectTranslator{
     function gridCols(){// cols which are rendered on the overview grid & on subobjects grids
 
         return array_values(array_diff(
-            array_merge(['id', 'parentid', 'name'], $this->addedDataWidgetsElts, ['comments', 'permission', 'grade',  'contextid', 'updator', 'updated', 'creator', 'created'], (in_array('custom', $this->model->allCols) ? ['custom'] : []) ), 
+            array_merge(['id', 'parentid', 'name'], $this->addedDataWidgetsElts, ['comments', 'permission', 'grade',  'contextid', 'updator', 'updated', 'creator', 'created'], (in_array('custom', $this->model->allCols) ? ['custom'] : []),
+                isset($this->dataWidgets['configstatus']) ? ['configstatus'] : []), 
             $this->_exceptionCols['grid']
         ));
-
     }
 
 

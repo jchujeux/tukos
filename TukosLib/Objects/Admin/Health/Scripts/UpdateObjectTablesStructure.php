@@ -22,12 +22,15 @@ class UpdateObjectTablesStructure {
                 'class=s'      => 'this class name',
                 'parentid-s'   => 'parent id (optional, default is user->id())',
             ]);
-            $objectsToConsider = array_intersect(Directory::getObjs(), $store->hook->fetchTableList());
+            $objectsToConsider = array_merge(array_intersect(Directory::getNativeObjs(), $store->tableList()), ['tukos']);
+            
             $changesWereMade = false;
+
             foreach ($objectsToConsider as $objectName){
                 try {
-                    $objectModel = $objectsStore->objectModel($objectName);
+                    $objectModel = $objectName === 'tukos' ? $tukosModel : $objectsStore->objectModel($objectName);
                     $colsDescription = $objectModel->colsDescription;
+                    $columnsStructure = Utl::toAssociative($store->tableColsStructure($objectName), 'Field');
                     $tableCols = $store->tableCols($objectName);
                     $objectCols = array_keys($colsDescription);
                     //$tableCols = array_keys($tableCols);
@@ -44,13 +47,13 @@ class UpdateObjectTablesStructure {
                     	echo 'table: ' . $objectName . ' - extra table cols(can be removed): ' . json_encode($extraTableCols) . '<br>';
                     }
                 }catch(\Exception $e){
-                    Tfk::error_message('on', ' Exception in TukosTableInit: ', $e->getMessage());
+                    Tfk::error_message('on', ' Exception in UpdateObjectTablesStructure: ', $e->getMessage());
                 }
             }
             if (!$changesWereMade){
                echo 'all tables are OK - no change made';
             }
-        }catch(Getopt_exception $e){
+        }catch(\Zend_Console_Getopt_Exception $e){
             Tfk::error_message('on', 'an exception occured while parsing command arguments : ', $e->getUsageMessage());
         }
     }

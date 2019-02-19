@@ -20,13 +20,14 @@ $configure =  '\\' . $appName . '\\Configure';
 
 Tfk::$registry->set('appConfig', new $configure());
 $appConfig = Tfk::$registry->get('appConfig');
-$appConfig->dataSource['dbname'] = Tfk::$registry->get('configStore')->getOne(['where' => [$appConfig->configSource['username_col'] => 'tukosscheduler'], 'cols' => ['targetdb'], 'table' => 'users'])['targetdb'];
-
+if (!empty($tukosSchedulerDb = Tfk::$registry->get('configStore')->getOne(['where' => [$appConfig->configSource['username_col'] => 'tukosscheduler'], 'cols' => ['targetdb'], 'table' => 'users'])['targetdb'])){
+    $appConfig->dataSource['dbname'] = $tukosSchedulerDb;
+}
+Tfk::setTranslator();
 SUtl::instantiate();
+$user = Tfk::$registry->get('user');
 
-$user           = Tfk::$registry->get('user');
 $objectsStore   = Tfk::$registry->get('objectsStore');
-
 $user->setUser(['name' => 'tukosscheduler']);/* so as $user has the proper rights and other initialization information*/
 
 $streamsStore = Tfk::$registry->get('streamsStore');

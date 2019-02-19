@@ -239,7 +239,6 @@ define("tukos/nls/fr/messages",
         remove: "enlever",
         define        : 'définir',
         entermodify : "Entrer la nouvelle valeur cible pour cette colonne (sera appliqué aux rangées sélectionnées lors de la prochaine action 'modifier'): <p>",
-        noDataMessage: "Cliquer-droit sur l'entête, puis sélectionnez 'Ajouter rangée' pour créer une nouvelle rangée",
         entertargetvalue: 'entrer la valeur cible',
         questionnaires: 'Import de nouveaux questionnaires',
 

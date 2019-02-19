@@ -32,7 +32,7 @@ abstract class AbstractModel extends ObjectTranslator {
   //these are the minimal cols required in the $store  table for any Tukos object, with associated keys definition, to be completed with object specific cols definitions
     protected $permissionOptions = ['NOTDEFINED', 'PR', 'RO', 'PU', 'ACL'];
     protected $gradeOptions = ['TEMPLATE', 'NORMAL', 'GOOD', 'BEST'];
-    protected $timeIntervalOptions =  ['year', 'quarter', 'month', 'week', 'weekday', 'day', 'hour', 'minute', 'second'];// corresponds to intersection of php strToTime & dojo.date supported intervals
+    protected $timeIntervalOptions =  ['', 'year', 'quarter', 'month', 'week', 'weekday', 'day', 'hour', 'minute', 'second'];// corresponds to intersection of php strToTime & dojo.date supported intervals
     protected $useItemsCache = true;
     const optionalCols = ['worksheet', 'custom', 'history'];
 
@@ -42,7 +42,7 @@ abstract class AbstractModel extends ObjectTranslator {
     
     function __construct ($objectName, $translator, $tableName, $idColsObjects, $jsonCols, $colsDefinition, $colsIndexes = [], $colsToTranslate = [], $optionalCols=['custom'], $extendedNameCols = ['name']) {
     	$this->configStatusOptions = array_keys(Directory::configStatusRange());
-    	$this->store  = Tfk::$registry->get('store');
+    	$this->store  = $store = Tfk::$registry->get('store');
         $this->user  = Tfk::$registry->get('user');
         $this->tukosModel = Tfk::$registry->get('tukosModel');
         parent::__construct($objectName, $translator);
@@ -55,10 +55,13 @@ abstract class AbstractModel extends ObjectTranslator {
         $this->gridsIdCols = [];
         
         $this->colsDescription = empty($colsDefinition) ? [] : array_merge([ 'id'  =>  'INT(11) NOT NULL PRIMARY KEY'], $colsDefinition);
-        if (!$this->store->tableExists($this->tableName) && !empty($colsDefinition)){
-            $this->store->createTable($this->tableName, $this->colsDescription, $colsIndexes);
+        if (!empty($this->colsDescription)){
+            if (!$store->tableExists($this->tableName)){
+                $store->createTable($this->tableName, $this->colsDescription, $colsIndexes);
+            }else if ($this->user->isSuperAdmin()){
+                $store->addMissingColsIfNeeded ($this->colsDescription, $tableName);
+            }
         }
-                    
         $this->extendedNameCols = $extendedNameCols;
         $this->tukosExtendedNameCols  = array_intersect($this->extendedNameCols, $this->tukosModel->allCols);
         $this->objectExtendedNameCols = array_diff($this->extendedNameCols, $this->tukosExtendedNameCols);
@@ -201,7 +204,8 @@ abstract class AbstractModel extends ObjectTranslator {
             if (!empty($fieldsMaxSize = $this->user->fieldsMaxSize())){
                 $presentMaxSizeCols = array_intersect($atts['cols'], $this->maxSizeCols);
                 foreach ($presentMaxSizeCols as $key => $col){
-                    $atts['cols'][$key] = 'if(length(' . $col . ') > ' . $fieldsMaxSize . ', concat("#tukos{id:", tukos.id, ",object:' . $this->objectName . ',col:' . $col . '}"),' . $col . ') ' . $col;
+                    //$atts['cols'][$key] = 'if(length(' . $col . ') > ' . $fieldsMaxSize . ', concat("#tukos{id:", tukos.id, ",object:' . $this->objectName . ',col:' . $col . '}"),' . $col . ') ' . $col;
+                    $atts['cols'][$key] = [$col => "if(length(${col}) > $fieldsMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$this->objectName, col:${col}}\"),${col})${col}"];
                 }
             }
         }

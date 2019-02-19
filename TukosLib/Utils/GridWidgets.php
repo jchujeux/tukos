@@ -29,10 +29,11 @@ trait  GridWidgets{
     public static function simpleDgrid($atts, $editOnly = true){
         if ($editOnly){
             $defAtts = ['title' => '', 'colspan' => 1, 'columns' => [], 'initialId'  => true];
+            $gridMode = Utl::extractItem('gridMode', $atts);
             if (isset($atts['colsDescription'])){
                 foreach ($atts['colsDescription'] as $col => $element){
                     if (isset($element['type'])){
-                        $defAtts['columns'][$col] = self::colGridAtts($element, $col, 'storeedit');
+                        $defAtts['columns'][$col] = self::colGridAtts($element, $col, !empty($gridMode) ? $gridMode : 'storeedit');
                     }else{
                         $defAtts['columns'][$col] = $element;
                     }
@@ -45,7 +46,6 @@ trait  GridWidgets{
             return '';
         }
     }
-
     public static function sheetGrid($atts, $editOnly = true){
          $colDescription = self::description(['type' => 'tukosTextArea', 'atts' => ['storeedit' => ['width' => 50, 'editOn' => 'click, keypress', 'editorArgs' => ['rows' => 1, 'style' => ['height' => '15px']]]]], false);
         if ($editOnly){
@@ -67,7 +67,6 @@ trait  GridWidgets{
             return '';
         }
     }
-
     public static function storeDgrid($atts, $editOnly = true){
         if ($editOnly){
             $defAtts = ['title' => '', 'colspan' => 1, 'columns' => [], 'initialId'  => false, 'keepScrollPosition' => true, 'dndParams' => ['skipForm' => true]];
@@ -84,11 +83,6 @@ trait  GridWidgets{
             return '';
         }
     }
-
-
-   /*
-    * Generates a tukos/OverviewGrid ready to be inserted into an edit form
-    */
     public static function overviewDgrid($atts, $editOnly = true){
         $defAtts = ['title' => '', 
                     'storeArgs' => ['useRangeHeaders' => true]/*, 'selectionMode' => 'none'*/, 'allowSelectAll' => true, 'minRowsPerPage' => 25, 'maxRowsPerPage' => 50

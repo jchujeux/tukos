@@ -2,15 +2,13 @@
 namespace TukosLib\Objects\Admin\Users\CustomViews;
 
 use TukosLib\Objects\AbstractModel;
-use TukosLib\Utils\Translator;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
-use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {
 
     protected $viewOptions = ['edit', 'overview', 'massedit'];
-    protected $panemodeOptions = ['Tab', 'Accordion'];
+    protected $panemodeOptions = ['tab', 'accordion'];
 
     function __construct($objectName, $translator=null){
         $colsDefinition = [
@@ -19,7 +17,7 @@ class Model extends AbstractModel {
             'panemode'      =>  "ENUM ('" . implode("','", $this->panemodeOptions) . "')",
         	'customization' =>  'longtext DEFAULT NULL'
         ];
-        parent::__construct($objectName, $translator, 'customviews', ['parentid' => ['users']], ['customization'], $colsDefinition, [], ['vobject', 'view', 'panemode'], [], ['name', 'vobject', 'view', 'panemode']);
+        parent::__construct($objectName, $translator, 'customviews', ['parentid' => ['users']], ['customization'], $colsDefinition, [], ['name', 'vobject', 'view', 'panemode'], [], ['name', 'vobject', 'view', 'panemode']);
         $this->vobjectOptions = $this->user->allowedModules();
     }
     public function deleteCustomization($where, $valuesToDelete){

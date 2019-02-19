@@ -12,13 +12,14 @@ use TukosLib\TukosFramework as Tfk;
 class Model extends AbstractModel {
 
     protected $relationsOptions = ["is a component of", "is associated with", "uses", "is a new version of", "will be replaced by ", "belongsTo"];
-
+    protected $_colsDefinition = ['relatedid'     =>  "INT(11) NOT NULL"];
+    protected $_colsIndexes =   [['relatedis']];
+    
     function __construct($objectName, $translator=null){
-        $colsDefinition = ['relatedid'     =>  "INT(11) NOT NULL KEY"];
         $user  = Tfk::$registry->get('user');
         $store  = Tfk::$registry->get('store');
         $relationObjects = array_intersect($user->allowedModules(), $store->tableList());
-        parent::__construct($objectName, $translator, 'objrelations', ['parentid' => $relationObjects, 'relatedid'=> $relationObjects], [], $colsDefinition);
+        parent::__construct($objectName, $translator, 'objrelations', ['parentid' => $relationObjects, 'relatedid'=> $relationObjects], [], $this->_colsDefinition, $this->_colsIndexes);
     }
 }
 ?>

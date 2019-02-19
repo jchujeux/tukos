@@ -14,7 +14,7 @@ class GridSelect extends AbstractAction{
     }
     function response($query){
         $result = $this->actionModel->getOverviewGrid($query);
-        Feedback::reset();// or else the feedback is added to the JsonRest response and screws-up the dgrid
+        //Feedback::reset();// or else the feedback is added to the JsonRest response and screws-up the dgrid
         return $result;
     }
 }

@@ -12,8 +12,8 @@ class TukosFramework{
     const phpVendorDir = self::phpTukosDir . 'vendor/';
     const auraDir   = self::phpVendorDir . 'auraphp-system-1.0.0/';
     const auraV2Dir = self::phpVendorDir . 'aura-2.1.0/';
-    const phpPearDir = self::phpVendorDir;
-    const phpZendDir = self::phpVendorDir . 'zf1/zend-console-getopt/library/';
+    //const phpPearDir = self::phpVendorDir;
+    //const phpZendDir = self::phpVendorDir . 'zf1/zend-console-getopt/library/';
     const phpCommand = '/xampp/php/php ';
     const phpDetachedCommand = 'start /Dx: /xampp/php/php '; // so that runs in a separate ms-dos windows (detached)
     const htmlToPdfCommand = '/wkhtmltopdf/bin/wkhtmltopdf ';
@@ -48,10 +48,7 @@ class TukosFramework{
         self::$tukosBaseLocation = self::publicDir . 'tukosenv/release';
         mb_internal_encoding('UTF-8');
         require __DIR__ . '/Registry.php';
-        self::$registry = new Registry($mode);
-        if ($mode === 'commandLine'){
-            self::$registry->appName = strtolower($appName);
-        }
+        self::$registry = new Registry($mode, $appName);
         self::$osName = php_uname('s');
         self::$mode = $mode;
     }

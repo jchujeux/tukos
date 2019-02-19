@@ -6,7 +6,6 @@ use Aura\Session\SegmentFactory;
 use Aura\Session\CsrfTokenFactory;
 
 use TukosLib\TukosFramework as Tfk; 
-use TukosLib\Utils\Widgets;
 use TukosLib\Auth\Authentication;
 use TukosLib\Auth\Drivers\Sql as SqlAuthentication;
 use TukosLib\Auth\UserInformation;
@@ -15,7 +14,6 @@ use TukosLib\Web\Dialogue as WebDialogue;
 use TukosLib\Web\TranslatorsManager;
 use TukosLib\Objects\ObjectsManager;
 use TukosLib\Objects\TukosModel;
-use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Objects\Admin\scripts\StreamsManager;
 
 class Configure{
@@ -25,9 +23,9 @@ class Configure{
         $this->appDir  = dirname(__FILE__);
         $key =  'XZK@w0kw' . getenv('MYSQL_ENV_VAR');
         $this->ckey = MD5($key);
-        $this->dataSource = ['datastore' => 'mysql', 'host'   => '127.0.0.1', 'admin'   => 'tukosAppAdmin', 'pass'   => MD5('XZK@w0kw' . getenv('MYSQL_ENV_VAR')), 'dbname'   => 'tukossports'];
-        $this->filesStore = ['datastore' => 'mysql', 'host'   => '127.0.0.1', 'admin'   => 'tukosAppAdmin', 'pass'   => MD5('XZK@w0kw' . getenv('MYSQL_ENV_VAR')), 'dbname'   => 'tukos20sportsfiles'];
-        $this->configSource = ['datastore' => 'mysql', 'host'   => '127.0.0.1', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname' => 'tukosconfig', 'authstore' => 'sql',	'table' => 'users', 'username_col' => 'username', 'password_col' => 'password'];
+        $this->dataSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => MD5('XZK@w0kw' . getenv('MYSQL_ENV_VAR')), 'dbname'   => 'tukossports'];
+        $this->filesStore = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => MD5('XZK@w0kw' . getenv('MYSQL_ENV_VAR')), 'dbname'   => 'tukos20sportsfiles'];
+        $this->configSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname' => 'tukosconfig', 'authstore' => 'sql',	'table' => 'users', 'username_col' => 'username', 'password_col' => 'password'];
         $this->languages = ['default' => 'en-us', 'supported' => ['en-us', 'fr-fr', 'es-es']];
 
         $this->modulesMenuLayout = [
@@ -75,9 +73,6 @@ class Configure{
         Tfk::$registry->set('translatorsStore', function(){
             return new TranslatorsManager($this->languages);
         }); 
-
-//        SUtl::instantiate();
-
         if (Tfk::$registry->mode === 'interactive'){
             Tfk::$registry->set('dialogue', function(){
                 return new WebDialogue(Tfk::$registry->get('translatorsStore'));
@@ -96,7 +91,6 @@ class Configure{
             return new UserInformation($this->objectModulesDefaultContextName, $this->modulesMenuLayout, $this->ckey);
         }); 
     }
-
     function setobjectModulesDefaultContextName($modulesLayout){
         static $depth = 0;
         static $contextName = 0;

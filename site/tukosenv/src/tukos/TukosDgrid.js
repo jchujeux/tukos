@@ -43,7 +43,7 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             };
             this.addKeyHandler(67, copyCellCallback);
             this.keepScrollPosition = true;
-            this.noDataMessage =  this.noDataMessage || messages.noDataMessage;
+            this.noDataMessage =  Pmg.message('noDataMessage');
             this.inherited(arguments);
             this.set('maxHeight', this.maxHeight);
             //this.filterWidgets = {};

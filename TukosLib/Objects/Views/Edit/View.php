@@ -37,7 +37,7 @@ class View {
         		'export'  => ['type' => 'ObjectExport', 'atts' => ['label' => $this->view->tr('export')]],
                  'process'  => ['type' => 'ObjectProcess',      'atts' => ['label' => $this->view->tr('Process')]],
            'clearFeedback'  => ['type' => 'ObjectFieldClear',   'atts' => ['label' => $this->view->tr('Clear Feedback'), 'fieldToClear' => 'feedback']],
-                'feedback'  => Widgets::textArea(['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 100, 'disabled' => true, 'style' => ['maxHeight' => '5em', 'overflow' => 'auto']]),
+                'feedback'  => Widgets::tukosTextArea(['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 100, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),
         ];
 
         $this->dataLayout = [
@@ -70,11 +70,11 @@ class View {
             'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert',  'content' => ''],
             'contents' => [
                 'actions' => [
-                    'tableAtts' => ['cols' => 10, 'customClass' => 'actionTable', 'showLabels' => false, 'label' => '<b>' . $this->view->tr('Actions') . ':<b>'],
+                    'tableAtts' => ['cols' => 10, 'customClass' => 'actionTable', 'showLabels' => false, 'label' => '<b>' . $this->view->tr('Actions') . ':</b>'],
                     'widgets' => ['save', 'reset', 'delete', 'duplicate', 'new', 'edit', 'calendartab', 'export'],
                 ],
                 'feedback' => [
-                    'tableAtts' => ['cols' => 2, 'customClass' => 'actionTable', 'showLabels' => false,  'label' => '<b>' . $this->view->tr('Feedback') . ':<b>'],
+                    'tableAtts' => ['cols' => 2, 'customClass' => 'actionTable', 'showLabels' => false,  'label' => '<b>' . $this->view->tr('Feedback') . ':</b>'],
                     'widgets' => [ 'clearFeedback',  'feedback'],
                 ],
             ],

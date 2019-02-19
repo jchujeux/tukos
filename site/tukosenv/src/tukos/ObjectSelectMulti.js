@@ -13,9 +13,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuIte
 			"_buttonNode": "dijitDownArrowButton"
 		},
         constructor: function(args){
-            args.onInput = function(event){
-                Tooltip.show("manual entry not allowed. Use dropdown", this.domNode, this.tooltipPosition,!this.isLeftToRight()); 
-                return false;
+            if (!args.allowManualInput){
+            	args.onInput = function(event){
+                    Tooltip.show("manual entry not allowed. Use dropdown", this.domNode, this.tooltipPosition,!this.isLeftToRight()); 
+                    return false;
+                }           	
             }
         },
         openDropDown: function(){

@@ -24,7 +24,7 @@ class View {
         		'export'  => ['type' => 'ObjectExport', 'atts' => ['label' => $this->view->tr('export')]],
                  'process'  => ['type' => 'ObjectProcess',      'atts' => ['label' => $this->view->tr('Process')]],
            'clearFeedback'  => ['type' => 'ObjectFieldClear',   'atts' => ['label' => $this->view->tr('Clear Feedback'), 'fieldToClear' => 'feedback']],
-                'feedback'  => Widgets::textArea(['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 100, 'disabled' => true, 'style' => ['maxHeight' => '5em', 'overflow' => 'auto']]),
+                'feedback'  => Widgets::textArea(['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 100, 'disabled' => true, 'style' => ['maxHeight' => '3em', 'overflow' => 'auto']]),
         ];
 
         $this->dataLayout = [

@@ -29,8 +29,9 @@ class View extends AbstractView {
             ], 
             'language'   => ViewUtils::storeSelect('language', $this, 'Language'),
             'environment'   => ViewUtils::storeSelect('environment', $this, 'Environment'),
-        	'targetdb' => ViewUtils::textBox($this, 'Targetdb'),
-        	'customviewids' => [
+            'targetdb' => ViewUtils::textBox($this, 'Targetdb'),
+            'tukosorganization' => ViewUtils::textBox($this, 'Tukosorganization', ['atts' => ['disabled' => !$this->user->isAdmin()]]),
+            'customviewids' => [
                 'type' => 'objectEditor', 
                 'atts' => ['edit' => ['title' => $this->tr('Custom views'), 'keyToHtml' => 'capitalToBlank', 'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px',  'overflow' => 'auto']]],
                 'objToEdit' => ['json_decode' => [true],  'map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]],
