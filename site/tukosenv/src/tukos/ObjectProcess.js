@@ -32,7 +32,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/mouse",  "dij
                                     });
                                 }
                             }else{
-                                this.doProcess(theId, self.urlArgs);
+                                self.doProcess(theId, self.urlArgs);
                             }
                         }else{
                             var dialog = new DialogConfirm({title: messages.newOrFieldsHaveBeenModified, content: messages.saveOrReloadFirst, hasSkipCheckBox: false});

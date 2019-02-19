@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dijit/_WidgetBase", "dijit/TooltipDialog", "dijit/popup", "dojo/json", "dojo/domReady!"], 
-function(declare, lang, dct, style, Widget, TooltipDialog, popup, JSON){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dijit/_WidgetBase", "dijit/TooltipDialog", "dijit/popup", "dijit/focus", "dojo/json", "dojo/domReady!"], 
+function(declare, lang, dct, style, Widget, TooltipDialog, popup, focus, JSON){
     return declare(Widget, {
         postCreate: function(){
             this.inherited(arguments);
@@ -9,8 +9,7 @@ function(declare, lang, dct, style, Widget, TooltipDialog, popup, JSON){
 
         toggleHiderMenu: function(){
 	        if (!this.dialog){
-				var form = this.form, widgetsName = form.widgetsName;
-	        	this.dialog = new TooltipDialog({});
+				var form = this.form, widgetsName = form.widgetsName, dialog = this.dialog = new TooltipDialog({});
 	            var hiderTable = this.hiderMenu = dct.create('table', {style: 'max-height: 300px; overflow: auto;background-color: #fff;'});
 	            for (var i in widgetsName){
 	                var widgetName = widgetsName[i];
@@ -24,7 +23,11 @@ function(declare, lang, dct, style, Widget, TooltipDialog, popup, JSON){
 	                    td.appendChild(document.createTextNode(widget.title || widget.label));
 	                }
 	            };
-	            this.dialog.set('content', hiderTable);
+	            dialog.set('content', hiderTable);
+	            dialog.onBlur = function(){
+	            	popup.close(dialog);
+	            	this.isOpened = false;
+	            }
 			}
 			if (this.isOpened){
 				popup.close(this.dialog);
@@ -34,6 +37,7 @@ function(declare, lang, dct, style, Widget, TooltipDialog, popup, JSON){
 	                popup: this.dialog,
 	                around: this.hiderButton
 	            });
+				focus.focus(this.dialog.domNode);
 				this.isOpened = true;
 			}
         },

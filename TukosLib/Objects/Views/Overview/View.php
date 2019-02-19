@@ -51,7 +51,7 @@ class View {
         	'export'  => ['type' => 'OverviewAction',     'atts' => ['label' => $this->view->tr('Export'), 'grid' => 'overview', 'serverAction' => 'Process', 'queryParams' => ['process' => 'exportItems']]],
         	 'process' => ['type' => 'OverviewAction',     'atts' => ['label' => $this->view->tr('Process'), 'grid' => 'overview', 'serverAction' => 'Process']],
        'clearFeedback' => ['type' => 'ObjectFieldClear','atts' => ['label' => $this->view->tr('Clear Feedback'), 'fieldToClear' => 'feedback']],
-           'feedback'  => Widgets::textArea(['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 130, 'disabled' => true, 'style' => ['maxHeight' => '5em', 'overflow' => 'auto']]),
+           'feedback'  => Widgets::tukosTextArea(['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 80, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),
         ];
         
         $this->dataLayout = [

@@ -16,7 +16,7 @@ class Directory{
         'mailaccounts'      => 'Admin\Mail\Accounts',
         'mailboxes'         => 'Admin\Mail\Boxes',
         'mailmessages'      => 'Admin\Mail\Messages',
-        'mailtukosmessages' => 'Admin\Mail\UukosMessages',
+        'mailtukosmessages' => 'Admin\Mail\TukosMessages',
         'scripts'           => 'Admin\Scripts',
         'scriptsoutputs'    => 'Admin\Scripts\Outputs',
         'health'            => 'Admin\Health',
@@ -87,7 +87,7 @@ class Directory{
         return array_keys(self::$directory);
     }
     public static function getNativeObjs(){
-        return array_diff(array_keys(self::$directory), ['tukos', 'mailboxes', 'mailmessages']);
+        return array_diff(array_keys(self::$directory), ['tukos', 'backoffice', 'mailboxes', 'mailmessages', 'translations']);
     }
     public static function getDomains(){
         $domains = [];

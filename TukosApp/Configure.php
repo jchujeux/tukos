@@ -5,7 +5,6 @@ use Aura\Session\SegmentFactory;
 use Aura\Session\CsrfTokenFactory;
 
 use TukosLib\TukosFramework as Tfk; 
-use TukosLib\Utils\Widgets;
 use TukosLib\Auth\Authentication;
 use TukosLib\Auth\Drivers\Sql as SqlAuthentication;
 use TukosLib\Auth\UserInformation;
@@ -14,7 +13,6 @@ use TukosLib\Web\Dialogue as WebDialogue;
 use TukosLib\Web\TranslatorsManager;
 use TukosLib\Objects\ObjectsManager;
 use TukosLib\Objects\TukosModel;
-use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Objects\Admin\scripts\StreamsManager;
 
 class Configure{
@@ -105,7 +103,6 @@ class Configure{
             return new UserInformation($this->objectModulesDefaultContextName, $this->modulesMenuLayout, $this->ckey);
         }); 
     }
-
     function setobjectModulesDefaultContextName($modulesLayout){
         static $depth = 0;
         static $contextName = 0;

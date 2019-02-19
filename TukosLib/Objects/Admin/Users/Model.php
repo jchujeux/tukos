@@ -19,7 +19,8 @@ class Model extends AbstractModel{
             'modules'       =>  'VARCHAR(2048) DEFAULT NULL',
             'language'      =>  "VARCHAR(80) DEFAULT NULL",
             'environment'   =>  "VARCHAR(80) DEFAULT NULL",
-    		'customviewids' =>  'longtext DEFAULT NULL',
+            'tukosorganization' =>  "VARCHAR(80) DEFAULT NULL",
+            'customviewids' =>  'longtext DEFAULT NULL',
             'customcontexts'=>  'longtext DEFAULT NULL',
             'pagecustom'=>  'longtext DEFAULT NULL',
     ];
@@ -28,7 +29,7 @@ class Model extends AbstractModel{
     function __construct($objectName, $translator=null){
         $this->languageOptions = Tfk::$registry->get('appConfig')->languages['supported'];
 
-        parent::__construct($objectName, $translator, 'users', ['parentid' => ['people']], ['modules', 'customviewids', 'customcontexts', 'pagecustom'], self::$_colsDefinition, self::$_colsIndexes, ['rights', 'modules', 'language']);
+        parent::__construct($objectName, $translator, 'users', ['parentid' => ['people']], ['modules', 'customviewids', 'customcontexts', 'pagecustom'], self::$_colsDefinition, self::$_colsIndexes, ['rights', 'modules', 'language'], ['history']);
 
         switch ($this->user->rights()){
             case 'SUPERADMIN': 
@@ -44,7 +45,7 @@ class Model extends AbstractModel{
     }
     function initialize($init=[]){
         
-    	return parent::initialize(array_merge(['rights' => 'ENDUSER', 'targetdb' => Tfk::$registry->get('appConfig')->dataSource['dbname']], $init));
+    	return parent::initialize(array_merge(['rights' => 'ENDUSER', 'targetdb' => Tfk::$registry->get('appConfig')->dataSource['dbname'], 'tukosorganization' => $this->user->tukosOrganization()], $init));
     }    
     
     public function getOneExtended ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
@@ -71,6 +72,9 @@ class Model extends AbstractModel{
         		$configStore->insert($authenticationInfo, ['table' => 'users']);
         	}
         	Utl::extractItem('targetdb', $values);
+        	if (empty(Utl::getItem('tukosorganization', $values))){
+        	    $values['tukosorganization'] = $this->user->tukosOrganization();
+        	}
         	return parent::insertExtended($values, false, $jsonFilter);
         }
     }
@@ -121,7 +125,7 @@ class Model extends AbstractModel{
     		if (Utl::extractItem('password', $newValues, false)){
     			Feedback::add($this->tr('passwordupdated'));
     		}
-    		if (Utl::extractItem('targetdb', $newValues, false) !== false){
+    		if (Utl::extractItem('targetdb', $newValues, false) !== false && $newValues['id'] === $this->user->id()){
     			Feedback::add($this->tr('reauthenticatefornewtargetdb'));
     		}
     		$authUpdate = true;

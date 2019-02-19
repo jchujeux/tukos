@@ -257,7 +257,12 @@ class StoreUtilities {
     public static function transformCols($cols, $objectName){
         $transformedCols = [];
         foreach ($cols as $col){
-            $transformedCols[] = self::colsPrefix($col, $objectName) . $col;
+            if (is_array($col)){
+                $template = reset($col);
+                $transformedCols[] = Utl::substitute(reset($col), [self::colsPrefix($colString = key($col), $objectName) . $colString]);
+            }else{
+                $transformedCols[] = self::colsPrefix($col, $objectName) . $col;
+            }
         }
         return $transformedCols;
     }

@@ -6,7 +6,7 @@ use TukosLib\Utils\DiContainer;
 
 class Registry{
 
-    function __construct($mode){
+    function __construct($mode, $appName){
         $this->mode = $mode;
         $auraDir = Tfk::$vendorDir['aura'];
         $this->loader = require $auraDir . 'package/Aura.Autoload/scripts/instance.php';
@@ -31,6 +31,8 @@ class Registry{
             $this->loader->add('Aura\Router\\', $auraDir . 'package/Aura.Router/src/');
             $this->loader->add('Aura\Uri\\', $auraDir . 'package/Aura.Uri/src/');
             $this->setHttpServices();
+        }else{
+            $this->appName = $this->setAppName($appName);
         }
         $this->loader->add('Aura\Sql\\'         , $auraDir . 'package/Aura.Sql/src/');
         $this->loader->add('Aura\SqlQuery', Tfk::$vendorDir['auraV2']);
@@ -64,7 +66,7 @@ class Registry{
         // get the route based on the path and server
         $this->route = $map->match($this->inComingUriPath, $_SERVER);
         if ($this->route && $this->route->values['application']){
-            $this->appName = strtolower($this->route->values['application']);
+            $this->appName = $this->setAppNAme($this->route->values['application']);
             if (isset($this->route->values['controller'])){
                 $this->controller = $this->route->values['controller'];
             }else{
@@ -85,7 +87,9 @@ class Registry{
         $url = $urlFactory->newCurrent();
         $this->urlQuery = $url->query->getArrayCopy();
     }        
-
+    public function setAppName($appName){
+        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus'][strtolower($appName)];
+    }
     public function set($service, $serviceObject){
         return $this->container->set($service, $serviceObject);
     }

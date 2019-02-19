@@ -1,4 +1,4 @@
-define(["dojo", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nls/messages"], function(dojo, number, currency, JSON, messages){
+define(["dojo", "dojo/_base/lang", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nls/messages"], function(dojo, lang, number, currency, JSON, messages){
     return {
         wasModified: false, previousUniqueIds: [],
         
@@ -15,7 +15,11 @@ define(["dojo", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nl
         	});
         	return result;
         },
-        
+        setObject: function(path, value, obj){
+        	var result = this.empty(obj) ? {} : obj;
+        	lang.setObject(typeof path === 'string'? path : path.join('.'), value, result);
+        	return result;
+        },
         empty: function(obj) {
             for(var key in obj) {
                 if(obj.hasOwnProperty(key))

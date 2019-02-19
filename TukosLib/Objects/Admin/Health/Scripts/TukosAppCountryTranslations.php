@@ -54,7 +54,7 @@ class TukosAppCountryTranslations {
                      ['ZWE', 'Zimbabwe'], 
                 ];
                 foreach ($items as $item){
-                    $objectModel->insert(['name' => $item[0], 'setname' => 'tukoslib',  'en_us' => $item[1], 'contextid' => 9158]);
+                    $objectModel->insert(['name' => $item[0], 'setname' => 'tukosLib',  'en_us' => $item[1], 'contextid' => 9158]);
                 }
 
                 $storeProfiles = Tfk::$registry->get('store')->getProfiles();

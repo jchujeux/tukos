@@ -20,13 +20,15 @@ class CheckOrphanIds {
             $idCols  = [];
             $objectsToConsider = Directory::getNativeObjs();
             foreach ($objectsToConsider as $objectName){
-                $model = $objectsStore->objectModel($objectName);
-                $modelIdCols = $model->idCols;
-                $cols = $modelIdCols; $cols[] = 'id';
-                $modelIds = $model->getAll(['where' => [['col' => 'id', 'opr' => '>', 'values' => 0]], 'cols' => $cols]);
-                $ids = array_merge($ids, array_column($modelIds, 'id'));
-                foreach($modelIdCols as $col){
-                	$idCols = array_unique(array_merge($idCols, array_column($modelIds, $col)));
+                if ($exists = $store->query("SELECT EXISTS(SELECT 1 FROM tukos WHERE object = '$objectName')")->fetch()[0]){
+                    $model = $objectsStore->objectModel($objectName);
+                    $modelIdCols = $model->idCols;
+                    $cols = $modelIdCols; $cols[] = 'id';
+                    $modelIds = $model->getAll(['where' => [['col' => 'id', 'opr' => '>', 'values' => 0]], 'cols' => $cols]);
+                    $ids = array_merge($ids, array_column($modelIds, 'id'));
+                    foreach($modelIdCols as $col){
+                        $idCols = array_unique(array_merge($idCols, array_column($modelIds, $col)));
+                    }
                 }
             }
             $orphanIds = array_filter(array_diff($idCols, $ids));
@@ -40,7 +42,7 @@ class CheckOrphanIds {
                     $model = $objectsStore->objectModel($objectName);
                     $modelIdCols = $model->idCols;
                     $where = [];
-                    $or = false;
+                    $or = null;
                     foreach ($modelIdCols as $col){
                         $where[] = ['col' => $col, 'opr' => 'IN', 'values' => $orphanIds, 'or' => $or];
                         $or = true;
@@ -52,7 +54,7 @@ class CheckOrphanIds {
                 }
                 echo $objValue['comments'];
             }
-        }catch(Getopt_exception $e){
+        }catch(\Zend_Console_Getopt_Exception $e){
             Tfk::debug_mode('log', 'an exception occured while parsing command arguments in CheckOrphanIds: ', $e->getUsageMessage());
         }
     }

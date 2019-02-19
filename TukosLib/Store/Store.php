@@ -5,8 +5,8 @@
 namespace TukosLib\Store;
 
 use Aura\Sql\ConnectionFactory;
-use TukosLib\Store\QueryBuilder;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
 
 class Store {
@@ -68,27 +68,24 @@ class Store {
     public function tableCols($tableName){
         return $this->hook->query("SHOW COLUMNS FROM `" . $tableName . "`")->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
+    public function tableColsStructure($tableName){
+        return $this->hook->query("SHOW COLUMNS FROM `" . $tableName . "`")->fetchAll(\PDO::FETCH_ASSOC);
+    }
     public function addCols($colsDescription, $tableName){
-        if ($colsDescription){
+        if (!empty($colsDescription)){
             $sqlStmt = 'ALTER TABLE `' . $tableName . '`';
             $separator = '';
             foreach ($colsDescription as $col => $description){
                 $sqlStmt .= $separator . ' ADD COLUMN `' . $col . '` ' . $description;
                 $separator = ',';
             }
+            Feedback::add(Tfk::tr('addingcolumn(s)') . ': ' . $sqlStmt);
             $this->hook->query($sqlStmt);
         }
     }
   
-    protected function addMissingColsIfNeeded($colsDescription, $tableName){
-        $tableCols = $this->store->tableCols($tableName);
-        $colsDefToAdd = [];
-        foreach ($colsDescription as $col => $description){
-            if (! in_array($col, $tableCols)){
-                $colsDefToAdd[$col] = $description;
-            }
-        }
-        $this->addCols($colsDefToAdd, $tableName);
+    public function addMissingColsIfNeeded($colsDescription, $tableName){
+        $this->addCols(array_diff_key($colsDescription, Utl::toAssociative($this->tableColsStructure($tableName), 'Field')), $tableName);
     }
 
     function setFoundRows($atts, $countResults){

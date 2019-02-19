@@ -18,46 +18,50 @@ trait ItemHistory {
     protected function expandHistory($item, $atts){// rebuild the full successive previous item values from current value and the successive differences - adds $history[$i]['id'] starting at 1.
         $history = json_decode($item['history'], true);
         ItemsCache::cacheExtra($history, 'compressedhistory', $atts);
+        $historyMaxItems = $this->user->historyMaxItems();
+        return $this->_expandHistory($item, empty($historyMaxItems) ? $history : array_slice($history, 0, $historyMaxItems));
+    }
+    public function _expandHistory($item, $history){
         $requiredJsonCols = array_intersect(array_keys($item), $this->jsonCols);
         $requiredTextCols = array_diff(array_intersect(array_keys($item), $this->textColumns), $requiredJsonCols);
         $currentTextColsValues = Utl::getItems($requiredTextCols, $item);
         $currentJsonColsValues = Utl::getItems($requiredJsonCols, $item);
-
         foreach ($history as $i => &$previousItem){
-            if (is_array($previousItem)){
-	        	$textCols = array_intersect(array_keys($previousItem), $requiredTextCols);
-	            foreach ($textCols as $col){
-	                $previousItem[$col] = CharTextDiff::Patch($currentTextColsValues[$col], $previousItem[$col]);
-	                $currentTextColsValues[$col] = $previousItem[$col];
-	            }
-	            $jsonCols = array_intersect(array_keys($previousItem), $requiredJsonCols);
-	            foreach ($jsonCols as $col){
-	                if (is_string($currentJsonColsValues[$col])){
-	                    $currentJsonColsValues[$col] = json_decode($currentJsonColsValues[$col], true);
-	                }
-	                $previousItem[$col] = Utl::array_merge_recursive_replace($currentJsonColsValues[$col], $previousItem[$col]);
-	                $currentJsonColsValues[$col] = $previousItem[$col];
-	                $previousItem[$col] = json_encode($previousItem[$col]);
-	            }
-	            $previousItem['id'] = $i+1;
-            }else{
-            	$previousItem = [];
+            $textCols = array_intersect(array_keys($previousItem), $requiredTextCols);
+            foreach ($textCols as $col){
+                $previousItem[$col] = is_array($previousItem[$col]) ? CharTextDiff::Patch($currentTextColsValues[$col], $previousItem[$col]) : $previousItem[$col];
+                $currentTextColsValues[$col] = $previousItem[$col];
             }
+            $jsonCols = array_intersect(array_keys($previousItem), $requiredJsonCols);
+            foreach ($jsonCols as $col){
+                if (is_string($currentJsonColsValues[$col])){
+                    $currentJsonColsValues[$col] = json_decode($currentJsonColsValues[$col], true);
+                }
+                $previousItem[$col] = Utl::array_merge_recursive_replace($currentJsonColsValues[$col], $previousItem[$col]);
+                $currentJsonColsValues[$col] = $previousItem[$col];
+                $previousItem[$col] = json_encode($previousItem[$col]);
+            }
+            $previousItem['id'] = $i+1;
         }
         return $history;
     }
     
     public function subHistory($value, $wantedNonEmptyCols, $wantedAdditionalCols=['updated']){// retrieves the history for $wantedNonEmptyCols. $wantedAdditionalCols is added on every returned row
         $subHistory = [];
-        if (!empty($value['history'])){
+        if (!empty($expandedHistory = $value['history'])){
+            $compressedHistory = ItemsCache::getExtrafromCache('compressedhistory', $value['id']);
+            if (count($compressedHistory > ($length = count($expandedHistory)))){
+                $expandedHistory = array_merge($expandedHistory, $this->_expandHistory(end($expandedHistory), array_slice($compressedHistory, $length)));
+            }
             $wantedNonEmptyKeys    = array_flip($wantedNonEmptyCols);
             $wantedAdditionalKeys = array_flip($wantedAdditionalCols);
-            foreach ($value['history'] as $historicValue){
+            foreach ($expandedHistory as $historicValue){
                 $subHistoryItem = array_intersect_key(array_filter($historicValue), $wantedNonEmptyKeys);
                 if (!empty($subHistoryItem)){
                     $subHistory[] = array_merge($subHistoryItem, array_intersect_key($historicValue, $wantedAdditionalKeys));
                 }
             }
+                
         }
         return $subHistory;
     }
@@ -78,14 +82,14 @@ trait ItemHistory {
         $oldCompressedHistory = ItemsCache::getExtrafromCache('compressedhistory', $id);
 
         foreach ($modifiedTextCols as $col){
-            $start = microtime(true);
+            //$start = microtime(true);
             $historyToCompress[$col] = CharTextDiff::Diff($item[$col], ($historyToCompress[$col] === null ? '' : $historyToCompress[$col]));
-            $end = microtime(true);
-            $timeCharTextDiff = $end - $start;
+            //$end = microtime(true);
+            //$timeCharTextDiff = $end - $start;
             //Feedback::add('CharTextDiff duration: ' . $timeCharTextDiff);
         }
         foreach ($modifiedJsonCols as $col){
-            $start = microtime(true);
+            //$start = microtime(true);
             if (is_string($item[$col])){ 
                 $item[$col] = json_decode($item[$col], true);
             }
@@ -106,7 +110,7 @@ trait ItemHistory {
                 $historyToCompress[$col] = Utl::array_merge_recursive_replace($oldToNew, $newNotInOld);
             }
 
-            $end = microtime(true);
+            //$end = microtime(true);
             //Feedback::add('json-diff_recursive duration: ' . $end - $start);
         }
         return json_encode((empty($oldCompressedHistory) ? [$historyToCompress] : array_merge([$historyToCompress], $oldCompressedHistory)));

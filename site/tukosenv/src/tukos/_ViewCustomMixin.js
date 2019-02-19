@@ -13,48 +13,48 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                customDialog.pane.resize();
             }else{
                 customDialog = targetPane.customDialog = new TukosTooltipDialog({paneDescription: {form: form, 
-                            widgetsDescription: {
-                                newCustomContent: {type: 'ObjectEditor', atts: {label: messages.newCustomContent, keyToHtml: 'capitalToBlank', style: {maxWidth: '600px', maxHeight: '600px', overflow: 'auto'}}},
-                                defaultCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'defaultCustomView'}}, 
-                                defaultCustomViewLabel: {type: 'HtmlContent', atts: {value: messages.defaultCustomView, disabled: true}},
-                                defaultCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', dropdownFilters: {vobject: form.object, view: form.viewMode}, onChange: lang.hitch(this, this.defaultCustomViewChange)}},
-                                itemCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'itemCustomView'}}, 
-                                itemCustomViewLabel: {type: 'HtmlContent', atts: {style: {width: '180px'}, value: messages.itemCustomView}},
-                                itemCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', mode: form.paneMode, dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, onChange: lang.hitch(this, this.itemCustomViewChange)}},
-                                itemCustomButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'itemCustom'}}, 
-                                itemCustomLabel: {type: 'HtmlContent', atts: {}},
-                                save: {type: 'TukosButton', atts: {label: messages.save, onClick: lang.hitch(this, this.saveCallback)}},
-                                close: {type: 'TukosButton', atts: {label: messages.close, onClickAction:  "this.pane.close();"}},
-                                newCustomView: {type: 'TukosButton', atts: {label: messages.newCustomView, onClick: lang.hitch(this, this.newCustomView)}},
-                                more: {type: 'TukosButton', atts: {label: messages.more, onClick:lang.hitch(this, this.moreCallback)}},
-                                less: {type: 'TukosButton', atts: {label: messages.less, hidden: true, onClick:lang.hitch(this, this.lessCallback)}},
-                                defaultCustomViewContent: {type: 'ObjectEditor', atts: {title: messages.defaultCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto', paddingRight: '25px'}, keyToHtml: 'capitalToBlank'}},
-                                itemCustomViewContent: {type: 'ObjectEditor', atts: {title: messages.itemCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto'}, keyToHtml: 'capitalToBlank'}},
-                                itemCustomContent: {type: 'ObjectEditor', atts: {title: messages.itemCustomContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto'}, keyToHtml: 'capitalToBlank'}},
-                                customContentDelete: {type: 'TukosButton', atts: {title: messages.forselectedcustom, label: messages.customContentDelete,  onClick: lang.hitch(this, self.deleteCallback)}}
-                            },
-                            layout:{
-                                tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: false, orientation: 'vert'},
+                    widgetsDescription: {
+                        newCustomContent: {type: 'ObjectEditor', atts: {label: messages.newCustomContent, keyToHtml: 'capitalToBlank', style: {maxWidth: '600px', maxHeight: '600px', overflow: 'auto'}}},
+                        defaultCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'defaultCustomView'}}, 
+                        defaultCustomViewLabel: {type: 'HtmlContent', atts: {value: messages.defaultCustomView, disabled: true}},
+                        defaultCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, onChange: lang.hitch(this, this.defaultCustomViewChange)}},
+                        itemCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'itemCustomView'}}, 
+                        itemCustomViewLabel: {type: 'HtmlContent', atts: {style: {width: '180px'}, value: messages.itemCustomView}},
+                        itemCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', mode: form.paneMode, dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, onChange: lang.hitch(this, this.itemCustomViewChange)}},
+                        itemCustomButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'itemCustom'}}, 
+                        itemCustomLabel: {type: 'HtmlContent', atts: {}},
+                        save: {type: 'TukosButton', atts: {label: messages.save, onClick: lang.hitch(this, this.saveCallback)}},
+                        close: {type: 'TukosButton', atts: {label: messages.close, onClickAction:  "this.pane.close();"}},
+                        newCustomView: {type: 'TukosButton', atts: {label: messages.newCustomView, onClick: lang.hitch(this, this.newCustomView)}},
+                        more: {type: 'TukosButton', atts: {label: messages.more, onClick:lang.hitch(this, this.moreCallback)}},
+                        less: {type: 'TukosButton', atts: {label: messages.less, hidden: true, onClick:lang.hitch(this, this.lessCallback)}},
+                        defaultCustomViewContent: {type: 'ObjectEditor', atts: {title: messages.defaultCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto', paddingRight: '25px'}, keyToHtml: 'capitalToBlank'}},
+                        itemCustomViewContent: {type: 'ObjectEditor', atts: {title: messages.itemCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto'}, keyToHtml: 'capitalToBlank'}},
+                        itemCustomContent: {type: 'ObjectEditor', atts: {title: messages.itemCustomContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto'}, keyToHtml: 'capitalToBlank'}},
+                        customContentDelete: {type: 'TukosButton', atts: {title: messages.forselectedcustom, label: messages.customContentDelete,  onClick: lang.hitch(this, self.deleteCallback)}}
+                    },
+                    layout:{
+                        tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: false, orientation: 'vert'},
+                        contents: {
+                            col1: {
+                                tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'},
                                 contents: {
-                                    col1: {
-                                        tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'},
-                                        contents: {
-                                            row1: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, labelWidth: 100, orientation: 'vert'},  widgets: ['newCustomContent']},
-                                            row2: {
-                                                tableAtts: {cols: 3, customClass: 'labelsAndValues', id: targetPane.id + 'viewsSettings', showLabels: false},
-                                                widgets: ['defaultCustomViewButton', 'defaultCustomViewLabel', 'defaultCustomView', 'itemCustomViewButton', 'itemCustomViewLabel',  'itemCustomView', 'itemCustomButton', 'itemCustomLabel']
-                                            },
-                                            row3: {
-                                                tableAtts: {cols: 5, customClass: 'labelsAndValues', showLabels: false, label: messages.selectAction},  
-                                                widgets: ['save', 'close', 'newCustomView', 'more', 'less']
-                                            }
-                                        }
+                                    row1: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, labelWidth: 100, orientation: 'vert'},  widgets: ['newCustomContent']},
+                                    row2: {
+                                        tableAtts: {cols: 3, customClass: 'labelsAndValues', id: targetPane.id + 'viewsSettings', showLabels: false},
+                                        widgets: ['defaultCustomViewButton', 'defaultCustomViewLabel', 'defaultCustomView', 'itemCustomViewButton', 'itemCustomViewLabel',  'itemCustomView', 'itemCustomButton', 'itemCustomLabel']
                                     },
-                                    col2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['defaultCustomViewContent', 'itemCustomViewContent', 'itemCustomContent']},
-                                    col3: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['customContentDelete']}
-                                }      
+                                    row3: {
+                                        tableAtts: {cols: 5, customClass: 'labelsAndValues', showLabels: false, label: messages.selectAction},  
+                                        widgets: ['save', 'close', 'newCustomView', 'more', 'less']
+                                    }
+                                }
                             },
-                            style: {width: "auto"}
+                            col2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['defaultCustomViewContent', 'itemCustomViewContent', 'itemCustomContent']},
+                            col3: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['customContentDelete']}
+                        }      
+                    },
+                    style: {width: "auto"}
                 }});
                 customDialog.pane.blurCallback = on.pausable(customDialog, 'blur', customDialog.close);
 
@@ -67,7 +67,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         setVisibility: function(args){
-            var  targetPane = this.currentPane(), form = targetPane.form || targetPane, pane = targetPane.customDialog.pane, viewMode = form.viewMode, isOverview = (viewMode === 'Overview' || targetPane.isAccordion()), isReadOnly = form.readOnly;
+            var  targetPane = this.currentPane(), form = targetPane.form || targetPane, pane = targetPane.customDialog.pane, viewMode = form.viewMode, isOverview = (viewMode === 'Overview'), isReadOnly = form.readOnly;
                     paneGetWidget = lang.hitch(pane, pane.getWidget);
             paneGetWidget('defaultCustomView').set('value',  form.customviewid ? form.customviewid : '', false);
             paneGetWidget('itemCustomView').set('value',  form.itemcustomviewid ? form.itemcustomviewid : '', false);
@@ -114,7 +114,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         defaultCustomViewChange: function(newValue){
             var targetPane = this.currentPane(), form = targetPane.form || targetPane;
             form.customviewid = newValue;
-        	Pmg.refresh(targetPane, 'tabdefaultcustomviewidsave', {customviewid: newValue}, {values: true, customization: true}).then(lang.hitch(this, function(){
+        	Pmg.refresh(targetPane, 'TabDefaultCustomViewIdSave', {customviewid: newValue}, {values: true, customization: true}).then(lang.hitch(this, function(){
                 var pane= targetPane.customDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
                 paneGetWidget('defaultCustomViewButton').set('disabled', ((form.customviewid && form.customviewid !== '') ? false : true));
                 if (paneGetWidget('more').get('hidden')){
@@ -127,15 +127,17 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         itemCustomViewChange: function(newValue){
-            var form = this.currentPane().form, custom = {};
-            custom[form.viewMode] = {itemcustomviewid: newValue};
-            Pmg.tabs.refresh('TabSave', {id: lang.hitch(form, form.valueOf)('id'), custom: custom}, {values: true, customization: true}).then(lang.hitch(this, function(){
-                var targetPane = this.currentPane(), form = targetPane.form || targetPane, pane = targetPane.customDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
+            var targetPane = this.currentPane(), form = targetPane.form || targetForm, custom = utils.setObject([form.viewMode.toLowerCase(), form.paneMode.toLowerCase()], {itemcustomviewid: newValue});
+            Pmg.refresh(targetPane, 'TabSave', {id: lang.hitch(form, form.valueOf)('id'), custom: custom}, {values: true, customization: true}).then(lang.hitch(this, function(){
+                var pane = targetPane.customDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
                 paneGetWidget('itemCustomViewButton').set('disabled', ((form.itemcustomviewid && form.itemcustomviewid !== '') ? false : true));
                 if (paneGetWidget('more').get('hidden')){
                 	this.moreCallback();
                 }
-            }));
+                if (targetPane.isAccordion()){
+                	Pmg.addCustom('itemcustomviewid', newValue);
+                }
+           }));
         },
 
         newCustomView: function(){
@@ -155,13 +157,14 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
             var close = true, targetPane = this.currentPane(), form = targetPane.form, customDialog = targetPane.customDialog, pane = customDialog.pane;
             switch (customDialog.get('value').saveOption){
                 case 'defaultCustomView':
-                    Pmg.refresh(targetPane, 'tabdefaultcustomviewsave', form.customization, {values: true});
+                    Pmg.refresh(targetPane, 'TabDefaultCustomViewSave', form.customization, {values: true});
                     break;
                 case 'itemCustomView': 
-                    Pmg.tabs.refresh('TabItemCustomViewSave', {id: form.itemcustomviewid, vobject: form.object, view: form.viewMode.toLowerCase(), customization: form.customization}, {values: true});
+                    Pmg.tabs.refresh('TabItemCustomViewSave', {id: form.itemcustomviewid/*, vobject: form.object, view: form.viewMode.toLowerCase()*/, customization: form.customization}, {values: true});
                     break;
                 case 'itemCustom': 
-                    Pmg.tabs.refresh('TabSave', {custom: utils.newObj([[form.viewMode.toLowerCase(), utils.newObj([[form.paneMode.toLowerCase(), form.customization]])]])}, {values: true});
+                    //Pmg.tabs.refresh('TabSave', {custom: utils.newObj([[form.viewMode.toLowerCase(), utils.newObj([[form.paneMode.toLowerCase(), form.customization]])]])}, {values: true});
+                    Pmg.tabs.refresh('TabSave', {custom: utils.setObject([form.viewMode.toLowerCase(), form.paneMode.toLowerCase()], form.customization)}, {values: true});
                     break;
                 default:
                     close = false;

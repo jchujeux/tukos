@@ -61,7 +61,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
         showColValues: function(){
             var grid = this, pane = grid.form, headerTable = grid.headerNode.firstChild, colValuesRow = query('.dgrid-colvalues-row', headerTable), clickedField = grid.clickedColumn.field;
             if (!colValuesRow.length > 0){
-                Pmg.serverDialog({object: grid.object, view: 'Overview', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'getColsWidgetDescription'}}}).then(function(response){
+                Pmg.serverDialog({object: grid.object, view: 'Overview', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'GetColsWidgetDescription'}}}).then(function(response){
             		grid.colValueWidgetsDescription = response.widgetsDescription;
             		grid.colValueParentNodes = {}, grid.colValueWidgets = {};
             		colValuesRow = dct.create('tr', {'class': 'dgrid-colvalues-row'}, headerTable);
@@ -97,6 +97,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
                 	lang.setObject('atts.style.width', '100%', widgetDescription);
             }
             widgetDescription.atts.placeHolder = messages.entertargetvalue;
+            widgetDescription.atts.allowManualInput = true;
         	when (WidgetsLoader.instantiate(widgetDescription.type, widgetDescription.atts), function(widget){
             	var td = grid.colValueParentNodes[field];
         		widget.on('change', function(newValue){

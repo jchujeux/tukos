@@ -27,34 +27,43 @@ class UserInformation{
     }
     
     public function setUser($where){
-        $tk = SUtl::$tukosTableName;
-        $tu = 'users';
-        $this->userInfo = SUtl::$store->getOne([/*can't use Users\Model here as AbstractModel relies on $this->userInfo */
-            'table' => $tu, 'join' => [['inner', $tk,  $tk . '.id = ' . $tu . '.id']],
-            'where' => SUtl::transformWhere($where, $tu),
-            'cols'  => SUtl::transformCols(['id', 'parentid', 'name', 'password', 'rights', 'modules', 'contextid', 'language', 'environment', 'customviewids', 'customcontexts', 'pagecustom'], $tu)
-        ]);
-        if (empty($this->userInfo)){
+        try {
+            $tk = SUtl::$tukosTableName;
+            $tu = 'users';
+            $this->userInfo = SUtl::$store->getOne([/*can't use Users\Model here as AbstractModel relies on $this->userInfo */
+                'table' => $tu, 'join' => [['inner', $tk,  $tk . '.id = ' . $tu . '.id']],
+                'where' => SUtl::transformWhere($where, $tu),
+                //'cols'  => SUtl::transformCols(['id', 'parentid', 'name', 'password', 'rights', 'modules', 'contextid', 'language', 'environment', 'tukosorganization', 'customviewids', 'customcontexts', 'pagecustom'], $tu)
+                'cols'  => ['*']
+            ]);
+            if (empty($this->userInfo)){
+                return false;
+            }
+            $this->unallowedModules  = ($this->rights() === 'SUPERADMIN' || $this->userInfo['modules'] === null) ? [] : json_decode($this->userInfo['modules'], true);
+            if ($where['name'] === 'tukosBackOffice'){
+                $this->allowedModules = ['contexts', 'backoffice'];
+            }else{
+                $this->allowedModules =  array_diff($this->objectModules, $this->unallowedModules);
+                if ($where['name'] !== 'tukosscheduler' && $this->isSuperAdmin()){
+                    SUtl::$store->addMissingColsIfNeeded (SUtl::$tukosModel->colsDescription, $tk);
+                }
+            }            
+            $this->ckey = $this->userInfo['password'];
+            $translatorsStore = Tfk::$registry->get('translatorsStore');
+            if (isset($this->userInfo['language'])){
+                $translatorsStore->setLanguage($this->userInfo['language']);
+            }
+            $this->language = $translatorsStore->getLanguageCol();
+            Tfk::setEnvironment($this->userInfo['environment']);
+            Tfk::setTranslator($this->language);
+            $this->contextModel = $this->objectsStore->objectModel('contexts', null);/* here and not in __construct  as else creates infinite loop recursion */
+            $this->pageCustomization = array_merge(['fieldsMaxSize' => 100000], empty($pageCustom = $this->userInfo['pagecustom']) ? [] : json_decode($pageCustom, true));
+            return true;
+        }catch(\Exception $e){
+            //Tfk::debug_mode('log', Tfk::tr('errorgettinguserinformation'), $e->getMessage());
+            Feedback::add(Tfk::tr('errorgettinguserinformation') . ': ' . $e->getMessage());
             return false;
         }
-        $this->unallowedModules  = ($this->rights() === 'SUPERADMIN' || $this->userInfo['modules'] === null) ? [] : json_decode($this->userInfo['modules'], true);
-        if ($where['name'] === 'tukosBackOffice'){
-            $this->allowedModules = ['contexts', 'backoffice'];
-        }else{
-            $this->allowedModules =  array_diff($this->objectModules, $this->unallowedModules);
-        }
-        
-        $this->ckey = $this->userInfo['password'];
-        $translatorsStore = Tfk::$registry->get('translatorsStore');
-        if (isset($this->userInfo['language'])){
-            $translatorsStore->setLanguage($this->userInfo['language']);
-        }
-        $this->language = $translatorsStore->getLanguageCol();
-        Tfk::setEnvironment($this->userInfo['environment']);
-        Tfk::setTranslator($this->language);
-        $this->contextModel = $this->objectsStore->objectModel('contexts', null);/* here and not in __construct  as else creates infinite loop recursion */
-        $this->pageCustomization = array_merge(['fieldsMaxSize' => 100000], empty($pageCustom = $this->userInfo['pagecustom']) ? [] : json_decode($pageCustom, true));
-        return true;
     }
 
     public function id(){
@@ -74,6 +83,9 @@ class UserInformation{
     }
     public function language(){
         return  $this->language;
+    }
+    public function tukosOrganization(){
+        return  Utl::getItem('tukosorganization', $this->userInfo, '');
     }
     public function dateFormat(){
         $formats = ['en_us' => 'Y-m-d', 'fr_fr' => 'd-m-Y', 'es_es' => 'd-m-Y'];
@@ -278,10 +290,14 @@ class UserInformation{
         //$this->userInfo['pagecustom'] = json_encode(empty($this->userInfo['pagecustom']) ? $pageCustom : array_merge(json_decode($this->userInfo['pagecustom'], true), $pageCustom));
         $this->pageCustomization = array_merge($this->pageCustomization, $pageCustom);
         $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => json_encode($this->pageCustomization)], ['where' => ['id' => $this->id()]]);
-        return [Tfk::tr('serveractiondone')];
+        Feedback::add(Tfk::tr('serveractiondone'));
+        return [];
     }
     public function fieldsMaxSize(){
-        return intval($this->pageCustomization['fieldsMaxSize']);
+        return intval(Utl::getItem('fieldsMaxSize', $this->pageCustomization));
+    }
+    public function historyMaxItems(){
+        return IntVal(Utl::getItem('historyMaxItems', $this->pageCustomization));
     }
 }
 ?>

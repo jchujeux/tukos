@@ -60,7 +60,7 @@ class GainLossCompute {
             }
             echo "The gain is: $gain\n";
             echo 'the stock is: ' . var_dump($this->stock);
-        }catch(Getopt_exception $e){
+        }catch(\Zend_Console_Getopt_Exception $e){
             Tfk::error_message('on', 'an exception occured while parsing command arguments : ', $e->getUsageMessage());
         }
     }

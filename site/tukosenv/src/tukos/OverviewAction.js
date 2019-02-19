@@ -128,7 +128,10 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
                                     		visibleCols.push(column.field);
                                     	}
                                     });
-                                	download.download({object: form.object, view: form.viewMode, action: action, query: {params: queryParams}}, {data: {ids: JSON.stringify(toProcess.ids), visibleCols: JSON.stringify(visibleCols)}});
+                                	download.download({object: form.object, view: form.viewMode, action: action, query: {params: queryParams}}, 
+                                    		{data: {ids: JSON.stringify(toProcess.ids), visibleCols: JSON.stringify(visibleCols), modifyValues: JSON.stringify(grid.modify.values)}}
+                            				//{data: JSON.stringify({ids: toProcess.ids, visibleCols: visibleCols, modifyValues: grid.modify.values})}
+                                	);
                                 }else{// is modify
                                 	self.form.serverDialog({action: action, query: queryParams ? {params: queryParams} : {}}, {ids: toProcess.ids, values: grid.modify}, [], messages.actionDone).then(function(response){
 	                                    if (needsRevert){

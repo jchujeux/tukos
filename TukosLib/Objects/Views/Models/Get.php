@@ -23,7 +23,7 @@ class Get extends AbstractViewModel {
         }
     }
 
-    function getOne($query, $cols, $modelToView, $silent = false){
+    function getOne($query, $cols, $modelToView, $silent = false, $historyModelToView = true){
 
         $getOne = $this->modelGetOne;
         $value = $this->modelToView(
@@ -39,9 +39,11 @@ class Get extends AbstractViewModel {
                 Feedback::add([$this->view->tr('doneObjectFetched') => json_encode($query)]);
             }
         }
-        if (isset($value['history'])){
-            $value['history'] = $this->modelToView($value['history'], $modelToView, true);
+
+        if ($historyModelToView && isset($value['history'])){
+            $value['history'] = $this->modelToView($value['history'], 'objToOverview', true);
         }
+
         return $value;
     }
 

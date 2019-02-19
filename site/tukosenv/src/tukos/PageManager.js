@@ -80,6 +80,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                         leftPaneButton.set("iconClass", displayStatus === 'none' ? "ui-icon tukos-right-arrow" : "ui-icon tukos-left-superarrow"), isMaximized = false;;
                         leftPaneButton.on('click', function(){
                             var displayStatus = domStyle.get('leftPanel', 'display');
+                            isMaximized = false;
                             if (displayStatus === 'none'){
                             	self.lazyCreateAccordion();
                                 ready(function(){
@@ -88,20 +89,14 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                                 	newPageCustomization.hideLeftPane = 'NO';
                                 	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
                                 	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-                                	registry.byId('appLayout').resize();
-                                	//ready(function(){//to get the comments / details column in the search accordion to display
-                                		registry.byId('leftPanel').resize();
-                                	//})
+                                	self.resizeLayoutPanes(true);
                                 });
                             }else{
                             	domStyle.set('leftPanel', 'display', 'none');
                             	newPageCustomization.hideLeftPane = 'YES';
                             	leftPaneButton.set("iconClass", "ui-icon tukos-right-arrow");
                             	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-                            	ready(function(){
-                            		registry.byId('appLayout').resize();
-                                	registry.byId('centerPanel').resize(); 
-                            	});
+                            	self.resizeLayoutPanes(false);
                             }
                         });                    	
                         leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
@@ -116,8 +111,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
     	                        	newPageCustomization.hideLeftPane = 'NO';
     	                        	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
     	                        	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
-    	                        	registry.byId('appLayout').resize();
-    	                        	registry.byId('leftPanel').resize();
+                                	self.resizeLayoutPanes(true)
                             	});
                             }else{
                             	if (isMaximized){
@@ -130,8 +124,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                                 	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
                                 	isMaximized = true;
                             	}
-                            	registry.byId('appLayout').resize();
-                            	registry.byId('centerPanel').resize();
+                            	self.resizeLayoutPanes(true)
                             }
                         });
                     }
@@ -146,12 +139,32 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                         	obj.newPageCustomization.width = newWidth;
                         	//console.log('splitter was called')
                         });
+                    	self.setFeedback(obj.feedback);
                     });
                     if (obj.focusedTab){
                             contentTabs.selectChild(tabArray[obj.focusedTab]);
                     }
                 });
             });
+        },
+        resizeLayoutPanes: function(leftPanelDisplay){
+        	var appLayout = registry.byId('appLayout');
+        	domStyle.set('leftPanel', 'display', 'none');
+        	domStyle.set('centerPanel', 'display', 'none');
+           	appLayout.resize();
+            ready(function(){
+            	if (leftPanelDisplay){
+            		domStyle.set('leftPanel', 'display', 'block');
+            	}
+            	domStyle.set('centerPanel', 'display', 'block');
+               	appLayout.resize();
+            	ready(function(){
+                   	registry.byId('centerPanel').resize();                            		
+                	if (leftPanelDisplay){
+                       	registry.byId('leftPanel').resize();                            		                                		
+                	}
+            	});
+        	});
         },
         lazyCreateAccordion: function(ignoreSelected){
             if (!this.createdAccordion){

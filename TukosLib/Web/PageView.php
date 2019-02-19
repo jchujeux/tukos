@@ -212,23 +212,29 @@ class PageView extends Translator{
 		                		'storeedit' => ['canEdit' => '(function(item, cellValue){console.log("I am here");if(item.hasId){return true;}else{return false;}})']
 		                	]), false),
                          ]])),
-           		       'fieldsMaxSize' => Widgets::textBox(Widgets::complete(['label' => $this->tr('Fieldsmaxsize'), 'onWatchLocalAction' =>
-               		        ['value' => ['maxFieldsSize' => ['localActionStatus' => [
-               		            'triggers' => ['user' => true],
-               		            'action' => "Pmg.addCustom('fieldsmaxsize', newValue); return true;"
-               		        ]]]]
-               		    ])),
-           				'cancel' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('close'), 'onClickAction' => 'this.pane.close();']],
-                        'action' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('save'), 'onClickAction' => 
-                        	"this.pane.serverAction( {object: 'users', view: 'NoView', action: 'PageCustomSave'}, {'excludeWidgets': ['cancel', 'action']});this.pane.close();" 
-                        ]],
+           		    'fieldsMaxSize' => Widgets::textBox(Widgets::complete(['label' => $this->tr('Fieldsmaxsize'), 'onWatchLocalAction' =>
+           		        ['value' => ['fieldsMaxSize' => ['localActionStatus' => [
+           		            'triggers' => ['user' => true],
+           		            'action' => "Pmg.addCustom('fieldsMaxSize', newValue); return true;"
+           		        ]]]]
+           		    ])),
+           		    'historyMaxItems' => Widgets::textBox(Widgets::complete(['label' => $this->tr('HistoryMaxItems'), 'onWatchLocalAction' =>
+           		        ['value' => ['historyMaxItems' => ['localActionStatus' => [
+           		            'triggers' => ['user' => true],
+           		            'action' => "Pmg.addCustom('historyMaxItems', newValue); return true;"
+           		        ]]]]
+           		    ])),
+           		    'cancel' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('close'), 'onClickAction' => 'this.pane.close();']],
+                    'action' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('save'), 'onClickAction' => 
+                        	"Pmg.setFeedback('" . Tfk::tr('saving') . " ... ');this.pane.serverAction( {object: 'users', view: 'NoView', action: 'PageCustomSave'}, {'excludeWidgets': ['cancel', 'action']});this.pane.close();" 
+                     ]],
                 ],
                 'layout' => [
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
                     'contents' => [
                        'row1' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 100],
-                            'widgets' => ['hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize'],
+                            'widgets' => ['hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems'],
                         ],
                        'row2' => [
                             'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
@@ -267,7 +273,7 @@ class PageView extends Translator{
         $this->pageManagerArgs['headerContent'] = Utl::substitute(
           	'<table width="100%"><tr><td> ${buttons}<b>Tukos 2.0</b><span id="tukosHeaderLoading"></span></td><td align="center"><b><i>${header} ${ownerorg}</i></b></td><td align="right">${welcome}</td></table>', [
           		'buttons' => empty($this->pageManagerArgs['accordionDescription']) ? '' : $this->leftPaneButtons, 'header' => $this->tr(Tfk::$registry->appName . 'HeaderBanner', 'none'), 
-          		'ownerorg' => $this->tr('ownerorganization', 'none'), 'welcome' => $this->welcomeConnect(Tfk::$registry->pageUrl . 'auth/logout')]
+          		'ownerorg' => $this->tr($this->user->tukosOrganization(), 'none'), 'welcome' => $this->welcomeConnect(Tfk::$registry->pageUrl . 'auth/logout')]
         );
         $this->pageManagerArgs['menuBarDescription'] = $this->menuBarDescription($modulesMenuLayout);
 
@@ -281,7 +287,7 @@ class PageView extends Translator{
 
         Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
         $this->pageManagerArgs = array_merge($this->pageManagerArgs, ['extras' => Tfk::getExtras()],
-            array_filter(['feedback' => Feedback::get(), 'extendedIds' => SUtl::translatedExtendedIdCols(), 'messages' => Tfk::$registry->get('translatorsStore')->getSetMessages('page')])
+            array_filter(['extendedIds' => SUtl::translatedExtendedIdCols(), 'messages' => Tfk::$registry->get('translatorsStore')->getSetMessages('page'), 'feedback' => Feedback::get()])
         );
 
         $template->pageManagerArgs = json_encode($this->pageManagerArgs);
