@@ -8,14 +8,16 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             lang.mixin(this.pane, {attachedWidget: this.attachedWidget, previewContent: lang.hitch(this, this.previewContent), tabContextId: lang.hitch(form, form.tabContextId)});
         	this.onOpen = lang.hitch(this, function(){
         		var pane = this.pane, _arguments = arguments;
-        		this.setVisibility();
-        		when(this.previewContent(), lang.hitch(this, function(){
-            		pane.watchOnChange = true;
-            		dijit.TooltipDialog.prototype.onOpen.apply(this, _arguments);
-            		ready(function(){
-            			pane.resize();
-            		});
-            	}));
+        		when(this.onOpenAction(), lang.hitch(this, function(){
+	        		this.setVisibility();
+	        		when(this.previewContent(), lang.hitch(this, function(){
+	            		pane.watchOnChange = true;
+	            		dijit.TooltipDialog.prototype.onOpen.apply(this, _arguments);
+	            		ready(function(){
+	            			pane.resize();
+	            		});
+	            	}));
+        		}));
         	});
         	this.blurCallback = on.pausable(this, 'blur', this.close);
         },
@@ -179,7 +181,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             	var form = this.pane.form;
                 lang.hitch(this, this.dataToProcess)().then(function(data){
                     Pmg.setFeedback(Pmg.message('savingfile'));
-                	download.download({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'process', query: {id: form.valueOf('id'), params: {process: 'fileContent', noget:  true}}}, {data: data});
+                	download.download({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'Process', query: {id: form.valueOf('id'), params: {process: 'fileContent', noget:  true}}}, {data: data});
                 });           	
             }), 100);
         },

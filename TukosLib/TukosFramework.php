@@ -16,7 +16,7 @@ class TukosFramework{
     //const phpZendDir = self::phpVendorDir . 'zf1/zend-console-getopt/library/';
     const phpCommand = '/xampp/php/php ';
     const phpDetachedCommand = 'start /Dx: /xampp/php/php '; // so that runs in a separate ms-dos windows (detached)
-    const htmlToPdfCommand = '/wkhtmltopdf/bin/wkhtmltopdf ';
+    //const htmlToPdfCommand = '/wkhtmltopdf/bin/wkhtmltopdf ';
     //const tukosUsersFiles = '/jch/tukosusersfiles/';
     //const tukosTmpDir = '/tukos/tmp/';
     const mailServerFolder = '/Xampp/MercuryMail/';
@@ -29,12 +29,13 @@ class TukosFramework{
     
     public static $phpRoot, $phpTukosDir, $phpVendorDir, $vendorDir = [], $tukosTmpDir,
                   $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment, $tukosBaseLocation, $dojoBaseLocation, $tukosFormsDojoBaseLocation, $dojoCdnBaseLocation, $tukosFormsTukosBaseLocation, 
-                  $tukosDomainName, $tukosFormsDomainName; 
+                  $tukosDomainName, $tukosFormsDomainName, $htmlToPdfCommand; 
   
     public static function initialize ($mode, $appName = null){
-        self::$startMicroTime = microtime(true);
+        //self::$startMicroTime = microtime(true);
         self::$phpRoot = getenv('tukosPhpRoot');
         self::$dojoBaseLocation = getenv('dojoBaseLocation');
+        self::$tukosBaseLocation = getenv('tukosBaseLocation');
         self::$tukosFormsDojoBaseLocation = self::$dojoCdnBaseLocation = getenv('dojoCdnBaseLocation');
         self::$tukosFormsDomainName = self::$tukosDomainName = getenv('tukosDomainName');
         self::$tukosFormsTukosBaseLocation = 'https://' . self::$tukosDomainName . '/tukos/tukosenv/release/';
@@ -45,12 +46,12 @@ class TukosFramework{
         array_walk($vendorDirs, function($vendorDir, $module){
             self::$vendorDir[$module] = self::$phpVendorDir . $vendorDir;
         });
-        self::$tukosBaseLocation = self::publicDir . 'tukosenv/release';
         mb_internal_encoding('UTF-8');
         require __DIR__ . '/Registry.php';
         self::$registry = new Registry($mode, $appName);
         self::$osName = php_uname('s');
         self::$mode = $mode;
+        self::$htmlToPdfCommand = getenv('wkHtmlToPdfCommand');
     }
     
     public static function setEnvironment($environment){

@@ -205,7 +205,7 @@ abstract class AbstractModel extends ObjectTranslator {
                 $presentMaxSizeCols = array_intersect($atts['cols'], $this->maxSizeCols);
                 foreach ($presentMaxSizeCols as $key => $col){
                     //$atts['cols'][$key] = 'if(length(' . $col . ') > ' . $fieldsMaxSize . ', concat("#tukos{id:", tukos.id, ",object:' . $this->objectName . ',col:' . $col . '}"),' . $col . ') ' . $col;
-                    $atts['cols'][$key] = [$col => "if(length(${col}) > $fieldsMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$this->objectName, col:${col}}\"),${col})${col}"];
+                    $atts['cols'][$key] = [$col => "if(length(${col}) > $fieldsMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$this->objectName,col:${col}}\"),${col})${col}"];
                 }
             }
         }

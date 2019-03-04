@@ -123,9 +123,10 @@ class TranslatorsManager {
             $i = 0;
             foreach($matchesToTranslate as &$match){
                 list($name, $mode, $translatorName) = explode('|', $match);
-                $translatedName = (empty($nameTranslations = Utl::getItem(strtolower($name), $translations))|| empty($activeSets = array_intersect($this->translatorPaths[$translatorName], array_keys($nameTranslations))))
-                ? $name
-                : preg_replace('/([^\\\\])"/', '$1\\"', $nameTranslations[reset($activeSets)]);
+                $translatedName = (empty($nameTranslations = Utl::getItem(strtolower($name), $translations))|| empty($activeSets = array_intersect($this->translatorPaths[$translatorName], array_keys($nameTranslations))) || 
+                                   empty($nameTranslation = $nameTranslations[reset($activeSets)]))
+                    ? $name
+                    : preg_replace('/([^\\\\])"/', '$1\\"', $nameTranslation);
                 if (!empty($mode)){
                     $translation = $this->transform($translatedName, $mode);
                 }else if (strtoupper($name) === $name){

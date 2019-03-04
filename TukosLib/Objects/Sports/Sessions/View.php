@@ -21,7 +21,7 @@ class View extends AbstractView {
 	                ]
 	            ),
 	            'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity'),
-	            'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', ['atts' => ['edit' => [
+	            'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', true, ['atts' => ['edit' => [
 	                    'onWatchLocalAction' => ['value' => [
 	                        'intensity' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "if (newValue === 'rest'){return '';}else{return undefined;}"]],
 	                        'stress' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "if (newValue === 'rest'){return '';}else{return undefined;}"]],

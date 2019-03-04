@@ -10,7 +10,7 @@ class Model extends AbstractModel {
 
     //protected $progressOptions      = ['submitted', 'logging and categorization', 'resolution', 'on hold', 'resolved', 'closed'];
     protected $escalationLevelOptions = ['normal', 'escalated', 'major'];
-    protected $initVals = ['notifiedvia' => 'tukos', 'callbackmethod' => 'tukos', 'escalationlevel' => 'normal', 'progress' => 'submitted'];
+    protected $initVals = ['notifiedvia' => 'tukos', 'callbackmethod' => 'tukos', 'urgency' => 'Medium', 'impact' => 'Medium', 'escalationlevel' => 'normal', 'progress' => 'submitted'];
     function __construct($objectName, $translator=null){
         $colsDefinition = [
             'notifiedby'        => 'INT(11) DEFAULT NULL',

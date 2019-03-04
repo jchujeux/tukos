@@ -25,7 +25,7 @@ class View extends AbstractView {
                     'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                     'team'    => ViewUtils::objectSelect($this, 'Support group', 'teams', ['atts' => ['storeedit' => ['width' => 50]]]),
                     'period'  => ViewUtils::objectSelect($this, 'Time schedule', 'calendarsentries', ['atts' => ['storeedit' => ['width' => 50]]]),
-                    'contact' => ViewUtils::storeSelect('callback', $this, 'Contact method', ['atts' => ['storeedit' => ['width' => 50]]]),
+                    'contact' => ViewUtils::storeSelect('callback', $this, 'Contact method', true, ['atts' => ['storeedit' => ['width' => 50]]]),
                 ],
                 ['atts' => ['edit' => ['colspan' => 4, 'style' => ['width' => '60%'], 'objectIdCols' => ['team', 'period'], 'sort' => [['property' => 'rowId', 'descending' => false]]]]]
             ),

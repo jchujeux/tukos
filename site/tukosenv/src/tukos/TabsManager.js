@@ -1,7 +1,7 @@
 
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready",  "dojo/on", "dojo/mouse", "tukos/_PanesManager", "tukos/TukosTab",  "dijit/registry", "dijit/Dialog", "dijit/Menu", "dijit/MenuItem", 
-         "dijit/PopupMenuItem", "tukos/utils", "tukos/PageManager", "dojo/json", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, dom, ready, on, mouse, _PanesManager, TukosTab, registry, Dialog, Menu, MenuItem, PopupMenuItem, utils, Pmg, JSON, messages ){
+         "dijit/PopupMenuItem", "tukos/utils", "tukos/PageManager", "dojo/json"], 
+    function(declare, lang, dom, ready, on, mouse, _PanesManager, TukosTab, registry, Dialog, Menu, MenuItem, PopupMenuItem, utils, Pmg, JSON){
     return declare([_PanesManager], {
         constructor: function(args){
             this.container = args.container;
@@ -38,7 +38,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready",  "do
             var theNewTab = new TukosTab(args), form = theNewTab.form;
             ready(lang.hitch(this, function(){
                 this.container.addChild(theNewTab);
-                Pmg.setFeedback(args.feedback, messages.tabCreated);
+                Pmg.setFeedback(args.feedback, Pmg.message('tabCreated'));
                 theNewTab.resize();
             }));
             return theNewTab;
@@ -65,7 +65,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready",  "do
                     if (response.focusOnOpen){
                         ready(function(){
                             self.container.selectChild(theNewTab);
-                            Pmg.setFeedback(response['feedback'], messages.nofeedback);
+                            Pmg.setFeedback(response['feedback'], Pmg.message('Ok'));
                             tukosHeaderLoading.innerHTML = '';
                         });
                     }

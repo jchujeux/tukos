@@ -17,7 +17,9 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dijit/for
                 var theCol = this.dropdownFilters[i];
                 if (typeof (theCol) == "string"){
                 	var testValue = widgetUtils.specialCharacters.indexOf(theCol[0]) > -1 ? this.valueOf(theCol) : theCol, okValues = object[i];
-                    if (okValues.constructor === Array){
+                    if (okValues === undefined){
+                    	match = true;
+                    }else if (okValues.constructor === Array){
                     	match = newMatch = previousMatch = okValues.indexOf(testValue) !== -1;
                     }else{
                         match = newMatch = previousMatch = (okValues == testValue) && previousMatch;                    	

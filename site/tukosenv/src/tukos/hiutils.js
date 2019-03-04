@@ -119,22 +119,16 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
 		});
     },
     postProcess: function(content, targetFormat){
-    	return this._inProcess(content, targetFormat === 'tukosform' ? ['pagebreak', 'pagenumber', 'numberofpages', 'tukosContainer'] : ['pagebreak', 'pagenumber', 'numberofpages']);
+    	return this._inProcess(content, targetFormat === 'tukosform' ? ['pagebreak', 'pagenumber', 'numberofpages', 'tukosContainer'] : ['pagebreak', 'pagenumber', 'numberofpages']).replace(/break-after: page/g, 'page-break-after: always');
     },
     pagebreakNode: function(node){
-        var parentNode = node.parentNode;
-        parentNode.insertBefore(dct.create('p', {style: {pageBreakAfter: 'always'}}), node); 
-        parentNode.removeChild(node);        	
+        dct.place(dct.create('p', {style: {pageBreakAfter: 'always'}}), node, 'replace');
     },
     pagenumberNode: function(node){
-        var parentNode = node.parentNode;
-        parentNode.insertBefore(dct.create('span', {'class': "page"}), node); 
-        parentNode.removeChild(node);        	
+        dct.place(dct.create('span', {'class': "page"}), node, 'replace');
     },
     numberofpagesNode: function(node){
-        var parentNode = node.parentNode;
-        parentNode.insertBefore(dct.create('span', {'class': "topage"}), node); 
-        parentNode.removeChild(node);
+        dct.place(dct.create('span', {'class': "topage"}), node, 'replace');
     },
     tukosContainerNode: function(node){
         dct.place(tukosWidgets.targetToSource(node), node, 'replace');

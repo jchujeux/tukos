@@ -25,7 +25,7 @@ class PageView extends Translator{
         $this->user = $controller->user;
         $this->dialogue = $controller->dialogue;
     	$this->leftPaneButtons = '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showHideLeftPane">' . $this->tr('showhideleftpane') . '</button>'.
-    							 '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showMaxLeftPane">' . $this->tr('showhideleftpane') . '</button>';
+    							 '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showMaxLeftPane">' . $this->tr('maximinimizeleftpane') . '</button>';
     	$this->pageManagerArgs = [
 
             'contextTreeAtts' => array_merge($this->user->contextTreeAtts($this->tr), ['style' => ['width' => '15em', 'backgroundColor' => '#F8F8F8']]),
@@ -230,14 +230,14 @@ class PageView extends Translator{
                      ]],
                 ],
                 'layout' => [
-                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
+                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
                     'contents' => [
                        'row1' => [
-                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 100],
+                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
                             'widgets' => ['hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems'],
                         ],
                        'row2' => [
-                            'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
+                            'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false],
                             'widgets' => ['cancel', 'action'],
                         ],
                     ],
@@ -285,7 +285,7 @@ class PageView extends Translator{
         }
         $this->pageManagerArgs['pageCustomDialogDescription'] = $this->pageCustomDialogDescription($this->pageManagerArgs['pageCustomization']);
 
-        Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
+        //Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
         $this->pageManagerArgs = array_merge($this->pageManagerArgs, ['extras' => Tfk::getExtras()],
             array_filter(['extendedIds' => SUtl::translatedExtendedIdCols(), 'messages' => Tfk::$registry->get('translatorsStore')->getSetMessages('page'), 'feedback' => Feedback::get()])
         );

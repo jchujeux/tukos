@@ -50,7 +50,7 @@ trait ItemHistory {
         $subHistory = [];
         if (!empty($expandedHistory = $value['history'])){
             $compressedHistory = ItemsCache::getExtrafromCache('compressedhistory', $value['id']);
-            if (count($compressedHistory > ($length = count($expandedHistory)))){
+            if (count($compressedHistory) > ($length = count($expandedHistory))){
                 $expandedHistory = array_merge($expandedHistory, $this->_expandHistory(end($expandedHistory), array_slice($compressedHistory, $length)));
             }
             $wantedNonEmptyKeys    = array_flip($wantedNonEmptyCols);

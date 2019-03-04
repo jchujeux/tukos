@@ -15,7 +15,6 @@ class Main{
     function __construct($request, $query){
 
         $dialogue = Tfk::$registry->get('dialogue');
-        Tfk::setTranslator();
         $username = Tfk::$registry->get('Authentication')->isAuthenticated($dialogue, $request);
         if ($username !== false){/* Proceed only if user is authorized */
         	SUtl::instantiate();

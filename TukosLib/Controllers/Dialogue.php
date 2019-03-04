@@ -20,7 +20,7 @@ class Dialogue extends Translator{
         $objectController = $objectsStore->objectController($request['object']);
         if (isset($query['storeatts'])){
             $query['storeatts'] = json_decode($query['storeatts'], true);
-/*
+
             if (!empty($query['storeatts']['where'])){
                 $colsToUntranslate = array_intersect($objectController->model->colsToTranslate, array_keys($query['storeatts']['where']));//assumes there is not a ['col' => ..., 'opr' => ..., 'value' => ...] condition
                 if (!empty($colsToUntranslate)){
@@ -34,7 +34,7 @@ class Dialogue extends Translator{
                     }
                 }
             }
-*/
+
         }
         if (!empty($query['params'])){
             $query['params'] = json_decode($query['params'], true);
@@ -55,7 +55,7 @@ class Dialogue extends Translator{
     }
 
     function responseToDialogue($response){
-        Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
+        //Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
         $response = json_encode(array_merge($response, array_filter(['extendedIds' => SUtl::translatedExtendedIdCols()]), ['extras' => Tfk::getExtras(), 'feedback' => Feedback::get()]));
         if ($response){
             $this->dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations($response));

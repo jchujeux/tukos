@@ -414,11 +414,11 @@ class Utilities{
    /*
     * Transforms array [value1, value2, , ...], into array [['id' => value1, 'name' => $translator(value1), ...], ready to be consumed by dojo/store (Intended for tukos/storeSelect)
     */
-    public static function idsNamesStore($idsStore, $translator, $translationMode='ucfirst'){
-        $theStore = [];
+    public static function idsNamesStore($idsStore, $translator, $allowEmpty = true, $translationMode='ucfirst'){
+        $theStore = $allowEmpty ? [['id' => '', 'name' => '']] : [];
         foreach ($idsStore as $key => $value){
             if (is_array($value)){
-            	$theStore[] = array_merge(['id' => $key, 'name' => $translator($key, $translationMode)], $value);
+            	$theStore[] = array_merge(['id' => $key, 'name' => $translator($key, $translationMode)], $value);// at least used for sports::levelOptions1, etc.
             }else{
         		$theStore[] = ['id' => $value, 'name' => $translator($value, $translationMode)];
             }
