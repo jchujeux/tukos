@@ -3,7 +3,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
     function(declare, arrayUtil, lang, when, all, mouse, registry, TooltipDialog, popup, utils, dutils,  wutils, mutils, eutils, wcutils, Pmg, messages){
     return declare(null, {
         decorate: function(widget){
-
             var self = this, menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
             menuItemsArgs = (widgetName === 'id' || utils.in_array(widgetName, this.objectIdCols))
                 ? menuItemsArgs.concat(lang.hitch(this, wcutils.idColsContextMenuItems)(widget))
@@ -16,7 +15,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
                 }
             });
         },
-
         getWidget: function(widgetName){
             var widget = registry.byId(this.id + widgetName);
         	if (!widget){
@@ -24,7 +22,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
         	}
         	return widget;
         },
-
         valueOf: function(widgetName, undefinedIfNotFound){
             var widget =  registry.byId(this.id + widgetName) || (this.form ? registry.byId(this.form.id + widgetName) : undefined);
             if (widget){
@@ -35,7 +32,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
         	  	return undefinedIfNotFound ? undefined :  '';
             }
         },
-        
         displayedValueOf: function(widgetName, undefinedIfNotFound){
             var widget =  registry.byId(this.id + widgetName) || (this.form ? registry.byId(this.form.id + widgetName) : undefined);
             if (widget){
@@ -46,14 +42,12 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
         	  	return undefinedIfNotFound ? undefined :  '';
             }
         },
-
         setValueOf: function(widgetName, value){
             var widget = registry.byId(this.id + widgetName);
             if (widget && !widget.inWatchCallback){
                 widget.set('value', value, '');
             }
         },
-        
         emptyWidgets: function(widgetsName){
             var self = this,
                 onLoadDeferredWidgets = [];
@@ -77,7 +71,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
                 return true;
             }
         },
-
         setWidgets: function(data){
             var self = this,
                   onLoadDeferredWidgets = [];
@@ -97,10 +90,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
                                 this.mayNeedResize = true;
                             }
                         }
-                    }/*else{
-                        alert('setWidgets - widget ' + widgetName + ' is undefined!');
                     }
-*/
                 }
             }
             if (!utils.empty(onLoadDeferredWidgets)){
@@ -111,40 +101,12 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
                 return true;
             }
        },
-
        hasChanged: function(widgetName){
            return widgetName ? this.changedWidgets[widgetName] : !utils.empty(this.changedWidgets);
        },
        userHasChanged: function(widgetName){
            return widgetName ? this.userChangedWidgets[widgetName] : !utils.empty(this.userChangedWidgets);
        },
-/*
-        markAsChanged: function(widgetsName, notEmpty){
-            if (utils.empty(widgetsName)){
-                widgetsName = this.get('postElts');
-            }
-            for (var i in widgetsName){
-                var widgetName = widgetsName[i],
-                       widget = registry.byId(this.id + widgetName);
-                if (notEmpty){
-                    var value = widget.get('value');
-                    if (value){
-                        wutils.markAsChanged(widget);
-                    }
-                }else{
-                    wutils.markAsChanged(widget);
-                }                  
-            }
-        },
-
-
-        markAsUnchanged: function(widgetsName){
-            for (var i in widgetsName){
-                wutils.markAsUnchanged(widgetsName[i]);
-            }
-        },
-*/
-        
         resetChangedWidgets: function(){
             var changedWidgets = this.changedWidgets;
             for (var widgetName in changedWidgets){
@@ -153,7 +115,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
             this.changedWidgets = {};
             this.userChangedWidgets = {};
         },
-        
         widgetsValue: function(widgetsName){
             var widgetsValue = {};
             widgetsName.forEach(lang.hitch(this, function(widgetName){
@@ -161,7 +122,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
             }));
             return widgetsValue;
         },
-
         changedValues: function(widgetsName){
             if (widgetsName == undefined){
                 widgetsName = this.get('postElts');
@@ -175,7 +135,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
             }));
             return changedValues;
         },
-
         keepChanges: function(options){
             if (options){
                 if (options.values){
@@ -192,7 +151,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
                 }
             }
         },
-
         restoreChanges: function(changes, options){
             if (options){
                 if (options.values){
@@ -211,7 +169,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
                 }
             }
         },
-
         widgetWatchLocalAction: function(widget, localActionFunctions, newValue){
             if (!this.inWidgetWatchLocalAction){
                 var self = this;
@@ -237,7 +194,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
                 this.inWidgetWatchLocalAction = false;
             }
         },
-        
         buildLocalActionFunctions: function(localActionFunctions, actionDescriptions){
             for (var widgetName in actionDescriptions){
                 localActionFunctions[widgetName] = {};
@@ -255,7 +211,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
         buildSubWidgetLocalActionFunction: function(action){
         	return eutils.eval(action, 'widget, oldValue, newValue')
         },
-
         serverAction: function(urlArgs, options){
             var self = this, widgetsName, requestOptions= {};
             if (options){
@@ -281,14 +236,13 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
             return Pmg.serverDialog(this.completeUrlArgs(urlArgs), requestOptions, messages.actionDone).then(
                 function(response){
                     self.watchContext = 'server';
-                    when(self.setWidgets(response['data']), function(){
+                    return when(self.setWidgets(response['data']), function(){
                         self.watchContext = 'user';
+                        return response;
                     });
-                    return response;
                 }
             ); 
         },
-        
         completeUrlArgs: function(urlArgs){
             var form = this.form || this;
             urlArgs.object = urlArgs.object || form.object;
@@ -299,19 +253,15 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
             }
             return urlArgs;
         },
-
-
         openAction: function(description){
             if (description){
                 if (!this.openActionFunction){
                     var myEval = lang.hitch(this, eutils.eval);
                     this.openActionFunction = myEval(description, '');
                 }
-                this.openActionFunction();
+                return this.openActionFunction();
             }
-            if (typeof this.lastOnOpen === 'function'){
-            	this.lastOnOpen();
-            }
+            return true;
         }
     });
 });

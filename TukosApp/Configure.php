@@ -13,7 +13,7 @@ use TukosLib\Web\Dialogue as WebDialogue;
 use TukosLib\Web\TranslatorsManager;
 use TukosLib\Objects\ObjectsManager;
 use TukosLib\Objects\TukosModel;
-use TukosLib\Objects\Admin\scripts\StreamsManager;
+use TukosLib\Objects\Admin\Scripts\StreamsManager;
 
 class Configure{
 
@@ -27,6 +27,23 @@ class Configure{
         $this->configSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname' => 'tukosconfig', 'authstore'    => 'sql',	'table' => 'users', 'username_col' => 'username', 'password_col' => 'password'];
         $this->languages = ['default' => 'en-us', 'supported' => ['en-us', 'fr-fr', 'es-es']];
 
+        Tfk::$registry->set('configStore', function(){
+            return new Store($this->configSource);
+        });
+        Tfk::$registry->set('tukosModel', function(){
+            return new TukosModel();
+        });
+        Tfk::$registry->set('objectsStore', function(){
+            return new ObjectsManager();
+        });
+        Tfk::$registry->set('streamsStore', function(){
+            return new StreamsManager();
+        });
+        Tfk::$registry->set('translatorsStore', function(){
+            return new TranslatorsManager($this->languages);
+        });
+        Tfk::setTranslator();
+            
         $this->modulesMenuLayout = [
             'admin' => [[
                 '#users' => [['#customviews' => [], '#navigation' => []]], '#contexts' => [], '#objrelations' => [], '#translations' => [],
@@ -52,7 +69,8 @@ class Configure{
             ]],
             'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [['#sptsessionsstages' => []]], '#sptexercises' => []]],
             'physio' => [['#physiopatients' => [], '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
-            '#help' => [],
+            '#help' => [['guidedtour' => ['type' => 'MenuItem', 'atts' => [
+                'onClickArgs' => ['object' => 'help', 'view' => 'edit', 'mode' => 'tab', 'action' => 'tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtour')]]])]]]]]],
         ];
         $this->transverseModules = ['admin', 'collab', 'help'];
         $this->objectModulesDefaultContextName = [];
@@ -69,21 +87,6 @@ class Configure{
         	['object' => 'navigation', 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'navigationTree'],
         ];
 
-        Tfk::$registry->set('configStore', function(){
-            return new Store($this->configSource);
-        }); 
-        Tfk::$registry->set('tukosModel', function(){
-            return new TukosModel();
-        }); 
-        Tfk::$registry->set('objectsStore', function(){
-            return new ObjectsManager();
-        }); 
-        Tfk::$registry->set('streamsStore', function(){
-            return new StreamsManager();
-        }); 
-        Tfk::$registry->set('translatorsStore', function(){
-            return new TranslatorsManager($this->languages);
-        }); 
 
         if (Tfk::$registry->mode === 'interactive'){
             Tfk::$registry->set('dialogue', function(){

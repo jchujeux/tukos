@@ -3,6 +3,7 @@ namespace TukosLib\Objects\Admin\Scripts;
 /*
  * "Stolen with pride" from http://www.ibm.com/developerworks/library/os-php-multitask/, and adapted to tukos
  */
+use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
 
 class StreamsManager{
@@ -28,12 +29,17 @@ class StreamsManager{
         //$desc = [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => ["file", Tfk::$tukosTmpDir . $id . "streamerror.txt", 'a']];
         $desc = [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => $scriptObj ? ["pipe", "w"] : ["file", Tfk::$tukosTmpDir . $id . "streamerror.txt", 'a']];
         if (empty($this->process[$id])){
-            $this->process[$id]['resource'] = proc_open($cmd, $desc, $pipes);
-            if ($scriptObj){
-                $this->scriptObj->updateOne(['id' => $id, 'status' => 'RUNNING', 'laststart' => date('Y-m-d H:i:s')]);
+            try{
+                $this->process[$id]['resource'] = proc_open($cmd, $desc, $pipes);
+                if ($scriptObj){
+                    $this->scriptObj->updateOne(['id' => $id, 'status' => 'RUNNING', 'laststart' => date('Y-m-d H:i:s')]);
+                }
+                $this->process[$id]['pipes'] = $pipes;
+                return true;
+            } catch (\Exception $e){
+                Feedback::add('Error in startStresm: ' . $e->getMessage());
+                return false;
             }
-            $this->process[$id]['pipes'] = $pipes;
-            return true;
         }else{
             return false;
         }

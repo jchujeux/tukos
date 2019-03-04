@@ -118,7 +118,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
     		return this.span(expression).innerHTML;
     	},
     	formulaOf: function(expression){
-    		return this.textArea(expression).innerHTML.trim();
+    		return this.textArea(expression).innerHTML;//.trim();
     	},
         isExpression: function(node){
         	return node && dcl.contains(node, 'tukosExpression');
@@ -153,7 +153,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
         },
     	onBlur: function(textArea){
     		console.log('entering expressions.onBlur');
-    		var expression = textArea.parentNode, span = this.span(expression), newValue = textArea.value, oldValue = textArea.innerHTML ||span.innerHTML;
+    		var expression = textArea.parentNode, span = this.span(expression), newValue = textArea.value, oldValue = textArea.oldValue;//textArea.innerHTML ||span.innerHTML;
     		if (lastKeyDown !== keys.ESCAPE && newValue !== oldValue){
 	    		if ((newValue || ' ').charAt(0) === '='){
 	    			this.setFormula(expression, newValue)
@@ -165,12 +165,15 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
     		span.style.display = 'inline';
     		textArea.style.display = 'none';
     	},
-    	onClick: function(expression){
+    	onClick: function(expression, stringToAppend){
     		console.log('is onclick');
     		var textArea = this.textArea(expression), span = this.span(expression);
-    		textArea.value = textArea.innerHTML.trim() || span.innerHTML;
+    		textArea.value = textArea.oldValue = textArea.innerHTML.trim() || span.innerHTML;
     		textArea.style.display = 'inline';
     		span.style.display = 'none';
+    		if (stringToAppend){
+    			textArea.value += stringToAppend;
+    		}
     		textArea.focus();
     	},
     	checkLastKeyDown: function(evt, keyCode, editor){

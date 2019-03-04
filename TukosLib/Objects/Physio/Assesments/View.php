@@ -28,7 +28,7 @@ class View extends AbstractView {
             'patient' => ViewUtils::objectSelect($this, 'Patient', 'physiopatients', ['atts' => ['edit' => ['placeHolder' => '', 'disabled' => true]]]),
             'prescriptor' => ViewUtils::objectSelect($this, 'Prescriptor', 'people', ['atts' => ['edit' => ['placeHolder' => '', 'disabled' => true]]]),
             'physiotherapist' => ViewUtils::objectSelect($this, 'Physiotherapist', 'people'),
-            'assesmenttype' => ViewUtils::storeSelect('assesmentType', $this, 'Assesmenttype', ['atts' => ['edit' => [
+            'assesmenttype' => ViewUtils::storeSelect('assesmentType', $this, 'Assesmenttype', true, ['atts' => ['edit' => [
                     'onWatchLocalAction' => ['value' => [
                         'name' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "return Pmg.itemName(sWidget.valueOf('#patient')) + '-' + sWidget.valueOf('#prescription') + '-' + sWidget.store.data[sWidget.store.index[newValue]].name;" ]],
                     ]],

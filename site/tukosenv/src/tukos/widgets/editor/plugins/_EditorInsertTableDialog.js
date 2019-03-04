@@ -50,13 +50,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 for (var c = firstCol; c < columns; c++){
                     if (isWorksheet){
                     	atts = {
-                    		innerHTML: string.substitute(template,  {name: sheetName + '!' + utils.alphabet(c) + r, value: ' ', formula: '', visualPreTag: '', visualPostTag: ''}),
+                    		innerHTML: string.substitute(template,  {name: sheetName + '!' + utils.alphabet(c) + r, value: '', formula: '', visualPreTag: '', visualPostTag: ''}),
                         	onclick: "parent.tukos.onTdClick(this);", ondblclick: "parent.tukos.onTdDblClick(this);"
                     	};
                     }else{
                     	atts = {innerHTML: '&nbsp'};
                     }
-                	var innerHTML = isWorksheet ? string.substitute(template,  {name: sheetName + '!' + utils.alphabet(c) + r, value: ' ', formula: '', visualPreTag: '', visualPostTag: ''}): '&nbsp;';
+                	//var innerHTML = isWorksheet ? string.substitute(template,  {name: sheetName + '!' + utils.alphabet(c) + r, value: '', formula: '', visualPreTag: '', visualPostTag: ''}): '&nbsp;';
                 	dct.create('td', atts, tr);
                 }
             }

@@ -56,7 +56,7 @@ class Page extends Translator{
         $pageView->setFocusedTab(0);
 
         if ($isOkAccordion && $isOkTab){
-            Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
+            //Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
             $pageView->render($this->user->modulesMenuLayout());
         }
         return true;

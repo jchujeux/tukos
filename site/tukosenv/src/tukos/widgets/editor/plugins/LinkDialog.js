@@ -296,7 +296,7 @@ define([
 			// make sure values are properly escaped, etc.
 			args = this._checkValues(args);
 			this.editor.execCommand('inserthtml',
-				string.substitute((args.targetSelect === 'standard' ? this.dijitHtmlTemplate : this.tukosHtmlTemplate), args));
+				string.substitute((args.targetSelect === 'tukos' ? this.tukosHtmlTemplate :this.dijitHtmlTemplate), args));
 
 			// IE sometimes leaves a blank link, so we need to fix it up.
 			// Go ahead and do this for everyone just to avoid blank links
@@ -469,7 +469,7 @@ define([
 
 		// htmlTemplate: [protected] String
 		//		String used for templating the `<img>` HTML to insert at the desired point.
-		htmlTemplate: "<img src=\"${urlInput}\" _djrealurl=\"${urlInput}\" alt=\"${textInput}\" />",
+		dijitHtmlTemplate: "<img src=\"${urlInput}\" _djrealurl=\"${urlInput}\" alt=\"${textInput}\" />",
 
 		// tag: [protected] String
 		//		Tag used for the link type (img).

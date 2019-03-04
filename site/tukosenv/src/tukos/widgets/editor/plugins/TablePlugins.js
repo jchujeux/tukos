@@ -301,13 +301,16 @@ define([
         	default:
 	  			if (!this.isCommandKey(evt)){
 	        		var selectedElement = this.editor.selection.getSelectedElement(), node;
-		  			if (selectedElement && selectedElement.tagName === 'TD' && expressions.isExpression(node = selectedElement.children[0])){
-		  				this.editor.begEdit();
-		  				expressions.onClick(node);
+		  			//if (selectedElement && selectedElement.tagName === 'TD' && expressions.isExpression(node = selectedElement.children[0])){
+			  		if (selectedElement && selectedElement.tagName && expressions.isExpression(node = selectedElement.tagName === 'TD' ? selectedElement.children[0]: selectedElement)){
+		  				evt.preventDefault();
+		  				evt.stopPropagation();
+			  			this.editor.begEdit();
+		  				expressions.onClick(node, evt.key);
 		  			}	
-		  			//console.log('TablePlusIns: - key: ' + key);
 	  			}
         }
+		console.log('TablePlugins: - key: ' + key);
     },
 	
     rightOrLeftCell: function(evt, right){

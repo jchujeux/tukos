@@ -118,7 +118,7 @@ class View extends AbstractView {
     					'object' => 'calendarsentries',
     					'atts' => [
     							'title' => $this->tr('Templates'), 'storeType' => 'LazyMemoryTreeObjects',  'colspan' => 1, 'noSendOnSave' => ['selected'],
-    							'dndParams' => ['copyOnly' => true, 'selfAccept' => false], 'columns' => ['selected' => Widgets::description(viewUtils::checkBox($this, $this->tr('Selected'), ['atts' => ['edit' => [
+    							'dndParams' => ['copyOnly' => true, 'selfAccept' => false], 'columns' => ['selected' => Widgets::description(viewUtils::checkBox($this, 'Selected', ['atts' => ['edit' => [
 									'onChangeLocalAction' => ['selected' => ['localActionStatus' => [
 										"if (newValue){\n" .
 											"var grid = sWidget.grid, collection = grid.collection, idp = collection.idProperty, dirty = grid.dirty, rowValues = grid.clickedRowValues(), calendarEntries = grid.form.getWidget('calendarsentries');\n" .
@@ -142,7 +142,7 @@ class View extends AbstractView {
 		return [
 				'sources' => ViewUtils::jsonGrid($this, 'Calendars', [
 						'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-						'selected' => viewUtils::checkBox($this, $this->tr('Selected'), ['atts' => [/*'storeedit' => ['editOn' => 'click'], */'edit' => [
+						'selected' => viewUtils::checkBox($this, 'Selected', ['atts' => [/*'storeedit' => ['editOn' => 'click'], */'edit' => [
 								'onChangeLocalAction' => ['selected' => ['localActionStatus' => [
 										"if (newValue){\n" .
 										"var grid = sWidget.grid, collection = grid.collection, idp = collection.idProperty, dirty = grid.dirty;\n" .
@@ -157,9 +157,9 @@ class View extends AbstractView {
 										"return true;\n"
 								]]],
 						]]]),
-						'visible' => viewUtils::checkBox($this, $this->tr('Visible')),
+						'visible' => viewUtils::checkBox($this, 'Visible'),
 						
-						'source'    => ViewUtils::storeSelect('source', $this, 'Source', ['atts' => ['storeedit' => ['width' => 100]]]),
+						'source'    => ViewUtils::storeSelect('source', $this, 'Source', true, ['atts' => ['storeedit' => ['width' => 100]]]),
 						'tukosparent'  => ViewUtils::objectSelectMulti($this->model->idColsObjects['parentid'], $this, 'Tukosparent', ['atts' => [
 								'edit' => ['onChangeLocalAction' => [
 										'source' => ['value' => "return newValue ? 'tukos' : '';" ],
@@ -168,7 +168,7 @@ class View extends AbstractView {
 										]]],
 								'storeedit' => ['width' => 200]
 						]]),
-						'googleid' => ViewUtils::restSelect($this, $this->tr('Googlecalendarid'), 'calendars', ['atts' => [
+						'googleid' => ViewUtils::restSelect($this, 'Googlecalendarid', 'calendars', ['atts' => [
 								'edit' => [
 										'storeArgs' => ['params' => ['getOne' => 'calendarSelect', 'getAll' => 'calendarsSelect']],
 										'onChangeServerAction' =>[

@@ -13,9 +13,14 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/TooltipDia
                 kwArgs.popup = this;
                 popup.open(kwArgs);
                 focus.focus(this.domNode);
-                return this.pane.openAction(this.paneDescription.onOpenAction);
+                //return this.pane.openAction(this.paneDescription.onOpenAction);
+                return this.onOpenAction();
             }));
         },
+        onOpenAction: function(){
+        	return this.pane.openAction(this.paneDescription.onOpenAction);
+        },
+        
         close: function(){
         	popup.close(this);
         }

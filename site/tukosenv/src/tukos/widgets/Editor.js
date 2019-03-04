@@ -177,7 +177,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
         },
 
         _getValueAttr: function(){
-               var value = this.inherited(arguments), forceSpace = this.isInViewSource && this.isInViewSource() ? '' : '&nbsp;';
+               var value = this.inherited(arguments), forceSpace = '';//this.isInViewSource && this.isInViewSource() ? '' : '&nbsp;';
                return value ? forceSpace + value.replace(/<span><\/span>|colspan="1"|rowspan="1"/g, '').replace(/[\n\t ]+/g, ' ').trim() + forceSpace : value;
         },
 

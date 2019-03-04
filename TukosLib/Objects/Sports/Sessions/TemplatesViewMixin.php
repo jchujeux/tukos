@@ -7,7 +7,7 @@ trait TemplatesViewMixin {
 
 	public function filterWidgets(){
         return [
-            'level1filter'    => ViewUtils::storeSelect('level1', $this, 'Level1', ['atts' => ['edit' => [
+            'level1filter'    => ViewUtils::storeSelect('level1', $this, 'Level1', true, ['atts' => ['edit' => [
             	'onChangeLocalAction' => [
 					'level2filter'  => ['value' => "return '';" ],
 					'level3filter'  => ['value' => "return '';" ],
@@ -16,7 +16,7 @@ trait TemplatesViewMixin {
             			"return tWidget.store.getRootCollection(filters);"
             		]
             	]]]]),
-            'level2filter'    => ViewUtils::storeSelect('level2', $this, 'Level2', ['atts' => ['edit' => [
+            'level2filter'    => ViewUtils::storeSelect('level2', $this, 'Level2', true, ['atts' => ['edit' => [
             	'dropdownFilters' => ['level1' => '@level1filter'],
             	'onChangeLocalAction' => [
 					'level3filter'  => ['value' => "return '';" ],
@@ -27,7 +27,7 @@ trait TemplatesViewMixin {
             		]
             	]
             ]]]),
-            'level3filter'    => ViewUtils::storeSelect('level3', $this, 'Level3', ['atts' => ['edit' => [
+            'level3filter'    => ViewUtils::storeSelect('level3', $this, 'Level3', true, ['atts' => ['edit' => [
             	'dropdownFilters' => ['level1' => '@level1filter'],
             	'onChangeLocalAction' => [
             		'exercisestemplates' => ['collection' => 

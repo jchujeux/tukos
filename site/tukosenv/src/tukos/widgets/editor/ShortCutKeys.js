@@ -129,8 +129,8 @@ function(declare, lang, keys, has, domStyle, expressions){
 					expressions.checkLastKeyDown(e, keyCode, this);
 					break;
 				default: 
-					//console.log('ShortCutKeys - keyCode: ' + keyCode);
 			}
+			console.log('ShortCutKeys - keyCode: ' + keyCode);
 			var handlers = this._keyHandlers[e.keyCode],
 				args = arguments;
 

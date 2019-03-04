@@ -169,7 +169,7 @@ trait ContentExporter {
 	    }
 	    $tmpPdfFileName = $dirFileName . '.pdf';
 	    $streamsStore = Tfk::$registry->get('streamsStore');
-	    if ($streamsStore->startStream('htmltopdf', Tfk::htmlToPdfCommand . $htmlToPdfOptions . $contentFileName . ' ' . $tmpPdfFileName, false)){
+	    if ($streamsStore->startStream('htmltopdf', Tfk::$htmlToPdfCommand . ' ' . $htmlToPdfOptions . $contentFileName . ' ' . $tmpPdfFileName, false)){
 	        $streamsStore->waitOnStream('htmltopdf', false, 'forget');
 	    }
 	    unlink($contentFileName);

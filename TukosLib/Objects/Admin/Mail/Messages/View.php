@@ -20,7 +20,7 @@ class View extends AbstractView {
         $this->dataWidgets = [
             'id' => ViewUtils::textBox($this, 'Id', [
                     'atts' => ['edit' =>  ['style' => ['width' => '12em'],],
-                        'storeedit' => ['onClickFilter' => ['parentid', 'mailboxname', 'uid'], 'rowsFilters' => Utl::idsNamesStore(['', 'Contains'], $this->tr)],
+                        'storeedit' => ['onClickFilter' => ['parentid', 'mailboxname', 'uid'], 'rowsFilters' => Utl::idsNamesStore(['Contains'], $this->tr)],
                          'overview' => ['onClickFilter' => ['parentid', 'mailboxname', 'uid']],
                     ],
                 ]
@@ -53,7 +53,7 @@ class View extends AbstractView {
             'name'  => ViewUtils::textBox($this, 'Mailbox', [
                     'atts' => [
                         'edit' => ['style' => ['width' => '20em']],
-                        'storeedit' => ['onClickFilter' => ['parentid', 'mailboxname', 'uid'], 'rowsFilters' => Utl::idsNamesStore(['', 'Contains'], $this->tr)],
+                        'storeedit' => ['onClickFilter' => ['parentid', 'mailboxname', 'uid'], 'rowsFilters' => Utl::idsNamesStore(['Contains'], $this->tr)],
                         'overview' => ['onClickFilter' => ['parentid', 'mailboxname', 'uid']],
                     ],
                 ]

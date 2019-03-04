@@ -329,7 +329,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
             if (beep){
                 document.getElementById('beep').play();
             }
-            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || messages.nofeedback),
+            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || this.message('Ok')),
                   currentTab = this.tabs.currentPane(), self = this;;
             if (currentTab){
                 var widget = (lang.hitch(currentTab.form, currentTab.form.getWidget))('feedback');
