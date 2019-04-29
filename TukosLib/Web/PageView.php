@@ -36,6 +36,7 @@ class PageView extends Translator{
     		'navigationTree' => 'navigationTree'
         ];
     	$this->accordionStoreData = [];
+    	$this->isMobile = Tfk::$registry->isMobile;
 
     }
 
@@ -56,10 +57,6 @@ class PageView extends Translator{
             $this->pageManagerArgs['tabsDescription'][] = $description;
             return true;
         }
-    }
-    
-    function setFocusedTab($tabIndex){
-        $this->pageManagerArgs['focusedTab'] = $tabIndex;
     }
 
     private function onTriggerUrlArgs($object, $view){
@@ -264,30 +261,37 @@ class PageView extends Translator{
             $module = '{"name":"' . $module . '","location":"' . Tfk::moduleLocation($module) . '"}';
         });
         $template->packagesString = '[' . implode(',', $packagesLocation) . ']';
-        $template->tukosDir = Tfk::moduleLocation('tukos');
-        $template->dgridDir = Tfk::moduleLocation('dgrid');
-        $template->dojoBaseDir = Tfk::dojoBaseLocation();
+        $template->tukosLocation = Tfk::moduleLocation('tukos');
+        $template->dgridLocation = Tfk::moduleLocation('dgrid');
+        $template->dojoBaseLocation = Tfk::dojoBaseLocation();
         $template->language = $translatorsStore = Tfk::$registry->get('translatorsStore')->getLanguage();
         $template->loadingMessage = $this->tr('Loading') . '...';
-
-        $this->pageManagerArgs['headerContent'] = Utl::substitute(
-          	'<table width="100%"><tr><td> ${buttons}<b>Tukos 2.0</b><span id="tukosHeaderLoading"></span></td><td align="center"><b><i>${header} ${ownerorg}</i></b></td><td align="right">${welcome}</td></table>', [
-          		'buttons' => empty($this->pageManagerArgs['accordionDescription']) ? '' : $this->leftPaneButtons, 'header' => $this->tr(Tfk::$registry->appName . 'HeaderBanner', 'none'), 
-          		'ownerorg' => $this->tr($this->user->tukosOrganization(), 'none'), 'welcome' => $this->welcomeConnect(Tfk::$registry->pageUrl . 'auth/logout')]
-        );
         $this->pageManagerArgs['menuBarDescription'] = $this->menuBarDescription($modulesMenuLayout);
-
-        $this->pageManagerArgs['userEditUrl'] = ['object' => 'users', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['id' => $this->user->id()]];
-
-        $this->pageManagerArgs['pageCustomization'] = $this->user->PageCustomization();
-        if (isset($this->pageManagerArgs['pageCustomization']['panesConfig'])){
-        	SUtl::addItemsIdCols($this->pageManagerArgs['pageCustomization']['panesConfig'], ['id']);
+        
+        
+        if ($this->pageManagerArgs['isMobile'] = $this->isMobile){
+            $this->pageManagerArgs['headerContent'] = 'This is mobile tukos!';
+            $pageTemplate = "MobilePageTemplate.php";
+        }else{
+            $this->pageManagerArgs['headerContent'] = Utl::substitute(
+                '<table width="100%"><tr><td> ${buttons}<b>Tukos 2.0</b><span id="tukosHeaderLoading"></span></td><td align="center"><b><i>${header} ${ownerorg}</i></b></td><td align="right">${welcome}</td></table>', [
+                    'buttons' => empty($this->pageManagerArgs['accordionDescription']) ? '' : $this->leftPaneButtons, 'header' => $this->tr(Tfk::$registry->appName . 'HeaderBanner', 'none'),
+                    'ownerorg' => $this->tr($this->user->tukosOrganization(), 'none'), 'welcome' => $this->welcomeConnect(Tfk::$registry->pageUrl . 'auth/logout')]
+                );
+            
+            $this->pageManagerArgs['userEditUrl'] = ['object' => 'users', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['id' => $this->user->id()]];
+            
+            $this->pageManagerArgs['pageCustomization'] = $this->user->PageCustomization();
+            if (isset($this->pageManagerArgs['pageCustomization']['panesConfig'])){
+                SUtl::addItemsIdCols($this->pageManagerArgs['pageCustomization']['panesConfig'], ['id']);
+            }
+            $this->pageManagerArgs['pageCustomDialogDescription'] = $this->pageCustomDialogDescription($this->pageManagerArgs['pageCustomization']);
+            $pageTemplate = 'PageTemplate.php';
         }
-        $this->pageManagerArgs['pageCustomDialogDescription'] = $this->pageCustomDialogDescription($this->pageManagerArgs['pageCustomization']);
 
         //Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
         $this->pageManagerArgs = array_merge($this->pageManagerArgs, ['extras' => Tfk::getExtras()],
-            array_filter(['extendedIds' => SUtl::translatedExtendedIdCols(), 'messages' => Tfk::$registry->get('translatorsStore')->getSetMessages('page'), 'feedback' => Feedback::get()])
+            array_filter(['extendedIds' => SUtl::translatedExtendedIdCols(), 'messages' => Tfk::$registry->get('translatorsStore')->getSetsMessages(['page', 'common']), 'feedback' => Feedback::get()])
         );
 
         $template->pageManagerArgs = json_encode($this->pageManagerArgs);
@@ -295,7 +299,7 @@ class PageView extends Translator{
         $finder = $template->getTemplateFinder();
         $finder->setPaths([dirname(__FILE__)]);
         
-        $this->dialogue->response->setContent (Tfk::$registry->get('translatorsStore')->substituteTranslations($template->fetch('PageTemplate.php')));
+        $this->dialogue->response->setContent (Tfk::$registry->get('translatorsStore')->substituteTranslations($template->fetch($pageTemplate)));
     }
 }
 ?>

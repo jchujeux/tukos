@@ -6,9 +6,11 @@
 
 use TukosLib\TukosFramework as Tfk;
 
-require getenv('tukosPhpRoot') . '/tukos/TukosLib/TukosFramework.php';
+$phpDir = getenv('tukosPhpDir');
 
-Tfk::initialize('interactive');
+require $phpDir . '/TukosLib/TukosFramework.php';
+
+Tfk::initialize('interactive', null, $phpDir);
 
 if (Tfk::$registry->route) {
     if ($appName = Tfk::$registry->appName){

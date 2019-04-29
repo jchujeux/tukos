@@ -52,8 +52,7 @@ class Page extends Translator{
         }
 
         $request['mode'] = $request['action'] = 'Tab';
-        $isOkTab = $pageView->addTab($dialogueController->response($request, $query));
-        $pageView->setFocusedTab(0);
+        $isOkTab = $pageView->addTab(array_merge($dialogueController->response($request, $query), ['selected' => true]));
 
         if ($isOkAccordion && $isOkTab){
             //Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));

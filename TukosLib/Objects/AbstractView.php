@@ -30,9 +30,9 @@ abstract class AbstractView extends ObjectTranslator{
         $this->dataWidgets = [
             'id' => ViewUtils::textBox($this, 'Id', [
                     'atts' => [
-                        'edit' =>  ['readOnly' => true, 'style' => ['width' => '9em', 'backgroundColor' => 'WhiteSmoke']],
-                        'storeedit' => ['width' => 110, 'onClickFilter' => ['id'], 'renderExpando' => true, 'formatter' => '', 'renderCell' => '', 'editOn' => 'dblClick'],
-                        'overview'  => ['width' => 110, 'onClickFilter' => ['id']],
+                        'edit' =>  ['readOnly' => true, 'style' => ['width' => '6em', 'backgroundColor' => 'WhiteSmoke']],
+                        'storeedit' => ['width' => 60, 'onClickFilter' => ['id'], 'renderExpando' => true, 'formatter' => '', 'renderCell' => '', 'editOn' => 'dblClick'],
+                        'overview'  => ['width' => 60, 'onClickFilter' => ['id']],
                     ]
                 ]
             ), 

@@ -4,7 +4,6 @@ define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "tukos/menuUt
         postCreate: function(){
             var self = this;
         	this.inherited(arguments);
-			//this.customizableAtts = {defaultCalendar: {att: 'defaultCalendar', name: messages.defaultCalendar, type: 'TextBox'}};
 			this.customizableAtts = {defaultCalendar: {att: 'defaultCalendar', name: messages.defaultCalendar, type: 'RestSelect', atts: {
 				dropDownFilters: {contextpathid: '$tabContextId'}, storeArgs: {object: 'calendars', params: {getOne: 'calendarSelect', getAll: 'calendarsSelect'}}
 			}}};

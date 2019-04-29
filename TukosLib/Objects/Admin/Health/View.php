@@ -21,10 +21,7 @@ class View extends AbstractView {
             'countupdatedids'   => ViewUtils::textBox($this, 'Count updated Ids' , ['atts' => ['edit' =>  ['style' => ['width' => '9em'], 'disabled' => true], 'storeedit' => ['width' => 85]]]),      
             'countdeletedids'   => ViewUtils::textBox($this, 'Count deleted Ids' , ['atts' => ['edit' =>  ['style' => ['width' => '9em'], 'disabled' => true], 'storeedit' => ['width' => 85]]]),
         ];
-        $subObjects['healthtables'] = ['atts' => ['title' => $this->tr('tables health')],
-                                        'filters'   => ['parentid' => '@id'],
-                                        'allDescendants' => true];
-        $this->customize($customDataWidgets, $subObjects);
+        $this->customize($customDataWidgets);
     }    
 }
 ?>

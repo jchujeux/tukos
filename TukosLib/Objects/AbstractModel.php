@@ -54,7 +54,7 @@ abstract class AbstractModel extends ObjectTranslator {
         $this->objectIdCols = array_diff($this->idCols, $this->tukosModel->idCols);
         $this->gridsIdCols = [];
         
-        $this->colsDescription = empty($colsDefinition) ? [] : array_merge([ 'id'  =>  'INT(11) NOT NULL PRIMARY KEY'], $colsDefinition);
+        $this->colsDescription = empty($colsDefinition) ? [] : array_merge([ 'id'  =>  'INT(11) PRIMARY KEY'], $colsDefinition);
         if (!empty($this->colsDescription)){
             if (!$store->tableExists($this->tableName)){
                 $store->createTable($this->tableName, $this->colsDescription, $colsIndexes);

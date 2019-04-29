@@ -39,7 +39,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
 			TimeTextBox: '<input class="tukosWidget" type="text" value="${value}"  style="width: ${width}; background-color: ${backgroundColor}; color: ${color};" data-dojo-type="dijit/form/TimeTextBox" />',
 			NumberSpinner: '<input class="tukosWidget" value="${value}" style="width: ${width}; background-color: ${backgroundColor}; color: ${color};" data-dojo-type="dijit/form/NumberSpinner" ' +
 				'data-dojo-props="smallDelta:${increment}, constraints:{min:${min},max:${max},places:${digits}}" />',
-			Select: '<select class="tukosWidget" data-dojo-type="dijit/form/Select">${options}</select>'
+			DropdownList: '<DropdownList class="tukosWidget" data-dojo-type="dijit/form/Select">${options}</select>'
 		},
 		widgetParams = {// all widgets include 'name' and 'type', so concatenated in this.widgetParams(widgetType)
 			TextBox: ['width', 'backgroundColor', 'color', 'value', 'placeHolder'],
@@ -52,7 +52,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
 			Checkbox: [],
 			MultiCheckInput: ['width', 'backgroundColor', 'color', 'value', 'values', 'numCols', 'orientation', 'uniquechoice'],
 			MultiGridCheckInput: ['width', 'backgroundColor', 'color', 'values', 'topics', 'uniquechoice'],
-			Select: ['width', 'values'],
+			DropdownList: ['width', 'values'],
 			Slider:  ['width', 'color', 'value', 'values'],
 			SendMailButton: ['subject', 'body', 'to', 'filename', 'subjectPrepend'], SendFileButton: ['filename'], SaveButton: [],	ReloadButton: []
 		},
@@ -128,7 +128,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
 					});
 					params.inputTrs = inputTrs;
 					break;
-    			case 'Select':
+    			case 'DropdownList':
     				var values = params.values.split(','), length = values.length;
     				//delete params.values;
     				optionTemplate = '<option value="${value}>${option}</option>', options='';

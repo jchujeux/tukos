@@ -91,7 +91,7 @@ html,body{
 .dgrid-row-odd { 
 	background-color: lightblue;
 }
-.dgrid-row-even { 
+.dgrid-row-even{ 
 	background-color: #DEEFF5;
 }
 
@@ -101,6 +101,7 @@ html,body{
 .dgrid-cell {
     overflow: auto;
     text-overflow: ellipsis;
+    color: black;
 
 }
 .dgrid-filter-cell {
@@ -122,6 +123,7 @@ th.dgrid-cell {
 }
 .dgrid-hider-menu {
 	width: 130px;
+	color: black;
 }
 
 .dijitTableLayout {

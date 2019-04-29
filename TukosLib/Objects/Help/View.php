@@ -14,7 +14,7 @@ use TukosLib\TukosFramework as Tfk;
 class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
-        parent::__construct($objectName, $translator, 'Parenthelp', 'Description');
+        parent::__construct($objectName, $translator, 'Parent', 'Description');
         $customDataWidgets = [
             'language'  => ViewUtils::storeSelect('language', $this, 'Language'),
             ];

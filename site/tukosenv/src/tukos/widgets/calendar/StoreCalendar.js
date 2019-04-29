@@ -1,7 +1,7 @@
 define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on", "dojo/store/Memory",  "dojo/store/Observable", "dojo/json", "dijit/registry", "dojox/calendar/Calendar",  "dojox/calendar/MonthColumnView", 
-         "dojox/calendar/Mouse", "dojox/calendar/Keyboard", /*"dojo/text!dojox/calendar/tests/CalendarMonthColumn.html",*/ "dojoFixes/dstore/legacy/DstoreAdapter", "tukos/widgets/calendar/DnD", 
+	     "dojoFixes/dstore/legacy/DstoreAdapter", "tukos/widgets/calendar/DnD", 
          "tukos/widgets/calendar/VerticalRenderer", "tukos/utils", "tukos/dateutils", "tukos/menuUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, arrayUtil, lang, on, Memory, Observable, JSON, registry, Calendar, MonthColumnView, Mouse, Keyboard/*, template*/, DstoreAdapter, DnD, VerticalRenderer, utils, dutils, mutils, Pmg, messages){
+    function(declare, arrayUtil, lang, on, Memory, Observable, JSON, registry, Calendar, MonthColumnView, DstoreAdapter, DnD, VerticalRenderer, utils, dutils, mutils, Pmg, messages){
     return declare([Calendar, DnD], {
         constructor: function(args){
             args.store=  Observable(new Memory({}));
@@ -24,17 +24,15 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
                 var grid = this.getGrid();
                 grid.selectRow(e.item.connectedIds ? e.item.connectedIds[this.gridWidget] : e.item[grid.store.idProperty]);//idProperty to support legacy
             });
-           
-            this.itemContextMenu = mutils.buildMenu({atts: {targetNodeIds: [this.domNode], selector: '.dojoxCalendarEvent'}, items: [
-                {atts: {label: messages.editinnewtab, onClick: lang.hitch(this, this.editInTab)}},
-                {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editSelectedItem)}},
-                {atts: {label: messages.duplicateitem, onClick: lang.hitch(this, this.duplicateSelectedItem)}},
-                {atts: {label: messages.deleteitem, onClick: lang.hitch(this, this.deleteSelectedItem)}},
-                {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [
-                    {atts: {label: messages.deleteitems,   onClick: lang.hitch(this, this.deleteSelectedItems)}}
-                ]}}
-            ]}); 
-
+        	this.on('itemContextMenu', function(evt){
+                mutils.setContextMenuItems(this, [{atts: {label: messages.editinnewtab, onClick: lang.hitch(this, this.editInTab)}},
+                    {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editSelectedItem)}},
+                    {atts: {label: messages.duplicateitem, onClick: lang.hitch(this, this.duplicateSelectedItem)}},
+                    {atts: {label: messages.deleteitem, onClick: lang.hitch(this, this.deleteSelectedItem)}},
+                    {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [
+                        {atts: {label: messages.deleteitems,   onClick: lang.hitch(this, this.deleteSelectedItems)}}
+                    ]}}]);
+        	});
             this.nextItemId = 0;
 
         }, 
@@ -72,7 +70,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
 			this.selectedItems.forEach(function(item){
 				store.remove(item.id);
 			});
-			this.itemContextMenu.onExecute();
+			this.contextMenu.menu.onExecute();
 		},
 		
 		editInTab: function(){

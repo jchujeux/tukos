@@ -1,20 +1,19 @@
-define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", "dojo/json", "tukos/utils",
-		"tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"],
-    function(ready, lang, dom, domStyle, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, utils, _WidgetsExtend, _WidgetsFormExtend, messages){
-    var stores,
-        tabs,
+define(["dojo/ready", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", "dojo/json",
+		"tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend"],
+function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, _WidgetsExtend, _WidgetsFormExtend){
+    var stores, tabs,
         objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
 		lang.extend(_WidgetBase, _WidgetsExtend);//for this to work in all cases, no require for a widget should be made before this statement executes, above in PageManager, and in modules required in evalUtils (which _WidgetsExtend depends on)
 		lang.extend(_FormValueMixin, _WidgetsFormExtend);
 		lang.extend(_CheckboxMixin, _WidgetsFormExtend);
-		return {
-		  initializeTukosForm: function(obj){
-            tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
-            this.cache = obj;
-            this.cache.messages = this.cache.messages || {};				
-		  },
-		  initialize: function(obj) {
+	return {
+		initializeTukosForm: function(obj){
+			tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
+			this.cache = obj;
+			this.cache.messages = this.cache.messages || {};				
+	   },
+	   initialize: function(obj) {
             tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
             this.cache = obj;
             this.cache.extras = this.cache.extras || {};
@@ -23,221 +22,78 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
             Date.prototype.toJSON = function(){
                 return dojo.date.locale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
             };
-            require(["dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/layout/AccordionContainer", "tukos/StoresManager", "tukos/NavigationMenu",
-                     "tukos/TabsManager", "tukos/AccordionManager", "tukos/TabOnClick", "dojo/domReady!"], 
-            function(BorderContainer, TabContainer, ContentPane, AccordionContainer, StoresManager, NavigationMenu, TabsManager, AccordionManager, TabOnClick){
-                stores = new StoresManager();
-                var appLayout = new BorderContainer({design: 'sidebar'}, "appLayout");
-
-                var pageCustomization = obj.pageCustomization || {}, hideLeftPane = pageCustomization.hideLeftPane === 'YES', leftPaneWidth = pageCustomization.leftPaneWidth || "12%", panesConfig = pageCustomization.panesConfig || [],
-                	newPageCustomization = obj.newPageCustomization = lang.clone(pageCustomization);;
-                var leftAccordion = new AccordionContainer({id: 'leftPanel', region: "left", 'class': "left", splitter: true, style: {width: leftPaneWidth, padding: "0px", display: (hideLeftPane ? "none" : "block")}});
-                appLayout.addChild(leftAccordion);
-                self.accordion   = new AccordionManager({container: leftAccordion});
-
-                var contentHeader = new ContentPane({id: 'tukosHeader', region: "top", 'class': "edgePanel", style: "padding: 0px;", content: obj.headerContent});
-                contentHeader.on('contextmenu', lang.hitch(self, self.contextMenuCallback));
-                contentHeader.addChild(new NavigationMenu(obj.menuBarDescription));
-                appLayout.addChild(contentHeader);
-
-                var contentTabs = new TabContainer({id: "centerPanel", region: "center", tabPosition: "top", 'class': "centerPanel", style: "width: 100%; height: 100%; padding: 0px"});
-                appLayout.addChild( contentTabs );
-
-                self.tabs = new TabsManager({container: contentTabs});
-                var userTabLink = new TabOnClick({url: obj.userEditUrl}, "pageusername");
-                       
-                var newPanesConfig = [], rowId = 1;
-                obj.accordionDescription.forEach(function(description, key){
-                	var paneId = description['id'], paneConfigKey, newPaneConfig;
-                	panesConfig.some(function(paneConfig, key){
-                		if(paneConfig.name === paneId){
-                			paneConfigKey = key;
-                			return true;
-                		};
-                	});
-                	newPaneConfig = paneConfigKey ? panesConfig[paneConfigKey] : {name: paneId, present: 'YES'};
-                	if (description.config){
-                		newPaneConfig = lang.mixin(newPaneConfig, description.config);
-                	}
-                	newPaneConfig.rowId = rowId;
-                	newPanesConfig.push(newPaneConfig);
-                	rowId += 1;
-                });
-                if (newPanesConfig.length > 0){
-                	self.addCustom('panesConfig', newPanesConfig);
-                }
-                var tabArray = [];
-                for (var i in obj.tabsDescription){
-                    tabArray[i] = self.tabs.create(obj.tabsDescription[i]);
+            require([obj.isMobile ? "tukos/mobile/buildPage" : "tukos/desktop/buildPage", "tukos/StoresManager", "tukos/utils"], function(buildPage, StoresManager, utils){
+            	stores = new StoresManager();
+            	buildPage.initialize();
+                self.requestUrl = function(urlArgs){//functions depending on utils locateed here so that utils can be located in the require above and then can depend on PageManager
+                    return string.substitute(urlTemplate, {dialogueUrl: self.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
                 };
-                ready(function(){
-                    if (!hideLeftPane){
-                    	self.lazyCreateAccordion();
-                    }
-                	appLayout.startup();
-                    var leftPaneButton = registry.byId('showHideLeftPane'), leftPaneMaxButton = registry.byId('showMaxLeftPane'), displayStatus = domStyle.get('leftPanel', 'display');
-                    if (leftPaneButton){
-                        leftPaneButton.set("iconClass", displayStatus === 'none' ? "ui-icon tukos-right-arrow" : "ui-icon tukos-left-superarrow"), isMaximized = false;;
-                        leftPaneButton.on('click', function(){
-                            var displayStatus = domStyle.get('leftPanel', 'display');
-                            isMaximized = false;
-                            if (displayStatus === 'none'){
-                            	self.lazyCreateAccordion();
-                                ready(function(){
-                                	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || pageCustomization.leftPaneWidth);
-                                	domStyle.set('leftPanel', 'display', 'block');
-                                	newPageCustomization.hideLeftPane = 'NO';
-                                	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
-                                	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-                                	self.resizeLayoutPanes(true);
+                self.addExtendedIdsToCache = function(newExtendedIds){
+                    self.cache.extendedIds = utils.merge(self.cache.extendedIds, newExtendedIds);
+                };
+                self.serverTranslations = function(expressions, actionModel){
+                    var results = {}, actionModel = actionModel || 'GetTranslations';
+                    return self.serverDialog({object: 'users', view: 'NoView', action: 'Get', query:{params: {actionModel: actionModel}}}, {data: expressions}, self.message('actionDone')).then(function (response){
+                            utils.forEach(response.data, function(translations, objectName){
+                                var objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {});
+                                results[objectName] = {};
+                                utils.forEach(translations, function(translation, expression){
+                                    objectTranslations[expression] = translation;
+                                    objectUntranslations[translation] = expression;
+                                    if (actionModel === 'GetTranslations'){
+                                        results[objectName][expression] = translation;
+                                    }else{
+                                        results[objectName][translation] = expression;
+                                    }
                                 });
-                            }else{
-                            	domStyle.set('leftPanel', 'display', 'none');
-                            	newPageCustomization.hideLeftPane = 'YES';
-                            	leftPaneButton.set("iconClass", "ui-icon tukos-right-arrow");
-                            	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-                            	self.resizeLayoutPanes(false);
-                            }
-                        });                    	
-                        leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-                        leftPaneMaxButton.on('click', function(){
-                            var displayStatus = domStyle.get('leftPanel', 'display');
-                            if (displayStatus === 'none'){
-                            	self.lazyCreateAccordion();
-                            	ready(function(){
-    	                        	domStyle.set('leftPanel', 'width', '80%');
-    	                        	isMaximized = true;
-    	                        	domStyle.set('leftPanel', 'display', 'block');
-    	                        	newPageCustomization.hideLeftPane = 'NO';
-    	                        	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
-    	                        	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
-                                	self.resizeLayoutPanes(true)
-                            	});
-                            }else{
-                            	if (isMaximized){
-                                	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || leftPaneWidth);                   		
-                                	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-                                	isMaximized = false;
-                            	}else{
-                                	domStyle.set('leftPanel', 'width', '80%');                       		
-                                	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-superarrow");
-                                	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
-                                	isMaximized = true;
-                            	}
-                            	self.resizeLayoutPanes(true)
-                            }
-                        });
-                    }
-                    ready(function(){
-                    	var leftSplitter = appLayout.getSplitter("left");
-                        domStyle.set(dom.byId('loadingOverlay'), 'display', 'none');
-                    	dojo.connect(leftSplitter.domNode, 'onmouseup', function(){
-                        	var newWidth = this.parentNode.children[0].style.width, leftPaneWidthWidget = registry.byId('tukos_page_custom_dialogleftPaneWidth');
-                        	if (leftPaneWidthWidget){
-                        		leftPaneWidthWidget.set('value', newWidth);
-                        	}
-                        	obj.newPageCustomization.width = newWidth;
-                        	//console.log('splitter was called')
-                        });
-                    	self.setFeedback(obj.feedback);
+                            });
+                            return results;
                     });
-                    if (obj.focusedTab){
-                            contentTabs.selectChild(tabArray[obj.focusedTab]);
-                    }
-                });
+                };
             });
         },
-        resizeLayoutPanes: function(leftPanelDisplay){
-        	var appLayout = registry.byId('appLayout');
-        	domStyle.set('leftPanel', 'display', 'none');
-        	domStyle.set('centerPanel', 'display', 'none');
-           	appLayout.resize();
-            ready(function(){
-            	if (leftPanelDisplay){
-            		domStyle.set('leftPanel', 'display', 'block');
-            	}
-            	domStyle.set('centerPanel', 'display', 'block');
-               	appLayout.resize();
-            	ready(function(){
-                   	registry.byId('centerPanel').resize();                            		
-                	if (leftPanelDisplay){
-                       	registry.byId('leftPanel').resize();                            		                                		
-                	}
-            	});
-        	});
-        },
-        lazyCreateAccordion: function(ignoreSelected){
-            if (!this.createdAccordion){
-            	var panesConfig = this.cache.newPageCustomization.panesConfig || [], self = this, selectedAccordionPane;
-            	this.cache.accordionDescription.forEach(function(description, key){
-                	var paneConfig = panesConfig[key] || {}, selected = paneConfig.selected;
-                	if (!(paneConfig.present === 'NO')){
-                		var pane = self.accordion.create(description);
-                    	if (selected){
-                    		selectedAccordionPane = pane;
-                    	}
-                	}
-                });  
-            	if (!ignoreSelected && selectedAccordionPane){
-            		ready(function(){self.accordion.gotoPane(selectedAccordionPane);});
-            	}
-            	this.createdAccordion = true;
-            }
-        },
-        showInNavigator: function(id){
-            if (domStyle.get('leftPanel', 'display') === 'none'){
-            	this.lazyCreateAccordion(true);
-                ready(lang.hitch(this, function(){
-                	var newPageCustomization = this.cache.newPageCustomization, leftPaneButton = registry.byId('showHideLeftPane'), leftPaneMaxButton = registry.byId('showMaxLeftPane');
-                	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || this.cache.pageCustomization.leftPaneWidth);
-                	domStyle.set('leftPanel', 'display', 'block');
-                	newPageCustomization.hideLeftPane = 'NO';
-                	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
-                	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-                	this.setNavigationPane(id);
-                }));
-            }else{
-            	this.setNavigationPane(id);
-            }
-        },
-
-        mayHaveNavigator: function(){
-        	return registry.byId('showHideLeftPane');
-        },
-
-        setNavigationPane: function(id){
-            var navigatorPane = registry.byId('pane_navigationTree');
-            if (navigatorPane){
-            	if (!navigatorPane.form){
-            		navigatorPane.createPane();
-            		ready(lang.hitch(this, function(){
-                    	navigatorPane.form.getWidget('tree').showItem({id: id, object: this.objectName(id)});
-                    	this.accordion.gotoPane(navigatorPane);
-            		}));
-            	}else{
-                	navigatorPane.form.getWidget('tree').showItem({id: id, object: this.objectName(id)});
-                	this.accordion.gotoPane(navigatorPane);                		
-            	}
-            }else{
-            	console.log('case of navigator pane not present to be done');
-            }
-        	registry.byId('appLayout').resize();
-        },
-        contextMenuCallback: function(evt){
-            evt.preventDefault();
-            evt.stopPropagation();
-            if (! this.pageCustomDialog){
-                var self = this;
-                require(["tukos/TukosTooltipDialog"], function(TukosTooltipDialog){
-                    self.pageCustomDialog = new TukosTooltipDialog(self.cache.pageCustomDialogDescription);
-                    ready(function(){
-                        self.pageCustomDialog.open({x: evt.clientX, y: evt.clientY});
-                    });
-                });
-            }else{
-                this.pageCustomDialog.open({x: evt.clientX, y: evt.clientY});
-            }
-        },
+		isMobile: function(){
+			return this.cache.isMobile;
+		},
+        confirm: function(atts, eventHandle){
+		    return this._dialogConfirm(atts, 'confirm', eventHandle);
+		},
+		alert: function(atts, eventHandle){
+		    return this._dialogConfirm(atts, 'alert', eventHandle);
+		},
+        _dialogConfirm: function(atts, mode, eventHandle){
+			var self = this;
+			if (eventHandle){
+				eventHandle.pause();
+			}
+			if (this.dialogConfirm){
+				return this.dialogConfirm.show(atts, mode).then(
+					function(response){
+						if (eventHandle){eventHandle.resume()};
+						return response;
+					},
+					function(response){
+						if (eventHandle){eventHandle.resume()};
+						return response;
+					}
+				);
+			}else{
+				var dfd = new Deferred();
+				require([this.cache.isMobile ? "tukos/mobile/DialogConfirm" : "tukos/desktop/DialogConfirm"], function(DialogConfirm){
+					self.dialogConfirm = new DialogConfirm({style: {backgroundColor: 'DarkGrey'}});
+					self.dialogConfirm.show(atts, mode).then(
+						function(){
+							dfd.resolve(true);
+							if (eventHandle){eventHandle.resume()};
+						},
+						function(){
+							dfd.cancel(true);
+							if (eventHandle){eventHandle.resume()};
+						});
+				});
+				return dfd;
+			}
+		},
         getItem: function(item){
             return this.cache[item];
         },
@@ -253,42 +109,33 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         store: function(args){
             return stores.get(args);
         },
+/*
         requestUrl: function(urlArgs){
             return string.substitute(urlTemplate, {dialogueUrl: this.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
         },
+*/
         openExternalUrl: function(url){//deprecated - to eliminate from existing editor content if present
             window.open(url);
             return false;
         },
-
         gotoExternalUrl: function(url, event){//deprecated - to eliminate from existing editor content
             window.open(url, url);
             event.stopPropagation();
             return false;
         },
-
         editorGotoUrl: function(url, event){
             window.open(url, url);
             event.stopPropagation();
             return false;
         },
-
-        editorGotoTab: function(target, event){
-            event.stopPropagation();
-        	this.tabs.gotoTab(target);
+        loading: function(title, longMessage){
+        	var url = require.toUrl('tukos/resources/images/loadingAnimation.gif');
+        	return title + '&nbsp;' + '<img alt="Embedded Image" src="' + url + '"/> ' + (longMessage ? (this.message('loading') + '...') : '');
         },
-
         refresh: function(tabOrAccordion, action, data, keepOptions){
         	return this[tabOrAccordion.isAccordion()? 'accordion' : 'tabs'].refresh(action, data, keepOptions);
         },
-        
-        loading: function(title, longMessage){
-        	var url = require.toUrl('tukos/resources/images/loadingAnimation.gif');
-        	return title + '&nbsp;' + '<img alt="Embedded Image" src="' + url + '"/> ' + (longMessage ? (messages.loading + ' ...') : '');
-        },
-        
         serverDialog: function(urlArgs, options, feedback, returnDeferred){//if returnDeferred is true, the returnedDfD.response.getHeader() will be available to extract header information
-            //this.setFeedback(messages.actionDoing);
             var self = this, isObjectFeedback = typeof feedback === 'object', defaultFeedback = isObjectFeedback ? feedback.defaultFeedback : feedback;
             options = lang.mixin({method: 'POST', timeout: 180000, handleAs: 'json'},  options);
             if (options.data){
@@ -315,7 +162,7 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
                     return response;
                 },
                 function(error){
-                    self.addFeedback(messages.failedOperation + '\n Server message is: ' + error.message);
+                    self.addFeedback(self.message(failedOperation)  + ': ' + error.message);
                     if (isObjectFeedback){
                     	set(att, attValue);
                     }
@@ -324,13 +171,12 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
             );
             return dfdOrPromise;
         },
-
         setFeedback: function(serverFeedback, clientFeedback, separator, beep){
             if (beep){
                 document.getElementById('beep').play();
             }
             var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || this.message('Ok')),
-                  currentTab = this.tabs.currentPane(), self = this;;
+                  currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;;
             if (currentTab){
                 var widget = (lang.hitch(currentTab.form, currentTab.form.getWidget))('feedback');
                 if (widget){
@@ -354,7 +200,6 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
             	}
             }
         },
-        
         appendFeedback: function(serverFeedback, clientFeedback, beep){
             this.setFeedback(serverFeedback, clientFeedback, ' ', beep);
         },
@@ -362,30 +207,6 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         addFeedback: function(serverFeedback, clientFeedback, beep){
             this.setFeedback(serverFeedback, clientFeedback, "\n", beep);
         },
-
-        alert: function(args, blurHandle){
-            require(["dijit/Dialog"], lang.hitch(this, function(Dialog){
-	         	if (!this.alertDialog){
-	                var dialog = this.alertDialog = new Dialog(lang.mixin(args, {onBlur: function(evt){this.hide();}}));
-	                this.alertDialog.onShow = function(){// hack to counter forcing to z-index 950 in dijit/Dialog!!
-	                    setTimeout(function(){
-	                        domStyle.set(dialog.domNode, 'z-index', 10000);
-	                    }, 100);
-	                }
-	            }else{
-	                for (var att in args){
-	                    this.alertDialog.set(att, args[att]);
-	                }
-	            }
-	            if (blurHandle){
-	                blurHandle.pause();
-	                return this.alertDialog.show().then(function(response){blurHandle.resume();return response;});
-	            }else{
-	                return this.alertDialog.show();
-	            }
-            }))
-        },
-
         namedId: function(id){
             return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].name + '(' + id + ')' : '(' + id + ')') : '');
         },
@@ -395,10 +216,11 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
         objectName: function(id){
             return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].object : '') : '');
         },
-
+/*
         addExtendedIdsToCache: function(newExtendedIds){
             this.cache.extendedIds = utils.merge(this.cache.extendedIds, newExtendedIds);
         },
+*/
         addExtrasToCache: function(newExtras){
         	this.cache.extras = lang.mixin(this.cache.extras, newExtras);
         },
@@ -428,25 +250,6 @@ define(["dojo/ready", "dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/str
     		})
     		return store;
     	},
-        serverTranslations: function(expressions, actionModel){
-                var self = this, results = {}, actionModel = actionModel || 'GetTranslations';
-                return this.serverDialog({object: 'users', view: 'NoView', action: 'Get', query:{params: {actionModel: actionModel}}}, {data: expressions}, messages.actionDone).then(function (response){
-                        utils.forEach(response.data, function(translations, objectName){
-                            var objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {});
-                            results[objectName] = {};
-                            utils.forEach(translations, function(translation, expression){
-                                objectTranslations[expression] = translation;
-                                objectUntranslations[translation] = expression;
-                                if (actionModel === 'GetTranslations'){
-                                    results[objectName][expression] = translation;
-                                }else{
-                                    results[objectName][translation/*.toLowerCase()*/] = expression;
-                                }
-                            });
-                        });
-                        return results;
-                });
-        },
         defaultTranslator: function(expression, objectName){
             var objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {});
             return objectTranslations[expression] || (objectTranslations[expression] = undefined);

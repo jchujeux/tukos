@@ -41,7 +41,7 @@ class TranslatorsManager {
         if (! $languageCol){
             $languageCol = $this->getLanguageCol();
         }
-        return array_column(Tfk::$registry->get('configStore')->getAll(['table' => 'translations', 'where' => ['col' => 'setname', 'opr' => 'IN', 'values' => $setItems], 'cols' => ['name', $languageCol]]), $languageCol, 'name');
+        return array_column(Tfk::$registry->get('configStore')->getAll(['table' => 'translations', 'where' => [['col' => 'setname', 'opr' => 'IN', 'values' => $setItems]], 'cols' => ['name', $languageCol]]), $languageCol, 'name');
     }
     
     private function addSet($setItem, $languageCol){
@@ -92,7 +92,7 @@ class TranslatorsManager {
     function translator($translatorName, $setsPath){
         $this->translatorPaths[$translatorName] = $setsPath;//array_map("strtolower", $setsPath);
         return function($key, $mode = null) use ($translatorName){
-            return '#{' . implode('|', [$key, $mode, $translatorName]) . '}';
+            return is_string($key) ?'#{' . implode('|', [$key, $mode, $translatorName]) . '}': $key;
             //return $key;
         };
     }

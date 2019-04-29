@@ -1,24 +1,23 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on", "dojo/mouse", "tukos/TukosTab",  "dijit/registry", "dijit/Dialog", "dijit/Menu", "dijit/MenuItem", 
-         "tukos/utils", "tukos/PageManager", "tukos/_ViewCustomMixin", "dojo/json", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, ready, on, mouse, TukosTab, registry, Dialog, Menu, MenuItem, utils, Pmg, _ViewCustomMixin, JSON, messages ){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "dijit/registry", "dijit/Dialog", 
+         "tukos/utils", "tukos/menuUtils", "tukos/PageManager", "tukos/_ViewCustomMixin", "tukos/DialogConfirm", "dojo/json", "dojo/i18n!tukos/nls/messages"], 
+  function(declare, lang, ready, on, registry, Dialog, utils, mutils, Pmg, _ViewCustomMixin, DialogConfirm, JSON, messages ){
     return declare([ _ViewCustomMixin], {
-
     	constructor: function(args){
-    		this.container = args.container;
+    		declare.safeMixin(this, args);
+            var defaultTabMenu = registry.byId(this.container.id + '_tablist_Menu');
+            if (defaultTabMenu){
+            	defaultTabMenu.destroyRecursive();
+            }
+    		mutils.buildContextMenu(this.container, {type: 'DynamicMenu', atts: {targetNodeIds: [this.container.domNode]}, items: []});
     	},
-    	
-    	mouseDownCallback: function(evt){
-            var self = this, pane = this.currentPane();;
-            if (mouse.isRight(evt) && (evt.target.checked || (evt.target.checked !== false && pane.isObjectPane() && pane.title === registry.getEnclosingWidget(evt.target).label))){
-                if (this.contextMenu){
-                    this.contextMenu.destroyRecursive();
-                }
-                this.contextMenu = new Menu({targetNodeIds:[evt.target]});
-                this.contextMenu.addChild(new MenuItem({label: messages.refresh, onClick: function(evt){self.refresh('Tab', []);}}));
-                this.contextMenu.addChild(new MenuItem({label: messages.customization, onClick: lang.hitch(this, this.openCustomDialog)}));
+    	contextMenuCallback: function(evt){
+            var self = this, pane = this.currentPane();
+            if (evt.target.checked || (evt.target.checked !== false && pane.isObjectPane() && pane.title === registry.getEnclosingWidget(evt.target).label)){
+                mutils.setContextMenuItems(this.container, [{atts: {label: messages.refresh, onClick: function(evt){self.refresh('Tab', []);}}}, {atts: {label: messages.customization, onClick: lang.hitch(this, this.openCustomDialog)}}]);
+            }else{
+                mutils.setContextMenuItems(this.container, []);
             }
         },
-
         refresh: function(action, data, keepOptions, currentPane){
             var currentPane = currentPane || this.currentPane(), theForm = currentPane.form, theFormContent = currentPane.formContent, changesToRestore = (keepOptions ? theForm.keepChanges(keepOptions) : {});
             var refreshAction = function(){
@@ -58,12 +57,30 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on", "doj
             if (keepOptions || !theForm){
                 return refreshAction();
             }else{
-                return theForm.checkChangesDialog(lang.hitch(this, refreshAction));
+                return this.checkChangesDialog(theForm, lang.hitch(this, refreshAction));
             }
         },
-
+        checkChangesDialog: function(form, action){
+            if (!form.hasChanged()){
+                return action();
+            }else{
+                return (new DialogConfirm({title: messages.fieldsHaveBeenModified, content: messages.sureWantToForget, hasSkipCheckBox: false})).show().then(
+                    function(){return action()},
+                    function(){Pmg.setFeedback(messages.actionCancelled);}
+                );
+            }
+        },
         currentPane: function(){
             return this.container.selectedChildWidget;
+        },
+        firstPane: function(){
+        	return this.container.getChildren()[0];
+        },
+        lastPane: function(){
+        	return this.container.getChildren().slice(-1)[0];
+        },
+        selectPane: function(pane, transition){
+        	this.container.selectChild(pane, transition);
         }
     }); 
 });

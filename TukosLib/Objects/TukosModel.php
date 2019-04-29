@@ -11,7 +11,7 @@ class TukosModel {
     protected $_nextIdTable = 'id';
     protected $tableName = 'tukos';
     protected $_colsDefinition = [
-        'id'           =>  'INT(11) NOT NULL PRIMARY KEY',
+        'id'           =>  'INT(11) PRIMARY KEY',
         'parentid'     =>  "INT(11) NOT NULL DEFAULT '0'",
         'object'       =>  "VARCHAR(80)",
         'name'         =>  "VARCHAR(255) DEFAULT ''",
@@ -44,7 +44,7 @@ class TukosModel {
             $this->store->createTable($this->tableName, $this->_colsDefinition, $this->_colsIndexes);
             $this->store->insert(['id' => 2, 'name' => 'tukos', 'object' => 'users', 'contextid' => 1, 'created' => $now, 'updated' => $now, 'creator' => 2, 'updator' => 2], ['table' => $this->tableName]);
             require __DIR__.'/Admin/Users/Model.php';
-            $this->store->createTable('users', array_merge([ 'id'  =>  'INT(11) NOT NULL PRIMARY KEY'], UserModel::$_colsDefinition), UserModel::$_colsIndexes);
+            $this->store->createTable('users', array_merge([ 'id'  =>  'INT(11) PRIMARY KEY'], UserModel::$_colsDefinition), UserModel::$_colsIndexes);
             $this->store->insert(['id' => 2, 'rights' => 'SUPERADMIN'], ['table' => 'users']);
             $this->store->insert(['id' => 1, 'name' => 'tukos', 'object' => 'contexts', 'created' => $now, 'updated' => $now, 'creator' => 2, 'updator' => 2], ['table' => $this->tableName]);
             $this->store->createTable($this->_nextIdTable, [/*'id' => 'INT(11)', */'configrange' => 'VARCHAR(20) PRIMARY KEY', 'nextid' => 'INT(11)', 'updated' => 'datetime']);

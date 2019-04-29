@@ -3,8 +3,8 @@
  *  Limitation: does not take into account the query part, which may specify different columns to return => limit usage to ObjectSelect which
  *  returns the same columns, or plan to generalize this component (or from the server side return all columns systematically ?)
  */
-define (["dojo/_base/declare", "dojo/string", "dojo/store/Memory", "dojo/store/Cache", "dojo/store/Observable", "tukos/PageManager", "tukos/store/ActionRequest", "tukos/store/ObjectSelect", "dojo/json"], 
-    function(declare, string, Memory, Cache, Observable, Pmg, ActionRequestStore, ObjectSelectStore, JSON){
+define (["dojo/_base/declare", "dojo/string", "dojo/store/Memory", "dojo/store/Cache", "dojo/store/Observable", "tukos/PageManager", "tukos/store/ActionRequest", "tukos/store/ObjectSelect"], 
+    function(declare, string, Memory, Cache, Observable, Pmg, ActionRequestStore, ObjectSelectStore){
     return declare(null, {
         constructor: function(args){
             this.stores = new Object();

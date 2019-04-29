@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/mouse",  "dijit/form/Button", "dijit/registry", "tukos/evalutils", "tukos/DialogConfirm", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, on, mouse, Button, registry, eutils, DialogConfirm, Pmg, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on",  "dijit/form/Button", "dijit/registry", "tukos/evalutils", "tukos/DialogConfirm", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+    function(declare, lang, on, Button, registry, eutils, DialogConfirm, Pmg, messages){
     return declare([Button], {
         postCreate: function(args){
             this.inherited(arguments);

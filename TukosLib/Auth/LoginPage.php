@@ -18,8 +18,9 @@ class LoginPage{
         $template->username = Tfk::tr('username');
         $template->password = Tfk::tr('password');
         $template->login = Tfk::tr('Login');
-        $template->authentication = Tfk::tr('Authentication');
+        $template->authentication = Tfk::tr(Tfk::$registry->appName . 'HeaderBanner', 'none') . ' - ' . Tfk::tr('Authentication');
         $template->serverFeedback = Tfk::tr('serverFeedback');
+        $template->headerBanner =  Tfk::tr('headerbanner');
         
         $finder = $template->getTemplateFinder();
         $finder->setPaths([dirname(__FILE__)]);

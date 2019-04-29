@@ -50,7 +50,7 @@ class Configure{
         	'#bustrackcustomers' => [],
         	'#bustrackquotes' => [],
         	'#bustrackinvoices' => [],
-        	'@help' => [['overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'help', 'view' => 'overview', 'mode' => 'tab', 'action' => 'tab']]],]],
+        	'@help' => [['overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],]],
         ];
         $this->transverseModules = ['help'];
         $this->objectModulesDefaultContextName = [];

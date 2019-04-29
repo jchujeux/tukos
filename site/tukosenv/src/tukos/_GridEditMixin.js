@@ -2,9 +2,9 @@
  *  tukos grids  mixin for dynamic widget information handling and cell rendering (widgets values and attributes that may be modified by the user or the server)
  *   - usage: 
  */
-define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all", "dojo/on", "dojo/when", "dojo/mouse", "dijit/registry", "dijit/focus", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/sheetUtils", 
+define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all", "dojo/on", "dojo/when", "dijit/registry", "dijit/focus", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/sheetUtils", 
          "tukos/widgetUtils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/widgets/WidgetsLoader", "tukos/PageManager", "tukos/TukosTooltipDialog", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, all, on, when, mouse, registry, focusUtil, utils, dutils, eutils, sutils, wutils, mutils, wcutils, WidgetsLoader, Pmg, TukosTooltipDialog, messages){
+    function(arrayUtil, declare, lang, all, on, when, registry, focusUtil, utils, dutils, eutils, sutils, wutils, mutils, wcutils, WidgetsLoader, Pmg, TukosTooltipDialog, messages){
     var mixin = declare(null, {
 
         constructor: function(args){
@@ -33,14 +33,9 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 var editor = evt.editor, column = evt.column;
                 editor.widgetType = column.widgetType;
                 if (!editor.contextMenu){
-                    mutils.setContextMenu(editor,{
+                    mutils.buildContextMenu(editor,{
                         atts: {targetNodeIds: [editor.domNode]}, 
                         items: lang.hitch(wcutils, wcutils.customizationContextMenuItems)(editor, column)
-                    });
-                    editor.on("mousedown", function(evt){
-                        if (mouse.isRight(evt)){
-                            mutils.showContextMenu(editor);
-                        }
                     });
                 }
             	//focusUtil.focus(editor.containerNode);// required for LazyEditor which is a ContentCOntainer and then does not get focused by default. Focus is required for onBlur to be activated and shared editor be removed

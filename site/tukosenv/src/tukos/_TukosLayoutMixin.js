@@ -5,11 +5,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/Deferred", "dojo/promise
         constructor: function(){
             this.instantiatingWidgets = {};
         },
-
-           
         tableLayout:    function(layout, fromParent, optionalWidgetInstantiationCallback){
-            var instantiatingWidgets = [],
-                  widgets = [];
+            var self = this, instantiatingWidgets = [], widgets = [];
             if (layout.tableAtts){
                 var parent  = new TableContainer(layout.tableAtts, dojo.doc.createElement('div'));
                 fromParent.addChild(parent);
@@ -30,17 +27,17 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/Deferred", "dojo/promise
 	                theDijitAtts.widgetType = theDijitType;
 	                theDijitAtts.widgetName = widgetName;
 	                var instantiatingWidget = widgetsLoader.instantiate(theDijitType, theDijitAtts, optionalWidgetInstantiationCallback);
-	                //console.log('widget: ' + widgetName);
 	                if (typeof instantiatingWidget.then === "function"){
 	                    this.instantiatingWidgets[widgetName] = instantiatingWidgets[i] = widgets[i] = instantiatingWidget;
 	                }else{
 	                    widgets[i] = instantiatingWidget;
 	                }
-	                dojo.when(instantiatingWidget, lang.hitch(this, function(widget){
-	                    widget.layoutHandle = this;
+	                //dojo.when(instantiatingWidget, lang.hitch(this, function(widget){
+		            dojo.when(instantiatingWidget, function(widget){
+	                    widget.layoutHandle = self;
 	                    widget.parentContentPane = fromParent;
-	                    this.decorate(widget);
-	                 }));
+	                    self.decorate(widget);
+	                 });
                 }else{
                 	Pmg.addFeedback('no widgetDescription for widget: ' + widgetName);
                 }
@@ -62,12 +59,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/Deferred", "dojo/promise
             }
             return parent;
         },
-        
         onInstantiated: function(callback){
             if (!utils.empty(this.instantiatingWidgets)){
                 return all(this.instantiatingWidgets).then(lang.hitch(this, function(results){
                     return callback();
-                    //this.deferredInstantiatingWidgets = {};
                 }));
             }else{
                 return callback();

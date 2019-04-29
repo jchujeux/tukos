@@ -19,11 +19,10 @@ class View {
             'type' => 'overviewDgrid', 
             'atts' => ['edit' =>[
                 'label'           => $this->view->tr('overview'),
-                'maxHeight' => '1000px', 
                 'colsDescription' => $this->view->widgetsDescription($this->view->gridCols(), false), 
                 'objectIdCols'    => array_values(array_intersect($this->view->gridCols(), $this->model->idCols)),
                 'sort'            => [['property' => 'updated', 'descending' => true]],
-                'storeArgs'       => ['view' => 'Overview', 'mode' => 'NoMode', 'action' => 'GridSelect'],
+                'storeArgs'       => ['object' => $this->objectName, 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'GridSelect'],
                 'object'           => $this->objectName,
 				'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false],
             ]],

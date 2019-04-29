@@ -1,4 +1,5 @@
-define(["dojo", "dojo/_base/lang", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nls/messages"], function(dojo, lang, number, currency, JSON, messages){
+define(["dojo", "dojo/_base/lang", "dojo/date/stamp", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nls/messages"], 
+function(dojo, lang, stamp, number, currency, JSON, messages){
     return {
         wasModified: false, previousUniqueIds: [],
         
@@ -196,17 +197,17 @@ define(["dojo", "dojo/_base/lang", "dojo/number", "dojo/currency", "dojo/json", 
             if ((typeof value == 'string' && value != '') || typeof value === 'number'){
                 switch (formatType){
                     case 'datetimestamp': // from yyyy-mm-ddThh:mm:ssZ to yyyy-mm-dd hh:mm:ss (server time format i.e. ISO to dojo widgets time format
-                        value = dojo.date.stamp.toISOString(dojo.date.stamp.fromISOString(value)).substring(0,19);
+                        value = stamp.toISOString(dojo.date.stamp.fromISOString(value)).substring(0,19);
                         value = value.replace("T", " ");
                         break;
                     case 'datetime': // from yyyy-mm-ddThh:mm:ssZ to yyyy-mm-dd hh:mm:ss (server time format i.e. ISO to dojo widgets time format
-                        value = dojo.date.locale.format(dojo.date.stamp.fromISOString(value));
+                        value = dojo.date.locale.format(stamp.fromISOString(value));
                         break;
                     case 'date':
                         if (value.length > 10 && value[10] !== 'T'){//hack as we change from datetime to date for sptsessions. 
                             value = value.substring(0, 10);
                         }
-                        value = dojo.date.locale.format(dojo.date.stamp.fromISOString(value), {selector: 'date'} );
+                        value = dojo.date.locale.format(stamp.fromISOString(value), {selector: 'date'} );
                         break;
                     case 'numberunit':
                      	var values = JSON.parse(value), count = values[0], unit=values[1], localUnit = messages[unit] || unit;
@@ -233,7 +234,7 @@ define(["dojo", "dojo/_base/lang", "dojo/number", "dojo/currency", "dojo/json", 
                 switch (formatType){
                     case 'datetimestamp': // from yyyy-mm-dd hh:mm:ss to yyyy-mm-ddThh:mm:ssZ
                         value = value.replace(" ", "T");
-                        value = dojo.date.stamp.toISOString(dojo.date.stamp.fromISOString(value), {zulu: true});
+                        value = stamp.toISOString(stamp.fromISOString(value), {zulu: true});
                         break;
                     default:
                         break;
@@ -263,11 +264,6 @@ define(["dojo", "dojo/_base/lang", "dojo/number", "dojo/currency", "dojo/json", 
                 this.forEach(objectOrString, function(value, key){
                     arrayValues.push(key + keyObjectSeparator + (typeof value === 'object' ? JSON.stringify(value) : value));
                 });
-/*
-                for (var key in objectOrString){
-                    arrayValues.push(key + keyObjectSeparator + (typeof objectOrString[key] === 'object' ? JSON.stringify(objectOrString[key]) : objectOrString[key]));
-                }
-*/
                 return arrayValues.join(valueSeparator);
             }else if (typeof objectOrString === 'string'){
                 return objectOrString;

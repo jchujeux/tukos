@@ -6,21 +6,28 @@
 		<title>Login into the system</title>
 	</head>
 	<body style="text-align: center;">
-		<h1>tukos - <?= $this->authentication?></h1>
-		<div id="svrFeedback" hidden=true></div>
 		<script>
 			function hideSvrFeedback(){
 				var svrFeedback = document.getElementById('svrFeedback');
 				svrFeedback.hidden = true;
 			}
 		</script>
-		<form id="formNode">
-			<table style="margin-left: auto; margin-right: auto;">
-				<tr><th><?= $this->username?>: </th><td><input type="text" name="username" oninput="hideSvrFeedback()" /></td></tr>
-				<tr><th><?= $this->password?>: </th><td><input type="password" name="password" oninput="hideSvrFeedback()" /></td></tr>
-				<tr><th></th><td><button type="submit"><?= $this->login?></button></td></tr>
-			</table>
-		</form>
+		<table style="margin-left: auto; margin-right: auto;">
+			<tr>
+				<td><img alt="tukos swiss knife" src="/tukos/images/tukosswissknife.jpg"><br><?= $this->headerBanner ?></td>
+				<td>
+            		<form id="formNode">
+                		<h1><?= $this->authentication?></h1>
+                		<div id="svrFeedback" hidden=true></div>
+            			<table style="margin-left: auto; margin-right: auto;">
+            				<tr><th><?= $this->username?>: </th><td><input type="text" name="username" oninput="hideSvrFeedback()" /></td></tr>
+            				<tr><th><?= $this->password?>: </th><td><input type="password" name="password" oninput="hideSvrFeedback()" /></td></tr>
+            				<tr><th></th><td><button type="submit"><?= $this->login?></button></td></tr>
+            			</table>
+            		</form>
+				</td>
+			</tr>
+		</table>
 		<!-- load dojo and provide config via data attribute -->
             <script src="<?= $this->dojoBaseLocation ?>dojo/dojo.js" daja-dojo-config="async: true"></script>
 		    <script>

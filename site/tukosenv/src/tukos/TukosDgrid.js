@@ -1,10 +1,10 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/keys", "dojo/on", "dojo/when", "dojo/query", "dojo/request", "dojo/aspect", "dojo/dom-style",
          "dgrid/OnDemandGrid", "tukos/_GridMixin", "tukos/_GridSummaryMixin", "dgrid/Selection", "dgrid/Keyboard", "dgrid/Selector", "dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer", 
          "dgrid/extensions/DijitRegistry", "tukos/dgrid/Editor", "tukos/utils", "tukos/widgetUtils", "tukos/evalutils"/*, "tukos/dgrid/lazytree"*/, "dgrid/Tree"/*, "tukos/ganttColumn"*/,"tukos/colFilter", 
-         "dijit/Menu", "dijit/MenuItem", "dijit/registry", "tukos/PageManager", "tukos/sheetUtils", "tukos/DialogConfirm", "dojo/json", "dojo/i18n!tukos/nls/messages"/*, "dojo/domReady!"*/], 
+         "tukos/PageManager", "tukos/sheetUtils", "tukos/DialogConfirm", "dojo/json", "dojo/i18n!tukos/nls/messages"/*, "dojo/domReady!"*/], 
 function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
          Grid, _GridMixin, _GridSummaryMixin, Selection, Keyboard, selector, Hider, Resizer, DijitRegistry, editor, utils, wutils, eutils, tree/*, ganttColumn*/,colFilter, 
-         Menu, MenuItem, registry, Pmg, sutils, DialogConfirm, JSON, messages){
+         Pmg, sutils, DialogConfirm, JSON, messages){
     
 	return declare([Grid, editor, tree, selector, Selection, Keyboard, Hider, Resizer, DijitRegistry, _GridMixin, _GridSummaryMixin], {
 
@@ -63,8 +63,6 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             }); 
 */
             this.on("dgrid-cellfocusin", lang.hitch(this, function(evt){
-            //this.on(".dgrid-header .dgrid-cell: focusin", lang.hitch(this, function(evt){
-            	console.log('dgrid-cellfocusin triggered');
                 this.clickedRow = this.row(evt);
             	this.clickedCell = this.cell(evt);
             }));
@@ -104,7 +102,7 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             	}
             });
 
-            this.on(".dgrid-row:mousedown, .dgrid-header:mousedown", lang.hitch(this, this.mouseDownCallback));
+            this.on(on.selector(".dgrid-row, .dgrid-header", "contextmenu"), lang.hitch(this, this.contextMenuCallback));
         },
 
         _setAllowLocalFilters: function(newValue){
@@ -178,7 +176,8 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
                     var td  = dct.create('td', {className: "dgrid-filter-cell dgrid-column-" + i + " field-" + colId}, filtersRow);
                     td.columnId = colId;
                     if (column.rowsFilters){
-                        var filter = new colFilter({onFilterChange: onFilterChange, grid: grid, col: colId, filters: column.rowsFilters, oprAtts: {style: 'width: 7em;'}, entryAtts: {style: 'width: 7em;'}}, td);
+                        var width = column.width ? column.width + 'px' : '7em', 
+                        	filter = new colFilter({onFilterChange: onFilterChange, grid: grid, col: colId, filters: column.rowsFilters, oprAtts: {style: {width: width}}, entryAtts: {style: {width: width}}}, td);
                         if (column.filter){
                             filter.set('value', column.filter);
                         }
@@ -191,38 +190,17 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             }
             setTimeout(function(){grid.layoutHandle.resize();}, 0);
         },
-        
         userFilters: function(){
         	var columnsCustomization = lang.getObject('widgetsDescription.' + this.widgetName + '.atts.columns', false, this.form.customization) || {}, userFilters = {};
         	utils.forEach(this.columns, function(column, field){
-        		if (((columnsCustomization[field] || {}).filter||{})[0]){
+        		var customFilter = (columnsCustomization[field] || {}).filter||{}, customFilterOpr = customFilter[0];
+        		if (customFilterOpr && (!utils.in_array(customFilterOpr, ['RLIKE', 'NOT RLIKE', 'BETWEEN']) || customFilter[1])){
         			userFilters[field] = columnsCustomization[field].filter;
         		}else if ((column.filter || {})[0]){
         			userFilters[field] = column.filter;
         		}
         	});
         	return userFilters;
-        },
-        
-        _setFilters: function(value){
-            console.log('needs to remove filter customization for: ' + this.widgetName);
-/*
-            if (value.length == 0){
-                this.filters = {};
-            }else{
-                this.filters = value;
-            }
-            for (var colId in this.filterWidgets){
-                if (this.filters[colId]){
-                    this.filterWidgets[colId].set('value', this.filters[colId]);
-                }else{
-                    this.filterWidgets[colId].set('value', ["", ""]);
-                }
-            }
-            if (!utils.empty(this.filters)){
-            	this.showFilters();
-            }
-*/
         },
         _setMaxHeight: function(value){
             this.bodyNode.style.maxHeight = value;

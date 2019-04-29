@@ -1,10 +1,5 @@
-/*
- *  Provides a Reset button field which issues a request  (via post) to get form field values from the server and reloads them on every involved field
- *   - usage: 
- */
- 
-define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dojo/dom-form", "dijit/form/Button", "dijit/registry", "tukos/DialogConfirm", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, dom, on, domForm, Button, registry, DialogConfirm, Pmg, messages){
+define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "dijit/registry", "tukos/DialogConfirm", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+    function(declare, dom, on, Button, registry, DialogConfirm, Pmg, messages){
     return declare("tukos.ObjectReset", [Button],{
         postCreate: function(){
             this.inherited(arguments);

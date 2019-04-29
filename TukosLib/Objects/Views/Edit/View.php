@@ -1,11 +1,9 @@
 <?php
-
 namespace TukosLib\Objects\Views\Edit;
 
 use TukosLib\Objects\Views\Edit\SubObjects;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
-use TukosLib\TukosFramework as Tfk;
 
 class View {
 
@@ -18,6 +16,7 @@ class View {
     	$this->objectName = $controller->objectName;
     	$this->user = $controller->user;
     	$this->paneMode = $controller->paneMode;
+    	$tr = $this->view->tr;
         if (isset($this->view->dataWidgets['configstatus'])){
             $this->_lastDataElts[] = 'configstatus';
         }
@@ -25,19 +24,19 @@ class View {
             SubObjects::addWidgets($this->view->subObjects, $this->view);
         }
         $this->actionWidgets = [
-                     'save' => ['type' => 'ObjectSave',         'atts' => ['label' => $this->view->tr('Save')]],                                                               
-                  'delete'  => ['type' => 'ObjectDelete',       'atts' => ['label' => $this->view->tr('Delete')]],                                                               
-                    'edit'  => Widgets::ObjectEdit(['storeArgs' => ['object' => $this->view->objectName],    'placeHolder' => $this->view->tr('Select item to edit'),
-                                                    'title' => $this->view->tr('Select item to edit'), 'dropdownFilters' => ['contextpathid' => '$tabContextId'],
-                               ]),
-                     'new'  => ['type' => 'ObjectNew'  ,        'atts' => ['label' => $this->view->tr('New')]],
-               'duplicate'  => ['type' => 'ObjectDuplicate',    'atts' => ['label' => $this->view->tr('Duplicate')]],
-                   'reset'  => ['type' => 'ObjectReset',        'atts' => ['label' => $this->view->tr('Reset')]],
-             'calendartab'  => ['type' => 'ObjectCalendar',        'atts' => ['label' => $this->view->tr('Calendar')]],
-        		'export'  => ['type' => 'ObjectExport', 'atts' => ['label' => $this->view->tr('export')]],
-                 'process'  => ['type' => 'ObjectProcess',      'atts' => ['label' => $this->view->tr('Process')]],
-           'clearFeedback'  => ['type' => 'ObjectFieldClear',   'atts' => ['label' => $this->view->tr('Clear Feedback'), 'fieldToClear' => 'feedback']],
-                'feedback'  => Widgets::tukosTextArea(['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 100, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),
+            'save' => ['type' => 'ObjectSave', 'atts' => ['serverAction' => 'save', 'label' => $this->view->tr('Save'), 'sendToServer' => ['changedValues', 'itemCustomization']]],                                                               
+            'delete'  => ['type' => 'ObjectDelete', 'atts' => ['label' => $this->view->tr('Delete')]],                                                               
+            'edit'  => Widgets::ObjectEdit(['storeArgs' => ['object' => $this->view->objectName],    'placeHolder' => $this->view->tr('Select item to edit'),
+                 'title' => $this->view->tr('Select item to edit'), 'dropdownFilters' => ['contextpathid' => '$tabContextId']]),
+            'new'  => ['type' => 'ObjectNew', 'atts' => ['serverAction' => 'edit', 'label' => $this->view->tr('New'), 'isNew' => true, 'confirmAtts' => ['title' => $tr('fieldshavebeenmodified'), 'content' => $tr('surewanttoforget')]]],
+            'duplicate'  => ['type' => 'ObjectDuplicate', 'atts' => ['label' => $this->view->tr('Duplicate')]],
+            'reset'  => ['type' => 'ObjectReset', 'atts' => ['serverAction' => 'reset', 'label' => $this->view->tr('Reset'), 'confirmAtts' => ['title' => $tr('fieldshavebeenmodified'), 'content' => $tr('surewanttoforget')]]],
+            'calendartab'  => ['type' => 'ObjectCalendar', 'atts' => ['label' => $this->view->tr('Calendar')]],
+        	'export'  => ['type' => 'ObjectExport', 'atts' => ['label' => $this->view->tr('export')]],
+            'process'  => ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Process')]],
+            'clearFeedback'  => ['type' => 'ObjectFieldClear', 'atts' => ['label' => $this->view->tr('Clear Feedback'), 'fieldToClear' => 'feedback']],
+            'feedback'  => Widgets::tukosTextArea(
+                    ['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 100, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),
         ];
 
         $this->dataLayout = [

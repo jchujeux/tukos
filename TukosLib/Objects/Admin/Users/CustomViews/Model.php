@@ -8,7 +8,7 @@ use TukosLib\Utils\Utilities as Utl;
 class Model extends AbstractModel {
 
     protected $viewOptions = ['edit', 'overview', 'massedit'];
-    protected $panemodeOptions = ['tab', 'accordion'];
+    protected $panemodeOptions = ['tab', 'accordion', 'mobile'];
 
     function __construct($objectName, $translator=null){
         $colsDefinition = [

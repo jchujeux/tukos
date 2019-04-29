@@ -15,13 +15,13 @@ trait Storage {
 
     protected $_nextFileIdTableName = 'nextFileidTable';
     protected $_nextFileIdTableColsDefinition = array(
-     'nextid'   =>  'mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY',
+     'nextid'   =>  'mediumint(8) unsigned auto_increment PRIMARY KEY',
      'updated'  =>  "timestamp",
      );
 
     protected $_filesTableName = 'filescontent';
     protected $_filesTableColsDefinition = array(
-     'id'       =>  'mediumint(8) unsigned NOT NULL auto_increment PRIMARY KEY',
+     'id'       =>  'mediumint(8) unsigned auto_increment PRIMARY KEY',
      'fileid'   =>  "mediumint(8) unsigned NOT NULL default '0'",
      'content'  =>  'longblob NOT NULL',
      );

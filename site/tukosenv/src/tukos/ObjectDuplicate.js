@@ -1,11 +1,6 @@
-/*
- *  Provides a Duplicate button field which creates a new object which it initializes from the currently edited object values
- *   - usage: 
- */
- 
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dojo/dom-form", "dojo/promise/all",  "dijit/form/Button", "dijit/registry", "tukos/PageManager", "tukos/DialogConfirm", "tukos/utils",
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dojo/promise/all",  "dijit/form/Button", "dijit/registry", "tukos/PageManager", "tukos/DialogConfirm", "tukos/utils",
          "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, dom, on, domForm, all, Button, registry, Pmg, DialogConfirm, utils, messages){
+    function(declare, lang, dom, on, all, Button, registry, Pmg, DialogConfirm, utils, messages){
     return declare([Button], {
         postCreate: function(){
             this.inherited(arguments);

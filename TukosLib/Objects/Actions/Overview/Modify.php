@@ -20,7 +20,7 @@ class Modify extends AbstractAction{
         }else{
             $where = [['col' => 'id', 'opr' => 'IN', 'values' => $received['ids']]];
         }
-        $result = $this->model->updateAll($received['values'], $where);
+        $result = $this->model->updateAll($received['values'], ['where' => $where]);
         Feedback::add($this->view->tr('DoneModified'));
         if ($result === 0){$this->dialogue->response->setStatusCode(404);}
         return [];

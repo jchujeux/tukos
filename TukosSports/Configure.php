@@ -59,7 +59,8 @@ class Configure{
             'bustrack' => [['#bustrackcatalog' => [], '#bustrackcustomers' => [], '#bustrackquotes' => [], '#bustrackinvoices' => []]],
         	'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [], '#sptsessionsstages' => [], '#sptexercises' => []]],
             'physio' => [['#physiopatients' => [], '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
-            '#help' => [],
+            '#help' => [['guidedtour' => ['type' => 'MenuItem', 'atts' => [
+                'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtour')]]])]]]]]],
         ];
         $this->transverseModules = ['admin', 'collab', 'help'];
         $this->objectModulesDefaultContextName = [];

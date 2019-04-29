@@ -2,9 +2,9 @@
  *  tukos grids  mixin for dynamic widget information handling and cell rendering (widgets values and attributes that may be modified by the user or the server)
  *   - usage: 
  */
-define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/dom-construct", "dojo/dom-style", "dojo/mouse", "dijit/registry", "dijit/Dialog", "tukos/utils", "tukos/widgetUtils", "tukos/menuUtils",
+define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/dom-construct", "dojo/dom-style", "dijit/registry", "dijit/Dialog", "tukos/utils", "tukos/widgetUtils", "tukos/menuUtils",
          "tukos/widgets/widgetCustomUtils", "tukos/sheetUtils", "tukos/widgets/ColorPicker", "tukos/PageManager", "dojo/number",  "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, on, dct, dst, mouse, registry, Dialog, utils, wutils, mutils, wcutils, sutils, ColorPicker, Pmg, number, messages){
+    function(arrayUtil, declare, lang, on, dct, dst, registry, Dialog, utils, wutils, mutils, wcutils, sutils, ColorPicker, Pmg, number, messages){
     return declare(null, {
 
         constructor: function(){
@@ -67,7 +67,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             node = dct.create('div', atts);
             if(typeof innerHTML === "string" && innerHTML.substring(0, 7) === '#tukos{'){
             	dst.set(node, {textDecoration: "underline", color: "blue", cursor: "pointer"});
-            	node.innerHTML = messages.loadOnClick;
+            	node.innerHTML = Pmg.message('loadOnClick');
             	node.onClickHandler = on(node, 'click', lang.hitch(this, this.loadContentOnClick));
             }
             return node;
@@ -127,7 +127,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                 }
             }
             if (!utils.empty(query)){
-                Pmg.tabs.request({object: object, view: 'Edit', mode: 'Tab', action: 'Tab', query: query});
+                Pmg.tabs.gotoTab({object: object, view: 'Edit', mode: 'Tab', action: 'Tab', query: query});
             }
         },
         showInNavigator: function(grid){
@@ -154,21 +154,16 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
         		return this.clickedRow.data;
         	}
         },
-
-        mouseDownCallback: function(evt){
-            console.log('mousedowncallback');
+        contextMenuCallback: function(evt){
+            console.log('contextmenucallback');
         	var row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column, clickedColumn = this.clickedColumn = this.column(evt);
-            if (mouse.isRight(evt)){
                 var menuItems = lang.clone(this.contextMenuItems);
                 var colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';
                 if (colItems !== 'header' && menuItems.canEdit && row.data.canEdit !== false){
                 	menuItems[colItems] = menuItems[colItems].concat(menuItems.canEdit);
                 }
-
-                mutils.setContextMenu(this, {atts: {targetNodeIds: [this.domNode], selector: ".dgrid-row, .dgrid-header"},  items: menuItems[colItems].concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this))});
-            }
+                mutils.setContextMenuItems(this, menuItems[colItems].concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this)));
         },
-
         editInNewTabSelector: function(grid){
             var theFields = [];
             for (var col in grid.columns){

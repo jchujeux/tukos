@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/mouse", "dijit/_editor/_Plugin", "dijit/form/Button", "dojo/i18n!tukos/nls/messages"], 
-function(declare, lang, domStyle, mouse, _Plugin, Button, messages) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/_editor/_Plugin", "dijit/form/Button", "dojo/i18n!tukos/nls/messages"], 
+function(declare, lang, domStyle, _Plugin, Button, messages) {
         
     var FitImage = dojo.declare([_Plugin], {
     

@@ -58,7 +58,7 @@ class Configure{
                     ],
                     '#mailmessages' => [], */'#mailtukosmessages' => [],
                 ]],
-                '#scripts' => [['#scriptsoutputs' => []]], '#health' => [['#healthtables' => []]],
+                '#scripts' => [['#scriptsoutputs' => []]], '#health' => [],
             ]],
             'collab' => [['#people' => [], '#organizations' => [], '#teams' => [], '#notes' => [], '#documents' => [], '#calendars' => [['#calendarsentries' => []]], '#tasks' => []]],
             'bustrack' => [['#bustrackcatalog' => [], '#bustrackcustomers' => [], '#bustrackquotes' => [], '#bustrackinvoices' => []]],
@@ -70,7 +70,7 @@ class Configure{
             'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [['#sptsessionsstages' => []]], '#sptexercises' => []]],
             'physio' => [['#physiopatients' => [], '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
             '#help' => [['guidedtour' => ['type' => 'MenuItem', 'atts' => [
-                'onClickArgs' => ['object' => 'help', 'view' => 'edit', 'mode' => 'tab', 'action' => 'tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtour')]]])]]]]]],
+                'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtour')]]])]]]]]],
         ];
         $this->transverseModules = ['admin', 'collab', 'help'];
         $this->objectModulesDefaultContextName = [];

@@ -1,7 +1,7 @@
 /*
  *  loads plugins required by tukos & a few enhancements
  */
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/has", "dojo/dom", "dojo/dom-style", "dojo/mouse", "dojo/when", "dijit/Editor",  "dijit/_editor/RichText",
+define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/has", "dojo/dom", "dojo/dom-style", "dojo/when", "dijit/Editor",  "dijit/_editor/RichText",
          "tukos/widgets/editor/ShortCutKeys", "tukos/PageManager", "tukos/expressions",
          "dijit/_editor/plugins/FontChoice", "dijit/_editor/plugins/TextColor", "tukos/widgets/editor/plugins/LinkDialog",  "dojoFixes/dijit/_editor/plugins/FullScreen",
          "dijit/_editor/plugins/Print", "dojoFixes/dijit/_editor/plugins/ViewSource",
@@ -9,7 +9,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
          "tukos/widgets/editor/plugins/TablePlugins", "tukos/utils", "tukos/hiutils", "tukos/menuUtils", "tukos/widgets/editor/plugins/TukosLinkDialog",
          "tukos/widgets/editor/plugins/TemplateProcess","tukos/widgets/editor/plugins/Inserter","tukos/widgets/editor/plugins/SelectionEditor","tukos/widgets/editor/plugins/FitImage",
          "tukos/StoreComboBox", "dojo/domReady!"], 
-    function(declare, array, connect, lang, Deferred, has, dom, domStyle, mouse, when, Editor, RichText, ShortCutKeys, PageManager, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
+    function(declare, array, connect, lang, Deferred, has, dom, domStyle, when, Editor, RichText, ShortCutKeys, PageManager, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
     		 TablePlugins, utils, hiutils, mutils, TukosLinkDialog, TemplateProcess, Inserter, SelectionEditor, FitImage, StoreComboBox){
 	return declare([Editor, ShortCutKeys], {
 

@@ -6,7 +6,6 @@ function(declare, lang, keys, has, domStyle, expressions){
     var cache = {}, modifyTableSelection; 
 	
 	return declare(null, {
-
     	addShortCutKeys: function(){
             this.addKeyHandler('c', false, false, lang.hitch(this, this.copySelection), true);
             this.addKeyHandler('v', false, false, lang.hitch(this, this.pasteCopiedSelection), true);
@@ -35,11 +34,11 @@ function(declare, lang, keys, has, domStyle, expressions){
         		var selection = this.selection, element = selection.getSelectedElement();
         		cache = {backgroundColor: (element && (element.getAttribute('data-backgroundColor') !== null) ? domStyle.get(element, 'backgroundColor') : null), html: selection.getSelectedHtml()};
     		}
-    		console.log('new cache in copySelection: ' + cache.toString());
+    		//console.log('new cache in copySelection: ' + cache.toString());
     	},
     	pasteCopiedSelection: function(){
     		if (!this.prepareModifyTableSelection('pasteAtSelected')){
-        		console.log('cache in pasteCache: ' + cache.toString());
+        		//console.log('cache in pasteCache: ' + cache.toString());
         		if (typeof cache === 'object'){
         			var selection = this.selection, element = selection.getSelectedElement();
         			if (element && cache.backgroundColor !== null){
@@ -130,7 +129,7 @@ function(declare, lang, keys, has, domStyle, expressions){
 					break;
 				default: 
 			}
-			console.log('ShortCutKeys - keyCode: ' + keyCode);
+			//console.log('ShortCutKeys - keyCode: ' + keyCode);
 			var handlers = this._keyHandlers[e.keyCode],
 				args = arguments;
 

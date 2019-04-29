@@ -40,7 +40,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                     TukosDateBox:widthConstraints,  //Editor: {}, // no need to customize
                     FormattedTextBox: heightConstraints, MultiSelect: widthConstraints, 
                     StoreSelect: widthConstraints, ObjectSelect:  widthConstraints,  ObjectSelectMulti:  widthConstraints,  ObjectSelectDropDown: widthConstraints,
-                    NumberUnitBox: width, DateTimeBox: width,  SimpleDgrid: dgridCustomAtts,  StoreDgrid: dgridCustomAtts, OverviewDgrid: dgridCustomAtts, 
+                    NumberUnitBox: width, DateTimeBox: width,  SimpleDgrid: dgridCustomAtts,  StoreDgrid: dgridCustomAtts, OverviewDgrid: dgridCustomAtts, MobileOverviewGrid: dgridCustomAtts,
                     ContextTree: width, NavigationTree: widthAndHeightConstraints, PieChart: width, ColumnsChart: width,  Chart: widthAndHeight, Uploader: width, Downloader: width, StoreCalendar: widthAndHeight
                 },
                     
@@ -161,7 +161,6 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
             if (oldAttValue !== newAttValue){
                 newAtt = attRoot === att ? newAttValue : utils.newObj([[att, newAttValue]]);//{[att]: newAttValue});
                 widget.set(attRoot, newAtt);
-                //lang.setObject((widget.itemCustomization || 'customization') + '.widgetsDescription.' + widget.widgetName + '.atts' + (attRoot === att ? '' : ('.' + attRoot)), newAttObject, widgetPane);
                 lang.setObject((widget.itemCustomization || 'customization') + '.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot, newAtt, widgetPane);
             }
         },

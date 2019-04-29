@@ -30,7 +30,8 @@ class StreamsManager{
         $desc = [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => $scriptObj ? ["pipe", "w"] : ["file", Tfk::$tukosTmpDir . $id . "streamerror.txt", 'a']];
         if (empty($this->process[$id])){
             try{
-                $this->process[$id]['resource'] = proc_open($cmd, $desc, $pipes);
+                //Feedback::add("streamsManager - osName: " . Tfk::osName() . " cmd: $cmd");
+                $this->process[$id]['resource'] = proc_open(Tfk::osName() === 'Linux' ? addslashes($cmd) : $cmd, $desc, $pipes);
                 if ($scriptObj){
                     $this->scriptObj->updateOne(['id' => $id, 'status' => 'RUNNING', 'laststart' => date('Y-m-d H:i:s')]);
                 }

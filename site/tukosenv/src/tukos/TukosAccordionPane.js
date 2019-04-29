@@ -42,11 +42,9 @@
         isObjectPane: function(){
         	return typeof(this.form.object) !== "undefined";
         }, 
-        
         isAccordion: function(){
         	return true;
         },
-            
         isTab: function(){
         	return false;
         }

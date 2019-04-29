@@ -11,7 +11,7 @@ class CommandLine {
                 $cmd = (is_array($parameters) ? implode(' ', $parameters) : $parameters);
                 break;
             case 'DETACHED':
-                $cmd = Tfk::phpDetachedCommand . Tfk::$phpTukosDir . 'tukosLib\tukosScheduler.php ' . (is_array($id) ? implode(' ', $id) : ' ' . $id);
+                $cmd = Tfk::phpDetachedCommand . Tfk::$tukosPhpDir . 'TukosLib\tukosScheduler.php ' . (is_array($id) ? implode(' ', $id) : ' ' . $id);
                 break;
             default:
                 Tfk::debug_mode('error', 'unknown runMode: ', $runMode);
