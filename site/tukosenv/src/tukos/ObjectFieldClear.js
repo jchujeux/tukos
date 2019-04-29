@@ -1,10 +1,5 @@
-/*
- *  Provides a Save button field which posts form edit contents to args.url
- *   - usage: 
- */
- 
-define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dojo/dom-form", "dijit/form/Button", "dojo/request", "dijit/registry"/*, "dojo/domReady!"*/], 
-    function(declare, dom, on, domForm, Button, request, registry){
+define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "dojo/request", "dijit/registry"/*, "dojo/domReady!"*/], 
+    function(declare, dom, on, Button, request, registry){
     return declare(Button, {
         postCreate: function(){
           var self = this;

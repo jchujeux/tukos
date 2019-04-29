@@ -17,7 +17,7 @@ class Model extends AbstractModel {
         $colsDefinition = [
             'language' =>  "ENUM ('" . implode("','", $this->languageOptions) . "')",
         ];
-        parent::__construct($objectName, $translator, 'help', ['parentid' => ['help']], [], $colsDefinition, [['language']]);
+        parent::__construct($objectName, $translator, 'help', ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], [], $colsDefinition, [['language']]);
     }
 }
 ?>

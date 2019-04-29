@@ -86,7 +86,7 @@ class ViewUtils{
     static public function lazyEditor($view, $label, $custom=[]){
     	return Utl::array_merge_recursive_replace([
     			'type' => 'lazyEditor',
-    			'atts' => ['edit' =>  ['label' => $view->tr($label), 'height' => Utl::drillDown($custom, ['atts', 'edit', 'height'], '100px'), 'style' => ['backgroundColor' => 'White', 'minHeight' => '5em']]],
+    			'atts' => ['edit' =>  ['label' => $view->tr($label), 'height' => Utl::drillDown($custom, ['atts', 'edit', 'height'], '100px'), 'style' => "background-color: white; color: initial; min-height: 5em"/*['backgroundColor' => 'White', 'minHeight' => '5em']*/]],
     			'objToEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
     			'objToStoreEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
     	],
@@ -151,7 +151,7 @@ class ViewUtils{
     public static function timeStampDataWidget($view, $label, $custom=[]){
          return  Utl::array_merge_recursive_replace([
                 'type' => 'formattedTextBox',       
-                'atts' => ['edit' => ['label' => $view->tr($label), 'style' => ['width' => '9em'], 'formatType' => 'datetimestamp'],
+                'atts' => ['edit' => ['label' => $view->tr($label), 'style' => ['width' => '10em'], 'formatType' => 'datetimestamp'],
                       'storeedit' => ['width' => 85,  'formatType' => 'datetime'],
                        'overview' => ['width' => 85,  'formatType' => 'datetime'],
                 ],

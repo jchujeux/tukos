@@ -1,21 +1,15 @@
-define (["dojo/_base/declare", "dojo/ready", "dojo/dom-construct", "dojo/mouse", "dijit/popup", "dijit/TooltipDialog", "dijit/form/Form", "dijit/form/Button", "tukos/PageManager", "tukos/widgets/WidgetsLoader",
+define (["dojo/_base/declare", "dojo/ready", "dojo/dom-construct", "dijit/popup", "dijit/TooltipDialog", "dijit/form/Button", "tukos/PageManager", "tukos/widgets/WidgetsLoader",
          "dojo/i18n!tukos/nls/messages"], 
-    function( declare, ready, dct, mouse, popup, TooltipDialog, form, Button, Pmg, widgetsLoader, messages){
+    function( declare, ready, dct, popup, TooltipDialog, Button, Pmg, widgetsLoader, messages){
     return declare(null, {
         onChangeContextCallback: function(newValue){
             console.log('context has changed to value: ' + newValue);
         },
-        contextMenuCallback: function(evt){
+        contextMenuCallback: function(item, evt){
             evt.preventDefault();
             evt.stopPropagation();
+            this.openCustomContextDialog(item);
         },
-        mouseDownCallback: function(item, evt){
-            if (mouse.isRight(evt)){
-                //console.log ("is a right click");
-                this.openCustomContextDialog(item);
-            }
-        },
-
         openCustomContextDialog: function(item){
             var customContextDialog = new TooltipDialog({});                                                              
             customContextDialog.set('content', this.customContextDialogContent(item));

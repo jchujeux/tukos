@@ -230,7 +230,7 @@ class UserInformation{
     }
     public function customViewId($objectName, $view, $paneMode = 'Tab'){
         $customViewIds = $this->customViewIds();
-        return Utl::drillDown($customViewIds, [$objectName, strtolower($view), strtolower($paneMode)]);
+        return Utl::drillDown($customViewIds, [strtolower($objectName), strtolower($view), strtolower($paneMode)]);
     }
     
     public function getCustomView($objectName, $view, $paneMode = 'Tab', $keys = [], $notFoundValue=[]){

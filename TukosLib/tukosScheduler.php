@@ -7,14 +7,15 @@ namespace TukosLib;
 use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\TukosFramework as Tfk;
 
-require dirname(__DIR__) . '/TukosLib/TukosFramework.php';
-require dirname(__DIR__) . '/TukosLib/cmdenv.php';
+$phpDir = dirname(__DIR__) . '/';
+require $phpDir . 'TukosLib/TukosFramework.php';
+require $phpDir . 'TukosLib/cmdenv.php';
 
 $params = getopt('', ['app:', 'class:']);
 
 $appName = $params['app'];
 
-Tfk::initialize('commandLine', $appName);
+Tfk::initialize('commandLine', $appName, $phpDir);
 
 $configure =  '\\' . $appName . '\\Configure';
 

@@ -1,8 +1,8 @@
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on", "dojo/mouse", 
-         "dijit/form/TextBox", "dijit/form/Button", "dijit/TooltipDialog", "dijit/popup", "dijit/layout/ContentPane", "dijit/Menu", "dijit/MenuItem", "dijit/registry", "dgrid/extensions/DnD",
+define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on", 
+         "dgrid/extensions/DnD",
          "tukos/_GridEditMixin", "tukos/_GridEditDialogMixin", "tukos/TukosDgrid", "tukos/dstore/MemoryTreeObjects", "tukos/dstore/LazyMemoryTreeObjects",
          "tukos/DialogConfirm", "tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, arrayUtil, lang, on, mouse, TextBox, Button, TooltipDialog, popup, ContentPane, Menu, MenuItem, registry, DnD, _GridEditMixin, _GridEditDialogMixin, TukosDgrid, MemoryTreeObjects, LazyMemoryTreeObjects,
+    function(declare, arrayUtil, lang, on, DnD, _GridEditMixin, _GridEditDialogMixin, TukosDgrid, MemoryTreeObjects, LazyMemoryTreeObjects,
     		 DialogConfirm, utils, eutils, mutils, Pmg, messages){
     var widget =  declare([TukosDgrid, DnD, _GridEditMixin, _GridEditDialogMixin], {
 

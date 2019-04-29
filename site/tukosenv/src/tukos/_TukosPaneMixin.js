@@ -1,18 +1,15 @@
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when", "dojo/promise/all", "dojo/mouse", "dijit/registry", "dijit/TooltipDialog", "dijit/popup", "tukos/utils", "tukos/dateutils",
-         "tukos/widgetUtils", "tukos/menuUtils", "tukos/evalutils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, arrayUtil, lang, when, all, mouse, registry, TooltipDialog, popup, utils, dutils,  wutils, mutils, eutils, wcutils, Pmg, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all", "dojo/on", "dijit/registry", "tukos/utils",
+         "tukos/widgetUtils", "tukos/evalutils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
+    function(declare, lang, when, all, on, registry, utils,  wutils, eutils, Pmg, messages){
     return declare(null, {
         decorate: function(widget){
-            var self = this, menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
-            menuItemsArgs = (widgetName === 'id' || utils.in_array(widgetName, this.objectIdCols))
-                ? menuItemsArgs.concat(lang.hitch(this, wcutils.idColsContextMenuItems)(widget))
-                : menuItemsArgs;
-            mutils.setContextMenu(widget,{atts: {targetNodeIds: [widget.domNode]}, items: menuItemsArgs});
-
-            widget.on("mousedown", function(evt){// for some reason event contextmenu does not work on grids(!)
-                if (mouse.isRight(evt)/* && !widget.pane.form*/){
-                	mutils.showContextMenu(widget);
-                }
+            var self = this;
+        	require(["tukos/menuUtils", "tukos/widgets/widgetCustomUtils"], function(mutils, wcutils){
+                menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
+                menuItemsArgs = (widgetName === 'id' || utils.in_array(widgetName, self.objectIdCols))
+                    ? menuItemsArgs.concat(lang.hitch(self, wcutils.idColsContextMenuItems)(widget))
+                    : menuItemsArgs;
+                mutils.buildContextMenu(widget,{type: 'DynamicMenu', atts: {targetNodeIds: [widget.domNode]}, items: menuItemsArgs});
             });
         },
         getWidget: function(widgetName){
@@ -51,7 +48,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/when
         emptyWidgets: function(widgetsName){
             var self = this,
                 onLoadDeferredWidgets = [];
-            arrayUtil.forEach(widgetsName, function(widgetName, index){
+            widgetsName.forEach(function(widgetName, index){
                 if (self.doNotEmpty && utils.in_array(widgetName, self.doNotEmpty)){
                 	return;
                 }

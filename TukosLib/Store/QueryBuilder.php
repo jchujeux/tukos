@@ -151,6 +151,9 @@ class QueryBuilder{
                 break;
             case 'BETWEEN':
             case 'NOT BETWEEN':
+                if (is_string($values)){
+                    $values = json_decode($values);
+                }
                 $whereString = $col . ' ' . $opr . ' :' . $this->bindKey($query, $values[0]) . ' AND :' . $this->bindKey($query, $values[1]);
                 break;
             default:

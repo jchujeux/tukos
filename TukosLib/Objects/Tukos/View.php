@@ -13,14 +13,8 @@ class View extends AbstractView {
         parent::__construct($objectName, $translator, 'Parent', 'Description');
         $customDataWidgets = [
             'name' => ['atts' => ['edit' => ['style' => ['width' => '30em']]]],
-/*
             'object' => ViewUtils::textBox($this, 'Object', [
-                'atts' => ['edit' => ['style' => ['width' => '20em']], 'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]],
                 'objToOverview' => ['translate' => ['tr' => ['class' => $this]]],
-            ])
-*/
-            'object' => ViewUtils::textBox($this, 'Object', [
-                'atts' => ['overview'  => ['editorArgs' => ['storeArgs' => ['data' => Utl::idsNamesStore(Directory::getObjs(), $this->tr)]], 'renderCell' => 'renderStoreValue']],
             ])
         ];
         $this->customize($customDataWidgets);

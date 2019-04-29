@@ -52,7 +52,7 @@ class Get extends ViewsGetModel {
         }else{
             //$parentId = $query['storeatts']['where']['parentid'];
             if (isset($query['params']['object'])){
-            	$utr = Tfk::$registry->get('translatorsStore')->untranslator('TukosLib', ['tukosLib']);
+            	$utr = Tfk::$registry->get('translatorsStore')->untranslator('TukosLib', ['tukosLib', 'common']);
             	$object = $utr($query['params']['object']);
             }
         	$where = $this->user->filter($query['storeatts']['where']);

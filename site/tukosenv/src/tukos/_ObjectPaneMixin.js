@@ -2,15 +2,15 @@
  *  ObjectPane mixin for dynamic widget information handling (widgets values and attributes that may be modified by the user or the server)
  *   - usage: 
  */
-define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when", "dojo/promise/all", "dojo/ready", "dijit/registry", "dojo/request", 
-            "tukos/utils", "tukos/dateutils", "tukos/widgetUtils", "tukos/widgets/widgetCustomUtils", "tukos/_TukosPaneMixin",
-            "tukos/DialogConfirm", "tukos/PageManager", "dojo/json", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, dcl, when, all, ready, registry, request, utils, dutils, wutils, wcutils, _TukosPaneMixin, DialogConfirm, Pmg, JSON, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when", "dojo/promise/all", "dojo/ready", "dijit/registry", "dojo/request", 
+            "tukos/utils", "tukos/_TukosPaneMixin",
+            "tukos/PageManager", "dojo/json", "dojo/i18n!tukos/nls/messages"], 
+    function(declare, lang, dcl, when, all, ready, registry, request, utils, _TukosPaneMixin, Pmg, JSON, messages){
     return declare(_TukosPaneMixin, {
 
         editInNewTab: function(widget){
             var value = this.valueOf(widget['widgetName']);
-            Pmg.tabs.request({object: (Pmg.objectName(value) || this.object), view: 'Edit', mode: 'Tab', action: 'Tab', query: {id: value}});
+            Pmg.tabs.gotoTab({object: (Pmg.objectName(value) || this.object), view: 'Edit', mode: Pmg.isMobile() ? 'Mobile' : 'Tab', action: 'Tab', query: {id: value}});
         },
         showInNavigator: function(widget){
         	Pmg.showInNavigator(this.valueOf(widget['widgetName']));
@@ -30,16 +30,17 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         serverDialog: function(urlArgs, data, emptyBeforeSet, defaultDoneMessage, markResponseIfChanged){
-            var self = this;
+            var self = this, noLoadingIcon = this.noLoadingIcon;
             Pmg.setFeedback(messages.actionDoing);
             urlArgs.object = urlArgs.object || this.object;
             urlArgs.view = urlArgs.view || this.viewMode;
             urlArgs.mode = urlArgs.mode || this.paneMode;
             urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: this.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
             return all(data).then(lang.hitch(this, function(data){
-                return Pmg.serverDialog(urlArgs, {data: data}, {widget: this.parent, att: 'title', defaultMessage: defaultDoneMessage}).then(lang.hitch(this, function(response){
+                return Pmg.serverDialog(urlArgs, {data: data}, noLoadingIcon ? defaultDoneMessage : {widget: this.parent, att: 'title', defaultMessage: defaultDoneMessage}).then(lang.hitch(this, function(response){
 	                    if (response['data'] === false){
-	                        parent.set('title', title);
+	                        //if (!noLoadingIcon){parent.set('title', title)};
+	                        return response;
 	                    }else if(response['data'] !== undefined){
 	                        this.markIfChanged = self.watchOnChange = false;
 	                        this.watchContext = 'server';
@@ -56,12 +57,15 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
 	                                this.markIfChanged = true;
 	                                this.watchContext = 'user';
 	                                ready(function(){
-	                                    Pmg.tabs.currentPane().resize();
+	                                    if (Pmg.tabs){
+		                                	Pmg.tabs.currentPane().resize();	                                    	
+	                                    }
 	                                });
 	                                return response;
 	                            }));
 	                        }));
 	                    }else{
+	                        //if (!noLoadingIcon){parent.set('title', title)};
 	                    	this.resetChangedWidgets();
 	                        return response;
 	                    }
@@ -92,18 +96,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                 url = utils.mergeRecursive(url, actionDescriptions.urlArgs);
             }
             this.serverDialog(url, this.changedValues(), [], messages.actionDone, true); 
-        },
-
-        checkChangesDialog: function(action){
-            var self = this;
-            if (!this.hasChanged()){
-                return action();
-            }else{
-                return (new DialogConfirm({title: messages.fieldsHaveBeenModified, content: messages.sureWantToForget, hasSkipCheckBox: false})).show().then(
-                    function(){return action()},
-                    function(){Pmg.setFeedback(messages.actionCancelled);}
-                );
-            }
         },
         tabContextId: function(){
             return this.contextPaths[0][this.contextPaths[0].length -1]['id'];

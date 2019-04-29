@@ -54,9 +54,10 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
                         			paneDescription: {
                         				widgetsDescription: {
                         					message: {type: 'HtmlContent', atts: {label: '', style: {marginLeft: '3em'}}},
-                        					cols: {type: 'ReadonlyGrid', atts: {
-                        						label: Pmg.message('columns to modify'), allowSelectAll: true, collection: new Memory({data: []}),
-                        						columns: {selector: {selector: 'checkbox', width: 50}, col: {label: Pmg.message('column'), width: 200}, value: {label: Pmg.message('newValue')}}}},
+                        					//cols: {type: 'ReadonlyGrid', atts: {
+                            				cols: {type: 'BasicGrid', atts: {
+                            					label: Pmg.message('columns to modify'), allowSelectAll: true, collection: new Memory({data: []}),
+                            					columns: {selector: {selector: 'checkbox', width: 50}, col: {label: Pmg.message('column'), width: 200}, value: {label: Pmg.message('newValue')}}}},
                         					allpages: {type: 'CheckBox', atts: {label: Pmg.message('allpages'), onClick: function(evt){
                         							var pane = tooltipDialog.pane, getWidget = lang.hitch(pane, pane.getWidget), messageWidget = getWidget('message');
                         							if (this.checked){

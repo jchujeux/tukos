@@ -1,11 +1,9 @@
 
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready",  "dojo/on", "dojo/mouse", "tukos/_PanesManager", "tukos/TukosTab",  "dijit/registry", "dijit/Dialog", "dijit/Menu", "dijit/MenuItem", 
-         "dijit/PopupMenuItem", "tukos/utils", "tukos/PageManager", "dojo/json"], 
-    function(declare, lang, dom, ready, on, mouse, _PanesManager, TukosTab, registry, Dialog, Menu, MenuItem, PopupMenuItem, utils, Pmg, JSON){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tukos/_PanesManager", "tukos/TukosTab",  "dijit/registry", "dijit/Dialog", "tukos/utils", "tukos/PageManager", "dojo/json"], 
+    function(declare, lang, dom, ready, _PanesManager, TukosTab, registry, Dialog, utils, Pmg, JSON){
     return declare([_PanesManager], {
         constructor: function(args){
-            this.container = args.container;
-            var self = this;
+            var self = this, descriptions = this.tabsDescription, created, selected;
             var unloadAction = function(){
                 var openedTabs = self.container.getChildren(),
                     changedTabs = [];
@@ -23,7 +21,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready",  "do
                 }                
             }
             window.onbeforeunload = unloadAction;
-            on(this.container.tablist.domNode, '.tabLabel:mousedown', lang.hitch(this, self.mouseDownCallback));
+            this.container.on(".dijitTab:contextmenu", lang.hitch(this, this.contextMenuCallback));
+        	for (var i in descriptions){
+        		created = this.create(descriptions[i]);
+        		if (descriptions[i].selected){
+        			selected = created;
+        		}
+        	}
             ready(lang.hitch(this, function(){
                 this.container.watch("selectedChildWidget", function(name, oldTab, newTab){
                     var form = newTab.form;
@@ -31,9 +35,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready",  "do
                         form.setUserContextPaths();
                     }
                 });
+                if (selected){
+                	self.container.selectChild(selected);
+                }
             }));
         },
-
         create: function(args){
             var theNewTab = new TukosTab(args), form = theNewTab.form;
             ready(lang.hitch(this, function(){

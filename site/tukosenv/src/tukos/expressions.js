@@ -154,7 +154,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
     	onBlur: function(textArea){
     		console.log('entering expressions.onBlur');
     		var expression = textArea.parentNode, span = this.span(expression), newValue = textArea.value, oldValue = textArea.oldValue;//textArea.innerHTML ||span.innerHTML;
-    		if (lastKeyDown !== keys.ESCAPE && newValue !== oldValue){
+    		if (lastKeyDown !== keys.ESCAPE/* && newValue !== oldValue*/){
 	    		if ((newValue || ' ').charAt(0) === '='){
 	    			this.setFormula(expression, newValue)
 	    		}else{

@@ -3,8 +3,8 @@
  *      -> 'overview': used as read-only cells, selector allow to select specific actions on selected rows via the save button
  */
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/dom-construct", "dojo/string", "dojo/query", "dgrid/extensions/DnD", "tukos/utils", "tukos/PageManager", "tukos/TukosDgrid", "tukos/dstore/Request",
-		 "tukos/widgets/WidgetsLoader", "dijit/form/TextBox", "dijit/form/Button", "dijit/TooltipDialog", "dijit/popup", "dijit/layout/ContentPane", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, when, on, dct, string, query, DnD, utils, Pmg, TukosDgrid, Request, WidgetsLoader, TextBox, Button, TooltipDialog, popup, ContentPane, messages){
+		 "tukos/widgets/WidgetsLoader", "dijit/form/TextBox", "dijit/form/Button", "dijit/TooltipDialog", "dijit/popup", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+    function(declare, lang, when, on, dct, string, query, DnD, utils, Pmg, TukosDgrid, Request, WidgetsLoader, TextBox, Button, TooltipDialog, popup, messages){
     return declare([TukosDgrid, DnD], {
         constructor: function(args){
             args.storeArgs.sortParam = args.storeArgs.sortParam || Pmg.getItem('sortParam');

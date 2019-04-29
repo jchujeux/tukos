@@ -14,7 +14,7 @@ class Itm {
     public static $categoryOptions    = [
         'app-svc-not-avail', 'app-data-issue', 'app-bug', 'app-perf', 'app-other', 'hard-server-down', 'hard-net-issue', 'hard-auto-alert', 'hard-printer-issue', 'hard-other', 'other'
     ];
-    public static $ciTypeOptions      = ['system', 'hardware', 'application'];
+    public static $ciTypeOptions      = ['system', 'hardware', 'application', 'documentation'];
     public static $ciStatusOptions    = ['development', 'test', 'production', 'maintenance', 'retired'];
     public static $trustOptions       = ['TRUSTED'/* */, 'UNKNOWN'/* */, 'SUSPECT'/* */, 'MALICIOUS'/* */,];
     public static $osFamilyOptions    = ['Windows'/* */, 'Linux'/* */, 'FreeBSD'/* */, 'MacOS'/* */, 'IOS'/* */, 'Android'/* */, 'Other'/* */,];

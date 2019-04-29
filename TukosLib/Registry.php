@@ -13,10 +13,10 @@ class Registry{
         $this->loader->register();
         require Tfk::$phpVendorDir . 'autoload.php';
         
-        $this->loader->add('TukosLib\\', Tfk::$phpTukosDir);
-        $this->loader->add('TukosApp\\', Tfk::$phpTukosDir);
-        $this->loader->add('TukosSports\\', Tfk::$phpTukosDir);
-        $this->loader->add('TukosBus\\', Tfk::$phpTukosDir);
+        $this->loader->add('TukosLib\\', Tfk::$tukosPhpDir);
+        $this->loader->add('TukosApp\\', Tfk::$tukosPhpDir);
+        $this->loader->add('TukosSports\\', Tfk::$tukosPhpDir);
+        $this->loader->add('TukosBus\\', Tfk::$tukosPhpDir);
         
         $this->loader->add('Aura\Di\\'    , $auraDir . 'package/Aura.Di/src/');
 
@@ -24,6 +24,11 @@ class Registry{
         $this->container = new DiContainer(new \Aura\Di\Forge(new \Aura\Di\Config));
         
         if ($this->mode === 'interactive'){
+            Tfk::$dojoBaseLocation = getenv('dojoBaseLocation');
+            Tfk::$tukosBaseLocation = getenv('tukosBaseLocation');
+            Tfk::$tukosFormsDojoBaseLocation = Tfk::$dojoCdnBaseLocation = getenv('dojoCdnBaseLocation');
+            Tfk::$tukosFormsDomainName = Tfk::$tukosDomainName = getenv('tukosDomainName');
+            Tfk::$tukosFormsTukosBaseLocation = 'https://' . Tfk::$tukosDomainName . '/tukos/tukosenv/release/';
             $this->loader->add('Aura\View\\'     , $auraDir . 'package/Aura.View/src/');
             $this->loader->add('Aura\Web\\'      , $auraDir . 'package/Aura.Web/src/');
             $this->loader->add('Aura\Session\\'  , $auraDir . 'package/Aura.Session/src/');
@@ -80,7 +85,7 @@ class Registry{
             $this->isMobile = strtolower(substr($this->controller, 0, 6)) === 'mobile' ? true : false;
 
             $this->pageUrl          = $map->generate('tukosController', ['application' => $this->appName, 'controller' => ($this->isMobile ? 'Mobile' : '') . 'Page']);
-            $this->dialogueUrl      = $map->generate('tukosController', ['application' => $this->appName, 'controller' => ($this->isMobile ? 'Mobile' : '') . 'Dialogue']);
+            $this->dialogueUrl      = $map->generate('tukosController', ['application' => $this->appName, 'controller' => 'Dialogue']);
         }
         $this->container->set('urlFactory', new \Aura\Uri\Url\Factory($_SERVER));
         $urlFactory = $this->get('urlFactory');

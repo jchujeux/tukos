@@ -87,7 +87,7 @@ trait  GridWidgets{
         $defAtts = ['title' => '', 
                     'storeArgs' => ['useRangeHeaders' => true]/*, 'selectionMode' => 'none'*/, 'allowSelectAll' => true, 'minRowsPerPage' => 25, 'maxRowsPerPage' => 50
         ];
-        $defAtts['columns'] = [['selector' => 'checkbox', 'label' => Tfk::tr('selector'), 'width' => 50, 'rowsFilters' =>  false/*, 'unhidable' => true*/]];
+        $defAtts['columns'] = [['selector' => 'checkbox', 'label' => Tfk::tr('selector'), 'width' => 30, 'rowsFilters' =>  false/*, 'unhidable' => true*/]];
         foreach ($atts['colsDescription'] as $col => $description){
             $defAtts['columns'][$col] = self::colGridAtts($description, $col, 'overview');
         }

@@ -1,7 +1,7 @@
-define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/on", "dojo/ready", "dijit/registry", "dijit/popup", 
-         "dijit/form/Button", "dijit/form/RadioButton", "dijit/form/TextBox", "dojo/request", "dojo/when", "tukos/utils", "tukos/TukosTooltipDialog", 
+define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/on", "dojo/ready", "dijit/registry", 
+         "dojo/request", "dojo/when", "tukos/utils", "tukos/TukosTooltipDialog", 
          "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, dct, on, ready, registry, popup, Button, RadioButton, TextBox, request, when, utils, TukosTooltipDialog, Pmg, messages){
+    function(arrayUtil, declare, lang, dct, on, ready, registry, request, when, utils, TukosTooltipDialog, Pmg, messages){
     return declare(null, {
         
         openCustomDialog: function(){
@@ -163,7 +163,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                     Pmg.tabs.refresh('TabItemCustomViewSave', {id: form.itemcustomviewid/*, vobject: form.object, view: form.viewMode.toLowerCase()*/, customization: form.customization}, {values: true});
                     break;
                 case 'itemCustom': 
-                    //Pmg.tabs.refresh('TabSave', {custom: utils.newObj([[form.viewMode.toLowerCase(), utils.newObj([[form.paneMode.toLowerCase(), form.customization]])]])}, {values: true});
                     Pmg.tabs.refresh('TabSave', {custom: utils.setObject([form.viewMode.toLowerCase(), form.paneMode.toLowerCase()], form.customization)}, {values: true});
                     break;
                 default:

@@ -1,7 +1,6 @@
-define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/on", "dojo/mouse",
-         "dijit/form/TextBox", "dijit/form/Button", "dijit/TooltipDialog", "dijit/popup", "dijit/layout/ContentPane", "dijit/Menu", "dijit/MenuItem",
-         "dijit/registry", "tukos/TukosDgrid", "tukos/dstore/MemoryTreeObjects", "dgrid/extensions/DnD", "tukos/_GridEditMixin",  "tukos/DialogConfirm", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, on, mouse, TextBox, Button, TooltipDialog, popup, ContentPane, Menu, MenuItem, registry, TukosDgrid, MemoryTreeObjects, DnD, _GridEditMixin, DialogConfirm, messages){
+define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/on",
+         "tukos/TukosDgrid", "tukos/dstore/MemoryTreeObjects", "dgrid/extensions/DnD", "tukos/_GridEditMixin", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+    function(declare, lang, on, TukosDgrid, MemoryTreeObjects, DnD, _GridEditMixin, messages){
     var widget = declare([TukosDgrid, DnD, _GridEditMixin], {
 
         constructor: function(args){
@@ -34,10 +33,5 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/on", "dojo/mouse",
         }
 
     }); 
-/*    
-    widget.loadDependingWidgets = function(Widget, atts){
-    	return _GridEditMixin.loadDependingWidgets(Widget, atts);
-    }
-*/    
     return widget;
 });

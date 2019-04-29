@@ -20,7 +20,6 @@ class Directory{
         'scripts'           => 'Admin\Scripts',
         'scriptsoutputs'    => 'Admin\Scripts\Outputs',
         'health'            => 'Admin\Health',
-        'healthtables'      => 'Admin\Health\Tables',
         'people'            => 'Collab\People',
         'organizations'     => 'Collab\Organizations',
         'teams'             => 'Collab\Teams',

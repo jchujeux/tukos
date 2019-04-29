@@ -19,7 +19,7 @@
     <script type="text/javascript">
 
     require([
-         "dojo/dom", "dojo/dom-construct", "dojo/request", "dijit/registry", "dojox/mobile", "dojox/mobile/view", "dojox/mobile/heading", "tukos/mobile/FormLayout",
+         "dojo/dom", "dojo/dom-construct", "dojo/request", "dijit/registry", "dojox/mobile", "dojox/mobile/View", "dojox/mobile/Heading", "tukos/mobile/FormLayout",
          //"dojox/mobile/compat",
          "dojo/domReady!"
      ], function (dom, dct, request, registry, Mobile, View, Heading, FormLayout) {
@@ -52,7 +52,7 @@
     });
 </script>
 </head>
-<body style="visibility:hidden;">
+<body >
     <div id="loginView"></div>
 </body>
 </html>
