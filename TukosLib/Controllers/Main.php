@@ -24,10 +24,8 @@ class Main{
 	                $controllerClass = 'TukosLib\\Controllers\\' . $request['controller'];
 	                $controller = new $controllerClass();
 	                if($controller->respond($request, $query)){
-	                    //$dialogue->sendResponse();
 	                }
 	            }catch(\Exception $e){
-	                //Tfk::debug_mode('log', 'an exception occured while responding to your request: ', $e->getMessage());
 	                Feedback::add(Tfk::tr('errorrespondingrequest') . ': ' . $e->getMessage());
 	                $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
 	            }            
@@ -41,7 +39,6 @@ class Main{
 	            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
 	            file_put_contents(Tfk::$tukosTmpDir . '/tukosconfigstoreprofiles.html', $storeProfilesOutput);
             }else{
-            	//Tfk::debug_mode('log', Tfk::tr('usersitemdoesnotexistforusername'));
             	Feedback::add(Tfk::tr('usersitemdoesnotexistforusername'));
             	$dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
             }

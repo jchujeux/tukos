@@ -156,6 +156,10 @@ class QueryBuilder{
                 }
                 $whereString = $col . ' ' . $opr . ' :' . $this->bindKey($query, $values[0]) . ' AND :' . $this->bindKey($query, $values[1]);
                 break;
+            case 'RLIKE':
+                if ($values === ''){
+                    $values = '.*';
+                }
             default:
                 if (is_array($values)){
                     $whereString = $col . ' ' . $opr . ' (:' . $this->bindKey($query, $values) . ')';

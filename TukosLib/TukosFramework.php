@@ -12,12 +12,11 @@ class TukosFramework{
     const mailServerFolder = '/Xampp/MercuryMail/';
     const backupBinDir = '/xampp/mysql/bin/';
 
-    const tukosSite = '/tukos/site/';
     const dojoModules = ['dojo', 'dijit', 'dojox'];
 
     const publicDir = '/tukos/'; // this is the beginnning of the url path, i.e. '/tukos/' is aliased with '/tukos/site/' in apache config
     
-    public static $tukosPhpDir, $phpVendorDir, $vendorDir = [], $tukosTmpDir,
+    public static $tukosPhpDir, $phpVendorDir, $vendorDir = [], $tukosTmpDir, $tukosPhpImages,
                   $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment, $tukosBaseLocation, $dojoBaseLocation, $tukosFormsDojoBaseLocation, $dojoCdnBaseLocation, $tukosFormsTukosBaseLocation, 
                   $tukosDomainName, $tukosFormsDomainName, $htmlToPdfCommand, $phpCommand; 
   
@@ -25,6 +24,7 @@ class TukosFramework{
         //self::$startMicroTime = microtime(true);
         self::$tukosPhpDir = $phpDir;
         self::$tukosTmpDir = $phpDir . '/tmp/';
+        self::$tukosPhpImages = $phpDir . 'site/images/';
         self::$phpVendorDir = self::$tukosPhpDir . 'vendor/';
         $vendorDirs = ['aura' => 'auraphp-system-1.0.0/', 'auraV2' => 'Aura-2.1.0', 'pear' => '', 'zend' => 'zf1/zend-console-getopt/library/'];
         array_walk($vendorDirs, function($vendorDir, $module){

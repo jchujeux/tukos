@@ -8,7 +8,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_PanesManager", "tukos/
         	this.container.selectChild = function(target, transition){
         		self.container.selectedChildWidget.performTransition(target.id, transition || 1, "slide");
         		self.container.selectedChildWidget = target;
-        		
         	}
         	for (var i in descriptions){
         		created = this.create(descriptions[i]);
@@ -51,13 +50,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_PanesManager", "tukos/
         },
         navigationView: function(){
         	if (this._navigationView){
-        		this.container.selectChild(this._navigationMenu);
+        		this.container.selectChild(this._navigationView);
         	}else{
-        		var self = this;
-        		require(["tukos/mobile/NavigationView"], function(NavigationView){
-        			self.container.addChild(self._navigationView = new NavigationView(Pmg.getItem('menuBarDescription')));
-        			self.container.selectChild(self._navigationView);
-        		});
+        		this._navigationView = this.create({title: Pmg.message('NavigationView'), navigationContent: Pmg.getItem('menuBarDescription')});
+        		this.container.selectChild(this._navigationView);
         	}
         }
     }); 

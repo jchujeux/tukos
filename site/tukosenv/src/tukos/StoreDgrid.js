@@ -1,9 +1,8 @@
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on", 
-         "dgrid/extensions/DnD",
+define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on", "dgrid/extensions/DnD",
          "tukos/_GridEditMixin", "tukos/_GridEditDialogMixin", "tukos/TukosDgrid", "tukos/dstore/MemoryTreeObjects", "tukos/dstore/LazyMemoryTreeObjects",
-         "tukos/DialogConfirm", "tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+         "tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
     function(declare, arrayUtil, lang, on, DnD, _GridEditMixin, _GridEditDialogMixin, TukosDgrid, MemoryTreeObjects, LazyMemoryTreeObjects,
-    		 DialogConfirm, utils, eutils, mutils, Pmg, messages){
+    		 utils, eutils, mutils, Pmg, messages){
     var widget =  declare([TukosDgrid, DnD, _GridEditMixin, _GridEditDialogMixin], {
 
         constructor: function(args){
@@ -132,10 +131,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
 
         addSubRow: function(item){
             if (!this.clickedRow.data.id){
-                var dialog = new DialogConfirm({title: messages.attemptToAddSubRowtoNewRow, content: messages.saveFirst, hasSkipCheckBox: false,
-                                            hasCancelButton: false});
-                dialog.show().then(function(){},/*user pressed OK: No action*/
-                                   function(){});/* user pressed Cancel: no action*/ 
+                Pmg.alert({title: messages.attemptToAddSubRowtoNewRow, content: messages.saveFirst});
             }else{
                 var init = {}
                     grid = this;
@@ -153,10 +149,5 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
             }
         }
     }); 
-/*
-    widget.loadDependingWidgets = function(Widget, atts){
-    	return _GridEditMixin.loadDependingWidgets(Widget, atts);
-    }
-*/    
     return widget;
 });

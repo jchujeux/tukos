@@ -1,6 +1,6 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "dijit/registry", "dijit/Dialog", 
-         "tukos/utils", "tukos/menuUtils", "tukos/PageManager", "tukos/_ViewCustomMixin", "tukos/DialogConfirm", "dojo/json", "dojo/i18n!tukos/nls/messages"], 
-  function(declare, lang, ready, on, registry, Dialog, utils, mutils, Pmg, _ViewCustomMixin, DialogConfirm, JSON, messages ){
+         "tukos/utils", "tukos/menuUtils", "tukos/PageManager", "tukos/_ViewCustomMixin", "dojo/json"], 
+  function(declare, lang, ready, on, registry, Dialog, utils, mutils, Pmg, _ViewCustomMixin, JSON ){
     return declare([ _ViewCustomMixin], {
     	constructor: function(args){
     		declare.safeMixin(this, args);
@@ -13,7 +13,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
     	contextMenuCallback: function(evt){
             var self = this, pane = this.currentPane();
             if (evt.target.checked || (evt.target.checked !== false && pane.isObjectPane() && pane.title === registry.getEnclosingWidget(evt.target).label)){
-                mutils.setContextMenuItems(this.container, [{atts: {label: messages.refresh, onClick: function(evt){self.refresh('Tab', []);}}}, {atts: {label: messages.customization, onClick: lang.hitch(this, this.openCustomDialog)}}]);
+                mutils.setContextMenuItems(this.container, [{atts: {label: Pmg.message('refresh'), onClick: function(evt){self.refresh('Tab', []);}}}, {atts: {label: Pmg.message('customization'), onClick: lang.hitch(this, this.openCustomDialog)}}]);
             }else{
                 mutils.setContextMenuItems(this.container, []);
             }
@@ -47,7 +47,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
                         currentPane.refresh(response.formContent);
                         ready(function(){
                             (currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);
-                            Pmg.setFeedback(response['feedback'], messages.tabRefreshed);
+                            Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
                             currentPane.resize();
                         });
                         return response;
@@ -64,9 +64,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             if (!form.hasChanged()){
                 return action();
             }else{
-                return (new DialogConfirm({title: messages.fieldsHaveBeenModified, content: messages.sureWantToForget, hasSkipCheckBox: false})).show().then(
+                return Pmg.confirm({title: Pmg.message('fieldsHaveBeenModified'), content: Pmg.message('sureWantToForget')}).then(
                     function(){return action()},
-                    function(){Pmg.setFeedback(messages.actionCancelled);}
+                    function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
                 );
             }
         },

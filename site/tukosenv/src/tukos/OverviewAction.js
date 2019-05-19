@@ -1,12 +1,11 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/ready", "dojo/string", "dijit/form/Button", "dijit/registry", "tukos/PageManager", "tukos/utils", "tukos/DialogConfirm", "tukos/Download", "dojo/json", 
-		 "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogConfirm, download, JSON, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/string", "dijit/form/Button", "dijit/registry", "tukos/PageManager", "tukos/utils", "tukos/Download", "dojo/json"], 
+function(declare, lang, ready, string, Button, registry, Pmg, utils, download, JSON){
     var toProcess;
 	return declare([Button], {
         postCreate: function(){
             this.inherited(arguments);
             var self = this;
-            on(this, "click", function(evt){
+            this.on("click", function(evt){
                 var form = self.form, grid = form.getWidget(self.grid);
                 evt.stopPropagation();
                 evt.preventDefault();
@@ -27,7 +26,7 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
                                 self.dialogDescription.paneDescription.form = self.form;
                                 self.dialogDescription.paneDescription.tabContextId = lang.hitch(self.form, self.form.tabContextId);
                                 self.tooltipDialog = new TukosTooltipDialog(self.dialogDescription);
-                                on(self.tooltipDialog, 'blur', self.tooltipDialog.close);
+                                self.tooltipDialog.on('blur', self.tooltipDialog.close);
                                 self.tooltipDialog.open({around: self.domNode});
                             });
                         }
@@ -35,19 +34,11 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
 	                	lang.hitch(self, self.resetAction());
                     }
                 }else if (toProcess.ids.length == 0){
-                    var dialog = new DialogConfirm({title: messages.noRowSelectedNoAction + toProcess.warning, hasSkipCheckBox: false, hasCancelButton: false});
-                    dialog.show().then(
-                        function(){Pmg.setFeedback(messages.noActionDone);},
-                        function(){Pmg.setFeedback(messages.noActionDone);}
-                    );                                 
+                    Pmg.alert({title: Pmg.message('noRowSelectedNoAction') + toProcess.warning});
                 }else{
                     if (action === 'Modify'){
                     	if (utils.empty(grid.modify.values)){
-	                    	var dialog = new DialogConfirm({title: messages.noModifySelectedNoAction, hasSkipCheckBox: false, hasCancelButton: false});
-	                        dialog.show().then(
-	                            function(){Pmg.setFeedback(messages.noActionDone);},
-	                            function(){Pmg.setFeedback(messages.noActionDone);}
-	                        );
+	                    	Pmg.alert({title: Pmg.message('noModifySelectedNoAction'), content: ''});
                     	}else{
                             require(["tukos/TukosTooltipDialog", "dstore/Memory"], function(TooltipDialog, Memory){
 	                        	var tooltipDialog = self.tooltipDialog || (self.tooltipDialog = new TooltipDialog({
@@ -75,12 +66,12 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
                                             	if (toProcess.all){
                                             		urlArgs.query.storeatts = {where: grid.userFilters()};
                                             	}
-                        						self.form.serverDialog(urlArgs, {ids: toProcess.all || toProcess.ids, values: grid.modify.values}, [], messages.actionDone).then(function(response){
+                        						self.form.serverDialog(urlArgs, {ids: toProcess.all || toProcess.ids, values: grid.modify.values}, [], Pmg.message('actionDone')).then(function(response){
             	                                    tooltipDialog.close();
                         							grid.revert();
                                             	});	                        						
                         					}}},
-                        					cancel: {type: 'TukosButton', atts: {label: messages.cancel, onClick: function(evt){tooltipDialog.close();}}}
+                        					cancel: {type: 'TukosButton', atts: {label: Pmg.message('cancel'), onClick: function(evt){tooltipDialog.close();}}}
                         				},
                         				layout: {
                         					tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false},
@@ -119,8 +110,7 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
                     		
                     	}
                     }else{
-                        var dialog = new DialogConfirm({title: messages['overview' + action] + toProcess.ids.length + messages.entries + toProcess.warning, content: messages.sureWantToContinue, hasSkipCheckBox: false});
-                        dialog.show().then(
+                        Pmg.confirm({title: Pmg.message('overview' + action) + toProcess.ids.length + Pmg.message('selectedEntries') + toProcess.warning, content: Pmg.message('sureWantToContinue')}).then(
                             function(){
                             	if(action === "Process" && (queryParams || {}).process === "exportItems"){
                                     var visibleCols = [];
@@ -131,10 +121,9 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
                                     });
                                 	download.download({object: form.object, view: form.viewMode, action: action, query: {params: queryParams}}, 
                                     		{data: {ids: JSON.stringify(toProcess.ids), visibleCols: JSON.stringify(visibleCols), modifyValues: JSON.stringify(grid.modify.values)}}
-                            				//{data: JSON.stringify({ids: toProcess.ids, visibleCols: visibleCols, modifyValues: grid.modify.values})}
                                 	);
                                 }else{// is modify
-                                	self.form.serverDialog({action: action, query: queryParams ? {params: queryParams} : {}}, {ids: toProcess.ids, values: grid.modify}, [], messages.actionDone).then(function(response){
+                                	self.form.serverDialog({action: action, query: queryParams ? {params: queryParams} : {}}, {ids: toProcess.ids, values: grid.modify}, [], Pmg.message('actionDone')).then(function(response){
 	                                    if (needsRevert){
 	                                    	grid.revert();
 	                                    }
@@ -142,7 +131,7 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
                                 }
                             },
                             function(){
-                                Pmg.setFeedback(messages.actionCancelled);
+                                Pmg.setFeedback(Pmg.message('actionCancelled'));
                             }
                         );
                     }
@@ -159,23 +148,23 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
             	filter.contextpathid = contextpathid
             }
             
-        	Pmg.setFeedback(messages.actionDoing);
+        	Pmg.setFeedback(Pmg.message('actionDoing'));
             grid.set('collection', grid.store.filter(filter));
-            Pmg.setFeedback(messages.actionDone);
+            Pmg.setFeedback(Pmg.message('actionDone'));
         },
 
         resetAction: function(options){
             var form = this.form, parent = form.parent, title = parent.get('title'), url = require.toUrl('tukos/resources/images/loadingAnimation.gif'), grid = form.getWidget(this.grid), queryParams = this.queryParams;
         	if (queryParams){
-                form.serverDialog({action: 'Reset', query: {params: queryParams}}, options || {}, [], messages.actionDone).then(function(response){
+                form.serverDialog({action: 'Reset', query: {params: queryParams}}, options || {}, [], Pmg.message('actionDone')).then(function(response){
             		response.feedback.pop();
-                    Pmg.alert({title: messages[queryParams.process], content: response.feedback.join('<br>')});
+                    Pmg.alert({title: Pmg.message(queryParams.process), content: response.feedback.join('<br>')});
                 	grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
-                    Pmg.setFeedback(messages.actionDone);
+                    Pmg.setFeedback(Pmg.message('actionDone'));
                 });
         	}else{
             	grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
-                Pmg.setFeedback(messages.actionDone);        		
+                Pmg.setFeedback(Pmg.message('actionDone'));        		
         	}
         },
         
@@ -204,7 +193,7 @@ function(declare, lang, on, ready, string, Button, registry, Pmg, utils, DialogC
 					}
 				}
 			}
-			return {ids: idsToProcess, selectionLength: selectionLength, warning: (deselect > 0  ? '<p>' + deselect + messages.werereadonlyexcluded : '')};
+			return {ids: idsToProcess, selectionLength: selectionLength, warning: (deselect > 0  ? '<p>' + deselect + Pmg.message('werereadonlyexcluded') : '')};
 		}
     });
 });

@@ -37,13 +37,10 @@ class Authentication{
                 }
                 return false;
             case 'backoffice':
-                //return $this->checkBackOfficeCredentials($dialogue);
                 return 'tukosBackOffice';
             default:// receiving a tukos application request check if authorized
                 $segment = $this->session->getSegment(Tfk::$registry->appName);
                 if ($segment->status !== 'VALID'){
-                    //SUtl::instantiate();
-                    //Tfk::setTranslator();
                     $login = new LoginPage(Tfk::$registry->pageUrl);
                     return false;
                 }else{

@@ -1,10 +1,10 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on",  "dijit/form/Button", "dijit/registry", "tukos/evalutils", "tukos/DialogConfirm", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, on, Button, registry, eutils, DialogConfirm, Pmg, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dijit/form/Button", "dijit/registry", "tukos/evalutils", "tukos/PageManager"], 
+    function(declare, lang, Button, registry, eutils, Pmg){
     return declare([Button], {
         postCreate: function(args){
             this.inherited(arguments);
             var self = this, form = this.form;
-            on(this, "click", function(evt){
+            this.on("click", function(evt){
                 evt.stopPropagation();
                 evt.preventDefault();
 
@@ -35,9 +35,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on",  "dijit/form/Button
                                 self.doProcess(theId, self.urlArgs);
                             }
                         }else{
-                            var dialog = new DialogConfirm({title: messages.newOrFieldsHaveBeenModified, content: messages.saveOrReloadFirst, hasSkipCheckBox: false});
-                            dialog.show().then(function(){Pmg.setFeedback(messages.actionCancelled);},
-                                               function(){Pmg.setFeedback(messages.actionCancelled);});/* user pressed Cancel: no action */
+                            Pmg.alert({title: Pmg.message('newOrFieldsModified'), content: Pmg.message('saveOrReloadFirst')});
                         }
                     }                	
                 }, 100);
@@ -45,8 +43,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on",  "dijit/form/Button
         },
         
         doProcess: function(theId, urlArgs){
-            Pmg.setFeedback(messages.actionDoing);
-            this.form.serverDialog({action:(urlArgs && urlArgs.action ? urlArgs.action : 'Process'), query:urlArgs ? lang.mixin({id: theId}, urlArgs.query) : {id: theId}}, this.valuesToSend, this.form.get('postElts'), messages.actionDone); 
+            Pmg.setFeedback(Pmg.message('actionDoing'));
+            this.form.serverDialog({action:(urlArgs && urlArgs.action ? urlArgs.action : 'Process'), query:urlArgs ? lang.mixin({id: theId}, urlArgs.query) : {id: theId}}, this.valuesToSend, this.form.get('postElts'),
+            	Pmg.message('actionDone')); 
         },
 
         needToSaveBeforeProcess: function(){
