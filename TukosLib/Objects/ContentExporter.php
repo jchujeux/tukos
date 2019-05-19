@@ -101,7 +101,7 @@ trait ContentExporter {
 		    case 'html2text':
 		        return $this->buildHtml2TextFile($dirFileName .'.txt', implode('', Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)));
 		    case 'tukosform':
-		        return $this->buildHtmlFile($dirFileName . '.htm', $atts['content'],//implode('', Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)),
+		        return $this->buildHtmlFile($dirFileName . '.htm', $atts['content'],
 		          Utl::substitute($this->tukosFormsHeader, ['title' => $fileName, 'dojoBaseLocation' => Tfk::$tukosFormsDojoBaseLocation]), '', null,
 		          Utl::substitute($this->tukosFormsBodyScripts, [
 		              'dojoBaseLocation' => Tfk::$tukosFormsDojoBaseLocation,

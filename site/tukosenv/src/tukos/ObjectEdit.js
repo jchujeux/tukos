@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "tukos/ObjectSelect", "dijit/registry", "dijit/focus", "tukos/DialogConfirm", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, ObjectSelect, registry, focusUtil, DialogConfirm, Pmg, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "tukos/ObjectSelect", "dijit/registry", "dijit/focus", "tukos/PageManager"], 
+    function(declare, lang, ObjectSelect, registry, focusUtil, Pmg){
     return declare(ObjectSelect, {
         postCreate: function(args){
             this.inherited(arguments);
@@ -10,14 +10,16 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/ObjectSelect", "dijit/r
 
                 if (! (item.id == '')){// this test is needed due to fact that this.reset() fires the 'change' event again :-(.
                     var setEditValues = function(){
-                        form.serverDialog(lang.mixin(self.urlArgs || {action: 'Edit'}, {query: {id: item.id}}), [], self.form.get('dataElts'), messages.actionDone); 
+                        form.serverDialog(lang.mixin(self.urlArgs || {action: 'Edit'}, {query: {id: item.id}}), [], self.form.get('dataElts'), Pmg.message('actionDone')); 
                     }
                     if(!form.hasChanged()){
                         setEditValues();
                     }else{
                         Pmg.setFeedback(' ');
-                        var dialog = new DialogConfirm({title: messages.fieldsHaveBeenModified, content: messages.sureWantToForget, hasSkipCheckBox: false});
-                        dialog.show().then(function(){setEditValues();}, function(){Pmg.setFeedback(messages.actionCancelled);});
+                        Pmg.confirm({title: Pmg.message('fieldsHaveBeenModified'), content: Pmg.message('sureWantToForget')}).then(
+                        		function(){setEditValues();}, 
+                        		function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
+                        );
                     }
                     this.reset();
                     //focusUtil.curNode && focusUtil.curNode.blur();

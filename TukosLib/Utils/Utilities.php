@@ -540,6 +540,10 @@ class Utilities{
     public static function substitute($template, $map){
     	return str_replace(array_map(function($key){return '${' . $key . '}';}, array_keys($map)), array_values($map), $template);
     }
+    
+    public static function escapeSQuote($string){
+        return str_replace("'", "\\\\'", $string);
+    }
 
     function hexToRgb($hexstr) {
     	$int = hexdec($hexstr);

@@ -15,6 +15,9 @@ class View extends EditView{
        parent::__construct($actionController);
 
         $tr = $this->view->tr;
+        $qtr = function($string) use ($tr){
+            return $tr($string, 'escapeSQuote');
+        };
         $this->dataLayout   = [
             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false,  'content' => ''],
             'contents' => [
@@ -148,8 +151,7 @@ class View extends EditView{
         		"if (typeof googlecalid === 'string' && googlecalid.length > 0){\n" .
         			"return true;\n" .
         		"}else{\n" .
-        			"var dialog = new DialogConfirm({title: '" . $tr('needgooglecalid') . "', content: '" . $tr('youneedtoselectagooglecalid') . "', hasSkipCheckBox: false});\n" .
-        			"dialog.show();\n" .
+                    "Pmg.alert({title: '" . $qtr('needgooglecalid') . "', content: '" . $qtr('youneedtoselectagooglecalid') . "'});\n" .
         			"return false;\n" .
         		"}"
         ]];
@@ -168,7 +170,6 @@ class View extends EditView{
 	                    "return when(pane.setWidgets({hidden: {newname: false, newacl: false, createcalendar: false, hide: false}, value: {newname: targetGetWidget('name').get('value'), newacl: [{rowId: 1, email: targetGetWidget('sportsmanemail').get('value'), role: 'writer'}]}})," . 
                     				 "function(){\n" .
 	                        			"pane.resize();\n" .			
-                    					"console.log('widgets are now set');\n" .
                     					"setTimeout(function(){pane.getWidget('newacl').resize();}, 0)\n" .
                     		"});\n" 
                     ]],
@@ -182,12 +183,10 @@ class View extends EditView{
                     			"when(pane.setWidgets({hidden: {name: false, acl: false, updateacl: false, deletecalendar: false, hide: false}, value: {name: getWidget('googlecalid').get('value')}})," . 
 	                    			  "function(){\n" .
 		                        			"pane.resize();\n" .			
-	                    					"console.log('widgets are now set');\n" .
 	                    					"setTimeout(function(){pane.getWidget('acl').resize();}, 0);\n" .
 	                    		"});}));\n" .
 		        		"}else{\n" .
-		        			"var dialog = new DialogConfirm({title: '" . $tr('needgooglecalid') . "', content: '" . $tr('youneedtoclicknewcalendar') . "', hasSkipCheckBox: false});\n" .
-		        			"dialog.show();\n" .
+		        		    "Pmg.alert({title: '" . $qtr('needgooglecalid') . "', content: '" . $qtr('youneedtoclicknewcalendar') . "'});\n" .
                     	"}"
                     ]],
 

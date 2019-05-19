@@ -67,32 +67,31 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
 				eventHandle.pause();
 			}
 			if (this.dialogConfirm){
-				return this.dialogConfirm.show(atts, mode).then(
-					function(response){
-						if (eventHandle){eventHandle.resume()};
-						return response;
-					},
-					function(response){
-						if (eventHandle){eventHandle.resume()};
-						return response;
-					}
-				);
+				return this._confirmDialogShow(atts, mode, eventHandle, this.dialogConfirm);
 			}else{
 				var dfd = new Deferred();
 				require([this.cache.isMobile ? "tukos/mobile/DialogConfirm" : "tukos/desktop/DialogConfirm"], function(DialogConfirm){
 					self.dialogConfirm = new DialogConfirm({style: {backgroundColor: 'DarkGrey'}});
-					self.dialogConfirm.show(atts, mode).then(
-						function(){
-							dfd.resolve(true);
-							if (eventHandle){eventHandle.resume()};
-						},
-						function(){
-							dfd.cancel(true);
-							if (eventHandle){eventHandle.resume()};
-						});
+					self._confirmDialogShow(atts, mode, eventHandle, self.dialogConfirm, dfd);
 				});
 				return dfd;
 			}
+		},
+		_confirmDialogShow: function(atts, mode, eventHandle, dialogConfirm, dfd){
+			var promise = dialogConfirm.show(atts, mode);
+			promise.then(
+				function(response){
+					if (dfd){dfd.resolve(true);}
+					if (eventHandle){eventHandle.resume()};
+					return response;
+				},
+				function(response){
+					if(dfd){dfd.cancel(true);}
+					if (eventHandle){eventHandle.resume()};
+					return response;
+				}
+			);
+			return promise;			
 		},
         getItem: function(item){
             return this.cache[item];
@@ -162,7 +161,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
                     return response;
                 },
                 function(error){
-                    self.addFeedback(self.message(failedOperation)  + ': ' + error.message);
+                    self.addFeedback(self.message('failedOperation')  + ': ' + error.message);
                     if (isObjectFeedback){
                     	set(att, attValue);
                     }
@@ -177,7 +176,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             }
             var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || this.message('Ok')),
                   currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;;
-            if (currentTab){
+            if (((currentTab || {}).form || {}).getWidget){
                 var widget = (lang.hitch(currentTab.form, currentTab.form.getWidget))('feedback');
                 if (widget){
                     widget.set('value', separator ? widget.get('value') + separator + newFeedback : newFeedback);

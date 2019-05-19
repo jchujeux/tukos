@@ -1,5 +1,5 @@
 define(["dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/ready", "dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/layout/AccordionContainer",
-	"tukos/NavigationMenu", "tukos/TabsManager", "tukos/AccordionManager", "tukos/TabOnClick", "tukos/PageManager"], 
+	"tukos/desktop/NavigationMenu", "tukos/TabsManager", "tukos/AccordionManager", "tukos/TabOnClick", "tukos/PageManager"], 
 function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, ContentPane, AccordionContainer, NavigationMenu, TabsManager, AccordionManager, TabOnClick, Pmg) {
 	return {
 		initialize: function(){

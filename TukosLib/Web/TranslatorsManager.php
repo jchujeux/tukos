@@ -127,6 +127,7 @@ class TranslatorsManager {
                                    empty($nameTranslation = $nameTranslations[reset($activeSets)]))
                     ? $name
                     : preg_replace('/([^\\\\])"/', '$1\\"', $nameTranslation);
+                    //: preg_replace('/([^\\\\])(["\'])/', '$1\\\\$2', $nameTranslation);
                 if (!empty($mode)){
                     $translation = $this->transform($translatedName, $mode);
                 }else if (strtoupper($name) === $name){
@@ -196,6 +197,9 @@ class TranslatorsManager {
         
     function transform($translation, $mode){
         switch ($mode){
+            case 'escapeSQuote':
+                return Utl::escapeSQuote($translation);
+                break;
             case 'ucfirst':
                 return ucfirst(mb_strtolower($translation));
                 break;

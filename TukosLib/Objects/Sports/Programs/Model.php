@@ -203,7 +203,7 @@ class Model extends AbstractModel {
             $intensity = $session['intensity'];
             $rowContent = [[ 'tag' => 'td',  'atts' => $tdAtts, 'content' => $atts['presentation'] === 'persession' ? 'S' . $i : ucfirst($this->tr(lcfirst(date('l', strtotime($session['startdate'])))))]];
             foreach ($optionalColsSelected as $col){
-                $value = ($col === 'sportimage' ? (!empty($session['sport']) ? Tfk::tukosSite . 'images/' . Sports::$sportImagesMap[$session['sport']] : '') : $session[$col]);
+                $value = ($col === 'sportimage' ? (!empty($session['sport']) ? Tfk::$tukosPhpImages . Sports::$sportImagesMap[$session['sport']] : '') : $session[$col]);
                 $rowContent[] = ['tag' => 'td', 'atts' => $tdAtts, 'content' => Utl::format($value, $optionalCols[$col], $this->tr)];
             }
             $rowContent[] = ['tag' => 'td', 'atts' => $tdAtts,  'content' => $contentString];
@@ -227,7 +227,7 @@ class Model extends AbstractModel {
                                     'content' => [[
                                             'tag' => 'td',
                                             'atts' => 'width="10%"',
-                                            'content' => Utl::format(Tfk::tukosSite . 'images/TDSLogoBlackH64.jpg', 'inlineImage', $this->tr)
+                                            'content' => Utl::format(Tfk::$tukosPhpImages . 'TDSLogoBlackH64.jpg', 'inlineImage', $this->tr)
                                         ], [
                                             'tag' => 'td',
                                             'atts' => 'style="text-align:center; color: White; font-size: large; font-weight: bold;" width="90%"',

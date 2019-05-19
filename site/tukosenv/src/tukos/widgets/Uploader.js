@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/dom-construct", "dojo/dom-attr", "dojo/on", "dojo/aspect", "dijit/_WidgetBase", "dijit/registry", "dijit/form/Button", "dojoFixes/dojox/form/Uploader", "dojoFixes/dojox/form/uploader/FileList", "tukos/PageManager", "dojo/json", "dojo/i18n!tukos/nls/messages"],
-    function(declare, arrayUtil, dct, dattr, on, aspect, Widget, registry, Button, Uploader, FileList, Pmg, JSON, messages){
+define (["dojo/_base/declare", "dojo/_base/array", "dojo/dom-construct", "dojo/dom-attr", "dojo/on", "dojo/aspect", "dijit/_WidgetBase", "dijit/registry", "dijit/form/Button", "dojoFixes/dojox/form/Uploader", "dojoFixes/dojox/form/uploader/FileList", "tukos/PageManager", "dojo/json"],
+    function(declare, arrayUtil, dct, dattr, on, aspect, Widget, registry, Button, Uploader, FileList, Pmg, JSON){
     return declare(Widget, {
         postCreate: function(){
             var self = this;
@@ -21,9 +21,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/dom-construct", "dojo/d
             on(this.uploadButton, "click", function(evt){
                 var theId   = dijit.registry.byId(self.form.id + 'id').get('value');
                 if ((theId == '') || self.form.hasChanged()){
-                    var dialog = new tukos.DialogConfirm({title: messages.newOrFieldsHaveBeenModified, content: messages.saveOrReloadFirst, hasSkipCheckBox: false});
-                    dialog.show().then(function(){Pmg.setFeedback(messages.actionCancelled);},
-                                       function(){Pmg.setFeedback(messages.actionCancelled);});
+                    Pmg.alert({title: Pmg.message('newOrFieldsModified'), content: Pmg.message('saveOrReloadFirst')});
                 }else{
                     if (this.subFiles){
                         var theName = dijit.registry.byId(self.form.id + 'name').get('value');

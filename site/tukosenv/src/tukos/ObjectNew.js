@@ -1,6 +1,6 @@
-define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "dijit/focus", "tukos/menuUtils", "tukos/DialogConfirm", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, Button, popup, focusUtil, mutils, DialogConfirm, Pmg, messages){
-    return declare("tukos.ObjectNew", Button, {
+define (["dojo/_base/declare", "dojo/when", "dijit/form/Button", "dijit/popup", "dijit/focus", "tukos/menuUtils", "tukos/PageManager"], 
+    function(declare, when, Button, popup, focusUtil, mutils, Pmg){
+    return declare(Button, {
         postCreate: function(){
             this.inherited(arguments);
             var self = this, form = self.form;
@@ -12,7 +12,7 @@ define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "dijit/focus"
                     var dropDown = self.dropDown,
                         newAction = function(dupid){
                         	form.resetChangedWidgets();
-                    		form.serverDialog({action: 'Edit', query: dupid ? {dupid: dupid} : {}}, [], form.get('dataElts'), messages.actionDone, true); 
+                    		form.serverDialog({action: 'Edit', query: dupid ? {dupid: dupid} : {}}, [], form.get('dataElts'), Pmg.message('actionDone'), true); 
                         	popup.close(self.dropDown);
                     	},
                     	onNewAction = function(evt){
@@ -27,7 +27,7 @@ define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "dijit/focus"
                     }else{
                         when(mutils.buildMenu(mutils.newObjectMenuDescription(self.form.object, onNewAction, onTemplateAction)), function(dropDown){
                         	self.dropDown = dropDown;
-                            dropDown.onBlur = function(){console.log('onBlur');popup.close(dropDown);};
+                            dropDown.on('blur', function(){popup.close(dropDown);});
                         	popup.open({popup: dropDown, around: self.domNode});
                 			focusUtil.focus(dropDown.domNode);
                         });
@@ -38,8 +38,10 @@ define (["dojo/_base/declare", "dijit/form/Button", "dijit/popup", "dijit/focus"
                     setNewValues();
                 }else{
                     Pmg.setFeedback('');
-                    var dialog = new DialogConfirm({title: messages.fieldsHaveBeenModified, content: messages.sureWantToForget, hasSkipCheckBox: false});
-                    dialog.show().then(function(){setTimeout(function(){setNewValues();}, 400)}, function(){Pmg.setFeedback(messages.newCancelled);});
+                    Pmg.confirm({title: Pmg.message('fieldsHaveBeenModified'), content: Pmg.message('sureWantToCancel')}).then(
+                    		function(){setTimeout(function(){setNewValues();}, 400)}, 
+                    		function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
+                    );
                 }
             });
         }

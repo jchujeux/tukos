@@ -1,26 +1,20 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dojo/promise/all",  "dijit/form/Button", "dijit/registry", "tukos/PageManager", "tukos/DialogConfirm", "tukos/utils",
-         "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, dom, on, all, Button, registry, Pmg, DialogConfirm, utils, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/promise/all",  "dijit/form/Button", "dijit/registry", "tukos/PageManager", "tukos/utils"], 
+    function(declare, lang, dom, all, Button, registry, Pmg, utils){
     return declare([Button], {
         postCreate: function(){
             this.inherited(arguments);
             var self = this, form = self.form;
-            on(this, "click", function(evt){
+            this.on("click", function(evt){
                 var idValue  = form.valueOf('id');
                 if (idValue == ''){
-
-                    var dialog = new DialogConfirm({title: messages.newNoDuplicate, content: messages.mustSaveFirst, hasSkipCheckBox: false});
-                    dialog.show().then(
-                        function(){form.setFeeedback(messages.actionCancelled);},/* user pressed OK    : no action */
-                        function(){form.setFeeedback(messages.actionCancelled);});/* user pressed Cancel: no action */
+                    Pmg.alert({title: Pmg.message('newNoDuplicate'), content: Pmg.message('mustSaveFirst')});
                 }else{
                     evt.stopPropagation();
                     evt.preventDefault();
-
                     var setDuplicate = function(){
                         var changedValues = form.changedValues();
                         form.resetChangedWidgets();
-                        form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Edit'), query: {dupid: idValue}}, [], form.get('dataElts'), messages.actionDone, true).then(
+                        form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Edit'), query: {dupid: idValue}}, [], form.get('dataElts'), Pmg.message('actionDone'), true).then(
                             function(response){
                                 form.setValueOf('id', '');
                                 if (response.itemCustomization){
@@ -46,8 +40,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dojo/p
                         setDuplicate();
                     }else{
                         Pmg.setFeedback('');
-                        var dialog = new DialogConfirm({title: messages.fieldsHaveBeenModified, content: messages.wantToSaveBefore, hasSkipCheckBox: false});
-                        dialog.show().then(function(){setDuplicate();}, function(){Pmg.setFeedback(messages.actionCancelled);});
+                        Pmg.confirm({title: Pmg.message('fieldsHaveBeenModified'), content: Pmg.message('wantToSaveBefore')}).then(
+                        		function(){setDuplicate();}, 
+                        		function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
+                        );
                     }
                 }
             });
