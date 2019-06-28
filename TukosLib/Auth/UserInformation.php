@@ -255,6 +255,7 @@ class UserInformation{
         }
     }
     function setCustomViewId($objectName, $view, $paneMode, $customViewId){
+        $objectName = strtolower($objectName);
         $view = strtolower($view);
         $paneMode = strtolower($paneMode);
         $this->objectsStore->objectModel('users')->updateOne(
@@ -262,8 +263,8 @@ class UserInformation{
             ['where' => ['id' => $this->id()]], 
             true, true
         );
-        $customViewIds = $this->customViewIds();/* to make sure $this->customViewIds is initialized*/
-        $this->customViewIds = Utl::array_merge_recursive_replace($this->customViewIds, [$objectName => [$view => [$paneMode => $customViewId]]]);
+        //$customViewIds = $this->customViewIds();/* to make sure $this->customViewIds is initialized*/
+        $this->customViewIds = Utl::array_merge_recursive_replace($this->customViewIds(), [$objectName => [$view => [$paneMode => $customViewId]]]);
     }
     public function updateCustomView($objectName, $view, $paneMode, $newValues){
         $customViewId = $this->customViewId($objectName, $view, $paneMode);

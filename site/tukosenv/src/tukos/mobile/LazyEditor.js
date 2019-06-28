@@ -8,7 +8,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 		postCreate: function(){
 			this.inherited(arguments);
     		this.container = new ContentPane(); 
-    		//this.domNode.appendChild(this.container.domNode);
     		this.addChild(this.container);
 			this.htmlContent = new HtmlContent({style: {width: '100%', height: this.editorToContentHeight(this.height) || "auto"}, value: this.value || ''});           	
 			this.container.addChild(this.htmlContent);
@@ -22,7 +21,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 				if (this.onClickHandle){
 					this.onClickHandle.remove();
 				}
-				console.log('just removed onClickHandle');
 				if (!editor){
 					when(WidgetsLoader.loadWidget('MobileEditor'), lang.hitch(this, function(Editor){
 						editor = new Editor({style: "width: 100%;"}, dojo.doc.createElement("div"));
@@ -34,15 +32,12 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 				}
 			}
 		},
-		
-		editorToContentHeight: function(editorHeight){
+				editorToContentHeight: function(editorHeight){
 			return editorHeight ? (parseInt(editorHeight) + 78) + 'px' : undefined;
 		},
-
 		contentToEditorHeight: function(contentHeight){
 			return contentHeight ? (parseInt(contentHeight) - 78) + 'px' : undefined;
 		},
-
 		placeEditor: function(){
 			console.log('calling placeEditor');
 			var htmlContent = this.htmlContent, height = this.contentToEditorHeight(htmlContent.get('style').height);
@@ -57,9 +52,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			editor.set('value', htmlContent.get('value'));
 			this.container.removeChild(htmlContent);
 			this.container.addChild(editor);
-			//editor.toggle();// defined in FullScreen
 		},
-		
 		onBlurCallback: function(){
 			console.log('calling onBlurCallback');
 			var htmlContent = this.htmlContent;
@@ -75,25 +68,21 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 				}
 			}), 100)
 		},
-		
 		_setValueAttr: function(value){
 			if (this.htmlContent){
 				this.htmlContent.set('value', value);
 			}
 			this._set('value', value);
-		},
-		
+		},		
 		_setStyleAttr: function(value){
 			this.inherited(arguments);
 			if (this.htmlContent){
 				this.htmlContent.set('style', value);
 			}
-		},
-		
+		},		
 		_getServerValueAttr: function(){
 			return this.serverValue;
-		},
-		
+		},		
 		_getDisplayedValueAttr: function(){
 			var result = this.inherited(arguments);
 			return result;

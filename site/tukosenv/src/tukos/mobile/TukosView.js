@@ -1,6 +1,6 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "tukos/mobile/ObjectPane", "tukos/PageManager"], 
     function(declare, lang, View, Heading, ToolBarButton, ObjectPane, Pmg){
-    var paneModules = {objectPane: "tukos/mobile/ObjectPane", tukosPane: "tukos/TukosPane", navigationPane: "tukos/Mobile/NavigationPane"};
+    var paneModules = {objectPane: "tukos/mobile/ObjectPane", tukosPane: "tukos/TukosPane", navigationPane: "tukos/mobile/NavigationPane"};
 	return declare(View, {
     	postCreate: function (){    
     		this.inherited(arguments);
@@ -12,8 +12,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mo
         	viewPaneContent.viewPane = this;
         	if (this.form){
             	this.form.destroyRecursive();
-            	previousView = this.heading.previousView.get('targetView');
-            	nextView = this.heading.nextView.get('targetView');
+            	previousView = this.heading.previousViewButton.get('targetView');
+            	nextView = this.heading.nextViewButton.get('targetView');
             	this.heading.destroyRecursive();
             	this.actionsHeading.destroyRecursive();
             }
@@ -36,26 +36,23 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mo
         	previousView = previousView || this.mobileViews.lastPane() || this;
         	nextView = nextView || this.mobileViews.firstPane() || this;
         	if (previousView !== this){
-        		previousView.nextView.set('targetView', this);
-        		nextView.previousView.set('targetView', this);
+        		previousView.heading.nextViewButton.set('targetView', this);
+        		nextView.heading.previousViewButton.set('targetView', this);
         	}
-        	this.previousView = new ToolBarButton({icon: "mblDomButtonWhiteLeftArrow", style: "float: left", targetView: previousView, onClick: function(evt){
-        		console.log('to be done');
+        	this.heading.previousViewButton = new ToolBarButton({icon: "mblDomButtonWhiteLeftArrow", style: "float: left", targetView: previousView, onClick: function(evt){
         		self.mobileViews.selectPane(this.targetView, -1);
         	}}).placeAt(this.heading, 'first');
         	if (this.paneModuleType !== 'navigationPane'){
-            	this.navigationView = new ToolBarButton({icon: "mblDomButtonWhiteUpArrow", style: "float: left", onClick: lang.hitch(this, function(){
+            	this.heading.navigationViewButton = new ToolBarButton({icon: "mblDomButtonWhiteUpArrow", style: "float: left", onClick: lang.hitch(this, function(){
             		self.mobileViews.navigationView();
             	})}).placeAt(this.heading, 1);
         	}
-        	this.nextView = new ToolBarButton({icon: "mblDomButtonWhiteRightArrow", style: "float: left", targetView: nextView, onClick: function(evt){
+        	this.heading.nextViewButton = new ToolBarButton({icon: "mblDomButtonWhiteRightArrow", style: "float: left", targetView: nextView, onClick: function(evt){
         		self.mobileViews.selectPane(this.targetView);
         	}}).placeAt(this.heading, 2);
         	require([paneModules[this.paneModuleType]], function(PaneModule){
             	self.form = new PaneModule(viewPaneContent);
             	self.form.noLoadingIcon = true;
-            	//self.addChild(self.heading);
-            	//self.addChild(self.actionsHeading);
             	self.addChild(self.form);        		
         	});
         },

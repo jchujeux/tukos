@@ -170,9 +170,12 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             );
             return dfdOrPromise;
         },
+        beep: function(){
+        	(this.beepCache || (this.beepCache = document.getElementById('beep'))).play();
+        },
         setFeedback: function(serverFeedback, clientFeedback, separator, beep){
             if (beep){
-                document.getElementById('beep').play();
+                this.beep();
             }
             var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || this.message('Ok')),
                   currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;;

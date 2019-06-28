@@ -20,26 +20,26 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/when",  "dojo
         	var items = popupDescription.items, accordion, self = this;
         	parent.addChild(accordion = new Accordion({iconBase: iconBase, "class": "mblAccordionRoundRect", onClick: parent.resize()}));
         	aspect.after(accordion, "expand", lang.hitch(this, this.setAutoHeight));
-        	utils.forEach(items, function(item, index){
+        	utils.forEach(items, function(item){
         		var pane;
         		if (item.type === "MenuItem"){
         			parent.startup();
         			accordion.addChild(pane = new Pane(lang.mixin({iconPos1: menuItemIcon}, item.atts)));
         			pane._at.onClickArgs = item.atts.onClickArgs;
         			self.addTriggers(pane._at);
-        		}else if (index === 'new' || index === "edit"){
+        		}else if(item.popup.type === 'DropDownMenu'){
+        			accordion.addChild(pane = new ContentPane({iconPos1: domainIcon, label: item.atts.label}));
+        			self.fillPane(pane, item.popup);
+        		}else{
         			parent.startup();
         			accordion.addChild(pane = new Pane(lang.mixin({iconPos1: newIcon}, item.atts)));
-                    when(mutils.buildMenu(index === "new" ? {type: 'Menu', items: item.popup.items} : item.popup, 'full', null, lang.hitch(self, self.addTriggers)), function(dropDown){
+                    when(mutils.buildMenu(item.popup, 'full', null, lang.hitch(self, self.addTriggers)), function(dropDown){
                         dropDown.on('blur', function(){popup.close(dropDown);});
                     	pane._at.on('click', function(evt){
                         	popup.open({popup: dropDown, around: pane._at.domNode});
                 			focusUtil.focus(dropDown.domNode);            				
             			});
                     });
-        		}else{
-        			accordion.addChild(pane = new ContentPane({iconPos1: domainIcon, label: item.atts.label}));
-        			self.fillPane(pane, item.popup);
         		}
         		
         	});

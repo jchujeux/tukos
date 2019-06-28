@@ -8,7 +8,7 @@ use Aura\View\HelperLocator;
 use TukosLib\TukosFramework as Tfk;
 
 class LoginPage{
-    public function __construct($pageUrl){
+    public function __construct($pageUrl, $svrFeedback=""){
         $dialogue = Tfk::$registry->get('dialogue');
         $template = new Template(new EscaperFactory, new TemplateFinder, new HelperLocator);
         $template->requestUrl = $pageUrl . 'auth/loginValidation';
@@ -19,7 +19,7 @@ class LoginPage{
         $template->password = Tfk::tr('password');
         $template->login = Tfk::tr('Login');
         $template->authentication = Tfk::tr(Tfk::$registry->appName . 'HeaderBanner', 'none') . ' - ' . Tfk::tr('Authentication');
-        $template->serverFeedback = Tfk::tr('serverFeedback');
+        $template->serverFeedback = Tfk::tr($svrFeedback);
         $template->headerBanner =  Tfk::tr('headerbanner');
         
         $finder = $template->getTemplateFinder();

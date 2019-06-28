@@ -12,6 +12,7 @@ var profile = (function(){
                 "tukos/evalutils": true,
                 "tukos/menuUtils": true,
                 "tukos/widgets/WidgetsLoader": true,
+                "tukos/mobile/TukosView": true
             };
             return (mid in list) ||
                 (/^tukos\/resources\//.test(mid)

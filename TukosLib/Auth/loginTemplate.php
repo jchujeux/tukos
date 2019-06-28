@@ -9,7 +9,7 @@
 		<script>
 			function hideSvrFeedback(){
 				var svrFeedback = document.getElementById('svrFeedback');
-				svrFeedback.hidden = true;
+				svrFeedback.style.display = "none";
 			}
 		</script>
 		<table style="margin-left: auto; margin-right: auto;">
@@ -18,7 +18,7 @@
 				<td>
             		<form id="formNode">
                 		<h1><?= $this->authentication?></h1>
-                		<div id="svrFeedback" hidden=true></div>
+                		<div id="svrFeedback"><i><?= $this->serverFeedback ?></i></div>
             			<table style="margin-left: auto; margin-right: auto;">
             				<tr><th><?= $this->username?>: </th><td><input type="text" name="username" oninput="hideSvrFeedback()" /></td></tr>
             				<tr><th><?= $this->password?>: </th><td><input type="password" name="password" oninput="hideSvrFeedback()" /></td></tr>
@@ -42,13 +42,13 @@
                                                 function(response){
 													var serverFeedback = dom.byId('svrFeedback');
                                                     serverFeedback.innerHTML = '<i>' + response + '</i>';
-                                                    serverFeedback.hidden = false;
+                                                    serverFeedback.style.display = "block";
                                                     document.location.reload();
                                                 },
                                                 function(error){
 													var serverFeedback = dom.byId('svrFeedback');
                                                     serverFeedback.innerHTML = "<i><?= $this->error; ?></i>";
-                                                    serverFeedback.hidden = false;
+                                                    serverFeedback.style.display = "block";
                                                 }
                                           );
 					});
