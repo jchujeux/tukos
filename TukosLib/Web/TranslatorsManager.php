@@ -108,17 +108,6 @@ class TranslatorsManager {
                 $setNames = array_unique(array_merge($setNames, $this->translatorPaths[$translatorName]));
             });
             $names = array_keys($names);
-/*
-            $languageCol = $this->getLanguageCol();
-            $translations = Utl::toAssociativeGrouped(Tfk::$registry->get('configStore')->getAll([
-                'table' => 'translations', 
-                'where' => [['col' => 'setname', 'opr' => 'IN', 'values' => $setNames], ['col' => 'name', 'opr' => 'IN', 'values' => $names]], 
-                'cols' => ['name', 'setname', $languageCol]]), 'name', true);
-            array_walk($translations, function(&$translation, $name) use ($languageCol){
-                $translation = array_column($translation, $languageCol, 'setname');
-            });
-            $translations = array_change_key_case(array_filter($translations));
-*/
             $translations = $this->_getTranslations($names, $setNames);
             $i = 0;
             foreach($matchesToTranslate as &$match){
@@ -171,13 +160,6 @@ class TranslatorsManager {
         if (!isset($this->translatorsMessages[$languageCol])){
             $this->translatorsMessages[$languageCol] = [];
         }
-        /*
-         $setItemsPath = [];
-        foreach ($setsPath as $setName){
-            $setItemsPath[] = strtolower($setName);
-        }
-        $this->translatorPaths[$translatorName] = $setItemsPath;
-*/
         $this->translatorPaths[$translatorName] = $setsPath;
         return function($key) use ($setsPath, $languageCol){
             $lckey = mb_strtolower($key);

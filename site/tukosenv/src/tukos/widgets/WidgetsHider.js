@@ -1,5 +1,5 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dijit/_WidgetBase", "dijit/TooltipDialog", "dijit/popup", "dijit/focus", "dojo/json", "dojo/domReady!"], 
-function(declare, lang, dct, style, Widget, TooltipDialog, popup, focus, JSON){
+function(declare, lang, dct, dst, Widget, TooltipDialog, popup, focus, JSON){
     return declare(Widget, {
         postCreate: function(){
             this.inherited(arguments);
@@ -10,7 +10,7 @@ function(declare, lang, dct, style, Widget, TooltipDialog, popup, focus, JSON){
         toggleHiderMenu: function(){
 	        if (!this.dialog){
 				var form = this.form, widgetsName = form.widgetsName, dialog = this.dialog = new TooltipDialog({});
-	            var hiderTable = this.hiderMenu = dct.create('table', {style: 'max-height: 300px; overflow: auto;background-color: #fff;'});
+	            var hiderTable = this.hiderMenu = dct.create('table', {style: 'max-height: 300px; overflow: auto;background-color: Silver;'});
 	            for (var i in widgetsName){
 	                var widgetName = widgetsName[i];
 	                var widget = form.getWidget(widgetName);
@@ -44,16 +44,22 @@ function(declare, lang, dct, style, Widget, TooltipDialog, popup, focus, JSON){
         
         toggleWidgetHideMode: function(evt){
             var form = this.form, target = evt.currentTarget, checked = target.checked, widgetName = target.widgetName, widget = form.getWidget(widgetName);
-            if (widget.disabled){
-                widget.hidden = !checked;//JCH see below
+            if (widget.layoutContainer){
+            	dst.set(widget.layoutContainer, 'display', checked ? '' : 'none');
+            	widget.set('hidden', !checked);
             }else{
-                widget.set('hidden', !checked);//JCH: for disabled textarea, this generates NS_ERROR_UNEXPECTED under firefox(!)
+                if (widget.disabled){
+                    widget.hidden = !checked;//JCH see below
+                }else{
+                    widget.set('hidden', !checked);//JCH: for disabled textarea, this generates NS_ERROR_UNEXPECTED under firefox(!)
+                }
+                if (widget.layoutHandle){
+                	widget.layoutHandle.resize();
+                }
+                if (!widget.hidden && typeof widget.resize === 'function'){
+                	setTimeout(function(){widget.resize();}, 0);// for dgrid's noDataMessage not to overlap header
+            	}
             }
-            widget.layoutHandle.resize();
-            if (!widget.hidden && typeof widget.resize === 'function'){
-            	setTimeout(function(){widget.resize();}, 0);// for dgrid's noDataMessage not to overlap header
-        	}
-            //lang.setObject((widget.itemCustomization || 'customization') + '.widgetsDescription.' + widget.widgetName + '.atts.hidden', widget.hidden, form);
             lang.setObject('customization.widgetsDescription.' + widget.widgetName + '.atts.hidden', widget.hidden, form);
         }
     });

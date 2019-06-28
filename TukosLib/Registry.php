@@ -66,24 +66,26 @@ class Registry{
         $map->add('tukosView  '     , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}/{:view}');
         $map->add('tukosObject'     , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}');
         $map->add('tukosController' , Tfk::publicDir . 'index20.php/{:application}/{:controller}/');
-        $map->add('tukosBase'       , Tfk::publicDir . 'index20.php/{:application}/');
+        $map->add('tukosBase'       , Tfk::publicDir . 'index20.php/{:application/}');
         
         // get the route based on the path and server
         $this->route = $map->match($this->inComingUriPath, $_SERVER);
         if ($this->route && $this->route->values['application']){
-            $this->appName = $this->setAppNAme($this->route->values['application']);
-            if (isset($this->route->values['controller'])){
-                $this->controller = $this->route->values['controller'];
+            $this->request = $this->route->values;
+            $this->appName = $this->setAppNAme($this->request['application']);
+            if (isset($this->request['controller'])){
+                $this->controller = $this->request['controller'];
             }else{
             	$this->controller = "page";
             }
-            if (isset($this->route->values['object'])){
-               $this->objectName = $this->route->values['object'];
+            if (isset($this->request['object'])){
+               $this->objectName = $this->request['object'];
             }else{
-            	$this->objectName = "help";
+                $this->objectName = "help";
             }
-            $this->isMobile = strtolower(substr($this->controller, 0, 6)) === 'mobile' ? true : false;
-
+            if ($this->isMobile = strpos(strtolower(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $this->controller), 'mobilepage') === false ? false : true){
+                $this->paneMode = $this->request['paneMode'] = 'mobile';
+            }
             $this->pageUrl          = $map->generate('tukosController', ['application' => $this->appName, 'controller' => ($this->isMobile ? 'Mobile' : '') . 'Page']);
             $this->dialogueUrl      = $map->generate('tukosController', ['application' => $this->appName, 'controller' => 'Dialogue']);
         }

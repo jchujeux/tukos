@@ -133,9 +133,9 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
         	var currentNameArray = expression.title.match(expressionNameRegExp), regExp = new RegExp(string.substitute(expressionReferenceRegExpTemplate, {name: currentNameArray[1], col: currentNameArray[2], row: currentNameArray[3]}), 'g'),
     		newName = (newNameObject.name ? newNameObject.name : expression.id.slide(2).split('!')[0]) + (newNameObject.col ? '!' + newNameObject.col + newNameObject.row : ''), newId = 'e_' + newName;
         	if (updateReferencingFormulaes){
-        		var referencingFormulaes = this.referencingFormulaes(expression), textArea;
+        		var referencingFormulaes = this.referencingFormulaes(expression), textArea, self = this;
             	referencingFormulaes.forEach(function(referencingFormula){
-            		textArea = this.textArea(referencingFormula);
+            		textArea = self.textArea(referencingFormula);
             		textArea.innerHTML = textArea.innerHTML.replace(
             				regExp, 
             				function(match, fPre, fName, fCol, fRow, pre, name, postName, col, row){

@@ -79,8 +79,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
         lastPane: function(){
         	return this.container.getChildren().slice(-1)[0];
         },
-        selectPane: function(pane, transition){
-        	this.container.selectChild(pane, transition);
+        selectPane: function(pane, transitionDir, transition){
+        	this.container.selectChild(pane, transitionDir, transition);
         }
     }); 
 });

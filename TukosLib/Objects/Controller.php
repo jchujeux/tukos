@@ -5,7 +5,6 @@ namespace TukosLib\Objects;
 use TukosLib\Utils\TukosException;
 use TukosLib\Objects\ObjectTranslator;
 use TukosLib\Utils\Feedback;
-use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class Controller extends ObjectTranslator{

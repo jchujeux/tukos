@@ -33,6 +33,7 @@ class Authentication{
                         $dialogue->response->headers->set("Location",  $_SERVER['HTTP_REFERER']);
                         $dialogue->response->setStatusCode(302);
                         $login = new LoginPage(Tfk::$registry->pageUrl);
+
                         break;
                 }
                 return false;
@@ -52,12 +53,17 @@ class Authentication{
                 }
         }
     }
+    public function logoutUser($dialogue, $message=''){
+        $this->session->start();
+        $this->session->destroy();
+        $dialogue->response->setStatusCode(302);
+        $login = new LoginPage(Tfk::$registry->pageUrl, $message);
+    }
     public function checkUserCredentials ($dialogue){
     	$username = $dialogue->context->getPost('username');
         $targetDb = Tfk::$registry->get('verifyUser')->targetDb($username, MD5($dialogue->context->getPost('password')));
         if ($targetDb === false){/* Authentication failed: notify user via http response */
             $dialogue->response->setStatusCode(401);
-            //Feedback::add('username:' . $username . ' , 'password: ' . $password');
         }else{/* Authentication succeeded: update session information, prepare $user global variable and redirect to the url initially requested */            
             $segment = $this->session->getSegment(Tfk::$registry->appName/*'TukosAuth'*/);
             $segment->username = $username;
@@ -67,6 +73,7 @@ class Authentication{
             $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(Tfk::tr('SUCCESSFULAUTHENTICATION')));
         }
     }
+/*
     public function checkBackOfficeCredentials($dialogue){
         $username = $dialogue->context->getPost('username');
         if (empty(Tfk::$registry->get('verifyUser')->getUser($username, $dialogue->context->getPost('password')))){
@@ -75,6 +82,6 @@ class Authentication{
             return $username;
         }
     }
-    
+*/    
 } 
 ?>

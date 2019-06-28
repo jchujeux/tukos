@@ -286,9 +286,14 @@ class Model extends AbstractModel {
 	        $updated = 0;
 	        $created = 0;
 	        $deleted = 0;
-	        foreach($sessionsToSync as $session){
-	        	$eventDescription = ['start' => ['date' => $session['startdate']], 'end' => ['date' => $session['startdate']], 'summary' => $session['name'], 'description' => $this->googleDescription($session)];
-	        	if (!empty($intensity = $session['intensity'])){
+	        foreach($sessionsToSync as $key => $session){
+	            $descriptions[$key] = $this->googleDescription($session);
+	        }
+	        $descriptions = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode($descriptions)), true);
+	        foreach($sessionsToSync as $key => $session){
+	            //$eventDescription = ['start' => ['date' => $session['startdate']], 'end' => ['date' => $session['startdate']], 'summary' => $session['name'], 'description' => $this->googleDescription($session)];
+	            $eventDescription = ['start' => ['date' => $session['startdate']], 'end' => ['date' => $session['startdate']], 'summary' => $session['name'], 'description' => $descriptions[$key]];
+	            if (!empty($intensity = $session['intensity'])){
 	        		$eventDescription['colorId'] = Calendar::getEventColorId(Sports::$colorNameToHex[Sports::$intensityColorsMap[$intensity]]);
 	        	}
 	        	if ((!$googleEventId = Utl::getItem('googleid', $session)) || empty($existingGoogleEvents[$googleEventId])){
@@ -314,7 +319,6 @@ class Model extends AbstractModel {
 	        	Calendar::deleteEvent($calId, $eventId);
 	        	$deleted +=1;
 	        }
-	        //Feedback::add($this->tr('nbsessionssynchronized') . ': ' . count($sessionsToSync));
 	        Feedback::add($this->tr('synchronizationoutcome') . ' - ' . $this->tr('created') . ': ' .  $created . ' - ' . $this->tr('updated') . ': ' . $updated . ' - ' .$this->tr('deleted') . ': ' . $deleted);
 	        $this->updateOne(['id' => $id, 'lastsynctime' => date('Y-m-d H:i:s')]);
         }
@@ -343,11 +347,13 @@ class Model extends AbstractModel {
     
     public function googleDescription($session){
         $attCols = ['duration' => 'numberUnit',  'intensity' => 'string', 'sport' => 'string', 'stress' => 'string'];
+        //$translatedAtts = Tfk::$registry->get('translatorsStore')->getTranslations(array_keys($atttCols), $this->objectName);
         $contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'];
         $description = '';
         foreach($attCols as $att => $attType){
         	if (!empty($session[$att])){
-        		$description .= '<b>' . $this->tr($att) . '</b>: ' . Utl::format($session[$att], $attType, $this->tr) . '<br>';
+        	    $description .= '<b>' . $this->tr($att) . '</b>: ' . Utl::format($session[$att], $attType, $this->tr) . '<br>';
+        	    //$description .= '<b>' . $translatedAtts[$att] . '</b>: ' . Utl::format($session[$att], $attType, $this->tr) . '<br>';
         	}
         }
         foreach($contentCols as $att){

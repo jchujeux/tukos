@@ -15,7 +15,8 @@ class Main{
     function __construct($request, $query){
 
         $dialogue = Tfk::$registry->get('dialogue');
-        $username = Tfk::$registry->get('Authentication')->isAuthenticated($dialogue, $request);
+        $authentication = Tfk::$registry->get('Authentication');
+        $username = $authentication->isAuthenticated($dialogue, $request);
         if ($username !== false){/* Proceed only if user is authorized */
         	SUtl::instantiate();
             $user = Tfk::$registry->get('user');
@@ -39,14 +40,10 @@ class Main{
 	            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
 	            file_put_contents(Tfk::$tukosTmpDir . '/tukosconfigstoreprofiles.html', $storeProfilesOutput);
             }else{
-            	Feedback::add(Tfk::tr('usersitemdoesnotexistforusername'));
-            	$dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
+            	$authentication->logoutUser($dialogue, 'usersitemdoesnotexistforusername');
             }
-        }//else{/* a new user needs to be authenticated: the response contains the login form */
-        
-            $dialogue->sendResponse(); 
-        
-        //}
+        }
+        $dialogue->sendResponse(); 
     }
 }
 ?>

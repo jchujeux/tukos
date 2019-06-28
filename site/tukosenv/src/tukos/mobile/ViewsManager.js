@@ -5,9 +5,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_PanesManager", "tukos/
         constructor: function(args){
         	var self = this, created, selected, descriptions = this.viewsDescription;
         	this.container.on(".mblView:contextmenu", lang.hitch(this, this.contextMenuCallback));
-        	this.container.selectChild = function(target, transition){
-        		self.container.selectedChildWidget.performTransition(target.id, transition || 1, "slide");
-        		self.container.selectedChildWidget = target;
+        	this.container.selectChild = function(target, transitionDir, transition){
+        		if (this.selectedChildWidget !== target){
+            		this.selectedChildWidget.performTransition(target.id, transitionDir || 1, transition || "slide");
+            		this.selectedChildWidget = target;        			
+        		}else{
+        			Pmg.beep();
+        		}
         	}
         	for (var i in descriptions){
         		created = this.create(descriptions[i]);
@@ -49,12 +53,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_PanesManager", "tukos/
         	return this.currentPane().heading.domNode;
         },
         navigationView: function(){
-        	if (this._navigationView){
-        		this.container.selectChild(this._navigationView);
-        	}else{
-        		this._navigationView = this.create({title: Pmg.message('NavigationView'), navigationContent: Pmg.getItem('menuBarDescription')});
-        		this.container.selectChild(this._navigationView);
-        	}
+        	this.selectPane(this._navigationView || (this._navigationView = this.create({title: Pmg.message('NavigationView'), navigationContent: Pmg.getItem('menuBarDescription')})), -1, 'slidev');
         }
     }); 
 });

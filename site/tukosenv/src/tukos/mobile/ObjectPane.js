@@ -1,12 +1,13 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/when", "dojo/promise/all", "dijit/registry", "dojox/mobile/ScrollablePane", "dojox/mobile/Container", "dojox/mobile/FormLayout", 
-		"tukos/widgets/WidgetsLoader", "tukos/_ObjectPaneMixin", "tukos/utils", "tukos/widgetUtils"], 
-    function(declare, lang, dct, when, all, registry, ScrollablePane, Container, FormLayout, widgetsLoader, _ObjectPaneMixin, utils, wutils){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/when", "dojo/promise/all", "dojo/aspect", "dijit/registry", "dojox/mobile/ScrollablePane", "dojox/mobile/Container", "dojox/mobile/FormLayout", 
+		"dojox/mobile/ToolBarButton", "tukos/widgets/WidgetsLoader", "tukos/_ObjectPaneMixin", "tukos/utils", "tukos/widgetUtils"], 
+    function(declare, lang, dct, dst, when, all, aspect, registry, ScrollablePane, Container, FormLayout, ToolBarButton, widgetsLoader, _ObjectPaneMixin, utils, wutils){
     
 	var mobileWidgetTypes = {TextBox: 'MobileTextBox', FormattedTextBox: 'MobileFormattedTextBox', LazyEditor: 'MobileEditor', ObjectReset: 'MobileObjectReset', ObjectSave: 'MobileObjectAction', ObjectNew: 'MobileObjectAction',
 							 OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction'};
 	return declare([Container, _ObjectPaneMixin], {
         postCreate: function(){
-            this.inherited(arguments);
+            var self = this;
+        	this.inherited(arguments);
             this.widgetType = "MobileObjectPane";
             this.widgetsName = [];
             this.widgets = [];
@@ -24,8 +25,22 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/whe
             this.watchOnChange = true;
             this.watchContext = 'server';
             this.onInstantiated(lang.hitch(this, function(){
-                //var widgetsHider = new WidgetsHider({form: this}, dojo.doc.createElement("div"));
-                //actionPane.addChild(widgetsHider);
+            	this.widgetsHiderButton = new ToolBarButton({icon: "mblDomButtonBlueCirclePlus", style: "float: right", form: this}).placeAt(this.viewPane.actionsHeading, 'first');
+            	this.widgetsHiderButton.on('click', function(evt){
+            		var widgetsHiderButton = self.widgetsHiderButton, hider = widgetsHiderButton.hider;
+            		if(!hider){
+                		require(["tukos/_WidgetsHider"], function(_WidgetsHider){
+                			(hider = widgetsHiderButton.hider = new _WidgetsHider({form: widgetsHiderButton.form, parent: widgetsHiderButton})).toggleHiderMenu();
+                			widgetsHiderButton.set('icon', "mblDomButtonBlueCircleMinus");
+                			aspect.before(self.viewPane.mobileViews, 'selectPane', function(method, args){
+                				hider.close();
+                			});
+                			//aspect.after(hider, 'close', function(method, args){widgetsHiderButton.set('icon', 'mblDomButtonBlueCirclePlus')});
+                		});
+            		}else{
+            			hider.toggleHiderMenu();
+            		}
+            	});
                 if (this.data && this.data.value && !this.data.value.id){
                     this.markIfChanged = true;
                 }
@@ -46,6 +61,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/whe
             	layout.widgets.forEach(lang.hitch(this, function(widgetName){
                     var widgetDescription = this.widgetsDescription[widgetName], instantiatingWidget, widgetType, widgetLayout, widgetLabel, widgetFieldSet;
                 	if (widgetDescription && (widgetType = mobileWidgetTypes[widgetDescription['type']])){
+    	                self.widgetsName.push(widgetName);
                     	widgetLayout = dct.create('div', null, theFormLayout.domNode);
                     	if (tableAtts.showLabels){
                     		widgetLabel = dct.create('label', {innerHTML: widgetDescription.atts.label}, widgetLayout);
@@ -54,6 +70,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/whe
                 		dojo.when(instantiatingWidget = widgetsLoader.instantiate(widgetType, lang.mixin(widgetDescription['atts'], {id: this.id + widgetName, pane: this, form: this, widgetType: widgetType, widgetName: widgetName}), 
                 										    optionalWidgetInstantiationCallback), function(theWidget){
                     		theWidget.layoutHandle = self;
+                    		theWidget.layoutContainer = widgetLayout;
+                    		if (theWidget.get('hidden')){
+                    			dst.set(widgetLayout, 'display', 'none');
+                    		}
                 			widgetFieldSet.appendChild(theWidget.domNode);
                     		self.decorate(theWidget);
                     		if (self._started){
@@ -75,10 +95,16 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/whe
             if (tableAtts && layout.widgets){
             	layout.widgets.forEach(lang.hitch(this, function(widgetName){
                     var widgetDescription = this.widgetsDescription[widgetName], instantiatingWidget, widgetType;
+	                self.widgetsName.push(widgetName);
                 	if (widgetDescription && (widgetType = mobileWidgetTypes[widgetDescription['type']])){
                 		dojo.when(instantiatingWidget = widgetsLoader.instantiate(widgetType, lang.mixin({id: this.id + widgetName, style: {backgroundColor: 'DarkGrey'}, pane: this, form: this, widgetType: widgetType, widgetName: widgetName}, 
                 			widgetDescription['atts']), optionalWidgetInstantiationCallback), function(theWidget){
                 				actionsHeading.addChild(theWidget);
+                				theWidget.layoutContainer = theWidget.domNode;
+                				if (theWidget.get('hidden')){
+                					//theWidget.set('style', {display: 'none'});
+                					dst.set(theWidget.domNode, 'display', 'none');
+                				}
                 				self.decorate(theWidget);
                     	});
                         if (typeof instantiatingWidget.then === "function"){

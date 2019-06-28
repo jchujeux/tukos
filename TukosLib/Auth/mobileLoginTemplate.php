@@ -25,8 +25,8 @@
      ], function (dom, dct, request, registry, Mobile, View, Heading, FormLayout) {
          // now parse the page for widgets
         var loginForm = {columns: 'two', rows: [
-			{label: {innerHTML: "<?= $this->username?>" }, widget: {type: "MobileTextBox", atts: {id: "username", title: "<?= $this->username?>", onInput: function(){dom.byId('svrFeedback').hidden = true}}}}, 
-			{label: {innerHTML: "<?= $this->password?>"}, widget: {type: 'MobileTextBox', atts: {id: 'password', title: "<?= $this->password?>", type: "password"}}},
+			{label: {innerHTML: "<?= $this->username?>" }, widget: {type: "TextBox", atts: {id: "username", title: "<?= $this->username?>", onInput: function(){dom.byId('svrFeedback').hidden = true}}}}, 
+			{label: {innerHTML: "<?= $this->password?>"}, widget: {type: 'TextBox', atts: {id: 'password', title: "<?= $this->password?>", type: "password"}}},
 			{label: {}, widget: {type: 'MobileButton', atts: {title: 'login', label: "<?= $this->login?>", onClick: function(evt){
 				request.post("<?= $this->requestUrl ?>", {data: {username: registry.byId('username').get('value'), password: registry.byId('password').get('value')}, timeout: 2000}).then(
                     function(response){

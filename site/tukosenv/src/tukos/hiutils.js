@@ -28,9 +28,9 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
                         var checkboxTd = dct.create('td', {style: "border: 1px solid black;padding: 5px;"}, row.tr);
                         var checkbox = dct.create(
                             'input', 
-                            {type: 'checkbox', onclick: lang.partial(
-                                    function(stringPath, key, evt){
-                                        lang.setObject(stringPath, this.checked, selectedLeaves);
+                            {type: 'checkbox', style: {width: '30px'}, onchange: lang.partial(
+                                    function(stringPath, key, change){
+                                        lang.setObject(stringPath, change.currentTarget.checked, selectedLeaves);
                                     },
                                     stringPath,
                                     key
