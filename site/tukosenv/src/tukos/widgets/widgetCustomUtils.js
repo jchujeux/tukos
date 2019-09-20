@@ -118,7 +118,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
             	if (widgetType === attValueType){
             		switch(widgetType){
             			case 'NumberUnitBox':
-            				widget.unitField.store.setData(atts ? atts.units : []);
+            				widget.unitField.store.setData(atts ? (typeof atts.units === 'string' ? widgetsCustomAtts[atts.unit].styleWidth.unit : atts.unit) : []);
             				widget.numberField.set('disabled', true);
             				break;
             			case 'StoreSelect':
