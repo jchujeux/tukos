@@ -39,8 +39,8 @@ abstract class AbstractView extends ObjectTranslator{
             'parentid'  => ViewUtils::objectSelectMulti($parentObjects, $this, $parentWidgetTitle),
             'name'      => ViewUtils::textBox($this, $nameWidgetTitle, [/*'atts' => ['edit' => ['style' => ['width' => '20em']]],*/ 'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]),
             'comments'  => ViewUtils::lazyEditor($this, 'CommentsDetails', ['atts' => ['edit' => ['height' => '400px']]]),
-            'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', false, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
-            'grade' => ViewUtils::storeSelect('grade', $this, 'Grade', true, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
+            'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [false, 'ucfirst', false], ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
+            'grade' => ViewUtils::storeSelect('grade', $this, 'Grade', null, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             'contextid'  => [
                 'type' => 'objectSelectDropDown', 
                 'atts' => [
@@ -61,7 +61,7 @@ abstract class AbstractView extends ObjectTranslator{
             
         ];
         if ($this->user->rights() === 'SUPERADMIN'){
-            $this->dataWidgets['configstatus'] = ViewUtils::storeSelect('configStatus', $this, 'Config Status', true, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]);
+            $this->dataWidgets['configstatus'] = ViewUtils::storeSelect('configStatus', $this, 'Config Status', null, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]);
         }
         $this->defaultDataWidgetsElts = array_keys($this->dataWidgets);
         $this->responseContent = null;
@@ -202,7 +202,7 @@ abstract class AbstractView extends ObjectTranslator{
         if (empty($values['id'])){
         	return $this->tr($this->objectName) . ' (' . $this->tr('new') . ')';
         }else{
-        	$name = SUtl::translatedExtendedName($this->model, $values['id']);
+            $name = SUtl::translatedExtendedName($this->model, $values['id']);
         }
         return $name . ' (' . ucfirst($this->tr($this->objectName)) . '  '  . $values['id'] . ')';
     }

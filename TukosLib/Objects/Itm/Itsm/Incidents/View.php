@@ -45,8 +45,8 @@ class View extends AbstractView {
                     ]
                 ]
             ),
-            'priority'          => ViewUtils::storeSelect('priority', $this, 'Priority', true, ['atts' => ['edit' => ['placeHolder' => 'from urgency and impact', 'disabled' => true, 'style' => ['fontWeight' => 700]]]]),
-            'progress'            => ViewUtils::storeSelect('incidentsProgress', $this, 'Progress', [
+            'priority'          => ViewUtils::storeSelect('priority', $this, 'Priority', null, ['atts' => ['edit' => ['placeHolder' => 'from urgency and impact', 'disabled' => true, 'style' => ['fontWeight' => 700]]]]),
+            'progress'            => ViewUtils::storeSelect('incidentsProgress', $this, 'Progress', null, [
                     'atts' => ['edit' => [
                             'onChangeServerAction' => [
                                 'inputWidgets' => ['parentid', 'progress'],

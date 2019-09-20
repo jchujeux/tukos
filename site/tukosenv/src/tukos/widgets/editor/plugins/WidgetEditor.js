@@ -1,8 +1,8 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/dom-class", "dojo/string", "tukos/widgets/editor/plugins/_TagEditDialog", "tukos/utils", "tukos/hiutils", 
 		"tukos/tukosWidgets", "tukos/PageManager"], 
 function(declare, lang, dct, domStyle, dcl, string, _TagEditDialog, utils, hiutils, tukosWidgets, Pmg) {
-	var attWidgets = ['backgroundColor', 'color', 'width', 'height', 'placeHolder'],
-		extraWidgets = ['type', 'name', 'uniquechoice', 'numCols', 'increment', 'min', 'max', 'digits', 'value', 'topics', 'values', 'orientation', 'to', 'subject', 'subjectPrepend', 'body', 'filename'],
+	var attWidgets = ['backgroundColor', 'color', 'width', 'height', 'paddingLeft', 'placeHolder'],
+		extraWidgets = ['type', 'name', 'uniquechoice', 'numCols', 'increment', 'min', 'max', 'digits', 'value', 'topics', 'values', 'labels', 'orientation', 'to', 'subject', 'subjectPrepend', 'body', 'filename'],
 		paramWidgets = extraWidgets.concat(attWidgets);
 	return declare(null, {
 
@@ -20,6 +20,7 @@ function(declare, lang, dct, domStyle, dcl, string, _TagEditDialog, utils, hiuti
 	        				value: {type: 'TukosTextarea', atts: {label: Pmg.message('initialvalue'), style: {width: '5em', height: '1em'}}},
 	       				 	topics: {type: 'TukosTextarea', atts: {label: Pmg.message('topics'), style: {width: '15em', height: '1em'}}},
 	       				 	values: {type: 'TukosTextarea', atts: {label: Pmg.message('values'), style: {width: '15em', height: '1em'}}},
+	       				 	labels: {type: 'TukosTextarea', atts: {label: Pmg.message('labels'), style: {width: '15em', height: '1em'}}},
 	        				numCols: {type: 'TextBox', atts: {label: Pmg.message('numCols'), style: {width: '3em'}}},
 	        				orientation: this.storeSelectDescription(Pmg.message('orientation'), Pmg.messageStoreData(['vertical', 'horizontal'])),
 	        				uniquechoice: {type: 'CheckBox', atts: {label: Pmg.message('uniquechoice')}},

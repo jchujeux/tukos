@@ -3,7 +3,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
     function(declare, lang, dct, dst, when, all, aspect, registry, ScrollablePane, Container, FormLayout, ToolBarButton, widgetsLoader, _ObjectPaneMixin, utils, wutils){
     
 	var mobileWidgetTypes = {TextBox: 'MobileTextBox', FormattedTextBox: 'MobileFormattedTextBox', LazyEditor: 'MobileEditor', ObjectReset: 'MobileObjectReset', ObjectSave: 'MobileObjectAction', ObjectNew: 'MobileObjectAction',
-							 OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction'};
+							 OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction', Textarea: 'MobileTextBox'};
 	return declare([Container, _ObjectPaneMixin], {
         postCreate: function(){
             var self = this;
@@ -25,25 +25,23 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
             this.watchOnChange = true;
             this.watchContext = 'server';
             this.onInstantiated(lang.hitch(this, function(){
-            	this.widgetsHiderButton = new ToolBarButton({icon: "mblDomButtonBlueCirclePlus", style: "float: right", form: this}).placeAt(this.viewPane.actionsHeading, 'first');
-            	this.widgetsHiderButton.on('click', function(evt){
-            		var widgetsHiderButton = self.widgetsHiderButton, hider = widgetsHiderButton.hider;
-            		if(!hider){
-                		require(["tukos/_WidgetsHider"], function(_WidgetsHider){
-                			(hider = widgetsHiderButton.hider = new _WidgetsHider({form: widgetsHiderButton.form, parent: widgetsHiderButton})).toggleHiderMenu();
-                			widgetsHiderButton.set('icon', "mblDomButtonBlueCircleMinus");
-                			aspect.before(self.viewPane.mobileViews, 'selectPane', function(method, args){
-                				hider.close();
-                			});
-                			//aspect.after(hider, 'close', function(method, args){widgetsHiderButton.set('icon', 'mblDomButtonBlueCirclePlus')});
-                		});
-            		}else{
-            			hider.toggleHiderMenu();
-            		}
-            	});
-                if (this.data && this.data.value && !this.data.value.id){
-                    this.markIfChanged = true;
-                }
+            	if (this.widgetsHider !== false){
+                	this.widgetsHiderButton = new ToolBarButton({icon: "mblDomButtonBlueCirclePlus", style: "float: right", form: this}).placeAt(this.viewPane.actionsHeading, 'first');
+                	this.widgetsHiderButton.on('click', function(evt){
+                		var widgetsHiderButton = self.widgetsHiderButton, hider = widgetsHiderButton.hider;
+                		if(!hider){
+                    		require(["tukos/_WidgetsHider"], function(_WidgetsHider){
+                    			(hider = widgetsHiderButton.hider = new _WidgetsHider({form: widgetsHiderButton.form, parent: widgetsHiderButton})).toggleHiderMenu();
+                    			widgetsHiderButton.set('icon', "mblDomButtonBlueCircleMinus");
+                    			aspect.before(self.viewPane.mobileViews, 'selectPane', function(method, args){
+                    				hider.close();
+                    			});
+                    		});
+                		}else{
+                			hider.toggleHiderMenu();
+                		}
+                	});
+            	}
                 when (this.setWidgets(this.data), lang.hitch(this, function(result){
                     if (this.onOpenAction){
                         this.openAction(this.onOpenAction);
@@ -59,16 +57,16 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
             if (tableAtts && layout.widgets){
                 this.addChild(theFormLayout = new FormLayout({columns: (tableAtts.showLabels && tableAtts.orientation!== 'vert') ? 'two' : 'single'}));
             	layout.widgets.forEach(lang.hitch(this, function(widgetName){
-                    var widgetDescription = this.widgetsDescription[widgetName], instantiatingWidget, widgetType, widgetLayout, widgetLabel, widgetFieldSet;
-                	if (widgetDescription && (widgetType = mobileWidgetTypes[widgetDescription['type']])){
+                    var widgetDescription = this.widgetsDescription[widgetName], widgetAtts = widgetDescription.atts, instantiatingWidget, widgetType, widgetLayout, widgetLabel, widgetFieldSet;
+                	if (widgetDescription && (widgetType = (mobileWidgetTypes[widgetDescription['type']] || widgetDescription['type']))){
     	                self.widgetsName.push(widgetName);
                     	widgetLayout = dct.create('div', null, theFormLayout.domNode);
                     	if (tableAtts.showLabels){
                     		widgetLabel = dct.create('label', {innerHTML: widgetDescription.atts.label}, widgetLayout);
                     	}
                 		widgetFieldSet = dct.create('fieldset', null, widgetLayout);
-                		dojo.when(instantiatingWidget = widgetsLoader.instantiate(widgetType, lang.mixin(widgetDescription['atts'], {id: this.id + widgetName, pane: this, form: this, widgetType: widgetType, widgetName: widgetName}), 
-                										    optionalWidgetInstantiationCallback), function(theWidget){
+                		dojo.when(instantiatingWidget = widgetsLoader.instantiate(widgetType, utils.mergeRecursive(widgetAtts, {id: this.id + widgetName, pane: this, form: this, widgetType: widgetType, widgetName: widgetName,
+                											style: {backgroundColor: widgetAtts.disabled ? 'lightgrey': 'white', color: 'black'}}), optionalWidgetInstantiationCallback), function(theWidget){
                     		theWidget.layoutHandle = self;
                     		theWidget.layoutContainer = widgetLayout;
                     		if (theWidget.get('hidden')){
@@ -95,14 +93,13 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
             if (tableAtts && layout.widgets){
             	layout.widgets.forEach(lang.hitch(this, function(widgetName){
                     var widgetDescription = this.widgetsDescription[widgetName], instantiatingWidget, widgetType;
-	                self.widgetsName.push(widgetName);
-                	if (widgetDescription && (widgetType = mobileWidgetTypes[widgetDescription['type']])){
-                		dojo.when(instantiatingWidget = widgetsLoader.instantiate(widgetType, lang.mixin({id: this.id + widgetName, style: {backgroundColor: 'DarkGrey'}, pane: this, form: this, widgetType: widgetType, widgetName: widgetName}, 
-                			widgetDescription['atts']), optionalWidgetInstantiationCallback), function(theWidget){
+                	if (widgetName !== 'feedback' && widgetDescription && (widgetType = (mobileWidgetTypes[widgetDescription['type']] || widgetDescription['type']))){
+    	                self.widgetsName.push(widgetName);
+                		dojo.when(instantiatingWidget = widgetsLoader.instantiate(widgetType, utils.mergeRecursive({id: this.id + widgetName, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, pane: this,
+                			form: this, widgetType: widgetType, widgetName: widgetName}, widgetDescription['atts']), optionalWidgetInstantiationCallback), function(theWidget){
                 				actionsHeading.addChild(theWidget);
                 				theWidget.layoutContainer = theWidget.domNode;
                 				if (theWidget.get('hidden')){
-                					//theWidget.set('style', {display: 'none'});
                 					dst.set(theWidget.domNode, 'display', 'none');
                 				}
                 				self.decorate(theWidget);

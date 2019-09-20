@@ -35,7 +35,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
         },
         
         renderStoreValue: function(object, value, node){
-            return this.grid._renderContent(this, object, value ? utils.find(this.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value);
+            return this.grid._renderContent(this, object, value ? utils.findReplace(this.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value);
         },
         
         renderCheckBox: function(object, value, node){

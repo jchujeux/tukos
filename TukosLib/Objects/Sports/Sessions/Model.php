@@ -22,10 +22,21 @@ class Model extends AbstractModel {
         	'warmupdetails' =>  'longtext',
             'mainactivitydetails' =>  'longtext',
             'warmdowndetails'     =>  'longtext',
-        		'googleid' => 'VARCHAR(255) DEFAULT NULL',
-        ];
+        	'googleid' => 'VARCHAR(255) DEFAULT NULL',
+            'mode' => 'VARCHAR(10) DEFAULT NULL',
+            'distance' => 'VARCHAR(10) DEFAULT NULL',
+            'elevationgain' => 'VARCHAR(10) DEFAULT NULL',
+            'feeling' => 'VARCHAR(255) DEFAULT NULL',
+            'sensations' => 'INT DEFAULT NULL',
+            'perceivedeffort' => 'INT DEFAULT NULL',
+            'mood' => 'INT DEFAULT NULL',
+            'athletecomments' => 'VARCHAR(512) DEFAULT NULL',
+            'athleteweeklyfeeling' => 'VARCHAR(512) DEFAULT NULL',
+            'coachcomments' => 'VARCHAR(512) DEFAULT NULL',
+            'coachweeklycomments' => 'VARCHAR(512) DEFAULT NULL'];
         parent::__construct(
-            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, [], ['intensity', 'stress', 'sport', 'difficulty'], ['worksheet', 'custom']
+            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, [], ['intensity', 'stress', 'sport', 'difficulty', 'sensations','perceivedeffort','mood','mode'], 
+            ['worksheet', 'custom']
         );
     }   
     function initialize($init=[]){

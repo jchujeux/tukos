@@ -1,5 +1,5 @@
-define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry", "tukos/utils"/*, "tukos/evalutils"*/], 
-	function(arrayUtil, lang, domstyle, registry, utils/*, eutils*/){
+define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry", "tukos/utils"], 
+	function(arrayUtil, lang, domstyle, registry, utils){
     return {
 
         specialCharacters: '$@#',

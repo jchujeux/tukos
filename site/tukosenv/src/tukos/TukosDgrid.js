@@ -105,9 +105,9 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
             this.on(on.selector(".dgrid-row, .dgrid-header", "contextmenu"), lang.hitch(this, this.contextMenuCallback));
         },
 
-        _setAllowLocalFilters: function(newValue){
-        	wutils.watchCallback(this, 'allowLocalFilters', this.allowLocalFilters, newValue);
-        	this.allowLocalFilters = newValue;
+        _setAllowApplicationFilter: function(newValue){
+        	wutils.watchCallback(this, 'allowApplicationFilter', this.allowApplicationFilter, newValue);
+        	this.allowApplicationFilter = newValue;
         },
         
 /*        
@@ -159,14 +159,26 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
                 }
             }
         },
-
+        onFilterChange: function(filterWidget){
+            lang.setObject('widgetsDescription.' + this.widgetName + '.atts.columns.' + filterWidget.col + '.filter', filterWidget.get('value'), this.pane.customization);        	
+        },
+        onFilterKeyDown: function(event){
+        	if (event.keyCode === 13) {
+    			var grid = this.grid;
+				grid.onFilterChange(this);
+				grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
+			}        	
+        },
         showFilters: function(){
             var grid = this, pane = grid.form,
                 headerTable = grid.headerNode.firstChild,
                 filtersRow = query('.dgrid-filter-row', headerTable);
-            var onFilterChange = function(filterWidget){
+            var onFilterChange = lang.hitch(grid, grid.onFilterChange), onFilterKeyDown = grid.onFilterKeyDown;
+/*
+            	var onFilterChange = function(filterWidget){
                 lang.setObject('widgetsDescription.' + grid.widgetName + '.atts.columns.' + filterWidget.col + '.filter', filterWidget.get('value'), pane.customization);
             }
+*/
             if (filtersRow.length > 0){
                 dct.destroy(filtersRow[0]);
             }else{
@@ -177,7 +189,7 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
                     td.columnId = colId;
                     if (column.rowsFilters){
                         var width = column.width ? column.width + 'px' : '7em', 
-                        	filter = new colFilter({onFilterChange: onFilterChange, grid: grid, col: colId, filters: column.rowsFilters, oprAtts: {style: {width: width}}, entryAtts: {style: {width: width}}}, td);
+                        	filter = new colFilter({onFilterChange: onFilterChange, onKeyDown: onFilterKeyDown, grid: grid, col: colId, filters: column.rowsFilters, oprAtts: {style: {width: width}}, entryAtts: {style: {width: width}}}, td);
                         if (column.filter){
                             filter.set('value', column.filter);
                         }
@@ -194,7 +206,7 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
         	var columnsCustomization = lang.getObject('widgetsDescription.' + this.widgetName + '.atts.columns', false, this.form.customization) || {}, userFilters = {};
         	utils.forEach(this.columns, function(column, field){
         		var customFilter = (columnsCustomization[field] || {}).filter||{}, customFilterOpr = customFilter[0];
-        		if (customFilterOpr && (!utils.in_array(customFilterOpr, ['RLIKE', 'NOT RLIKE', 'BETWEEN']) || customFilter[1])){
+        		if (customFilterOpr/* && (!utils.in_array(customFilterOpr, ['RLIKE', 'NOT RLIKE', 'BETWEEN']) || customFilter[1])*/){
         			userFilters[field] = columnsCustomization[field].filter;
         		}else if ((column.filter || {})[0]){
         			userFilters[field] = column.filter;

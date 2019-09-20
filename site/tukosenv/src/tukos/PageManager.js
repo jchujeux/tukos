@@ -9,9 +9,24 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
 		lang.extend(_CheckboxMixin, _WidgetsFormExtend);
 	return {
 		initializeTukosForm: function(obj){
-			tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
+			tukos = {Pmg: this};
 			this.cache = obj;
 			this.cache.messages = this.cache.messages || {};				
+	   },
+	   initializeForm: function(obj){
+		   this.cache = obj;
+		   this.cache.messages = this.cache.messages || {};
+           var self = this;
+           Date.prototype.toJSON = function(){
+               return dojo.date.locale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
+           };
+           require([obj.isMobile ? "tukos/mobile/buildForm" : "tukos/desktop/buildForm", "tukos/StoresManager", "tukos/utils"], function(buildForm, StoresManager, utils){
+           	stores = new StoresManager();
+           	buildForm.initialize();
+           self.requestUrl = function(urlArgs){//functions depending on utils located here so that utils can be located in the require above and then can depend on PageManager
+               return string.substitute(urlTemplate, {dialogueUrl: self.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
+           };
+           });
 	   },
 	   initialize: function(obj) {
             tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
@@ -153,7 +168,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
                     }
                     self.addExtrasToCache(response.extras);
                     if (defaultFeedback !== false){
-                        self.addFeedback(response['feedback'], defaultFeedback);
+                        self.setFeedback(response['feedback'], defaultFeedback);
                     }
                     if (isObjectFeedback){
                     	set(att, attValue);
@@ -161,7 +176,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
                     return response;
                 },
                 function(error){
-                    self.addFeedback(self.message('failedOperation')  + ': ' + error.message);
+                    self.setFeedback(self.message('failedOperation')  + ': ' + error.message);
                     if (isObjectFeedback){
                     	set(att, attValue);
                     }
@@ -177,7 +192,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             if (beep){
                 this.beep();
             }
-            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || this.message('Ok')),
+            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || '' /*|| this.message('Ok')*/),
                   currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;;
             if (((currentTab || {}).form || {}).getWidget){
                 var widget = (lang.hitch(currentTab.form, currentTab.form.getWidget))('feedback');
@@ -202,10 +217,11 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             	}
             }
         },
+/*
         appendFeedback: function(serverFeedback, clientFeedback, beep){
             this.setFeedback(serverFeedback, clientFeedback, ' ', beep);
         },
-
+*/
         addFeedback: function(serverFeedback, clientFeedback, beep){
             this.setFeedback(serverFeedback, clientFeedback, "\n", beep);
         },

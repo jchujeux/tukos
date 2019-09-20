@@ -5,6 +5,7 @@ namespace TukosLib\Objects;
 use TukosLib\Utils\TukosException;
 use TukosLib\Objects\ObjectTranslator;
 use TukosLib\Utils\Feedback;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class Controller extends ObjectTranslator{
@@ -31,11 +32,27 @@ class Controller extends ObjectTranslator{
     function response($request, $query, $ignoreUnallowed = false){
         $this->request = $request;
         $this->paneMode = $request['mode'];
-        $this->query = $query;
         if ($this->user->isAllowed($request['object'], $query)){
             try{
                 $action = $this->objectsStore->objectAction($this, $request);
-                //$this->view->request = $request;
+                if (isset($query['storeatts']) && !empty($query['storeatts']['where'])){
+                    $where = &$query['storeatts']['where']; $storesData = [];
+                    $where = array_merge($this->user->getCustomView($this->objectName, 'overview', $this->paneMode, ['data', 'filters', 'overview']), $where);
+                    foreach($where as $widgetName => $condition){
+                        if (!empty($description = Utl::getItem($widgetName, $this->view->dataWidgets)) && $description['type'] === 'storeSelect'){
+                            $storesData[$widgetName] = $description['atts']['edit']['storeArgs']['data'];
+                        }
+                    }
+                    $storesData = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode($storesData)), true);
+                    foreach($storesData as $widgetName => $storeData){
+                        list($opr, $value) = $where[$widgetName];$cache = [];
+                        if ($value){
+                            $where[$widgetName][1] = ($opr === 'RLIKE' || $opr === 'NOT RLIKE') ? Utl::includesReplace($storeData, 'name', $value, 'id', $cache, true, true) : Utl::findReplace($storeData, 'name', $value, 'id', $cache, true, true);
+                        }
+                    }
+                }
+                $this->query = $query;
+                
                 return $action->response($query);
             }
             catch (TukosException $e){

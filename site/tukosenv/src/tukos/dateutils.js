@@ -1,5 +1,6 @@
 define(["dojo", "dojox/date/posix"], function(dojo, ISODates){
-    return {
+    var durations = {second: 1, minute: 60, hour: 3600, day: 24*3600, week: 7*24*3600, month: 24*3600*30, quarter: 24*3600*30*3, year: 24*3600*365};
+	return {
 
         toISO: function(date, options){
             return dojo.date.stamp.toISOString(date, options || {zulu: true});
@@ -113,8 +114,11 @@ define(["dojo", "dojox/date/posix"], function(dojo, ISODates){
                 return '';
             }
          },
-        
-        convert: function(duration, fromUnit, toUnit){
+         seconds: function(durationString){
+        	 var durationArray = JSON.parse(durationString);
+        	 return (durationArray[0] && durationArray[1]) ? durationArray[0] * durations[durationArray[1]] : 0;
+         },
+         convert: function(duration, fromUnit, toUnit){
             var durations = {second: 1, minute: 60, hour: 3600, day: 24*3600, week: 7*24*3600, month: 24*3600*30, quarter: 24*3600*30*3, year: 24*3600*365};
             var fromUnitDuration = durations[fromUnit], toUnitDuration = durations[toUnit];
             if (fromUnitDuration && toUnitDuration){

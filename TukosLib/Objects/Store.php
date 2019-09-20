@@ -23,7 +23,7 @@ trait Store {
         return $items;
     }
 
-    public function updateItem($item, $atts){
+    public function updateItems($item, $atts){
     	$item = array_intersect_key($item, array_flip($this->allCols));
     	$transformedAtts = SUtl::transformUpdate($item, $atts, $this->tableName);
         return $this->store->update($item, $transformedAtts);

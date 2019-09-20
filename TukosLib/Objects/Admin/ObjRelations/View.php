@@ -15,7 +15,7 @@ class View extends AbstractView {
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Relating object', 'Relation');
         $customDataWidgets = [
-            'name'      => ViewUtils::storeSelect('relations', $this, 'Relation', true, ['atts' => ['edit' => ['required' => true]]]),
+            'name'      => ViewUtils::storeSelect('relations', $this, 'Relation', null, ['atts' => ['edit' => ['required' => true]]]),
             'relatedid' => ViewUtils::objectSelectMulti('relatedid', $this, 'Related object'),
         ];
         $this->customize($customDataWidgets);

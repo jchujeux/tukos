@@ -6,7 +6,8 @@ define (
         sizeUnits = utils.storeData(['auto', 'cm', '%', 'em', 'px']), thicknessUnits = utils.storeData(['cm', 'em', 'px']), hAlignStoreData = Pmg.messageStoreData(['default', 'left', 'center', 'right']),
         vAlignStoreData = Pmg.messageStoreData(['top', 'middle', 'bottom']), displayStoreData = Pmg.messageStoreData(['block', 'inline', 'none']),
     	description = {backgroundColor: 'colorDescription', borderColor: 'colorDescription', color: 'colorDescription', textAlign: 'hAlignDescription', verticalAlign: 'vAlignDescription', width: 'sizeDescription',
-    				   height: 'sizeDescription', margin: 'sizeDescription', display: 'displayDescription', placeHolder: 'domAttDescription', border: 'domAttDescription', cellPadding: 'domAttDescription', cellSpacing: 'domAttDescription'},
+    				   height: 'sizeDescription', margin: 'sizeDescription', display: 'displayDescription', paddingLeft: 'sizeDescription', paddingRight: 'sizeDescription', paddingBottom: 'sizeDescription', paddingTop: 'sizeDescription',
+    				   placeHolder: 'domAttDescription', border: 'domAttDescription', cellPadding: 'domAttDescription', cellSpacing: 'domAttDescription'},
 	    domAttValue = {
 	        get: function(node, att){
 	            return domAttr.get(node, att);

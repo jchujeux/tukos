@@ -7,6 +7,8 @@
 		"zf1/zend-console-getopt" : "~1.12",
 		"phpoffice/phpspreadsheet" : "~1.5",
 		"google/apiclient-services" : "~0.74",
-		"mobiledetect/mobiledetectlib" : "~2.8"
+		"mobiledetect/mobiledetectlib" : "~2.8",
+		"lukebaird/dropbox-v2-php-sdk" : "~1.1",
+		"box/spout" : "~3.0"
 	}
 }

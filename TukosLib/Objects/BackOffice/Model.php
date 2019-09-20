@@ -13,6 +13,7 @@ class Model extends Translator{
         return [];
     }
     function __construct($objectName){
+        $this->objectName = $objectName;
         parent::__construct(Tfk::$tr);
     }
 }

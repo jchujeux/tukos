@@ -28,7 +28,6 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
             }
             return true;
         },
-
         forEach: function(object, callback){
             for (var key in object){
                 if (object.hasOwnProperty(key)){
@@ -36,12 +35,10 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                 }
             }
         },
-        
         assign: function(object, property, value){
             object[property] = value;
             return object;
         },
-        
         filter: function(object){
             for (var key in object){
                 if (object.hasOwnProperty(key)){
@@ -53,7 +50,6 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
             }
             return object;
         },
-
         objectKeys: function(object){
             var objectKeys = [];
             for (var key in object){
@@ -63,7 +59,6 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
             }
             return objectKeys;
         },
-
         object_search: function(needle, object){
             for (var key in object){
                 if (object.hasOwnProperty(key) && object[key] === 'needle'){
@@ -72,14 +67,27 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
             }
             return false;
         },
-        
-        find: function (arrayToSearch, searchProperty, searchValue, returnProperty, cache){
+        replace: function (comparisonOperator, arrayToSearch, searchProperty, searchValue, returnProperty, cache, ignoreCase, ignoreAccent){
         	var search = function (row){
-        		return String(row[searchProperty]) === String(searchValue);
+        		var targetValue = String(row[searchProperty]), sourceValue = String(searchValue);
+        		if (ignoreCase){
+        			targetValue = targetValue.toLowerCase();
+        			sourceValue = sourceValue.toLowerCase();
+        		}
+        		if (ignoreAccent){
+        			targetValue = targetValue.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        			sourceValue = sourceValue.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        		}
+        		return comparisonOperator === 'find' ? targetValue === sourceValue : targetValue.includes(sourceValue);
         	};
         	return cache[searchValue] || (cache[searchValue] = ((arrayToSearch.find(search)|| [])[returnProperty] || searchValue));       		
         },
-        
+        findReplace: function (arrayToSearch, searchProperty, searchValue, returnProperty, cache, ignoreCase, ignoreAccent){
+            return this.replace('find', arrayToSearch, searchProperty, searchValue, returnProperty, cache, ignoreCase, ignoreAccent);
+        },
+        includesReplace: function (arrayToSearch, searchProperty, searchValue, returnProperty, cache, ignoreCase, ignoreAccent){
+            return this.replace('includes', arrayToSearch, searchProperty, searchValue, returnProperty, cache, ignoreCase, ignoreAccent);
+        },
         objectContains: function(subObject, object){
         	for (var key in subObject){
         		if (subObject.hasOwnProperty(key) && subObject[key] != object[key]){

@@ -7,11 +7,13 @@ use TukosLib\Store\Store;
 use TukosLib\Utils\Translator;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Utils\Cipher;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel{
     protected $rightsOptions = ['SUPERADMIN', 'ADMIN', 'ENDUSER'];
     protected $environmentOptions = ['production', 'development'];
+    protected $dropboxbackofficeaccessOptions = ['yes', 'no'];
     
     public static $_colsDefinition = [
             'password'      =>  'VARCHAR(255)  DEFAULT NULL',
@@ -20,6 +22,8 @@ class Model extends AbstractModel{
             'language'      =>  "VARCHAR(80) DEFAULT NULL",
             'environment'   =>  "VARCHAR(80) DEFAULT NULL",
             'tukosorganization' =>  "VARCHAR(80) DEFAULT NULL",
+            'dropboxaccesstoken'      =>  'VARCHAR(255)  DEFAULT NULL',
+            'dropboxbackofficeaccess' => 'VARCHAR(10) DEFAULT NULL',
             'customviewids' =>  'longtext DEFAULT NULL',
             'customcontexts'=>  'longtext DEFAULT NULL',
             'pagecustom'=>  'longtext DEFAULT NULL',
@@ -29,7 +33,7 @@ class Model extends AbstractModel{
     function __construct($objectName, $translator=null){
         $this->languageOptions = Tfk::$registry->get('appConfig')->languages['supported'];
 
-        parent::__construct($objectName, $translator, 'users', ['parentid' => ['people']], ['modules', 'customviewids', 'customcontexts', 'pagecustom'], self::$_colsDefinition, self::$_colsIndexes, ['rights', 'modules', 'language'], ['history']);
+        parent::__construct($objectName, $translator, 'users', ['parentid' => ['people']], ['modules', 'customviewids', 'customcontexts', 'pagecustom'], self::$_colsDefinition, self::$_colsIndexes, ['rights', 'modules', 'language'], ['custom', 'history']);
 
         switch ($this->user->rights()){
             case 'SUPERADMIN': 
@@ -75,7 +79,11 @@ class Model extends AbstractModel{
         	if (empty(Utl::getItem('tukosorganization', $values))){
         	    $values['tukosorganization'] = $this->user->tukosOrganization();
         	}
-        	return parent::insertExtended($values, false, $jsonFilter);
+        	$item =  parent::insertExtended($values, false, $jsonFilter);
+        	if (Utl::getItem('dropboxbackofficeaccess', $values) === 'yes'){
+        	    $this->updateOne(['custom' => ['dropbox' => [$item['id']]]], ['where' => ['name' => 'tukosBackOffice']]);
+        	}
+        	return $item;
         }
     }
 
@@ -133,14 +141,30 @@ class Model extends AbstractModel{
     	$result = parent::updateOneExtended($newValues, $atts, $insertIfNoOld, $jsonFilter);
     	if (!$result && $authUpdate){
     		$result = ['id' => $newValues['id']];
+    	}else{
+    	    $this->processDropbox($newValues);
     	}
     	return $result;
     }
-    
+    private function processDropbox($newValues){
+        switch (Utl::getItem('dropboxbackofficeaccess', $newValues)){
+            case 'yes': 
+                $this->updateOne(['custom' => ['dropbox' => [$newValues['id']]]], ['where' => ['name' => 'tukosBackOffice']]); 
+                break;
+            case 'no': 
+                $dropboxIds = $this->getOne(['where' => ['name' => 'tukosBackOffice'], 'cols' => ['custom']], ['custom' => ['dropbox']])['custom'];
+                if (($key = array_search($newValues['id'], $dropboxIds)) !== false){
+                    $dropboxIds[$key] = '~delete';
+                    $this->updateOne(['custom' => ['dropbox' => $dropboxIds]], ['where' => ['name' => 'tukosBackOffice']]);
+                }
+        }
+    }
+/*    
     public function delete ($where, $item = []){
     	$username = $this->getOne(['where' => $where, 'cols' => ['name']])['name'];
     	Tfk::$registry->get('configStore')->delete(['table' => 'users', 'where' => ['username' => $username]]);
     	parent::delete($where, $item);
     }
+*/
 }
 ?>

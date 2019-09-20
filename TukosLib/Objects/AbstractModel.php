@@ -291,7 +291,7 @@ abstract class AbstractModel extends ObjectTranslator {
     
     public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false){
         $this->processLargeCols($newValues);
-        return $this->updateOne($newValues, $atts, $insertIfNoOld, $jsonFilter);
+        return $this->updateOne(array_intersect_key($newValues, array_flip($this->allCols)), $atts, $insertIfNoOld, $jsonFilter);
     }
     
     public function processLargeCols(&$newValues){
@@ -382,7 +382,7 @@ abstract class AbstractModel extends ObjectTranslator {
             $this->jsonEncode($differences, $jsonFilter);
             //$this->jsonEncode($differences, true);
             
-            $update = $this->updateItem($differences, ['table' =>  $this->tableName, 'where' => ['id' => $oldValues['id']]]);
+            $update = $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $oldValues['id']]]);
 
             $updatedRow = ['id' => $oldValues['id'], 'updated' => $updated, 'updator' => $updator];
 
@@ -469,7 +469,7 @@ abstract class AbstractModel extends ObjectTranslator {
             $values = array_merge($this->initializeExtended(), $values);
         }
         $this->processLargeCols($values);
-        return $this->insert($values, false, $jsonFilter);        
+        return $this->insert(array_intersect_key($values, array_flip($this->allCols)), false, $jsonFilter);        
     }
 
     public function duplicate($ids, $cols=['*']){
@@ -493,7 +493,7 @@ abstract class AbstractModel extends ObjectTranslator {
         return $duplicate;
     }
 
-    
+/*    
     public function delete ($where, $item = []){
         $old = $this->getOne(['where' => $where, 'cols' => ['id', 'updator', 'permission', 'updated']]);
         if ($this->user->hasUpdateRights($old)){
@@ -504,12 +504,38 @@ abstract class AbstractModel extends ObjectTranslator {
                 }
             }
             $atts = ['where' => $where, 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]];
-            return $this->updateItem([], $atts, false);
+            return $this->updateItems([], $atts, false);
         }else{
             Feedback::add($this->tr('nodeleterightsfor') . ': ' . $old['id']);
         }
     }
-    
+*/
+    public function delete ($where, $item = []){
+        $oldItems = $this->getAll(['where' => $where, 'cols' => ['id', 'updator', 'permission', 'updated']]);
+/*
+        if (($updated = Utl::getItem('updated', $item)) && $oldItems[0]['updated'] > $updated){
+            Feedback::add([[$this->tr('theuser') => $oldItems[0]['updator']], ['updatedat' => $oldItems[0]['updated']], ['afteryouredit' => null]]);
+            return false;
+        }else{
+*/
+            foreach($oldItems as $old){
+                if ($this->user->hasUpdateRights($old)){
+                    $toDelete[] = $old['id'];
+                }else{
+                    $noRightToDelete[] = $old['id'];
+                }
+            }
+            if (!empty($noRightToDelete)){
+                Feedback::add($this->tr('nodeleterightsfor') . ': ' . json_encode($noRightToDelete));
+            }
+            if (empty($toDelete)){
+                Feedback::add($this->tr('noitemwasdeleted'));
+                return false;
+            }else{
+                return $this->updateItems([], ['where' => [['col' => 'id', 'opr' => 'in', 'values' => $toDelete]], 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]]);
+            }
+//        }
+    }
     public function summary($activeUserFilters = null){
         return [
         		'filteredrecords' => is_null($activeUserFilters) ? $this->foundRows() : $this->getAll(['where' => $this->user->filter($activeUserFilters, $this->objectName), 'cols' => ['count(*)']])[0]['count(*)'],

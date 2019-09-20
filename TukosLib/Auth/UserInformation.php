@@ -87,6 +87,9 @@ class UserInformation{
     public function tukosOrganization(){
         return  Utl::getItem('tukosorganization', $this->userInfo, '');
     }
+    public function dropboxAccessToken(){
+        return $this->decrypt(Utl::getItem('dropboxaccesstoken', $this->userInfo, ''), 'private');
+    }
     public function dateFormat(){
         $formats = ['en_us' => 'Y-m-d', 'fr_fr' => 'd-m-Y', 'es_es' => 'd-m-Y'];
         return isset($formats[$this->language]) ? $formats[$this->language] : 'Y-m-d';
@@ -217,6 +220,24 @@ class UserInformation{
     public function hasUpdateRights($item){
         return $this->rights() === "SUPERADMIN" || $item['updator'] === $this->id() || $item['permission'] === 'PU' || $item['id'] === $this->id();
     }
+    public function getDropboxUserAccessToken($userId){
+        if (is_string($this->userInfo['custom'])){
+            $this->userInfo['custom'] = json_decode($this->userInfo['custom'], true);
+        }
+        if (in_array($userId, $this->userInfo['custom']['dropbox'])){
+            $usersModel = $this->objectsStore->objectModel('users');
+            $values = $usersModel->getOne(['where' => ['id' => $userId], 'cols' => ['password', 'dropboxaccesstoken']]);
+            if (empty($values['dropboxaccesstoken'])){
+                Feedback::add('nodropboxaccesstokenforuser' . ': ' . $userId);
+                return false;
+            }else{
+                return Cipher::decrypt($values['dropboxaccesstoken'], $values['password']);
+            }
+        }else{
+            Feedback::add('noaccesstouserdropbox');
+            return false;
+        }
+    }
     private function customViewIds(){
         if (!property_exists($this, 'customViewIds')){
             if (!empty($this->userInfo['customviewids'])){
@@ -267,10 +288,11 @@ class UserInformation{
         $this->customViewIds = Utl::array_merge_recursive_replace($this->customViewIds(), [$objectName => [$view => [$paneMode => $customViewId]]]);
     }
     public function updateCustomView($objectName, $view, $paneMode, $newValues){
+        $paneMode = strtolower($paneMode); $view = strtolower($view);
         $customViewId = $this->customViewId($objectName, $view, $paneMode);
         if (empty($customViewId)){
             $result = $this->objectsStore->objectModel('customviews')->insert(
-                ['name' => 'new', 'vobject' => $objectName, 'view' => strtolower($view), 'panemode' => strtolower($paneMode), 'customization' => $newValues], 
+                ['name' => 'new', 'vobject' => $objectName, 'view' => $view, 'panemode' => $paneMode, 'customization' => $newValues], 
                 true, true
             );
             $this->setCustomViewId($objectName, $view, $paneMode, $result['id']);
@@ -285,10 +307,9 @@ class UserInformation{
         }
     }
     public function pageCustomization(){
-        return $this->pageCustomization;//empty($this->userInfo['pagecustom']) ? [] : json_decode($this->userInfo['pagecustom'], true);
+        return $this->pageCustomization;
     }
     public function updateUserInfo($pageCustom){
-        //$this->userInfo['pagecustom'] = json_encode(empty($this->userInfo['pagecustom']) ? $pageCustom : array_merge(json_decode($this->userInfo['pagecustom'], true), $pageCustom));
         $this->pageCustomization = array_merge($this->pageCustomization, $pageCustom);
         $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => json_encode($this->pageCustomization)], ['where' => ['id' => $this->id()]]);
         Feedback::add(Tfk::tr('serveractiondone'));

@@ -29,7 +29,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                 dgridCustomAtts = {
                     maxHeight: {att: 'maxHeight', name: messages.maxHeight, units: sizeConstraintUnits}, //minHeight: {att: 'minHeight', name: messages.minHeight, units: sizeConstraintUnits}, height: {att: 'height', name: messages.height, units: sizeConstraintUnits}, 
                     //minWidth: {att: 'minWidth', name: messages.minWidth, units: sizeConstraintUnits}, maxWidth: {att: 'maxWidth', name: messages.maxWidth, units: sizeConstraintUnits}, width: {att: 'width', name: messages.width, units: sizeConstraintUnits}, 
-                    allowLocalFilters: {att: 'allowLocalFilters', name: messages.allowLocalFilters, units: filtersUnits},
+                    allowApplicationFilter: {att: 'allowApplicationFilter', name: messages.allowApplicationFilter, units: filtersUnits},
                     hideServerFilters: {att: 'hideServerFilters', name: messages.hideServerFilters, units: filtersUnits}
                 },
 
@@ -41,7 +41,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                     FormattedTextBox: heightConstraints, MultiSelect: widthConstraints, 
                     StoreSelect: widthConstraints, ObjectSelect:  widthConstraints,  ObjectSelectMulti:  widthConstraints,  ObjectSelectDropDown: widthConstraints,
                     NumberUnitBox: width, DateTimeBox: width,  SimpleDgrid: dgridCustomAtts,  StoreDgrid: dgridCustomAtts, OverviewDgrid: dgridCustomAtts, MobileOverviewGrid: dgridCustomAtts,
-                    ContextTree: width, NavigationTree: widthAndHeightConstraints, PieChart: width, ColumnsChart: width,  Chart: widthAndHeight, Uploader: width, Downloader: width, StoreCalendar: widthAndHeight
+                    ContextTree: width, NavigationTree: widthAndHeightConstraints, PieChart: width, ColumnsChart: width,  Chart: width, Uploader: width, Downloader: width, StoreCalendar: widthAndHeight
                 },
                     
                 widgetCustomDialogDescription = {
@@ -118,7 +118,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
             	if (widgetType === attValueType){
             		switch(widgetType){
             			case 'NumberUnitBox':
-            				widget.unitField.store.setData(atts ? (typeof atts.units === 'string' ? widgetsCustomAtts[atts.unit].styleWidth.unit : atts.unit) : []);
+            				widget.unitField.store.setData(atts ? atts.units : []);
             				widget.numberField.set('disabled', true);
             				break;
             			case 'StoreSelect':

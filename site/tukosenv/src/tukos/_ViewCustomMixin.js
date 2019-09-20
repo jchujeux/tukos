@@ -127,7 +127,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         itemCustomViewChange: function(newValue){
-            var targetPane = this.currentPane(), form = targetPane.form || targetForm, custom = utils.setObject([form.viewMode.toLowerCase(), form.paneMode.toLowerCase()], {itemcustomviewid: newValue});
+            var targetPane = this.currentPane(), form = targetPane.form || targetForm, custom = utils.setObject([form.viewMode, form.paneMode], {itemcustomviewid: newValue});
             Pmg.refresh(targetPane, 'TabSave', {id: lang.hitch(form, form.valueOf)('id'), custom: custom}, {values: true, customization: true}).then(lang.hitch(this, function(){
                 var pane = targetPane.customDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
                 paneGetWidget('itemCustomViewButton').set('disabled', ((form.itemcustomviewid && form.itemcustomviewid !== '') ? false : true));
@@ -160,7 +160,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                     Pmg.refresh(targetPane, 'TabDefaultCustomViewSave', form.customization, {values: true});
                     break;
                 case 'itemCustomView': 
-                    Pmg.tabs.refresh('TabItemCustomViewSave', {id: form.itemcustomviewid/*, vobject: form.object, view: form.viewMode.toLowerCase()*/, customization: form.customization}, {values: true});
+                    Pmg.tabs.refresh('TabItemCustomViewSave', {id: form.itemcustomviewid/*, vobject: form.object, view: form.viewMode*/, customization: form.customization}, {values: true});
                     break;
                 case 'itemCustom': 
                     Pmg.tabs.refresh('TabSave', {custom: utils.setObject([form.viewMode.toLowerCase(), form.paneMode.toLowerCase()], form.customization)}, {values: true});
@@ -178,7 +178,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         moreCallback: function(){
             var targetPane = this.currentPane(), targetNode = this.currentPaneNode(), form = targetPane.form || targetPane, id = form.valueOf('id'),  customDialog = targetPane.customDialog, pane = customDialog.pane, getWidget = lang.hitch(pane, pane.getWidget);
             this.setVisibility({hideMore: false});
-            Pmg.serverDialog({object: form.object, view: form.viewMode.toLowerCase(), mode: form.paneMode.toLowerCase(), action: 'CustomViewMore', query: id ? {id: id} : {}}).then(
+            Pmg.serverDialog({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'CustomViewMore', query: id ? {id: id} : {}}).then(
                 function(response){
                     ['defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
                         var contentName = customSet + 'Content'

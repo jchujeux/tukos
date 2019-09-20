@@ -1,0 +1,26 @@
+<!DOCTYPE HTML><html ><head><meta charset="utf-8"><title>suiviséances</title><link rel="stylesheet" href="/tukos/tukosenv/src/dijit/themes/claro/claro.css" media="screen"></head><body class="claro" ><br><table style="width: 100%;" cellspacing="0" cellpadding="0" border="1"><tbody><tr><td id="tdid0_1564675056713">&nbsp;<img alt="tds logo" src="http://localhost/tukos/images/tdspetit.jpg"></td><td id="tdid1_1564675056713"><h1><font size="7">&nbsp;Suivi de séance d'entraînement</font></h1></td></tr><tr><td id="tdid2_1564675056713">&nbsp;Nom &amp; prénom<br></td><td id="tdid3_1564675056713">&nbsp; <div class="tukosContainer" data-widgetid="nom" data-params="{&quot;name&quot;:&quot;nom&quot;,&quot;type&quot;:&quot;TextBox&quot;,&quot;width&quot;:&quot;100%&quot;,&quot;backgroundColor&quot;:&quot;&quot;,&quot;color&quot;:&quot;&quot;,&quot;value&quot;:&quot;&quot;,&quot;placeHolder&quot;:&quot;Entrez le nom et prénom&quot;}" style="display: inline;" title="nom"><input class="tukosWidget" ,="" value="" style="width: 100%; background-color: ; color: ;" data-dojo-type="dijit/form/TextBox" data-dojo-props="trim:true, placeHolder:'Entrez le nom et prénom'"></div> </td></tr><tr><td id="tdid4_1564675056713">&nbsp;Distance parcourue<br></td><td id="tdid5_1564675056713">&nbsp; <div class="tukosContainer" data-widgetid="distance" data-params="{&quot;name&quot;:&quot;distance&quot;,&quot;type&quot;:&quot;NumberSpinner&quot;,&quot;width&quot;:&quot;100%&quot;,&quot;backgroundColor&quot;:&quot;&quot;,&quot;color&quot;:&quot;&quot;,&quot;value&quot;:&quot;0&quot;,&quot;increment&quot;:&quot;5&quot;,&quot;min&quot;:&quot;0&quot;,&quot;max&quot;:&quot;100&quot;,&quot;digits&quot;:&quot;0&quot;}" style="display: inline;" title="distance"><input class="tukosWidget" value="0" style="width: 100%; background-color: ; color: ;" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="smallDelta:5, constraints:{min:0,max:100,places:0}"></div> </td></tr><tr><td id="tdid6_1564675056713">&nbsp;Dénivelé positif<br></td><td id="tdid7_1564675056713">&nbsp; <div class="tukosContainer" data-widgetid="dénivelé" data-params="{&quot;name&quot;:&quot;dénivelé&quot;,&quot;type&quot;:&quot;NumberSpinner&quot;,&quot;width&quot;:&quot;100%&quot;,&quot;backgroundColor&quot;:&quot;&quot;,&quot;color&quot;:&quot;&quot;,&quot;value&quot;:&quot;0&quot;,&quot;increment&quot;:&quot;10&quot;,&quot;min&quot;:&quot;0&quot;,&quot;max&quot;:&quot;3000&quot;,&quot;digits&quot;:&quot;0&quot;}" style="display: inline;" title="dénivelé"><input class="tukosWidget" value="0" style="width: 100%; background-color: ; color: ;" data-dojo-type="dijit/form/NumberSpinner" data-dojo-props="smallDelta:10, constraints:{min:0,max:3000,places:0}"></div> </td></tr><tr><td id="tdid8_1564675056713">&nbsp;sensations</td><td id="tdid9_1564675056713">&nbsp; <div class="tukosContainer" data-widgetid="RE" data-params="{&quot;name&quot;:&quot;RE&quot;,&quot;type&quot;:&quot;Slider&quot;,&quot;width&quot;:&quot;100%&quot;,&quot;color&quot;:&quot;&quot;,&quot;value&quot;:&quot;5:moyen&quot;,&quot;values&quot;:&quot;0:très mauvais,5:moyen,10:très bien&quot;}" style="display: inline;" title="RE"><div style="width: 100%;"><input data-widgetid="RE" class="tukosWidget" value="5:moyen" data-dojo-type="dijit/form/HorizontalSlider" data-dojo-props="minimum: 0, maximum: 2, showButtons: false, discreteValues: 3" type="range"><div data-dojo-type="dijit/form/HorizontalRule" data-dojo-props="container: 'bottomDecoration',	count: 3" style="height: 5px; margin: 0 12px;"></div><ol data-dojo-type="dijit/form/HorizontalRuleLabels" data-dojo-props="container: 'bottomDecoration'" style="height: 2em; margin: 0 12px; font-weight: bold;"><li>0:très mauvais</li><li>5:moyen</li><li>10:très bien</li></ol></div></div> </td></tr><tr><td id="tdid10_1564675056713">&nbsp;ressenti d'effort<br></td><td id="tdid11_1564675056713">&nbsp;</td></tr><tr><td id="tdid12_1564675056713">&nbsp;Commentaires</td><td id="tdid13_1564675056713">&nbsp;</td></tr></tbody></table><br><br>
+<script>var dojoConfig ={
+            baseUrl: "", isDebug: false, async: true, locale: "en-en",
+            packages: [{"name": "dojo", "location": "/tukos/tukosenv/src/dojo"}, {"name": "dijit", "location": "/tukos/tukosenv/src/dijit"}, {"name": "dojox", "location": "/tukos/tukosenv/src/dojox"}, 
+                      {"name": "tukos", "location": "/tukos/tukosenv/src/tukos"}]
+        };
+</script>
+<script src="/tukos/tukosenv/src/dojo/dojo.js"></script>
+<script>
+    require(["tukos/expressions", "tukos/tukosForms", "tukos/PageManager", "dojo/parser", "dijit/Editor", "dijit/_editor/plugins/AlwaysShowToolbar"], function (expressions, tukosForms, Pmg, parser) {
+        Pmg.initializeTukosForm({"tukosFormsDomainName":"localhost","messages":{"sent":"envoy\u00e9"}});    
+        tukos.onTdClick = function(td){
+	    	expressions.onClick(td.children[0]);
+	    };
+	    tukos.onTdDblClick = function(td){
+	    	expressions.onClick(td.children[0]);
+	    }; 
+	    tukos.onExpClick = function(expression){
+	    	expressions.onClick(expression);
+	    };
+	    tukos.onExpBlur = function(expression){
+	    	expressions.onBlur(expression);
+	    };
+	    parser.parse();
+	});
+</script></body></html>

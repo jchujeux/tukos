@@ -42,6 +42,10 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
             var requiredTypes = Object.keys(requiredClasses);
             require(requiredTypes.map(function(i){return requiredClasses[i];}), lang.hitch(this, function(){
                 var chartStyle = this.chartStyle || {}, tableStyle = this.tableStyle || {};
+                if (this.chartHeight){
+                	chartStyle.height = this.chartHeight;
+                	this.chartStyle = chartStyle;
+                }
             	this.chartClasses = {};
                 for (var i in requiredTypes){
                     this.chartClasses[requiredTypes[i]] = arguments[i];
@@ -49,10 +53,10 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
                 dst.set(this.domNode, {height: 'auto'});//or else the legend ovelaps other content
 
                 if (this.tableAtts){
-                	var table = dct.create('table', {}, this.domNode);
+                	var table = this.table = dct.create('table', {style: {tableLayout: 'fixed', width: '100%'}}, this.domNode);
                 	var tr = dct.create('tr', {}, table);
-                	this.tableNode = dct.create('div', {style: tableStyle}, dct.create('td', {style: {width: "20%"}}, tr));
-                	this.chartNode = dct.create('div', {style: chartStyle}, dct.create('td', {style: {width: "80%"}}, tr));
+                	this.tableNode = dct.create('div', {style: tableStyle}, dct.create('td', {style: {width: this.tableWidth || "20%"}}, tr));
+                	this.chartNode = dct.create('div', {style: chartStyle}, dct.create('td', {}, tr));
                 }else{
                     this.chartNode = dct.create('div', {style: chartStyle}, this.domNode);  
                 }
@@ -85,10 +89,16 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
             this.watch('showTable', lang.hitch(this, function(){
             	this.set('value', this.value);
             }));
+            this.watch('tableWidth', lang.hitch(this, function(){
+            	this.set('value', this.value);
+            }));
+            this.watch('chartHeight', lang.hitch(this, function(){
+            	this.set('value', this.value);
+            }));
         },
         
-        createTableWidget: function(){
-        	//this.tableWidget = new this.chartClasses['ReadonlyGrid'](lang.mixin(this.tableAtts, {hidden: this.showTable !== 'yes', form: this.form, collection: new DMemory({data: []})}), this.tableNode);
+        createTableWidget: function(maxHeight){
+        	this.tableAtts.maxHeight = maxHeight;
         	this.tableWidget = new this.chartClasses['BasicGrid'](lang.mixin(this.tableAtts, {hidden: this.showTable !== 'yes', form: this.form, collection: new DMemory({data: []})}), this.tableNode);
         	this.tableWidget.customizationPath = this.itemCustomization || 'customization' + '.widgetsDescription.' + this.widgetName + '.atts.tableAtts.';
             this.tableWidget.on("dgrid-columnstatechange", lang.hitch(this, function(evt){
@@ -106,20 +116,26 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
                 store.setData(value.store);
                 var sortedData = this.sortedData = store.query(kwArgs.query, kwArgs);//kwArgs.query ? store.query(kwArgs.query, kwArgs) : value.store;
                 this.onLoadDeferred.then(lang.hitch(this, function(){
-                    var chart = this.chart, showTable = this.showTable, tableNode = this.tableNode, width = dst.get(this.domNode, "width"), height = dst.get(this.chartNode, "height");//, tableStore = this.tableStore;
+                    var chart = this.chart, showTable = this.showTable, tableNode = this.tableNode, chartNode = this.chartNode, width = dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height"),
+                    	tableHeight = (parseInt(height)-20) + 'px';
                 	if (showTable === 'yes'){
                     	if (!this.tableWidget){
-                    		lang.hitch(this, this.createTableWidget)();
+                    		lang.hitch(this, this.createTableWidget)(tableHeight);
+                    	}else{
+                    		this.tableWidget.set('maxHeight', tableHeight);
                     	}
-                		dst.set(tableNode, {display: "block", minWidth: this.tableAtts.minWidth});
-                		//this.tableWidget.renderArray(value.store);
+                		dst.set(this.table, {tableLayout: "fixed"});
+                		dst.set(tableNode, {display: "block"});
+                		dst.set(tableNode.parentNode, {width: this.tableWidth || '20%'});
                 		this.tableWidget.collection.setData(value.store);
                 		this.tableWidget.refresh();
                 	}else{
                 		if (tableNode){
-                    		dst.set(tableNode, {display: "none"});               			
+                    		dst.set(tableNode, {display: "none"});   
+                    		dst.set(this.table, {tableLayout: "auto"});
                 		}
                 	}
+                	dst.set(chartNode, {height: height});
                 	for (var axisName in value.axes){
                             chart.addAxis(axisName, utils.mergeRecursive(this.axes[axisName], value.axes[axisName]));
                     }

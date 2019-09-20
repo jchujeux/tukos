@@ -349,7 +349,37 @@ class Utilities{
         }
         return false;
     }
-
+    public static function replace($comparisonOperator, $arrayToSearch, $searchProperty, $searchValue, $returnProperty, &$cache, $ignoreCase, $ignoreAccent){
+        if (empty($cache[$searchValue])){
+            foreach($arrayToSearch as $row){
+                $targetValue = $row[$searchProperty]; $sourceValue = $searchValue;
+                if ($ignoreAccent){
+                    $transliterator = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC');
+                    $targetValue = $transliterator->transliterate($targetValue);
+                    $sourceValue = $transliterator->transliterate($sourceValue);
+                }
+                if ($ignoreCase){
+                    $targetValue = strtolower($targetValue);
+                    $sourceValue = strtolower($sourceValue);
+                }
+                if($comparisonOperator === 'find' ? $targetValue === $sourceValue : strpos($targetValue, $sourceValue) !== false){
+                    $cache[$searchValue] = $row[$returnProperty];
+                    break;
+                }
+            }
+            if (empty($cache[$searchValue])){
+                $cache[$searchValue] = $searchValue;
+            }
+        }
+        return $cache[$searchValue];
+    }
+    public static function findReplace($arrayToSearch, $searchProperty, $searchValue, $returnProperty, &$cache, $ignoreCase, $ignoreAccent){
+        return self::replace('find', $arrayToSearch, $searchProperty, $searchValue, $returnProperty, $cache, $ignoreCase, $ignoreAccent);
+    }
+    public static function includesReplace($arrayToSearch, $searchProperty, $searchValue, $returnProperty, &$cache, $ignoreCase, $ignoreAccent){
+        return self::replace('includes', $arrayToSearch, $searchProperty, $searchValue, $returnProperty, $cache, $ignoreCase, $ignoreAccent);
+    }
+    
    /*
     * Transforms the associative array $data into an array, ready to be consumed by dojo/store. 
     *   [$key => $value, ...] => [[$idProperty => $i, $keyProperty => $key, $valueProperty => $value],...]
@@ -414,13 +444,14 @@ class Utilities{
    /*
     * Transforms array [value1, value2, , ...], into array [['id' => value1, 'name' => $translator(value1), ...], ready to be consumed by dojo/store (Intended for tukos/storeSelect)
     */
-    public static function idsNamesStore($idsStore, $translator, $allowEmpty = true, $translationMode='ucfirst'){
+    public static function idsNamesStore($idsStore, $translator, $options = null){
+        list($allowEmpty, $translationMode, $useKeyAsId) = empty($options) ? [true, 'ucfirst', false] : $options;
         $theStore = $allowEmpty ? [['id' => '', 'name' => '']] : [];
         foreach ($idsStore as $key => $value){
             if (is_array($value)){
             	$theStore[] = array_merge(['id' => $key, 'name' => $translator($key, $translationMode)], $value);// at least used for sports::levelOptions1, etc.
             }else{
-        		$theStore[] = ['id' => $value, 'name' => $translator($value, $translationMode)];
+                 $theStore[] = ['id' => $useKeyAsId ? $key : $value, 'name' => $translator($value, $translationMode)];
             }
         }
         return $theStore;
@@ -513,7 +544,13 @@ class Utilities{
     }
 
     public static function utf8($value){
-    	return Tfk::isWindows() ? iconv('Windows-1252','UTF-8', $value) : $value;
+        switch ($encoding = mb_detect_encoding($value, null, true)){
+            case 'UTF-8' : 
+            case false   : return $value; break;
+            default:
+                return iconv($encoding, 'UTF-8', $value);
+        }
+        //return Tfk::isWindows() ? iconv('Windows-1252','UTF-8', $value) : utf8_encode($value);
     }
 
     public static function adjustSourceCols(&$cols, &$removedComputedCols, &$addedSourceCols, $computedColsDescription){

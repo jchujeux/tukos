@@ -170,6 +170,9 @@ class QueryBuilder{
         }
         //$andorwhere = ((isset($condition['or']) && $condition['or'] === true) ? 'orWhere' : 'where');
         //$query->$andorwhere($leftParen . $whereString . $rightParen);
+        if (in_array($opr, ['NOT IN SELECT', '<>', 'NOT RLIKE', 'NOT BETWEEN'])){
+            $whereString = "($whereString OR $col IS NULL )";
+        }
         if ($or = Utl::getItem('or', $condition) === null){
             return $whereString;
         }else{
