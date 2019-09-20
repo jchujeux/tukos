@@ -9,19 +9,16 @@ define([
     return declare(null, {
         constructor: function () {
             this.root = this;
+            this.userCollectionFilter = new this.Filter(); this.applicationCollectionFilter = new this.Filter();
         },
         getCollectionFilter: function(filters){
-            if (!this.collectionFilter){
-                this.collectionFilter = this.defaultCollectionFilter = new this.Filter();
-            }
-            if (filters){
-            	var collectionFilter = this.defaultCollectionFilter;
+            var combinedFilter = (new this.Filter()).and(this.applicationCollectionFilter, this.userCollectionFilter);
+        	if (filters){
             	filters.forEach(function(filter){
-            		collectionFilter = collectionFilter[filter[0]](filter[1], filter[2]);
+            		combinedFilter = combinedFilter[filter[0]](filter[1], filter[2]);
             	});
-            	this.collectionFilter = collectionFilter;
             }
-            return this.collectionFilter;
+            return combinedFilter;
         },
 
         mayHaveChildren: function (object) {
@@ -35,7 +32,11 @@ define([
             });
             return this.root.filter(this.getCollectionFilter(filters).ni('parentid', ids));
         },
-
+        
+        getFullCollection: function(filters){
+            return this.root.filter(this.getCollectionFilter(filters));
+        },
+        
         getChildren: function (object) {
             return this.root.filter(this.getCollectionFilter().eq('parentid', object.id));
         }

@@ -1,7 +1,7 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/form/HorizontalSlider",
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/form/HorizontalSlider",
 	"dojox/calendar/_RendererMixin", "dojo/text!tukos/widgets/calendar/VerticalRenderer.html", "tukos/utils"],
 	
-	function(declare, lang, dct, domStyle, _WidgetBase, _TemplatedMixin, HorizontalSlider, _RendererMixin, template, utils){
+	function(declare, lang, dct, domStyle, string, _WidgetBase, _TemplatedMixin, HorizontalSlider, _RendererMixin, template, utils){
 	
 	return declare([_WidgetBase, _TemplatedMixin, _RendererMixin], {
 		
@@ -39,21 +39,23 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
 			//		The width in pixels of the renderer.
 			// h: Number?
 			//		The height in pixels of the renderer.
-			h = h || this.item.h;
-			w = w || this.item.w;
+			var item = this.item;
+			h = h || item.h;
+			w = w || item.w;
 			if(!h && !w){
 				return;
 			}
-			this.item.h = h;
-			this.item.w = w;
+			item.h = h;
+			item.w = w;
+			
 			
 			var size = this._orientation == "vertical" ? h : w;
 	                     var rd = this.owner.renderData;
-			var startHidden = rd.dateModule.compare(this.item.range[0], this.item.startTime) != 0;
-			var endHidden =  rd.dateModule.compare(this.item.range[1], this.item.endTime) != 0;
+			var startHidden = rd.dateModule.compare(item.range[0], item.startTime) != 0;
+			var endHidden =  rd.dateModule.compare(item.range[1], item.endTime) != 0;
 			var visible;
 			
-            this.customize(this.item, w, h);
+            this.customize(item, w, h);
 			if(this.beforeIcon != null) {
 				visible = this._orientation != "horizontal" || this.isLeftToRight() ? startHidden : endHidden;
 				domStyle.set(this.beforeIcon, "display", visible ? this.getDisplayValue("beforeIcon") : "none");
@@ -79,14 +81,14 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
 				
 				domStyle.set(this.startTimeLabel, "display", visible?this.getDisplayValue("startTimeLabel"):"none");
 				if(visible) {
-					this._setText(this.startTimeLabel, this._formatTime(rd, this.item.startTime));
+					this._setText(this.startTimeLabel, this._formatTime(rd, item.startTime));
 				}
 			}
 			if(this.endTimeLabel) {
 				visible = this._isElementVisible("endTimeLabel", startHidden, endHidden, size);
 				domStyle.set(this.endTimeLabel, "display", visible?this.getDisplayValue("endTimeLabel"):"none");
 				if(visible) {
-					this._setText(this.endTimeLabel, this._formatTime(rd, this.item.endTime));
+					this._setText(this.endTimeLabel, this._formatTime(rd, item.endTime));
 				}
 			}
 			if(this.summaryLabel) {
@@ -100,11 +102,20 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                     if (this.ruler){
                         dct.place(this.ruler.domNode, this.summaryLabel);
                     }
-                    //this._setText(this.summaryLabel, this.item.summary, true);
-                    dct.place('<span>' + this.item.summary + '</span>', this.summaryLabel);
+                    if (this.urlTag){
+                    	dct.place(this.urlTag + '<br>', this.summaryLabel);
+                    }
+                    dct.place('<span>' + item.summary + '</span>', this.summaryLabel);
 				}
 			}
-         },
+			if (item._item.connectedIds){
+				var grid = this.owner.owner.getGrid(), collection = grid.collection, idProperty = collection.idProperty, overallItem = this.overallItem,
+					gridItem = collection.filter((new collection.Filter()).eq(idProperty, item._item.connectedIds[grid.widgetName])).fetchSync();
+				if (!gridItem.length){
+					setTimeout(function(){domStyle.set(overallItem.parentNode, "display", "none");}, 10);
+					return;
+				}
+			}         },
 
          customize: function(item, w, h){
             var calendar = this.owner.owner, itemsCustom = (calendar.customization ||{}).items;
@@ -126,7 +137,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                 	switch(customType){
                 		case 'style': 
                             var newAttValue = (fieldValue ? (map[fieldValue] || fieldValue) : defaultStyleValue(customAtts.defaultValue, attr)) || '';
-                			domStyle.set(this.overallItem, attr, newAttValue);
+                			domStyle.set(utils.in_array(attr, ['color', 'fontStyle']) ? this.summaryLabel : this.overallItem, attr, newAttValue);
                             domStyle.set(this.startTimeLabel, attr, newAttValue);
                             break;
                 		case 'img':
@@ -145,10 +156,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                     var customAtts = itemsCustom[customType];
                     if (customType === 'style'){
                 		for (var att in customAtts){
-                			customAction(customType, customAtts[att], this.item._item, att);
+                			customAction(customType, customAtts[att], item._item, att);
                 		}
                     }else{
-                    	customAction(customType, customAtts, this.item._item);
+                    	customAction(customType, customAtts, item._item);
                     }
                 }
             }

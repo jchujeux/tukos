@@ -49,7 +49,7 @@ class View extends AbstractView {
     	return [
     			'calendarsentries' => [
     					'atts' => [
-    							'title' => $this->tr('Appointments'), 'maxHeight' => '300px', 'storeType' => 'LazyMemoryTreeObjects', 'allowLocalFilters' => 'yes',
+    							'title' => $this->tr('Appointments'), 'maxHeight' => '300px', 'storeType' => 'LazyMemoryTreeObjects', 'allowApplicationFilter' => 'yes',
     							'dndParams' => ['copyOnly' => true, 'selfAccept' => false],
     							'onChangeNotify' => [
     									'calendar' => ['startdatetime' => 'startTime', 'duration' => 'duration',  'enddatetime' => 'endTime',  'allday' => 'allDay', 'name' => 'summary', 'id' => 'objectId', 'comments' => 'comments',
@@ -63,8 +63,8 @@ class View extends AbstractView {
     									'templates' => ['fields' => [/*'parentid' => 'parentid', */'allday' => 'allday', 'name' => 'name', 'comments' => 'comments', 'startdatetime' => 'startdatetime', 'duration' => 'duration', 'enddatetime' => 'enddatetime',
     											'periodicity' => 'periodicity', 'lasteststartdatetime' => 'lasteststartdatetime', 'backgroundcolor' => 'backgroundcolor']],
     							],
-    							'onWatchLocalAction' => ['allowLocalFilters' => [
-    									'calendarsentries' => $this->allowLocalFiltersChangeGridWidgetLocalAction
+    							'onWatchLocalAction' => ['allowApplicationFilter' => [
+    									'calendarsentries' => $this->allowApplicationFilterChangeGridWidgetLocalAction
     							]],
     					],
     					'initialRowValue' => ['duration' => '[1, "hour"]'],
@@ -159,7 +159,7 @@ class View extends AbstractView {
 						]]]),
 						'visible' => viewUtils::checkBox($this, 'Visible'),
 						
-						'source'    => ViewUtils::storeSelect('source', $this, 'Source', true, ['atts' => ['storeedit' => ['width' => 100]]]),
+						'source'    => ViewUtils::storeSelect('source', $this, 'Source', null, ['atts' => ['storeedit' => ['width' => 100]]]),
 						'tukosparent'  => ViewUtils::objectSelectMulti($this->model->idColsObjects['parentid'], $this, 'Tukosparent', ['atts' => [
 								'edit' => ['onChangeLocalAction' => [
 										'source' => ['value' => "return newValue ? 'tukos' : '';" ],

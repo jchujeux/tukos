@@ -25,13 +25,19 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
                 grid.selectRow(e.item.connectedIds ? e.item.connectedIds[this.gridWidget] : e.item[grid.store.idProperty]);//idProperty to support legacy
             });
         	this.on('itemContextMenu', function(evt){
-                mutils.setContextMenuItems(this, [{atts: {label: messages.editinnewtab, onClick: lang.hitch(this, this.editInTab)}},
+                var self = this;
+        		mutils.setContextMenuItems(this, [
+                	{atts: {label: messages.editinnewtab, onClick: lang.hitch(this, this.editInTab)}},
                     {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editSelectedItem)}},
                     {atts: {label: messages.duplicateitem, onClick: lang.hitch(this, this.duplicateSelectedItem)}},
                     {atts: {label: messages.deleteitem, onClick: lang.hitch(this, this.deleteSelectedItem)}},
                     {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [
                         {atts: {label: messages.deleteitems,   onClick: lang.hitch(this, this.deleteSelectedItems)}}
-                    ]}}]);
+                ]}}]);
+        		setTimeout(function(){self.contextMenu.menu.items = self.contextMenu.description.items;}, 100);
+        	});
+        	this.on('contextMenu', function(evt){
+        		console.log('in calendar contextmenu callback');
         	});
             this.nextItemId = 0;
 
@@ -72,18 +78,14 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
 			});
 			this.contextMenu.menu.onExecute();
 		},
-		
 		editInTab: function(){
-			var item = this.selectedItem;
-            var grid = this.getGrid();
-            Pmg.tabs.gotoTab({object: grid.object, view: 'Edit', query: {id: item.objectId, googlecalid: item.googlecalid}});
+			var grid = this.getGrid(), item = grid.collection.getSync(this.selectedItem.connectedIds[grid.widgetName]);
+            Pmg.tabs.gotoTab({object: grid.object, view: 'Edit', query: {id: item.id}});
 		},
-		
 		editSelectedItem: function(evt){
 			var grid = this.getGrid(), item = grid.collection.getSync(this.selectedItem.connectedIds[grid.widgetName]);
 			grid.openEditDialog(item, {x: evt.clientX, y: evt.clientY});
 		},
-
         defaultItemAtts: function(item){
         	var id = item._item.googlecalid || item._item.parentid, custom = this.customization;
         	if (id){
@@ -95,7 +97,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
         		return undefined;
         	}
         },
-        
         buildDefaultItemsAtts: function(calendars){
         	var sources = calendars.sources, styles = calendars.style, defaultItemsAtts = {};
         	sourceWidget = this.form.getWidget(sources); 

@@ -26,11 +26,13 @@ class TukosFramework{
         self::$tukosTmpDir = $phpDir . '/tmp/';
         self::$tukosPhpImages = $phpDir . 'site/images/';
         self::$phpVendorDir = self::$tukosPhpDir . 'vendor/';
-        $vendorDirs = ['aura' => 'auraphp-system-1.0.0/', 'auraV2' => 'Aura-2.1.0', 'pear' => '', 'zend' => 'zf1/zend-console-getopt/library/'];
+        $vendorDirs = ['aura' => 'auraphp-system-1.0.0/', 'auraV2' => 'Aura-2.1.0', 'pear' => '', 'zend' => 'zf1/zend-console-getopt/library/', 'MobileDetect' => 'mobiledetect/mobiledetectlib/namespaced/',
+                       'Dropbox' => 'lukebaird/dropbox-v2-php-sdk/'];
         array_walk($vendorDirs, function($vendorDir, $module){
             self::$vendorDir[$module] = self::$phpVendorDir . $vendorDir;
         });
         mb_internal_encoding('UTF-8');
+        mb_detect_order(['UTF-8', 'windows-1252', 'ISO-8859-1']);
         require __DIR__ . '/Registry.php';
         self::$registry = new Registry($mode, $appName);
         self::$osName = php_uname('s');

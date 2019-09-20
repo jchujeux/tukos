@@ -18,7 +18,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
            
         changedValues: function(widgetsName){
             var changedValues = this.inherited(arguments), valueOf = lang.hitch(this, this.valueOf);
-            if (!utils.empty(changedValues) && valueOf('id') != ''){
+            if (!utils.empty(changedValues)/* && valueOf('id') != ''*/){
                 this.sendOnSave.forEach(function(widgetName){
                 	var value = valueOf(widgetName);
                 	if (value){
@@ -31,7 +31,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
 
         serverDialog: function(urlArgs, data, emptyBeforeSet, defaultDoneMessage, markResponseIfChanged){
             var self = this, noLoadingIcon = this.noLoadingIcon;
-            Pmg.setFeedback(messages.actionDoing);
+            //Pmg.setFeedback(''/*messages.actionDoing*/);
             urlArgs.object = urlArgs.object || this.object;
             urlArgs.view = urlArgs.view || this.viewMode;
             urlArgs.mode = urlArgs.mode || this.paneMode;
@@ -39,7 +39,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
             return all(data).then(lang.hitch(this, function(data){
                 return Pmg.serverDialog(urlArgs, {data: data}, noLoadingIcon ? defaultDoneMessage : {widget: this.parent, att: 'title', defaultMessage: defaultDoneMessage}).then(lang.hitch(this, function(response){
 	                    if (response['data'] === false){
-	                        //if (!noLoadingIcon){parent.set('title', title)};
 	                        return response;
 	                    }else if(response['data'] !== undefined){
 	                        this.markIfChanged = self.watchOnChange = false;
@@ -65,7 +64,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
 	                            }));
 	                        }));
 	                    }else{
-	                        //if (!noLoadingIcon){parent.set('title', title)};
 	                    	this.resetChangedWidgets();
 	                        return response;
 	                    }

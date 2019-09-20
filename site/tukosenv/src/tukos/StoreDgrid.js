@@ -1,8 +1,8 @@
 define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on", "dgrid/extensions/DnD",
          "tukos/_GridEditMixin", "tukos/_GridEditDialogMixin", "tukos/TukosDgrid", "tukos/dstore/MemoryTreeObjects", "tukos/dstore/LazyMemoryTreeObjects",
-         "tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+         "tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/widgetUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
     function(declare, arrayUtil, lang, on, DnD, _GridEditMixin, _GridEditDialogMixin, TukosDgrid, MemoryTreeObjects, LazyMemoryTreeObjects,
-    		 utils, eutils, mutils, Pmg, messages){
+    		 utils, eutils, mutils, wutils, Pmg, messages){
     var widget =  declare([TukosDgrid, DnD, _GridEditMixin, _GridEditDialogMixin], {
 
         constructor: function(args){
@@ -39,9 +39,42 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
                 this.contextMenuItems.idCol = this.contextMenuItems.idCol.concat(addedItems);
                 this.contextMenuItems.header.push(mutils.newObjectPopupMenuItemDescription(this.object, messages.addrow, lang.hitch(this, this.addRow), lang.hitch(this, this.getTemplate, 'appendRow')));
             }
+            if (this.hasFilters && this.hideServerFilters !== 'yes'){
+            	this.setUserCollectionFilters();
+            	dojo.ready(lang.hitch(this, function(){
+                	this.showFilters();
+            	}));
+            }
             this.revert();//Necessary for the children rows expansion / collapse to work (!)
         },
-
+        setUserCollectionFilters: function(){
+        	var userCollectionFilter = new this.store.Filter(), map = {'=': 'eq', '<>': 'ne', '>': 'gt', '<': 'lt', '>=': 'gte', '<=': 'lte', 'RLIKE': 'rlike', 'NOT RLIKE': 'notrlike', 'BETWEEN': 'between'}, columns = this.columns;
+        	utils.forEach(this.userFilters(), function(filter, col){
+        		var opr = filter[0], value = filter[1], column = columns[col];
+        		if (opr && value){
+        			if (column.widgetType === "StoreSelect"){
+        				value = utils[(opr === 'RLIKE' || opr === 'NOT RLIKE') ? 'includesReplace' : 'findReplace'](column.editorArgs.storeArgs.data, 'name', value, 'id', {}, true, true);
+        			}
+        			userCollectionFilter = userCollectionFilter[map[opr]](col, value);
+        		}
+        	});
+        	this.store.userCollectionFilter = userCollectionFilter;
+        },
+        onFilterChange: function(filterWidget){
+        	this.inherited(arguments);
+        	this.setUserCollectionFilters();
+        	this.set('collection', this.store.getRootCollection());
+        },
+        onFilterKeyDown: function(event){
+			if (event.keyCode === 13) {
+				var grid = this.grid;
+				this.onFilterChange(this);
+			}        	
+        },
+        _setCollection: function(newValue){
+        	this.inherited(arguments);
+        	wutils.watchCallback(this, 'collection', null, newValue);
+        },
         deleteSelection: function(){
         	var deselect = 0, grid = this;
         	utils.forEach(this.selection, function(status, id){

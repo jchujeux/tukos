@@ -29,10 +29,8 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/Co
             this.watchOnChange = true;
             this.watchContext = 'server';
             this.onInstantiated(lang.hitch(this, function(){
-                var widgetsHider = new WidgetsHider({form: this}, dojo.doc.createElement("div"));
-                actionPane.addChild(widgetsHider);
-                if (this.data && this.data.value && !this.data.value.id){
-                    this.markIfChanged = true;
+                if (this.widgetsHider !== false){
+                    actionPane.addChild(new WidgetsHider({form: this}, dojo.doc.createElement("div")));
                 }
                 when (this.setWidgets(this.data), lang.hitch(this, function(result){
                     if (this.onOpenAction){

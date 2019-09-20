@@ -44,7 +44,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dijit/form/Button", "dijit/re
         
         doProcess: function(theId, urlArgs){
             Pmg.setFeedback(Pmg.message('actionDoing'));
-            this.form.serverDialog({action:(urlArgs && urlArgs.action ? urlArgs.action : 'Process'), query:urlArgs ? lang.mixin({id: theId}, urlArgs.query) : {id: theId}}, this.valuesToSend, this.form.get('postElts'),
+            return this.form.serverDialog({action:(urlArgs && urlArgs.action ? urlArgs.action : 'Process'), query:urlArgs ? lang.mixin({id: theId}, urlArgs.query) : {id: theId}}, this.valuesToSend, this.form.get('postElts'),
             	Pmg.message('actionDone')); 
         },
 

@@ -15,7 +15,7 @@ class View extends AbstractView {
 
         parent::__construct($objectName, $translator, 'Host', 'Description');
         $customDataWidgets = [
-             'status'    => ViewUtils::storeSelect('status', $this, 'Status', true, ['atts' => ['edit' =>  ['disabled' => true]]]),
+             'status'    => ViewUtils::storeSelect('status', $this, 'Status', null, ['atts' => ['edit' =>  ['disabled' => true]]]),
              'hostname'  => ViewUtils::textBox($this, 'Host name'    , ['atts' => ['edit' =>  ['disabled' => true]]]),
              'type'      => ViewUtils::textBox($this, 'Device type'  , ['atts' => ['edit' =>  ['disabled' => true]]]),
              'vendor'    => ViewUtils::textBox($this, 'OS Vendor'    , ['atts' => ['edit' =>  ['disabled' => true]]]),

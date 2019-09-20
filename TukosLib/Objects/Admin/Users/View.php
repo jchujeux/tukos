@@ -31,6 +31,8 @@ class View extends AbstractView {
             'environment'   => ViewUtils::storeSelect('environment', $this, 'Environment'),
             'targetdb' => ViewUtils::textBox($this, 'Targetdb'),
             'tukosorganization' => ViewUtils::textBox($this, 'Tukosorganization', ['atts' => ['disabled' => !$this->user->isAdmin()]]),
+            'dropboxaccesstoken'   => ViewUtils::textBox($this, 'Dropboxaccesstoken', ['atts' => ['edit' =>  ['type' => 'password']], 'editToObj' => ['encrypt' => ['class' => $this->user, 'private']]]),
+            'dropboxbackofficeaccess' => ViewUtils::storeSelect('dropboxbackofficeaccess', $this, 'dropboxbackofficeaccess'),
             'customviewids' => [
                 'type' => 'objectEditor', 
                 'atts' => ['edit' => ['title' => $this->tr('Custom views'), 'keyToHtml' => 'capitalToBlank', 'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px',  'overflow' => 'auto']]],

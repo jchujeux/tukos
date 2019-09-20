@@ -17,7 +17,7 @@ class Get extends AbstractViewModel {
 
     public function getElementsCustomization($query = false){ 
         if ($query){
-            return  $this->model->getCombinedCustomization($query, $this->controller->request['view'], strtolower($this->paneMode), ['widgetsDescription']);
+            return  $this->model->getCombinedCustomization($query, $this->controller->request['view'], $this->paneMode, ['widgetsDescription']);
         }else{
             return $this->user->getCustomView($this->view->objectName, $this->controller->request['view'], $this->paneMode, ['widgetsDescription']);
         }

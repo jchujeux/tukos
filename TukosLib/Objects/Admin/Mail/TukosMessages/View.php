@@ -45,7 +45,7 @@ class View extends AbstractView {
             ],
             'ccs'   => ['type' => 'textArea', 'atts' => ['edit' => ['title' => $this->tr('cc'), 'colspan' => '6']]],
             'bccs'  => ['type' => 'textArea', 'atts' => ['edit' => ['title' => $this->tr('bcc'), 'colspan' => '6']]],
-            'status'=> ViewUtils::storeSelect('status', $this, 'Status', [
+            'status'=> ViewUtils::storeSelect('status', $this, 'Status', null, [
                     'atts' => ['edit' =>  [
                             'disabled' => true,
                             'onChangeLocalAction' => [

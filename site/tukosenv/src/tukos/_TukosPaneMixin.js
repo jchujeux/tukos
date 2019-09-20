@@ -178,7 +178,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
                         if (actionFunction.triggers[this.watchContext]){
                             var newAtt = actionFunction.action(widget, targetWidget, newValue);
                             if (newAtt != undefined && widget){
-                                if (newAtt !== targetWidget.get(att)){
+                                if (targetWidget && newAtt !== targetWidget.get(att)){
                                     targetWidget.set(att, newAtt);
                                     if (att === 'hidden'){
                                         this.mayNeedResize = true;
@@ -230,6 +230,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
             }else{
                 requestOptions.data = this.widgetsValue(widgetsName);
             }
+            Pmg.setFeedback(messages.actionDoing);
             return Pmg.serverDialog(this.completeUrlArgs(urlArgs), requestOptions, messages.actionDone).then(
                 function(response){
                     self.watchContext = 'server';

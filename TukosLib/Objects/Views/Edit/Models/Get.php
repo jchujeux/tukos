@@ -113,7 +113,7 @@ class Get extends ViewsGetModel {
     		$response, 
     		$customMode === 'object'
     				? $this->user->getCustomView($this->objectName, 'edit', $this->paneMode, [])
-    				: $this->model->getCombinedCustomization(['id' => $itemId], 'edit', strtolower($this->paneMode), [])
+    				: $this->model->getCombinedCustomization(['id' => $itemId], 'edit', $this->paneMode, [])
     	);
     }
 }

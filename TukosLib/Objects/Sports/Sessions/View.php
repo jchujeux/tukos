@@ -21,7 +21,7 @@ class View extends AbstractView {
 	                ]
 	            ),
 	            'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity'),
-	            'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', true, ['atts' => ['edit' => [
+	            'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', null, ['atts' => ['edit' => [
 	                    'onWatchLocalAction' => ['value' => [
 	                        'intensity' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "if (newValue === 'rest'){return '';}else{return undefined;}"]],
 	                        'stress' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "if (newValue === 'rest'){return '';}else{return undefined;}"]],
@@ -38,11 +38,23 @@ class View extends AbstractView {
 	            'mainactivitydetails'    => ViewUtils::lazyEditor($this, 'mainactivitydetails', ['atts' => ['edit' => ['onDropMap' => ['column' => 'details']]]]),
 	            'warmdowndetails'    => ViewUtils::lazyEditor($this, 'warmdowndetails', ['atts' => ['edit' => ['onDropMap' => ['column' => 'details']]]]),
 	            'googleid' => ViewUtils::textBox($this, 'Googleid'),
-	        ],
+                'mode' => ViewUtils::storeSelect('mode', $this, 'Mode'),
+                'distance' => ViewUtils::textBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'style' => ['width' => '8em']]]]),
+                'elevationgain' => ViewUtils::textBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'style' => ['width' => '8em']]]]),
+                //'feeling' => ViewUtils::textArea($this, 'Athletefeeling'),
+                'feeling' => ViewUtils::storeSelect('feeling', $this, 'feeling', [true, 'ucfirst', true], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+                'sensations' => ViewUtils::storeSelect('sensations', $this, 'sensations', [true, 'ucfirst', true]),
+                'perceivedeffort' => ViewUtils::storeSelect('perceivedEffort', $this, 'Perceivedeffort', [true, 'ucfirst', true]),
+                'mood' => ViewUtils::storeSelect('mood', $this, 'Mood', [true, 'ucfirst', true]),
+                'athletecomments' => ViewUtils::textArea($this, 'AthleteComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
+            'athleteweeklyfeeling' => ViewUtils::textArea($this, 'Athleteweeklyfeeling', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
+            'coachcomments' => ViewUtils::textArea($this, 'CoachSessionComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
+            'coachweeklycomments' => ViewUtils::textArea($this, 'CoachWeeklyComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]])
+        ],
         	$this->filterWidgets()
         );
 
-        $this->mustGetCols = array_merge($this->mustGetCols, ['duration', 'intensity', 'stress', 'sport','warmup', 'mainactivity', 'warmdown', 'comments']);
+        $this->mustGetCols = array_merge($this->mustGetCols, ['name', 'duration', 'intensity', 'stress', 'sport','warmup', 'mainactivity', 'warmdown', 'comments', 'mode']);
 
         $subObjects = $this->templatesSubObjects();
 

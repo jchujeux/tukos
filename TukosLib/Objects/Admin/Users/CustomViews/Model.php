@@ -17,7 +17,7 @@ class Model extends AbstractModel {
             'panemode'      =>  "ENUM ('" . implode("','", $this->panemodeOptions) . "')",
         	'customization' =>  'longtext DEFAULT NULL'
         ];
-        parent::__construct($objectName, $translator, 'customviews', ['parentid' => ['users']], ['customization'], $colsDefinition, [], ['name', 'vobject', 'view', 'panemode'], [], ['name', 'vobject', 'view', 'panemode']);
+        parent::__construct($objectName, $translator, 'customviews', ['parentid' => ['users']], ['customization'], $colsDefinition, [], ['vobject', 'view', 'panemode'], [], ['name', 'vobject', 'view', 'panemode']);
         $this->vobjectOptions = $this->user->allowedModules();
     }
     public function deleteCustomization($where, $valuesToDelete){

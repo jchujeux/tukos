@@ -110,7 +110,7 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
                     		
                     	}
                     }else{
-                        Pmg.confirm({title: Pmg.message('overview' + action) + toProcess.ids.length + Pmg.message('selectedEntries') + toProcess.warning, content: Pmg.message('sureWantToContinue')}).then(
+                        Pmg.confirm({title: Pmg.message('overview' + action) + ' ' + toProcess.ids.length + ' ' + Pmg.message('selectedEntries') + toProcess.warning, content: Pmg.message('sureWantToContinue')}).then(
                             function(){
                             	if(action === "Process" && (queryParams || {}).process === "exportItems"){
                                     var visibleCols = [];

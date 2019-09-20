@@ -27,5 +27,13 @@ class Sports {
     public static $sportImagesMap = [
         'bicycle' =>'bicycleblank.png', 'running' =>'runningblank.png', 'swimming' =>'swimmingblank.png', 'climbing' =>  'climbingblank.png',  'elliptic' =>'elliptic.jpg', 'bodybuilding' =>'bodybuilding.png', 'rest' =>'sleeping.png',  'other' =>'othersport.png'
     ];
+    public static $modeOptions = ['planned', 'performed'];
+    public static $feelingOptions = ['1' => 'superfeeling', '2' => 'goodfeeling',  '3' => 'badfeeling', '4' => 'verybadfeeling'];
+    public static $sensationsOptions = ['1' => 'supersensations', '2' => 'verygoodsensations',  '3' => 'goodsensations', '4' => 'aboveaveragesensations', '5' => 'averagesensations', '6' => 'belowaveragesensations',
+        '7' => 'ratherbadsensations', '8' => 'badsensations', '9' => 'verybadsensations', '10' => 'extremelybadsensations'];
+    public static $perceivedEffortOptions = ['1' => 'extremelyeasy', '2' => 'veryeasy',  '3' => 'easy', '4' => 'comfortable', '5' => 'rathercomfortable', '6' => 'slightlydifficult', '7' => 'ratherdifficult',
+        '8' => 'difficult', '9' => 'verydifficult', '10' => 'extremelydifficult'];
+    public static $moodOptions = ['1' => 'supermood', '2' => 'verygoodmood',  '3' => 'goodmood', '4' => 'aboveaveragemood', '5' => 'averagemood', '6' => 'belowaveragemood', '7' => 'ratherbadmood',
+        '8' => 'badmood', '9' => 'verybadmood', '10' => 'extremelybadmood'];
 }
 ?>

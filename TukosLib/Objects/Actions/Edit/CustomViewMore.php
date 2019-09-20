@@ -7,9 +7,10 @@ use TukosLib\TukosFramework as Tfk;
 
 class CustomViewMore extends AbstractAction{
     function response($query){
-        $response['defaultCustomViewContent'] = $this->view->user->getCustomView($this->view->objectName, 'edit', $this->paneMode);
+        $paneMode = strtolower($this->paneMode);
+        $response['defaultCustomViewContent'] = $this->view->user->getCustomView($this->view->objectName, 'edit', $paneMode);
         if (!empty($query['id'])){
-            $itemCustomization = $this->view->model->getOne(['where' => ['id' => $query['id']], 'cols' => ['custom']], ['custom' => ['edit', $this->paneMode]]);
+            $itemCustomization = $this->view->model->getOne(['where' => ['id' => $query['id']], 'cols' => ['custom']], ['custom' => ['edit', $paneMode]]);
             if (!empty($itemCustomization['custom'])){
                 $response['itemCustomContent'] = $itemCustomization['custom'];
                 if (!empty($response['itemCustomContent']['itemcustomviewid'])){

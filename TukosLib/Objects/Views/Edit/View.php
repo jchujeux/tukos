@@ -24,13 +24,13 @@ class View {
             SubObjects::addWidgets($this->view->subObjects, $this->view);
         }
         $this->actionWidgets = [
-            'save' => ['type' => 'ObjectSave', 'atts' => ['serverAction' => 'save', 'label' => $this->view->tr('Save'), 'sendToServer' => ['changedValues', 'itemCustomization']]],                                                               
+            'save' => ['type' => 'ObjectSave', 'atts' => ['serverAction' => 'Save', 'label' => $this->view->tr('Save'), 'sendToServer' => ['changedValues', 'itemCustomization']]],                                                               
             'delete'  => ['type' => 'ObjectDelete', 'atts' => ['label' => $this->view->tr('Delete')]],                                                               
             'edit'  => Widgets::ObjectEdit(['storeArgs' => ['object' => $this->view->objectName],    'placeHolder' => $this->view->tr('Select item to edit'),
                  'title' => $this->view->tr('Select item to edit'), 'dropdownFilters' => ['contextpathid' => '$tabContextId']]),
-            'new'  => ['type' => 'ObjectNew', 'atts' => ['serverAction' => 'edit', 'label' => $this->view->tr('New'), 'isNew' => true, 'confirmAtts' => ['title' => $tr('fieldsHaveBeenModified'), 'content' => $tr('sureWantToForget')]]],
+            'new'  => ['type' => 'ObjectNew', 'atts' => ['serverAction' => 'Edit', 'label' => $this->view->tr('New'), 'isNew' => true, 'confirmAtts' => ['title' => $tr('fieldsHaveBeenModified'), 'content' => $tr('sureWantToForget')]]],
             'duplicate'  => ['type' => 'ObjectDuplicate', 'atts' => ['label' => $this->view->tr('Duplicate')]],
-            'reset'  => ['type' => 'ObjectReset', 'atts' => ['serverAction' => 'reset', 'label' => $this->view->tr('Reset'), 'confirmAtts' => ['title' => $tr('fieldsHaveBeenModified'), 'content' => $tr('sureWantToForget')]]],
+            'reset'  => ['type' => 'ObjectReset', 'atts' => ['serverAction' => 'Reset', 'label' => $this->view->tr('Reset'), 'confirmAtts' => ['title' => $tr('fieldsHaveBeenModified'), 'content' => $tr('sureWantToForget')]]],
             'calendartab'  => ['type' => 'ObjectCalendar', 'atts' => ['label' => $this->view->tr('Calendar')]],
         	'export'  => ['type' => 'ObjectExport', 'atts' => ['label' => $this->view->tr('export')]],
             'process'  => ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Process')]],
@@ -69,7 +69,7 @@ class View {
             'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert',  'content' => ''],
             'contents' => [
                 'actions' => [
-                    'tableAtts' => ['cols' => 10, 'customClass' => 'actionTable', 'showLabels' => false, 'label' => '<b>' . $this->view->tr('Actions') . ':</b>'],
+                    'tableAtts' => ['cols' => 11, 'customClass' => 'actionTable', 'showLabels' => false, 'label' => '<b>' . $this->view->tr('Actions') . ':</b>'],
                     'widgets' => ['save', 'reset', 'delete', 'duplicate', 'new', 'edit', 'calendartab', 'export'],
                 ],
                 'feedback' => [

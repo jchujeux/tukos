@@ -3,15 +3,16 @@ namespace TukosLib;
 
 use TukosLib\TukosFramework as Tfk;
 use TukosLib\Utils\DiContainer;
+use Detection\MobileDetect;
 
 class Registry{
 
     function __construct($mode, $appName){
         $this->mode = $mode;
+        require Tfk::$phpVendorDir . 'autoload.php';// needed for google
         $auraDir = Tfk::$vendorDir['aura'];
         $this->loader = require $auraDir . 'package/Aura.Autoload/scripts/instance.php';
         $this->loader->register();
-        require Tfk::$phpVendorDir . 'autoload.php';
         
         $this->loader->add('TukosLib\\', Tfk::$tukosPhpDir);
         $this->loader->add('TukosApp\\', Tfk::$tukosPhpDir);
@@ -35,6 +36,7 @@ class Registry{
             $this->loader->add('Aura\Http\\'     , $auraDir . 'package/Aura.Http/src/');
             $this->loader->add('Aura\Router\\', $auraDir . 'package/Aura.Router/src/');
             $this->loader->add('Aura\Uri\\', $auraDir . 'package/Aura.Uri/src/');
+            $this->loader->add('Detection\\', Tfk::$vendorDir['MobileDetect']);
             $this->setHttpServices();
         }else{
             $this->appName = $this->setAppName($appName);
@@ -49,8 +51,8 @@ class Registry{
         //$this->loader->add('PaulButler\\' , Tfk::$phpVendorDir);
         $this->loader->add('Ifsnop\\'     , Tfk::$phpVendorDir);
         $this->loader->add('PHPMailer\\'  , Tfk::$phpVendorDir);
-        $this->loader->add('Html2Text\\'  , Tfk::$phpVendorDir);
-        
+        $this->loader->add('Html2Text\\'  , Tfk::$phpVendorDir);        
+        $this->loader->add('Dropbox\\', Tfk::$vendorDir['Dropbox']);
     }
 
     protected function setHttpServices(){
@@ -58,6 +60,7 @@ class Registry{
         $this->container->set('routeMap', new \Aura\Router\Map(new \Aura\Router\DefinitionFactory, new \Aura\Router\RouteFactory)); 
         $map = $this->get('routeMap');
         
+        $this->rootUrl = (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
         $this->inComingUriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         
         $map->add('tukosPane'       , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}/{:view}/{:mode}/{:action}/{:pane}');
@@ -66,13 +69,13 @@ class Registry{
         $map->add('tukosView  '     , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}/{:view}');
         $map->add('tukosObject'     , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}');
         $map->add('tukosController' , Tfk::publicDir . 'index20.php/{:application}/{:controller}/');
-        $map->add('tukosBase'       , Tfk::publicDir . 'index20.php/{:application/}');
+        $map->add('tukosBase'       , Tfk::publicDir . 'index20.php/{:application}/');
         
         // get the route based on the path and server
         $this->route = $map->match($this->inComingUriPath, $_SERVER);
         if ($this->route && $this->route->values['application']){
             $this->request = $this->route->values;
-            $this->appName = $this->setAppNAme($this->request['application']);
+            $this->appName = $this->setAppName($this->request['application']);
             if (isset($this->request['controller'])){
                 $this->controller = $this->request['controller'];
             }else{
@@ -83,11 +86,11 @@ class Registry{
             }else{
                 $this->objectName = "help";
             }
-            if ($this->isMobile = strpos(strtolower(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $this->controller), 'mobilepage') === false ? false : true){
-                $this->paneMode = $this->request['paneMode'] = 'mobile';
-            }
+            //if ($this->isMobile = strpos(strtolower(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $this->controller), 'mobilepage') === false ? false : true){
+            if ($this->isMobile = (new MobileDetect)->isMobile());
             $this->pageUrl          = $map->generate('tukosController', ['application' => $this->appName, 'controller' => ($this->isMobile ? 'Mobile' : '') . 'Page']);
             $this->dialogueUrl      = $map->generate('tukosController', ['application' => $this->appName, 'controller' => 'Dialogue']);
+            $this->appUrl          = $map->generate('tukosBase', ['application' => $this->appName]);
         }
         $this->container->set('urlFactory', new \Aura\Uri\Url\Factory($_SERVER));
         $urlFactory = $this->get('urlFactory');

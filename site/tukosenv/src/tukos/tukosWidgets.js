@@ -4,11 +4,12 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
 	var widgetHolder = 	' <div class="tukosContainer" data-widgetid="${name}" data-params=\'${params}\' style="display: inline;" title="${name}">${visualPreTag}${widgetSource}${visualPostTag}</div> ',
 		widgetTemplates = {
 			Slider: 
-				'<div style="width: ${width};">' +
+				'<div style="width: ${width};padding-left: ${paddingLeft};">' +
+				'<ol data-dojo-type="dijit/form/HorizontalRuleLabels" data-dojo-props="container: \'topDecoration\'" style="height: 1.2em;" labelStyle="width: 6em; font-weight: bold;">${liTopTags}</ol>' + 
+				'<div data-dojo-type="dijit/form/HorizontalRule" data-dojo-props="container: \'topDecoration\',	count: ${count}" style="height: 5px; margin: 0 12px;"></div>' +
 					'<input data-widgetid="${name}" class="tukosWidget" type="range" value="${value}" data-dojo-type="dijit/form/HorizontalSlider" data-dojo-props="minimum: ${minimum}, maximum: ${maximum}, ' +
 					 'showButtons: false, discreteValues: ${count}" />' +
-					'<div data-dojo-type="dijit/form/HorizontalRule" data-dojo-props="container: \'bottomDecoration\',	count: ${count}" style="height: 5px; margin: 0 12px;"></div>' +
-					'<ol data-dojo-type="dijit/form/HorizontalRuleLabels" data-dojo-props="container: \'bottomDecoration\'" style="height: 2em; margin: 0 12px; font-weight: bold;">${liTags}</ol>' + 
+					'<ol data-dojo-type="dijit/form/HorizontalRuleLabels" data-dojo-props="container: \'bottomDecoration\'" labelStyle="width: 6em; font-weight: bold;">${liBottomTags}</ol>' + 
 				'</div>',
 			TextBox: '<input class="tukosWidget", value="${value}" style="width: ${width}; background-color: ${backgroundColor}; color: ${color};" data-dojo-type="dijit/form/TextBox" data-dojo-props="trim:true, ' +
 					  'placeHolder:\'${placeHolder}\'" />',
@@ -53,7 +54,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
 			MultiCheckInput: ['width', 'backgroundColor', 'color', 'value', 'values', 'numCols', 'orientation', 'uniquechoice'],
 			MultiGridCheckInput: ['width', 'backgroundColor', 'color', 'values', 'topics', 'uniquechoice'],
 			DropdownList: ['width', 'values'],
-			Slider:  ['width', 'color', 'value', 'values'],
+			Slider:  ['width', 'paddingLeft', 'color', 'value', 'values', 'labels'],
 			SendMailButton: ['subject', 'body', 'to', 'filename', 'subjectPrepend'], SendFileButton: ['filename'], SaveButton: [],	ReloadButton: []
 		},
 		defaultParams = {width: '100%'};
@@ -87,9 +88,9 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
     		}
     		switch(type){
     			case 'Slider': 
-    				var values = params.values.split(','), length = values.length;
+    				var values = params.values.split(','), length = values.length, labels = params.labels.split(',');
     				//delete params.values;
-    				params = lang.mixin(params, {count: length, minimum: 0, maximum: length-1, liTags: '<li>' + values.join('</li><li>') + '</li>'});
+    				params = lang.mixin(params, {count: length, minimum: 1, maximum: length, liBottomTags: '<li>' + labels.join('</li><li>') + '</li>', liTopTags: '<li>' + values.join('</li><li>') + '</li>'});
     				if (!params.value){
     					params.value = values[0];
     				}

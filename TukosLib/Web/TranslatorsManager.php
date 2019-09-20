@@ -92,8 +92,18 @@ class TranslatorsManager {
     function translator($translatorName, $setsPath){
         $this->translatorPaths[$translatorName] = $setsPath;//array_map("strtolower", $setsPath);
         return function($key, $mode = null) use ($translatorName){
-            return is_string($key) ?'#{' . implode('|', [$key, $mode, $translatorName]) . '}': $key;
-            //return $key;
+            //return is_string($key) ?'#{' . implode('|', [$key, $mode, $translatorName]) . '}': $key;
+            if (is_string($key)) {
+                return '#{' . implode('|', [$key, $mode, $translatorName]) . '}';
+            }else if (is_array($key)){
+                $translation = '';
+                foreach ($key as $subKey){
+                    $translation .= ($subKey[0] === 'no' ? $subKey[1] : '#{' . implode('|', [$subKey[1], $mode, $translatorName]) . '}');
+                }
+                return $translation;
+            }else{
+                return $key;
+            }
         };
     }
     

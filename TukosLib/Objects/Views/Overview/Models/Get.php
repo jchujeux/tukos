@@ -18,9 +18,7 @@ class Get extends ViewsGetModel {
         return $unHiddenCols;
     }
     function getOverviewGrid($query){
-        $storeAtts = $query['storeatts'];
-        $storeAtts['where'] = array_merge($this->user->getCustomView($this->objectName, 'overview', $this->paneMode, ['data', 'filters', 'overview']), $storeAtts['where']);
-        $result = $this->getGrid($storeAtts, $this->unHiddenOverviewGridCols($this->view->gridCols()), false, 'objToOverview');
+        $result = $this->getGrid($query['storeatts'], $this->unHiddenOverviewGridCols($this->view->gridCols()), false, 'objToOverview');
         $result['summary'] = ['value' => $this->model->summary()];
         return $result;
     }

@@ -49,14 +49,6 @@ class Dialogue {
     function getBrowserLanguage(){
         return $this->browserLanguage;
     }
-/*
-    function getLanguage(){
-        return $this->translatorsStore->getLanguage();
-    }
-    function setLanguage($theLanguage){
-        $this->translatorsStore->setLanguage($theLanguage);
-    }
-*/
    /*
     * get the Rest method invoked by the request for this dialogue
     */

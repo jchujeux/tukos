@@ -42,7 +42,7 @@ class View extends AbstractView {
             ],
             'cost'      => ViewUtils::tukosCurrencyBox($this, 'Cost'),
             'whereobtained' => ViewUtils::storeSelect('whereObtained', $this, 'Obtained at'),
-            'format'        => ViewUtils::storeSelect('format', $this, 'Format', true, ['atts' => ['edit' => [
+            'format'        => ViewUtils::storeSelect('format', $this, 'Format', null, ['atts' => ['edit' => [
                             'onChangeLocalAction' => [
                                 'name'  => ['value' =>
                                     "return Pmg.itemName(sWidget.valueOf('#winesid')) + '-' + sWidget.valueOf('#vintage') + '-' + newValue;" 

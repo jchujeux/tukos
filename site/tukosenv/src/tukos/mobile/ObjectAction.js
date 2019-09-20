@@ -23,7 +23,8 @@ function(declare, lang, on, Button, registry, Pmg, utils){
         	}
         },
         action: function(){
-            var theId = this.isNew ? '' : this.form.valueOf('id'), label = this.get('label'), data = {}, self = this, sendToServer = this.sendToServer;
+            var theId = this.isNew ? '' : this.form.valueOf('id'), label = this.get('label'), data = {}, self = this, sendToServer = this.sendToServer, includeWidgets = this.includeWidgets || [], excludeWidgets = this.excludeWidgets || [],
+            	form = this.form, valueOf = lang.hitch(form, form.valueOf);
             if (sendToServer){
             	sendToServer.forEach(lang.hitch(this, function(toSend){
             		this[toSend](data);
@@ -33,8 +34,18 @@ function(declare, lang, on, Button, registry, Pmg, utils){
             		return;
             	}
             }
+            includeWidgets.forEach(function(name){
+            	if (!(name in data)){
+            		data[name] = valueOf(name);
+            	}
+            });
+            excludeWidgets.forEach(function(name){
+            	if (name in data){
+            		delete data[name];
+            	}
+            });
             this.set('label', Pmg.loading(label));
-            return this.form.serverDialog({action: this.serverAction, query: theId == '' ? {} : {id: theId}}, data, this.form.get('dataElts')).then(function(response){
+            return this.form.serverDialog({action: this.serverAction, query: self.urlArgs ? lang.mixin({id: theId}, self.urlArgs.query) : {id: theId}}, data, this.form.get('dataElts')).then(function(response){
             	self.set('label', label);
             });         	
         },

@@ -14,7 +14,7 @@ define([
                 }else{
                     return true;
                 }
-	},
+            },
             eqColId: function(colId, value){
                 return colId.id === value || colId === value;
             },
@@ -30,11 +30,25 @@ define([
                 }else{
                     return true;
                 }
-	}
+            },
+    		rlike: function (value, required, object) {
+    			//return (required === '' ? '.*' : required).test(value, object);
+    			return require === '' ? true : (new RegExp(required)).test(value, object);
+    		},
+    		notrlike: function(value, required, object){
+            	console.log('notrlike to be implemented');
+            	return (new RegExp(required === '' ? '([^\s]*)' : ('^((?!(' + required + ')).)*$'))).test(value,object);
+    			return true;
+    		}, 
+    		between: function(col, value){
+    			var values = json.parse(value); 
+    			return col >= values[0] && col <= values[1];
+    		}
         },
         constructor: function(){
             lang.extend(this.Filter, {ni: this.Filter.filterCreator('ni'), eqColId: this.Filter.filterCreator('eqColId'), neColId: this.Filter.filterCreator('neColId'), 
-                                      inColId: this.Filter.filterCreator('inColId'), niColId: this.Filter.filterCreator('niColId')}
+                                      inColId: this.Filter.filterCreator('inColId'), niColId: this.Filter.filterCreator('niColId'),
+                                      rlike: this.Filter.filterCreator('rlike'), notrlike: this.Filter.filterCreator('notrlike'), between: this.Filter.filterCreator('between')}
             );
         },
         

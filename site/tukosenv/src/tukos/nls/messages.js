@@ -170,7 +170,7 @@ define("tukos/nls/messages", { root:
     tagEditor: 'tag editor',
     tagName: 'tag name',
     attribute: 'property',
-    allowLocalFilters: 'allow local filters',
+    allowApplicationFilter: 'allow local filters',
     hideServerFilters: 'hide table filters',
     yes: 'yes',
     no: 'no',
