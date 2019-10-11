@@ -8,11 +8,13 @@ namespace TukosLib\Objects;
 use TukosLib\Objects\Directory;
 use TukosLib\Utils\Widgets;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Utils\DateTimeUtilities as Dutl;
 use TukosLib\TukosFramework as Tfk;
 
 class ViewUtils{
 
     const utl = 'TukosLib\Utils\Utilities';
+    const dutl = 'TukosLib\Utils\DateTimeUtilities';
     
 	static public function textBox($view, $label, $custom=[]){
         return Utl::array_merge_recursive_replace(['type' => 'textBox', 'atts' => ['edit' => ['label' => $view->tr($label)]]], $custom);
@@ -118,8 +120,8 @@ class ViewUtils{
         return Utl::array_merge_recursive_replace([
                 'type' => 'storeSelect',   
                 'atts' => ['edit' =>  ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr, $storeOptions)], 'label' => $view->tr($label)]],
-                'objToOverview' => ['tr' => ['class' => $view, 'ucfirst']],
-                'format' => ['type' => 'tr', 'class' => $view]
+                //'objToOverview' => ['tr' => ['class' => $view, 'ucfirst']],
+                //'format' => ['type' => 'tr', 'class' => $view]
             ],
             $custom
         );
@@ -133,20 +135,30 @@ class ViewUtils{
             $custom
         );
     }
+    static public function timeTextBox($view, $label, $custom=[]){
+        return  Utl::array_merge_recursive_replace(['type' => 'timeTextBox' , 'atts' => ['edit' =>  ['label' => $view->tr($label)]]], $custom);
+    }
+    static public function minutesTextBox($view, $label, $custom=[]){
+        return  Utl::array_merge_recursive_replace(['type' => 'timeTextBox' , 'atts' => ['edit' =>  ['label' => $view->tr($label), 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:15', 'visibleRange' => 'T01:00']]], 
+            'objToEdit' => ['minutesToTime' => ['class' => self::dutl]],
+            'editToObj' => ['timeToMinutes' => ['class' => self::dutl]],
+            //'objToOverview' => ['minutesToTime' => ['class' =>self::dutl]],
+        ], $custom);
+    }
     static public function dateTimeBoxDataWidget($view, $label, $custom=[]){
-         return  Utl::array_merge_recursive_replace([
-                'type' => 'dateTimeBox' ,  
-                'atts' => ['edit' =>  ['label' => $view->tr($label)],
-                      'storeedit' => ['width' => 85,  'formatType' => 'datetime'],
-                       'overview' => ['width' => 85,  'formatType' => 'datetime'],
-                ],
-             'objToEdit'        => ['toUTC' => []], 'editToObj'         => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
-             'objToStoreEdit'   => ['toUTC' => []], 'storeEditToObj'    => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
-             'objToOverview'    => ['toUTC' => []], 'overviewToObj'     => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
-        	//	'editToObj' => ['blankToNull' => ['class' => self::utl]], 'storeEditToObj' => ['blankToNull' => ['class' => self::utl]], 'overviewToObj' => ['blankToNull' => ['class' => self::utl]], 
-         ],
+        return  Utl::array_merge_recursive_replace([
+            'type' => 'dateTimeBox' ,
+            'atts' => ['edit' =>  ['label' => $view->tr($label)],
+                'storeedit' => ['width' => 85,  'formatType' => 'datetime'],
+                'overview' => ['width' => 85,  'formatType' => 'datetime'],
+            ],
+            'objToEdit'        => ['toUTC' => []], 'editToObj'         => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
+            'objToStoreEdit'   => ['toUTC' => []], 'storeEditToObj'    => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
+            'objToOverview'    => ['toUTC' => []], 'overviewToObj'     => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
+            //	'editToObj' => ['blankToNull' => ['class' => self::utl]], 'storeEditToObj' => ['blankToNull' => ['class' => self::utl]], 'overviewToObj' => ['blankToNull' => ['class' => self::utl]],
+        ],
             $custom
-        );
+            );
     }
     public static function timeStampDataWidget($view, $label, $custom=[]){
          return  Utl::array_merge_recursive_replace([

@@ -118,7 +118,11 @@ trait  GridWidgets{
             $atts['field'] = $col;
         }
         $atts = self::complete($atts, (isset($element['atts']['edit']) ? $element['atts']['edit'] : $atts));
-        if ($mode !== 'overview'){
+        if ($mode === 'overview'){
+            if ($element['type'] === 'StoreSelect'){
+                $atts['editorArgs'] = ['storeArgs' => ['data' => $element['atts']['edit']['storeArgs']['data']]];
+            }
+        }else{
             $atts['disabled'] = (isset($atts['disabled']) ? $atts['disabled'] : (isset($element['atts']['edit']['disabled']) ? $element['atts']['edit']['disabled'] : false));
             if (!$atts['disabled']){
                 if (isset($atts['type'])){

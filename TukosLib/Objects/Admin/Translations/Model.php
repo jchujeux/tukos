@@ -4,13 +4,15 @@ namespace TukosLib\Objects\Admin\Translations;
 use TukosLib\Objects\ObjectTranslator;
 use TukosLib\Objects\Directory;
 use TukosLib\Objects\StoreUtilities as SUtl;
+use TukosLib\Objects\ItemsExporter;
+use TukosLib\Objects\ItemsImporter;
 
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends ObjectTranslator {
-
+    use itemsExporter, itemsImporter;
 	public static function translationSets(){
         return [];
     }

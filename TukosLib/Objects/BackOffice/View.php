@@ -17,7 +17,7 @@ class View extends ObjectTranslator{
     function instantiateBackOffice($query){
         if (empty($this->backOffice)){
             $backOfficeClass = 'TukosLib\\Objects\\' . Directory::getObjDir($query['object']) . '\\BackOffice\\' . $query['form'];
-            $this->backOffice = new $backOfficeClass();
+            $this->backOffice = new $backOfficeClass($query);
             $this->dataWidgets = $this->backOffice->dataWidgets;
         }
     }

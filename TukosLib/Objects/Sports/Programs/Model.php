@@ -1,9 +1,6 @@
 <?php
 namespace TukosLib\Objects\Sports\Programs;
 
-use TukosLib\Utils\XlsxInterface;
-use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
-use Box\Spout\Writer\Common\Creator\WriterEntityFactory;
 use TukosLib\Objects\Sports\Sports;
 use TukosLib\Objects\Sports\AbstractModel;
 use TukosLib\Objects\Sports\Programs\Questionnaire;
@@ -23,6 +20,7 @@ class Model extends AbstractModel {
     
 	protected $presentationOptions = ['perdate', 'persession'];
     protected $synchnextmondayOptions = ['YES', 'NO'];
+    public $defaultSessionsTrackingVersion = 'V1';
     
     function __construct($objectName, $translator=null){
         $colsDefinition = [
@@ -337,11 +335,17 @@ class Model extends AbstractModel {
     public function googleSynchronize($query, $atts = []){
     	$sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
         $id = $query['id'];
-        $trackingConfiguration = $this->getOne(['where' => ['id' => $id], 'cols' => ['custom']],
-            ['custom' => ['edit', 'tab', 'widgetsDescription', 'sessionstracking', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription']]
-        )['custom'];
+        $trackingConfiguration = $this->getCombinedCustomization(['id' => $id], 'edit', null, ['widgetsDescription', 'sessionstracking', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription']);
         $includeTrackingFormUrl = ($eventFormUrl = Utl::getItem('eventformurl', $trackingConfiguration)) ? $eventFormUrl['atts']['checked'] : false;
-        $logofile = $includeTrackingFormUrl ? (($logo = Utl::getItem('formlogo', $trackingConfiguration)) ? $logo['atts']['value'] : '') : '';
+        if ($includeTrackingFormUrl){
+            $logoFile = ($logo = Utl::getItem('formlogo', $trackingConfiguration)) ? $logo['atts']['value'] : '';
+            $formPresentation = ($presentation = Utl::getItem('formpresentation', $trackingConfiguration)) ? $presentation['atts']['value'] : '';
+            $formVersion = ($version = Utl::getItem('version', $trackingConfiguration)) ? $version['atts']['value'] : $this->defaultSessionsTrackingVersion;
+        }else{
+            $logoFile = $formPresentation = $formVersion = '';
+        }
+        //$logofile = $includeTrackingFormUrl ? (($logo = Utl::getItem('formlogo', $trackingConfiguration)) ? $logo['atts']['value'] : '') : '';
+        //$formPresentation = $includeTrackingFormUrl ? (($presentation = Utl::getItem('formpresentation', $trackingConfiguration)) ? $presentation['atts']['value'] : '') : '';
         $where = ['parentid' => $id, [['col' => 'mode', 'opr' => '<>', 'values' => 'performed'], ['col' => 'mode', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]];
         if ($minTimeToSync = Utl::getItem('synchrostart', $atts, '', '')){
         	$where[] = ['col' => 'startdate', 'opr' => '>=', 'values' => $minTimeToSync];
@@ -371,7 +375,7 @@ class Model extends AbstractModel {
 	        $deleted = 0;
 	        if (!empty($sessionsToSync)){
 	            foreach($sessionsToSync as $key => $session){
-	                $descriptions[$key] = $this->googleDescription($session, $id, $includeTrackingFormUrl, $logofile);
+	                $descriptions[$key] = $this->googleDescription($session, $id, $includeTrackingFormUrl, $logoFile, $formPresentation, $formVersion);
 	            }
 	            $descriptions = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode($descriptions)), true);
 	            foreach($sessionsToSync as $key => $session){
@@ -431,7 +435,7 @@ class Model extends AbstractModel {
     	return ['acl' => (array) Calendar::getRules([$atts['googlecalid']])];
     }
     
-    public function googleDescription($session, $programId, $includeTrackingFormUrl = false, $logoFile = ''){
+    public function googleDescription($session, $programId, $includeTrackingFormUrl = false, $logoFile = '', $presentation = '', $version = ''){
         $attCols = ['duration' => 'numberUnit',  'intensity' => 'string', 'sport' => 'string', 'stress' => 'string'];
         $contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'];
         $description = '';
@@ -446,8 +450,8 @@ class Model extends AbstractModel {
         	}
         }
         if ($includeTrackingFormUrl){
-            $description .= '<a href="' .  Tfk::$registry->rootUrl . Tfk::$registry->appUrl . 'Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&parentid=' . $programId . '&date=' . $session['startdate'] .
-            ($logoFile ? '&logo=' . $logoFile : '') . '">' . $this->tr('SessionFeedback') . '</a><br>';
+            $description .= '<a href="' .  Tfk::$registry->rootUrl . Tfk::$registry->appUrl . 'Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&version=' . $version . '&parentid=' . $programId . '&date=' . $session['startdate'] .
+            ($logoFile ? '&logo=' . $logoFile : '') . ($presentation ? '&presentation=' . $presentation : '') . '">' . $this->tr('SessionFeedback') . '</a><br>';
         }
         return $description;
     }
@@ -470,133 +474,23 @@ class Model extends AbstractModel {
     	$values = Sheets::getValues($atts['googlesheetid'], $range);
     	$this->storeNewQuestionnaires($values, $initialValue, 'sptprograms', 'sptathletes');
     }
-    public function downloadPerformedSessions($query, $atts){
-        $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
-        $sessions = $sessionsModel->getAll(['where' => $this->user->filter(['parentid' => $query['id'], 'mode' => 'performed', ['col' => 'startdate', 'opr' => '>=', 'values' => $atts['synchrostart']],
-            ['col' => 'startdate', 'opr' => '<=', 'values' => $atts['synchroend']] ], 'sptsessions'),
-            'orderBy' => ['startdate' => ' ASC'],  'cols' => ['count(*)']]);
-        if ($sessions[0]['count(*)'] > 0){
-            Feedback::add($this->tr('youalreadyhaveperformedsessionsfortheperiod'));
-        }else{
-            if (!empty($filePath = Dropbox::downloadFile($atts['filepath'], $this->user->dropboxAccessToken()))){
-                $workbook = new XlsxInterface();
-                $workbook->open($filePath);
-                $sheet = $workbook->getSheet('1');
-                $refDate = new \DateTime('1899-12-30');
-                $synchroStartDays = substr($refDate->diff(new \DateTime($atts['synchrostart']))->format('%R%a'), 1);
-                $synchroEndDays = substr($refDate->diff(new \DateTime($atts['synchroend']))->format('%R%a'), 1) + 1;
-                
-                $dateCol = 3; $row = 2; $downloadedSessions = 0;
-                $cols = ['date' => 3, 'theme' => 4, 'duration' => 5, 'distance' => 6, 'elevationgain' => 7, 'feeling' => 8, 'comments' => 9, 'weeklyFeeling' => 10, 'coachComments' => 11, 'coachWeeklyComments' => 12];
-                while (($date = $workbook->getCellValue($sheet, $row, $dateCol)) <= $synchroStartDays) {
-                    $row += 1;
-                }
-                while ($date <= $synchroEndDays){
-                    foreach ($cols as $key => $col){
-                        $values[$key] = $workbook->getCellValue($sheet, $row, $col);
-                    };
-                    if (!empty($values['duration'])){
-                        $performedSession = ['parentid' => $query['id'], 'sportsman' => $atts['parentid'], 'startdate' => (new \DateTime('1899-12-30'))->add(new \DateInterval('P' . $date . 'D'))->format('Y-m-d'), 'mode' => 'performed',
-                            'duration' => '[' . floatval($values['duration']) . ',"minute"]', 'distance' =>$values['distance'], 'elevationgain' => $values['elevationgain'],
-                            'athletecomments' => $values['comments'], 'athleteweeklyfeeling' => $values['weeklyFeeling'],
-                            'coachcomments' => $values['coachComments'], 'coachweeklycomments' => $values['coachWeeklyComments'],
-                            'feeling' => $values['feeling'],
-                            'name' => /*$this->tr('distance') . ': ' . $values['distance'] . ' kms' . '<br>' . $this->tr('elevationgain') . ': ' . $values['elevationgain'] . ' m<br>' . */$values['theme']
-                        ];
-                        $performedSession = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode($performedSession)), true);
-                        $sessionsModel->insert($performedSession, true);
-                        $downloadedSessions += 1;
-                    }
-                    $row += 1;
-                    $date = $workbook->getCellValue($sheet, $row, $dateCol);
-                }
-                Feedback::add($downloadedSessions . ' ' . $this->tr('sessionsweredownloaded'));
-                $workbook->close();
-            }
+    public function instantiate($class, $params){
+        if (empty($this->$class)){
+            $fullClassPath = 'TukosLib\\Objects\\Sports\\Programs\\' . $class;
+            $this->$class = new $fullClassPath($params);
         }
+    }
+    public function downloadPerformedSessions($query, $atts){
+        $this->instantiate('SessionsFeedback', $atts['version']);
+        $this->SessionsFeedback->downloadPerformedSessions($query, $atts);
     }
     public function uploadPerformedSessions($query, $atts){
-        if (!empty($filePath = Dropbox::downloadFile($atts['filepath'], $this->user->dropboxAccessToken()))){
-            $workbook = new XlsxInterface();
-            $workbook->open($filePath);
-            $refDateString = '1899-12-30';
-            $refDate = new \DateTime($refDateString);
-            $synchroStartDate = $atts['synchrostart']; $synchroEndDate = $atts['synchroend'];
-            //var_dump($refDate);
-            //echo "refDateString: $refDateString - synchroStartDate: $synchroStartDate - synchroEndDate: $synchroEndDate";
-            $synchroStartDays = substr($refDate->diff(new \DateTime($atts['synchrostart']))->format('%R%a'), 1);
-            $synchroEndDays = substr($refDate->diff(new \DateTime($atts['synchroend']))->format('%R%a'), 1) + 1;
-            //echo "synchroStartDays: $synchroStartDays - synchroEndDays: $synchroEndDays\n";
-            $sheet = $workbook->getSheet('1');
-            $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
-            $sessions = $sessionsModel->getAll(['where' => $this->user->filter(['parentid' => $query['id'], 'mode' => 'performed', ['col' => 'startdate', 'opr' => '>=', 'values' => $atts['synchrostart']],
-                    ['col' => 'startdate', 'opr' => '<=', 'values' => $atts['synchroend']] ], 'sptsessions'),
-                'orderBy' => ['startdate' => ' ASC'],  'cols' => ['startdate', 'coachcomments', 'coachweeklycomments']]);
-            if (empty($sessions)){
-                Feedback::add($this->tr('nosessiontoupdate'));
-                $workbook->close();
-            }else{
-                $dateCol = 3; $row = 2; $cellsUpdated = 0;
-                $cols = ['coachcomments' => 11, 'coachweeklycomments' => 12];
-                while (($dateInDays = $workbook->getCellValue($sheet, $row, $dateCol)) <= $synchroStartDays) {
-                    $row += 1;
-                }
-                //$session = reset($sessions);
-                foreach ($sessions as $session){
-                    $startDate = (new \DateTime($refDateString))->add(new \DateInterval('P' . $dateInDays . 'D'))->format('Y-m-d');
-                    $sessionDate = $session['startdate'];
-                    //echo "updatePerformedSession - date: $dateInDays - startDate: $startDate - sessionDate: $sessionDate\n";
-                    while($startDate < $session['startdate']){
-                        $row += 1;
-                        $dateInDays = $workbook->getCellValue($sheet, $row, $dateCol);
-                        $startDate = (new \DateTime($refDateString))->add(new \DateInterval('P' . $dateInDays . 'D'))->format('Y-m-d');
-                    }
-                    //echo "updatePerformedSession - date: $dateInDays - startDate: $startDate - sessionDate: $sessionDate\n";
-                    foreach ($cols as $key => $col){
-                        if ($session[$key] != $workbook->getCellValue($sheet, $row, $col)){
-                            $workbook->setCellValue($sheet, $session[$key], $row, $col);
-                            $cellsUpdated += 1;
-                        }
-                    };
-                    $row += 1;
-                    $dateInDays = $workbook->getCellValue($sheet, $row, $dateCol);
-                }
-/*
-                while ($date <= $synchroEndDays){
-                    $startDate = (new \DateTime($refDateString))->add(new \DateInterval('P' . $dateInDays . 'D'))->format('Y-m-d');
-                    $sessionDate = $session['startdate'];
-                    echo "updatePerformedSession - date: $dateInDays - startDate: $startDate - sessionDate: $sessionDate\n";
-                    if ($startDate === $session['startdate']){
-                        foreach ($cols as $key => $col){
-                            if ($session[$key] != $workbook->getCellValue($sheet, $row, $col)){
-                                $workbook->setCellValue($sheet, $session[$key], $row, $col);
-                                $cellsUpdated += 1;
-                            }
-                        };
-                    }
-                    $row += 1;
-                    $session = next($sessions);
-                    $dateInDays = $workbook->getCellValue($sheet, $row, $dateCol);
-                }
-*/
-                if (!empty($cellsUpdated)){
-                    $workbook->updateSheet(1, $sheet);
-                    $workbook->close();
-                    $returnData = Dropbox::uploadFile($atts['filepath'], $this->user->dropboxAccessToken());
-                    Feedback::add($this->tr('nbcellsupdated') . ': ' . $cellsUpdated);
-                }else{
-                    Feedback::add($this->tr('Noupdateneeded'));
-                    $workbook->close();
-                }
-            }
-        }
+        $this->instantiate('SessionsFeedback', $atts['version']);
+        $this->SessionsFeedback->uploadPerformedSessions($query, $atts);
     }
     public function removePerformedSessions($query, $atts){
-        $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
-        $count = $sessionsModel->delete($this->user->filter(
-            ['parentid' => $query['id'], 'mode' => 'performed', ['col' => 'startdate', 'opr' => '>=', 'values' => $atts['synchrostart']], ['col' => 'startdate', 'opr' => '<=', 'values' => $atts['synchroend']] ], 'sptsessions')
-        );
-        Feedback::add($this->tr('doneEntriesDeleted') . $count);
+        $this->instantiate('SessionsFeedback', $atts['version']);
+        $this->SessionsFeedback->removePerformedSessions($query, $atts);
     }
     
 }

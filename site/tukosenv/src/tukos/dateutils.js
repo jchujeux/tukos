@@ -9,15 +9,18 @@ define(["dojo", "dojox/date/posix"], function(dojo, ISODates){
             return dojo.date.stamp.fromISOString(dateString);
         },
 
-        durationString: function(fromDate, toDate, duration, correction){// format: '[number, interval]', where interval can be 'day', 'week', etc.
+        durationString: function(fromDate, toDate, duration, correction){// format: '[number, interval]', where interval can be 'day', 'week', etc. if correction is true, then the durationString returned is the ceiling (nearest higher integer number of units)
             if (fromDate && toDate){
                 var fromDateObject = (typeof fromDate === 'string' ? this.parseDate(fromDate) : fromDate),
                     toDateObject = (typeof toDate === 'string' ? this.parseDate(toDate) : toDate),
-                    interval = typeof duration === 'string' && duration !== '' ? JSON.parse(duration)[1] : (typeof duration === 'object' ? duration[1] : '');
+                    //interval = typeof duration === 'string' && duration !== '' ? JSON.parse(duration)[1] : (typeof duration === 'object' ? duration[1] : '');
+                    interval = (duration == null || duration == '') ? 'minute' : (typeof duration === 'string' ? JSON.parse(duration)[1] : duration[1]);
+/*
                 if (interval === ''){
                     interval = 'minute';
                 }
-                var correctedToDate = (correction ? new Date(this.dateAdd(toDateObject, interval, correction).getTime() - correction) : toDateObject);
+*/
+                var correctedToDate = (correction ? new Date(this.dateAdd(toDateObject, interval, 1).getTime() - 1) : toDateObject);
                 return JSON.stringify([dojo.date.difference(fromDateObject, correctedToDate, interval), interval]);
             }else{
                 return duration;
@@ -116,7 +119,7 @@ define(["dojo", "dojox/date/posix"], function(dojo, ISODates){
          },
          seconds: function(durationString){
         	 var durationArray = JSON.parse(durationString);
-        	 return (durationArray[0] && durationArray[1]) ? durationArray[0] * durations[durationArray[1]] : 0;
+        	 return (durationArray != null && durationArray[0] && durationArray[1]) ? durationArray[0] * durations[durationArray[1]] : 0;
          },
          convert: function(duration, fromUnit, toUnit){
             var durations = {second: 1, minute: 60, hour: 3600, day: 24*3600, week: 7*24*3600, month: 24*3600*30, quarter: 24*3600*30*3, year: 24*3600*365};

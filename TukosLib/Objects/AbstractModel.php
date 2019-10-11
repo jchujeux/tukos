@@ -215,7 +215,7 @@ abstract class AbstractModel extends ObjectTranslator {
     }
 
     public function translateOne(&$item){
-    	$cols = array_intersect(array_keys($item), $this->colsToTranslate);
+        $cols = array_intersect(array_keys($item), $this->colsToTranslate);
     	foreach ($cols as $col){
     		$item[$col] = $this->tr($item[$col]);
     	}

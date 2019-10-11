@@ -201,7 +201,14 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
     		})
     		return store;
     	},
-        transform: function(value, formatType, formatOptions){
+        pad: function(number, size){
+        	var result = String(number);
+        	while (result.length < size){
+        		result = '0' + result;
+        	}
+        	return result;
+        },
+    	transform: function(value, formatType, formatOptions){
             if ((typeof value == 'string' && value != '') || typeof value === 'number'){
                 switch (formatType){
                     case 'datetimestamp': // from yyyy-mm-ddThh:mm:ssZ to yyyy-mm-dd hh:mm:ss (server time format i.e. ISO to dojo widgets time format

@@ -15,12 +15,12 @@ class Save extends AbstractAction{
     function response($query){
         $newValues = $this->saveViewModel->save($query);
         if ($newValues){
-            return $newValues;
-/*
+            //return $newValues;
+
             $response = [];
-            $this->getViewModel->respond($response, $newValues);
+            $this->getViewModel->respond($response, $query);
             return $response;
-*/
+
         }else{
             return ['data' => false];
         }

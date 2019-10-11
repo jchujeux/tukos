@@ -1,5 +1,6 @@
 <?php
 namespace TukosLib\Utils;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class DateTimeUtilities{
@@ -12,7 +13,7 @@ class DateTimeUtilities{
         if (is_string($duration)){
             $duration = json_decode($duration, true);
         }
-        return $duration[0] * self::timeIntervals[$duration[1]];
+        return isset($duration[0]) ? $duration[0] * self::timeIntervals[$duration[1]] : 0;
     }
     public static function duration($value, $possibleUnits = ['hour', 'minute'], $round = 'ceiling', $tolerance = 0.01){
 		foreach ($possibleUnits as $unit){
@@ -31,6 +32,21 @@ class DateTimeUtilities{
     }
     public static function toUserDate($value){
     	return empty($value) ? $value : date('Y-m-d', strtotime($value) - Tfk::$registry->timezoneOffset);
+    }
+    public static function timeToSeconds(/*xxxhh:mm:ss*/$time){
+        $duration = explode(':', substr($time,-8));
+        return $duration[0] * self::timeIntervals['hour'] + $duration[1] * self::timeIntervals['minute'] + $duration[2];
+    }
+    public static function secondsToTime(/* should be less than 24 hours*/$seconds){
+        $seconds = intval($seconds);
+        return 'T' . Utl::pad($hours = intval($seconds / self::timeIntervals['hour']), 2) . ':' .  Utl::pad(($seconds - self::timeIntervals['hour']* $hours) / self::timeIntervals['minute'], 2) . ':' . 
+                Utl::pad($seconds % self::timeIntervals['minute'], 2);
+    }
+    public static function timeToMinutes($time){
+        return intval(self::timeToSeconds($time) / self::timeIntervals['minute']);
+    }
+    public static function minutesToTime($minutes){
+        return self::secondsToTime(floatval($minutes) * self::timeIntervals['minute']);
     }
 }
 ?>

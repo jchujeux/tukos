@@ -6,8 +6,10 @@ use TukosLib\Objects\Views\Models\ModelsAndViews;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
-abstract class AbstractViewModel extends ModelsAndViews{
+abstract class AbstractViewModel/* extends ModelsAndViews*/{
 
+    use ModelsAndViews;
+    
     function __construct($controller, $params=[]){
         $this->controller = $controller;
         $this->dialogue = $controller->dialogue;
@@ -19,11 +21,11 @@ abstract class AbstractViewModel extends ModelsAndViews{
         $this->paneMode = $controller->paneMode;
     }
 
-    function modelToView($values, $modelToView, $multiRows){
+    function modelToView($values, $modelToView, $multiRows = false){
         return $this->convert($values, $this->view->dataWidgets, $modelToView, $multiRows, [], false); 
     }
 
-    function viewToModel($values, $viewToModel, $multiRows){
+    function viewToModel($values, $viewToModel, $multiRows = false){
         return $this->convert($values, $this->view->dataWidgets, $viewToModel, $multiRows, [], false); 
     }
 

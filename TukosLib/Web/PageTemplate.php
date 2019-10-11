@@ -24,7 +24,7 @@
                     async: true, locale: "<?= $this->language ?>",
         			selectorEngine: 'lite',
 					packages: <?= $this->__raw()->packagesString ?>,
-                    map: {'dojo' : {'dojo/dnd/Selector': "dojoFixes/dojo/dnd/Selector"},/* '*': {'dojo/dnd/common': 'dojoFixes/dojo/dnd/common'}, */'dijit/Menu': {'dijit/popup': 'dojoFixes/dijit/popup'}},
+                    map: {'dojo' : {'dojo/dnd/Selector': "dojoFixes/dojo/dnd/Selector"}, 'dijit/Menu': {'dijit/popup': 'dojoFixes/dijit/popup'}, 'dojox/mobile': {'dojox/mobile/SpinWheelSlot': 'dojoFixes/dojox/mobile/SpinWheelSlot'}}
                 };
         </script>
         <script src="<?= $this->dojoBaseLocation ?>dojo/dojo.js"></script>

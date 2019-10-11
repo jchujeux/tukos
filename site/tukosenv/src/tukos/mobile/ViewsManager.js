@@ -1,4 +1,3 @@
-
 define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_PanesManager", "tukos/mobile/TukosView", "tukos/PageManager"], 
     function(declare, lang, _PanesManager, TukosView, Pmg){
     return declare(_PanesManager, {

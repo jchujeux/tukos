@@ -61,11 +61,11 @@ class View extends AbstractView {
     		"  chartItem = {day: dayDate, distance: 0, elevationgain: 0, volume: 0, perceivedEffort: 0, fatigue: 0};\n" .
     		"  gridWidget.collection.filter(filter.eq('startdate', dayDate).eq('mode', 'performed')).forEach(function(item){\n" .
     		"    var duration = dutils.seconds(item.duration) / 60;" .
-    		"    if (duration && (item.distance || item.elevationgain || item.perceivedEffort)){" .
+    		//"    if (duration && (item.distance || item.elevationgain || item.perceivedEffort)){" .
     		"        console.log('duration' + duration);" .
     		"        chartItem.volume = duration; chartItem.distance = item.distance; chartItem.elevationgain = item.elevationgain / 10;chartItem.perceivedEffort = item.perceivedEffort || 5;\n" .
     		"        chartItem.fatigue = ((item.sensations || 5) + (item.mood || 5))/2;\n" .
-    		"    }" .
+    		//"    }" .
     		"  });\n" .
     		"  chartItem.distanceTooltip = '$tDistance: ' + chartItem.distance + ' km';\n" .
     		"  chartItem.volumeTooltip = chartItem.volume + ' ' + 'minutes';\n" .
@@ -237,8 +237,9 @@ class View extends AbstractView {
 		    'performedloadchart' => $performedLoadChartDescription('performedloadchart', 'week', 'weekoftheyear', 'weekof', $tWeekOfTheYear, $loadChartCustomization('week', $programLoadChartIdPropertyStoreData)),
 		    'weekperformedloadchart' => $performedLoadChartDescription('weekperformedloadchart', 'day', 'dateofday', 'dayofweek', $tDayOfTheWeek, $loadChartCustomization('day', $weekLoadChartIdPropertyStoreDataDescription)),
 		    'worksheet' => ['atts' => ['edit' => ['dndParams' => ['accept' => ['dgrid-row', 'quarterhour']]/*, 'copyOnly' => true, 'selfAccept' => false*/]]],
-			'calendar' => $this->calendarWidgetDescription(
-				['atts' => ['edit' => [
+			'calendar' => $this->calendarWidgetDescription([
+				'type' => 'StoreSimpleCalendar', 
+			    'atts' => ['edit' => [
 					'columnViewProps' => ['minHours' => 0, 'maxHours' => 4],
 					'style' => ['height' => '350px', 'width' => '700px'], 
 					'timeMode' => 'duration', 'moveEnabled' => true,

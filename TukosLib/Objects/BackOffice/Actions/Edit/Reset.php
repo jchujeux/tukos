@@ -9,7 +9,7 @@ use TukosLib\TukosFramework as Tfk;
 class Reset extends AbstractAction{
     function __construct($controller){
         parent::__construct($controller);
-        $this->resetViewModel  = $controller->objectsStore->objectViewModel($controller, 'Edit', 'Reset');
+        $this->resetViewModel  = $controller->objectsStore->objectViewModel($controller, 'Edit', 'Get');
     }
     function response($query){
         $response = [];
