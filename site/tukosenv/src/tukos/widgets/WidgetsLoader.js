@@ -10,11 +10,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/p
                 RestSelect: "tukos/", ObjectExport: "tukos/", ObjectSave: "tukos/", ObjectReset: "tukos/", ObjectProcess: "tukos/", ObjectNew: "tukos/", ObjectEdit: "tukos/", ObjectDelete: "tukos/", ObjectDuplicate: "tukos/",
                 ObjectCalendar: "tukos/", ObjectFieldClear: "tukos/", OverviewAction: "tukos/", OverviewEdit: "tukos/",  TukosDgrid: "tukos/", SimpleDgrid: "tukos/",  StoreDgrid: "tukos/", OverviewDgrid: "tukos/", ReadonlyGrid: "tukos/",
                 BasicGrid: "tukos/", ContextTree: "tukos/", NavigationTree: "tukos/", PieChart: "tukos/", ColumnsChart: "tukos/", Chart: "tukos/", 
-                SimpleUploader: "tukos/widgets/", Uploader: "tukos/widgets/", Downloader: "tukos/widgets/", StoreCalendar: "tukos/widgets/calendar/", widgetsHider: "tukos/widgets/", HorizontalLinearGauge: "tukos/widgets/dgauges/",
+                SimpleUploader: "tukos/widgets/", Uploader: "tukos/widgets/", Downloader: "tukos/widgets/", StoreCalendar: "tukos/widgets/calendar/", StoreSimpleCalendar: "tukos/widgets/calendar/", 
+                widgetsHider: "tukos/widgets/", HorizontalLinearGauge: "tukos/widgets/dgauges/",
                 ObjectEditor: "tukos/widgets/", HtmlContent: "tukos/widgets/", StoreComboBox: "tukos/", TukosTextarea: "tukos/widgets/", ColorButton: "tukos/widgets/", ComboBox: "dijit/form/",
                 MobileTextBox: "tukos/mobile/TukosTextarea*", MobileButton: "dojox/mobile/Button*",
                 MobileFormattedTextBox: "tukos/mobile/FormattedTextBox*", MobileEditor: "tukos/mobile/Editor*", MobileLazyEditor: "tukos/mobile/LazyEditor*", MobileObjectReset: "tukos/mobile/ObjectAction*",
-                MobileObjectAction: "tukos/mobile/ObjectAction*", MobileOverviewGrid: "tukos/mobile/OverviewGrid*", MobileOverviewAction: "tukos/mobile/OverviewAction*"
+                MobileObjectAction: "tukos/mobile/ObjectAction*", MobileOverviewGrid: "tukos/mobile/OverviewGrid*", MobileOverviewAction: "tukos/mobile/OverviewAction*", MobileStoreSelect: "tukos/mobile/StoreSelect*",
+                MobileTimePicker: "tukos/mobile/TimePicker*", MobileNumberBox: "tukos/mobile/NumberPicker*"
             },
             loadedWidgets: {}, loadingWidgets: {},
 

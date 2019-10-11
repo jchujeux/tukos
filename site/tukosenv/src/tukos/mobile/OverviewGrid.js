@@ -7,9 +7,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/on", "tuko
             args.collection = args.store.filter({contextpathid: args.form.tabContextId});
             for (var i in args.columns){
                 var column = args.columns[i], field = column['field'];
-                if (field && args.objectIdCols.indexOf(field) >= 0){
-                    column['renderCell'] = this.renderNamedId;
-                }
                 if (column.filter){
                 	this.hasFilters = true;
                 	console.log('field: ' + field + ' has filter');

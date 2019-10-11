@@ -30,46 +30,56 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
         },
 
         serverDialog: function(urlArgs, data, emptyBeforeSet, defaultDoneMessage, markResponseIfChanged){
-            var self = this, noLoadingIcon = this.noLoadingIcon;
+            var noLoadingIcon = this.noLoadingIcon;
             //Pmg.setFeedback(''/*messages.actionDoing*/);
-            urlArgs.object = urlArgs.object || this.object;
-            urlArgs.view = urlArgs.view || this.viewMode;
-            urlArgs.mode = urlArgs.mode || this.paneMode;
-            urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: this.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
-            return all(data).then(lang.hitch(this, function(data){
-                return Pmg.serverDialog(urlArgs, {data: data}, noLoadingIcon ? defaultDoneMessage : {widget: this.parent, att: 'title', defaultMessage: defaultDoneMessage}).then(lang.hitch(this, function(response){
-	                    if (response['data'] === false){
-	                        return response;
-	                    }else if(response['data'] !== undefined){
-	                        this.markIfChanged = self.watchOnChange = false;
-	                        this.watchContext = 'server';
-	                        return when(this.emptyWidgets(emptyBeforeSet), lang.hitch(this, function(){;
-	                            this.watchOnChange = true;
-	                            this.markIfChanged = (markResponseIfChanged  ? true : false);
-	                            return when(self.setWidgets(response['data']), lang.hitch(this, function(){
-	                                if (response['title'] && dcl.contains(this.domNode.parentNode, 'dijitTabPane')){
-	                                    Pmg.tabs.setCurrentTabTitle(response['title']);
-	                                }
-	                                if (!this.markIfChanged){
-	                                    this.resetChangedWidgets();
-	                                }
-	                                this.markIfChanged = true;
-	                                this.watchContext = 'user';
-	                                ready(function(){
-	                                    if (Pmg.tabs){
-		                                	Pmg.tabs.currentPane().resize();	                                    	
-	                                    }
-	                                });
-	                                return response;
-	                            }));
-	                        }));
-	                    }else{
-	                    	this.resetChangedWidgets();
-	                        return response;
-	                    }
-	                })
-                );
-            }));
+            if (this.inServerDialog){
+            	Pmg.setFeedback(Pmg.message('actionnotcompletedwait'), '', '', true);
+            	return false;//should be a deferred/promise
+            }else{
+                this.inServerDialog = true;
+            	urlArgs.object = urlArgs.object || this.object;
+                urlArgs.view = urlArgs.view || this.viewMode;
+                urlArgs.mode = urlArgs.mode || this.paneMode;
+                urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: this.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
+                return all(data).then(lang.hitch(this, function(data){
+                    return Pmg.serverDialog(urlArgs, {data: data}, noLoadingIcon ? defaultDoneMessage : {widget: this.parent, att: 'title', defaultMessage: defaultDoneMessage}).then(lang.hitch(this, function(response){
+    	                this.inServerDialog = false;    
+                    	if (response['data'] === false){
+    	                        return response;
+    	                    }else if(response['data'] !== undefined){
+    	                        this.markIfChanged = this.watchOnChange = false;
+    	                        this.watchContext = 'server';
+    	                        return when(this.emptyWidgets(emptyBeforeSet), lang.hitch(this, function(){;
+    	                            this.watchOnChange = true;
+    	                            this.markIfChanged = (markResponseIfChanged  ? true : false);
+    	                            return when(this.setWidgets(response['data']), lang.hitch(this, function(){
+    	                                if (response['title'] && dcl.contains(this.domNode.parentNode, 'dijitTabPane')){
+    	                                    Pmg.tabs.setCurrentTabTitle(response['title']);
+    	                                }
+    	                                if (!this.markIfChanged){
+    	                                    this.resetChangedWidgets();
+    	                                }
+    	                                this.markIfChanged = true;
+    	                                this.watchContext = 'user';
+    	                                ready(function(){
+    	                                    if (Pmg.tabs){
+    		                                	Pmg.tabs.currentPane().resize();	                                    	
+    	                                    }
+    	                                });
+    	                                return response;
+    	                            }));
+    	                        }));
+    	                    }else{
+    	                    	this.resetChangedWidgets();
+    	                        return response;
+    	                    }
+    	                }),
+    	                lang.hitch(this, function(error){
+                    		this.inServerDialog = false;
+    	                })
+                    );
+                }));
+            }
         }, 
         widgetChangeServerDialog: function(widget){
             var valuesToPost = {'input': {}};

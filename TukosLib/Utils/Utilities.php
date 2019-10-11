@@ -362,7 +362,7 @@ class Utilities{
                     $targetValue = strtolower($targetValue);
                     $sourceValue = strtolower($sourceValue);
                 }
-                if($comparisonOperator === 'find' ? $targetValue === $sourceValue : strpos($targetValue, $sourceValue) !== false){
+                if($comparisonOperator === 'find' ? (string)$targetValue === (string)$sourceValue : strpos($targetValue, $sourceValue) !== false){
                     $cache[$searchValue] = $row[$returnProperty];
                     break;
                 }
@@ -552,7 +552,6 @@ class Utilities{
         }
         //return Tfk::isWindows() ? iconv('Windows-1252','UTF-8', $value) : utf8_encode($value);
     }
-
     public static function adjustSourceCols(&$cols, &$removedComputedCols, &$addedSourceCols, $computedColsDescription){
         $addedSourceCols = [];
         $removedComputedCols = array_intersect($cols, array_keys($computedColsDescription));
@@ -565,7 +564,6 @@ class Utilities{
             $cols = array_merge($cols, $addedSourceCols);
         }
     }
-    
     public static function sentence($words, $translator = null){
         if (isset($translator)){
             return implode(' ', array_map($translator, $words));
@@ -573,30 +571,31 @@ class Utilities{
             return implode(' ', $words);
         }
     }
-    
     public static function substitute($template, $map){
     	return str_replace(array_map(function($key){return '${' . $key . '}';}, array_keys($map)), array_values($map), $template);
     }
-    
     public static function escapeSQuote($string){
         return str_replace("'", "\\\\'", $string);
     }
-
     function hexToRgb($hexstr) {
     	$int = hexdec($hexstr);
     	return array("red" => 0xFF & ($int >> 0x10), "green" => 0xFF & ($int >> 0x8), "blue" => 0xFF & $int);
     }
-    
     function is_integer($value){
     	return ctype_digit(strval($value));
     }
-    
     function identityMapping($values){
     	foreach ($values as $value){
     		$mapping[$value] = $value;
     	}
     	return $mapping;
     }
-    
+    function pad($number, $size){
+       $result = strval(intval($number));
+        while (strlen($result)< $size){
+            $result = '0' . $result;
+        }
+        return $result;
+    }
 }
 ?>

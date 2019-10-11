@@ -3,7 +3,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
     function(declare, lang, dct, dst, when, all, aspect, registry, ScrollablePane, Container, FormLayout, ToolBarButton, widgetsLoader, _ObjectPaneMixin, utils, wutils){
     
 	var mobileWidgetTypes = {TextBox: 'MobileTextBox', FormattedTextBox: 'MobileFormattedTextBox', LazyEditor: 'MobileEditor', ObjectReset: 'MobileObjectReset', ObjectSave: 'MobileObjectAction', ObjectNew: 'MobileObjectAction',
-							 OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction', Textarea: 'MobileTextBox'};
+							 OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction', Textarea: 'MobileTextBox', StoreSelect: "MobileStoreSelect", TimeTextBox: "MobileTimePicker", TukosNumberBox: "MobileNumberBox"};
 	return declare([Container, _ObjectPaneMixin], {
         postCreate: function(){
             var self = this;
@@ -58,7 +58,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                 this.addChild(theFormLayout = new FormLayout({columns: (tableAtts.showLabels && tableAtts.orientation!== 'vert') ? 'two' : 'single'}));
             	layout.widgets.forEach(lang.hitch(this, function(widgetName){
                     var widgetDescription = this.widgetsDescription[widgetName], widgetAtts = widgetDescription.atts, instantiatingWidget, widgetType, widgetLayout, widgetLabel, widgetFieldSet;
-                	if (widgetDescription && (widgetType = (mobileWidgetTypes[widgetDescription['type']] || widgetDescription['type']))){
+                	if (widgetDescription && (widgetType = (widgetDescription.atts.mobileWidgetType || mobileWidgetTypes[widgetDescription['type']] || widgetDescription['type']))){
     	                self.widgetsName.push(widgetName);
                     	widgetLayout = dct.create('div', null, theFormLayout.domNode);
                     	if (tableAtts.showLabels){
@@ -74,9 +74,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                     		}
                 			widgetFieldSet.appendChild(theWidget.domNode);
                     		self.decorate(theWidget);
-                    		if (self._started){
+                    		//if (self._started){
                     			theWidget.startup();
-                    		}
+                    		//}
                     	});
                         if (typeof instantiatingWidget.then === "function"){
                         	this.instantiatingWidgets[widgetName] = instantiatingWidget;

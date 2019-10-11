@@ -1,0 +1,63 @@
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style", "dojox/mobile/SpinWheel", "dojox/mobile/SpinWheelSlot", "tukos/utils", "tukos/widgetUtils"], 
+  function(declare, lang, aspect, dst, SpinWheel, SpinWheelSlot, utils, wutils){
+	return declare([SpinWheel], {
+		//slotClasses,
+		//slotProps,
+    	constructor: function(args){
+    		delete args.style.width;
+    		args.style = lang.mixin({height: '90px'}, args.style);
+    		this.digits = args.style.constraints.pattern.split('.');
+    		this.slotClasses = [];
+    		this.slotProps = [];
+    		for (var i = 1; i <= this.digits[0].length; i++){
+    			this.slotClasses.push(SpinWheelSlot);
+    			this.slotProps.push({labelFrom:0, labelTo:9, style:{width:"30px", textAlign:"right"}});
+    		};
+    		args.style = lang.mixin({height: '90px', width: (30*this.digits[0].length + 10) + 'px'}, args.style);
+    	},
+		postCreate: function(){
+			var self = this;
+			this.inherited(arguments);
+            var slots = this.getChildren();
+            slots.forEach(function(slot){
+            	aspect.after(slot, "slideTo", function(){
+            		self.set('value', self.get('value'));
+            	});
+            });
+		},
+		buildRendering: function(){
+			this.inherited(arguments);
+			var barNode = Array.apply(null, this.domNode.getElementsByClassName('mblSpinWheelBar')).shift()
+			dst.set(barNode, {top: (parseInt(this.style.height) - dst.get(barNode, "height"))/2 + 'px'});
+		},
+        setStyleToChanged: function(widget){
+            this.getChildren().forEach(function(slot){
+            	slot.set('style', {backgroundColor: wutils.changeColor});
+            });
+        },
+        setStyleToUnchanged: function(){
+            this.getChildren().forEach(function(slot){
+            	slot.set('style', {backgroundColor: ''});
+            });
+        }, 
+		_setValueAttr: function(value){
+			var values = [], digits = this.digits[0].length, divider = Math.pow(10, digits-1), remainder = parseInt(value), digit;
+			this._set('value', value);
+			for (var i = 0; i < digits; i++){
+				digit = Math.trunc(remainder / divider);
+				remainder = remainder - digit * divider;
+				divider = divider / 10;
+				values[i] = digit;
+			}
+			this.set('values', values);
+		},
+		_getValueAttr: function(){
+			var values = this.get('values'), digits = this.digits[0].length, value = 0, multiplier = Math.pow(10, digits-1);
+			for (var i = 0; i < digits; i++){
+				value = value + values[i] * multiplier;
+				multiplier = multiplier / 10;
+			}
+			return value;
+		}
+	});
+});

@@ -289,9 +289,19 @@ class View extends EditView{
 		    'closeOnBlur' => true,
 		    'paneDescription' => [
 		        'widgetsDescription' => [
-		            'filepath' => Widgets::textBox(Widgets::complete(['label' => $tr('sessionstrackingfilepath'), 'style' => ['width' => '30em'], 'onWatchLocalAction' => $this->watchLocalAction('filepath')])),
+		            'filepath' => Widgets::textBox(Widgets::complete(['label' => $tr('sessionstrackingfilepath'), 'style' => ['width' => '30em'], 'onWatchLocalAction' => Utl::array_merge_recursive_replace($this->watchLocalAction('filepath'), 
+		                ['value' => ['downloadperformedsessions' => ['localActionStatus' =>
+		                    "var getWidget = lang.hitch(sWidget.form, sWidget.form.getWidget), disabled = newValue ? false : true;" .
+		                    "['downloadperformedsessions', 'uploadperformedsessions', 'removeperformedsessions'].forEach(function(name){" .
+		                    "    getWidget(name).set('disabled', disabled);" .
+		                    "});"
+		                ]]])])),
 		            'eventformurl' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showeventtrackingformurl'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('eventformurl')])),
-		            'formlogo' => Widgets::textBox(Widgets::complete(['label' => $tr('trackingformlogo'), 'style' => ['width' => '30em'], 'onWatchLocalAction' => $this->watchLocalAction('formlogo')])),
+		            'formlogo' => Widgets::textBox(Widgets::complete(['label' => $tr('trackingformlogo'), 'style' => ['width' => '15em'], 'onWatchLocalAction' => $this->watchLocalAction('formlogo')])),
+		            'formpresentation' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['MobileTextBox', 'default'], $tr)], 'label' => $tr('formpresentation'),
+		                'onWatchLocalAction' => $this->watchLocalAction('formpresentation')])),
+		            'version' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['V1', 'V2'], $tr, [false, 'ucfirst', false])], 'label' => $tr('version'),
+		                'value' => $this->view->model->defaultSessionsTrackingVersion, 'onWatchLocalAction' => $this->watchLocalAction('version')])),
 		            'downloadperformedsessions' => $this->sessionsTrackingActionWidgetDescription('downloadPerformedSessions'),
 		            'uploadperformedsessions' => $this->sessionsTrackingActionWidgetDescription('uploadPerformedSessions'),
 		            'removeperformedsessions' => $this->sessionsTrackingActionWidgetDescription('removePerformedSessions'),
@@ -307,15 +317,20 @@ class View extends EditView{
 		                    'widgets' => ['filepath'],
 		                ],
 		                'row2' => [
-		                    'tableAtts' =>['cols' =>2,  'customClass' => 'labelsAndValues', 'showLabels' => true],
-		                    'widgets' => ['eventformurl', 'formlogo'],
+		                    'tableAtts' =>['cols' =>4,  'customClass' => 'labelsAndValues', 'showLabels' => true],
+		                    'widgets' => ['eventformurl', 'formlogo', 'formpresentation', 'version'],
 		                ],
 		                'row3' => [
 		                    'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => false],
 		                    'widgets' => ['close', 'downloadperformedsessions', 'uploadperformedsessions', 'removeperformedsessions'],
 		                ],
 		            ],
-		        ]
+		        ],
+		        'onOpenAction' =>
+    		      "var filePath = this.valueOf('filepath'), getWidget = lang.hitch(this, this.getWidget), disabled = filePath ? false : true;" .
+			      "['downloadperformedsessions', 'uploadperformedsessions', 'removeperformedsessions'].forEach(function(name){" .
+		          "    getWidget(name).set('disabled', disabled);" .
+		          "});"
 		    ]];
 	}
 	private function sessionsTrackingActionWidgetDescription($action){
@@ -323,14 +338,12 @@ class View extends EditView{
 	            "var pane = this.pane, parentW = pane.attachedWidget, form = parentW.form, getWidget = lang.hitch(form, form.getWidget), paneValueOf = lang.hitch(pane, pane.valueOf), formValueOf = lang.hitch(form, form.valueOf),". 
                 "    label = this.get('label'), urlArgs = parentW.urlArgs;\n" .
 	            "this.set('label', Pmg.loading(label));\n" .
-	            "form.serverDialog({action: 'Process', query: {id: formValueOf('id'), params: " . json_encode(['process' => $action, 'save' => true]) . "}}, lang.mixin(parentW.valuesToSend, {filepath: paneValueOf('filepath')})," .
+	            "form.serverDialog({action: 'Process', query: {id: formValueOf('id'), params: " . json_encode(['process' => $action, 'save' => true]) .
+	            "}}, lang.mixin(parentW.valuesToSend, {filepath: paneValueOf('filepath'), version: paneValueOf('version')})," .
 	            "  form.get('postElts'), Pmg.message('actionDone')).then(lang.hitch(this, function(response){" .
 	            "    console.log('server action completed');" .
 	            "    this.set('label', label);\n" .
 	            "    pane.close();" .
-	            //"    var widget = getWidget('displayeddate'), oldDate = widget.get('value');\n" .
-	            //"    widget.set('value', '2000-01-01', false);\n" .
-	            //"    widget.set('value', oldDate);" .
 	        "}));"
 	        ]];
 	}

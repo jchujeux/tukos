@@ -9,9 +9,7 @@ use TukosLib\TukosFramework as Tfk;
  * Class to convert model values into view values and vice-versa
  */
 
-class ModelsAndViews{
-
-
+trait ModelsAndViews{
    /*
     * Returns conversion of $values according to $widgets['col'][$vieworObj] instructions:
     */
@@ -52,7 +50,7 @@ class ModelsAndViews{
                         }
                         $row[$col] = call_user_func_array($method, array_merge([$row[$col]], $params));
                     }else{
-                        $row = call_user_func_array([__NAMESPACE__ . '\ModelsAndViews', $func], array_merge([$row, $col], [$params]));            
+                        $row = call_user_func_array([__NAMESPACE__ . '\ModelsAndViews', $func], array_merge([$row, $col], [$params]));
                     }
                 }
             }

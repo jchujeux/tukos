@@ -77,19 +77,16 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                         if (attr === 'value' && form.watchContext === 'user'){
                             if (widget.onChangeServerAction && !widget.inOnChangeServerAction){
                                 form.widgetChangeServerDialog(widget);
-                                //form.mayNeedResize = true;
                             }
                             if (widget.onChangeLocalAction){
                                 if (utils.empty(widget.localActionFunctions['value'])){
                                     form.buildLocalActionFunctions(widget.localActionFunctions['value'], widget.onChangeLocalAction);
                                 }
                                 form.widgetWatchLocalAction(widget, widget.localActionFunctions['value'], value);
-                                //form.mayNeedResize = true;
                             }
                         }
                         if (widget.onWatchServerAction && widget.onWatchServerAction[attr]){
                             form.widgetWatchServerAction(widget, widget.onWatchServerAction[attr], value);
-                            //form.mayNeedResize = true;
                         } 
                         if (widget.onWatchLocalAction && widget.onWatchLocalAction[attr]){
                             if (utils.empty(widget.localActionFunctions[attr])){

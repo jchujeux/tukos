@@ -25,6 +25,7 @@ class Main{
 	                $controllerClass = 'TukosLib\\Controllers\\' . $request['controller'];
 	                $controller = new $controllerClass();
 	                if($controller->respond($request, $query)){
+	                    $dialogue->sendResponse();
 	                }
 	            }catch(\Exception $e){
 	                Feedback::add(Tfk::tr('errorrespondingrequest') . ': ' . $e->getMessage());
@@ -41,9 +42,11 @@ class Main{
 	            file_put_contents(Tfk::$tukosTmpDir . '/tukosconfigstoreprofiles.html', $storeProfilesOutput);
             }else{
             	$authentication->logoutUser($dialogue, 'usersitemdoesnotexistforusername');
+            	$dialogue->sendResponse();
             }
+        }else{
+            $dialogue->sendResponse();
         }
-        $dialogue->sendResponse(); 
     }
 }
 ?>

@@ -153,7 +153,7 @@ class Widgets{
     public static function lazyEditor($atts, $editOnly = true){
     	$defAtts = [
             'edit' => [],
-    			'storeedit' => ['editOn'  => 'click',],
+    			'storeedit' => ['editOn'  => 'click'],
     	];
     	return ['type' =>'LazyEditor', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
@@ -165,7 +165,7 @@ class Widgets{
             	'style' => ['width' => "auto", 'minWidth' => '5em', 'maxWidth' => '15em'], 'fetchProperties' => ['sort' => [['attribute' => 'name', 'descending' => false]]], 'ignoreCase' => true,
             ],
             'storeedit' => ['width' => 110, 'editOn' => 'click', 'renderCell' => 'renderNamedId'],
-            'overview'  => ['width' => 110],
+            'overview'  => ['width' => 110, 'renderCell' => 'renderNamedId'],
         ];
         return ['type' => 'ObjectSelect', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
@@ -177,7 +177,7 @@ class Widgets{
     					'style' => ['width' => "auto", 'minWidth' => '5em', 'maxWidth' => '30em'], 'fetchProperties' => ['sort' => [['attribute' => 'name', 'descending' => false]]], 'ignoreCase' => true,
     			],
     			'storeedit' => ['width' => 110, 'editOn' => 'click', 'renderCell' => 'renderNamedIdExtra'],
-    			'overview'  => ['width' => 110],
+    	    'overview'  => ['width' => 110, 'renderCell' => 'renderNamedIdExtra'],
     	];
     	return ['type' => 'RestSelect', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
@@ -186,7 +186,7 @@ class Widgets{
         $defAtts = [
             'edit'      => ['title' => '', 'placeHolder' => Tfk::tr('Select a name'), 'style' => ['width' => '12em']],
             'storeedit' => ['width' => 110, 'editOn' => 'click', 'renderCell' => 'renderNamedId'],
-            'overview'  => ['width' => 110],
+            'overview'  => ['width' => 110, 'renderCell' => 'renderNamedId'],
         ];
         if ($editOnly){
             return ['type' => 'ObjectSelectMulti', 'atts' => Utl::array_merge_recursive_replace($defAtts['edit'], $atts)];
@@ -202,7 +202,7 @@ class Widgets{
                 'storeArgs' => ['data' => null]
             ],
             'storeedit' => ['width' => 110, 'editOn' => 'click', 'renderCell' => 'renderStoreValue'],
-            'overview'  => ['width' => 110],
+            'overview'  => ['width' => 110, 'renderCell' => 'renderStoreValue'],
         ];
 
         return ['type' => 'StoreSelect', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
@@ -274,7 +274,7 @@ class Widgets{
         $defAtts = [
             'edit'      => ['dropDownWidget' => Utl::array_merge_recursive_replace(['atts' => ['style' => ['width' => '15em', 'backgroundColor' => '#F8F8F8']]], self::$dropDownWidgetType($dropDownWidget['atts']))],
             'storeedit' => ['width' => 110, 'editOn' => 'click', 'renderCell' => 'renderNamedId'],
-            'overview'  => ['width' => 110],
+            'overview'  => ['width' => 110, 'renderCell' => 'renderNamedId'],
         ];
         return ['type' => 'ObjectSelectDropDown', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
@@ -326,7 +326,11 @@ class Widgets{
         $defAtts = ['edit' => ['dateInterval' => 'day',  'createOnGridClick' => true, 'style' => ['position' => 'relative',  'width' => '1000px', 'height' => '1000px',  'storeArgs' => ['data' => null]]]];
         return ['type' => 'StoreCalendar',  'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
+    public static function StoreSimpleCalendar($atts, $editOnly = true){
+        $defAtts = ['edit' => ['dateInterval' => 'day',  'createOnGridClick' => true, 'style' => ['position' => 'relative',  'width' => '1000px', 'height' => '1000px',  'storeArgs' => ['data' => null]]]];
+        return ['type' => 'StoreSimpleCalendar',  'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
+    }
+    
     /* Widgets with 'edit' array sub-level omitted as used only in edit mode, and called directly, not via self::description
      *
      * Need to provide at least : ['storeArgs']['data' => $storeData, 'root' => $root, 'paths' => $paths], 'urlArgs' => $urlArgs]

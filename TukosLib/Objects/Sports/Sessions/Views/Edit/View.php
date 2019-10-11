@@ -21,7 +21,7 @@ class View extends EditView{
                 ],
                 'row1b' => [
                     'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-                    'widgets' => ['mode', 'distance', 'elevationgain', 'feeling', 'athletecomments', 'athleteweeklycomments', 'coachcomments', 'coachweeklycomments', 'sensations', 'perceivedeffort', 'mood']
+                    'widgets' => ['mode', 'distance', 'elevationgain', 'feeling', 'athletecomments', 'athleteweeklyfeeling', 'coachcomments', 'coachweeklycomments', 'sensations', 'perceivedeffort', 'mood']
                 ],
                 'row2' => [
             		'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false,  'content' => '', 'widgetWidths' => ['60%', '40%']/*, 'style' => 'height: 100%; width: 100%'*/],

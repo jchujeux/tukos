@@ -24,7 +24,9 @@
     <audio id="beep" src="<?= $this->tukosLocation ?>/sounds/beep.wav"></audio>
     <!-- dojo configuration options -->
     <script type="text/javascript">
-        dojoConfig = {async: true, locale: "<?= $this->language ?>", selectorEngine: 'lite', packages: <?= $this->__raw()->packagesString ?>};
+        dojoConfig = {async: true, locale: "<?= $this->language ?>", selectorEngine: 'lite', packages: <?= $this->__raw()->packagesString ?>,
+                	  map: {'dojo' : {'dojo/dnd/Selector': "dojoFixes/dojo/dnd/Selector"}, 'dijit/Menu': {'dijit/popup': 'dojoFixes/dijit/popup'}, 'dojox/mobile': {'dojox/mobile/SpinWheelSlot': 'dojoFixes/dojox/mobile/SpinWheelSlot'}}
+        };
     </script>
     <!-- dojo bootstrap -->
     <script type="text/javascript" src="<?= $this->dojoBaseLocation ?>dojo/dojo.js"></script>

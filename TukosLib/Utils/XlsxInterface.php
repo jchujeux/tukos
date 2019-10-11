@@ -3,6 +3,9 @@ namespace TukosLib\Utils;
 
 class XlsxInterface{
 
+    private static $refDate = false;
+    
+    
     private function getSharedStrings(){
         if (empty($this->sharedStrings)){
             $this->sharedStrings = simplexml_load_string($this->zip->getFromName('xl/sharedStrings.xml'));
@@ -18,6 +21,16 @@ class XlsxInterface{
     private function updateSharedString(){
         return $this->zip->addFromString('xl/sharedStrings.xml', $this->sharedStrings->asXml());
     }
+    public static function refDate(){
+        return self::$refDate ? self::$refDate : self::$refDate = new \DateTime('1899-12-30'); // excel date format uses number of days since this $refDate
+    }
+    public function dateInDays($date){
+        return substr(XlsxInterface::refDate()->diff(new \DateTime($date))->format('%R%a'), 1);
+        
+    }
+    public static function date($dateInDays){
+        return (clone(self::refDate()))->add(new \DateInterval('P' . $dateInDays . 'D'))->format('Y-m-d');
+    }
     public function open($pFilename){      
         $this->zip = new \ZipArchive();
         $this->zip->open($pFilename);
@@ -32,14 +45,6 @@ class XlsxInterface{
         $sheetFilePath = 'xl/worksheets/sheet' . $sheetNumber . '.xml';
         $sheetContent = $this->zip->getFromName($sheetFilePath);
         $xmlObject = simplexml_load_string($sheetContent);        
-/*
-        foreach ($xmlObject->getDocNamespaces() as $strPrefix => $strNamespace){
-            if (strlen($strPrefix) == 0){
-                $strPrefix = 'r';
-            }
-            $xmlObject->registerXPathNamespace($strPrefix, $strNamespace);
-        }
-*/
         return $xmlObject;
     }
     public function updateSheet($sheetNumber, $sheetXmlObject){

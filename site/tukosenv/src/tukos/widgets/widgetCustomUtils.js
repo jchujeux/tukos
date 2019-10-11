@@ -41,7 +41,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                     FormattedTextBox: heightConstraints, MultiSelect: widthConstraints, 
                     StoreSelect: widthConstraints, ObjectSelect:  widthConstraints,  ObjectSelectMulti:  widthConstraints,  ObjectSelectDropDown: widthConstraints,
                     NumberUnitBox: width, DateTimeBox: width,  SimpleDgrid: dgridCustomAtts,  StoreDgrid: dgridCustomAtts, OverviewDgrid: dgridCustomAtts, MobileOverviewGrid: dgridCustomAtts,
-                    ContextTree: width, NavigationTree: widthAndHeightConstraints, PieChart: width, ColumnsChart: width,  Chart: width, Uploader: width, Downloader: width, StoreCalendar: widthAndHeight
+                    ContextTree: width, NavigationTree: widthAndHeightConstraints, PieChart: width, ColumnsChart: width,  Chart: width, Uploader: width, Downloader: width, StoreCalendar: widthAndHeight, StoreSimpleCalendar: widthAndHeight
                 },
                     
                 widgetCustomDialogDescription = {
