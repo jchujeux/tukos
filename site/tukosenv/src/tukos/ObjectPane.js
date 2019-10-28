@@ -36,9 +36,11 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/Co
                     if (this.onOpenAction){
                         this.openAction(this.onOpenAction);
                     }
-                    this.markIfChanged = true;
-                    this.watchContext = 'user';
-                    this.setUserContextPaths(); 
+                    setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
+                    	this.markIfChanged = true;
+                        this.watchContext = 'user';
+                        this.setUserContextPaths(); 
+                    }));
                 }));
             }));
             this.onClose = function(){

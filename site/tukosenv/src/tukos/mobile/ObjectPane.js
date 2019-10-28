@@ -3,7 +3,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
     function(declare, lang, dct, dst, when, all, aspect, registry, ScrollablePane, Container, FormLayout, ToolBarButton, widgetsLoader, _ObjectPaneMixin, utils, wutils){
     
 	var mobileWidgetTypes = {TextBox: 'MobileTextBox', FormattedTextBox: 'MobileFormattedTextBox', LazyEditor: 'MobileEditor', ObjectReset: 'MobileObjectReset', ObjectSave: 'MobileObjectAction', ObjectNew: 'MobileObjectAction',
-							 OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction', Textarea: 'MobileTextBox', StoreSelect: "MobileStoreSelect", TimeTextBox: "MobileTimePicker", TukosNumberBox: "MobileNumberBox"};
+							 OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction', Textarea: 'MobileTextBox', StoreSelect: "MobileSliderSelect", TimeTextBox: "MobileTimePicker", TukosNumberBox: "MobileNumberBox"};
 	return declare([Container, _ObjectPaneMixin], {
         postCreate: function(){
             var self = this;
@@ -46,9 +46,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                     if (this.onOpenAction){
                         this.openAction(this.onOpenAction);
                     }
-                    this.markIfChanged = true;
-                    this.watchContext = 'user';
-                    this.setUserContextPaths(); 
+                    setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
+                    		this.markIfChanged = true;
+                            this.watchContext = 'user';
+                            this.setUserContextPaths(); 
+                    	}), 0);
                 }));
             }));
         },

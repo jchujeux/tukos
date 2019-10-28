@@ -15,8 +15,9 @@ Abstract class SessionsFeedbackVersion {
     }
     public function getFormDataWidgets(){
         return $this->dataWidgets = array_merge(
-            ['sportsman'      => ViewUtils::textBox($this->view, 'name', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '100%']]]]), 'startdate'   => ViewUtils::tukosDateBox($this->view, 'date', ['atts' => ['edit' => ['disabled' => true]]]),
-                'duration' => ViewUtils::minutesTextBox($this->view, 'duration', ['atts' => ['edit' => ['label' => $this->view->tr('Duration') . ' (hh:mn)']]])],
+            ['sportsman' => ViewUtils::textBox($this->view, 'name', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '100%']]]]), 
+             'startdate' => ViewUtils::tukosDateBox($this->view, 'date', ['atts' => ['edit' => ['disabled' => true]]]),
+             'duration'  => ViewUtils::minutesTextBox($this->view, 'duration', ['atts' => ['edit' => ['label' => $this->view->tr('Duration') . ' (hh:mn)']]])],
             array_intersect_key($this->dataWidgets, array_flip($this->formObjectWidgets()))
         );
     }
@@ -32,6 +33,9 @@ Abstract class SessionsFeedbackVersion {
     public function numberWidgets(){
         return $this->numberWidgets;
     }
+    public function ratingWidgets(){
+        return $this->ratingWidgets;
+    }
     public function row2LayoutWidgets(){
         return $this->row2LayoutWidgets;
     }
@@ -42,10 +46,10 @@ Abstract class SessionsFeedbackVersion {
         return $values;
     }
     public function sheetRowToForm($workbook, $sheet, $row){
-        return self::sheetRowToX($workbook, $sheet, $row, $this->formToSheetMapping);
+        return $this->sheetRowToX($workbook, $sheet, $row, $this->formToSheetMapping);
     }
     public function sheetRowToStore($workbook, $sheet, $row){
-        $values =  self::sheetRowToX($workbook, $sheet, $row, $this->storeToSheetMapping);
+        $values =  $this->sheetRowToX($workbook, $sheet, $row, $this->storeToSheetMapping);
         if (($duration = Utl::getItem('duration', $values)) && !empty($duration)){
             $values['duration'] = '[' . floatval($duration) . ',"minute"]';
         }

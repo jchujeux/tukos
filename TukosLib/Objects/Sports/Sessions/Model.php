@@ -35,7 +35,7 @@ class Model extends AbstractModel {
             'coachcomments' => 'VARCHAR(512) DEFAULT NULL',
             'coachweeklycomments' => 'VARCHAR(512) DEFAULT NULL'];
         parent::__construct(
-            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, [], ['intensity', 'stress', 'sport', 'difficulty', 'sensations','perceivedeffort','mood','mode'], 
+            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, [], ['startdate', 'duration', 'intensity', 'stress', 'sport'/*, 'difficulty'*/, 'sensations','perceivedeffort','mood','mode'], 
             ['worksheet', 'custom']
         );
     }   

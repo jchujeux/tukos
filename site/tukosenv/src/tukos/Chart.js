@@ -80,6 +80,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
                         plotOptions.type = this.chartClasses[plotOptions.plotType];
                         this.chart.addPlot(plotName, plotOptions);
                     }
+            		lang.hitch(this, this.createTableWidget)();
                     this.onLoadDeferred.resolve();
                 }), 0);
             }));
@@ -97,8 +98,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
             }));
         },
         
-        createTableWidget: function(maxHeight){
-        	this.tableAtts.maxHeight = maxHeight;
+        createTableWidget: function(){
         	this.tableWidget = new this.chartClasses['BasicGrid'](lang.mixin(this.tableAtts, {hidden: this.showTable !== 'yes', form: this.form, collection: new DMemory({data: []})}), this.tableNode);
         	this.tableWidget.customizationPath = this.itemCustomization || 'customization' + '.widgetsDescription.' + this.widgetName + '.atts.tableAtts.';
             this.tableWidget.on("dgrid-columnstatechange", lang.hitch(this, function(evt){
@@ -119,16 +119,12 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
                     var chart = this.chart, showTable = this.showTable, tableNode = this.tableNode, chartNode = this.chartNode, width = dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height"),
                     	tableHeight = (parseInt(height)-20) + 'px';
                 	if (showTable === 'yes'){
-                    	if (!this.tableWidget){
-                    		lang.hitch(this, this.createTableWidget)(tableHeight);
-                    	}else{
-                    		this.tableWidget.set('maxHeight', tableHeight);
-                    	}
                 		dst.set(this.table, {tableLayout: "fixed"});
                 		dst.set(tableNode, {display: "block"});
                 		dst.set(tableNode.parentNode, {width: this.tableWidth || '20%'});
+                		this.tableWidget.set('maxHeight', tableHeight);
                 		this.tableWidget.collection.setData(value.store);
-                		this.tableWidget.refresh();
+                		this.tableWidget.set('collection', this.tableWidget.collection);
                 	}else{
                 		if (tableNode){
                     		dst.set(tableNode, {display: "none"});   
@@ -149,8 +145,8 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
                         	tooltips[seriesName] = new this.chartClasses['Tooltip'](chart, series.options.plot);
                         }
                     }
-                    chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
                     chart.render();
+                    chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
                     if (this.legend && !this.legendWidget){
                         this.legendWidget = new this.chartClasses[this.legend.type](lang.mixin({chart: chart}, this.legend.options || {}), this.legendNode); 
                     }

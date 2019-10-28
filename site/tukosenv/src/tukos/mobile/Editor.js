@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/Editor", "dijit/_editor/plugins/FullScreen", "dojox/editor/plugins/StatusBar"], 
-    function(declare, lang, dst, Editor, FullScreen, StatusBar){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/Editor", "dijit/_editor/plugins/FullScreen", "dojox/editor/plugins/StatusBar", "tukos/utils"], 
+    function(declare, lang, dst, Editor, FullScreen, StatusBar, utils){
     return declare([Editor], {
     	
     	constructor: function(args){
@@ -17,8 +17,22 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/Editor
 				this.toolbar.set('style', {display: "none"});
 			});	
         },
+        changeStyle: function(property, value){
+            this.document.body.style[property] = value;
+        },
         startup: function(){
-        	this.inherited(arguments);
+        	if (this.style && typeof this.style === 'object'){// richtext only supports string notation
+                var style = this.style, changeStyle = lang.hitch(this, this.changeStyle);
+                delete this.style;
+            }
+            this.inherited(arguments);
+            this.onLoadDeferred.then(lang.hitch(this, function(){
+            	if (style){
+                    utils.forEach(style, function(value, property){
+                        changeStyle(property, value);
+                    });
+            	}
+            }));
         	this.toolbar.set('style', {display: 'none'});
             this.statusBar.resizeHandle.on ('resize', lang.hitch(this, function(evt){
                 var newHeight = this.height = dst.get(this.editingArea, 'height') + "px";

@@ -28,6 +28,9 @@ class SessionFeedback extends ObjectTranslator{
                     foreach($this->version->numberWidgets() as $name){
                         $this->dataWidgets[$name]['atts']['edit']['mobileWidgetType'] = 'MobileTextBox';
                     }
+                    foreach($this->version->ratingWidgets() as $name){
+                        $this->dataWidgets[$name]['atts']['edit']['mobileWidgetType'] = 'MobileStoreSelect';
+                    }
                     $this->dataWidgets['duration']['atts']['edit']['mobileWidgetType'] = 'TimeTextBox';
             }
         }
@@ -129,6 +132,8 @@ class SessionFeedback extends ObjectTranslator{
                 $sessionsModel->getOne(['where' => $this->user->filter(['startdate' => $sessionDate, 'mode' => 'performed'], 'sptsessions'), 'cols' => array_merge($this->version->formObjectWidgets(), ['duration'])]));
             if ($duration = Utl::getItem('duration', $performedSession)){
                 $performedSession['duration'] = Dutl::seconds($duration) / 60;
+            }else{
+                $performedSession['duration'] = 0;
             }
         }
         return $performedSession;

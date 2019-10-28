@@ -24,10 +24,6 @@ class SessionsFeedback extends ObjectTranslator{
             $downloadedSessions = 0; $dateCol = 3;
             $synchroEndDays = XlsxInterface::dateInDays($atts['synchroend']) + 1;
             while ($dateInDays <= $synchroEndDays){
-                $performedSession = array_merge(
-                    ['parentid' => $query['id'], 'sportsman' => $atts['parentid'], 'startdate' => XlsxInterface::date($dateInDays), 'mode' => 'performed'],
-                    $this->version->sheetRowToStore($this->workbook, $this->sheet, $this->row)
-                );
                 $performedSession = $this->version->sheetRowToStore($this->workbook, $this->sheet, $this->row);
                 if (!empty(array_filter($performedSession))){
                     $performedSession = array_merge(['parentid' => $query['id'], 'sportsman' => $atts['parentid'], 'startdate' => XlsxInterface::date($dateInDays), 'mode' => 'performed'], $performedSession);

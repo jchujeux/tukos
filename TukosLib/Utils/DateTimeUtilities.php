@@ -8,6 +8,7 @@ class DateTimeUtilities{
     const dayInSeconds = 24*3600;
     const timeIntervals =  ['year' => 365*self::dayInSeconds, 'quarter' => 90*self::dayInSeconds, 'month' => 30*self::dayInSeconds, 'week' => 7*self::dayInSeconds, 'weekday' => self::dayInSeconds,
     						'day' => self::dayInSeconds, 'hour' => 3600, 'minute' => 60, 'second' => 1];// corresponds to intersection of php strToTime & dojo.date supported intervals
+    const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     
     public static function seconds($duration){
         if (is_string($duration)){
@@ -38,7 +39,7 @@ class DateTimeUtilities{
         return $duration[0] * self::timeIntervals['hour'] + $duration[1] * self::timeIntervals['minute'] + $duration[2];
     }
     public static function secondsToTime(/* should be less than 24 hours*/$seconds){
-        $seconds = intval($seconds);
+        $seconds = round($seconds);
         return 'T' . Utl::pad($hours = intval($seconds / self::timeIntervals['hour']), 2) . ':' .  Utl::pad(($seconds - self::timeIntervals['hour']* $hours) / self::timeIntervals['minute'], 2) . ':' . 
                 Utl::pad($seconds % self::timeIntervals['minute'], 2);
     }

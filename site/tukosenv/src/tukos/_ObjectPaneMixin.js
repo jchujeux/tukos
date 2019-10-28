@@ -43,9 +43,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
                 urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: this.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
                 return all(data).then(lang.hitch(this, function(data){
                     return Pmg.serverDialog(urlArgs, {data: data}, noLoadingIcon ? defaultDoneMessage : {widget: this.parent, att: 'title', defaultMessage: defaultDoneMessage}).then(lang.hitch(this, function(response){
-    	                this.inServerDialog = false;    
-                    	if (response['data'] === false){
-    	                        return response;
+    	                	if (response['data'] === false){
+    	                        this.inServerDialog = false;
+    	                		return response;
     	                    }else if(response['data'] !== undefined){
     	                        this.markIfChanged = this.watchOnChange = false;
     	                        this.watchContext = 'server';
@@ -56,22 +56,26 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
     	                                if (response['title'] && dcl.contains(this.domNode.parentNode, 'dijitTabPane')){
     	                                    Pmg.tabs.setCurrentTabTitle(response['title']);
     	                                }
-    	                                if (!this.markIfChanged){
-    	                                    this.resetChangedWidgets();
-    	                                }
-    	                                this.markIfChanged = true;
-    	                                this.watchContext = 'user';
+    	                                setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
+    	                                	if (!this.markIfChanged){
+        	                                    this.resetChangedWidgets();
+    	                                	}
+    	                                	this.markIfChanged = true;
+    	                                	this.watchContext = 'user';
+    	                                }, 0));
     	                                ready(function(){
     	                                    if (Pmg.tabs){
     		                                	Pmg.tabs.currentPane().resize();	                                    	
     	                                    }
     	                                });
+    	                                this.inServerDialog = false;
     	                                return response;
     	                            }));
     	                        }));
     	                    }else{
     	                    	this.resetChangedWidgets();
-    	                        return response;
+    	                        this.inServerDialog = false;
+    	                    	return response;
     	                    }
     	                }),
     	                lang.hitch(this, function(error){

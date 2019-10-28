@@ -13,7 +13,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
     			this.slotClasses.push(SpinWheelSlot);
     			this.slotProps.push({labelFrom:0, labelTo:9, style:{width:"30px", textAlign:"right"}});
     		};
-    		args.style = lang.mixin({height: '90px', width: (30*this.digits[0].length + 10) + 'px'}, args.style);
+    		args.style = lang.mixin({height: '90px', width: (30*this.digits[0].length + 14) + 'px'}, args.style);// 12 seems compromise allowing proper display with different screen width/zoom
     	},
 		postCreate: function(){
 			var self = this;
@@ -25,10 +25,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
             	});
             });
 		},
-		buildRendering: function(){
-			this.inherited(arguments);
+		startup: function(){
 			var barNode = Array.apply(null, this.domNode.getElementsByClassName('mblSpinWheelBar')).shift()
 			dst.set(barNode, {top: (parseInt(this.style.height) - dst.get(barNode, "height"))/2 + 'px'});
+			this.inherited(arguments);
 		},
         setStyleToChanged: function(widget){
             this.getChildren().forEach(function(slot){

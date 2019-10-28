@@ -83,7 +83,7 @@ class XlsxInterface{
             return $cell->v = $i;
         }else{
             dom_import_simplexml($cell)->setAttribute('t', 'n');
-            return $cell->v = $value;
+            return $cell->v = str_replace(',', '.', (string)$value);
         }
     }
 }

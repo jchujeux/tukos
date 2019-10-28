@@ -29,11 +29,11 @@ class Sports {
     ];
     public static $modeOptions = ['planned', 'performed'];
     public static $feelingOptions = ['1' => 'superfeeling', '2' => 'goodfeeling',  '3' => 'badfeeling', '4' => 'verybadfeeling'];
-    public static $sensationsOptions = ['1' => 'supersensations', '2' => 'verygoodsensations',  '3' => 'goodsensations', '4' => 'aboveaveragesensations', '5' => 'averagesensations', '6' => 'belowaveragesensations',
-        '7' => 'ratherbadsensations', '8' => 'badsensations', '9' => 'verybadsensations', '10' => 'extremelybadsensations'];
+    public static $sensationsOptions = ['10' => 'supersensations', '9' => 'verygoodsensations',  '8' => 'goodsensations', '7' => 'aboveaveragesensations', '6' => 'averagesensations', '5' => 'belowaveragesensations',
+        '4' => 'ratherbadsensations', '3' => 'badsensations', '2' => 'verybadsensations', '1' => 'extremelybadsensations'];
     public static $perceivedEffortOptions = ['1' => 'extremelyeasy', '2' => 'veryeasy',  '3' => 'easy', '4' => 'comfortable', '5' => 'rathercomfortable', '6' => 'slightlydifficult', '7' => 'ratherdifficult',
         '8' => 'difficult', '9' => 'verydifficult', '10' => 'extremelydifficult'];
-    public static $moodOptions = ['1' => 'supermood', '2' => 'verygoodmood',  '3' => 'goodmood', '4' => 'aboveaveragemood', '5' => 'averagemood', '6' => 'belowaveragemood', '7' => 'ratherbadmood',
-        '8' => 'badmood', '9' => 'verybadmood', '10' => 'extremelybadmood'];
+    public static $moodOptions = ['10' => 'supermood', '9' => 'verygoodmood',  '8' => 'goodmood', '7' => 'aboveaveragemood', '6' => 'averagemood', '5' => 'belowaveragemood', '4' => 'ratherbadmood',
+        '3' => 'badmood', '2' => 'verybadmood', '1' => 'extremelybadmood'];
 }
 ?>

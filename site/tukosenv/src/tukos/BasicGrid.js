@@ -1,5 +1,6 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/on", "dgrid/OnDemandGrid", "dgrid/Selector", "dgrid/extensions/DijitRegistry", "dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer", "tukos/utils", "tukos/PageManager"], 
-function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resizer, utils, Pmg){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/on", "dgrid/OnDemandGrid", "dgrid/Selector", "dgrid/extensions/DijitRegistry", "dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer",
+	"tukos/utils", "tukos/evalutils", "tukos/PageManager"], 
+function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resizer, utils, eutils, Pmg){
     return declare([Grid, DijitRegistry, Hider, Resizer, Selector], {
         constructor: function(args){
             for (var i in args.columns){
@@ -54,6 +55,7 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
                     lang.setObject(grid.customizationPath + 'sort', evt.sort, grid.form);               	
                 }
             });
+            this.rowHeights = {};
         },
     	_setMaxHeight: function(value){
             this.bodyNode.style.maxHeight = value;
@@ -71,6 +73,9 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         },
         renderNameExtra: function(object, value, node){
             return this.grid._renderContent(this, object, Pmg.namedExtra(value));
+        },
+        renderStoreValue: function(object, value, node){
+            return this.grid._renderContent(this, object, value ? utils.findReplace(this.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value);
         },
         renderCheckBox: function(object, value, node){
         	return this.grid._renderContent(this, object, value ? '☑' : '☐', {textAlign: 'center'});
@@ -121,14 +126,19 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
             grid.refresh({keepScrollPosition: true});
         },
         viewCellInPopUpDialog: function(grid){
-            var myDialog = new Dialog({title: "extended view"});
-            //myDialog.set("content", grid.clickedCell.row.data[grid.clickedCell.column.field]);
-            myDialog.set("content", grid.clickedRowValues()[grid.clickedCell.column.field]);
-            myDialog.show();
+            if (!grid.viewCellDialog){
+            	require (['dijit/Dialog'], function(Dialog){
+            		grid.viewCellDialog = new Dialog({style: {color: 'black'}});
+            		grid.viewCellDialog.set('content', grid.clickedRowValues()[grid.clickedCell.column.field]);
+            		grid.viewCellDialog.show();
+            	});
+            }else{
+                grid.viewCellDialog.set("content", grid.clickedRowValues()[grid.clickedCell.column.field]);
+                grid.viewCellDialog.show();
+            }
         },
         viewInSeparateBrowserWindow: function(grid){
             var newWindow = window.open('', grid.clickedCell.column.field+grid.clickedCell.row.id, 'toolbar=no,location=no,status=no,menubar=no,directories=no,copyhistory=no, scrollbars=yes');
-            //newWindow.document.write(grid.clickedCell.row.data[grid.clickedCell.column.field]);
             newWindow.document.write(grid.clickedRowValues()[grid.clickedCell.column.field]);
             newWindow.document.close();
         },
