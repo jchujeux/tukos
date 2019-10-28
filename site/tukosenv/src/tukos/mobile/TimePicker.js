@@ -14,10 +14,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
             	});
             });
 		},
-		buildRendering: function(){
-			this.inherited(arguments);
-			var barNode = Array.apply(null, this.domNode.getElementsByClassName('mblSpinWheelBar')).shift()
+		startup: function(){
+			var barNode = Array.apply(null, this.domNode.getElementsByClassName('mblSpinWheelBar')).shift();
+			console.log(' barNode height: ' + dst.get(barNode, "height"));
 			dst.set(barNode, {top: (parseInt(this.style.height) - dst.get(barNode, "height"))/2 + 'px'});
+			this.inherited(arguments);
 		},
         setStyleToChanged: function(widget){
             this.getChildren().forEach(function(slot){
@@ -28,7 +29,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
             this.getChildren().forEach(function(slot){
             	slot.set('style', {backgroundColor: ''});
             });
-        }, 
+        },
 		_setValueAttr: function(value){
 			this._set('value', value);
 			var values = value.substring(1).split(':').slice(0,2);

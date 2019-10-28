@@ -6,6 +6,7 @@ use TukosLib\Objects\ViewUtils;
 use TukosLib\Objects\Sports\Sports;
 use TukosLib\Objects\Collab\Calendars\CalendarsViewUtils;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Utils\DateTimeUtilities as Dutl;
 use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
@@ -20,78 +21,86 @@ class View extends AbstractView {
 		
 		$this->setGridWidget('sptsessions', 'startdate', 'startdate');
 		$tVolume = $this->tr('volume'); $tStress = $this->tr('stress'); $tLoad = $this->tr('load'); $tIntensity = $this->tr('intensity'); $tWeekOfTheYear = $this->tr('weekoftheyear'); $tDistance = $this->tr('distance');
-		$tElevationGain = $this->tr('elevationgain'); $tPerceivedEffort = $this->tr('perceivedeffort'); $tFatigue = $this->tr('fatigue'); $tDayOfTheWeek = $this->tr('dayoftheweek');
+		$tElevationGain = $this->tr('elevationgain'); $tPerceivedEffort = $this->tr('perceivedeffort'); $tSensations = $this->tr('sensations'); $tMood = $this->tr('mood'); 
+		$tFatigue = $this->tr('fatigue'); $tDayOfWeek = $this->tr('dayofweek'); $tDateOfDay = $this->tr('dateofday');
 		$qtPerceivedEffort = $this->tr('perceivedeffort', 'escapeSQuote');
-		
-		$loadChartLocalActionString =  
-			"tWidget.plots.week.values = dutils.difference(tWidget.form.valueOf('fromdate'), newValue, 'week') + 1;" .
-			"tWidget.chart.addPlot('week', tWidget.plots.week);" .
-			"tWidget.chart.render();" .
-			"return true;";
-		$weekLoadChartLocalActionString =
-    		"dojo.ready(function(){" .
-    		//"var date = new Date(newValue), dayDate, chartItem, chartData = [],\n" .
-    		"var date = new Date(sWidget.form.valueOf('displayeddate')), dayDate, chartItem, chartData = [], normalizationVolume = 2,\n" .
-    		"    gridWidget = sWidget.form.getWidget('sptsessions'), filter = new gridWidget.store.Filter();\n" .
-    		"for (i = 1; i <= 7; i++){\n" .
-    		"  dayDate = dutils.formatDate(dutils.getDayOfWeek(i, date));\n" .
-    		"  chartItem = {day: dayDate, load: 0, intensity: 0, volume: 0, stress: 0};\n" .
-    		"  gridWidget.collection.filter(filter.eq('startdate', dayDate).ne('mode', 'performed')).forEach(function(item){\n" .
-    		"    if (item.sport !== 'rest'){\n" .
-    		"        chartItem.volume = dutils.seconds(item.duration) / 60; chartItem.intensity = $intensityOptionsString.indexOf(item.intensity) + 1; chartItem.load = chartItem.intensity * chartItem.volume/60/normalizationVolume;\n" .
-    		"        chartItem.stress = $stressOptionsString.indexOf(item.stress) + 1;\n" .
-    		"    }\n" .
-    		"  });\n" .
-    		"  chartItem.loadTooltip = '$tLoad: ' + chartItem.load;\n" .
-    		"  chartItem.volumeTooltip = chartItem.volume + ' ' + 'minutes';\n" .
-    		"  chartItem.intensityTooltip = '$tIntensity: ' + chartItem.intensity;\n" .
-    		"  chartItem.stressTooltip = '$tStress: ' + chartItem.stress;\n" .
-    		"  chartData.push(chartItem);\n" .
-    		"}\n" .
-    		"sWidget.form.getWidget('weekloadchart').set('value', {store: chartData, axes: {x: {title: 'date'}}});\n" .
-    		"});\n" .
-    		"return true;";
-		$weekPerformedLoadChartLocalActionString =
-    		"dojo.ready(function(){" .
-    		//"var date = new Date(newValue), dayDate, chartItem, chartData = [],\n" .
-    		"var date = new Date(sWidget.form.valueOf('displayeddate')), dayDate, chartItem, chartData = [],\n" .
-    		"    gridWidget = sWidget.form.getWidget('sptsessions'), filter = new gridWidget.store.Filter();\n" .
-    		"for (i = 1; i <= 7; i++){\n" .
-    		"  dayDate = dutils.formatDate(dutils.getDayOfWeek(i, date));\n" .
-    		"  chartItem = {day: dayDate, distance: 0, elevationgain: 0, volume: 0, perceivedEffort: 0, fatigue: 0};\n" .
-    		"  gridWidget.collection.filter(filter.eq('startdate', dayDate).eq('mode', 'performed')).forEach(function(item){\n" .
-    		"    var duration = dutils.seconds(item.duration) / 60;" .
-    		//"    if (duration && (item.distance || item.elevationgain || item.perceivedEffort)){" .
-    		"        console.log('duration' + duration);" .
-    		"        chartItem.volume = duration; chartItem.distance = item.distance; chartItem.elevationgain = item.elevationgain / 10;chartItem.perceivedEffort = item.perceivedEffort || 5;\n" .
-    		"        chartItem.fatigue = ((item.sensations || 5) + (item.mood || 5))/2;\n" .
-    		//"    }" .
-    		"  });\n" .
-    		"  chartItem.distanceTooltip = '$tDistance: ' + chartItem.distance + ' km';\n" .
-    		"  chartItem.volumeTooltip = chartItem.volume + ' ' + 'minutes';\n" .
-    		"  chartItem.elevationGainTooltip = '$tElevationGain: ' + chartItem.elevationgain * 10 + ' m';\n" .
-    		"  chartItem.perceivedEffortTooltip = '$qtPerceivedEffort: ' + chartItem.perceivedEffort;\n" .
-    		"  chartItem.fatigueTooltip = '$tFatigue: ' + chartItem.fatigue;\n" .
-    		"  chartData.push(chartItem);\n" .
-    		"}\n" .
-    		"sWidget.form.getWidget('weekperformedloadchart').set('value', {store: chartData, axes: {x: {title: 'date'}}});\n" .
-    		"});\n" .
-    		"return true;";		
+		$tDaysOfWeek = [];
+		foreach(Dutl::daysOfWeek as $day){
+		    $tDaysOfWeek[] = $this->tr($day);
+		}
+		$tDaysOfWeek = '["' . implode('","', $tDaysOfWeek) . '"]';
+        $loadChartLocalActionString = <<<EOT
+	tWidget.plots.week.values = dutils.difference(tWidget.form.valueOf('fromdate'), newValue, 'week') + 1;
+	tWidget.chart.addPlot('week', tWidget.plots.week);
+	tWidget.chart.render();
+	return true;
+EOT;
+        $weekLoadChartLocalActionString = <<<EOT
+    dojo.ready(function(){
+        var date = new Date(sWidget.form.valueOf('displayeddate')), weekLoadChartWidget = sWidget.form.getWidget('weekloadchart'), dayDate, chartItem, chartData = [], normalizationVolume = 2,
+            gridWidget = sWidget.form.getWidget('sptsessions'), dayType = weekLoadChartWidget.get('daytype'), filter = new gridWidget.store.Filter(), daysOfWeek = $tDaysOfWeek;
+        for (i = 1; i <= 7; i++){
+          dayDate = dutils.formatDate(dutils.getDayOfWeek(i, date));
+          chartItem = {day: dayType === 'dayofweek' ? daysOfWeek[i-1] : dayDate, load: 0, intensity: 0, volume: 0, stress: 0};
+          gridWidget.collection.filter(filter.eq('startdate', dayDate).ne('mode', 'performed')).forEach(function(item){
+            if (item.sport !== 'rest'){
+                chartItem.volume = dutils.seconds(item.duration) / 60; chartItem.intensity = $intensityOptionsString.indexOf(item.intensity) + 1; chartItem.load = chartItem.intensity * chartItem.volume/60/normalizationVolume;
+                chartItem.stress = $stressOptionsString.indexOf(item.stress) + 1;
+            }
+          });
+          chartItem.loadTooltip = '$tLoad: ' + chartItem.load;
+          chartItem.volumeTooltip = chartItem.volume + ' ' + 'minutes';
+          chartItem.intensityTooltip = '$tIntensity: ' + chartItem.intensity;
+          chartItem.stressTooltip = '$tStress: ' + chartItem.stress;
+          chartData.push(chartItem);
+        }
+        weekLoadChartWidget.set('value', {store: chartData, axes: {x: {title: dayType === 'dayofweek' ? '$tDayOfWeek' : '$tDateOfDay'}}});
+    });
+    return true;
+EOT;
+        $weekPerformedLoadChartLocalActionString = <<<EOT
+	dojo.ready(function(){
+	var date = new Date(sWidget.form.valueOf('displayeddate')), dayDate, chartItem, chartData = [],
+	    gridWidget = sWidget.form.getWidget('sptsessions'), filter = new gridWidget.store.Filter();
+	for (i = 1; i <= 7; i++){
+	  dayDate = dutils.formatDate(dutils.getDayOfWeek(i, date));
+	  chartItem = {day: dayDate, distance: 0, elevationgain: 0, volume: 0, perceivedEffort: 0, sensations: 0, mood: 0, fatigue: 0};
+	  gridWidget.collection.filter(filter.eq('startdate', dayDate).eq('mode', 'performed')).forEach(function(item){
+	    var duration = dutils.seconds(item.duration) / 60;
+	    chartItem.volume = duration; chartItem.distance = item.distance; chartItem.elevationgain = item.elevationgain / 10;chartItem.perceivedEffort = Number(item.perceivedEffort) || 5;
+	    chartItem.sensations = Number(item.sensations) || 5; chartItem.mood = Number(item.mood) || 5;
+	    chartItem.fatigue = 11 - (Number(item.sensations || 5) + Number(item.mood || 5))/2;
+	  });
+	  chartItem.distanceTooltip = '$tDistance: ' + chartItem.distance + ' km';
+	  chartItem.volumeTooltip = chartItem.volume + ' ' + 'minutes';
+	  chartItem.elevationGainTooltip = '$tElevationGain: ' + chartItem.elevationgain * 10 + ' m';
+	  chartItem.perceivedEffortTooltip = '$qtPerceivedEffort: ' + chartItem.perceivedEffort;
+	  chartItem.sensationsTooltip = '$tSensations: ' + chartItem.sensations;
+	  chartItem.moodTooltip = '$tMood: ' + chartItem.mood;
+	  chartItem.fatigueTooltip = '$tFatigue: ' + chartItem.fatigue;
+	  chartData.push(chartItem);
+	}
+	sWidget.form.getWidget('weekperformedloadchart').set('value', {store: chartData, axes: {x: {title: 'date'}}});
+	});
+	return true;	
+EOT;
 		$synchroStartLocalActionString = function($displayeddate, $synchnextmonday){
-			return 
-			"dojo.ready(function(){" .
-			"var synchroWeeksBefore = parseInt(sWidget.valueOf('#synchroweeksbefore')), synchroWeeksAfter = parseInt(sWidget.valueOf('#synchroweeksafter')), " .
-					"displayeddate = " . ($displayeddate === 'newValue' ? "newValue" : ("sWidget.valueOf('" . $displayeddate . "')")) . ", form = sWidget.form;" .
-				"console.log('in synchrostartlocalactionstring');" .
-				"if (Number.isInteger(synchroWeeksBefore)){" .
-				"form.getWidget('synchrostart').set('value', dutils.formatDate(dutils.dateAdd(dutils.getDayOfWeek(1, new Date(displayeddate)), 'week', -synchroWeeksBefore)));" .
-				"}" .
-				"if (Number.isInteger(synchroWeeksAfter)){" .
-					"var nextMonday = " . ($synchnextmonday === 'newValue' ? "newValue === 'YES'" : ("sWidget.valueOf('" . $synchnextmonday . "') === 'YES'")) . ";" .
-					"form.getWidget('synchroend').set('value', dutils.formatDate(dutils.dateAdd(dutils.getDayOfWeek(nextMonday ? 1 : 7, new Date(displayeddate)), 'week', nextMonday ? synchroWeeksAfter + 1 : synchroWeeksAfter)));" .
-				"}" .
-				"});" .
-				"return true;";
+		    $displayedDateValue = $displayeddate === "newValue" ? "newValue" : ("sWidget.valueOf('$displayeddate')");
+		    $synchNextMondayValue = $synchnextmonday === 'newValue' ? "newValue === 'YES'" : ("sWidget.valueOf('$synchnextmonday') === 'YES'");
+		    return <<<EOT
+	dojo.ready(function(){
+    	var synchroWeeksBefore = parseInt(sWidget.valueOf('#synchroweeksbefore')), synchroWeeksAfter = parseInt(sWidget.valueOf('#synchroweeksafter')),
+    		displayeddate = $displayedDateValue, form = sWidget.form;
+    	if (Number.isInteger(synchroWeeksBefore)){
+            form.getWidget('synchrostart').set('value', dutils.formatDate(dutils.dateAdd(dutils.getDayOfWeek(1, new Date(displayeddate)), 'week', -synchroWeeksBefore)));
+    	}
+    	if (Number.isInteger(synchroWeeksAfter)){
+    		var nextMonday = $synchNextMondayValue;
+    		form.getWidget('synchroend').set('value', dutils.formatDate(dutils.dateAdd(dutils.getDayOfWeek(nextMonday ? 1 : 7, new Date(displayeddate)), 'week', nextMonday ? synchroWeeksAfter + 1 : synchroWeeksAfter)));
+    	}
+	});
+	return true;
+EOT;
 		};
 		$loadChartCustomization = function($idProperty, $idPropertyStoreData){
 		    $idPropertyType = $idProperty.'type';
@@ -107,10 +116,10 @@ class View extends AbstractView {
 		        'units' => [['id' => '', 'name' => ''], ['id' => 'auto', 'name' => 'auto'], ['id' => '%', 'name' => '%'], ['id' => 'em', 'name' => 'em'], ['id' => 'px', 'name' => 'px']]]
 		];};
 		$programLoadChartIdPropertyStoreData = [['id' => 'weekoftheyear', 'name' => $tWeekOfTheYear], ['id' =>  'weekofprogram', 'name' =>  $this->tr('weekofprogram')]];
-		$weekLoadChartIdPropertyStoreDataDescription = [['id' => 'dayofweek', 'name' => $tDayOfTheWeek], ['id' =>  'dateofday', 'name' =>  $this->tr('dateofday')]];
-		$plannedLoadChartDescription = function ($chartName/*loadchart' or 'weeklyloadchart'*/, $idProperty /*'week' or 'day'*/, $idPropertyType, $sortAttribute/*'weekof' or 'dayofweek'*/, $xTitle/*$tWeekOfTheYear or $tDayOfTheWeek*/,
+		$weekLoadChartIdPropertyStoreDataDescription = [['id' => 'dayofweek', 'name' => $tDayOfWeek], ['id' =>  'dateofday', 'name' =>  $tDateOfDay]];
+		$plannedLoadChartDescription = function ($chartName/*loadchart' or 'weeklyloadchart'*/, $idProperty /*'week' or 'day'*/, $idPropertyType, $sortAttribute/*'weekof' or 'dayofweek'*/, $xTitle/*$tWeekOfTheYear or $tDayOfWeek*/,
 		                                         $timeUnit, $customizableAtts)
-		  use ($tIntensity, $tLoad, $tStress, $tVolume, $tWeekOfTheYear)  {
+		  use ($tIntensity, $tLoad, $tStress, $tVolume, $tWeekOfTheYear, $weekLoadChartLocalActionString)  {
 		    return ['type' => 'chart', 'atts' => ['edit' => [
 		        'title' => $this->tr($chartName), 'idProperty' => $idProperty, 'kwArgs'	 => ['sort'=> [['attribute' => $sortAttribute, 'descending' => false]]],
 		        'style' => ['width' => '700px'],
@@ -141,10 +150,13 @@ class View extends AbstractView {
 		            $tLoad	   => ['value' => ['y' => 'load', 'text' => $idProperty, 'tooltip' => 'loadTooltip'], 'options' => ['plot' => 'columns']],
 		            $tVolume  => ['value' => ['y' => 'volume', 'text' => $idProperty, 'tooltip' => 'volumeTooltip'], 'options' => ['plot' => $tVolume]],
 		        ],
+		        'onWatchLocalAction' => [$idProperty.'type' => [
+		            $chartName => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $idProperty === 'day' ? $weekLoadChartLocalActionString : "Pmg.setFeedback('savecustomforeffect', null, null, true); return true;"]]
+		        ]],
 		        'customizableAtts' => $customizableAtts
 		    ]]];
 		};
-		$performedLoadChartDescription = function($chartName, $idProperty, $idPropertyType, $sortAttribute, $xTitle, $customizableAtts) use ($tDistance, $tVolume, $tElevationGain, $tPerceivedEffort, $tFatigue){
+		$performedLoadChartDescription = function($chartName, $idProperty, $idPropertyType, $sortAttribute, $xTitle, $customizableAtts) use ($tDistance, $tVolume, $tElevationGain, $tPerceivedEffort, $tSensations, $tMood, $tFatigue){
 		  return ['type' => 'chart', 'atts' => ['edit' => [
 		    'title' => $this->tr($chartName), 'idProperty' => $idProperty, 'kwArgs'	 => ['sort'=> [['attribute' => $sortAttribute, 'descending' => false]]],
 		    'style' => ['width' => '700px'],
@@ -154,13 +166,14 @@ class View extends AbstractView {
 		    'tableAtts' => [
 		        'columns' => [$idProperty => ['label' => $this->tr($idProperty), 'field' => $idProperty, 'width' => 65], 'distance' => ['label' => $tDistance . ' (km)', 'field' => 'distance', 'width' => 60],
 		            'elevationgain' => ['label' => $tElevationGain . ' (dam)', 'field' => 'elevationgain', 'width' => 60], 'volume' => ['label' => $tVolume . ' (minutes)', 'width' => 60],
-		            'perceivedEffort' => ['label' => $tPerceivedEffort, 'width' => 60], 'fatigue' => ['label' => $tFatigue, 'width' => 60]]
+		            'perceivedEffort' => ['label' => $tPerceivedEffort, 'width' => 60], 'sensations' => ['label' => $tSensations, 'width' => 60], 
+		            'mood' => ['label' => $tMood, 'width' => 60], 'fatigue' => ['label' => $tFatigue, 'width' => 60]]
 		    ],
 		    ($idProperty.'type') => $idPropertyType,
 		    'axes' =>  [
-		        'x'   => ['title' => $xTitle, 'titleOrientation' => 'away', 'titleGap' => 5, 'labelCol' => 'week', 'majorTicks' => true, 'majorTickStep' => 1, 'minorTicks' => false],
+		        'x'   => ['title' => $xTitle, 'titleOrientation' => 'away', 'titleGap' => 5, 'labelCol' => $idProperty, 'majorTicks' => true, 'majorTickStep' => 1, 'minorTicks' => false],
 		        'y1' => ['title' => $tVolume . '(' . $this->tr('minute') . 's) ' . $tDistance . ' (km) & ' . $tElevationGain . ' (dam)', 'vertical' => true, 'min' => 0/*, 'max' => 500*/],
-		        'y2' => ['title' => $tFatigue . ' & ' . $tPerceivedEffort, 'vertical' => true, 'leftBottom' => false, 'min' => 0, 'max' => 10],
+		        'y2' => ['title' => $tPerceivedEffort . ' & ' . $tSensations . ' & ' . $tMood . ' & ' . $tFatigue, 'vertical' => true, 'leftBottom' => false, 'min' => 0, 'max' => 10],
 		    ],
 		    'plots' =>  [
 		        'lines' => ['plotType' => 'Lines', 'hAxis' => 'x', 'vAxis' => 'y2', 'lines' => true, 'markers' => true, 'tension' => 'X', 'shadow' => ['dx' => 1, 'dy' => 1, 'width' => 2]],
@@ -173,6 +186,8 @@ class View extends AbstractView {
 		        $tDistance => [ 'value' => ['y' => 'distance', 'text' => $idProperty, 'tooltip' => 'distanceTooltip'], 'options' => ['plot' => 'cluster']],
 		        $tVolume	   => ['value' => ['y' => 'volume', 'text' => $idProperty, 'tooltip' => 'volumeTooltip'], 'options' => ['plot' => 'cluster']],
 		        $tPerceivedEffort => [ 'value' => ['y' => 'perceivedEffort', 'text' => $idProperty, 'tooltip' => 'perceivedEffortTooltip'], 'options' => ['plot' => 'lines']],
+		        $tSensations => [ 'value' => ['y' => 'sensations', 'text' => $idProperty, 'tooltip' => 'sensationsTooltip'], 'options' => ['plot' => 'lines']],
+		        $tMood => [ 'value' => ['y' => 'mood', 'text' => $idProperty, 'tooltip' => 'moodTooltip'], 'options' => ['plot' => 'lines']],
 		        $tFatigue	   => ['value' => ['y' => 'fatigue', 'text' => $idProperty, 'tooltip' => 'fatigueTooltip'], 'options' => ['plot' => 'lines']],
 		    ],
 		    'customizableAtts' => $customizableAtts
@@ -233,9 +248,9 @@ class View extends AbstractView {
 			]]]]]),
 			'questionnairetime'  =>  ViewUtils::timeStampDataWidget($this, 'QuestionnaireTime', ['atts' => ['edit' => ['disabled' => true]]]),
 		    'loadchart' => $plannedLoadChartDescription('loadchart', 'week', 'weekoftheyear', 'weekof', $tWeekOfTheYear, 'hour', $loadChartCustomization('week', $programLoadChartIdPropertyStoreData)),
-		    'weekloadchart' => $plannedLoadChartDescription('weekloadchart', 'day', 'dateofday', 'dayofweek', $tDayOfTheWeek, 'minute', $loadChartCustomization('day', $weekLoadChartIdPropertyStoreDataDescription)),
+		    'weekloadchart' => $plannedLoadChartDescription('weekloadchart', 'day', 'dateofday', 'dayofweek', $tDayOfWeek, 'minute', $loadChartCustomization('day', $weekLoadChartIdPropertyStoreDataDescription)),
 		    'performedloadchart' => $performedLoadChartDescription('performedloadchart', 'week', 'weekoftheyear', 'weekof', $tWeekOfTheYear, $loadChartCustomization('week', $programLoadChartIdPropertyStoreData)),
-		    'weekperformedloadchart' => $performedLoadChartDescription('weekperformedloadchart', 'day', 'dateofday', 'dayofweek', $tDayOfTheWeek, $loadChartCustomization('day', $weekLoadChartIdPropertyStoreDataDescription)),
+		    'weekperformedloadchart' => $performedLoadChartDescription('weekperformedloadchart', 'day', 'dateofday', 'dayofweek', $tDayOfWeek, $loadChartCustomization('day', $weekLoadChartIdPropertyStoreDataDescription)),
 		    'worksheet' => ['atts' => ['edit' => ['dndParams' => ['accept' => ['dgrid-row', 'quarterhour']]/*, 'copyOnly' => true, 'selfAccept' => false*/]]],
 			'calendar' => $this->calendarWidgetDescription([
 				'type' => 'StoreSimpleCalendar', 
@@ -322,7 +337,6 @@ class View extends AbstractView {
 				 'allDescendants' => true, 
 			],
 		];
-
 		$this->customize($customDataWidgets, $subObjects, [ 'grid' => ['calendar', 'displayeddate', 'loadchart'], 'get' => ['displayeddate', 'weekloadchart', 'weekperformedloadchart'], 'post' => ['displayeddate', 'weekloadchart', 'weekperformedloadchart', 'synchrostart', 'synchroend']]);
 	}
 }

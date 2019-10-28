@@ -4,7 +4,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <title>Tukos mobile</title>
-    <script type="text/javascript" src="<?= $this->dojoBaseLocation ?>dojox/mobile/deviceTheme.js"></script>
+    <script type="text/javascript">
+    	dojoBasePath = "<?= $this->dojoBaseLocation ?>";<!-- used in deviceTheme.js -->
+    </script>
+    <script type="text/javascript" src="<?= $this->tukosLocation ?>/mobile/deviceTheme.js"></script>
     <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dijit/themes/claro/claro.css" media="screen">
     <link rel="stylesheet" href="<?= $this->dgridLocation ?>/css/dgrid.css" media="screen">
     <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/css/StatusBar.css" media="screen">
@@ -20,7 +23,8 @@
     <!-- dojo configuration options -->
     <script type="text/javascript">
         dojoConfig = {async: true, locale: "<?= $this->language ?>", selectorEngine: 'lite', packages: <?= $this->__raw()->packagesString ?>,  
-                      map: {'dojo' : {'dojo/dnd/Selector': "dojoFixes/dojo/dnd/Selector"}, 'dijit/Menu': {'dijit/popup': 'dojoFixes/dijit/popup'}, 'dojox/mobile': {'dojox/mobile/SpinWheelSlot': 'dojoFixes/dojox/mobile/SpinWheelSlot'}}
+                      map: {'dojo' : {'dojo/dnd/Selector': "dojoFixes/dojo/dnd/Selector"}, 'dijit/Menu': {'dijit/popup': 'dojoFixes/dijit/popup'}, 'dojox/mobile': {'dojox/mobile/SpinWheelSlot': 'dojoFixes/dojox/mobile/SpinWheelSlot'},
+                    	    'tukos/mobile': {'dojox/mobile/SpinWheelSlot': 'dojoFixes/dojox/mobile/SpinWheelSlot'}}
         };
     </script>
     <!-- dojo bootstrap -->

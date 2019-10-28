@@ -13,6 +13,7 @@ class SessionsFeedbackV1 extends SessionsFeedbackVersion{
         $this->formCols = ['name', 'distance', 'elevationgain', 'feeling', 'athletecomments', 'athleteweeklyfeeling', 'duration', 'sportsman'];
         $this->sheetCols = ['name', 'distance', 'elevationgain', 'feeling', 'athletecomments', 'athleteweeklyfeeling', 'duration', 'coachcomments', 'coachweeklycomments'];
         $this->numberWidgets = ['distance', 'elevationgain'];
+        $this->ratingWidgets = ['feeling'];
         $this->row2LayoutWidgets = ['name', 'duration', 'distance', 'elevationgain', 'feeling'];
     }
 }

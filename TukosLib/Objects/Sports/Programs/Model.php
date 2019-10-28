@@ -55,7 +55,6 @@ class Model extends AbstractModel {
         $item = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
         $item['calendar'] = '';
         $item['loadchart'] = $this->loadChartData($item);
-        //$item['weekloadchart'] = $this->loadWeekChartData($item);
         $item['performedloadchart'] = $this->performedLoadChartData($item);
         if (!empty($item['parentid'])){
             $peopleModel = Tfk::$registry->get('objectsStore')->objectModel('sptathletes');
@@ -171,27 +170,34 @@ class Model extends AbstractModel {
                     $weekNumber += 1;
                     $numberOfSessions = 0;
                     $chartItem = ['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'distance' => 0, 'elevationgain' => 0, 'volume' => 0, 
-                                  'perceivedEffort' => 0, 'fatigue' => 0];
+                        'perceivedEffort' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0];
                     while(!empty($session) && $session['startdate'] < $nextMondayDate){
                         $numberOfSessions += 1;
+                        $volume = DUtl::seconds($session['duration']) / 60;
                         $chartItem['distance'] += floatval($session['distance']);
                         $chartItem['elevationgain'] += floatval($session['elevationgain']);
-                        $chartItem['volume'] += DUtl::seconds($session['duration']) / 60;
-                        $chartItem['perceivedEffort'] += empty($v = floatval($session['perceivedeffort'])) ? 5 : $v;
-                        $chartItem['fatigue'] += ((empty($v = floatval($session['sensations'])) ? 5 : $v) + (empty($v = floatval($session['mood'])) ? 5 : $v)) / 2;
+                        $chartItem['volume'] += $volume;
+                        $chartItem['perceivedEffort'] += (empty($v = floatval($session['perceivedeffort'])) ? 5 : $v) * $volume;
+                        $chartItem['sensations'] += (empty($v = floatval($session['sensations'])) ? 5 : $v) * $volume;
+                        $chartItem['mood'] += (empty($v = floatval($session['mood'])) ? 5 : $v) * $volume;
+                        $chartItem['fatigue'] += ((empty($v = floatval($session['sensations'])) ? 5 : $v) + (empty($v = floatval($session['mood'])) ? 5 : $v)) / 2 * $volume;
                         $session = next($sessions);
                     }
-                    $chartItem['volume'] = round($chartItem['volume'], 0);
                     $chartItem['distance'] = round($chartItem['distance'], 1);
-                    if ($numberOfSessions > 0){
-                        $chartItem['perceivedEffort'] = round($chartItem['perceivedEffort'] / $numberOfSessions, 1);
-                        $chartItem['fatigue'] = round($chartItem['fatigue'] / $numberOfSessions, 1);
+                    if ($chartItem['volume'] > 0){
+                        $chartItem['perceivedEffort'] = round($chartItem['perceivedEffort'] / $chartItem['volume'], 1);
+                        $chartItem['sensations'] = round($chartItem['sensations'] / $chartItem['volume'], 1);
+                        $chartItem['mood'] = round($chartItem['mood'] / $chartItem['volume'], 1);
+                        $chartItem['fatigue'] = 11 - round($chartItem['fatigue'] / $chartItem['volume'], 1);
                     }
                     $chartItem['elevationgain'] = round($chartItem['elevationgain'] / 10, 1);
+                    $chartItem['volume'] = round($chartItem['volume'], 0);
                     $chartItem['volumeTooltip']= $chartItem['volume']/60 . ' ' . $this->tr('hour') . '(s)';
                     $chartItem['distanceTooltip']= $this->tr('distance') . ': ' . $chartItem['distance'] . ' ' . 'kms';
                     $chartItem['elevationGainTooltip']= $this->tr('elevationgain') . ': ' . $chartItem['elevationgain']*10 . ' ' . 'm';
-                    $chartItem['perceivedEffortTooltip'] = 'RE: ' . $chartItem['perceivedEffort'];
+                    $chartItem['perceivedEffortTooltip'] =$this->tr('perceivedEffort') . ': ' . $chartItem['perceivedEffort'];
+                    $chartItem['sensationsTooltip'] = $this->tr('sensations') . ': ' . $chartItem['sensations'];
+                    $chartItem['moodTooltip'] = $this->tr('mood') . ': ' . $chartItem['mood'];
                     $chartItem['fatigueTooltip'] = $this->tr('fatigue') . ': ' . $chartItem['fatigue'];
                     $chartData[] = $chartItem;
                     $mondayDate = $nextMondayDate;
@@ -221,7 +227,7 @@ class Model extends AbstractModel {
             $weekType = 'weekoftheyear';
         }
         return [
-            'store' => [['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? 1 : date('W', time())),  'distance' => 0, 'elevationgain' => 0, 'volume' => 0, 'perceivedEffort' => 0, 'fatigue' => 0]],
+            'store' => [['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? 1 : date('W', time())),  'distance' => 0, 'elevationgain' => 0, 'volume' => 0, 'perceivedEffort' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0]],
             'axes' => ['x' => ['title' => $this->tr($weekType)]]
         ];
     }
