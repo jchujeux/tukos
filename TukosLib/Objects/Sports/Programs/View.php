@@ -44,7 +44,7 @@ EOT;
           chartItem = {day: dayType === 'dayofweek' ? daysOfWeek[i-1] : dayDate, load: 0, intensity: 0, volume: 0, stress: 0};
           gridWidget.collection.filter(filter.eq('startdate', dayDate).ne('mode', 'performed')).forEach(function(item){
             if (item.sport !== 'rest'){
-                chartItem.volume = dutils.seconds(item.duration) / 60; chartItem.intensity = $intensityOptionsString.indexOf(item.intensity) + 1; chartItem.load = chartItem.intensity * chartItem.volume/60/normalizationVolume;
+                chartItem.volume = dutils.seconds(item.duration, 'time') / 60; chartItem.intensity = $intensityOptionsString.indexOf(item.intensity) + 1; chartItem.load = chartItem.intensity * chartItem.volume/60/normalizationVolume;
                 chartItem.stress = $stressOptionsString.indexOf(item.stress) + 1;
             }
           });
@@ -66,10 +66,12 @@ EOT;
 	  dayDate = dutils.formatDate(dutils.getDayOfWeek(i, date));
 	  chartItem = {day: dayDate, distance: 0, elevationgain: 0, volume: 0, perceivedEffort: 0, sensations: 0, mood: 0, fatigue: 0};
 	  gridWidget.collection.filter(filter.eq('startdate', dayDate).eq('mode', 'performed')).forEach(function(item){
-	    var duration = dutils.seconds(item.duration) / 60;
-	    chartItem.volume = duration; chartItem.distance = item.distance; chartItem.elevationgain = item.elevationgain / 10;chartItem.perceivedEffort = Number(item.perceivedEffort) || 5;
-	    chartItem.sensations = Number(item.sensations) || 5; chartItem.mood = Number(item.mood) || 5;
-	    chartItem.fatigue = 11 - (Number(item.sensations || 5) + Number(item.mood || 5))/2;
+	    if (item.sport !== 'rest'){
+	       var duration = dutils.seconds(item.duration, 'time') / 60;
+           chartItem.volume = duration; chartItem.distance = item.distance; chartItem.elevationgain = item.elevationgain / 10;chartItem.perceivedEffort = Number(item.perceivedEffort) || 5;
+	       chartItem.sensations = Number(item.sensations) || 5; chartItem.mood = Number(item.mood) || 5;
+	       chartItem.fatigue = 11 - (Number(item.sensations || 5) + Number(item.mood || 5))/2;
+        }
 	  });
 	  chartItem.distanceTooltip = '$tDistance: ' + chartItem.distance + ' km';
 	  chartItem.volumeTooltip = chartItem.volume + ' ' + 'minutes';
@@ -257,7 +259,7 @@ EOT;
 			    'atts' => ['edit' => [
 					'columnViewProps' => ['minHours' => 0, 'maxHours' => 4],
 					'style' => ['height' => '350px', 'width' => '700px'], 
-					'timeMode' => 'duration', 'moveEnabled' => true,
+					'timeMode' => 'duration', 'durationFormat' => 'time', 'moveEnabled' => true,
 					'customization' => ['items' => [
 						 'style' => ['backgroundColor' => ['field' => 'intensity', 'map' => Sports::$intensityColorsMap, 'defaultValue' => 'Peru'], 'color' => ['field' => 'mode', 'map' => ['planned' => 'white', 'performed' => 'black']],
 						  'fontStyle' => ['field' => 'mode', 'map' => ['planned' => 'normal', 'performed' => 'italic']]],
@@ -304,6 +306,7 @@ EOT;
 					        'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalActionString,]],
 					        'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekPerformedLoadChartLocalActionString,]],
 					    ]],
+				    'renderCallback' => "if (rowData.mode === 'performed'){domstyle.set(node, 'fontStyle', 'italic');}"
 				],
 				'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
 			],

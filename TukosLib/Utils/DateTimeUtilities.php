@@ -49,5 +49,13 @@ class DateTimeUtilities{
     public static function minutesToTime($minutes){
         return self::secondsToTime(floatval($minutes) * self::timeIntervals['minute']);
     }
+    public static function minutesToFormattedDuration($minutes){
+        $minutes = round($minutes);
+        return Utl::pad(intval($minutes / 60), 2) . ':' .  Utl::pad($minutes % 60, 2);
+    }
+    public static function mondayThisWeek($ymdDate){
+        $dateStamp = strtotime($ymdDate);
+        return date('Y-m-d', strtotime(date('w', $dateStamp) == 1 ? 'this monday' : 'previous monday', $dateStamp));
+    }
 }
 ?>

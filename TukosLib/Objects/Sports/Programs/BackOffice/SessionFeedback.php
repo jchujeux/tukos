@@ -10,7 +10,6 @@ use TukosLib\Utils\DateTimeUtilities as Dutl;
 use TukosLib\Objects\Sports\Programs\SessionsFeedbackUtils;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Dropbox;
-use TukosLib\Utils\XlsxInterface;
 
 class SessionFeedback extends ObjectTranslator{
     use SessionsFeedbackUtils;
@@ -22,6 +21,12 @@ class SessionFeedback extends ObjectTranslator{
         $this->view  = $this->objectsStore->objectView('sptsessions');
         $this->instantiateVersion($query['version']);
         $this->dataWidgets = $this->version->getFormDataWidgets();
+        foreach ($this->version->hideIfEmptyWidgets as $name){
+            $this->dataWidgets[$name]['atts']['edit']['disabled'] = true;
+            /*$this->dataWidgets[$name]['atts']['edit']['onWatchLocalAction'] = ['value' => [
+                $name => ['hidden'=> ['triggers' => ['server' => true, 'user' => true], 'action' => 'return true;']],
+            ]];*/
+        }
         if ($presentation = Utl::getItem('presentation', $query)){
             switch($presentation){
                 case 'MobileTextBox':
@@ -39,7 +44,7 @@ class SessionFeedback extends ObjectTranslator{
             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'orientation' => 'vert', 'showLabels' => true],
             'contents' => [
                 'row1' => [
-                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'label' => '<b>' . $this->view->tr('SessionFeedbackForm') . '</b>'],
+                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'label' => '<b>' . $this->view->tr('Athletefeedback') . '</b>'],
                     'contents' => [
                         'col2' => [
                             'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true],
@@ -52,10 +57,14 @@ class SessionFeedback extends ObjectTranslator{
                     'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true],
                     'widgets' => $this->version->row2LayoutWidgets()
                 ],
-                'row4' => [
+                'row3' => [
                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true],
                     'widgets' => ['athletecomments', 'athleteweeklyfeeling']
                 ],
+                'row4' => [
+                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'label' => "<b>{$this->view->tr('Coachcomments')}</b>"],
+                    'widgets' => ['coachcomments', 'coachweeklycomments']
+                ]
             ]
         ];
         $this->actionLayout = [
@@ -89,18 +98,21 @@ class SessionFeedback extends ObjectTranslator{
             $actionWidgets['logo'] = ['type' => 'HtmlContent', 'atts' => ['value' => 
                 '<img alt="logo" src="' . Tfk::publicDir . 'images/' . $logo . '" style="height: ' . ($isMobile ? '40' : '80') . 'px; width: ' . ($isMobile ? '100' : '200') . 'px;' . ($isMobile ? 'float: right;' : '') . '">']];
         }
-        $actionWidgets['send'] = ['atts' => ['urlArgs' => ['query' => ['form' => $query['form'], 'version' => $query['version'], 'object' => $query['object'], 'parentid' => $query['parentid'], 'date' => $query['date']]]]];
-        $actionWidgets['reset'] = ['atts' => ['urlArgs' => ['query' => ['form' => $query['form'], 'version' => $query['version'], 'object' => $query['object'], 'parentid' => $query['parentid'], 'date' => $query['date']]]]];
+        $query['targetdb'] = rawurlencode($query['targetdb']);
+        $actionWidgets['send'] = ['atts' => ['urlArgs' => ['query' => $query]]];
+            //['form' => $query['form'], 'version' => $query['version'], 'object' => $query['object'], 'parentid' => $query['parentid'], 'date' => $query['date'], 'targetdb' => rawurlencode($query['targetdb'])]]]];
+        $actionWidgets['reset'] = ['atts' => ['urlArgs' => ['query' => $query]]];
+            //['form' => $query['form'], 'version' => $query['version'], 'object' => $query['object'], 'parentid' => $query['parentid'], 'date' => $query['date'], 'targetdb' => rawurlencode($query['targetdb'])]]]];
         return $actionWidgets;
     }
     function getTitle(){
         return $this->tr('sessiontrackingformtitle');
     }
     function sendOnSave(){
-        return ['startdate'];
+        return [/*'startdate'*/];
     }
     function sendOnReset(){
-        return ['startdate'];
+        return [/*'startdate'*/];
     }
     function get($query, $formValues = []){
         $query = array_merge($query, $formValues);
@@ -108,8 +120,7 @@ class SessionFeedback extends ObjectTranslator{
         return $this->getPerformedSession($query);
     }
     function save($query, $valuesToSave){
-        $programId = Utl::getItem('parentid', $query);
-        $this->updatePerformedSession($programId, $valuesToSave);
+        $this->updatePerformedSession($query, $valuesToSave);
         return $valuesToSave;
     }
     public function getPerformedSession($query){
@@ -117,33 +128,37 @@ class SessionFeedback extends ObjectTranslator{
         $sessionDate = $query['date'];
         $programInformation = $this->getProgramInformation($programId);
         $sportsmanName = SUtl::translatedExtendedName(Tfk::$registry->get('objectsStore')->objectModel('people'), $programInformation['parentid']);
-        $performedSession = ['sportsman' => $sportsmanName, 'startdate' => $sessionDate];
+        $performedSession = ['id' => 'xxx', 'sportsman' => $sportsmanName, 'startdate' => $sessionDate];
         if (!empty($dropboxFilePath = $programInformation['dropboxFilePath'])){
             if ($this->downloadDropboxFile($dropboxFilePath, $programInformation['updator'])){
                 if ($this->setWorksheetRow($sessionDate)){
-                    $performedSession = array_merge($performedSession, $this->version->sheetRowToForm($this->workbook, $this->sheet, $this->row));
-                    //$performedSession = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode($performedSession)), true);
+                    $performedSession = array_merge($performedSession, $this->version->sheetRowToForm($this)); 
                 }
                 $this->workbook->close();
             }
         }else{
             $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
             $performedSession = array_merge($performedSession, 
-                $sessionsModel->getOne(['where' => $this->user->filter(['startdate' => $sessionDate, 'mode' => 'performed'], 'sptsessions'), 'cols' => array_merge($this->version->formObjectWidgets(), ['duration'])]));
-            if ($duration = Utl::getItem('duration', $performedSession)){
-                $performedSession['duration'] = Dutl::seconds($duration) / 60;
-            }else{
+                $sessionsModel->getOne(['where' => $this->user->filter(['parentid' => $programId, 'startdate' => $sessionDate, 'mode' => 'performed'], 'sptsessions'), 'cols' => $this->version->formCols()]),
+                $sessionsModel->getOne(['where' => $this->user->filter(['parentid' => $programId, 'startdate' => Dutl::mondayThisWeek($sessionDate), 'mode' => 'performed'], 'sptsessions'), 'cols' => $this->version->formWeeklyCols]));
+            if (!$duration = Utl::getItem('duration', $performedSession)){
                 $performedSession['duration'] = 0;
+            }
+        }
+        $query['name'] = rawurldecode($query['name']);
+        foreach(['name', 'sport'] as $property){
+            if (empty($performedSession[$property])&& !empty($query[$property])){
+                $performedSession[$property] = $query[$property];
             }
         }
         return $performedSession;
     }
-    public function updatePerformedSession($programId, $values){
-        $programInformation = $this->getProgramInformation($programId);
+    public function updatePerformedSession($query, $values){
+        $programInformation = $this->getProgramInformation($query['parentid']);
         if (!empty($dropboxFilePath = $programInformation['dropboxFilePath'])){
             if ($this->downloadDropboxFile($dropboxFilePath, $programInformation['updator'])){
-                if ($this->setWorksheetRow(Utl::extractItem('startdate', $values))){
-                    $cellsUpdated = $this->version->formToSheetRow($values, $this->workbook, $this->sheet, $this->row);
+                if ($this->setWorksheetRow($query['date'])){
+                    $cellsUpdated = $this->version->formToSheetRow($values, $this);
                     if (!empty($cellsUpdated)){
                         $this->workbook->updateSheet(1, $this->sheet);
                         $this->workbook->close();
@@ -157,14 +172,24 @@ class SessionFeedback extends ObjectTranslator{
             }
         }else{
             $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
-            $values['mode'] = 'performed';
+            /*$values['mode'] = 'performed';
             $values['parentid'] = $programId;
-            $values['sportsman'] = $programInformation['parentid'];
-            if ($duration = Utl::getItem('duration', $values)){
-                $values['duration'] = '[' . floatval($values['duration']) . ',"minute"]';
+            $values['sportsman'] = $programInformation['parentid'];*/
+            $weeklyValues = Utl::extractItems($this->version->formWeeklyCols, $values);
+            $savedCount = 0;
+            if (!empty($values)){
+                $sessionsModel->updateOne($values, ['where' => $this->user->filter(['parentid' => $query['parentid'], 'startdate' => $query['date'], 'mode' => 'performed'])], true, false, 
+                    ['name' => $query['name'], 'sport' => $query['sport'], 'permission' => 'PU', 'startdate' => $query['date'], 'mode' => 'performed', 'parentid' => $query['parentid'], 'sportsman' => $programInformation['parentid']]);
+                $savedCount += count($values);
             }
-            $sessionsModel->updateOne($values, ['where' => $this->user->filter(['startdate' => $values['startdate'], 'mode' => 'performed'])], true);
-            }
+            if (!empty($weeklyValues)){
+                $weeklySessionDate = Dutl::mondayThisWeek($query['date']);
+                $sessionsModel->updateOne($weeklyValues, ['where' => $this->user->filter(['parentid' => $query['parentid'], 'startdate' => $weeklySessionDate, 'mode' => 'performed'])], true, false, 
+                    ['sport' => 'rest', 'permission' => 'PU', 'startdate' => $weeklySessionDate, 'mode' => 'performed', 'parentid' => $query['parentid']]);
+                $savedCount += count($weeklyValues);
+            };
+            Feedback::add($this->tr('nbcellsupdated') . ': ' . $savedCount);
+        }
     }
     function getProgramInformation($programId){
         $programsModel = $this->objectsStore->objectModel('sptprograms');

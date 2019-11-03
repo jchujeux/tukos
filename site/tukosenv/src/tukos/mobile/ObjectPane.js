@@ -42,6 +42,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                 		}
                 	});
             	}
+                if (this.data && this.data.value && !this.data.value.id){
+                    this.markIfChanged = true;
+                }
                 when (this.setWidgets(this.data), lang.hitch(this, function(result){
                     if (this.onOpenAction){
                         this.openAction(this.onOpenAction);

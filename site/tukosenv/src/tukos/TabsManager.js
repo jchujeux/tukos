@@ -9,7 +9,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
                     changedTabs = [];
                 for (var i in openedTabs){
                     var theTab = openedTabs[i];
-                    if (theTab.form && theTab.form.hasChanged()){
+                    if (theTab.form && theTab.form.userHasChanged()){
                         changedTabs.push(theTab.get('title'));
                     }
                 }
@@ -41,7 +41,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
             }));
         },
         create: function(args){
-            var theNewTab = new TukosTab(args), form = theNewTab.form;
+            var theNewTab = new TukosTab(args);
             ready(lang.hitch(this, function(){
                 this.container.addChild(theNewTab);
                 Pmg.setFeedback(args.feedback, Pmg.message('tabCreated'));

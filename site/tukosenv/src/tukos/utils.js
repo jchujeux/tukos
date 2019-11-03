@@ -224,6 +224,12 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                         }
                         value = dojo.date.locale.format(stamp.fromISOString(value), {selector: 'date'} );
                         break;
+                    case 'minutesToHoursMinutes':
+                        var minutes = parseInt(value);
+                        return this.pad(parseInt(minutes / 60), 2) + ':' +  this.pad(minutes % 60, 2);
+                        break;
+                    case 'timeToHoursMinutes':
+                    	return value.substring(1,6);
                     case 'numberunit':
                      	var values = JSON.parse(value), count = values[0], unit=values[1], localUnit = messages[unit] || unit;
                         value = count + ' ' + localUnit + (count > 1 ? 's' : '');

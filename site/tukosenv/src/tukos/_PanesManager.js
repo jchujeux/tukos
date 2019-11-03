@@ -61,10 +61,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             }
         },
         checkChangesDialog: function(form, action){
-            if (!form.hasChanged()){
+            if (!form.userHasChanged()){
                 return action();
             }else{
-                return Pmg.confirm({title: Pmg.message('fieldsHaveBeenModified'), content: Pmg.message('sureWantToForget')}).then(
+                return Pmg.confirmForgetChanges().then(
                     function(){return action()},
                     function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
                 );

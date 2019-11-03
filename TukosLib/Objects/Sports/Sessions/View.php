@@ -11,8 +11,9 @@ class View extends AbstractView {
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Parent', 'Description');
         $customDataWidgets = array_merge([
-            'name'      => ['atts' => ['edit' =>  ['label' => 'Theme', 'style' => ['width' => '30em']]],],
+            'name'      => ['atts' => ['edit' =>  ['label' =>$this->tr('Theme'), 'style' => ['width' => '30em']]],],
             'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
+/*
             'duration'          =>ViewUtils::numberUnitBox('timeInterval', $this, 'Duration', ['atts' => [
                         'edit' => [],
                         'storeedit' => ['formatType' => 'numberunit'],
@@ -20,6 +21,8 @@ class View extends AbstractView {
                     ]
                 ]
             ),
+*/
+            'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => ['edit' => ['label' => $this->tr('Duration') . ' (hh:mn)']]]),
             'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity'),
             'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', null, ['atts' => ['edit' => [
                     'onWatchLocalAction' => ['value' => [

@@ -38,7 +38,6 @@ class Utilities{
         $keys = ($excludeAbsent ? array_intersect($atKeys, array_keys($fromArray)) : $atKeys);
         foreach ($keys as $key){
             $result[$key] = self::getItem($key, $fromArray, $absentValue, $emptyValue);
-            //$result[$key] = $fromArray[$key];
         }
         return $result;
     }
