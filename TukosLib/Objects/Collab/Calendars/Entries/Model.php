@@ -153,7 +153,7 @@ class Model extends AbstractModel {
     	return Utl::is_integer($id) && $id < 1000000;
     }
     
-    public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false){
+    public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
     	$id = $newValues['id'];
     	if ($this->isTukosEvent($id)){//was a tukos calendar entry
     		if (!empty($newValues['startdatetime']) && !empty($newValues['googlecalid'])){// transform into a google event

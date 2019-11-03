@@ -73,6 +73,9 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         confirm: function(atts, eventHandle){
 		    return this._dialogConfirm(atts, 'confirm', eventHandle);
 		},
+		confirmForgetChanges: function(){
+			return this.confirm({title: this.message('fieldsHaveBeenModified'), content: this.message('sureWantToForget')});
+		},
 		alert: function(atts, eventHandle){
 		    return this._dialogConfirm(atts, 'alert', eventHandle);
 		},

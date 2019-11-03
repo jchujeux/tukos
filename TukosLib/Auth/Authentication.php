@@ -7,8 +7,7 @@
 namespace TukosLib\Auth;
 
 use TukosLib\Auth\LoginPage;
-use TukosLib\utils\Feedback;
-use TukosLib\Objects\StoreUtilities as SUtl;
+use TukosLib\Utils\Cipher;
 use TukosLib\TukosFramework as Tfk;
 
 class Authentication{
@@ -21,7 +20,7 @@ class Authentication{
         }
         $this->session = $session;
     }
-    public function isAuthenticated($dialogue, $request){
+    public function isAuthenticated($dialogue, $request, $query){
         switch ($request['object']){
             case 'auth':
                 switch ($request['view']){
@@ -38,6 +37,9 @@ class Authentication{
                 }
                 return false;
             case 'backoffice':
+                if (isset($query['targetdb'])){
+                    Tfk::$registry->get('appConfig')->dataSource['dbname'] = Cipher::decrypt(rawurldecode($query['targetdb']), Tfk::$registry->get('appConfig')->ckey);
+                }
                 return 'tukosBackOffice';
             default:// receiving a tukos application request check if authorized
                 $segment = $this->session->getSegment(Tfk::$registry->appName);

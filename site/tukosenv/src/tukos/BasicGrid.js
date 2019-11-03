@@ -31,6 +31,9 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
             ['maxHeight', 'maxWidth', 'minWidth', 'width'].forEach(function(att){
             	self.set(att, self[att]);
             });
+            if (this.renderCallback){
+            	this.renderCallBackFunction = eutils.eval(this.renderCallback, "node, rowData")
+            }
             this.keepScrollPosition = true;
         	this.customizationPath = this.itemCustomization || 'customization' + '.widgetsDescription.' + this.widgetName + '.atts.';
             this.on("dgrid-cellfocusin", lang.hitch(this, function(evt){

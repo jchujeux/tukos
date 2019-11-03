@@ -70,6 +70,12 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             	node.innerHTML = Pmg.message('loadOnClick');
             	node.onClickHandler = on(node, 'click', lang.hitch(this, this.loadContentOnClick));
             }
+            if (this.renderCallbackFunction){
+            	this.renderCallbackFunction(node, row.data);
+            	//if (row.data.mode === 'performed'){
+                //	dst.set(node, 'fontStyle', 'italic');
+            	//}
+            }
             return node;
         },
         

@@ -35,12 +35,13 @@ class Model extends AbstractModel {
             'coachcomments' => 'VARCHAR(512) DEFAULT NULL',
             'coachweeklycomments' => 'VARCHAR(512) DEFAULT NULL'];
         parent::__construct(
-            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, [], ['startdate', 'duration', 'intensity', 'stress', 'sport'/*, 'difficulty'*/, 'sensations','perceivedeffort','mood','mode'], 
+            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, [], 
+            ['startdate', 'duration', 'intensity', 'stress', 'sport'/*, 'difficulty'*/, 'sensations','perceivedeffort','mood','mode'], 
             ['worksheet', 'custom']
         );
     }   
     function initialize($init=[]){
-        return parent::initialize(array_merge(['duration' => json_encode([60, 'minute']), 'warmup' => '', 'mainactivity' => '', 'warmdown' => ''], $init));
+        return parent::initialize(array_merge(['duration' => '60', 'warmup' => '', 'mainactivity' => '', 'warmdown' => ''], $init));
     }
 }
 ?>

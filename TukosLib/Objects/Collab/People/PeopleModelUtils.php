@@ -17,7 +17,7 @@ trait PeopleModelUtils {
 			return $result;
 		}
 	}
-	public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false){
+	public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
 		$newValues = $this->handlePeopleCols($newValues);
 		parent::updateOne($newValues, $atts, $insertIfNoOld, $jsonFilter);
 	}

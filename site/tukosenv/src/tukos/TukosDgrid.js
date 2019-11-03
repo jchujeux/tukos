@@ -42,6 +42,9 @@ function(declare, lang, dct, keys, on, when, query, request, aspect, domStyle,
                 }
             };
             this.addKeyHandler(67, copyCellCallback);
+            if (this.renderCallback){
+            	this.renderCallbackFunction = eutils.eval(this.renderCallback, "node, rowData")
+            }
             this.keepScrollPosition = true;
             this.noDataMessage =  Pmg.message('noDataMessage');
             this.inherited(arguments);

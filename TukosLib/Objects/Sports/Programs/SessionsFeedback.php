@@ -24,13 +24,12 @@ class SessionsFeedback extends ObjectTranslator{
             $downloadedSessions = 0; $dateCol = 3;
             $synchroEndDays = XlsxInterface::dateInDays($atts['synchroend']) + 1;
             while ($dateInDays <= $synchroEndDays){
-                $performedSession = $this->version->sheetRowToStore($this->workbook, $this->sheet, $this->row);
+                $performedSession = $this->version->sheetRowToStore($this);
                 if (!empty(array_filter($performedSession))){
                     $performedSession = array_merge(['parentid' => $query['id'], 'sportsman' => $atts['parentid'], 'startdate' => XlsxInterface::date($dateInDays), 'mode' => 'performed'], $performedSession);
                     $sessionsModel->updateOne($performedSession, ['where' => $this->user->filter(['startdate' => $performedSession['startdate'], 'mode' => 'performed'])], true);
                     $downloadedSessions += 1;
                 }
-                //$performedSession = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode($performedSession)), true);
                 $this->row += 1;
                 $dateInDays = $this->workbook->getCellValue($this->sheet, $this->row, $dateCol);
             }
@@ -58,7 +57,7 @@ class SessionsFeedback extends ObjectTranslator{
                         $dateInDays = $this->workbook->getCellValue($this->sheet, $this->row, $dateCol);
                         $startDate = XlsxInterface::date($dateInDays);
                     }
-                    $cellsUpdated += $this->version->storeToSheetRow($session, $this->workbook, $this->sheet, $this->row);
+                    $cellsUpdated += $this->version->storeToSheetRow($session, $this);
                     $this->row += 1;
                     $dateInDays = $this->workbook->getCellValue($this->sheet, $this->row, $dateCol);
                 }

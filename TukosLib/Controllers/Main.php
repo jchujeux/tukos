@@ -16,7 +16,7 @@ class Main{
 
         $dialogue = Tfk::$registry->get('dialogue');
         $authentication = Tfk::$registry->get('Authentication');
-        $username = $authentication->isAuthenticated($dialogue, $request);
+        $username = $authentication->isAuthenticated($dialogue, $request, $query);
         if ($username !== false){/* Proceed only if user is authorized */
         	SUtl::instantiate();
             $user = Tfk::$registry->get('user');

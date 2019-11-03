@@ -25,11 +25,13 @@ Abstract class SessionsFeedbackVersion {
         return $this->formObjectWidgets;
     }
     public function formCols(){
-        return $this->formCols;
+        return $this->sheetCols;
     }
+/*
     public function sheetCols(){
         return $this->sheetCols;
     }
+*/
     public function numberWidgets(){
         return $this->numberWidgets;
     }
@@ -39,42 +41,58 @@ Abstract class SessionsFeedbackVersion {
     public function row2LayoutWidgets(){
         return $this->row2LayoutWidgets;
     }
-    public function sheetRowToX($workbook, $sheet, $row, $mapping){
-        foreach ($mapping as $key => $col){
+    public function sheetRowToX($workbook, $sheet, $row, $rowMapping, $weeklyRow, $weeklyMapping){
+        foreach ($rowMapping as $key => $col){
             $values[$key] = $this->cellToTukos($workbook->getCellValue($sheet, $row, $col), $key);
+        };
+        foreach ($weeklyMapping as $key => $col){
+            $values[$key] = $this->cellToTukos($workbook->getCellValue($sheet, $weeklyRow, $col), $key);
         };
         return $values;
     }
-    public function sheetRowToForm($workbook, $sheet, $row){
-        return $this->sheetRowToX($workbook, $sheet, $row, $this->formToSheetMapping);
+    public function sheetRowToForm($description){
+        return $this->sheetRowToX($description->workbook, $description->sheet, $description->row, $this->tukosToSheetRowMapping, $this->mondayRow($description->row, $description->rowDate), $this->tukosToSheetWeeklyMapping);
     }
-    public function sheetRowToStore($workbook, $sheet, $row){
-        $values =  $this->sheetRowToX($workbook, $sheet, $row, $this->storeToSheetMapping);
+    public function sheetRowToStore($description){
+        $values = $this->sheetRowToForm($description);
+/*
         if (($duration = Utl::getItem('duration', $values)) && !empty($duration)){
             $values['duration'] = '[' . floatval($duration) . ',"minute"]';
         }
+*/
         return $values;
     }
-    public function xToSheetRow($values, $workbook, $sheet, $row, $mapping){
+    public function xToSheetRow($values, $workbook, $sheet, $row, $rowMapping, $weeklyRow, $weeklyMapping){
         $cellsUpdated = 0;
         foreach ($values as $key => $value){
-            $col = $mapping[$key];
+            if ($col = Utl::getItem($key, $rowMapping)){
+                $cellRow = $row;
+            }else if ($col = Utl::getItem($key, $weeklyMapping)){
+                $cellRow = $weeklyRow;
+            }else{
+                break; 
+            }
             $value = $this->tukosToCell($values[$key], $key);
-            if ($value != $workbook->getCellValue($sheet, $row, $col)){
-                $workbook->setCellValue($sheet, $value, $row, $col);
+            if ($value != $workbook->getCellValue($sheet, $cellRow, $col)){
+                $workbook->setCellValue($sheet, $value, $cellRow, $col);
                 $cellsUpdated += 1;
             }
         }
         return $cellsUpdated;
     }
-    public function storeToSheetRow($values, $workbook, $sheet, $row){
+    public function formToSheetRow($values, $description){
+        return $this->xToSheetRow($values, $description->workbook, $description->sheet, $description->row, $this->tukosToSheetRowMapping, $this->mondayRow($description->row, $description->rowDate), $this->tukosToSheetWeeklyMapping);
+    }
+    public function storeToSheetRow($values, $description){
+/*
         if ($duration = Utl::getItem('duration', $values)){
             $values['duration'] = Dutl::seconds($duration) / 60;
         }
-        return $this->xToSheetRow($values, $workbook, $sheet, $row, $this->storeToSheetMapping);
+*/
+        return $this->formToSheetRow($values, $description);
     }
-    public function formToSheetRow($values, $workbook, $sheet, $row){
-        return $this->xToSheetRow($values, $workbook, $sheet, $row, $this->formToSheetMapping);
+    public function mondayRow($row, $rowYmd){
+        return $row - date('N', strtotime($rowYmd)) + 1;
     }
     public function tukosToCell($value, $widgetName){
         if ($this->dataWidgets[$widgetName]['type'] === 'storeSelect'){

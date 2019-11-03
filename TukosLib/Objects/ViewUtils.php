@@ -139,10 +139,15 @@ class ViewUtils{
         return  Utl::array_merge_recursive_replace(['type' => 'timeTextBox' , 'atts' => ['edit' =>  ['label' => $view->tr($label)]]], $custom);
     }
     static public function minutesTextBox($view, $label, $custom=[]){
-        return  Utl::array_merge_recursive_replace(['type' => 'timeTextBox' , 'atts' => ['edit' =>  ['label' => $view->tr($label), 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:15', 'visibleRange' => 'T01:00']]], 
+        return  Utl::array_merge_recursive_replace(['type' => 'timeTextBox' , 'atts' => [
+                'edit' =>  ['label' => $view->tr($label), 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:15', 'visibleRange' => 'T01:00']],
+                'storeedit' => ['formatType' => 'timeToHoursMinutes'],
+                'overview' => ['formatType' => 'minutesToHoursMinutes']
+            ], 
             'objToEdit' => ['minutesToTime' => ['class' => self::dutl]],
             'editToObj' => ['timeToMinutes' => ['class' => self::dutl]],
-            //'objToOverview' => ['minutesToTime' => ['class' =>self::dutl]],
+            'objToStoreEdit' => ['minutesToTime' => ['class' => self::dutl]],
+            'storeEditToObj' => ['timeToMinutes' => ['class' => self::dutl]],
         ], $custom);
     }
     static public function dateTimeBoxDataWidget($view, $label, $custom=[]){

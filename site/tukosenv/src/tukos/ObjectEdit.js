@@ -16,13 +16,12 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/ObjectSelect", "dijit/r
                         setEditValues();
                     }else{
                         Pmg.setFeedback(' ');
-                        Pmg.confirm({title: Pmg.message('fieldsHaveBeenModified'), content: Pmg.message('sureWantToForget')}).then(
+                        Pmg.confirmForgetChanges().then(
                         		function(){setEditValues();}, 
                         		function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
                         );
                     }
                     this.reset();
-                    //focusUtil.curNode && focusUtil.curNode.blur();
                 }
             });
         }

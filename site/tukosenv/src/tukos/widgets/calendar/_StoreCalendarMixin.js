@@ -175,7 +175,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
         notifyWidgets: function(object, removedFrom, insertedInto){
             if (!(this.inNotifyWidget || this.noNotifyWidgets)){
                 this.inNotifyWidget = true;
-            	object.duration = dutils.durationString(object.startTime, object.endTime, object.duration);
+            	object.duration = dutils.durationString(object.startTime, object.endTime, object.duration, false, this.durationFormat);
                 lang.setObject('connectedIds.' + this.widgetName, object.id, object);
                 if (typeof object.allDay !== "undefined"){
                 	object.allDay = object.allDay ? 'YES' : 'NO';
@@ -207,7 +207,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
             	}
             }
             if (targetItem.startTime && typeof targetItem.duration === 'string'){
-            	targetItem.endTime = dutils.addDurationString(targetItem.duration, targetItem.startTime);
+            	targetItem.endTime = dutils.addDurationString(targetItem.duration, targetItem.startTime, this.durationFormat);
             }else if (typeof targetItem.endTime === 'string') {
             	targetItem.endTime = dutils.parseDate(targetItem.endTime);
             }

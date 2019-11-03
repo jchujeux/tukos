@@ -38,7 +38,7 @@ define (["dojo/_base/declare", "dojo/when", "dijit/form/Button", "dijit/popup", 
                     setNewValues();
                 }else{
                     Pmg.setFeedback('');
-                    Pmg.confirm({title: Pmg.message('fieldsHaveBeenModified'), content: Pmg.message('sureWantToCancel')}).then(
+                    Pmg.confirmForgetChanges().then(
                     		function(){setTimeout(function(){setNewValues();}, 400)}, 
                     		function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
                     );

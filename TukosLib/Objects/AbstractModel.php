@@ -232,7 +232,7 @@ abstract class AbstractModel extends ObjectTranslator {
         if ((empty($atts) || empty($atts['where'])) && !empty($values['id'])){
             $atts['where'] = ['id' => $values['id']];
         }
-        $defCols = ['id', 'updator', 'updated'];
+        $defCols = ['id', 'permission', 'updator', 'updated'];
         if (in_array('history', $this->allCols)){
             $defCols[] = 'history';
         }
@@ -262,7 +262,7 @@ abstract class AbstractModel extends ObjectTranslator {
         return $activeJsonCols;
     }
 
-    public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false){
+    public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
         if (isset($newValues['configstatus'])){
             unset($newValues['configstatus']);
         }
@@ -270,7 +270,7 @@ abstract class AbstractModel extends ObjectTranslator {
         $oldValues = $this->getOne($atts, $this->activeJsonColsDefaultPath($newValues));
         if (empty($oldValues)){
             if ( $insertIfNoOld){
-                return $this->insert($newValues, true);
+                return $this->insert($newValues, $init);
             }else{
                 Feedback::add($this->tr('objectNotFound') . ': ' . json_encode($atts['where']));
                 return false;
@@ -289,9 +289,9 @@ abstract class AbstractModel extends ObjectTranslator {
         }
     }
     
-    public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false){
+    public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
         $this->processLargeCols($newValues);
-        return $this->updateOne(array_intersect_key($newValues, array_flip($this->allCols)), $atts, $insertIfNoOld, $jsonFilter);
+        return $this->updateOne(array_intersect_key($newValues, array_flip($this->allCols)), $atts, $insertIfNoOld, $jsonFilter, $init);
     }
     
     public function processLargeCols(&$newValues){
@@ -433,7 +433,9 @@ abstract class AbstractModel extends ObjectTranslator {
     }
     
     public function insert($values, $init = false, $jsonFilter = false, $reference = null){
-        if ($init){
+        if (is_array($init)){
+            $values = array_merge($this->initialize(), $init, $values);
+        }else if ($init){
             $values = array_merge($this->initialize(), $values);
         }
         if (isset($values['configstatus'])){
@@ -465,7 +467,9 @@ abstract class AbstractModel extends ObjectTranslator {
     }
     
     public function insertExtended($values, $init=false, $jsonFilter = false){
-        if ($init){
+        if (is_array($init)){
+            $values = array_merge($this->initializeExtended(), $init, $values);
+        }else if ($init){
             $values = array_merge($this->initializeExtended(), $values);
         }
         $this->processLargeCols($values);

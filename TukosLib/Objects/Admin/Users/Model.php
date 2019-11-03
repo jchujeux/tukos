@@ -87,7 +87,7 @@ class Model extends AbstractModel{
         }
     }
 
-    public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false){
+    public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
     	$authInfo = Utl::getItems(['name', 'password', 'targetdb'], $newValues);
     	$authUpdate = false;
     	if (!empty($authInfo)){

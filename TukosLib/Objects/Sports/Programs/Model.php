@@ -107,7 +107,8 @@ class Model extends AbstractModel {
                                 if ($session['sport'] != 'rest'){
                                     $numberOfSessions += 1;
                                     $intensity = array_search($session['intensity'], Sports::$intensityOptions);
-                                    $volume = DUtl::seconds($session['duration']) / 3600;
+                                    //$volume = DUtl::seconds($session['duration']) / 3600;
+                                    $volume = $session['duration'] / 60;
                                     $stress = array_search($session['stress'], Sports::$stressOptions);
                                     $chartItem['intensity'] += $intensity * $volume;
                                     $chartItem['volume'] += $volume;
@@ -173,7 +174,8 @@ class Model extends AbstractModel {
                         'perceivedEffort' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0];
                     while(!empty($session) && $session['startdate'] < $nextMondayDate){
                         $numberOfSessions += 1;
-                        $volume = DUtl::seconds($session['duration']) / 60;
+                        //$volume = DUtl::seconds($session['duration']) / 60;
+                        $volume = empty($volume = empty($session['duration'])) ? 0 : $volume;
                         $chartItem['distance'] += floatval($session['distance']);
                         $chartItem['elevationgain'] += floatval($session['elevationgain']);
                         $chartItem['volume'] += $volume;
@@ -316,7 +318,8 @@ class Model extends AbstractModel {
                                             'atts' => 'style="text-align:center; color: White; font-size: large; font-weight: bold;" width="90%"',
                                             'content' => $atts['presentation'] === 'persession'
                                                 ? $program['name'] . '<br>' . $this->tr('week') . ' ' . $atts['weekofprogram'] . ' /  ' . $atts['weeksinprogram']
-                                                : $program['name'] . '<br>' . $this->tr('week') . ' ' . $atts['weekoftheyear'] . ': ' . $this->tr('fromdate') . ' ' . date($dateFormat, strtotime($atts['firstday'])) . ' ' . $this->tr('todate') . ' ' . date($dateFormat, strtotime($atts['lastday'])),
+                                                : $program['name'] . '<br>' . $this->tr('week') . ' ' . $atts['weekoftheyear'] . ': ' . $this->tr('fromdate') . ' ' . date($dateFormat, strtotime($atts['firstday'])) . ' ' .
+                                                  $this->tr('todate') . ' ' . date($dateFormat, strtotime($atts['lastday'])),
                                         ]
                                     ]
                                 ]
@@ -442,7 +445,8 @@ class Model extends AbstractModel {
     }
     
     public function googleDescription($session, $programId, $includeTrackingFormUrl = false, $logoFile = '', $presentation = '', $version = ''){
-        $attCols = ['duration' => 'numberUnit',  'intensity' => 'string', 'sport' => 'string', 'stress' => 'string'];
+        //$attCols = ['duration' => 'numberUnit',  'intensity' => 'string', 'sport' => 'string', 'stress' => 'string'];
+        $attCols = ['duration' => 'minutesToHoursMinutes',  'intensity' => 'string', 'sport' => 'string', 'stress' => 'string'];
         $contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'];
         $description = '';
         foreach($attCols as $att => $attType){
@@ -456,14 +460,17 @@ class Model extends AbstractModel {
         	}
         }
         if ($includeTrackingFormUrl){
-            $description .= '<a href="' .  Tfk::$registry->rootUrl . Tfk::$registry->appUrl . 'Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&version=' . $version . '&parentid=' . $programId . '&date=' . $session['startdate'] .
-            ($logoFile ? '&logo=' . $logoFile : '') . ($presentation ? '&presentation=' . $presentation : '') . '">' . $this->tr('SessionFeedback') . '</a><br>';
+            $sessionName = rawurlencode($session['name']);
+            $description .= '<a href="' .  Tfk::$registry->rootUrl . Tfk::$registry->appUrl . 
+            "Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&version=$version&parentid=$programId&date={$session['startdate']}&name=$sessionName&sport={$session['sport']}" .
+            ($logoFile ? "&logo=$logoFile" : '') . ($presentation ? "&presentation=$presentation" : '') . "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared')) . '">' . 
+            $this->tr('SessionFeedback') . '</a><br>';
         }
         return $description;
     }
     public function insert($values, $init = false, $jsonFilter = false, $reference = null){
     	if(!empty($values['fromdate']) && !empty($values['todate']) && empty($values['duration'])){
-    		$values['duration'] = DUtl::duration(strtotime($values['todate']) - strtotime($values['fromdate']), ['week']);
+    	    $values['duration'] = DUtl::duration(strtotime($values['todate']) - strtotime($values['fromdate']), ['week']);
     	}
     	return parent::insert($values, $init, $jsonFilter, $reference);
     }

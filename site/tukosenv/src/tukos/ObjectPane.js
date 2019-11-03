@@ -1,5 +1,6 @@
-define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/ContentPane", "dijit/layout/BorderContainer", "dijit/registry", "tukos/widgetUtils", "tukos/_TukosLayoutMixin", "tukos/_ObjectPaneMixin", "tukos/widgets/WidgetsHider"], 
-    function(declare, lang, when, ContentPane, BorderContainer, registry, wutils, _TukosLayoutMixin,  _ObjectPaneMixin, WidgetsHider){
+define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/ContentPane", "dijit/layout/BorderContainer", "dijit/registry", "tukos/widgetUtils", "tukos/_TukosLayoutMixin", "tukos/_ObjectPaneMixin", 
+		 "tukos/widgets/WidgetsHider", "tukos/PageManager"], 
+    function(declare, lang, when, ContentPane, BorderContainer, registry, wutils, _TukosLayoutMixin,  _ObjectPaneMixin, WidgetsHider, Pmg){
     return declare([BorderContainer, _TukosLayoutMixin, _ObjectPaneMixin], {
 
         postCreate: function(){
@@ -32,6 +33,9 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/Co
                 if (this.widgetsHider !== false){
                     actionPane.addChild(new WidgetsHider({form: this}, dojo.doc.createElement("div")));
                 }
+                if (this.data && this.data.value && !this.data.value.id){
+                    this.markIfChanged = true;
+                }
                 when (this.setWidgets(this.data), lang.hitch(this, function(result){
                     if (this.onOpenAction){
                         this.openAction(this.onOpenAction);
@@ -43,20 +47,27 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/Co
                     }));
                 }));
             }));
-            this.onClose = function(){
-                if (this.hasChanged()){
-                    return confirm("Some fields have been modified on the tab. Are you sure you want to close it ?");
-                }else{
-                    return true;
-                }
-            }
         },
-
         setUserContextPaths: function(){
             var userContextWidget = registry.byId('tukos_userContextcontextid');
             if (userContextWidget){
                 userContextWidget.set('paths',  this.contextPaths);
             }
+        },
+        onClose: function(){
+            if (this.userHasChanged()){
+                var tab = this.parent;
+                Pmg.confirmForgetChanges().then(
+                		function(){
+                			tab.getParent().removeChild(tab);
+                			tab.destroyRecursive();
+                		}, 
+                		function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
+                );
+                return false;
+            }else{
+            	return true;
+            }        	
         }
     }); 
 });

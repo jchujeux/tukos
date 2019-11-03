@@ -26,6 +26,7 @@ trait SessionsFeedbackUtils{
             $row += 1;
         }
         $this->row = $row;
+        $this->rowDate = $sessionDate;
         return (($date-1) == $synchroDay) ? $date : false;
     }    
 }
