@@ -517,6 +517,10 @@ class Utilities{
                         $values = json_decode($value, true);
                         $value = $values[0] . ' ' . (empty($translator) ? $values[1] : $translator($values[1])) . ($values[0] > 1 ? 's' : '');
                         break;
+                case 'minutesToHHMM':
+                    $minutes = round($value);
+                        return self::pad(intval($minutes / 60), 2) . ':' .  self::pad($minutes % 60, 2);
+                    break;
                 case 'inlineImage':
                         if (!empty($value)){
                             $type = pathinfo($value, PATHINFO_EXTENSION);

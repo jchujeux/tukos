@@ -17,7 +17,7 @@ class SessionsFeedbackV2 extends SessionsFeedbackVersion{
         $this->formWeeklyCols = ['athleteweeklyfeeling', 'coachweeklycomments'];
         $this->hideIfEmptyWidgets = ['coachcomments', 'coachweeklycomments'];
         $this->numberWidgets = ['distance', 'elevationgain'];
-        $this->ratingWidgets = ['sensations', 'mood'];
+        $this->ratingWidgets = ['perceivedeffort', 'sensations', 'mood'];
         $this->row2LayoutWidgets = ['name', 'sport', 'duration', 'distance', 'elevationgain', 'perceivedeffort',  'sensations', 'mood'];
     }
     public function getFormDataWidgets(){

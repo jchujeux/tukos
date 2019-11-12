@@ -55,9 +55,10 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/Co
             }
         },
         onClose: function(){
-            if (this.userHasChanged()){
+            var feedback;
+        	if (feedback = this.userHasChanged()){
                 var tab = this.parent;
-                Pmg.confirmForgetChanges().then(
+                Pmg.confirmForgetChanges(feedback).then(
                 		function(){
                 			tab.getParent().removeChild(tab);
                 			tab.destroyRecursive();

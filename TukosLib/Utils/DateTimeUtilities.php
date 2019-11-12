@@ -35,8 +35,12 @@ class DateTimeUtilities{
     	return empty($value) ? $value : date('Y-m-d', strtotime($value) - Tfk::$registry->timezoneOffset);
     }
     public static function timeToSeconds(/*xxxhh:mm:ss*/$time){
-        $duration = explode(':', substr($time,-8));
-        return $duration[0] * self::timeIntervals['hour'] + $duration[1] * self::timeIntervals['minute'] + $duration[2];
+        if ($time){
+            $duration = explode(':', substr($time,-8));
+            return $duration[0] * self::timeIntervals['hour'] + $duration[1] * self::timeIntervals['minute'] + $duration[2];
+        }else{
+            return $time;
+        }
     }
     public static function secondsToTime(/* should be less than 24 hours*/$seconds){
         $seconds = round($seconds);
@@ -49,7 +53,7 @@ class DateTimeUtilities{
     public static function minutesToTime($minutes){
         return self::secondsToTime(floatval($minutes) * self::timeIntervals['minute']);
     }
-    public static function minutesToFormattedDuration($minutes){
+    public static function minutesToHHMM($minutes){
         $minutes = round($minutes);
         return Utl::pad(intval($minutes / 60), 2) . ':' .  Utl::pad($minutes % 60, 2);
     }

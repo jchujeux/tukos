@@ -1,8 +1,6 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style", "dojox/mobile/SpinWheel", "dojox/mobile/SpinWheelSlot", "tukos/utils", "tukos/widgetUtils"], 
   function(declare, lang, aspect, dst, SpinWheel, SpinWheelSlot, utils, wutils){
 	return declare([SpinWheel], {
-		//slotClasses,
-		//slotProps,
     	constructor: function(args){
     		delete args.style.width;
     		args.style = lang.mixin({height: '90px'}, args.style);
@@ -13,7 +11,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
     			this.slotClasses.push(SpinWheelSlot);
     			this.slotProps.push({labelFrom:0, labelTo:9, style:{width:"30px", textAlign:"right"}});
     		};
-    		args.style = lang.mixin({height: '90px', width: (30*this.digits[0].length + 14) + 'px'}, args.style);// 12 seems compromise allowing proper display with different screen width/zoom
+    		args.style = lang.mixin({height: '90px', width: (32*this.digits[0].length + 10) + 'px'}, args.style);// set empirically
     	},
 		postCreate: function(){
 			var self = this;

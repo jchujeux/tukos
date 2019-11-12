@@ -42,7 +42,8 @@ class Model extends AbstractModel {
 
     function initialize($init=[]){
         return parent::initialize(array_merge(
-            ['duration' =>'[1,"week"]', 'loadchart' => $this->defaultLoadChart(), 'performedloadchart' =>  $this->defaultPerformedLoadChart(), 'synchroweeksbefore' => 0, 'synchroweeksafter' => 0, 'synchnextmonday' => 'YES'], $init));
+            ['fromdate' => date('Y-m-d', $nextMondayStamp = strtotime('next monday')), 'duration' =>'[1,"week"]', 'todate' => date('Y-m-d', strtotime('next sunday', $nextMondayStamp)), 
+             'loadchart' => $this->defaultLoadChart(), 'performedloadchart' =>  $this->defaultPerformedLoadChart(), 'synchroweeksbefore' => 0, 'synchroweeksafter' => 0, 'synchnextmonday' => 'YES'], $init));
     }
     
     public function getOneExtended($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
@@ -245,7 +246,7 @@ class Model extends AbstractModel {
             'cols' => ['id', 'name', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'mainactivity', 'warmdown', 'comments']
         ]);
         
-        $optionalCols = ['duration' => 'numberUnit',  'intensity' => 'string', 'sport' => 'string', 'sportimage' => 'inlineImage', 'stress' => 'string'];
+        $optionalCols = ['duration' => 'minutesToHHMM',  'intensity' => 'string', 'sport' => 'string', 'sportimage' => 'inlineImage', 'stress' => 'string'];
         $optionalColsSelected = [];
         foreach ($optionalCols as $col => $format){
             if ($atts[$col] === 'on'){
@@ -446,7 +447,7 @@ class Model extends AbstractModel {
     
     public function googleDescription($session, $programId, $includeTrackingFormUrl = false, $logoFile = '', $presentation = '', $version = ''){
         //$attCols = ['duration' => 'numberUnit',  'intensity' => 'string', 'sport' => 'string', 'stress' => 'string'];
-        $attCols = ['duration' => 'minutesToHoursMinutes',  'intensity' => 'string', 'sport' => 'string', 'stress' => 'string'];
+        $attCols = ['duration' => 'minutesToHHMM',  'intensity' => 'string', 'sport' => 'string', 'stress' => 'string'];
         $contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'];
         $description = '';
         foreach($attCols as $att => $attType){

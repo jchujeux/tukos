@@ -145,11 +145,15 @@ class TranslatorsManager {
         }
     }
     function getTranslations($names, $translatorName){
-        $translationValues = $this->_getTranslations($names, $this->translatorPaths[$translatorName]);
-        foreach($names as $name){
-            $translations[$name] = ($value = Utl::getItem($name, $translationValues)) === null ? $name : reset($value); 
+        if (empty($names)){
+            return [];
+        }else{
+            $translationValues = $this->_getTranslations($names, $this->translatorPaths[$translatorName]);
+            foreach($names as $name){
+                $translations[$name] = ($value = Utl::getItem($name, $translationValues)) === null ? $name : reset($value);
+            }
+            return $translations;
         }
-        return $translations;
     }
     function _getTranslations($names, $setNames){
         $languageCol = $this->getLanguageCol();

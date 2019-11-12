@@ -9,6 +9,9 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         trimExt: function(string){
   		  return string.replace(/^[\s(&nbsp;)]+/g,'').replace(/[\s(&nbsp;)]+$/g,'');
         },
+        capitalize: function(string){
+        	return  typeof string !== 'string' ? '' : (string.charAt(0).toUpperCase() + string.slice(1));
+        },
         newObj: function(sourceArray){
         	var result = {};
         	sourceArray.forEach(function(item){
@@ -211,7 +214,9 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
     	transform: function(value, formatType, formatOptions){
             if ((typeof value == 'string' && value != '') || typeof value === 'number'){
                 switch (formatType){
-                    case 'datetimestamp': // from yyyy-mm-ddThh:mm:ssZ to yyyy-mm-dd hh:mm:ss (server time format i.e. ISO to dojo widgets time format
+                	case 'string':
+                		break;
+                	case 'datetimestamp': // from yyyy-mm-ddThh:mm:ssZ to yyyy-mm-dd hh:mm:ss (server time format i.e. ISO to dojo widgets time format
                         value = stamp.toISOString(dojo.date.stamp.fromISOString(value)).substring(0,19);
                         value = value.replace("T", " ");
                         break;
@@ -222,13 +227,13 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                         if (value.length > 10 && value[10] !== 'T'){//hack as we change from datetime to date for sptsessions. 
                             value = value.substring(0, 10);
                         }
-                        value = dojo.date.locale.format(stamp.fromISOString(value), {selector: 'date'} );
+                        value = dojo.date.locale.format(stamp.fromISOString(value), formatOptions || {selector: 'date'});
                         break;
-                    case 'minutesToHoursMinutes':
+                    case 'minutesToHHMM':
                         var minutes = parseInt(value);
                         return this.pad(parseInt(minutes / 60), 2) + ':' +  this.pad(minutes % 60, 2);
                         break;
-                    case 'timeToHoursMinutes':
+                    case 'tHHMMSSToHHMM':
                     	return value.substring(1,6);
                     case 'numberunit':
                      	var values = JSON.parse(value), count = values[0], unit=values[1], localUnit = messages[unit] || unit;
@@ -239,6 +244,9 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                         break;
                     case 'currency' : 
                         value = currency.format(value, formatOptions || {currency: 'EUR'});
+                    case 'image':
+                        value = '<img src="' + value + '" >';
+                        break;
                     default: 
                         if (!isNaN(value)){
                             if (value % 1 !== 0){

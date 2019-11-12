@@ -46,6 +46,12 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
                 self.addExtendedIdsToCache = function(newExtendedIds){
                     self.cache.extendedIds = utils.merge(self.cache.extendedIds, newExtendedIds);
                 };
+                self.addMessagesToCache = function(messages, object){
+                	if (!utils.empty(messages)){
+                    	var objectsMessagesCache = this.cache.objectsMessages || (this.cache.objectsMessages = {}), objectMessagesCache = objectsMessagesCache[object] || (objectsMessagesCache[object] = {});
+                    	objectMessagesCache = lang.mixin(objectMessagesCache, messages);
+                	}
+                };
                 self.serverTranslations = function(expressions, actionModel){
                     var results = {}, actionModel = actionModel || 'GetTranslations';
                     return self.serverDialog({object: 'users', view: 'NoView', action: 'Get', query:{params: {actionModel: actionModel}}}, {data: expressions}, self.message('actionDone')).then(function (response){
@@ -73,8 +79,13 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         confirm: function(atts, eventHandle){
 		    return this._dialogConfirm(atts, 'confirm', eventHandle);
 		},
-		confirmForgetChanges: function(){
-			return this.confirm({title: this.message('fieldsHaveBeenModified'), content: this.message('sureWantToForget')});
+		confirmForgetChanges: function(changes){
+			var changesMessage = changes ? (changes.widgets ? (changes.customization ? 'fieldsAndCustom' : 'fields') : (changes.customization ? 'custom' : '')) : 'fieldsOrCustom';
+			if (changesMessage === ''){
+				return true;
+			}else{
+				return this.confirm({title: this.message(changesMessage + 'HaveBeenModified'), content: this.message('sureWantToForget')});
+			}
 		},
 		alert: function(atts, eventHandle){
 		    return this._dialogConfirm(atts, 'alert', eventHandle);
@@ -169,6 +180,9 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
                     if (response.extendedIds){
                         self.addExtendedIdsToCache(response.extendedIds);
                     }
+                    if (response.messages){
+                    	self.addMessagesToCache(response.messages, urlArgs.object);
+                    }
                     self.addExtrasToCache(response.extras);
                     if (defaultFeedback !== false){
                         self.setFeedback(response['feedback'], defaultFeedback);
@@ -254,8 +268,8 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         nameExtra: function(id){
         	return (id ? (this.cache.extras[id] && this.cache.extras[id].name ? this.cache.extras[id].name : id) : '');
         },
-        message: function(key){
-        	return this.cache.messages[key] || key;
+        message: function(key, object){
+        	return object ? this.cache.objectsMessages[object][key] || this.cache.messages[key] || key : this.cache.messages[key] || key;
         },
         messages: function(keys){
         	var result = {}, messages = this.cache.messages;

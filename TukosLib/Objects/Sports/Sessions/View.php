@@ -13,15 +13,6 @@ class View extends AbstractView {
         $customDataWidgets = array_merge([
             'name'      => ['atts' => ['edit' =>  ['label' =>$this->tr('Theme'), 'style' => ['width' => '30em']]],],
             'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
-/*
-            'duration'          =>ViewUtils::numberUnitBox('timeInterval', $this, 'Duration', ['atts' => [
-                        'edit' => [],
-                        'storeedit' => ['formatType' => 'numberunit'],
-                        'overview' => ['formatType' => 'numberunit'],
-                    ]
-                ]
-            ),
-*/
             'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => ['edit' => ['label' => $this->tr('Duration') . ' (hh:mn)']]]),
             'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity'),
             'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', null, ['atts' => ['edit' => [
@@ -44,7 +35,7 @@ class View extends AbstractView {
             'mode' => ViewUtils::storeSelect('mode', $this, 'Mode'),
             //'distance' => ViewUtils::textBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'style' => ['width' => '8em']]]]),
             'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'style' => ['width' => '5em', 'constraints' => ['pattern' => '#00.']]]]]),
-            'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'style' => ['width' => '5em', 'constraints' => ['pattern' => '#00.']]]]]),
+            'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'style' => ['width' => '5em', 'constraints' => ['pattern' => '#000.']]]]]),
             //'feeling' => ViewUtils::textArea($this, 'Athletefeeling'),
             'feeling' => ViewUtils::storeSelect('feeling', $this, 'feeling', [true, 'ucfirst', true], ['atts' => ['edit' => ['noMobileKeyboard' => true, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
             'sensations' => ViewUtils::storeSelect('sensations', $this, 'sensations', [true, 'ucfirst', true], ['atts' => ['edit' => ['noMobileKeyboard' => true, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
@@ -58,7 +49,7 @@ class View extends AbstractView {
         	$this->filterWidgets()
         );
 
-        $this->mustGetCols = array_merge($this->mustGetCols, ['name', 'duration', 'intensity', 'stress', 'sport','warmup', 'mainactivity', 'warmdown', 'comments', 'mode']);
+        $this->mustGetCols = array_merge($this->mustGetCols, ['name', 'duration', 'intensity', 'stress', 'sport','warmup', 'mainactivity', 'warmdown', 'comments', 'mode', 'athleteweeklyfeeling', 'coachweeklycomments']);
 
         $subObjects = $this->templatesSubObjects();
 
