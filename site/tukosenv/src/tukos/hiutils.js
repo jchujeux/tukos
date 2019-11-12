@@ -52,6 +52,19 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         addTableRows(object, selectedLeaves);
         return table;  
     },
+    buildHtml: function (htmlElements){
+    	var self = this, html = '';
+    	if (Array.isArray(htmlElements)){
+    		htmlElements.forEach(function(element){
+    			html += self.buildHtml(element);
+    		});
+    	}else if(htmlElements.tag){
+    		html += '<' + htmlElements.tag + (htmlElements.atts ? ' ' + htmlElements.atts : '') + '>' + (htmlElements.content ? this.buildHtml(htmlElements.content) : '') + '</' + htmlElements.tag + '>';
+    	}else{
+    		html += htmlElements;
+    	}
+    	return html;
+    },
     getSelectedSpan: function(selectedHtml){
         var result = /<span .*id="([2-9a-z]*Span)/g.exec(selectedHtml);
         return (result && result[1]) || undefined;

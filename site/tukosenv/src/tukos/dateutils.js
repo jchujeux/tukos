@@ -1,5 +1,6 @@
 define(["dojo", "dojox/date/posix", "tukos/utils"], function(dojo, ISODates, utils){
-    var durations = {second: 1, minute: 60, hour: 3600, day: 24*3600, week: 7*24*3600, month: 24*3600*30, quarter: 24*3600*30*3, year: 24*3600*365};
+    var durations = {second: 1, minute: 60, hour: 3600, day: 24*3600, week: 7*24*3600, month: 24*3600*30, quarter: 24*3600*30*3, year: 24*3600*365},
+    	daysName = ['sunday', 'monday', 'tuesday', 'wednesday','thursday', 'friday', 'saturday'];
 	return {
         toISO: function(date, options){
             return dojo.date.stamp.toISOString(date, options || {zulu: true});
@@ -13,7 +14,7 @@ define(["dojo", "dojox/date/posix", "tukos/utils"], function(dojo, ISODates, uti
         },
         secondsToTime: function(seconds){
         	var seconds = parseInt(seconds);
-        	return 'T' + utils.pad(hours = parseInt(seconds / 3600, 2), 2) + ':' + utils.pad((seconds - 3600 * hours) / 60, 2) + ':' + utils.pad(seconds % 60, 2);
+        	return 'T' + utils.pad(hours = parseInt(seconds / 3600), 2) + ':' + utils.pad((seconds - 3600 * hours) / 60, 2) + ':' + utils.pad(seconds % 60, 2);
         },
         durationString: function(fromDate, toDate, duration, correction, format){// format: '[number, interval]', where interval can be 'day', 'week', etc. if correction is true, then the durationString returned is the ceiling (nearest higher integer number of units)
             if (fromDate && toDate){
@@ -68,10 +69,13 @@ define(["dojo", "dojox/date/posix", "tukos/utils"], function(dojo, ISODates, uti
             }
             return new Date(toDate);
         },
-        getDayOfWeek: function (number, date) {
+        getDayOfWeek: function (number, date) {// returns a date
           var day = date.getDay(),
               diff = date.getDate() - day + number + (day == 0 ? -7:0); // adjust when day is sunday
           return new Date(date.setDate(diff));
+        },
+        dateToDayName: function(date){
+        	return daysName[date.getDay()];
         },
         getISOWeekOfYear: function(date){
             return ISODates.getIsoWeekOfYear(typeof date === "string" ? this.parseDate(date) : date);

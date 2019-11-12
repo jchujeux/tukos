@@ -141,8 +141,8 @@ class ViewUtils{
     static public function minutesTextBox($view, $label, $custom=[]){
         return  Utl::array_merge_recursive_replace(['type' => 'timeTextBox' , 'atts' => [
                 'edit' =>  ['label' => $view->tr($label), 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:15', 'visibleRange' => 'T01:00']],
-                'storeedit' => ['formatType' => 'timeToHoursMinutes'],
-                'overview' => ['formatType' => 'minutesToHoursMinutes']
+                'storeedit' => ['formatType' => 'tHHMMSSToHHMM'],
+                'overview' => ['formatType' => 'minutesToHHMM']
             ], 
             'objToEdit' => ['minutesToTime' => ['class' => self::dutl]],
             'editToObj' => ['timeToMinutes' => ['class' => self::dutl]],

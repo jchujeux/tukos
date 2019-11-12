@@ -9,7 +9,7 @@ use TukosLib\Utils\Widgets;
 
 class View extends EditView{
 
-    use LocalActions;
+    use LocalActions, ViewActionStrings;
     
 	function __construct($actionController){
        parent::__construct($actionController);
@@ -48,13 +48,19 @@ class View extends EditView{
             ]
         ];
 
-       $this->onOpenAction =
-            "var widget = this.getWidget('loadchart');\n" .
-            "widget.plots.week.values = dutils.difference(this.valueOf('fromdate'), this.valueOf('displayeddate'), 'week')+1;\n" .
-            "widget.chart.addPlot('week', widget.plots.week);\n" .
-            "widget.chart.render();\n" .
-            $this->view->gridWidgetOpenAction;
-
+        $this->onOpenAction = $this->onViewOpenAction() . $this->view->gridWidgetOpenAction;
+        $plannedOptionalCols = ['name', 'duration', 'intensity', 'sport', 'sportimage', 'stress', 'distance', 'elevationgain', 'content']; $plannedColOptions = [];
+        $performedOptionalCols = ['name', 'duration', 'sport', 'sportimage', 'distance', 'elevationgain', 'perceivedeffort', 'sensations', 'mood', 'athletecomments', 'coachcomments']; $plannedColOptions = [];
+        $optionalWeeks = ['performedthisweek', 'plannedthisweek', 'performedlastweek', 'plannedlastweek']; $weekOptions;
+        foreach($plannedOptionalCols as $col){
+            $plannedColOptions[$col] = $this->view->tr($col);
+        }
+        foreach($performedOptionalCols as $col){
+            $performedColOptions[$col] = $this->view->tr($col);
+        }
+        foreach($optionalWeeks as $week){
+           $weekOptions[$week] = $this->view->tr($week);
+       }
        $this->actionWidgets['export']['atts']['dialogDescription'] = [
             'paneDescription' => [
                 'widgetsDescription' => [
@@ -62,7 +68,12 @@ class View extends EditView{
                         ['storeArgs' => ['data' => Utl::idsNamesStore($this->view->model->options('presentation'), $this->view->tr)], 'title' => $this->view->tr('presentation'), 'value' => 'perdate',
                          'onWatchLocalAction' => $this->watchLocalAction('presentation'),
                     ])),
-                   'contentseparator' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('separator'), 'style' => ['width' => '5em'], 'onWatchLocalAction' =>  $this->watchLocalAction('contentseparator')])),
+                    'plannedcolstoinclude' => Widgets::multiSelect(Widgets::complete(['title' => $this->view->tr('plannedcolstoinclude'), 'options' => $plannedColOptions, 'style' => ['height' => '150px'],
+                        'onWatchLocalAction' =>  $this->watchLocalAction('plannedcolstoinclude')])),
+                    'performedcolstoinclude' => Widgets::multiSelect(Widgets::complete(['title' => $this->view->tr('performedcolstoinclude'), 'options' => $performedColOptions, 'style' => ['height' => '150px'],
+                        'onWatchLocalAction' =>  $this->watchLocalAction('performedcolstoinclude')])),
+                    'optionalweeks' => Widgets::multiSelect(Widgets::complete(['title' => $this->view->tr('weekstoinclude'), 'options' => $weekOptions, 'style' => ['height' => '150px'], 'onWatchLocalAction' =>  $this->watchLocalAction('optionalweeks')])),
+                    'contentseparator' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('separator'), 'style' => ['width' => '5em'], 'onWatchLocalAction' =>  $this->watchLocalAction('contentseparator')])),
                    'prefixwarmup' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('warmup'), 'style' => ['width' => '10em'], 'onWatchLocalAction' =>  $this->watchLocalAction('prefixwarmup')])),
                    'prefixmainactivity' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('mainactivity'), 'style' => ['width' => '10em'],  'onWatchLocalAction' => $this->watchLocalAction('prefixmainactivity')])),
                    'prefixwarmdown' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('warmdown'), 'style' => ['width' => '10em'], 'onWatchLocalAction' => $this->watchLocalAction('prefixwarmdown')])),
@@ -82,13 +93,8 @@ class View extends EditView{
                    'weekoftheyear' => Widgets::textBox(Widgets::complete(['title' =>$this->view->tr('weekoftheyear'), 'style' => ['width' => '3em']])),
                    'weekofprogram' => Widgets::textBox(Widgets::complete(['title' =>$this->view->tr('weekofprogram'), 'style' => ['width' => '3em']])),
                    'weeksinprogram' => Widgets::textBox(Widgets::complete(['title' =>$this->view->tr('weeksinprogram'), 'style' => ['width' => '3em']])),
-                    'update' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('prepare'), 'hidden' => true, 'onClickAction' => 
-                        "this.pane.serverAction( {action: 'Process', query: {id: true, params: " . json_encode(['process' => 'updateReport', 'noget' => true]) . "}}, {includeWidgets: ['presentation', 'contentseparator', 'prefixwarmup', 'prefixmainactivity', 'prefixwarmdown', 'prefixcomments', 'duration', 'intensity', 'sport', 'sportimage', 'stress', 'rowintensitycolor', 'firstday', 'lastday', 'weekoftheyear', 'weekofprogram', 'weeksinprogram']}).then(lang.hitch(this, function(){" .
-                            "this.pane.previewContent();" .
-                            "this.set('hidden', true);" .
-                        "}));"  
-                    ]],
-                    'weeklytable'  => Widgets::editor(Widgets::complete(['title' => $this->view->tr('weeklyprogram'), 'hidden' => true])),
+                    'update' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('prepare'), 'hidden' => true, 'onClickAction' => $this->paneUpdateOnClickAction()]],
+                    'weeklytable'  => Widgets::htmlContent(Widgets::complete(['title' => $this->view->tr('weeklyprogram'), 'hidden' => true])),
                 ],
                 'layout' => [
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
@@ -98,21 +104,37 @@ class View extends EditView{
                             'contents' => [
                                 'titlerow' => [
                                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
-                                    'contents' => ['row1' => [
-                                        'tableAtts' => ['label' => $this->view->tr('weeklyprogram')],
-                                    ]],
+                                    'contents' => ['row1' => ['tableAtts' => ['label' => $this->view->tr('weeklyprogram')]]],
                                 ],
-                                'row8' => [
-                                        'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true],
-                                        'widgets' => ['firstday', 'lastday', 'weekoftheyear', 'weekofprogram', 'weeksinprogram'],
-                                ],
-                               'row9' => [
-                                    'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 100],
-                                    'widgets' => ['prefixwarmup', 'prefixmainactivity', 'prefixwarmdown', 'prefixcomments','contentseparator'],
-                                ],
-                               'row10' => [
-                                    'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 50],
-                                    'widgets' => ['presentation', 'duration', 'intensity', 'sport', 'sportimage', 'stress', 'rowintensitycolor'],
+                                'row2' => [
+                                    'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'orientation' => 'vert'],
+                                    'contents' => [
+                                        'col1' => [
+                                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+                                            'widgets' => ['optionalweeks']
+                                        ],
+                                        'col2' => [
+                                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
+                                            'contents' => [
+                                                'row8' => [
+                                                    'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true],
+                                                    'widgets' => ['firstday', 'lastday', 'weekoftheyear', 'weekofprogram', 'weeksinprogram'],
+                                                ],
+                                                'row9' => [
+                                                    'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 100],
+                                                    'widgets' => ['prefixwarmup', 'prefixmainactivity', 'prefixwarmdown', 'prefixcomments','contentseparator'],
+                                                ],
+                                                'row10' => [
+                                                    'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 50],
+                                                    'widgets' => ['presentation'/*, 'duration', 'intensity', 'sport', 'sportimage', 'stress'*/, 'rowintensitycolor'],
+                                                ],
+                                            ]
+                                        ],
+                                        'col3' => [
+                                            'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+                                            'widgets' => ['plannedcolstoinclude', 'performedcolstoinclude']
+                                        ]
+                                    ]
                                 ],
                                 'row11' => [
                                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
@@ -126,34 +148,13 @@ class View extends EditView{
                         ],
                     ],
                 ],                          
-                'onOpenAction' => 
-                    "var self = this, date = this.form.getWidget('calendar').get('date'), fromDate = this.form.valueOf('fromdate');" . 
-                    "this.watchOnChange = false;" .
-                    "return when(this.setWidgets({value: {" .
-                        "firstday: dutils.toISO(dutils.getDayOfWeek(1, date))," .
-                        "lastday: dutils.toISO(dutils.getDayOfWeek(7, date))," .
-                        "weekoftheyear: dutils.getISOWeekOfYear(date)," .
-                        "weekofprogram: dutils.difference(fromDate, date, 'week') + 1," .
-                        "weeksinprogram: dutils.difference(fromDate, this.form.valueOf('todate'), 'week') + 1," . 
-                        "content: ' ' " .
-                    "}}), function(){" .
-                        "self.watchOnChange = true;" .
-                        "return self.serverAction( {action: 'Process', query: {id: true, params: " . json_encode(['process' => 'updateReport', 'noget' => true]) . "}}, {includeWidgets: ['presentation', 'contentseparator', 'prefixwarmup', 'prefixmainactivity', 'prefixwarmdown', 'prefixcomments', 'duration', 'intensity', 'sport', 'sportimage', 'stress', 'rowintensitycolor', 'firstday', 'lastday', 'weekoftheyear', 'weekofprogram', 'weeksinprogram']}).then(function(){"  .
-                            "return true;" .
-                        "});" .
-                    "});" 
+                'onOpenAction' => $this->exportPaneOnOpenAction(),
+                'customContentCallback' => $this->exportCustomContent($tr),
             ]
         ];
         $this->actionWidgets['googlesync'] =  ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Googlesync'), 'allowSave' => true,
         	'urlArgs' => ['query' => ['params' => json_encode(['process' => 'googleSynchronize', 'save' => true])]], 'includeWidgets' => ['parentid', 'googlecalid', 'synchrostart', 'synchroend', 'lastsynctime'],
-        	'conditionDescription' =>
-        		"var form = this.form, googlecalid = form.valueOf('googlecalid');\n" .
-        		"if (typeof googlecalid === 'string' && googlecalid.length > 0){\n" .
-        			"return true;\n" .
-        		"}else{\n" .
-                    "Pmg.alert({title: '" . $qtr('needgooglecalid') . "', content: '" . $qtr('youneedtoselectagooglecalid') . "'});\n" .
-        			"return false;\n" .
-        		"}"
+            'conditionDescription' => $this->googleSyncConditionDescription($qtr('needgooglecalid'), $qtr('youneedtoselectagooglecalid')),
         ]];
 		$this->actionLayout['contents']['actions']['widgets'][] = 'googlesync';
 		$this->actionWidgets['googleconf'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Googleconf'), 'allowSave' => true]];
@@ -165,15 +166,18 @@ class View extends EditView{
 		                'title' => $this->view->tr('googlecalid'),	'storeArgs' => ['object' => 'calendars', 'params' => ['getOne' => 'calendarSelect', 'getAll' => 'calendarsSelect']],
 		                'onWatchLocalAction' =>  ['value' => ['googlecalid' => ['localActionStatus' => ['action' => "sWidget.pane.form.setValueOf('googlecalid', newValue);sWidget.pane.form.setValueOf('lastsynctime', null);"]],]]
 		            ])),
-		            'newcalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('newcalendar'), 'onClickAction' =>
+		            'newcalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('newcalendar'), 'onClickAction' => $this->googleConfNewCalendarOnClickAction(),
+/*
 		                "var pane = this.pane, targetPane = pane.attachedWidget.form, targetGetWidget = lang.hitch(targetPane, targetPane.getWidget);\n" .
 		                "return when(pane.setWidgets({hidden: {newname: false, newacl: false, createcalendar: false, hide: false}, value: {newname: targetGetWidget('name').get('value'), newacl: [{rowId: 1, email: targetGetWidget('sportsmanemail').get('value'), role: 'writer'}]}})," .
 		                "function(){\n" .
 		                "pane.resize();\n" .
 		                "setTimeout(function(){pane.getWidget('newacl').resize();}, 0)\n" .
 		                "});\n"
+*/
 		            ]],
-		            'managecalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('managecalendar'), 'onClickAction' =>
+		            'managecalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('managecalendar'), 'onClickAction' => $this->googleConfManageCalendarOnClickAction($qtr('needgooglecalid'), $qtr('youneedtoclicknewcalendar')),
+/*
 		                "var pane = this.pane, getWidget = lang.hitch(pane, pane.getWidget), calId = getWidget('googlecalid').get('value'), label = this.get('label');\n" .
 		                "if (typeof calId === 'string' && calId.length > 0){\n" .
 		                "this.set('label', Pmg.loading(label));\n" .
@@ -188,6 +192,7 @@ class View extends EditView{
 		                "}else{\n" .
 		                "Pmg.alert({title: '" . $qtr('needgooglecalid') . "', content: '" . $qtr('youneedtoclicknewcalendar') . "'});\n" .
 		                "}"
+*/
 		            ]],
 		            
 		            'close' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('close'), 'onClickAction' =>
@@ -213,7 +218,8 @@ class View extends EditView{
 		                            'edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['reader', 'writer', 'owner'], $tr)], 'label' => $tr('role')]
 		                        ]), false),
 		                    ]])),
-		            'createcalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('createcalendar'), 'hidden' => true, 'onClickAction' =>
+		            'createcalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('createcalendar'), 'hidden' => true, 'onClickAction' => $this->googleConfCreateCalendarOnClickAction(),
+/*
 		                "var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');\n" .
 		                "this.set('label', Pmg.loading(label));\n" .
 		                "pane.serverAction( {action: 'Process', query: {id: true, params: " . json_encode(['process' => 'createCalendar', 'noget' => true]) . "}}, {includeWidgets: ['newname', 'newacl']}).then(lang.hitch(this, function(response){" .
@@ -222,8 +228,10 @@ class View extends EditView{
 		                "this.set('label', label);\n" .
 		                "pane.resize();\n" .
 		                "}));"
+*/
 		            ]],
-		            'updateacl' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('updateacl'), 'hidden' => true, 'onClickAction' =>
+		            'updateacl' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('updateacl'), 'hidden' => true, 'onClickAction' => $this->googleSyncUpdateAclOnClickAction(),
+/*
 		                "var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');\n" .
 		                "this.set('label', Pmg.loading(label));\n" .
 		                "pane.serverAction( {action: 'Process', query: {id: true, params: " . json_encode(['process' => 'updateAcl', 'noget' => true]) . "}}, {includeWidgets: ['googlecalid', 'acl']}).then(lang.hitch(this, function(){" .
@@ -231,8 +239,10 @@ class View extends EditView{
 		                "this.set('label', label);\n" .
 		                "pane.resize();\n" .
 		                "}));"
+*/
 		            ]],
-		            'deletecalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('deletecalendar'), 'hidden' => true, 'onClickAction' =>
+		            'deletecalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('deletecalendar'), 'hidden' => true, 'onClickAction' => $this->googleSyncDeleteCalendarOnClickAction(),
+/*
 		                "var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');\n" .
 		                "this.set('label', Pmg.loading(label));\n" .
 		                "pane.serverAction( {action: 'Process', query: {id: true, params: " . json_encode(['process' => 'deleteCalendar', 'noget' => true]) . "}}, {includeWidgets: ['googlecalid']}).then(lang.hitch(this, function(){\n" .
@@ -244,11 +254,14 @@ class View extends EditView{
 		                "this.set('label', label);\n" .
 		                "pane.resize();\n" .
 		                "}));"
+*/
 		            ]],
-		            'hide' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('hide'), 'hidden' => true, 'onClickAction' =>
+		            'hide' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('hide'), 'hidden' => true, 'onClickAction' => $this->googleSyncHideOnClickAction(),
+/*
 		                "var pane = this.pane;\n" .
 		                "pane.setWidgets({hidden: {name: true, acl: true, deletecalendar: true, newname: true, newacl: true, createcalendar: true, updateacl: true, hide: true}});\n" .
 		                "pane.resize();\n"
+*/
 		            ]],
 		        ],
 		        'layout' => [
@@ -276,12 +289,14 @@ class View extends EditView{
 		                ],
 		            ],
 		        ],
-		        'onOpenAction' =>
+		        'onOpenAction' => $this->googleSyncOnOpenAction(),
+/*
 		        "var pane = this, googlecalid = pane.form.getWidget('googlecalid').get('value');\n" .
 		        "pane.watchOnChange = false;\n" .
 		        "return when(this.setWidgets({value: {googlecalid: googlecalid}}), function(){\n" .
 		        "pane.watchOnChange = true;\n" .
 		        "});\n"
+*/
 		    ]];
 		$this->actionWidgets['sessionstracking'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Sessionstracking'), 'allowSave' => true, 'includeWidgets' => ['parentid', 'synchrostart', 'synchroend']]];
 		$this->actionLayout['contents']['actions']['widgets'][] = 'sessionstracking';
@@ -326,16 +341,19 @@ class View extends EditView{
 		                ],
 		            ],
 		        ],
-		        'onOpenAction' =>
-    		      "var filePath = this.valueOf('filepath'), getWidget = lang.hitch(this, this.getWidget), disabled = filePath ? false : true;" .
+		        'onOpenAction' => $this->sessionsTrackingOnOpenAction(),
+/*
+		        "var filePath = this.valueOf('filepath'), getWidget = lang.hitch(this, this.getWidget), disabled = filePath ? false : true;" .
 			      "['downloadperformedsessions', 'uploadperformedsessions', 'removeperformedsessions'].forEach(function(name){" .
 		          "    getWidget(name).set('disabled', disabled);" .
 		          "});"
+*/
 		    ]];
 	}
 	private function sessionsTrackingActionWidgetDescription($action){
-	    return ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr($action), 'onClickAction' =>
-	            "var pane = this.pane, parentW = pane.attachedWidget, form = parentW.form, getWidget = lang.hitch(form, form.getWidget), paneValueOf = lang.hitch(pane, pane.valueOf), formValueOf = lang.hitch(form, form.valueOf),". 
+	    return ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr($action), 'onClickAction' => $this->sessionsTrackingActionButtonsOnClickAction($action)
+/*
+	        "var pane = this.pane, parentW = pane.attachedWidget, form = parentW.form, getWidget = lang.hitch(form, form.getWidget), paneValueOf = lang.hitch(pane, pane.valueOf), formValueOf = lang.hitch(form, form.valueOf),". 
                 "    label = this.get('label'), urlArgs = parentW.urlArgs;\n" .
 	            "this.set('label', Pmg.loading(label));\n" .
 	            "form.serverDialog({action: 'Process', query: {id: formValueOf('id'), params: " . json_encode(['process' => $action, 'save' => true]) .
@@ -345,6 +363,7 @@ class View extends EditView{
 	            "    this.set('label', label);\n" .
 	            "    pane.close();" .
 	        "}));"
+*/
 	        ]];
 	}
 }

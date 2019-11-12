@@ -20,6 +20,7 @@ class Tab extends AbstractAction{
             'style'       => 'padding: 0px;',
             'content'     => '',
             'formContent' => $formContent,
+            'messages' => method_exists($this->view, 'getToTranslate') ? Tfk::$registry->get('translatorsStore')->getTranslations($this->view->getToTranslate(), $this->objectName) : []
         ];
     }
 }

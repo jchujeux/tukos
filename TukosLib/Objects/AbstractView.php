@@ -25,7 +25,6 @@ abstract class AbstractView extends ObjectTranslator{
         $this->user  = Tfk::$registry->get('user');
         $this->sendOnSave = $this->sendOnDelete = ['updated'];
         $this->mustGetCols = ['id', 'parentid', 'updated', 'permission', 'updator'];
-        //$this->senderTargetWidget = 'comments';
 
         $this->dataWidgets = [
             'id' => ViewUtils::textBox($this, 'Id', [
@@ -67,6 +66,7 @@ abstract class AbstractView extends ObjectTranslator{
         $this->responseContent = null;
         $this->subObjects = [];
         $this->customFormContent = [];
+        $this->toTranslate = [];
     }
     function customize($customDataWidgets=[], $subObjects=[], $exceptionCols=[], $jsonColsPathsView=[]){
 
@@ -189,8 +189,6 @@ abstract class AbstractView extends ObjectTranslator{
             $this->_exceptionCols['grid']
         ));
     }
-
-
     function widgetsDescription($elements, $editOnly = true){
         $result = [];
         foreach ($elements as $id){
@@ -205,6 +203,12 @@ abstract class AbstractView extends ObjectTranslator{
             $name = SUtl::translatedExtendedName($this->model, $values['id']);
         }
         return $name . ' (' . ucfirst($this->tr($this->objectName)) . '  '  . $values['id'] . ')';
+    }
+    function addToTranslate($toTranslate){
+        $this->toTranslate = array_merge($this->toTranslate, $toTranslate);
+    }
+    function getToTranslate(){
+        return property_exists($this, 'toTranslate') ? $this->toTranslate : [];
     }
 }
 ?>

@@ -108,7 +108,26 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
             	node.innerHTML = Pmg.message('loadOnClick');
             	node.onClickHandler = on(node, 'click', lang.hitch(this, this.loadContentOnClick));
             }
+            if (this.renderCallbackFunction){
+            	this.renderCallbackFunction(node, row.data);
+            }
             return node;
+        },
+        colDisplayedValue: function(value, colName){
+        	var column = this.columns[colName];
+        	switch (column.widgetType){
+        		case 'StoreSelect': 
+        			return value ? utils.findReplace(column.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value;
+        		case 'ObjectSelect':
+        		case 'ObjectSelectMulti':
+        		case 'ObjectSelectDropDown':
+        			return Pmg.namedId(value);
+        		default:
+        			return utils.transform(value, column.formatType, column.formatOptions);
+        	}
+        },
+        colDisplayedTitle: function(colName){
+        	return this.columns[colName].title;
         },
         loadContentOnClick: function(evt){
         	var clickedCell = this.clickedCell, field = clickedCell.column.field, data = clickedCell.row.data, source = RegExp("#tukos{id:([^,]*),object:([^,]*),col:([^}]*)}", "g").exec(data[field]), targetCol = source[3],

@@ -101,8 +101,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
        hasChanged: function(widgetName){
            return widgetName ? this.changedWidgets[widgetName] : !utils.empty(this.changedWidgets);
        },
-       userHasChanged: function(widgetName){
-           return widgetName ? this.userChangedWidgets[widgetName] : !utils.empty(this.userChangedWidgets);
+       userHasChanged: function(){
+           var valuesHaveChanged = !utils.empty(this.userChangedWidgets), customizationHasChanged = !utils.empty(this.customization);
+    	   return (this.viewMode !== 'Overview' && (valuesHaveChanged || customizationHasChanged)) ? {widgets: valuesHaveChanged, customization: customizationHasChanged} : false;
        },
         resetChangedWidgets: function(){
             var changedWidgets = this.changedWidgets;
@@ -254,7 +255,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
         openAction: function(description){
             if (description){
                 if (!this.openActionFunction){
-                    var myEval = lang.hitch(this, eutils.eval);
+                    var myEval = this.myEval = lang.hitch(this, eutils.eval);
                     this.openActionFunction = myEval(description, '');
                 }
                 return this.openActionFunction();
