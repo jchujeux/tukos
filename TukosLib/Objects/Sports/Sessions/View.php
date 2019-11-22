@@ -14,7 +14,7 @@ class View extends AbstractView {
             'name'      => ['atts' => ['edit' =>  ['label' =>$this->tr('Theme'), 'style' => ['width' => '30em']]],],
             'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
             'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => ['edit' => ['label' => $this->tr('Duration') . ' (hh:mn)']]]),
-            'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity'),
+            'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity', [true, 'ucfirst', true]),
             'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', null, ['atts' => ['edit' => [
                     'onWatchLocalAction' => ['value' => [
                         'intensity' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "if (newValue === 'rest'){return '';}else{return undefined;}"]],
@@ -27,7 +27,7 @@ class View extends AbstractView {
             'warmdown'    => ViewUtils::lazyEditor($this, 'warmdown', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
             'sessionid' => ViewUtils::textBox($this, 'Sessionid', ['atts' => ['edit' => [ 'style' => ['width' => '5em']]]]),
         	'sportsman' => ViewUtils::objectSelect($this, 'Sportsman', 'people'),
-            'difficulty'     => ViewUtils::storeSelect('intensity', $this, 'Difficulty'),
+            //'difficulty'     => ViewUtils::storeSelect('intensity', $this, 'Difficulty'),
         	'warmupdetails'    => ViewUtils::lazyEditor($this, 'warmupdetails', ['atts' => ['edit' => ['onDropMap' => ['column' => 'details']]]]),
             'mainactivitydetails'    => ViewUtils::lazyEditor($this, 'mainactivitydetails', ['atts' => ['edit' => ['onDropMap' => ['column' => 'details']]]]),
             'warmdowndetails'    => ViewUtils::lazyEditor($this, 'warmdowndetails', ['atts' => ['edit' => ['onDropMap' => ['column' => 'details']]]]),
@@ -49,11 +49,13 @@ class View extends AbstractView {
         	$this->filterWidgets()
         );
 
-        $this->mustGetCols = array_merge($this->mustGetCols, ['name', 'duration', 'intensity', 'stress', 'sport','warmup', 'mainactivity', 'warmdown', 'comments', 'mode', 'athleteweeklyfeeling', 'coachweeklycomments']);
-
+        //$this->mustGetCols = array_merge($this->mustGetCols, ['name', 'duration', 'intensity', 'stress', 'sport','warmup', 'mainactivity', 'warmdown', 'comments', 'mode', 'athleteweeklyfeeling', 'coachweeklycomments']);
+        $this->mustGetCols = array_merge($this->mustGetCols, array_keys($customDataWidgets));
+        
         $subObjects = $this->templatesSubObjects();
 
         $this->customize($customDataWidgets, $subObjects, $this->filterWidgetsExceptionCols());
+        //$this->mustGetCols = array_keys($this->dataWidgets);
     }    
 }
 ?>

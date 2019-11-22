@@ -14,8 +14,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
                     }
                 }
                 if (!utils.empty(changedTabs)){
-                    var theMessage = 'The following tabs have changed and were not saved: \n' + changedTabs.join(', ');
-                    var theDialog = new Dialog({title: 'Unsaved changes', content: theMessage});
+                    var theMessage = Pmg.message('tabschangednotsaved') + ': <br>' + changedTabs.join(', ');
+                    var theDialog = new Dialog({title: Pmg.message('Unsaved changes'), content: theMessage});
                     theDialog.show();
                     return theMessage;
                 }                

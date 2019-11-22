@@ -372,10 +372,10 @@ class Utilities{
         }
         return $cache[$searchValue];
     }
-    public static function findReplace($arrayToSearch, $searchProperty, $searchValue, $returnProperty, &$cache, $ignoreCase, $ignoreAccent){
+    public static function findReplace($arrayToSearch, $searchProperty, $searchValue, $returnProperty, &$cache, $ignoreCase = false, $ignoreAccent = false){
         return self::replace('find', $arrayToSearch, $searchProperty, $searchValue, $returnProperty, $cache, $ignoreCase, $ignoreAccent);
     }
-    public static function includesReplace($arrayToSearch, $searchProperty, $searchValue, $returnProperty, &$cache, $ignoreCase, $ignoreAccent){
+    public static function includesReplace($arrayToSearch, $searchProperty, $searchValue, $returnProperty, &$cache, $ignoreCase = false, $ignoreAccent = false){
         return self::replace('includes', $arrayToSearch, $searchProperty, $searchValue, $returnProperty, $cache, $ignoreCase, $ignoreAccent);
     }
     
@@ -510,7 +510,7 @@ class Utilities{
         }
     }
 
-    public static function format($value, $format, $translator = null){
+    public static function format($value, $format, $translator = null, $idsNamesStore = null, $storeCache = null){
         if (isset($value)){
             switch($format){
                 case 'numberUnit':
@@ -536,6 +536,9 @@ class Utilities{
 					$loc = localeconv();      
                 	$value = empty($value) ? '' : number_format($value * 100, 2, $loc['decimal_point'], self::utf8($loc['thousands_sep'])) . ' %';
 					break;
+                case 'StoreSelect':
+                    $value = self::findReplace($idsNamesStore, 'id', $value, 'name', $storeCache);
+                    break;
                 default:
                     if (!empty($translator)){
                         $value = $translator($value);

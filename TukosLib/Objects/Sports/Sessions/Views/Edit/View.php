@@ -17,7 +17,7 @@ class View extends EditView{
             'contents' => [
                 'row1' => [
                     'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-                    'widgets' => ['id', 'parentid', 'name', 'sessionid', 'startdate', 'duration', 'intensity', 'stress', 'sport', 'sportsman', 'difficulty', 'googleid']
+                    'widgets' => ['id', 'parentid', 'name', 'sessionid', 'startdate', 'duration', 'intensity', 'stress', 'sport', 'sportsman', 'googleid']
                 ],
                 'row1b' => [
                     'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],

@@ -80,7 +80,7 @@ class Model extends AbstractModel {
             $sessions = $sessionsModel->getAll([
                 'where' => $this->user->filter(['parentid' => $item['id'], [['col' => 'mode', 'opr' => '=', 'values' => 'planned'], ['col' => 'mode', 'opr' => 'IS NULL', 'values' => null, 'or' => true],
                     ['col' => 'startdate', 'opr' => '>=', 'values' => $item['fromdate']],['col' => 'startdate', 'opr' => '<=', 'values' => $item['todate']]]], 'sptsessions'),
-                'orderBy' => ['startdate' => ' ASC'],  'cols' => ['startdate', 'duration', 'intensity', 'sport', 'stress']]);
+                'orderBy' => ['startdate' => ' ASC'],  'cols' => ['startdate', 'duration', 'distance', 'elevationgain', 'intensity', 'sport', 'stress']]);
                     $chartData = [];
                     if (!empty($sessions)){
                         $fromDateStamp = empty($item['fromdate']) ? strtotime(reset($sessions)['startdate']) : strtotime($item['fromdate']);
@@ -99,38 +99,44 @@ class Model extends AbstractModel {
                             $session = next($sessions);
                         }
                         $weekNumber = 0;
-                        $normalizationVolume = 10;
+                        $normalizationDuration = 600;
                         while($mondayDate <= $lastMondayDate){
                             $weekNumber += 1;
                             $numberOfSessions = 0;
-                            $chartItem = ['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'load' => 0, 'intensity' => 0, 'volume' => 0, 'stress' => 0];
+                            $chartItem = ['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'load' => 0, 'intensity' => 0, 'duration' => 0, 'stress' => 0,
+                                'distance' => 0, 'elevationgain' => 0
+                            ];
                             while(!empty($session) && $session['startdate'] < $nextMondayDate){
                                 if ($session['sport'] != 'rest'){
                                     $numberOfSessions += 1;
-                                    $intensity = array_search($session['intensity'], Sports::$intensityOptions);
-                                    //$volume = DUtl::seconds($session['duration']) / 3600;
-                                    $volume = $session['duration'] / 60;
+                                    $chartItem['distance'] += floatval($session['distance']);
+                                    $chartItem['elevationgain'] += floatval($session['elevationgain']);
+                                    $intensity = intval($session['intensity']);//array_search($session['intensity'], Sports::$intensityOptions);
+                                    $duration = $session['duration'];
                                     $stress = array_search($session['stress'], Sports::$stressOptions);
-                                    $chartItem['intensity'] += $intensity * $volume;
-                                    $chartItem['volume'] += $volume;
-                                    $chartItem['stress'] += $stress * $volume;
+                                    $chartItem['intensity'] += $intensity * $duration;
+                                    $chartItem['duration'] += $duration;
+                                    $chartItem['stress'] += $stress * $duration;
                                 }
                                 $session = next($sessions);
                             }
-                            if ($chartItem['volume'] > 0){
-                                $chartItem['load'] = round($chartItem['intensity'] / $normalizationVolume, 2);
-                                $chartItem['intensity'] = round($chartItem['intensity'] / $chartItem['volume'], 2);
-                                $chartItem['stress'] = round($chartItem['stress'] / $chartItem['volume'], 2);
-                                $charItem['volume'] = round($chartItem['volume'], 2);
+                            if ($chartItem['duration'] > 0){
+                                $chartItem['load'] = round($chartItem['intensity'] / $normalizationDuration, 2);
+                                $chartItem['intensity'] = round($chartItem['intensity'] / $chartItem['duration'], 2);
+                                $chartItem['stress'] = round($chartItem['stress'] / $chartItem['duration'], 2);
+                                $charItem['duration'] = round($chartItem['duration'], 2);
                             }else{
                                 $chartItem['load'] = 0;
                                 $chartItem['intensity'] = 0;
                                 $chartItem['stress'] = 0;
                             }
-                            $chartItem['volumeTooltip']= $chartItem['volume'] . ' ' . $this->tr('hour') . '(s)';
+                            $chartItem['elevationgain'] = round($chartItem['elevationgain'] / 10, 1);
+                            $chartItem['durationTooltip']= $this->tr('duration') . ': ' .Utl::format($chartItem['duration'], 'minutesToHHMM');
                             $chartItem['loadTooltip']= $this->tr('load') . ': ' . $chartItem['load'];
                             $chartItem['intensityTooltip']= $this->tr('intensity') . ': ' . $chartItem['intensity'];
                             $chartItem['stressTooltip']= $this->tr('stress') . ': ' . $chartItem['stress'];
+                            $chartItem['distanceTooltip']= $this->tr('distance') . ': ' . $chartItem['distance'] . ' km';
+                            $chartItem['elevationgainTooltip']= $this->tr('elevationgain') . ': ' . $chartItem['elevationgain']*10 . ' m';
                             $chartData[] = $chartItem;
                             $mondayDate = $nextMondayDate;
                             $nextMondayStamp = strtotime('next monday', $nextMondayStamp);
@@ -168,37 +174,39 @@ class Model extends AbstractModel {
                     $session = next($sessions);
                 }
                 $weekNumber = 0;
+                $normalizationDuration = 600;
                 while($mondayDate <= $lastMondayDate){
                     $weekNumber += 1;
                     $numberOfSessions = 0;
-                    $chartItem = ['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'distance' => 0, 'elevationgain' => 0, 'volume' => 0, 
-                        'perceivedEffort' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0];
+                    $chartItem = ['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'distance' => 0, 'elevationgain' => 0, 'duration' => 0, 
+                        'perceivedeffort' => 0, 'perceivedload' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0];
                     while(!empty($session) && $session['startdate'] < $nextMondayDate){
                         $numberOfSessions += 1;
-                        //$volume = DUtl::seconds($session['duration']) / 60;
-                        $volume = empty($volume = empty($session['duration'])) ? 0 : $volume;
+                        $duration = empty($duration = $session['duration']) ? 0 : $duration;
                         $chartItem['distance'] += floatval($session['distance']);
                         $chartItem['elevationgain'] += floatval($session['elevationgain']);
-                        $chartItem['volume'] += $volume;
-                        $chartItem['perceivedEffort'] += (empty($v = floatval($session['perceivedeffort'])) ? 5 : $v) * $volume;
-                        $chartItem['sensations'] += (empty($v = floatval($session['sensations'])) ? 5 : $v) * $volume;
-                        $chartItem['mood'] += (empty($v = floatval($session['mood'])) ? 5 : $v) * $volume;
-                        $chartItem['fatigue'] += ((empty($v = floatval($session['sensations'])) ? 5 : $v) + (empty($v = floatval($session['mood'])) ? 5 : $v)) / 2 * $volume;
+                        $chartItem['duration'] += $duration;
+                        $chartItem['perceivedeffort'] += (empty($v = floatval($session['perceivedeffort'])) ? 5 : $v) * $duration;
+                        $chartItem['sensations'] += (empty($v = floatval($session['sensations'])) ? 5 : $v) * $duration;
+                        $chartItem['mood'] += (empty($v = floatval($session['mood'])) ? 5 : $v) * $duration;
+                        $chartItem['fatigue'] += ((empty($v = floatval($session['sensations'])) ? 5 : $v) + (empty($v = floatval($session['mood'])) ? 5 : $v)) / 2 * $duration;
                         $session = next($sessions);
                     }
                     $chartItem['distance'] = round($chartItem['distance'], 1);
-                    if ($chartItem['volume'] > 0){
-                        $chartItem['perceivedEffort'] = round($chartItem['perceivedEffort'] / $chartItem['volume'], 1);
-                        $chartItem['sensations'] = round($chartItem['sensations'] / $chartItem['volume'], 1);
-                        $chartItem['mood'] = round($chartItem['mood'] / $chartItem['volume'], 1);
-                        $chartItem['fatigue'] = 11 - round($chartItem['fatigue'] / $chartItem['volume'], 1);
+                    if ($chartItem['duration'] > 0){
+                        $chartItem['perceivedeffort'] = round($chartItem['perceivedeffort'] / $chartItem['duration'], 1);
+                        $chartItem['perceivedload'] = round($chartItem['perceivedeffort'] * $chartItem['duration'] / $normalizationDuration, 2);
+                        $chartItem['sensations'] = round($chartItem['sensations'] / $chartItem['duration'], 1);
+                        $chartItem['mood'] = round($chartItem['mood'] / $chartItem['duration'], 1);
+                        $chartItem['fatigue'] = 11 - round($chartItem['fatigue'] / $chartItem['duration'], 1);
                     }
                     $chartItem['elevationgain'] = round($chartItem['elevationgain'] / 10, 1);
-                    $chartItem['volume'] = round($chartItem['volume'], 0);
-                    $chartItem['volumeTooltip']= $chartItem['volume']/60 . ' ' . $this->tr('hour') . '(s)';
+                    $chartItem['duration'] = round($chartItem['duration'], 0);
+                    $chartItem['durationTooltip']= Utl::format($chartItem['duration'], 'minutesToHHMM');
                     $chartItem['distanceTooltip']= $this->tr('distance') . ': ' . $chartItem['distance'] . ' ' . 'kms';
-                    $chartItem['elevationGainTooltip']= $this->tr('elevationgain') . ': ' . $chartItem['elevationgain']*10 . ' ' . 'm';
-                    $chartItem['perceivedEffortTooltip'] =$this->tr('perceivedEffort') . ': ' . $chartItem['perceivedEffort'];
+                    $chartItem['elevationgainTooltip']= $this->tr('elevationgain') . ': ' . $chartItem['elevationgain']*10 . ' ' . 'm';
+                    $chartItem['perceivedeffortTooltip'] =$this->tr('perceivedeffort') . ': ' . $chartItem['perceivedeffort'];
+                    $chartItem['perceivedloadTooltip'] =$this->tr('perceivedload') . ': ' . $chartItem['perceivedload'];
                     $chartItem['sensationsTooltip'] = $this->tr('sensations') . ': ' . $chartItem['sensations'];
                     $chartItem['moodTooltip'] = $this->tr('mood') . ': ' . $chartItem['mood'];
                     $chartItem['fatigueTooltip'] = $this->tr('fatigue') . ': ' . $chartItem['fatigue'];
@@ -219,7 +227,7 @@ class Model extends AbstractModel {
             $weekType = 'weekoftheyear';
         }
         return [
-            'store' => [['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? 1 : date('W', time())),  'load' => 0, 'intensity' => 0, 'volume' => 0, 'stress' => 0]],
+            'store' => [['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? 1 : date('W', time())),  'load' => 0, 'intensity' => 0, 'duration' => 0, 'stress' => 0]],
             'axes' => ['x' => ['title' => $this->tr($weekType)]]
         ];
     }
@@ -230,7 +238,7 @@ class Model extends AbstractModel {
             $weekType = 'weekoftheyear';
         }
         return [
-            'store' => [['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? 1 : date('W', time())),  'distance' => 0, 'elevationgain' => 0, 'volume' => 0, 'perceivedEffort' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0]],
+            'store' => [['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? 1 : date('W', time())),  'distance' => 0, 'elevationgain' => 0, 'duration' => 0, 'perceivedeffort' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0]],
             'axes' => ['x' => ['title' => $this->tr($weekType)]]
         ];
     }
@@ -344,6 +352,8 @@ class Model extends AbstractModel {
 
     public function googleSynchronize($query, $atts = []){
     	$sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
+    	$sessionView = Tfk::$registry->get('objectsStore')->objectView('sptsessions');
+    	$this->storeSelectCache = [];
         $id = $query['id'];
         $trackingConfiguration = $this->getCombinedCustomization(['id' => $id], 'edit', null, ['widgetsDescription', 'sessionstracking', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription']);
         $includeTrackingFormUrl = ($eventFormUrl = Utl::getItem('eventformurl', $trackingConfiguration)) ? $eventFormUrl['atts']['checked'] : false;
@@ -356,7 +366,7 @@ class Model extends AbstractModel {
         }
         //$logofile = $includeTrackingFormUrl ? (($logo = Utl::getItem('formlogo', $trackingConfiguration)) ? $logo['atts']['value'] : '') : '';
         //$formPresentation = $includeTrackingFormUrl ? (($presentation = Utl::getItem('formpresentation', $trackingConfiguration)) ? $presentation['atts']['value'] : '') : '';
-        $where = ['parentid' => $id, [['col' => 'mode', 'opr' => '<>', 'values' => 'performed'], ['col' => 'mode', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]];
+        $where = ['parentid' => $id, [['col' => 'duration', 'opr' => '<>', 'values' => '0'], ['col' => 'mode', 'opr' => '<>', 'values' => 'performed']]];
         if ($minTimeToSync = Utl::getItem('synchrostart', $atts, '', '')){
         	$where[] = ['col' => 'startdate', 'opr' => '>=', 'values' => $minTimeToSync];
         }
@@ -385,7 +395,7 @@ class Model extends AbstractModel {
 	        $deleted = 0;
 	        if (!empty($sessionsToSync)){
 	            foreach($sessionsToSync as $key => $session){
-	                $descriptions[$key] = $this->googleDescription($session, $id, $includeTrackingFormUrl, $logoFile, $formPresentation, $formVersion);
+	                $descriptions[$key] = $this->googleDescription($session, $sessionView, $id, $includeTrackingFormUrl, $logoFile, $formPresentation, $formVersion);
 	            }
 	            $descriptions = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode($descriptions)), true);
 	            foreach($sessionsToSync as $key => $session){
@@ -424,7 +434,33 @@ class Model extends AbstractModel {
         }
         return [];
     }
-    
+    public function googleDescription($session, $sessionView, $programId, $includeTrackingFormUrl = false, $logoFile = '', $presentation = '', $version = ''){
+        $attCols = ['duration' => 'minutesToHHMM',  'intensity' => 'StoreSelect', 'sport' => 'string', 'stress' => 'string'];
+        $contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'];
+        $description = '';
+        foreach($attCols as $col => $attType){
+            if (!empty($session[$col])){
+                //$description .= '<b>' . $this->tr($col) . '</b>: ' . Utl::format($session[$col], $attType, $this->tr) . '<br>';
+                $description .= "<b>{$this->tr($col)}" . ($col === 'duration' ? " {$this->tr('estimated')}</b> (HH:MM): " : "</b>: ") . ($attType === 'StoreSelect'
+                        ? Utl::format($session[$col], $attType, $this->tr,  $sessionView->dataWidgets[$col]['atts']['edit']['storeArgs']['data'], $this->storeSelectCache)
+                        : Utl::format($session[$col], $attType, $this->tr))
+                    . '<br>';
+            }
+        }
+        foreach($contentCols as $att){
+            if (!empty($session[$att])){
+                $description .= '<b>' . $this->tr($att) . '</b>: '. $session[$att] . '<br>';
+            }
+        }
+        if ($includeTrackingFormUrl){
+            $sessionName = rawurlencode($session['name']);
+            $description .= '<a href="' .  Tfk::$registry->rootUrl . Tfk::$registry->appUrl .
+            "Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&version=$version&parentid=$programId&date={$session['startdate']}&name=$sessionName&sport={$session['sport']}" .
+            ($logoFile ? "&logo=$logoFile" : '') . ($presentation ? "&presentation=$presentation" : '') . "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared')) . '">' .
+            $this->tr('SessionFeedback') . '</a><br>';
+        }
+        return $description;
+    }
     public function createCalendar($query, $atts){
     	$newName = $atts['newname'];
     	$newCalendarId = Calendar::createCalendar(['summary' => $newName, 'description' => ''], $atts['newacl'])->getId();
@@ -444,38 +480,12 @@ class Model extends AbstractModel {
     public function calendarAcl($query, $atts){
     	return ['acl' => (array) Calendar::getRules([$atts['googlecalid']])];
     }
-    
-    public function googleDescription($session, $programId, $includeTrackingFormUrl = false, $logoFile = '', $presentation = '', $version = ''){
-        //$attCols = ['duration' => 'numberUnit',  'intensity' => 'string', 'sport' => 'string', 'stress' => 'string'];
-        $attCols = ['duration' => 'minutesToHHMM',  'intensity' => 'string', 'sport' => 'string', 'stress' => 'string'];
-        $contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'];
-        $description = '';
-        foreach($attCols as $att => $attType){
-        	if (!empty($session[$att])){
-        	    $description .= '<b>' . $this->tr($att) . '</b>: ' . Utl::format($session[$att], $attType, $this->tr) . '<br>';
-        	}
-        }
-        foreach($contentCols as $att){
-        	if (!empty($session[$att])){
-        		$description .= '<b>' . $this->tr($att) . '</b>: '. $session[$att] . '<br>';
-        	}
-        }
-        if ($includeTrackingFormUrl){
-            $sessionName = rawurlencode($session['name']);
-            $description .= '<a href="' .  Tfk::$registry->rootUrl . Tfk::$registry->appUrl . 
-            "Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&version=$version&parentid=$programId&date={$session['startdate']}&name=$sessionName&sport={$session['sport']}" .
-            ($logoFile ? "&logo=$logoFile" : '') . ($presentation ? "&presentation=$presentation" : '') . "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared')) . '">' . 
-            $this->tr('SessionFeedback') . '</a><br>';
-        }
-        return $description;
-    }
     public function insert($values, $init = false, $jsonFilter = false, $reference = null){
     	if(!empty($values['fromdate']) && !empty($values['todate']) && empty($values['duration'])){
     	    $values['duration'] = DUtl::duration(strtotime($values['todate']) - strtotime($values['fromdate']), ['week']);
     	}
     	return parent::insert($values, $init, $jsonFilter, $reference);
     }
-    
     public function questionnaires($atts){
     	$range = 'Reponses au formulaire 1!A1:AM1007';
     	if (!empty($atts['template'])){

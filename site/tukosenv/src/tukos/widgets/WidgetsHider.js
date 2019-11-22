@@ -60,7 +60,7 @@ function(declare, lang, dct, dst, Widget, TooltipDialog, popup, focus, JSON){
                 	setTimeout(function(){widget.resize();}, 0);// for dgrid's noDataMessage not to overlap header
             	}
             }
-            lang.setObject('customization.widgetsDescription.' + widget.widgetName + '.atts.hidden', widget.hidden, form);
+            lang.setObject('customization.widgetsDescription.' + (this.dialogPath || '') + widget.widgetName + '.atts.hidden', widget.hidden, form.form || form);
         }
     });
 }); 
