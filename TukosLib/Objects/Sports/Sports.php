@@ -5,7 +5,9 @@ use TukosLib\TukosFramework as Tfk;
 
 class Sports {
 
-    public static $intensityOptions = ['verylow', 'low', 'medium', 'high', 'veryhigh'];
+    //public static $intensityOptions = ['verylow', 'low', 'medium', 'high', 'veryhigh'];
+    public static $intensityOptions = ['1' => 'extremelylow', '2' => 'verylow',  '3' => 'low', '4' => 'ratherlow', '5' => 'medium', '6' => 'slightlyhigh', '7' => 'ratherhigh',
+        '8' => 'high', '9' => 'veryhigh', '10' => 'extremelyhigh'];
     public static $stressOptions   = ['verylow', 'low', 'medium', 'high', 'veryhigh'];
     public static $sportOptions = ['bicycle', 'running', 'swimming', 'climbing', 'elliptic', 'bodybuilding', 'rest', 'other'];
     public static $stagetypeOptions = ['warmup', 'mainactivity', 'warmdown', 'various'];
@@ -22,11 +24,11 @@ class Sports {
     		'active' => ['level1' => 'stretching'], 'passive' => ['level1' => 'stretching']
     ];
     
-    public static $intensityColorsMap = ['verylow' => 'Lime', 'low' => 'Cyan', 'medium' => 'Gold', 'high' => 'DarkOrange', 'veryhigh' => 'Red'];
-    public static $colorNameToHex = ['Lime' => '00FF00', 'Cyan' => '00FFFF', 'Gold' => 'FFD700', 'DarkOrange' => 'FF8C00', 'Red' => 'FF0000'];
-    public static $sportImagesMap = [
-        'bicycle' =>'bicycleblank.png', 'running' =>'runningblank.png', 'swimming' =>'swimmingblank.png', 'climbing' =>  'climbingblank.png',  'elliptic' =>'elliptic.jpg', 'bodybuilding' =>'bodybuilding.png', 'rest' =>'sleeping.png',  'other' =>'othersport.png'
-    ];
+    public static $intensityColorsMap = ['1' => 'LightYellow', '2' => 'Lime',  '3' => 'LightSkyBlue', '4' => 'CornflowerBlue', '5' => 'Gold', '6' => 'Orange', '7' => 'DarkOrange',  '8' => 'OrangeRed', '9' => 'Red', '10' => 'MediumVioletRed'];
+    public static $colorNameToHex = ['LightYellow' => 'FFFE0', 'Lime' => '00FF00', 'LightSkyBlus' => '87CEFA', 'CornFlowerBlus' => 'FFD700', 'Gold' => 'FFD700', 'Orange' => 'FFA500', 'DarkOrange' => 'FF8C00', 'OrangeRed' => 'FF4500', 
+        'Red' => 'FF0000', 'MediumVioletRed' => 'C71585'];
+    public static $sportImagesMap = ['bicycle' =>'bicycleblank.png', 'running' =>'runningblank.png', 'swimming' =>'swimmingblank.png', 'climbing' =>  'climbingblank.png',  'elliptic' =>'elliptic.jpg', 'bodybuilding' =>'bodybuilding.png',
+        'rest' =>'sleeping.png',  'other' =>'othersport.png'];
     public static $modeOptions = ['planned', 'performed'];
     public static $feelingOptions = ['1' => 'superfeeling', '2' => 'goodfeeling',  '3' => 'badfeeling', '4' => 'verybadfeeling'];
     public static $sensationsOptions = ['10' => 'supersensations', '9' => 'verygoodsensations',  '8' => 'goodsensations', '7' => 'aboveaveragesensations', '6' => 'averagesensations', '5' => 'belowaveragesensations',

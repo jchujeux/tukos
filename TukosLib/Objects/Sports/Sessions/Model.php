@@ -10,7 +10,7 @@ class Model extends AbstractModel {
         $colsDefinition = [
             'startdate'  => 'VARCHAR(30)  DEFAULT NULL',
             'duration'   => 'VARCHAR(30)  DEFAULT NULL',
-            'intensity'  =>  "ENUM ('" . implode("','", Sports::$intensityOptions) . "')",
+            'intensity'  =>  'TINYINT DEFAULT NULL',
             'stress'     =>  "ENUM ('" . implode("','", Sports::$stressOptions) . "')",
             'sport'      =>  "ENUM ('" . implode("','", Sports::$sportOptions) . "')",
             'warmup'     =>  'longtext',
@@ -18,7 +18,7 @@ class Model extends AbstractModel {
             'warmdown'     =>  'longtext',
         	'sessionid' => 'VARCHAR(10) DEFAULT NULL',
         	'sportsman' => 'INT(11) DEFAULT NULL', 
-        	'difficulty' => 'VARCHAR(10) DEFAULT NULL',
+        	//'difficulty' => 'VARCHAR(10) DEFAULT NULL',
         	'warmupdetails' =>  'longtext',
             'mainactivitydetails' =>  'longtext',
             'warmdowndetails'     =>  'longtext',
@@ -36,7 +36,7 @@ class Model extends AbstractModel {
             'coachweeklycomments' => 'VARCHAR(512) DEFAULT NULL'];
         parent::__construct(
             $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, [], 
-            ['startdate', 'duration', 'intensity', 'stress', 'sport'/*, 'difficulty'*/, 'sensations','perceivedeffort','mood','mode'], 
+            [/*'startdate', 'duration', 'intensity', 'stress', 'sport', 'sensations','perceivedeffort','mood','mode'*/], 
             ['worksheet', 'custom']
         );
     }   

@@ -17,7 +17,7 @@ class View extends AbstractView {
 	            'name'      => ['atts' => ['edit' =>  ['style' => ['width' => '20em;']]],],
 	            'duration'          =>ViewUtils::numberUnitBox('timeInterval', $this, 'Duration'),
 	            'stagetype'     => ViewUtils::storeSelect('stagetype', $this, 'Stage'),
-	            'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity'),
+            'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity', [true, 'ucfirst', true]),
 	            'stress'        => ViewUtils::storeSelect('stress', $this, 'Mechanical stress'),
 	            'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport'),
 	            'summary'    => ViewUtils::lazyEditor($this, 'Summary', ['atts' => ['edit' => ['style' => ['minHeight' => '1em']]]]),

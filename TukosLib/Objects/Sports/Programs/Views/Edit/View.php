@@ -27,7 +27,7 @@ class View extends EditView{
                     'widgets' => ['id', 'parentid', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter', 'synchnextmonday', 'questionnairetime']
                 ],
             	'row2' => [
-                    'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['33%', '33%', '33%']],      
+            	    'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['33%', '33%', '33%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
                     'contents' => [              
                         'col1' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => ['comments', 'loadchart', 'performedloadchart', 'worksheet']],
                         'col2' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => [ 'calendar', 'weekloadchart', 'weekperformedloadchart']],
@@ -167,32 +167,8 @@ class View extends EditView{
 		                'onWatchLocalAction' =>  ['value' => ['googlecalid' => ['localActionStatus' => ['action' => "sWidget.pane.form.setValueOf('googlecalid', newValue);sWidget.pane.form.setValueOf('lastsynctime', null);"]],]]
 		            ])),
 		            'newcalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('newcalendar'), 'onClickAction' => $this->googleConfNewCalendarOnClickAction(),
-/*
-		                "var pane = this.pane, targetPane = pane.attachedWidget.form, targetGetWidget = lang.hitch(targetPane, targetPane.getWidget);\n" .
-		                "return when(pane.setWidgets({hidden: {newname: false, newacl: false, createcalendar: false, hide: false}, value: {newname: targetGetWidget('name').get('value'), newacl: [{rowId: 1, email: targetGetWidget('sportsmanemail').get('value'), role: 'writer'}]}})," .
-		                "function(){\n" .
-		                "pane.resize();\n" .
-		                "setTimeout(function(){pane.getWidget('newacl').resize();}, 0)\n" .
-		                "});\n"
-*/
 		            ]],
 		            'managecalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('managecalendar'), 'onClickAction' => $this->googleConfManageCalendarOnClickAction($qtr('needgooglecalid'), $qtr('youneedtoclicknewcalendar')),
-/*
-		                "var pane = this.pane, getWidget = lang.hitch(pane, pane.getWidget), calId = getWidget('googlecalid').get('value'), label = this.get('label');\n" .
-		                "if (typeof calId === 'string' && calId.length > 0){\n" .
-		                "this.set('label', Pmg.loading(label));\n" .
-		                "pane.serverAction( {action: 'Process', query: {id: true, params: " . json_encode(['process' => 'calendarAcl', 'noget' => true]) . "}}, {includeWidgets: ['googlecalid']}).then(lang.hitch(this, function(response){" .
-		                "getWidget('acl').set('value', response.acl);\n" .
-		                "this.set('label', label);\n" .
-		                "when(pane.setWidgets({hidden: {name: false, acl: false, updateacl: false, deletecalendar: false, hide: false}, value: {name: getWidget('googlecalid').get('value')}})," .
-		                "function(){\n" .
-		                "pane.resize();\n" .
-		                "setTimeout(function(){pane.getWidget('acl').resize();}, 0);\n" .
-		                "});}));\n" .
-		                "}else{\n" .
-		                "Pmg.alert({title: '" . $qtr('needgooglecalid') . "', content: '" . $qtr('youneedtoclicknewcalendar') . "'});\n" .
-		                "}"
-*/
 		            ]],
 		            
 		            'close' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('close'), 'onClickAction' =>
@@ -219,49 +195,12 @@ class View extends EditView{
 		                        ]), false),
 		                    ]])),
 		            'createcalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('createcalendar'), 'hidden' => true, 'onClickAction' => $this->googleConfCreateCalendarOnClickAction(),
-/*
-		                "var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');\n" .
-		                "this.set('label', Pmg.loading(label));\n" .
-		                "pane.serverAction( {action: 'Process', query: {id: true, params: " . json_encode(['process' => 'createCalendar', 'noget' => true]) . "}}, {includeWidgets: ['newname', 'newacl']}).then(lang.hitch(this, function(response){" .
-		                "console.log('server action completed');" .
-		                "pane.setWidgets({hidden: {newname: true, newacl: true, createcalendar: true, hide: true}, value: {googlecalid: response.googlecalid}});\n" .
-		                "this.set('label', label);\n" .
-		                "pane.resize();\n" .
-		                "}));"
-*/
 		            ]],
 		            'updateacl' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('updateacl'), 'hidden' => true, 'onClickAction' => $this->googleSyncUpdateAclOnClickAction(),
-/*
-		                "var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');\n" .
-		                "this.set('label', Pmg.loading(label));\n" .
-		                "pane.serverAction( {action: 'Process', query: {id: true, params: " . json_encode(['process' => 'updateAcl', 'noget' => true]) . "}}, {includeWidgets: ['googlecalid', 'acl']}).then(lang.hitch(this, function(){" .
-		                "console.log('server action completed');" .
-		                "this.set('label', label);\n" .
-		                "pane.resize();\n" .
-		                "}));"
-*/
 		            ]],
 		            'deletecalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('deletecalendar'), 'hidden' => true, 'onClickAction' => $this->googleSyncDeleteCalendarOnClickAction(),
-/*
-		                "var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');\n" .
-		                "this.set('label', Pmg.loading(label));\n" .
-		                "pane.serverAction( {action: 'Process', query: {id: true, params: " . json_encode(['process' => 'deleteCalendar', 'noget' => true]) . "}}, {includeWidgets: ['googlecalid']}).then(lang.hitch(this, function(){\n" .
-		                "console.log('server action completed');\n" .
-		                "pane.setWidgets({hidden: {name: true, acl: true, newacl: true, updateacl: true, deletecalendar: true, hide: true}, value: {newname: '', name: '', newacl: '', acl: '', googlecalid: ''}});\n" .
-		                "targetPane.markIfChanged = false;\n" .
-		                "targetPane.setWidgets({value: {googlecalid: null, lastsynctime: null}});\n" .
-		                "targetPane.markIfChanged = false;\n" .
-		                "this.set('label', label);\n" .
-		                "pane.resize();\n" .
-		                "}));"
-*/
 		            ]],
 		            'hide' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('hide'), 'hidden' => true, 'onClickAction' => $this->googleSyncHideOnClickAction(),
-/*
-		                "var pane = this.pane;\n" .
-		                "pane.setWidgets({hidden: {name: true, acl: true, deletecalendar: true, newname: true, newacl: true, createcalendar: true, updateacl: true, hide: true}});\n" .
-		                "pane.resize();\n"
-*/
 		            ]],
 		        ],
 		        'layout' => [
@@ -290,13 +229,6 @@ class View extends EditView{
 		            ],
 		        ],
 		        'onOpenAction' => $this->googleSyncOnOpenAction(),
-/*
-		        "var pane = this, googlecalid = pane.form.getWidget('googlecalid').get('value');\n" .
-		        "pane.watchOnChange = false;\n" .
-		        "return when(this.setWidgets({value: {googlecalid: googlecalid}}), function(){\n" .
-		        "pane.watchOnChange = true;\n" .
-		        "});\n"
-*/
 		    ]];
 		$this->actionWidgets['sessionstracking'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Sessionstracking'), 'allowSave' => true, 'includeWidgets' => ['parentid', 'synchrostart', 'synchroend']]];
 		$this->actionLayout['contents']['actions']['widgets'][] = 'sessionstracking';
@@ -342,28 +274,10 @@ class View extends EditView{
 		            ],
 		        ],
 		        'onOpenAction' => $this->sessionsTrackingOnOpenAction(),
-/*
-		        "var filePath = this.valueOf('filepath'), getWidget = lang.hitch(this, this.getWidget), disabled = filePath ? false : true;" .
-			      "['downloadperformedsessions', 'uploadperformedsessions', 'removeperformedsessions'].forEach(function(name){" .
-		          "    getWidget(name).set('disabled', disabled);" .
-		          "});"
-*/
 		    ]];
 	}
 	private function sessionsTrackingActionWidgetDescription($action){
 	    return ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr($action), 'onClickAction' => $this->sessionsTrackingActionButtonsOnClickAction($action)
-/*
-	        "var pane = this.pane, parentW = pane.attachedWidget, form = parentW.form, getWidget = lang.hitch(form, form.getWidget), paneValueOf = lang.hitch(pane, pane.valueOf), formValueOf = lang.hitch(form, form.valueOf),". 
-                "    label = this.get('label'), urlArgs = parentW.urlArgs;\n" .
-	            "this.set('label', Pmg.loading(label));\n" .
-	            "form.serverDialog({action: 'Process', query: {id: formValueOf('id'), params: " . json_encode(['process' => $action, 'save' => true]) .
-	            "}}, lang.mixin(parentW.valuesToSend, {filepath: paneValueOf('filepath'), version: paneValueOf('version')})," .
-	            "  form.get('postElts'), Pmg.message('actionDone')).then(lang.hitch(this, function(response){" .
-	            "    console.log('server action completed');" .
-	            "    this.set('label', label);\n" .
-	            "    pane.close();" .
-	        "}));"
-*/
 	        ]];
 	}
 }

@@ -78,7 +78,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
                         row5: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['fileheadertemplate', 'template', 'filefootertemplate','filecovertemplate']}
                 }},
                 style: {minWidth: (dojo.window.getBox().w*0.8) + 'px', overflow: 'auto'},
-                widgetsHider: true
+                widgetsHider: true,
+    			widgetsHiderArgs: {dialogPath: this.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription.'}
             }};
             if (this.dialogDescription){
                 return utils.mergeRecursive(description, this.dialogDescription);

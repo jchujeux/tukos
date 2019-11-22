@@ -70,6 +70,19 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
             }
             return false;
         },
+/*
+        object_walk(object, callback){
+        	if (Array.isArray(object)){
+        		object.forEach(function())
+        	}
+        	for (var key in object){
+        		if (object.hasOwnProperty){
+        			callback(value, key);
+        			if (typeof )
+        		}
+        	}
+        },
+*/
         replace: function (comparisonOperator, arrayToSearch, searchProperty, searchValue, returnProperty, cache, ignoreCase, ignoreAccent){
         	var search = function (row){
         		var targetValue = String(row[searchProperty]), sourceValue = String(searchValue);

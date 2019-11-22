@@ -6,10 +6,12 @@ trait ViewActionStrings{
 
   protected function onViewOpenAction(){
         return <<<EOT
-    var widget = this.getWidget('loadchart');
+['loadchart', 'performedloadchart'].forEach(lang.hitch(this, function(widgetName){    
+    var widget = this.getWidget(widgetName);
         widget.plots.week.values = dutils.difference(this.valueOf('fromdate'), this.valueOf('displayeddate'), 'week')+1;
     widget.chart.addPlot('week', widget.plots.week);
     widget.chart.render();
+}));
 EOT;
   }
   protected function paneUpdateOnClickAction(){

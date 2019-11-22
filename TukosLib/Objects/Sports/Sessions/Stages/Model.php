@@ -12,7 +12,7 @@ class Model extends AbstractModel {
         $colsDefinition = [
             'stagetype'  =>"ENUM ('" . implode("','", Sports::$stagetypeOptions) . "') ",
             'duration'     => 'VARCHAR(30)  DEFAULT NULL',
-            'intensity'     =>  "ENUM ('" . implode("','", Sports::$intensityOptions) . "') ",
+            'intensity'     =>  'TINYINT DEFAULT NULL',
             'stress'         =>  "ENUM ('" . implode("','", Sports::$stressOptions) . "') ",
             'sport'          =>  "ENUM ('" . implode("','", Sports::$sportOptions) . "') ",
         	'summary'          =>  'longtext ',

@@ -2,7 +2,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
     function(declare, lang, on, all, ready, when, utils, TukosTooltipDialog, Pmg, JSON, messages){
 	return declare(null, {
         editInPopup: function(evt){
-			this.openEditDialog(this.clickedRowValues(), {x: evt.clientX, y: evt.clientY});
+			//this.openEditDialog(this.clickedRowValues(), {x: evt.clientX, y: evt.clientY});
+			this.openEditDialog(this.clickedRowValues(), {x: 0, y: 0});
         },
 		openEditDialog: function(item, openArgs){
             var self = this, editDialog = this.editDialog;
@@ -19,7 +20,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
         
         dialogAtts: function(form){
             var self = this, form = this.form, columns = this.columns, widgetsDescription, layout = {}, editDialogAtts = this.editDialogAtts || {}, ignoreColumns = editDialogAtts.ignoreColumns || [], 
-            	editDialogDescription = editDialogAtts.description || false, editorWidgets = [], otherWidgets = [], description;
+            	editDialogDescription = editDialogAtts || false, editorWidgets = [], otherWidgets = [], description;
             widgetsDescription = {
                 save: {type: 'TukosButton', atts: {label: messages.save, onClick: lang.hitch(this, this.saveEditDialog)}},
             	cancel: {type: 'TukosButton', atts: {label: messages.cancel, onClick: lang.hitch(this, this.cancelEditDialog)}}
@@ -39,7 +40,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
 	                    row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'},  widgets: editorWidgets}
 	    			}
     			},
-                style: {maxWidth: (dojo.window.getBox().w*0.5) + 'px',maxHeight: (dojo.window.getBox().h*0.5) + 'px', overflow: 'auto'}
+    			widgetsHider: true,
+    			widgetsHiderArgs: {dialogPath: this.widgetName + '.atts.editDialogAtts.paneDescription.widgetsDescription.'},
+                style: {minWidth: (dojo.window.getBox().w*0.8) + 'px',overflow: 'auto'}
         	}};
             
         	return editDialogDescription ? utils.mergeRecursive(description, editDialogDescription) : description;
@@ -52,6 +55,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             when(editDialog.open(openArgs), lang.hitch(this, function(){
                 when (pane.setWidgets({value: item}), function(){
                 	pane.watchOnChange = pane.markIfChanged = true;
+                	pane.resize();
                 });
             }));
         },

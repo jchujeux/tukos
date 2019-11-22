@@ -83,7 +83,8 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
 		},
 		editSelectedItem: function(evt){
 			var grid = this.getGrid(), item = grid.collection.getSync(this.selectedItem.connectedIds[grid.widgetName]);
-			grid.openEditDialog(item, {x: evt.clientX, y: evt.clientY});
+			//grid.openEditDialog(item, {x: evt.clientX, y: evt.clientY});
+			grid.openEditDialog(item, {x: 0, y: 0});
 		},
         defaultItemAtts: function(item){
         	var id = item._item.googlecalid || item._item.parentid, custom = this.customization;
