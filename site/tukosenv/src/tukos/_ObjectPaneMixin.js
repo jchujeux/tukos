@@ -2,10 +2,10 @@
  *  ObjectPane mixin for dynamic widget information handling (widgets values and attributes that may be modified by the user or the server)
  *   - usage: 
  */
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when", "dojo/promise/all", "dojo/ready", "dijit/registry", "dojo/request", 
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when", "dojo/promise/all", "dojo/ready", "dijit/registry", 
             "tukos/utils", "tukos/_TukosPaneMixin",
             "tukos/PageManager", "dojo/json", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, dcl, when, all, ready, registry, request, utils, _TukosPaneMixin, Pmg, JSON, messages){
+    function(declare, lang, dcl, when, all, ready, registry, utils, _TukosPaneMixin, Pmg, JSON, messages){
     return declare(_TukosPaneMixin, {
 
         editInNewTab: function(widget){

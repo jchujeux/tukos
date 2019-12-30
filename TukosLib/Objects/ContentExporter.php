@@ -20,7 +20,9 @@ trait ContentExporter {
 				"for (var i in x) {" .
 					"var y = document.getElementsByClassName(x[i]);" .
 					"for (var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];" .
-		"}}</script>";
+		"}}</script>" /*.
+		'<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' .
+		'<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/mml-chtml.js"></script>'*/;
 	protected $tukosFormsHeader = '<title>${title}</title><link rel="stylesheet" href="${dojoBaseLocation}dijit/themes/claro/claro.css" media="screen">';
 	protected $tukosFormsBodyScripts = '
 <script>var dojoConfig ={
@@ -169,7 +171,7 @@ trait ContentExporter {
 	    }
 	    $tmpPdfFileName = $dirFileName . '.pdf';
 	    $streamsStore = Tfk::$registry->get('streamsStore');
-	    if ($streamsStore->startStream('htmltopdf', Tfk::$htmlToPdfCommand . ' ' . $htmlToPdfOptions . $contentFileName . ' ' . $tmpPdfFileName, false)){
+	    if ($streamsStore->startStream('htmltopdf', Tfk::$htmlToPdfCommand /*. ' --javascript-delay 25000 ' */. $htmlToPdfOptions . $contentFileName . ' ' . $tmpPdfFileName, false)){
 	        $streamsStore->waitOnStream('htmltopdf', false, 'forget');
 	    }
 	    unlink($contentFileName);

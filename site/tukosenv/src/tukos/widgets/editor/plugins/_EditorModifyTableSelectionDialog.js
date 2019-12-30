@@ -56,19 +56,20 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 }));
                 redipsTable.merge('h', false, table);
                 redipsTable.merge('v', true, table);
-                this.close();
+                self.close();
             });
         },
         split: function(){
             var self = this, tds = this.selectedTds, table = this.table;
             require(["redips/redipsTable"], function(redipsTable){
-                dojo.forEach(tds, lang.hitch(this, function(td){
+                tds.forEach(function(td){
                     redipsTable.mark(true, td);
                     redipsTable.split('h', table);
                     redipsTable.mark(true, td);
                     redipsTable.split('v', table);
-                }));
-                this.close();
+                });
+                self.close();
+                self.editor._tablePluginHandler._prepareTable(table, true);
             });
         }
     });

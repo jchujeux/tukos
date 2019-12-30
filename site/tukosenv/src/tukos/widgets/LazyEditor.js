@@ -14,10 +14,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			if (!this.disabled && !this.readOnly){
 				if (!editor){
 					when(WidgetsLoader.loadWidget('Editor'), lang.hitch(this, function(Editor){
-						editor = new Editor({style: {width: '100%'}, onChange: function(evt){
+						editor = new Editor({style: {width: '100%'}/*, onChange: function(evt){
 							editor.lazyEditor.set('value', editor.get('value'));
 							editor.lazyEditor.set('serverValue', editor.get('serverValue'));
-						}}, dojo.doc.createElement("div"));
+						}*/}, dojo.doc.createElement("div"));
 						editor.startup();//JCH: needed for OverviewDgrid editor instantiation in colValues
 						this.placeEditor();
 					}));
@@ -58,12 +58,20 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 		},
 		
 		onBlurCallback: function(){
+			var htmlContent = this.htmlContent, self = this, newValue;
 			console.log('calling onBlurCallback - isPlaced: ' + isPlaced);
 			this.onBlurHandle.remove();
-			var htmlContent = this.htmlContent;
 			if (editor && this.getIndexOfChild(editor) > -1/* && editor.isFullscreen !== true*/){//case where focus not via onClick, e.g. onDrop
 				htmlContent.set('style', {height: this.editorToContentHeight(editor.get('height'))});
 				this.viewSource = editor.isInViewSource();
+				editor.set('value', (newValue = editor.get('value')));// to make sure the Editor onWatch is triggered, that untranslates if needed into serverValue
+				this.set('value', newValue);
+				when(editor.get('serverValue'), function(serverValue){
+					if (serverValue){
+						self.set('value', serverValue);
+					}
+				})
+
 				this.removeChild(editor);
 				this.addChild(htmlContent);
 				this.resize();

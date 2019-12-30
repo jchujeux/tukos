@@ -6,6 +6,12 @@ function(declare, lang, keys, has, domStyle, expressions){
     var cache = {}, modifyTableSelection; 
 	
 	return declare(null, {
+	    shiftKeyDown: function(keyboardEvent){
+	    	return keyboardEvent.shiftKey;
+	    },
+	    isCommandKey: function(keyboardEvent){
+	    	return keyboardEvent.ctrlKey || keyboardEvent.altKey || keyboardEvent.metaKey;
+	    },
     	addShortCutKeys: function(){
             this.addKeyHandler('c', false, false, lang.hitch(this, this.copySelection), true);
             this.addKeyHandler('v', false, false, lang.hitch(this, this.pasteCopiedSelection), true);
@@ -47,7 +53,9 @@ function(declare, lang, keys, has, domStyle, expressions){
         				}
         				domStyle.set(element, 'backgroundColor', cache.backgroundColor);
         			}
-        			this.execCommand('inserthtml', cache.html);
+        			//this.execCommand('inserthtml', cache.html);
+        			//this.onDisplayChanged();
+        			this.pasteAndRefresh(cache.html);
         		}
     		}
     	}, 
@@ -72,47 +80,39 @@ function(declare, lang, keys, has, domStyle, expressions){
 		},
 		onKeyDown: function(/* Event */ e){
 			// override RichText to support Alt key
-			var keyCode = e.keyCode;
+			var keyCode = e.keyCode, key = e.key, ancestorContext = (this.selection.getAncestorElement('math', 'table') || {tagName: ''}).tagName.toLowerCase(), handled;
+			console.log('ShortCutKeys - keyCode: ' + keyCode + ' key: ' + e.key);
 			switch(keyCode){
 				case keys.SHIFT:
 				case keys.ALT: //e.preventDefault();
 				case keys.META:
 				case keys.CTRL: return true;
 				case keys.TAB:
-					if (this.isTabIndent){
-						//prevent tab from moving focus out of editor
-						e.stopPropagation();
-						e.preventDefault();
-						// FIXME: this is a poor-man's indent/outdent. It would be
-						// better if it added 4 "&nbsp;" chars in an undoable way.
-						// Unfortunately pasteHTML does not prove to be undoable
-						if(this.queryCommandEnabled((e.shiftKey ? "outdent" : "indent"))){
-							this.execCommand((e.shiftKey ? "outdent" : "indent"));
+					if (!e.ctrlKey && !e.altkey){
+						switch (ancestorContext){
+							case 'math':
+								this.selectNextMathPlaceHolder(); break;
+							case 'table':
+								this.previousOrNextCell(e); break;
+							default:
+								if (this.isTabIndent){
+									if(this.queryCommandEnabled((e.shiftKey ? "outdent" : "indent"))){
+										this.execCommand((e.shiftKey ? "outdent" : "indent"));
+									}
+								}else if(e.shiftKey){
+									// focus the <iframe> so the browser will shift-tab away from it instead
+									this.beforeIframeNode.focus();
+								}else{
+									// focus node after the <iframe> so the browser will tab away from it instead
+									this.afterIframeNode.focus();
+								}
 						}
-					}else if (!e.ctrlKey && !e.altkey){
-						// Make tab and shift-tab skip over the <iframe>, going from the nested <div> to the toolbar
-						// or next element after the editor
-						if(e.shiftKey){
-							// focus the <iframe> so the browser will shift-tab away from it instead
-							this.beforeIframeNode.focus();
-						}else{
-							// focus node after the <iframe> so the browser will tab away from it instead
-							this.afterIframeNode.focus();
-						}
-						// Prevent onKeyPressed from firing in order to avoid triggering a display change event when the
-						// editor is tabbed away; this fixes toolbar controls being inappropriately disabled in IE9+
-						return true;
+						handled = true;
 					}
 					break;
 				case keys.BACKSPACE:
-					if(has("ie") < 9 && this.document.selection.type === "Control"){
-						// IE has a bug where if a non-text object is selected in the editor,
-						// hitting backspace would act as if the browser's back button was
-						// clicked instead of deleting the object. see #1069
-						e.stopPropagation();
-						e.preventDefault();
-						this.execCommand("delete");
-					}
+					this.execCommand("delete");
+					handle = true;
 					break;
 				case keys.PAGE_UP:
 				case keys.PAGE_DOWN:
@@ -123,16 +123,45 @@ function(declare, lang, keys, has, domStyle, expressions){
 						}						
 					}
 					break;
+	        	case keys.RIGHT_ARROW:
+					if (!this.isCommandKey(e) && ancestorCOntext === 'table'){
+		  			  handled = this.rightOrLeftCell(e, true);
+					}
+		  			 break;
+	        	case keys.LEFT_ARROW:
+					if (!this.isCommandKey(e) && ancestorCOntext === 'table'){
+		  			  	handled = this.rightOrLeftCell(e, false);
+					}
+		  			break;
+	        	case keys.DOWN_ARROW:
+					if (!this.isCommandKey(e) && ancestorCOntext === 'table'){
+						handled = this.upOrDownCell(e, true);
+					}
+		  			break;
+	        	case keys.UP_ARROW:
+					if (!this.isCommandKey(e) && ancestorCOntext === 'table'){
+						handled = this.upOrDownCell(e, false);
+					}
+		  			break;
 				case keys.ESCAPE:
 				case keys.ENTER:
 					expressions.checkLastKeyDown(e, keyCode, this);
 					break;
 				default: 
+					console.log('ShortCutKeys - keyCode: ' + keyCode);
+				switch(ancestorContext){
+					case 'math':
+						this.handleMathML(e); break;
+					case 'table':
+						this.onExpressionCellFocus(e);
+						break;
+				}	
 			}
-			//console.log('ShortCutKeys - keyCode: ' + keyCode);
-			var handlers = this._keyHandlers[e.keyCode],
-				args = arguments;
-
+			if (handled){
+				e.preventDefault();
+				e.stopPropagation();
+			}
+			var handlers = this._keyHandlers[keyCode], args = arguments;
 			if(handlers){
 				handlers.some(function(h){
 					// treat meta- same as ctrl-, for benefit of mac users
@@ -140,6 +169,8 @@ function(declare, lang, keys, has, domStyle, expressions){
 						if(!h.handler.apply(this, args)){
 							e.preventDefault();
 						}
+						e.stopPropagation();
+						e.preventDefault();
 						return true;
 					}
 				}, this);

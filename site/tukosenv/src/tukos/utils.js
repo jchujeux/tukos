@@ -4,7 +4,7 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         wasModified: false, previousUniqueIds: [],
         
         visualTag: function(){
-        	return '<span class="visualTag" style="background-color:lightgrey">¤</span>';
+        	return '<span class="visualTag" style="background-color:lightgrey; font-size: 5px;">¤</span>';
         },
         trimExt: function(string){
   		  return string.replace(/^[\s(&nbsp;)]+/g,'').replace(/[\s(&nbsp;)]+$/g,'');
@@ -257,6 +257,7 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                         break;
                     case 'currency' : 
                         value = currency.format(value, formatOptions || {currency: 'EUR'});
+                        break;
                     case 'image':
                         value = '<img src="' + value + '" >';
                         break;

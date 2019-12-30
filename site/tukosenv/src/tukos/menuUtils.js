@@ -17,9 +17,13 @@ function(declare, lang, when, Menu, widgetsLoader, Pmg){
 					if (type === 'DynamicMenu'){
 						theMenu = setTriggers(new DynamicMenu(atts));
 					}else{
-						theMenu = when(widgetsLoader.instantiate(type, atts), function(widget){
-							return setTriggers(widget);
-						});
+						if (description.type){
+							theMenu = when(widgetsLoader.instantiate(type, atts), function(widget){
+								return setTriggers(widget);
+							});
+						}else{
+							theMenu = setTriggers(description);
+						}
 					}
 				case 'itemsOnly':
 		        	when(theMenu, function(theMenu){

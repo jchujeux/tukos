@@ -135,36 +135,6 @@ abstract class AbstractView extends ObjectTranslator{
     public function dataElts($viewMode='edit'){
         return array_values(array_diff(array_keys($this->dataWidgets), $this->_exceptionCols[$viewMode]));
     }
-    
-    public function widgetsNameTranslations($widgetsName, $editOnly = true){
-        foreach ($widgetsName as $widgetName){
-            if (isset($this->dataWidgets[$widgetName])){
-                $translations[$widgetName] = mb_strtolower(Widgets::description($this->dataWidgets[$widgetName], $editOnly)['atts']['label']);
-            }else{
-                Feedback::add('Notavalidwidgetname' . ': ' . $widgetName);
-            }
-        }
-        return $translations;
-    }
-
-    public function widgetsNameUntranslations($translatedWidgetsName, $editOnly = true){
-        $untranslations = []; $translations = []; 
-        $dataWidgets = $this->dataWidgets;
-        foreach ($dataWidgets as $name => $description){
-            $untranslations[mb_strtolower(Widgets::description($description, $editOnly)['atts']['label'])] = $name;            
-        }
-        foreach ($translatedWidgetsName as $translatedWidgetName){
-            $lcTranslatedWidgetName = mb_strtolower($translatedWidgetName);
-            if (isset($untranslations[$lcTranslatedWidgetName])){
-                $translations[$untranslations[$lcTranslatedWidgetName]] = $translatedWidgetName;
-            }else{
-                Feedback::add('Couldnotfinduntranslationfor' . ': ' . $translatedWidgetName);
-                $translations[$lcTranslatedWidgetName] = $translatedWidgetName;
-            }
-        }
-        return $translations;
-    }
-
     function allowedGetCols(){
         return array_values(array_diff($this->model->allCols, $this->_exceptionCols['get']));
     }

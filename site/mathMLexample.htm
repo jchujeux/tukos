@@ -1,0 +1,1612 @@
+<html>
+	<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+	<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/mml-chtml.js"></script>
+<body>
+Hello world!
+<math display = 'block'>
+  <mrow>
+    <mi>&psi;</mi>
+  </mrow>
+</math>
+
+<div>
+  <h3>
+    Postulat 1:
+  </h3>
+</div>
+<div style="margin-left: 40px;">
+  A tout instant de temps t, l'état d'un système est complètement déterminé par la fonction d'onde
+  <math display="inline">
+    <mrow>
+      <mi>ψ</mi>
+      <mfenced close=")" open="(">
+        <mrow>
+          <mover>
+            <mrow>
+              <mi>r</mi>
+            </mrow>
+            <mrow>
+              <mi>→</mi>
+            </mrow>
+          </mover>
+          <mo>,</mo><mi>t</mi>
+        </mrow>
+      </mfenced>
+    </mrow>
+  </math>
+  , qui est une fonction aux valeurs complexes, dans l'espace de Hilbert
+  <math display="inline">
+    <mrow>
+      <mi>F</mi><mo>⊂</mo><mi></mi>
+      <msup>
+        <mrow>
+          <mi>L</mi>
+        </mrow>
+        <mrow>
+          <mn>2</mn>
+        </mrow>
+      </msup>
+      <mfenced close=")" open="(">
+        <mrow>
+          <msup>
+            <mrow>
+              R
+            </mrow>
+            <mrow>
+              <mn>3</mn>
+            </mrow>
+          </msup>
+        </mrow>
+      </mfenced>
+      <mtext>&nbsp; </mtext>
+    </mrow>
+  </math>
+  des fonctions d'ondes, telles que
+  <math display="inline">
+    <mrow>
+      <msubsup>
+        <mo>∫</mo>
+        <mrow>
+          <msup>
+            <mrow>
+              <mi>R</mi>
+            </mrow>
+            <mrow>
+              <mn>3</mn>
+            </mrow>
+          </msup>
+        </mrow>
+        <mrow>
+          <mtext> </mtext>
+        </mrow>
+      </msubsup>
+    </mrow>
+    <mi></mi>
+    <msup>
+      <mrow>
+        <mfenced close="|" open="|">
+          <mrow>
+            <mi>ψ</mi>
+            <mfenced close=")" open="(">
+              <mrow>
+                <mover>
+                  <mrow>
+                    r
+                  </mrow>
+                  <mrow>
+                    →
+                  </mrow>
+                </mover>
+                <mo>,</mo><mi>t</mi>
+              </mrow>
+            </mfenced>
+          </mrow>
+        </mfenced>
+      </mrow>
+      <mrow>
+        <mn>2</mn>
+      </mrow>
+    </msup>
+    <msup>
+      <mrow>
+        <mi>d</mi>
+      </mrow>
+      <mrow>
+        <mn>3</mn>
+      </mrow>
+    </msup>
+    <mi>r</mi><mo>=</mo><mn>1</mn><mo>,</mo><mtext></mtext><mi></mi><mi></mi><mi></mi><mi></mi><mtext></mtext><mi></mi><mi></mi><mtext></mtext>
+  </math>
+  muni du produit scalaire
+  <math display="inline">
+    <mrow>
+      <mfenced close=")" open="(">
+        <mrow>
+          <mi>φ</mi><mo>,</mo>ψ
+        </mrow>
+      </mfenced>
+      <mo>=</mo>
+      <msubsup>
+        <mo>∫</mo>
+        <mrow>
+          <msup>
+            <mrow>
+              <mi>R</mi>
+            </mrow>
+            <mrow>
+              <mn>3</mn>
+            </mrow>
+          </msup>
+        </mrow>
+        <mrow>
+          <mtext>&nbsp;</mtext>
+        </mrow>
+      </msubsup>
+      <mrow>
+        <msup>
+          <mrow>
+            φ
+          </mrow>
+          <mrow>
+            <mo>*</mo>
+          </mrow>
+        </msup>
+        <mfenced close=")" open="(">
+          <mrow>
+            <mover>
+              <mrow>
+                r
+              </mrow>
+              <mrow>
+                →
+              </mrow>
+            </mover>
+            <mo>,</mo><mi>t</mi>
+          </mrow>
+        </mfenced>
+        <mi>ψ</mi>
+        <mfenced close=")" open="(">
+          <mrow>
+            <mover>
+              <mrow>
+                r
+              </mrow>
+              <mrow>
+                →
+              </mrow>
+            </mover>
+            <mo>,</mo><mi>t</mi>
+          </mrow>
+        </mfenced>
+        <msup>
+          <mrow>
+            <mi>d</mi>
+          </mrow>
+          <mrow>
+            <mn>3</mn>
+          </mrow>
+        </msup>
+        <mover>
+          <mrow>
+            r
+          </mrow>
+          <mrow>
+            →
+          </mrow>
+        </mover>
+      </mrow>
+    </mrow>
+  </math>
+  <br>
+</div>
+<div style="margin-left: 40px;">
+  <br>
+</div>
+<div style="margin-left: 40px;">
+  Cette fonction est interprétée comme amplitude de probabilité de présence: la probabilité
+  <math display="inline">
+    <mrow>
+      <mi>d</mi><mi>P</mi>
+      <mfenced close=")" open="(">
+        <mrow>
+          <mi>r</mi><mo>,</mo><mi>t</mi>
+        </mrow>
+      </mfenced>
+    </mrow>
+  </math>
+  que la particule se trouve dans un volume
+  <math display="inline">
+    <mrow>
+      <msup>
+        <mrow>
+          <mi>d</mi>
+        </mrow>
+        <mrow>
+          <mn>3</mn>
+        </mrow>
+      </msup>
+      <mi>r</mi><mo>=</mo><mi>d</mi><mi>x</mi><mtext>&nbsp;</mtext><mi>d</mi><mi>y</mi><mtext>&nbsp;</mtext><mi>d</mi><mi>z</mi>
+    </mrow>
+  </math>
+  autour du point
+  <math display="inline">
+    <mrow>
+      <mi>r</mi>
+    </mrow>
+  </math>
+  , est donnée par
+  <math display="inline">
+    <mrow>
+      <mi>d</mi><mi>P</mi><mo>=</mo>
+      <msup>
+        <mrow>
+          <mfenced close="|" open="|">
+            <mrow>
+              <mi>ψ</mi>
+              <mfenced close=")" open="(">
+                <mrow>
+                  <mi>r</mi><mo>,</mo><mi>t</mi>
+                </mrow>
+              </mfenced>
+            </mrow>
+          </mfenced>
+        </mrow>
+        <mrow>
+          <mn>2</mn>
+        </mrow>
+      </msup>
+      <msup>
+        <mrow>
+          <mi>d</mi>
+        </mrow>
+        <mrow>
+          <mn>3</mn>
+        </mrow>
+      </msup>
+    </mrow>
+    <mi>r</mi>
+  </math>
+</div>
+<div style="margin-left: 40px;">
+  <span style="font-style: italic;">Principe de superposition</span>: toute combinaison linéaire de fonction d'onde possibles est également une fonction d'onde possible.
+</div>
+<div style="margin-left: 40px;">
+  <span style="font-style: italic;">Notion d'opérateur</span> (linéaire):&nbsp;
+  <math display="inline">
+    <mtext> </mtext><mi>C</mi><mi>o</mi><mi>m</mi><mi>m</mi><mi>u</mi><mi>t</mi><mi>a</mi><mi>t</mi><mi>e</mi><mi>u</mi><mi>r</mi><mo>:</mo><mtext>&nbsp;</mtext>
+    <mfenced close="]" open="[">
+      <mrow>
+        <mover>
+          <mrow>
+            <mi>A</mi><mo>,</mo>
+          </mrow>
+          <mrow>
+            <mo>^</mo>
+          </mrow>
+        </mover>
+        <mover>
+          <mrow>
+            B
+          </mrow>
+          <mrow>
+            <mo>^</mo>
+          </mrow>
+        </mover>
+      </mrow>
+    </mfenced>
+    <mo>=</mo><mi>A</mi><mi>B</mi><mo>-</mo><mi>B</mi><mi>A</mi><mo>;</mo><mtext> </mtext><mtext>exemple:</mtext><mi></mi>
+    <mfenced close="]" open="[">
+      <mrow>
+        <mfrac>
+          <mrow>
+            <mi>∂</mi>
+          </mrow>
+          <mrow>
+            <mi>∂</mi><mi>x</mi>
+          </mrow>
+        </mfrac>
+        <mo>,</mo><mi>f</mi>
+        <mfenced close=")" open="(">
+          <mrow>
+            <mi>x</mi>
+          </mrow>
+        </mfenced>
+      </mrow>
+    </mfenced>
+    <mo>=</mo>
+    <mfrac>
+      <mrow>
+        <mi>∂</mi>
+      </mrow>
+      <mrow>
+        <mi>∂</mi><mi>x</mi>
+      </mrow>
+    </mfrac>
+    <mi>f</mi>
+    <mfenced close=")" open="(">
+      <mrow>
+        <mi>x</mi>
+      </mrow>
+    </mfenced>
+    <mo>;</mo><mtext>&nbsp;</mtext>
+    <mfenced close="]" open="[">
+      <mrow>
+        <mfrac>
+          <mrow>
+            <mi>∂</mi>
+          </mrow>
+          <mrow>
+            <mi>∂</mi><mi>x</mi>
+          </mrow>
+        </mfrac>
+        <mo>,</mo><mi>x</mi>
+      </mrow>
+    </mfenced>
+    <mo>=</mo><mn>1</mn>
+  </math>
+  <br>
+</div>
+<div>
+  <h3>
+    Postulat 2:
+  </h3>
+</div>
+<div style="margin-left: 40px;">
+  <math display="inline">
+    <mi></mi><mtext></mtext><mi></mi><mi></mi><mtext></mtext><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi>
+  </math>
+  A tout instant t de temps, la fonction d'onde satisfait l'équation aux dérivées partielles:
+  <math display="inline">
+    <mrow>
+      <mi>i</mi><mi>ℏ</mi>
+      <mfrac>
+        <mrow>
+          <mi>∂</mi>
+        </mrow>
+        <mrow>
+          <mi>∂</mi><mi>t</mi>
+        </mrow>
+      </mfrac>
+      <mi>ψ</mi>
+      <mfenced close=")" open="(">
+        <mrow>
+          <mover>
+            <mrow>
+              r
+            </mrow>
+            <mrow>
+              →
+            </mrow>
+          </mover>
+          <mo>,</mo><mi>t</mi>
+        </mrow>
+      </mfenced>
+      <mo>=</mo>
+      <mover>
+        <mrow>
+          <mi>H</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+      <mi>ψ</mi>
+      <mfenced close=")" open="(">
+        <mrow>
+          <mover>
+            <mrow>
+              r
+            </mrow>
+            <mrow>
+              →
+            </mrow>
+          </mover>
+          <mo>,</mo><mi>t</mi>
+        </mrow>
+      </mfenced>
+      <mo>,</mo><mtext> </mtext><mtext>où </mtext><mi></mi>
+      <mover>
+        <mrow>
+          <mi>H</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+      <mo>=</mo><mo>-</mo>
+      <mfrac>
+        <mrow>
+          <mi></mi>
+          <msup>
+            <mrow>
+              <mi>ℏ</mi>
+            </mrow>
+            <mrow>
+              <mn>2</mn>
+            </mrow>
+          </msup>
+        </mrow>
+        <mrow>
+          <mn>2</mn><mi>m</mi>
+        </mrow>
+      </mfrac>
+      Δ<mo>+</mo><mi>V</mi>
+      <mfenced close=")" open="(">
+        <mrow>
+          <mover>
+            <mrow>
+              r
+            </mrow>
+            <mrow>
+              →
+            </mrow>
+          </mover>
+          <mo>,</mo><mi>t</mi>
+        </mrow>
+      </mfenced>
+    </mrow>
+  </math>
+  . C'est l'équation de Schrödinger (particule de masse m).
+</div>
+<div style="margin-left: 40px;">
+  <span style="font-style: italic;">Etats stationnaires</span> (Hamiltonien ne dépendant pas explicitement du temps):
+  <math display="inline">
+    <mrow>
+      ψ
+      <mfenced close=")" open="(">
+        <mrow>
+          <mi>r</mi><mo>,</mo><mi>t</mi>
+        </mrow>
+      </mfenced>
+      <mo>=</mo>φ
+      <mfenced close=")" open="(">
+        <mrow>
+          <mi>r</mi>
+        </mrow>
+      </mfenced>
+      <msup>
+        <mrow>
+          <mi>e</mi>
+        </mrow>
+        <mrow>
+          <mo>-</mo><mi>i</mi>ω<mi>t</mi>
+        </mrow>
+      </msup>
+      <mo>=</mo><mi>φ</mi>
+      <mfenced close=")" open="(">
+        <mrow>
+          <mi>r</mi>
+        </mrow>
+      </mfenced>
+      <msup>
+        <mrow>
+          <mi>e</mi>
+        </mrow>
+        <mrow>
+          <mo>-</mo><mi>i</mi><mi>E</mi><mi>t</mi><mo>/</mo><mi>ℏ</mi>
+        </mrow>
+      </msup>
+      <mo>;</mo><mtext>&nbsp;</mtext><mi>c</mi><mi>a</mi><mi>r</mi><mtext>&nbsp;</mtext><mi>E</mi><mtext>&nbsp;</mtext><mo>=</mo><mtext> </mtext><mi>hν</mi><mo>=</mo><mi>ℏ</mi>ω<mtext>&nbsp;</mtext>⇒<mtext> </mtext>
+      <mover>
+        <mrow>
+          <mi>H</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+      <mi>φ</mi>
+      <mfenced close=")" open="(">
+        <mrow>
+          <mi>r</mi><mo></mo><mi></mi>
+        </mrow>
+      </mfenced>
+      <mo>=</mo><mi>E</mi><mi>φ</mi>
+      <mfenced close=")" open="(">
+        <mrow>
+          <mi>r</mi><mo></mo><mi></mi>
+        </mrow>
+      </mfenced>
+      <mo>:</mo><mtext> équation de Schrödinger indépendente du temps. C'est l'équation aux valeurs propres du Hamiltonien.</mtext>
+    </mrow>
+  </math>
+</div>
+<div style="margin-left: 80px;">
+  Les valeurs propres
+  <math display="inline">
+    <mrow>
+      <msub>
+        <mrow>
+          <mi>E</mi>
+        </mrow>
+        <mrow>
+          <mi>n</mi>
+        </mrow>
+      </msub>
+      <mtext> </mtext><mi></mi><mi></mi><mi></mi><mi></mi><mo></mo><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mtext></mtext><mi></mi><mi></mi><mi></mi><mtext></mtext><mo></mo><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mtext></mtext><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mtext></mtext><mi></mi><mi></mi><mi></mi><mtext></mtext><mi></mi><mi></mi><mi></mi><mi></mi><mo></mo><mi></mi><mi></mi><mo></mo><mtext></mtext><mi></mi><mi></mi><mtext></mtext><mi></mi><mi></mi><mi></mi>
+    </mrow>
+  </math>
+  représentent les énergies accessibles au système, et les fonctions
+  <math display="inline">
+    <mi>ψ</mi>
+    <mfenced close=")" open="(">
+      <mrow>
+        <mi>r</mi><mo>,</mo><mi>t</mi>
+      </mrow>
+    </mfenced>
+    <mo>=</mo>
+    <mrow>
+      <msub>
+        <mrow>
+          φ
+        </mrow>
+        <mrow>
+          <mi>n</mi>
+        </mrow>
+      </msub>
+      <mfenced close=")" open="(">
+        <mrow>
+          <mi>r</mi>
+        </mrow>
+      </mfenced>
+      <msup>
+        <mrow>
+          <mi>e</mi>
+        </mrow>
+        <mrow>
+          <mo>-</mo><mi>i</mi>
+          <msub>
+            <mrow>
+              <mi>E</mi>
+            </mrow>
+            <mrow>
+              <mi>n</mi>
+            </mrow>
+          </msub>
+          <mi>t</mi><mo>/</mo><mi>ℏ</mi>
+        </mrow>
+      </msup>
+      <mtext></mtext><mi></mi><mi></mi><mi></mi><mi></mi><mo></mo><mi></mi><mi></mi><mi></mi>
+    </mrow>
+  </math>
+  représentent les états stationnaires associés: la distribution de probabilité de présence ne dépend pas du temps.
+</div>
+<div>
+  <br>
+</div>
+<div style="margin-left: 40px;">
+  <span style="font-style: italic;">Principe de correspondance:</span>
+</div>
+<div>
+  <br>
+</div>
+<div style="margin-left: 40px;">
+  <table border="1" cellpadding="0" cellspacing="0" style="text-align: center; width: 80%;">
+    <tbody>
+      <tr align="center">
+        <td colspan="2" id="tdid0_1576237081530"><span style="font-weight: bold;">&nbsp;Tableau des correspondances</span>
+        <br>
+        </td>
+      </tr>
+      <tr>
+        <td id="tdid2_1576237081530" style="text-align: center;">&nbsp;Physique <span style="font-style: italic;">classique</span>
+        <br>
+        </td><td id="tdid3_1576237081530" style="text-align: center;">Physique <span style="font-style: italic;">quantique</span>
+        <br>
+        </td>
+      </tr>
+      <tr>
+        <td id="tdid4_1576237081530" style="text-align: left;">&nbsp;Position:
+        <math display="inline">
+          <mrow>
+            <mover>
+              <mrow>
+                r
+              </mrow>
+              <mrow>
+                →
+              </mrow>
+            </mover>
+            <mfenced close=")" open="(">
+              <mrow>
+                <mi>x</mi><mo>,</mo><mi>y</mi><mo>,</mo><mi>z</mi><mo>,</mo><mi>t</mi>
+              </mrow>
+            </mfenced>
+          </mrow>
+        </math>
+        <br>
+        &nbsp;Impulsion:
+        <math display="inline">
+          <mrow>
+            <mover>
+              <mrow>
+                p
+              </mrow>
+              <mrow>
+                →
+              </mrow>
+            </mover>
+            <mfenced close=")" open="(">
+              <mrow>
+                <mi>x</mi><mo>,</mo><mi>y</mi><mo>,</mo><mi>z</mi><mo>,</mo><mi>t</mi>
+              </mrow>
+            </mfenced>
+          </mrow>
+        </math>
+        <br>
+        &nbsp;Energie cinétique:
+        <math display="inline">
+          <mrow>
+            <mi>T</mi><mo>=</mo>
+            <mfrac>
+              <mrow>
+                <msup>
+                  <mrow>
+                    <mi>p</mi>
+                  </mrow>
+                  <mrow>
+                    <mtext class="tukosPlaceHolder">2</mtext>
+                  </mrow>
+                </msup>
+              </mrow>
+              <mrow>
+                <mtext class="tukosPlaceHolder">2m</mtext>
+              </mrow>
+            </mfrac>
+          </mrow>
+        </math>
+        <br>
+        &nbsp;Energie potentielle:
+        <math display="inline">
+          <mrow>
+            <mi>V</mi>
+            <mfenced close=")" open="(">
+              <mrow>
+                <mi>r</mi><mo>,</mo><mi>t</mi>
+              </mrow>
+            </mfenced>
+          </mrow>
+        </math>
+        <br>
+        &nbsp;Energie totale:
+        <math display="inline">
+          <mrow>
+            <mi>H</mi><mo>=</mo><mi>T</mi><mo>+</mo><mi>V</mi>
+          </mrow>
+        </math>
+        <br>
+        </td><td id="tdid5_1576237081530" style="text-align: left;">&nbsp;Opérateur position:
+        <math display="inline">
+          <mrow>
+            <mover>
+              <mrow>
+                <mi>x</mi>
+              </mrow>
+              <mrow>
+                <mo>^</mo>
+              </mrow>
+            </mover>
+            <mo>=</mo><mi>x</mi><mo>,</mo><mtext>&nbsp;</mtext>
+            <mover>
+              <mrow>
+                <mi>y</mi>
+              </mrow>
+              <mrow>
+                <mo>^</mo>
+              </mrow>
+            </mover>
+            <mo>=</mo><mi>y</mi><mo>,</mo><mtext> </mtext><mi>z</mi><mo>=</mo>
+            <mover>
+              <mrow>
+                <mi>z</mi>
+              </mrow>
+              <mrow>
+                <mo>^</mo>
+              </mrow>
+            </mover>
+          </mrow>
+        </math>
+        <br>
+        &nbsp;Opérateur impulsion:
+        <math display="inline">
+          <mrow>
+            <mover>
+              <mrow>
+                <mi>p</mi>
+              </mrow>
+              <mrow>
+                <mo>^</mo>
+              </mrow>
+            </mover>
+            <mo>=</mo><mo>-</mo><mi>i</mi><mi>ℏ</mi>
+            <mover>
+              <mrow>
+                ∇
+              </mrow>
+              <mrow>
+                →
+              </mrow>
+            </mover>
+          </mrow>
+        </math>
+        <br>
+        &nbsp;Opérateur énergie cinétique:
+        <math display="inline">
+          <mrow>
+            <mi></mi>
+            <mover>
+              <mrow>
+                <mi>T</mi>
+              </mrow>
+              <mrow>
+                <mtext class="tukosPlaceHolder">^</mtext>
+              </mrow>
+            </mover>
+            <mo>=</mo>
+            <mfrac>
+              <mrow>
+                <msup>
+                  <mrow>
+                    <mover>
+                      <mrow>
+                        <mi>p</mi>
+                      </mrow>
+                      <mrow>
+                        <mtext class="tukosPlaceHolder">^</mtext>
+                      </mrow>
+                    </mover>
+                  </mrow>
+                  <mrow>
+                    <mtext class="tukosPlaceHolder">2</mtext>
+                  </mrow>
+                </msup>
+              </mrow>
+              <mrow>
+                <mtext class="tukosPlaceHolder">2m</mtext>
+              </mrow>
+            </mfrac>
+          </mrow>
+        </math>
+        <br>
+        &nbsp;Opérateur énergie potentielle:
+        <math display="inline">
+          <mrow>
+            <mover>
+              <mrow>
+                <mi>V</mi>
+              </mrow>
+              <mrow>
+                <mo>^</mo>
+              </mrow>
+            </mover>
+            <mo>=</mo><mi>V</mi>
+            <mfenced close=")" open="(">
+              <mrow>
+                <mi>r</mi><mo>,</mo><mi>t
+                <br>
+                </mi>
+              </mrow>
+            </mfenced>
+          </mrow>
+        </math>
+        <br>
+        &nbsp;Opérateur énergie totale:
+        <math display="inline">
+          <mrow>
+            <mi></mi>
+            <mover>
+              <mrow>
+                <mi>H</mi>
+              </mrow>
+              <mrow>
+                <mo>^</mo>
+              </mrow>
+            </mover>
+            <mo>=</mo>
+            <mover>
+              <mrow>
+                <mi>T</mi>
+              </mrow>
+              <mrow>
+                <mo>^</mo>
+              </mrow>
+            </mover>
+            <mo>+</mo>
+            <mover>
+              <mrow>
+                <mi>V</mi>
+              </mrow>
+              <mrow>
+                <mo>^</mo>
+              </mrow>
+            </mover>
+          </mrow>
+        </math>
+        <br>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div style="margin-left: 40px;">
+  <br>
+</div>
+<div style="margin-left: 40px;">
+  On a:
+  <math display="inline">
+    <mrow>
+      <mfenced close="]" open="[">
+        <mrow>
+          <mover>
+            <mrow>
+              <mi>x</mi>
+            </mrow>
+            <mrow>
+              <mo>^</mo>
+            </mrow>
+          </mover>
+          <mo>,</mo>
+          <msub>
+            <mrow>
+              <mover>
+                <mrow>
+                  <mi>p</mi>
+                </mrow>
+                <mrow>
+                  <mo>^</mo>
+                </mrow>
+              </mover>
+            </mrow>
+            <mrow>
+              <mi>x</mi>
+            </mrow>
+          </msub>
+        </mrow>
+      </mfenced>
+      <mo>=</mo><mi>i</mi><mi>ℏ</mi>
+    </mrow>
+  </math>
+</div>
+<h3>
+  Généralisation - Formalisme de Dirac
+</h3>
+<h3>
+  Postulat 1:
+</h3>
+<div style="margin-left: 40px;">
+  A chaque système physique est associé un espace de Hilbert
+  <math display="inline">
+    <mrow>
+      <msub>
+        <mrow>
+          <mi>E</mi>
+        </mrow>
+        <mrow>
+          <mi>H</mi>
+        </mrow>
+      </msub>
+    </mrow>
+  </math>
+  .
+</div>
+<div style="margin-left: 40px;">
+  A chaque instant de temp<span style="font-style: italic;"></span>s <span style="font-style: italic;">t</span> l'état du système est représenté par un vecteur de norme unitaire appartenant à l'espcae de Hilbert
+  <math display="inline">
+    <mrow>
+      <msub>
+        <mrow>
+          <mi>E</mi>
+        </mrow>
+        <mrow>
+          <mi>H</mi>
+        </mrow>
+      </msub>
+      <mo></mo><mtext></mtext><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi>
+    </mrow>
+  </math>
+  , indiqué par
+  <math display="inline">
+    <mrow>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <mi>ψ</mi>
+          <mfenced close=")" open="(">
+            <mrow>
+              <mi>t</mi>
+            </mrow>
+          </mfenced>
+        </mrow>
+      </mfenced>
+      ∈
+      <msub>
+        <mrow>
+          <mi>E</mi>
+        </mrow>
+        <mrow>
+          <mi>H</mi>
+        </mrow>
+      </msub>
+    </mrow>
+  </math>
+  .
+</div>
+<div style="margin-left: 40px;">
+  Le ket
+  <math display="inline">
+    <mrow>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <mi>ψ</mi>
+          <mfenced close=")" open="(">
+            <mrow>
+              <mi>t</mi>
+            </mrow>
+          </mfenced>
+          <mi></mi>
+        </mrow>
+      </mfenced>
+      <mtext></mtext><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi><mi></mi>
+    </mrow>
+  </math>
+  contient toutes les informations du système à l'instant de temps <span style="font-style: italic;">t</span>.
+</div>
+<h3>
+  Postulat 2:
+</h3>
+<div style="margin-left: 40px;">
+  Tant que le système n'est pas soumis à une mesure, l'évolution dans le temps d'un vecteur détat
+  <math display="inline">
+    <mrow>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <mi>ψ</mi>
+          <mfenced close=")" open="(">
+            <mrow>
+              <mi>t</mi>
+            </mrow>
+          </mfenced>
+        </mrow>
+      </mfenced>
+    </mrow>
+  </math>
+  est régie par l'équation de Schrödinger:
+  <math display="inline">
+    <mrow>
+      <mi>i</mi><mi>ℏ</mi>
+      <mfrac>
+        <mrow>
+          <mi>d</mi>
+        </mrow>
+        <mrow>
+          <mi>d</mi><mi>t</mi>
+        </mrow>
+      </mfrac>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <mi>ψ</mi>
+          <mfenced close=")" open="(">
+            <mrow>
+              <mi>t</mi>
+            </mrow>
+          </mfenced>
+        </mrow>
+      </mfenced>
+      <mo>=</mo>
+      <mover>
+        <mrow>
+          <mi>H</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <mi></mi><mi>ψ</mi>
+          <mfenced close=")" open="(">
+            <mrow>
+              <mi>t</mi>
+            </mrow>
+          </mfenced>
+        </mrow>
+      </mfenced>
+    </mrow>
+  </math>
+</div>
+<div style="margin-left: 40px;">
+  L'observable
+  <math display="inline">
+    <mrow>
+      <mover>
+        <mrow>
+          <mi>H</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+      <mtext> </mtext><mi></mi><mi></mi>
+    </mrow>
+  </math>
+  est l'opérateur hamiltonien du système.
+</div>
+<h3>
+  Postulat 3:
+</h3>
+<div style="margin-left: 40px;">
+  A chaque grandeur physique <span style="font-style: italic;">A</span> on peut associer une observable caractérisée par un opérateur hermitien
+  <math display="inline">
+    <mrow>
+      <mover>
+        <mrow>
+          <mi>A</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+    </mrow>
+  </math>
+  , agissant dans l'espace des états du système.
+</div>
+<div style="margin-left: 40px;">
+  Les résultats possibles pour une mesurede la grandeur physique A sont les valeurs propres de l'observable
+  <math display="inline">
+    <mrow>
+      <mover>
+        <mrow>
+          <mi>A</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+      <mo>.</mo>
+      <br>
+      </br>
+    </mrow>
+  </math>
+</div>
+<div style="margin-left: 40px;">
+  La valeur moyenne des résultats possibles pour une mesure de l'observable
+  <math display="inline">
+    <mrow>
+      <mover>
+        <mrow>
+          <mi>A</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+    </mrow>
+  </math>
+  est donnée par
+  <math display="inline">
+    <mrow>
+    </mrow>
+  </math>
+  <math display="inline">
+    <mrow>
+      <mo></mo>
+      <mfenced close="⟩" open="⟨">
+        <mrow>
+          <mover>
+            <mrow>
+              <mi>A</mi>
+            </mrow>
+            <mrow>
+              <mo>^</mo>
+            </mrow>
+          </mover>
+        </mrow>
+      </mfenced>
+      <mo>=</mo>
+      <mfenced close="|" open="⟨">
+        <mrow>
+          <mi>ψ</mi>
+        </mrow>
+      </mfenced>
+    </mrow>
+    <mover>
+      <mrow>
+        <mi>A</mi>
+      </mrow>
+      <mrow>
+        <mo>^</mo>
+      </mrow>
+    </mover>
+    <mfenced close="⟩" open="|">
+      <mrow>
+        <mi>ψ</mi>
+      </mrow>
+    </mfenced>
+  </math>
+  , où
+  <math display="inline">
+    <mrow>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <mi>ψ</mi>
+        </mrow>
+      </mfenced>
+    </mrow>
+  </math>
+  est l'état du système avant la mesure.
+</div>
+<div style="margin-left: 40px;">
+  Après la mesure, le système sera dans l'état propre associé à la valeur propre mesurée.
+</div>
+<h3>
+  Evolution dans le temps d'un système isolé (Hamiltonien indépendant du temps).
+</h3>
+<div style="margin-left: 40px;">
+  <math display="inline">
+    <mrow>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <mi>ψ</mi>
+          <mfenced close=")" open="(">
+            <mrow>
+              <mi>t</mi>
+            </mrow>
+          </mfenced>
+        </mrow>
+      </mfenced>
+      <mo>=</mo>
+      <munderover>
+        <mo>∑</mo>
+        <mrow>
+          <mi>α</mi>
+        </mrow>
+        <mrow>
+          <mtext>&nbsp;</mtext>
+        </mrow>
+      </munderover>
+      <mrow>
+        <msub>
+          <mrow>
+            <mi>C</mi>
+          </mrow>
+          <mrow>
+            <mi>α</mi>
+          </mrow>
+        </msub>
+      </mrow>
+      <msup>
+        <mrow>
+          <mi>e</mi>
+        </mrow>
+        <mrow>
+          <mo>-</mo><mi>i</mi>
+          <msub>
+            <mrow>
+              <mi>E</mi>
+            </mrow>
+            <mrow>
+              <mi>α</mi>
+            </mrow>
+          </msub>
+          <mi></mi><mo>/</mo><mi>ℏ</mi><mo></mo>
+        </mrow>
+      </msup>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <msub>
+            <mrow>
+              ψ
+            </mrow>
+            <mrow>
+              <mi>α</mi>
+            </mrow>
+          </msub>
+        </mrow>
+      </mfenced>
+    </mrow>
+    <mo>,</mo><mtext> </mtext><mtext>où </mtext><mi></mi><mtext>&nbsp;</mtext>
+    <mover>
+      <mrow>
+        <mi>H</mi>
+      </mrow>
+      <mrow>
+        <mo>^</mo>
+      </mrow>
+    </mover>
+    <mfenced close="⟩" open="|">
+      <mrow>
+        <msub>
+          <mrow>
+            <mi>ψ</mi>
+          </mrow>
+          <mrow>
+            <mi>α</mi>
+          </mrow>
+        </msub>
+      </mrow>
+    </mfenced>
+    <mo>=</mo>
+    <msub>
+      <mrow>
+        <mi>E</mi>
+      </mrow>
+      <mrow>
+        <mi>α</mi>
+      </mrow>
+    </msub>
+    <mfenced close="⟩" open="|">
+      <mrow>
+        <msub>
+          <mrow>
+            <mi>ψ</mi>
+          </mrow>
+          <mrow>
+            <mi>α</mi>
+          </mrow>
+        </msub>
+      </mrow>
+    </mfenced>
+  </math>
+  <br>
+</div>
+<div>
+  <br>
+</div>
+<div>
+  <h3>
+    Théorème d'Ehrenfest
+  </h3>
+  <div style="margin-left: 40px;">
+    <math display="inline">
+      <mrow>
+        <mfrac>
+          <mrow>
+            <mi>d</mi>
+          </mrow>
+          <mrow>
+            <mi>d</mi><mi>t</mi>
+          </mrow>
+        </mfrac>
+        <mfenced close="⟩" open="⟨">
+          <mrow>
+            <mi>a</mi>
+          </mrow>
+        </mfenced>
+        <mo>=</mo>
+        <mfrac>
+          <mrow>
+            <mn>1</mn>
+          </mrow>
+          <mrow>
+            <mi>i</mi><mi>ℏ</mi>
+          </mrow>
+        </mfrac>
+        <mfenced close="|" open="⟨">
+          <mrow>
+            <mi>ψ</mi>
+          </mrow>
+        </mfenced>
+      </mrow>
+      <mfenced close="]" open="[">
+        <mrow>
+          <mover>
+            <mrow>
+              <mi>A</mi>
+            </mrow>
+            <mrow>
+              <mo>^</mo>
+            </mrow>
+          </mover>
+          <mo>,</mo>
+          <mover>
+            <mrow>
+              <mi></mi>
+              <mover>
+                <mrow>
+                  <mi>H</mi>
+                </mrow>
+                <mrow>
+                  <mo>^</mo>
+                </mrow>
+              </mover>
+              <mo></mo>
+            </mrow>
+            <mrow>
+            </mrow>
+          </mover>
+        </mrow>
+      </mfenced>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <mi>ψ</mi>
+        </mrow>
+      </mfenced>
+      <mo>+</mo>
+      <mfenced close="|" open="⟨">
+        <mrow>
+          <mi>ψ</mi>
+        </mrow>
+      </mfenced>
+      <mfrac>
+        <mrow>
+          <mi>∂</mi>
+        </mrow>
+        <mrow>
+          <mi>∂</mi><mi>t</mi>
+        </mrow>
+      </mfrac>
+      <mover>
+        <mrow>
+          <mi>A</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <mi>ψ</mi>
+        </mrow>
+      </mfenced>
+      <mtext>&nbsp; </mtext><mtext>où&nbsp; </mtext><mi></mi>
+      <mfenced close="⟩" open="⟨">
+        <mrow>
+          <mi>a</mi>
+        </mrow>
+      </mfenced>
+      <mo></mo><mo>=</mo>
+      <mfenced close="|" open="⟨">
+        <mrow>
+          <mi>ψ</mi>
+        </mrow>
+      </mfenced>
+      <mover>
+        <mrow>
+          <mi>A</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+      <mfenced close="⟩" open="|">
+        <mrow>
+          <mi></mi><mi>ψ</mi><mtext></mtext>
+        </mrow>
+      </mfenced>
+      <mtext> </mtext><mtext></mtext><mtext>&nbsp; est la valeur moyenne de l'observable&nbsp; </mtext>
+      <mover>
+        <mrow>
+          <mi>A</mi>
+        </mrow>
+        <mrow>
+          <mo>^</mo>
+        </mrow>
+      </mover>
+      <mtext>&nbsp; </mtext><mtext>appliqué à&nbsp; </mtext><mi>ψ</mi><mtext>&nbsp;</mtext>
+    </math>
+    <br>
+  </div>
+</div>
+<div style="margin-left: 40px;">
+  <math display="inline">
+    <mrow>
+      <mfrac>
+        <mrow>
+          <mi>d</mi>
+        </mrow>
+        <mrow>
+          <mi>d</mi><mi>t</mi>
+        </mrow>
+      </mfrac>
+      <mfenced close="⟩" open="⟨">
+        <mrow>
+          <mover>
+            <mrow>
+              <mi>A</mi>
+            </mrow>
+            <mrow>
+              <mo>^</mo>
+            </mrow>
+          </mover>
+        </mrow>
+      </mfenced>
+      <mo>=</mo>
+      <mfrac>
+        <mrow>
+          <mn>1</mn>
+        </mrow>
+        <mrow>
+          <mi>i</mi><mi>ℏ</mi>
+        </mrow>
+      </mfrac>
+      <mfenced close="⟩" open="⟨">
+        <mrow>
+          <mfenced close="]" open="[">
+            <mrow>
+              <mover>
+                <mrow>
+                  <mi>A</mi>
+                </mrow>
+                <mrow>
+                  <mo>^</mo>
+                </mrow>
+              </mover>
+              <mo>,</mo>
+              <mover>
+                <mrow>
+                  <mi>H</mi>
+                </mrow>
+                <mrow>
+                  <mo>^</mo>
+                </mrow>
+              </mover>
+            </mrow>
+          </mfenced>
+        </mrow>
+      </mfenced>
+      <mo>+</mo>
+      <mfenced close="⟩" open="⟨">
+        <mrow>
+          <mfrac>
+            <mrow>
+              <mi>∂</mi>
+            </mrow>
+            <mrow>
+              <mi>∂</mi><mi>t</mi>
+            </mrow>
+          </mfrac>
+          <mover>
+            <mrow>
+              <mi>A</mi>
+            </mrow>
+            <mrow>
+              <mo>^</mo>
+            </mrow>
+          </mover>
+        </mrow>
+      </mfenced>
+    </mrow>
+  </math>
+</div>
+<div style="margin-left: 40px;">
+  <br>
+</div>
+<div style="margin-left: 40px;">
+  <br>
+  <table border="1" cellpadding="0" cellspacing="0" style="width: 100%;">
+    <tbody>
+      <tr align="center">
+        <td colspan="2" id="tdid0_1576623188596"><span style="font-weight: bold;">Règle de quantification</span>
+        <br>
+        </td>
+      </tr>
+      <tr>
+        <td id="tdid2_1576623188596" style="text-align: center;"><span style="font-style: italic;">Physique classique</span>
+        <br>
+        </td><td id="tdid3_1576623188596" style="text-align: center;"><span style="font-style: italic;">Physique quantique</span>
+        <br>
+        </td>
+      </tr>
+      <tr>
+        <td id="tdid4_1576623188596">&nbsp;
+        <math display="inline">
+          <mrow>
+            <mfrac>
+              <mrow>
+                <mi>d</mi>
+              </mrow>
+              <mrow>
+                <mi>d</mi><mi>t</mi>
+              </mrow>
+            </mfrac>
+            <mi>A</mi><mo>=</mo>
+            <mfenced close="}" open="{">
+              <mrow>
+                <mi>A</mi><mo>,</mo><mi>H</mi>
+              </mrow>
+            </mfenced>
+            <mo>+</mo>
+            <mfrac>
+              <mrow>
+                <mi>∂</mi>
+              </mrow>
+              <mrow>
+                <mi>∂t</mi><mi></mi>
+              </mrow>
+            </mfrac>
+            <mi>A</mi><mi>
+            <br>
+            </mi>
+          </mrow>
+        </math>
+        </td><td id="tdid5_1576623188596">
+        <div style="margin-left: 40px;">
+          <math display="inline">
+            <mrow>
+              <mfrac>
+                <mrow>
+                  <mi>d</mi>
+                </mrow>
+                <mrow>
+                  <mi>d</mi><mi>t</mi>
+                </mrow>
+              </mfrac>
+              <mfenced close="⟩" open="⟨">
+                <mrow>
+                  <mover>
+                    <mrow>
+                      <mi>A</mi>
+                    </mrow>
+                    <mrow>
+                      <mo>^</mo>
+                    </mrow>
+                  </mover>
+                </mrow>
+              </mfenced>
+              <mo>=</mo>
+              <mfrac>
+                <mrow>
+                  <mn>1</mn>
+                </mrow>
+                <mrow>
+                  <mi>i</mi><mi>ℏ</mi>
+                </mrow>
+              </mfrac>
+              <mfenced close="⟩" open="⟨">
+                <mrow>
+                  <mfenced close="]" open="[">
+                    <mrow>
+                      <mover>
+                        <mrow>
+                          <mi>A</mi>
+                        </mrow>
+                        <mrow>
+                          <mo>^</mo>
+                        </mrow>
+                      </mover>
+                      <mo>,</mo>
+                      <mover>
+                        <mrow>
+                          <mi>H</mi>
+                        </mrow>
+                        <mrow>
+                          <mo>^</mo>
+                        </mrow>
+                      </mover>
+                    </mrow>
+                  </mfenced>
+                </mrow>
+              </mfenced>
+              <mo>+</mo>
+              <mfenced close="⟩" open="⟨">
+                <mrow>
+                  <mfrac>
+                    <mrow>
+                      <mi>∂</mi>
+                    </mrow>
+                    <mrow>
+                      <mi>∂</mi><mi>t</mi>
+                    </mrow>
+                  </mfrac>
+                  <mover>
+                    <mrow>
+                      <mi>A</mi>
+                    </mrow>
+                    <mrow>
+                      <mo>^</mo>
+                    </mrow>
+                  </mover>
+                </mrow>
+              </mfenced>
+            </mrow>
+          </math>
+        </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <br>
+  <br>
+</div>
+
+</body>
+</html>
