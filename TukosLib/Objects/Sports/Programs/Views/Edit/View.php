@@ -27,11 +27,22 @@ class View extends EditView{
                     'widgets' => ['id', 'parentid', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter', 'synchnextmonday', 'questionnairetime']
                 ],
             	'row2' => [
-            	    'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['33%', '33%', '33%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
+            	    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['66%', '33%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
                     'contents' => [              
-                        'col1' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => ['comments', 'loadchart', 'performedloadchart', 'worksheet']],
-                        'col2' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => [ 'calendar', 'weekloadchart', 'weekperformedloadchart']],
-                        'col3' => [
+                        'col1' => [
+                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 
+                            'contents' => [
+                                'row1' => [
+                                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'widgetWidths' => ['50%', '50%']],
+                                    'widgets' => ['comments', 'calendar']],
+                                'row2' => [
+                                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+                                    'widgets' => ['loadchart',  'weekloadchart']],
+                                'row3' => [
+                                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+                                    'widgets' => ['performedloadchart', 'weekperformedloadchart']],
+                            ]],
+                        'col2' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 
                             'widgets' => ['templates',  'warmup', 'mainactivity', 'warmdown'],
                        ],
@@ -152,12 +163,14 @@ class View extends EditView{
                 'customContentCallback' => $this->exportCustomContent($tr),
             ]
         ];
-        $this->actionWidgets['googlesync'] =  ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Googlesync'), 'allowSave' => true,
-        	'urlArgs' => ['query' => ['params' => json_encode(['process' => 'googleSynchronize', 'save' => true])]], 'includeWidgets' => ['parentid', 'googlecalid', 'synchrostart', 'synchroend', 'lastsynctime'],
-            'conditionDescription' => $this->googleSyncConditionDescription($qtr('needgooglecalid'), $qtr('youneedtoselectagooglecalid')),
-        ]];
-		$this->actionLayout['contents']['actions']['widgets'][] = 'googlesync';
-		$this->actionWidgets['googleconf'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Googleconf'), 'allowSave' => true]];
+       $this->actionWidgets['googlesync'] =  ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Googlesync'), 'allowSave' => true,
+           'urlArgs' => ['query' => ['params' => json_encode(['process' => 'googleSynchronize', 'save' => true])]], 'includeWidgets' => ['parentid', 'googlecalid', 'synchrostart', 'synchroend', 'lastsynctime'],
+           'conditionDescription' => $this->googleSyncConditionDescription($qtr('needgooglecalid'), $qtr('youneedtoselectagooglecalid')),
+       ]];
+       $this->actionLayout['contents']['actions']['widgets'][] = 'googlesync';
+       $this->actionWidgets['goldenSheetahSync'] =  ['type' => 'GoldenSheetahSync', 'atts' => ['label' => $this->view->tr('GoldenSheetahSync')]];
+       $this->actionLayout['contents']['actions']['widgets'][] = 'goldenSheetahSync';
+       $this->actionWidgets['googleconf'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Googleconf'), 'allowSave' => true]];
 		$this->actionLayout['contents']['actions']['widgets'][] = 'googleconf';
 		$this->actionWidgets['googleconf']['atts']['dialogDescription'] = [
 		    'paneDescription' => [

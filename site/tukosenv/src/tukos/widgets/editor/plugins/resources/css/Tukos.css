@@ -116,6 +116,20 @@
 	width: 18px;
 	height: 18px;
 }
+.dijitAdditionalEditorIconMathMLEdit {
+	background-image: url(../icons/mathMLEdit.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+.dijitDisabled .dijitAdditionalEditorIconMathMLEdit {
+	background-image: url(../icons/mathMLEdit.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
 /* Editor Table selection buttons */
 .editorIconModifyTableSelection{ 	
 	background-image:url(../images/tableSelectionIcons.png);

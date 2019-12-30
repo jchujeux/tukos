@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "dojo/request", "dijit/registry"/*, "dojo/domReady!"*/], 
-    function(declare, dom, on, Button, request, registry){
+define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "dijit/registry"/*, "dojo/domReady!"*/], 
+    function(declare, dom, on, Button, registry){
     return declare(Button, {
         postCreate: function(){
           var self = this;

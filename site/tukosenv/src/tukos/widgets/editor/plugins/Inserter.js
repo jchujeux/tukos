@@ -1,7 +1,7 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/ready", "dojo/string", "dojo/json", "dijit/_editor/_Plugin", "dijit/form/DropDownButton", "dijit/DropDownMenu", "dijit/MenuItem",
-        "dijit/PopupMenuItem", "dijit/ColorPalette", "dijit/popup", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/hiutils", "tukos/PageManager", "tukos/widgets/editor/plugins/_ColorContentInserter",
+        "dijit/PopupMenuItem", "dijit/ColorPalette", "dijit/popup", "tukos/utils", "tukos/hiutils", "tukos/PageManager", "tukos/widgets/editor/plugins/_ColorContentInserter",
         "tukos/widgets/editor/plugins/_ChoiceListInserter", "tukos/widgets/editor/plugins/_HtmlSourceInserter", "dojo/i18n!tukos/nls/messages"], 
-function(declare, lang, dct, domStyle, ready, string, JSON, _Plugin, Button, Menu, MenuItem, PopupMenuItem, ColorPicker, popup, TooltipDialog, utils, hiutils, Pmg, _ColorContentInserter, _ChoiceListInserter, _HtmlSourceInserter, messages) {
+function(declare, lang, dct, domStyle, ready, string, JSON, _Plugin, Button, Menu, MenuItem, PopupMenuItem, ColorPicker, popup, utils, hiutils, Pmg, _ColorContentInserter, _ChoiceListInserter, _HtmlSourceInserter, messages) {
     var inserters = {
     	fieldTemplate: '${^@xxx}',
         subfieldTemplate: '${^@xxx|yyy}',

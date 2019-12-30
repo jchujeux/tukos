@@ -58,18 +58,23 @@ define([
             this.initialized = true;
             this.editor = editor;
             this.editor._tablePluginHandler = this;
+            this.editor.previousOrNextCell = lang.hitch(this, this.previousOrNextCell);
+            this.editor.rightOrLeftCell = lang.hitch(this, this.rightOrLeftCell);
+            this.editor.upOrDownCell = lang.hitch(this, this.upOrDownCell);
+            this.editor.onExpressionCellFocus = lang.hitch(this, this.onExpressionCellFocus);
             
             editor.onLoadDeferred.addCallback(dojo.hitch(this, function(){
                 this.editorDomNode = this.editor.editNode || this.editor.iframe.document.body.firstChild;
                 // RichText should have a mouseup connection to recognize drag-selections. Example would be selecting multiple table cells
                 this._myListeners = [
-                    dojo.connect(this.editorDomNode , "mouseup", this.editor, "onClick"),
-                    dojo.connect(this.editor, "onDisplayChanged", this, "checkAvailable"),
+                    //dojo.connect(this.editorDomNode , "mouseup", this.editor, "onClick"),
+                    //dojo.connect(this.editor, "onDisplayChanged", this, "checkAvailable"),
+                	aspect.after(this.editor, 'onDisplayChanged', lang.hitch(this, this.checkAvailable)),
                     dojo.connect(this.editor, "onBlur", this, "checkAvailable"),
-                    dojo.connect(this.editor, "_saveSelection", this, function(){
+                    //dojo.connect(this.editor, "_saveSelection", this, function(){
                         // because on IE, the selection is lost when the iframe goes out of focus
-                        this._savedTableInfo = this.getTableInfo();
-                    }),
+                        //this._savedTableInfo = this.getTableInfo();
+                    //}),
                     dojo.connect(this.editor, "_restoreSelection", this, function(){
                         delete this._savedTableInfo;
                     })
@@ -158,7 +163,8 @@ define([
 
     checkAvailable: function(){
         // For table plugs Checking if a table or part of a table has focus so that Plugs can change their status
-        if(this.availableCurrentlySet){// availableCurrentlySet is set for a short amount of time, so that all  plugins get the same return without doing the method over
+        console.log('calling checkAvailable');
+    	if(this.availableCurrentlySet){// availableCurrentlySet is set for a short amount of time, so that all  plugins get the same return without doing the method over
             return this.currentlyAvailable;
         }else{
             if(!this.editor) {
@@ -169,6 +175,8 @@ define([
             }else{
                 this.currentlyAvailable = this.editor.focused && (this._savedTableInfo ? this._savedTableInfo.tbl :
                     this.editor.hasAncestorElement("table"));
+                console.log('has table ancestor: ' + this.editor.hasAncestorElement("table"));
+                console.log('currentlyavailable: ' + this.currentlyAvailable);
                 if(this.currentlyAvailable){
                     this.connectTableKeys();
                 }else{
@@ -181,10 +189,10 @@ define([
         }
     },
 	
-    _prepareTable: function(tbl){
+    _prepareTable: function(tbl, forceIds){
         // For IE's sake, we are adding IDs to the TDs if none is there We go ahead and use it for other code for convenience
         var trs = Array.apply(null, tbl.children[0].children), i = 0, timeStamp = this.getTimeStamp();
-        if (!trs[0].children[0].id){
+        if (forceIds || !trs[0].children[0].id){
             trs.forEach(function(r){
                 var tds = Array.apply(null, r.children);
                 tds.forEach(function(td){
@@ -236,89 +244,35 @@ define([
         }else{
             this.tablesConnected = true;
             var node = (this.editor.iframe) ? this.editor.document : this.editor.editNode;
-            this.cnKeyDn = dojo.connect(node, "onkeydown", this, "onKeyDown");
-            this.cnKeyUp = dojo.connect(node, "onkeyup", this, "onKeyUp");
-            this._myListeners.push(dojo.connect(node, "onkeypress", this, "onKeyUp"));
+            //this.cnKeyDn = dojo.connect(node, "onkeydown", this, "onKeyDown");
+            //this.cnKeyUp = dojo.connect(node, "onkeyup", this, "onKeyUp");
+            //this._myListeners.push(dojo.connect(node, "onkeypress", this, "onKeyUp"));
             this._prepareTable(this.editor.getAncestorElement('table'));
         }
     },
 	
     disconnectTableKeys: function(){
-        dojo.disconnect(this.cnKeyDn);
-        dojo.disconnect(this.cnKeyUp);
+        //dojo.disconnect(this.cnKeyDn);
+        //dojo.disconnect(this.cnKeyUp);
         this.tablesConnected = false;
     },
-    shiftKeyDown: function(keyboardEvent){
-    	return keyboardEvent.shiftKey;
-    },
-    isCommandKey: function(keyboardEvent){
-    	return keyboardEvent.ctrlKey || keyboardEvent.altKey || keyboardEvent.metaKey;
-    },
-	
-    onKeyDown: function(evt){
-        var key = evt.keyCode;
-        switch (key){
-        	case keys.SHIFT	: 
-        	case keys.CTRL  :
-        	case keys.ALT   :
-        	case keys.META  : 
-        	break;
-        	case keys.TAB	: 
-        		var o = this.getTableInfo();
-	            // modifying the o.tdIndex in the tableData directly, because we may save it
-	            // FIXME: tabTo is a global
-	            o.tdIndex = this.shiftKeyDown(evt) ? o.tdIndex-1 : tabTo = o.tdIndex+1;
-	            if(o.tdIndex>=0 && o.tdIndex<o.tds.length){
-	                this.editor.selectElement(o.tds[o.tdIndex]);
-	                // we know we are still within a table, so block the need to run the method
-	                this.currentlyAvailable = true;
-	                this._tempAvailability(true);
-	                this._tempStoreTableData(true);
-	                this.stopEvent = true;
-	            }else{ //tabbed out of table
-	                this.stopEvent = false;
-	                this.onDisplayChanged();
-	            }
-	              if(this.stopEvent) {
-	                dojo.stopEvent(evt);
-	            }
-	            break;
-        	case keys.RIGHT_ARROW:
-	  			  this.rightOrLeftCell(evt, true);
-	  			  break;
-        	case keys.LEFT_ARROW:
-	  			  this.rightOrLeftCell(evt, false);
-	  			  break;
-        	case keys.DOWN_ARROW:
-	  			this.upOrDownCell(evt, true);
-	  			break;
-        	case keys.UP_ARROW:
-	  			this.upOrDownCell(evt, false);
-	  			break;
-        	case keys.ESCAPE:
-        	case keys.ENTER:
-        		break;
-        	default:
-	  			if (!this.isCommandKey(evt)){
-	        		var selectedElement = this.editor.selection.getSelectedElement(), node;
-		  			//if (selectedElement && selectedElement.tagName === 'TD' && expressions.isExpression(node = selectedElement.children[0])){
-			  		if (selectedElement && selectedElement.tagName && expressions.isExpression(node = selectedElement.tagName === 'TD' ? selectedElement.children[0]: selectedElement)){
-		  				evt.preventDefault();
-		  				evt.stopPropagation();
-			  			this.editor.begEdit();
-		  				expressions.onClick(node, evt.key);
-		  			}	
-	  			}
+    previousOrNextCell: function(evt){
+		var o = this.getTableInfo(), editor = this.editor;
+		o.tdIndex = editor.shiftKeyDown(evt) ? o.tdIndex-1 : tabTo = o.tdIndex+1;
+        console.log('tdIndex: ' + o.tdIndex);
+        if(o.tdIndex>=0 && o.tdIndex<o.tds.length){
+            editor.selectElement(o.tds[o.tdIndex]);
+            this.currentlyAvailable = true;
+            this._tempAvailability(true);
+            this._tempStoreTableData(true);
+        }else{
+            this.onDisplayChanged();
         }
-		console.log('TablePlugins: - key: ' + key);
     },
-	
     rightOrLeftCell: function(evt, right){
 		  var editor = this.editor, selectedElement = editor.selection.getSelectedElement();
 		  if (selectedElement && selectedElement.tagName === 'TD'){
 			var previousOrNext = right ? 'nextElementSibling' : 'previousElementSibling', nextSelected = selectedElement[previousOrNext];
-			evt.stopPropagation();
-			evt.preventDefault();
 			if (!nextSelected){
 				var newRow = selectedElement.parentNode[previousOrNext];
 				if (newRow){
@@ -329,7 +283,9 @@ define([
 			}else{
 				editor.selectElement(nextSelected);
 			}
+			return true;
 		  }
+		  return false;
   },
   upOrDownCell: function(evt, down){
 	  var editor = this.editor, selectedElement = editor.selection.getSelectedElement();
@@ -361,12 +317,26 @@ define([
 				  tCol = sCol;
 			  }
 		  }
-		  evt.stopPropagation();
-		  evt.preventDefault();
 		  editor.selectElement(editor.byId('tdid' + (tCol + tRow * cols) + '_' + tableTimeStamp));
+		  return true;
 	  }
+	  return false;
   	},
-    onKeyUp: function(evt){
+  	onExpressionCellFocus: function(evt){
+		var editor = this.editor;
+  		if (!editor.isCommandKey(evt)){
+    		var selectedElement = this.editor.selection.getSelectedElement(), node;
+	  		if (selectedElement && selectedElement.tagName && expressions.isExpression(node = selectedElement.tagName === 'TD' ? selectedElement.children[0]: selectedElement)){
+  				evt.preventDefault();
+  				evt.stopPropagation();
+	  			this.editor.begEdit();
+  				expressions.onClick(node, evt.key);
+  			}	
+		}
+  		
+  	},
+/*
+  	onKeyUp: function(evt){
         var key = evt.keyCode;
         switch (key){
 	    	case keys.SHIFT	: 
@@ -381,11 +351,13 @@ define([
 	    	case keys.UP_ARROW   : 
 	    		this.onDisplayChanged(); break;
 	    	case keys.TAB : 
-	    		if (this.stopEvent){dojo.stopEvent(evt);}; break;
+	    		dojo.stopEvent(evt);//if (this.stopEvent){dojo.stopEvent(evt);}; break;
         }
     },
+*/
     onDisplayChanged: function(){
-        this.currentlyAvailable = false;
+        console.log('onDisplayChanged');
+    	this.currentlyAvailable = false;
         this._tempStoreTableData(false);
         this._tempAvailability(false);
         this.checkAvailable();

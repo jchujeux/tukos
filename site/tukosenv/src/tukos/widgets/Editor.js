@@ -1,16 +1,16 @@
 /*
  *  loads plugins required by tukos & a few enhancements
  */
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/has", "dojo/dom", "dojo/dom-style", "dojo/when", "dijit/Editor",  "dijit/_editor/RichText",
+define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/has", "dojo/dom", "dojo/dom-style", "dojo/dom-class", "dojo/when", "dojo/aspect", "dijit/Editor",  "dijit/_editor/RichText",
          "tukos/widgets/editor/ShortCutKeys", "tukos/PageManager", "tukos/expressions",
          "dijit/_editor/plugins/FontChoice", "dijit/_editor/plugins/TextColor", "tukos/widgets/editor/plugins/LinkDialog",  "dojoFixes/dijit/_editor/plugins/FullScreen",
          "dijit/_editor/plugins/Print", "dojoFixes/dijit/_editor/plugins/ViewSource",
          "dojox/editor/plugins/StatusBar", "dojox/editor/plugins/FindReplace", 
          "tukos/widgets/editor/plugins/TablePlugins", "tukos/utils", "tukos/hiutils", "tukos/menuUtils", "tukos/widgets/editor/plugins/TukosLinkDialog",
-         "tukos/widgets/editor/plugins/TemplateProcess","tukos/widgets/editor/plugins/Inserter","tukos/widgets/editor/plugins/SelectionEditor","tukos/widgets/editor/plugins/FitImage",
+         "tukos/widgets/editor/plugins/TemplateProcess","tukos/widgets/editor/plugins/Inserter","tukos/widgets/editor/plugins/MathMLEdit","tukos/widgets/editor/plugins/SelectionEditor","tukos/widgets/editor/plugins/FitImage",
          "tukos/StoreComboBox", "dojo/domReady!"], 
-    function(declare, array, connect, lang, Deferred, has, dom, domStyle, when, Editor, RichText, ShortCutKeys, PageManager, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
-    		 TablePlugins, utils, hiutils, mutils, TukosLinkDialog, TemplateProcess, Inserter, SelectionEditor, FitImage, StoreComboBox){
+    function(declare, array, connect, lang, Deferred, has, dom, domStyle, dcl, when, aspect, Editor, RichText, ShortCutKeys, PageManager, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
+    		 TablePlugins, utils, hiutils, mutils, TukosLinkDialog, TemplateProcess, Inserter, MathMLEdit, SelectionEditor, FitImage, StoreComboBox){
 	return declare([Editor, ShortCutKeys], {
 
     	constructor: function(args){
@@ -18,7 +18,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
                             'justifyLeft', 'justifyCenter', 'justifyRight','justifyFull', 'insertHorizontalRule'/*, 'EnterKeyHandling'*/];
             args.extraPlugins = args.extraPlugins ||  
                 ['fontName', 'fontSize', 'formatBlock', 'foreColor', 'hiliteColor', 'createLink', 'unlink', 'insertImage', 'fullScreen', {name: 'viewSource', stripScripts: false}, 'TukosLinkDialog'/*, 'ChoiceList', 'TemplateProcess'*/, 
-                 'statusBar', 'insertTable', 'modifyTable', 'modifyTableSelection', 'Inserter', 'print', 'FindReplace', 'SelectionEditor', 'FitImage'];
+                 'statusBar', 'insertTable', 'modifyTable', 'modifyTableSelection', 'Inserter', 'MathMLEdit', 'print', 'FindReplace', 'SelectionEditor', 'FitImage'];
             if (args.optionalPlugins){
                 args.extraPlugins = args.extraPlugins.concat(args.optionalPlugins);
             }
@@ -93,6 +93,18 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
     	    	expressions.onBlur(expression);
 	    		this.endEdit();
     	    });
+    	    aspect.after(this, 'onDisplayChanged', lang.hitch(this, function(){
+    			var document = this.document, wSelection;
+    	    	if (document && (wSelection = document.getSelection())){
+    				var eSelection = this.selection, anchorNode = wSelection.anchorNode, parentNode = anchorNode.parentNode, path = parentNode.nodeName + ' > ';
+        			while(parentNode && (parentNode.nodeName !== 'BODY')){
+        				parentNode = parentNode.parentNode;
+        				path = parentNode.nodeName + ' > ' + path;
+        			}
+    				this.statusBar.set('value', path + anchorNode.nodeName + (anchorNode.nodeType == 1 ? ('(' + (anchorNode.childNodes[wSelection.anchorOffset] || {}).nodeName + ')') : '') + 
+    						'(anchorOffset: ' + wSelection.anchorOffset + ' anchorFocus: ' + wSelection.focusOffset + ')');
+    			}
+    	    }));
         },
 		execCommand: function(command, argument){
 			var returnValue, editorFocused;
@@ -231,6 +243,8 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
         },
 		pasteHtmlAtCaret: function(html, selectPastedContent) {// found here: http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div/6691294#6691294
             var sel = dijit.range.getSelection(this.window), range = sel.getRangeAt(0);
+            this.endEdit();
+            this.begEdit();
             range.deleteContents();
             var el = document.createElement("div");
             el.innerHTML = html;
@@ -253,6 +267,28 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
                 sel.removeAllRanges();
                 sel.addRange(range);
             }
+            this.endEdit();
+            this.begEdit();
+        },
+        pasteAndRefresh: function(htmlFragment){
+        	var eSelection = this.selection, selectedClass = 'tukosLastSelected';
+        	this.pasteHtmlAtCaret(htmlFragment, true);
+			var pastedNode = eSelection.getSelectedElement();
+            dcl.add(pastedNode, selectedClass);	
+            this.set('value', this.get('value'));
+            Array.apply(null, this.document.getElementsByClassName(selectedClass)).forEach(function(node){
+    			var placeHolders = Array.apply(null, node.getElementsByClassName('tukosPlaceHolder'));
+    			if (placeHolders.length > 0){
+    				eSelection.selectElement(placeHolders[0]);
+    			}else{
+    				eSelection.selectElement(node);
+    				eSelection.collapse();
+    			}
+            	dcl.remove(node, selectedClass);
+            	if (!node.getAttribute('class')){
+            		node.removeAttribute('class');
+            	}
+            });
         }
     }); 
 });

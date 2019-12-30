@@ -80,8 +80,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
             		}
             	}
             }
-            tableInfo.tds[0].id = '';
-            this.editor._tablePluginHandler._prepareTable(table);
+            this.editor._tablePluginHandler._prepareTable(table, true);
         },
         insertRowBefore: function(){
             this.insertRow();
@@ -120,8 +119,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
             		}
             	}
             }
-            tableInfo.tds[0].id = '';
-            this.editor._tablePluginHandler._prepareTable(table);
+            this.editor._tablePluginHandler._prepareTable(table, true);
         },
         insertColBefore: function(){
             this.insertCol();
@@ -147,8 +145,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 	}
                 }
                 tableInfo.trIndex = (trIndex > this.tableInfo.rows -1 ? tableInfo.rows -1 : trIndex);
-                tableInfo.tds[0].id = '';
-                this.editor._tablePluginHandler._prepareTable(table);
+                this.editor._tablePluginHandler._prepareTable(table, true);
             }
         },
         deleteCol: function(){
@@ -174,8 +171,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 	}
                 }
                 tableInfo.colIndex = (colIndex > this.tableInfo.cols -1 ? this.tableInfo.cols -1 : colIndex);
-                tableInfo.tds[0].id = '';
-                this.editor._tablePluginHandler._prepareTable(table);
+                this.editor._tablePluginHandler._prepareTable(table, true);
             }
         }
     });

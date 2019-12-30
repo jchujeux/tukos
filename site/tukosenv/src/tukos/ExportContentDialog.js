@@ -89,12 +89,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
         },
         _watchAction: function(sWidget, tWidget, newValue, att){
             var pane = sWidget.pane, newCustom = {}, watchOnChange = pane.watchOnChange;
-            when(pane.valueOf(sWidget.widgetName), function(value){
-                if (watchOnChange){
-            		var attachedWidgetName = sWidget.pane.attachedWidget.widgetName;
-                    lang.setObject('customization.widgetsDescription.' + sWidget.pane.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription.' + sWidget.widgetName + '.atts.' + att, value, pane.form);
-                }
-            });
+            if (watchOnChange){
+        		var attachedWidgetName = sWidget.pane.attachedWidget.widgetName;
+                lang.setObject('customization.widgetsDescription.' + sWidget.pane.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription.' + sWidget.widgetName + '.atts.' + att, newValue, pane.form);
+            }
         },
         watchAction: function(sWidget, tWidget, newValue){
             this._watchAction(sWidget, tWidget, newValue, 'value');
@@ -130,12 +128,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             return true;
         },
         templateWatchAction: function(sWidget, tWidget, newValue){
-            this.watchAction(sWidget, tWidget, newValue);
-            var pane = this.pane, form = this.form;
-            when(pane.valueOf(sWidget.widgetName), function(newValue){
-                when(hiutils.processTemplate(newValue, {'@': form, '§': pane}), function(newValue){
-                    tWidget.set('value', newValue || '');
-                });
+            //this.watchAction(sWidget, tWidget, newValue);
+            var pane = this.pane, form = this.form, _watchAction = this._watchAction;
+            when(hiutils.processTemplate(newValue, {'@': form, '§': pane}), function(newValue){
+                tWidget.set('value', newValue || '');
+                when (sWidget.get('serverValue') || sWidget.get('value'), function(newValue){
+                    _watchAction(sWidget, tWidget, newValue, 'value');
+                })
             });
             return true;
         },

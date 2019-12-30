@@ -1,7 +1,7 @@
 define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/on", "dojo/ready", "dijit/registry", 
-         "dojo/request", "dojo/when", "tukos/utils", "tukos/TukosTooltipDialog", 
+         "dojo/when", "tukos/utils", "tukos/TukosTooltipDialog", 
          "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, dct, on, ready, registry, request, when, utils, TukosTooltipDialog, Pmg, messages){
+    function(arrayUtil, declare, lang, dct, on, ready, registry, when, utils, TukosTooltipDialog, Pmg, messages){
     return declare(null, {
         
         openCustomDialog: function(){

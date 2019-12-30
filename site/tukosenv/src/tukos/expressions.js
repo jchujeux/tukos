@@ -178,7 +178,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
     	},
     	checkLastKeyDown: function(evt, keyCode, editor){
     		var target = evt.target, parent = target.parentNode;
-    		console.log('checkLastKeyDown - keyCode: ' + keyCode + ' evt.target.tagName: ' + target.tagName);
+    		//console.log('checkLastKeyDown - keyCode: ' + keyCode + ' evt.target.tagName: ' + target.tagName);
     		if (this.isExpression(parent)){
     			lastKeyDown = keyCode;
     			if (keyCode === keys.ENTER){

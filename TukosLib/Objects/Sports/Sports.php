@@ -25,7 +25,7 @@ class Sports {
     ];
     
     public static $intensityColorsMap = ['1' => 'LightYellow', '2' => 'Lime',  '3' => 'LightSkyBlue', '4' => 'CornflowerBlue', '5' => 'Gold', '6' => 'Orange', '7' => 'DarkOrange',  '8' => 'OrangeRed', '9' => 'Red', '10' => 'MediumVioletRed'];
-    public static $colorNameToHex = ['LightYellow' => 'FFFE0', 'Lime' => '00FF00', 'LightSkyBlus' => '87CEFA', 'CornFlowerBlus' => 'FFD700', 'Gold' => 'FFD700', 'Orange' => 'FFA500', 'DarkOrange' => 'FF8C00', 'OrangeRed' => 'FF4500', 
+    public static $colorNameToHex = ['LightYellow' => 'FFFE0', 'Lime' => '00FF00', 'LightSkyBlue' => '87CEFA', 'CornFlowerBlus' => 'FFD700', 'Gold' => 'FFD700', 'Orange' => 'FFA500', 'DarkOrange' => 'FF8C00', 'OrangeRed' => 'FF4500', 
         'Red' => 'FF0000', 'MediumVioletRed' => 'C71585'];
     public static $sportImagesMap = ['bicycle' =>'bicycleblank.png', 'running' =>'runningblank.png', 'swimming' =>'swimmingblank.png', 'climbing' =>  'climbingblank.png',  'elliptic' =>'elliptic.jpg', 'bodybuilding' =>'bodybuilding.png',
         'rest' =>'sleeping.png',  'other' =>'othersport.png'];

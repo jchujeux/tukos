@@ -131,6 +131,19 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
             }
 		});
     },
+    removeEmptyDescendants: function(fromNode){
+		var self = this;
+    	Array.apply(null, fromNode.children).forEach(function(child){
+			if (child.innerHTML === ''){
+				child.parentNode.removeChild(child);
+			}else if (child.children.length > 0){
+				self.removeEmptyDescendants(child);
+				if (child.innerHTML === ''){
+					child.parentNode.removeChild(child);
+				}
+			}
+		});    		
+    },
     postProcess: function(content, targetFormat){
     	return this._inProcess(content, targetFormat === 'tukosform' ? ['pagebreak', 'pagenumber', 'numberofpages', 'tukosContainer'] : ['pagebreak', 'pagenumber', 'numberofpages']).replace(/break-after: page/g, 'page-break-after: always');
     },
@@ -337,7 +350,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
             if (utils.empty(toRequest)){
                 return paramsString;
             }else{
-                return when (/*lang.hitch(Pmg, */Pmg.serverTranslations(toRequest, serverAction || 'getWidgetsNameTranslations')/*)*/, function(translations){
+                return when (/*lang.hitch(Pmg, */Pmg.serverTranslations(toRequest, serverAction || 'GetTranslations')/*)*/, function(translations){
                     return paramsString.replace(replaceRegExp, function(match, matchType, matchedParam){
                         var paramArray = matchedParam.split(separator), item = paramArray[0], itemTranslation = itemTranslator(item, objectName), itemWidgetName = (sourceCharFlag === '^' ? itemTranslation : item);
                         if (!itemTranslation){
@@ -364,7 +377,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
     },
 
     untranslateParams: function(paramsString, widget){
-        return this.translateParams(paramsString, widget, lang.hitch(Pmg, Pmg.widgetNameUntranslator), 'getWidgetsNameUntranslations', '^', '$');
+        return this.translateParams(paramsString, widget, lang.hitch(Pmg, Pmg.widgetNameUntranslator), 'GetUntranslations', '^', '$');
     },
 
     removeTranslatorFlag: function(paramsString){

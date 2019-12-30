@@ -1,13 +1,14 @@
 <!DOCTYPE HTML>
 <html lang="en">
     <head>
-        <meta charset="utf-8">
+        <meta charset="utf-8"> 
         <title>Tukos 2.0</title>
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dijit/themes/claro/claro.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dgridLocation ?>/css/dgrid.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/editorPlugins.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/css/StatusBar.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/css/FindReplace.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/css/InsertEntity.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/calendar/themes/claro/Calendar.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/form/resources/UploaderFileList.css" media="screen">
         <link rel="stylesheet" href="<?= $this->tukosLocation ?>/resources/tukos.css" media="screen">
