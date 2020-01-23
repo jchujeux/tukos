@@ -168,8 +168,8 @@ class View extends EditView{
            'conditionDescription' => $this->googleSyncConditionDescription($qtr('needgooglecalid'), $qtr('youneedtoselectagooglecalid')),
        ]];
        $this->actionLayout['contents']['actions']['widgets'][] = 'googlesync';
-       $this->actionWidgets['goldenSheetahSync'] =  ['type' => 'GoldenSheetahSync', 'atts' => ['label' => $this->view->tr('GoldenSheetahSync')]];
-       $this->actionLayout['contents']['actions']['widgets'][] = 'goldenSheetahSync';
+       //$this->actionWidgets['goldenSheetahSync'] =  ['type' => 'GoldenSheetahSync', 'atts' => ['label' => $this->view->tr('GoldenSheetahSync')]];
+       //$this->actionLayout['contents']['actions']['widgets'][] = 'goldenSheetahSync';
        $this->actionWidgets['googleconf'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Googleconf'), 'allowSave' => true]];
 		$this->actionLayout['contents']['actions']['widgets'][] = 'googleconf';
 		$this->actionWidgets['googleconf']['atts']['dialogDescription'] = [

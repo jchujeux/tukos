@@ -221,6 +221,12 @@ class PageView extends Translator{
            		            'action' => "Pmg.addCustom('historyMaxItems', newValue); return true;"
            		        ]]]]
            		    ])),
+           		    'ignoreCustomOnClose' => Widgets::storeSelect(Widgets::complete(
+           		        ['storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $this->tr)], 'title' => $this->tr('ignoreCustomOnClose'),
+           		            'onWatchLocalAction' => ['value' => ['ignoreCustomOnClose' => ['localActionStatus' => [
+           		                'triggers' => ['user' => true],
+           		                'action' => "Pmg.addCustom('ignoreCustomOnClose', newValue); return true;"
+           		            ]]]]])),
            		    'cancel' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('close'), 'onClickAction' => 'this.pane.close();']],
                     'action' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('save'), 'onClickAction' => 
                         	"Pmg.setFeedback('" . Tfk::tr('saving') . " ... ');this.pane.serverAction( {object: 'users', view: 'NoView', action: 'PageCustomSave'}, {'excludeWidgets': ['cancel', 'action']});this.pane.close();" 
@@ -231,7 +237,7 @@ class PageView extends Translator{
                     'contents' => [
                        'row1' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
-                            'widgets' => ['hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems'],
+                            'widgets' => ['hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose'],
                         ],
                        'row2' => [
                             'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false],

@@ -11,6 +11,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			this.viewSource = false;
 		},
 		onClickCallback: function(){
+			this.onClickHandle.remove();
 			if (!this.disabled && !this.readOnly){
 				if (!editor){
 					when(WidgetsLoader.loadWidget('Editor'), lang.hitch(this, function(Editor){
@@ -23,7 +24,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 					}));
 				}else{
 					if (!isPlaced){
-						this.onClickHandle.remove();
 						this.placeEditor();
 					}
 				}
