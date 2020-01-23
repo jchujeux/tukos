@@ -19,7 +19,7 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom", "dijit/form/Butto
                 if (!self.form.hasChanged()){
                     return setResetValues();
                 }else{
-                	Pmg.confirmForgetChanges().then(
+                	Pmg.confirmForgetChanges({widgets: true}).then(
                             function(){return setResetValues()},
                             function(){Pmg.setFeedback(Pmg.message('actionCancelled'));
                     });

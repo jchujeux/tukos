@@ -5,20 +5,38 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
         constructor: function(args){
             var self = this, descriptions = this.tabsDescription, created, selected;
             var unloadAction = function(){
-                var openedTabs = self.container.getChildren(),
-                    changedTabs = [];
+                var openedTabs = self.container.getChildren(), changedTabs = {widgets: [], customization: []}, tabChange, theMessage;
                 for (var i in openedTabs){
                     var theTab = openedTabs[i];
-                    if (theTab.form && theTab.form.userHasChanged()){
-                        changedTabs.push(theTab.get('title'));
+                    if (theTab.form && (tabChange = theTab.form.userHasChanged())){
+                        //changedTabs.push(theTab.get('title'));
+                        if (tabChange.widgets){
+                        	changedTabs.widgets.push(theTab.get('title'));
+                        }
+                        if (tabChange.customization){
+                        	changedTabs.customization.push(theTab.get('title'));
+                        }
                     }
                 }
+/*
                 if (!utils.empty(changedTabs)){
                     var theMessage = Pmg.message('tabschangednotsaved') + ': <br>' + changedTabs.join(', ');
                     var theDialog = new Dialog({title: Pmg.message('Unsaved changes'), content: theMessage});
                     theDialog.show();
                     return theMessage;
-                }                
+                }
+*/
+                if (!utils.empty(changedTabs.widgets)){
+                	theMessage = Pmg.message('tabsvalueschangednotsaved') + ': <br>' + changedTabs.widgets.join(', ');
+                }
+                if (!utils.empty(changedTabs.customization)){
+                	theMessage = (theMessage ? theMessage + '<br>' : '') + Pmg.message('tabscustomizationchangednotsaved') + ': <br>' + changedTabs.customization.join(', ');
+                }
+                if (theMessage){
+                	var theDialog = new Dialog({title: Pmg.message('Unsaved changes'), content: theMessage});
+                	theDialog.show();
+                	return theMessage;
+                }
             }
             window.onbeforeunload = unloadAction;
             this.container.on(".dijitTab:contextmenu", lang.hitch(this, this.contextMenuCallback));

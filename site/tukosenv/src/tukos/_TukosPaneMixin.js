@@ -102,8 +102,16 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
            return widgetName ? this.changedWidgets[widgetName] : !utils.empty(this.changedWidgets);
        },
        userHasChanged: function(){
-           var valuesHaveChanged = !utils.empty(this.userChangedWidgets), customizationHasChanged = !utils.empty(this.customization);
-    	   return (this.viewMode !== 'Overview' && (valuesHaveChanged || customizationHasChanged)) ? {widgets: valuesHaveChanged, customization: customizationHasChanged} : false;
+           //var valuesHaveChanged = !utils.empty(this.userChangedWidgets), customizationHasChanged = !utils.empty(this.customization);
+    	   //return (this.viewMode !== 'Overview' && (valuesHaveChanged || customizationHasChanged)) ? {widgets: valuesHaveChanged, customization: customizationHasChanged} : false;
+    	   var hasChanged = {};
+    	   if (!utils.empty(this.userChangedWidgets)){
+    		   hasChanged = {widgets: true};
+    	   }
+    	   if ((Pmg.getCustom().ignoreCustomOnClose !== 'YES') && !utils.empty(this.customization)){
+    		   hasChanged.customization = true;
+    	   }
+    	   return utils.empty(hasChanged) ? false : hasChanged;
        },
         resetChangedWidgets: function(){
             var changedWidgets = this.changedWidgets;

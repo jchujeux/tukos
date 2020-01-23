@@ -16,7 +16,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/ObjectSelect", "dijit/r
                         setEditValues();
                     }else{
                         Pmg.setFeedback(' ');
-                        Pmg.confirmForgetChanges().then(
+                        Pmg.confirmForgetChanges({widgets: true}).then(
                         		function(){setEditValues();}, 
                         		function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
                         );
