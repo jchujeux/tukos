@@ -3,10 +3,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
     function(declare, lang, when, all, on, registry, utils,  wutils, eutils, Pmg, messages){
     return declare(null, {
         decorate: function(widget){
-            var self = this;
-        	require(["tukos/menuUtils", "tukos/widgets/widgetCustomUtils"], function(mutils, wcutils){
-                menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
-                menuItemsArgs = (widgetName === 'id' || utils.in_array(widgetName, self.objectIdCols))
+            var self = this, form = this.form;
+            require(["tukos/menuUtils", "tukos/widgets/widgetCustomUtils"], function(mutils, wcutils){
+                var menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
+                menuItemsArgs = (utils.in_array(widgetName, self.objectIdCols))
                     ? menuItemsArgs.concat(lang.hitch(self, wcutils.idColsContextMenuItems)(widget))
                     : menuItemsArgs;
                 mutils.buildContextMenu(widget,{type: 'DynamicMenu', atts: {targetNodeIds: [widget.domNode]}, items: menuItemsArgs});
@@ -41,7 +41,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
         },
         setValueOf: function(widgetName, value){
             var widget = registry.byId(this.id + widgetName);
-            if (widget && !widget.inWatchCallback){
+            if (widget && widget.inWatchCallback !== 'value'){
                 widget.set('value', value, '');
             }
         },
@@ -102,16 +102,25 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
            return widgetName ? this.changedWidgets[widgetName] : !utils.empty(this.changedWidgets);
        },
        userHasChanged: function(){
-           //var valuesHaveChanged = !utils.empty(this.userChangedWidgets), customizationHasChanged = !utils.empty(this.customization);
-    	   //return (this.viewMode !== 'Overview' && (valuesHaveChanged || customizationHasChanged)) ? {widgets: valuesHaveChanged, customization: customizationHasChanged} : false;
     	   var hasChanged = {};
     	   if (!utils.empty(this.userChangedWidgets)){
     		   hasChanged = {widgets: true};
     	   }
-    	   if ((Pmg.getCustom().ignoreCustomOnClose !== 'YES') && !utils.empty(this.customization)){
+    	   if ((Pmg.getCustom('ignoreCustomOnClose') !== 'YES') && !utils.empty(this.customization)){
     		   hasChanged.customization = true;
     	   }
     	   return utils.empty(hasChanged) ? false : hasChanged;
+       },
+       checkChangesDialog: function(action, timeout){
+           var changes = this.userHasChanged();
+       	if (!changes){
+               return action();
+           }else{
+               return Pmg.confirmForgetChanges(changes).then(
+                   function(){return timeout === undefined ? action() : setTimeout(action, timeout)},
+                   function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
+               );
+           }
        },
         resetChangedWidgets: function(){
             var changedWidgets = this.changedWidgets;
@@ -175,15 +184,19 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
                 }
             }
         },
-        widgetWatchLocalAction: function(widget, localActionFunctions, newValue){
-            if (!this.inWidgetWatchLocalAction){
-                var self = this;
-                this.inWidgetWatchLocalAction = true;              
-                for (var widgetName in localActionFunctions){
-                    var targetWidget = this.getWidget(widgetName),
-                          widgetActionFunctions =  localActionFunctions[widgetName];
-                    for (var att in widgetActionFunctions){
+        widgetWatchLocalAction: function(widget, watchedAtt, localActionFunctions, newValue){
+            var allowedNestedWatchActions = this.allowedNestedWatchActions, nestedWidgetWatchActions = widget.nestedWatchActions = widget.nestedWatchActions || {},
+            	self = this;
+            this.nestedWatchActions = this.nestedWatchActions || 0;
+            nestedWidgetWatchActions[watchedAtt] = nestedWidgetWatchActions[watchedAtt] || 0;
+            for (var widgetName in localActionFunctions){
+                var targetWidget = this.getWidget(widgetName),
+                      widgetActionFunctions =  localActionFunctions[widgetName];
+                for (var att in widgetActionFunctions){
+                    if (allowedNestedWatchActions === undefined || (this.nestedWatchActions <= allowedNestedWatchActions) && nestedWidgetWatchActions[watchedAtt] < 1){
                         var actionFunction = widgetActionFunctions[att];
+                    	this.nestedWatchActions += 1;
+                        nestedWidgetWatchActions[watchedAtt] += 1;
                         if (actionFunction.triggers[this.watchContext]){
                             var newAtt = actionFunction.action(widget, targetWidget, newValue);
                             if (newAtt != undefined && widget){
@@ -195,9 +208,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
                                 }
                             }
                         }
+                    	this.nestedWatchActions += -1;
+                        nestedWidgetWatchActions[watchedAtt]  += -1;
                     }
                 }
-                this.inWidgetWatchLocalAction = false;
             }
         },
         buildLocalActionFunctions: function(localActionFunctions, actionDescriptions){

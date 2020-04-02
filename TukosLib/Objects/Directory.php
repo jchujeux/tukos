@@ -65,9 +65,15 @@ class Directory{
         'physiocdcs' => 'Physio\Cdcs',
         'physiotemplates' => 'Physio\Templates',
     	'bustrackcatalog' => 'BusTrack\Catalog',
-        'bustrackcustomers' => 'BusTrack\Customers',
+        'bustrackpeople' => 'BusTrack\People',
+        'bustrackorganizations' => 'BusTrack\Organizations',
         'bustrackquotes' => 'BusTrack\Quotes',
         'bustrackinvoices' => 'BusTrack\Invoices',
+        'bustrackinvoicesitems' => 'BusTrack\Invoices\Items',
+        'bustrackpayments'  => 'BusTrack\Payments',
+        'bustrackpaymentsitems' => 'BusTrack\Payments\Items',
+        'bustrackcategories' => 'BusTrack\Categories',
+        'bustrackdashboards' => 'BusTrack\Dashboards',
         'help'              => 'Help',
         ];
     private static $configStatusRange = ['tukos' => 3, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'users' => 10001];

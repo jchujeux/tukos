@@ -6,7 +6,7 @@
 namespace TukosLib\Objects\Itm\Hosts;
 
 use TukosLib\Objects\Itm\Itm;
-use TukosLib\Objects\Itm\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 use TukosLib\TukosFramework as Tfk; 
 
 class Model extends AbstractModel {

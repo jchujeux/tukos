@@ -1,7 +1,7 @@
 <?php
 namespace TukosLib\Objects\Itm\Systems;
 
-use TukosLib\Objects\Itm\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 use TukosLib\Objects\Itm\Itm;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;

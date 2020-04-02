@@ -1,9 +1,10 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/on", "dgrid/OnDemandGrid", "dgrid/Selector", "dgrid/extensions/DijitRegistry", "dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer",
-	"tukos/utils", "tukos/evalutils", "tukos/PageManager"], 
-function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resizer, utils, eutils, Pmg){
+	"tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager"], 
+function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resizer, utils, eutils, mutils, wcutils, Pmg){
     return declare([Grid, DijitRegistry, Hider, Resizer, Selector], {
         constructor: function(args){
-            for (var i in args.columns){
+            var self = this;
+        	for (var i in args.columns){
                 this.setColArgsFunctions(args.columns[i]);
             }
             this.contextMenuItems = {
@@ -12,11 +13,13 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
                         {atts: {label: Pmg.message('viewcellindialog'), onClick: lang.hitch(this, function(evt){this.viewCellInPopUpDialog(this);})}},
                         {atts: {label: Pmg.message('viewcellinwindow'), onClick: lang.hitch(this, function(evt){this.viewInSeparateBrowserWindow(this);})}}
                      ],
+                     idCol: [{atts: {label: Pmg.message('editinnewtab'), onClick: function(evt){self.editInNewTab()}}}].concat(
+                    		 [{atts: {label: Pmg.message('togglerowheight'), onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}]),
                      header: []
             };
         },
         setColArgsFunctions: function(colArgs){
-            ['formatter', 'get', 'renderCell', 'canEdit'].forEach(
+            ['formatter', 'get', 'renderCell', 'canEdit', 'renderHeaderCell'].forEach(
                 function(col, index, array){
                     if (colArgs[col]){
                         colArgs[col] = (typeof this[colArgs[col]] === 'function') ? this[colArgs[col]] : eutils.eval(colArgs[col]);
@@ -26,8 +29,13 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
             );
         },
         postCreate: function(){
-            var self = this;
+            var self = this, form = this.form;
         	this.inherited(arguments);
+        	if (!this.collection){
+        		require(["dstore/Memory"], function(Memory){
+        			self.collection = new Memory({data: []});
+        		});
+        	}
             ['maxHeight', 'maxWidth', 'minWidth', 'width'].forEach(function(att){
             	self.set(att, self[att]);
             });
@@ -35,30 +43,36 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
             	this.renderCallBackFunction = eutils.eval(this.renderCallback, "node, rowData")
             }
             this.keepScrollPosition = true;
-        	this.customizationPath = this.itemCustomization || 'customization' + '.widgetsDescription.' + this.widgetName + '.atts.';
-            this.on("dgrid-cellfocusin", lang.hitch(this, function(evt){
+        	if (!this.itemCustomization){
+        		this.customizationPath = 'customization.widgetsDescription.' + (form.attachedWidget ? form.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription.' : '') + this.widgetName + '.atts.';
+        	}
+        	this.on("dgrid-cellfocusin", lang.hitch(this, function(evt){
                 this.clickedRow = this.row(evt);
             	this.clickedCell = this.cell(evt);
             }));
             this.on("dgrid-columnstatechange", function(evt){
                 var grid = evt.grid;
                 if (grid.customizationPath){
-                    lang.setObject(grid.customizationPath + 'columns.' + evt.column.field + '.hidden', evt.hidden, grid.form);
+                    lang.setObject(grid.customizationPath + 'columns.' + evt.column.field + '.hidden', evt.hidden, grid.getRootForm());
                 }
             });
             this.on("dgrid-columnresize", function(evt){
                 var grid = evt.grid;
                 if (evt.width != 'auto' && grid.customizationPath){
-                	lang.setObject(grid.customizationPath + 'columns.' + grid.columns[evt.columnId].field + '.width', evt.width, grid.form);
+                	lang.setObject(grid.customizationPath + 'columns.' + grid.columns[evt.columnId].field + '.width', evt.width, grid.getRootForm());
                 }
             });
             this.on("dgrid-sort", function(evt){
                 var grid = evt.grid;
                 if (grid.customizationPath){
-                    lang.setObject(grid.customizationPath + 'sort', evt.sort, grid.form);               	
+                    lang.setObject(grid.customizationPath + 'sort', evt.sort, grid.getRootForm());               	
                 }
             });
             this.rowHeights = {};
+            if (this.dynamicColumns){//to ensure columns are not built on instantiation
+            	this.set('columns', {});
+            }
+            this.on(on.selector(".dgrid-row, .dgrid-header", "contextmenu"), lang.hitch(this, this.contextMenuCallback));
         },
     	_setMaxHeight: function(value){
             this.bodyNode.style.maxHeight = value;
@@ -66,11 +80,12 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         canEditRow: function(object){
             return !this.grid.disabled && object.canEdit;
         }, 
-
+        formatContent: function(value, object){
+        	return this.formatType ? utils.transform(value, this.formatType, this.formatOptions, Pmg) : value;
+        },
         renderNamedId: function(object, value, node){
             return this.grid._renderContent(this, object, Pmg.namedId(value));
         },
-
         renderNamedIdExtra: function(object, value, node){
             return this.grid._renderContent(this, object, Pmg.namedIdExtra(value));
         },
@@ -88,10 +103,9 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         },
         renderContent: function(object, value, node){
             var grid = this.grid, row = grid.row(object), 
-            	result = utils.transform((value === undefined || value === null) ? '' : grid.evalFormula ? grid.evalFormula(grid, value, this.field, row.data[grid.collection.idProperty]) : value, this.formatType, this.formatOptions);
+            	result = utils.transform((value === undefined || value === null) ? '' : grid.evalFormula ? grid.evalFormula(grid, value, this.field, row.data[grid.collection.idProperty]) : value, this.formatType, this.formatOptions, Pmg);
             return grid._renderContent(this, object, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {});
         },
-        
         _renderContent: function(column, object, innerHTML, styleAtts){
             var grid = column.grid, row =this.row(object), rowHeight = ((this.rowHeights || {})[row.id] ? this.rowHeights[row.id] : column.minHeightFormatter), atts = {style: lang.mixin({maxHeight: rowHeight, overflow: 'auto'}, styleAtts)},
             	rowId =  object[this.collection.idProperty], node;
@@ -123,7 +137,7 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         		case 'ObjectSelectDropDown':
         			return Pmg.namedId(value);
         		default:
-        			return utils.transform(value, column.formatType, column.formatOptions);
+        			return utils.transform(value, column.formatType, column.formatOptions, Pmg);
         	}
         },
         colDisplayedTitle: function(colName){
@@ -172,7 +186,6 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
             var result = this.collection.getSync(idPropertyValue) || this.emptyRowItem(idPropertyValue);
             return this.dirty ? lang.mixin(lang.clone(result), this.dirty[idPropertyValue]) : result;
         },
-        
         clickedRowValues: function(){
         	var idPropertyValue = this.clickedRowIdPropertyValue();
         	if (this.dirty && this.dirty[idPropertyValue]){
@@ -180,6 +193,40 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         	}else{
         		return this.clickedRow.data;
         	}
+        },
+        _setValue: function(value){
+        	this.collection.setData(value ? value : [])
+        	this.set('collection', this.collection);
+        },
+        _setColumns: function(columns){
+        	var staticColsProperties = this.params.columns;
+        	if (this.dynamicColumns){
+        		for (var col in columns){
+        			if (staticColsProperties){
+            			columns[col] = lang.mixin(columns[col], staticColsProperties[col]);
+        			}
+        			this.setColArgsFunctions(columns[col]);
+        		}
+        	}
+    		this.inherited(arguments);
+        },
+        contextMenuCallback: function(evt){
+            console.log('contextmenucallback');
+        	var row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column, clickedColumn = this.clickedColumn = this.column(evt);
+                var menuItems = lang.clone(this.contextMenuItems);
+                var colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';
+                if (colItems !== 'header' && menuItems.canEdit && row.data.canEdit !== false){
+                	menuItems[colItems] = menuItems[colItems].concat(menuItems.canEdit);
+                }
+                mutils.setContextMenuItems(this, menuItems[colItems].concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this)));
+        },
+        editInNewTab: function(){
+            var grid = this, field  = grid.clickedCell.column.field, id = grid.clickedRowValues()[grid.clickedCell.column.field];
+            if (id){
+                Pmg.tabs.gotoTab({object: Pmg.objectName(id), view: 'Edit', mode: 'Tab', action: 'Tab', query: {id: id}});
+            }
+            if (!utils.empty(query)){
+            }
         }
     });
 });

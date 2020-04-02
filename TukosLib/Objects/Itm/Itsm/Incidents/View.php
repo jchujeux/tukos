@@ -23,7 +23,7 @@ class View extends AbstractView {
             'notifiedby'        => ViewUtils::objectSelectMulti('notifiedby', $this, 'Notified by'),
             'notifiedvia'       => ViewUtils::storeSelect('notifiedVia', $this, 'Notified via'),
             'callbackmethod'    => ViewUtils::storeSelect('callback', $this, 'Call back method'),
-            'urgency'           => ViewUtils::storeSelect('urgency', $this, 'Urgency', ['atts' => ['edit' => [
+            'urgency'           => ViewUtils::storeSelect('urgency', $this, 'Urgency', null, ['atts' => ['edit' => [
                             'onChangeLocalAction' => [
                                 'priority'  => ['value' =>
                                     "if (newValue === ''){return '';}else{var impactW = sWidget.form.getWidget('impact'), impactValue = impactW.get('value');" .
@@ -34,7 +34,7 @@ class View extends AbstractView {
                     ]
                 ]
             ),
-            'impact'            => ViewUtils::storeSelect('impact', $this, 'Impact', ['atts' => ['edit' => [
+            'impact'            => ViewUtils::storeSelect('impact', $this, 'Impact', null, ['atts' => ['edit' => [
                             'onChangeLocalAction' => [
                                 'priority'  => ['value' =>
                                     "if (newValue === ''){return '';}else{var urgencyW = sWidget.form.getWidget('urgency'), urgencyValue = urgencyW.get('value');" .

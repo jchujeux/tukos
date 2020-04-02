@@ -45,9 +45,9 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
 			   	self.lazyCreateAccordion();
 			   }
 				   appLayout.startup();
-			   var leftPaneButton = registry.byId('showHideLeftPane'), leftPaneMaxButton = registry.byId('showMaxLeftPane'), displayStatus = domStyle.get('leftPanel', 'display');
+			   var leftPaneButton = registry.byId('showHideLeftPane'), leftPaneMaxButton = registry.byId('showMaxLeftPane'), displayStatus = domStyle.get('leftPanel', 'display'), isMaximized = false;
 			   if (leftPaneButton){
-			       leftPaneButton.set("iconClass", displayStatus === 'none' ? "ui-icon tukos-right-arrow" : "ui-icon tukos-left-superarrow"), isMaximized = false;;
+			       leftPaneButton.set("iconClass", displayStatus === 'none' ? "ui-icon tukos-right-arrow" : "ui-icon tukos-left-superarrow");
 			       leftPaneButton.on('click', function(){
 			           var displayStatus = domStyle.get('leftPanel', 'display');
 			           isMaximized = false;

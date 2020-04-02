@@ -9,7 +9,7 @@
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/css/StatusBar.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/css/FindReplace.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/css/InsertEntity.css" media="screen">
-        <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/calendar/themes/claro/Calendar.css" media="screen">
+		<link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/calendar/themes/claro/Calendar.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/form/resources/UploaderFileList.css" media="screen">
         <link rel="stylesheet" href="<?= $this->tukosLocation ?>/resources/tukos.css" media="screen">
     </head>

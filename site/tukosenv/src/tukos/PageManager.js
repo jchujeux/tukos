@@ -1,10 +1,11 @@
 define(["dojo/ready", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", "dojo/json",
-		"tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend"],
-function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, _WidgetsExtend, _WidgetsFormExtend){
+		"dgrid/List", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/utils"],
+function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, List, _WidgetsExtend, _WidgetsFormExtend, utils){
     var stores, tabs,
         objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
 		lang.extend(_WidgetBase, _WidgetsExtend);//for this to work in all cases, no require for a widget should be made before this statement executes, above in PageManager, and in modules required in evalUtils (which _WidgetsExtend depends on)
+		lang.extend(List, _WidgetsExtend);
 		lang.extend(_FormValueMixin, _WidgetsFormExtend);
 		lang.extend(_CheckboxMixin, _WidgetsFormExtend);
 	return {
@@ -20,12 +21,12 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
            Date.prototype.toJSON = function(){
                return dojo.date.locale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
            };
-           require([obj.isMobile ? "tukos/mobile/buildForm" : "tukos/desktop/buildForm", "tukos/StoresManager", "tukos/utils"], function(buildForm, StoresManager, utils){
-           	stores = new StoresManager();
-           	buildForm.initialize();
-           self.requestUrl = function(urlArgs){//functions depending on utils located here so that utils can be located in the require above and then can depend on PageManager
-               return string.substitute(urlTemplate, {dialogueUrl: self.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
-           };
+           require([obj.isMobile ? "tukos/mobile/buildForm" : "tukos/desktop/buildForm", "tukos/StoresManager"], function(buildForm, StoresManager){
+	           stores = new StoresManager();
+	           buildForm.initialize();
+	           self.requestUrl = function(urlArgs){//functions depending on utils located here so that utils can be located in the require above and then can depend on PageManager
+	               return string.substitute(urlTemplate, {dialogueUrl: self.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
+	           };
            });
 	   },
 	   initialize: function(obj) {
@@ -37,7 +38,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             Date.prototype.toJSON = function(){
                 return dojo.date.locale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
             };
-            require([obj.isMobile ? "tukos/mobile/buildPage" : "tukos/desktop/buildPage", "tukos/StoresManager", "tukos/utils"], function(buildPage, StoresManager, utils){
+            require([obj.isMobile ? "tukos/mobile/buildPage" : "tukos/desktop/buildPage", "tukos/StoresManager"], function(buildPage, StoresManager){
             	stores = new StoresManager();
             	buildPage.initialize();
                 self.requestUrl = function(urlArgs){//functions depending on utils locateed here so that utils can be located in the require above and then can depend on PageManager
@@ -164,7 +165,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         	return this[tabOrAccordion.isAccordion()? 'accordion' : 'tabs'].refresh(action, data, keepOptions);
         },
         serverDialog: function(urlArgs, options, feedback, returnDeferred){//if returnDeferred is true, the returnedDfD.response.getHeader() will be available to extract header information
-            var self = this, isObjectFeedback = typeof feedback === 'object', defaultFeedback = isObjectFeedback ? feedback.defaultFeedback : feedback;
+            var self = this, isObjectFeedback = utils.isObject(feedback), defaultFeedback = isObjectFeedback ? feedback.defaultFeedback : feedback;
             options = lang.mixin({method: 'POST', timeout: 180000, handleAs: 'json'},  options);
             if (options.data){
                 options.data = JSON.stringify(options.data);
@@ -176,7 +177,8 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             }
             var dfdOrPromise = request(this.requestUrl(urlArgs), options, returnDeferred);
             dfdOrPromise.then(
-                 function(response){
+            	function(response){
+                    response = response || {};
                     if (response.extendedIds){
                         self.addExtendedIdsToCache(response.extendedIds);
                     }
@@ -234,28 +236,20 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             	}
             }
         },
-/*
-        appendFeedback: function(serverFeedback, clientFeedback, beep){
-            this.setFeedback(serverFeedback, clientFeedback, ' ', beep);
-        },
-*/
         addFeedback: function(serverFeedback, clientFeedback, beep){
             this.setFeedback(serverFeedback, clientFeedback, "\n", beep);
         },
         namedId: function(id){
-            return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].name + '(' + id + ')' : '(' + id + ')') : '');
+            //return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].name + '(' + id + ')' : '(' + id + ')') : '');
+            return id ? (utils.drillDown(this.cache.extendedIds, [id, 'name']) || utils.drillDown(this.cache.extras, [id, 'name'], '')) + '(' + id + ')' : '';
         },
         itemName: function(id){
             return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].name : '') : '');
         },
         objectName: function(id){
-            return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].object : '') : '');
+            //return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].object : '') : '');
+            return id ? (utils.drillDown(this.cache.extendedIds, [id, 'object']) || utils.drillDown(this.cache.extras, [id, 'object'])) : '';
         },
-/*
-        addExtendedIdsToCache: function(newExtendedIds){
-            this.cache.extendedIds = utils.merge(this.cache.extendedIds, newExtendedIds);
-        },
-*/
         addExtrasToCache: function(newExtras){
         	this.cache.extras = lang.mixin(this.cache.extras, newExtras);
         },
@@ -348,8 +342,8 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         	lang.setObject(path, value, this.cache.newPageCustomization);
         },
         
-        getCustom: function(){
-        	return this.cache.newPageCustomization;
+        getCustom: function(property){
+        	return this.cache.newPageCustomization[property];
         }
     }
 });

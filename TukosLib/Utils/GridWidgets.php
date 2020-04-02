@@ -25,7 +25,16 @@ trait  GridWidgets{
         }
         return $attsTarget;
     }
-
+    public static function basicGrid($atts, $editOnly = true){
+        if (isset($atts['columns'])){
+            foreach ($atts['columns'] as $key => &$description){
+                if (isset($description['formatType']) && ! isset($description['formatter'])){
+                    $description['formatter'] = 'formatContent';
+                }
+            }
+        }
+        return ['type' =>'BasicGrid', 'atts' => $atts];
+    }
     public static function simpleDgrid($atts, $editOnly = true){
         if ($editOnly){
             $defAtts = ['title' => '', 'colspan' => 1, 'columns' => [], 'initialId'  => true];
@@ -85,7 +94,7 @@ trait  GridWidgets{
     }
     public static function overviewDgrid($atts, $editOnly = true){
         $defAtts = ['title' => '', 
-                    'storeArgs' => ['useRangeHeaders' => true]/*, 'selectionMode' => 'none'*/, 'allowSelectAll' => true, 'minRowsPerPage' => 25, 'maxRowsPerPage' => 50
+                    'storeArgs' => ['useRangeHeaders' => true], 'allowSelectAll' => true, 'minRowsPerPage' => 25, 'maxRowsPerPage' => 50
         ];
         $defAtts['columns'] = [['selector' => 'checkbox', 'label' => Tfk::tr('selector'), 'width' => 30, 'rowsFilters' =>  false/*, 'unhidable' => true*/]];
         foreach ($atts['colsDescription'] as $col => $description){
@@ -120,7 +129,8 @@ trait  GridWidgets{
         $atts = self::complete($atts, (isset($element['atts']['edit']) ? $element['atts']['edit'] : $atts));
         if ($mode === 'overview'){
             if ($element['type'] === 'StoreSelect'){
-                $atts['editorArgs'] = ['storeArgs' => ['data' => $element['atts']['edit']['storeArgs']['data']]];
+                $editorArgs = ['storeArgs' => ['data' => $element['atts']['edit']['storeArgs']['data']]];
+                $atts['editorArgs'] = empty($atts['editorArgs']) ? $editorArgs : Utl::array_merge_recursive_replace($editorArgs, $atts['editorArgs']);
             }
         }else{
             $atts['disabled'] = (isset($atts['disabled']) ? $atts['disabled'] : (isset($element['atts']['edit']['disabled']) ? $element['atts']['edit']['disabled'] : false));

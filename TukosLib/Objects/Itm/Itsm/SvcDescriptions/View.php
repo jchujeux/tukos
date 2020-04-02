@@ -27,14 +27,14 @@ class View extends AbstractView {
                     'period'  => ViewUtils::objectSelect($this, 'Time schedule', 'calendarsentries', ['atts' => ['storeedit' => ['width' => 50]]]),
                     'contact' => ViewUtils::storeSelect('callback', $this, 'Contact method', null, ['atts' => ['storeedit' => ['width' => 50]]]),
                 ],
-                ['atts' => ['edit' => ['colspan' => 4, 'style' => ['width' => '60%'], 'objectIdCols' => ['team', 'period'], 'sort' => [['property' => 'rowId', 'descending' => false]]]]]
+                ['atts' => ['edit' => ['colspan' => 4, 'style' => ['width' => '60%'], 'sort' => [['property' => 'rowId', 'descending' => false]]]]]
             ),
             'incidentssla' => ViewUtils::JsonGrid($this, 'IncidentsSLATargets', [
                     'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                     'priority' => ViewUtils::storeSelect('priority', $this, 'Priority'),
                     'sla' => ViewUtils::objectSelect($this, 'Description', 'itslatargets'),
                 ],
-                ['atts' => ['edit' => ['objectIdCols' => ['description']], 'storeedit' => ['editorArgs' => ['dropdownFilters' => ['itsmprocess' => 'incident']]], 'sort' => [['property' => 'rowId', 'descending' => false]]]]
+                ['atts' => ['edit' => ['storeedit' => ['editorArgs' => ['dropdownFilters' => ['itsmprocess' => 'incident']]], 'sort' => [['property' => 'rowId', 'descending' => false]]]]]
             ),
             'incidentswf' => ViewUtils::JsonGrid($this, 'Incidents workflow', [
                     'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
@@ -42,7 +42,7 @@ class View extends AbstractView {
                     'assignedto' => ViewUtils::objectSelect($this, 'assignedto', 'teams'),
                     'notifyvia' => ViewUtils::storeSelect('callback', $this, 'Notify via'),
                 ],
-                ['atts' => ['edit' => ['objectIdCols' => ['assignedto'], 'sort' => [['property' => 'rowId', 'descending' => false]],]]]
+                ['atts' => ['edit' => ['sort' => [['property' => 'rowId', 'descending' => false]],]]]
             ),
         ];
         $this->customize($customDataWidgets, [], ['grid' => ['supportgroups', 'incidentssla', 'incidentswf']], ['supportgroups' => [], 'incidentssla' => [], 'incidentswf' => []]);

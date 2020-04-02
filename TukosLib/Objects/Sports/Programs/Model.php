@@ -2,15 +2,13 @@
 namespace TukosLib\Objects\Sports\Programs;
 
 use TukosLib\Objects\Sports\Sports;
-use TukosLib\Objects\Sports\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 use TukosLib\Objects\Sports\Programs\Questionnaire;
 use TukosLib\Google\Calendar;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
 use TukosLib\Utils\HtmlUtilities as HUtl;
-use TukosLib\Objects\StoreUtilities as SUtl;
-use TukosLib\Utils\Dropbox as Dropbox;
 use TukosLib\TukosFramework as Tfk;
 use TukosLib\Google\Sheets;
 
@@ -34,9 +32,10 @@ class Model extends AbstractModel {
         	'synchroweeksbefore'   => 'INT(11) DEFAULT NULL',
         	'synchroweeksafter'   => 'INT(11) DEFAULT NULL',
         	'synchnextmonday' => "ENUM ('" . implode("','", $this->synchnextmondayOptions) . "') DEFAULT NULL",
-			'questionnairetime'  =>  'VARCHAR(20)  DEFAULT NULL'
+			'questionnairetime'  =>  'VARCHAR(20)  DEFAULT NULL',
+            'weeklies' => 'longtext'
         ];
-        parent::__construct($objectName, $translator, 'sptprograms', ['parentid' => ['sptathletes']], [], $colsDefinition, [], [], ['worksheet', 'custom']);
+        parent::__construct($objectName, $translator, 'sptprograms', ['parentid' => ['sptathletes']], ['weeklies'], $colsDefinition, [], [], ['worksheet', 'custom']);
         $this->afterGoogleSync = false;
     }
 
@@ -62,14 +61,6 @@ class Model extends AbstractModel {
             $person = $peopleModel->getOneExtended(['where' => ['id' => $item['parentid']], 'cols' => ['email']]);
             $item['sportsmanemail'] = $person['email'];
         }
-/*
-        if (!is_null($weeksBefore = Utl::getItem('synchroweeksbefore', $item))){
-    		$item['synchrostart'] = date('Y-m-d', strtotime('last monday') - $weeksBefore * 7 * 24 * 3600);
-    	}
-    	if (!is_null($weeksAfter = Utl::getItem('synchroweeksafter', $item))){
-    		$item['synchroend'] = date('Y-m-d', strtotime('next sunday') + $weeksAfter *  (7 * 24) * 3600);
-        }
-*/
         return $item;
     }
     public function loadChartData($item){
@@ -374,7 +365,7 @@ class Model extends AbstractModel {
         	$where[] = ['col' => 'startdate', 'opr' => '<=', 'values' => $maxTimeToSync];
         }
         $sessionsToSync = $sessionsModel->getAll([
-        		'where' => $this->user->filter($where, 'sptsessions'), 'cols' => ['id', 'name', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'mainactivity', 'warmdown', 'comments', 'googleid']
+        		'where' => $this->user->filter($where, 'sptsessions'), 'cols' => ['id', 'name', 'startdate', 'sessionid', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'mainactivity', 'warmdown', 'comments', 'googleid']
         ]);
         $calId = empty($atts['googlecalid']) ? $atts['googlecalid'] : $atts['googlecalid'];
         $existingGoogleEvents = [];
@@ -440,7 +431,6 @@ class Model extends AbstractModel {
         $description = '';
         foreach($attCols as $col => $attType){
             if (!empty($session[$col])){
-                //$description .= '<b>' . $this->tr($col) . '</b>: ' . Utl::format($session[$col], $attType, $this->tr) . '<br>';
                 $description .= "<b>{$this->tr($col)}" . ($col === 'duration' ? " {$this->tr('estimated')}</b> (HH:MM): " : "</b>: ") . ($attType === 'StoreSelect'
                         ? Utl::format($session[$col], $attType, $this->tr,  $sessionView->dataWidgets[$col]['atts']['edit']['storeArgs']['data'], $this->storeSelectCache)
                         : Utl::format($session[$col], $attType, $this->tr))
@@ -454,8 +444,9 @@ class Model extends AbstractModel {
         }
         if ($includeTrackingFormUrl){
             $sessionName = rawurlencode($session['name']);
+            $sport = rawurlencode($session['sport']);
             $description .= '<a href="' .  Tfk::$registry->rootUrl . Tfk::$registry->appUrl .
-            "Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&version=$version&parentid=$programId&date={$session['startdate']}&name=$sessionName&sport={$session['sport']}" .
+            "Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&version=$version&parentid=$programId&date={$session['startdate']}&name=$sessionName&sport=$sport&sessionid={$session['sessionid']}" .
             ($logoFile ? "&logo=$logoFile" : '') . ($presentation ? "&presentation=$presentation" : '') . "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared')) . '">' .
             $this->tr('SessionFeedback') . '</a><br>';
         }
@@ -504,18 +495,5 @@ class Model extends AbstractModel {
             $this->$class = new $fullClassPath($params);
         }
     }
-    public function downloadPerformedSessions($query, $atts){
-        $this->instantiate('SessionsFeedback', $atts['version']);
-        $this->SessionsFeedback->downloadPerformedSessions($query, $atts);
-    }
-    public function uploadPerformedSessions($query, $atts){
-        $this->instantiate('SessionsFeedback', $atts['version']);
-        $this->SessionsFeedback->uploadPerformedSessions($query, $atts);
-    }
-    public function removePerformedSessions($query, $atts){
-        $this->instantiate('SessionsFeedback', $atts['version']);
-        $this->SessionsFeedback->removePerformedSessions($query, $atts);
-    }
-    
 }
 ?>

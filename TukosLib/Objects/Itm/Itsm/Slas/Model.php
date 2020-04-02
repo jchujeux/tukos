@@ -1,7 +1,7 @@
 <?php
 namespace TukosLib\Objects\Itm\Itsm\Slas;
 
-use TukosLib\Objects\Itm\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 

@@ -18,7 +18,7 @@ class View extends AbstractView {
     	parent::__construct($objectName, $translator, 'Parent', 'Description', []);
 		array_push($this->mustGetCols, 'sources', 'periodstart', 'periodend', 'displayeddate', 'calendarsentries');
     	$this->doNotEmpty = ['displayeddate'];
-    	$this->setGridWidget('calendarsentries', 'startdatetime', 'enddatetime');
+    	$this->setGridWidget('calendarsentries');
 
     	$this->dataWidgets['parentid']['atts']['edit']['onChangeLocalAction'] = ['parentid' => ['localActionStatus' =>
     			"var changedSessionsEntries = sWidget.form.hasChanged('sessionsentries');\n" .
@@ -49,7 +49,7 @@ class View extends AbstractView {
     	return [
     			'calendarsentries' => [
     					'atts' => [
-    							'title' => $this->tr('Appointments'), 'maxHeight' => '300px', 'storeType' => 'LazyMemoryTreeObjects', 'allowApplicationFilter' => 'yes',
+    							'title' => $this->tr('Appointments'), 'maxHeight' => '300px', 'storeType' => 'LazyMemoryTreeObjects', 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'startdatetime', 'endDateTimeCol' => 'enddatetime',
     							'dndParams' => ['copyOnly' => true, 'selfAccept' => false],
     							'onChangeNotify' => [
     									'calendar' => ['startdatetime' => 'startTime', 'duration' => 'duration',  'enddatetime' => 'endTime',  'allday' => 'allDay', 'name' => 'summary', 'id' => 'objectId', 'comments' => 'comments',
@@ -63,9 +63,7 @@ class View extends AbstractView {
     									'templates' => ['fields' => [/*'parentid' => 'parentid', */'allday' => 'allday', 'name' => 'name', 'comments' => 'comments', 'startdatetime' => 'startdatetime', 'duration' => 'duration', 'enddatetime' => 'enddatetime',
     											'periodicity' => 'periodicity', 'lasteststartdatetime' => 'lasteststartdatetime', 'backgroundcolor' => 'backgroundcolor']],
     							],
-    							'onWatchLocalAction' => ['allowApplicationFilter' => [
-    									'calendarsentries' => $this->allowApplicationFilterChangeGridWidgetLocalAction
-    							]],
+    							'onWatchLocalAction' => ['allowApplicationFilter' => ['calendarsentries' => $this->dateChangeGridLocalAction("tWidget.valueOf('displayeddate')", 'tWidget', 'newValue')]],
     					],
     					'initialRowValue' => ['duration' => '[1, "hour"]'],
     					'filters' => ['#sources' => '@sources', [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]],
@@ -115,26 +113,27 @@ class View extends AbstractView {
 	        	],
     			
     			'templates' => [
-    					'object' => 'calendarsentries',
-    					'atts' => [
-    							'title' => $this->tr('Templates'), 'storeType' => 'LazyMemoryTreeObjects',  'colspan' => 1, 'noSendOnSave' => ['selected'],
-    							'dndParams' => ['copyOnly' => true, 'selfAccept' => false], 'columns' => ['selected' => Widgets::description(viewUtils::checkBox($this, 'Selected', ['atts' => ['edit' => [
-									'onChangeLocalAction' => ['selected' => ['localActionStatus' => [
-										"if (newValue){\n" .
-											"var grid = sWidget.grid, collection = grid.collection, idp = collection.idProperty, dirty = grid.dirty, rowValues = grid.clickedRowValues(), calendarEntries = grid.form.getWidget('calendarsentries');\n" .
-											"console.log('newValue is true: ' + newValue);\n" .
-											"collection.fetchSync().forEach(function(item){\n" .
-												"var idv = item[idp], dirtyItem = dirty[idv];\n" .
-												"if ((dirtyItem && dirtyItem.hasOwnProperty('selected') && dirtyItem.selected) || item.selected){\n" .
-													"grid.updateDirty(idv, 'selected', false);\n" .
-												"}\n" .
-											"})\n;" .
-											"calendarEntries.set('initialRowValue', {duration: rowValues.duration, backgroundcolor: rowValues.backgroundcolor})\n;" .
+					'object' => 'calendarsentries',
+					'atts' => [
+						'title' => $this->tr('Templates'), 'storeType' => 'LazyMemoryTreeObjects',  'colspan' => 1, 'noSendOnSave' => ['selected'],
+						'dndParams' => ['copyOnly' => true, 'selfAccept' => false], 
+				        'columns' => ['selected' => Widgets::description(viewUtils::checkBox($this, 'Selected', ['atts' => ['edit' => [
+							'onChangeLocalAction' => ['selected' => ['localActionStatus' => [
+								"if (newValue){\n" .
+									"var grid = sWidget.grid, collection = grid.collection, idp = collection.idProperty, dirty = grid.dirty, rowValues = grid.clickedRowValues(), calendarEntries = grid.form.getWidget('calendarsentries');\n" .
+									"console.log('newValue is true: ' + newValue);\n" .
+									"collection.fetchSync().forEach(function(item){\n" .
+										"var idv = item[idp], dirtyItem = dirty[idv];\n" .
+										"if ((dirtyItem && dirtyItem.hasOwnProperty('selected') && dirtyItem.selected) || item.selected){\n" .
+											"grid.updateDirty(idv, 'selected', false);\n" .
 										"}\n" .
-										"return true;\n"
-								]]]]]]), false),]],
-    					'filters' => ['grade' => 'TEMPLATE'],
-    					'sendOnHidden' => ['contextid']
+									"})\n;" .
+									"calendarEntries.set('initialRowValue', {duration: rowValues.duration, backgroundcolor: rowValues.backgroundcolor})\n;" .
+								"}\n" .
+								"return true;\n"
+						]]]]]]), false),]],
+					'filters' => ['grade' => 'TEMPLATE'],
+					'sendOnHidden' => ['contextid']
     			],
     		];
     }
@@ -183,15 +182,9 @@ class View extends AbstractView {
 								],
 								'storeedit' => ['width' => 400]
 						]]),
-						'backgroundcolor' => viewUtils::colorPickerTextBox($this, 'BackgroundColor'/*, ['atts' => ['edit' => [
-								'onChangeLocalAction' => ['backgroundcolor' => ['localActionStatus' => [
-									"var form = sWidget.grid.form, calendar = form.getWidget('calendar');\n"	.
-									"calendar.customization.defaultItemsAtts = undefined;\n" .
-										"return true;\n"
-								]]]
-						]]]*/),
+						'backgroundcolor' => viewUtils::colorPickerTextBox($this, 'BackgroundColor'),
 					],
-					['atts' => ['edit' => [/*'colspan' => 4, 'style' => ['width' => '60%'], */'objectIdCols' => ['tukosparent'], 'sort' => [['property' => 'rowId', 'descending' => false]]]]]
+					['atts' => ['edit' => ['sort' => [['property' => 'rowId', 'descending' => false]]]]]
 				),
 				'periodstart' => ViewUtils::tukosDateBox($this, 'Periodstart', ['atts' => ['edit' => ['onWatchLocalAction' => ['value' => [
                         'weeksbefore' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "return '';" ]],

@@ -22,6 +22,7 @@ class TukosModel {
         'creator'      =>  'INT(11) NOT NULL',
         'updator'      =>  'INT(11) NOT NULL',
         'permission'   =>  "ENUM ('NOTDEFINED', 'PR', 'RO', 'PU', 'ACL')",
+        'acl'           => 'longtext',
         'grade'          =>  "ENUM ('TEMPLATE', 'NORMAL', 'GOOD', 'BEST')",
         'worksheet'    =>  'longtext',
         'custom'       =>  'longtext',
@@ -31,7 +32,7 @@ class TukosModel {
         
 
     public $_textColumns = ['char', 'varc', 'long', 'text'];
-    public $_largeColumns = ['medi', 'long'];
+    public $_largeColumns = ['mediumte', 'longtext'];
     
     function __construct () {
         Tfk::$registry->set('store', function(){
@@ -57,7 +58,6 @@ class TukosModel {
         $this->allCols = array_keys($this->_colsDefinition);
         $this->sharedObjectCols = array_diff($this->allCols, ['object']);
         $this->idColsObjects = ['parentid' => [$this->tableName], 'contextid' => ['contexts'], 'creator' =>['users'], 'updator' => ['users']];
-        $this->idCols = array_keys($this->idColsObjects);
     }
     
     public function nextId($configStatus, $increment = true){

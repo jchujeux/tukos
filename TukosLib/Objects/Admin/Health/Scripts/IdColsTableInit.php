@@ -44,19 +44,6 @@ class IdColsTableInit {
                     $idCols = $objectModel->idCols;
                     $objectModel->setIdCols($idCols);
                     foreach ($idCols as $idCol){
-
-                        /*$updatedCount = $objectModel->updateAll([$idCol => 0], ['where' => [['col' => $idCol, 'opr' => 'IS NULL', 'values' => null]]]);
-                        if ($updatedCount){
-                            echo 'Object: ' . $objectName . 'Updated count - ' . $idCol . ' from null to 0: ' . count($updatedCount) . '<br>';
-                        }
-                        $stmt = $store->hook->query("SELECT count(*), `id` FROM `" . $objectName . "`WHERE `id` = `" . $idCol . "`");
-                        $results = $stmt->fetchAll();
-                        if(count($results) > 1 || $results[0]['count(*)'] > 0){
-                            Tfk::log_message('on', 'Object: ' . $objectName . ' - rows with id = ' . $colId . ': ', $results);
-                        }
-                        $stmt = $store->hook->query("ALTER TABLE `" . $objectName . "` CHANGE `" . $idCol . "` `" . $idCol . "` INT( 11 ) NOT NULL DEFAULT '0'", []);
-                        */
-
                         $results = $objectModel->getAll([
                              'where' => [], 
                               'cols' => ['count(*)', $idCol],

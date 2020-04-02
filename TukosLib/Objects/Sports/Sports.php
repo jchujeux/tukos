@@ -37,5 +37,6 @@ class Sports {
         '8' => 'difficult', '9' => 'verydifficult', '10' => 'extremelydifficult'];
     public static $moodOptions = ['10' => 'supermood', '9' => 'verygoodmood',  '8' => 'goodmood', '7' => 'aboveaveragemood', '6' => 'averagemood', '5' => 'belowaveragemood', '4' => 'ratherbadmood',
         '3' => 'badmood', '2' => 'verybadmood', '1' => 'extremelybadmood'];
+    public static $sessionidOptions = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5'];
 }
 ?>

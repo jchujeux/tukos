@@ -24,7 +24,7 @@ trait ItemJsonCols {
             if (is_array($values[$col])){
                 if ($jsonFilter || Utl::getItem($col, $this->jsonColsFilters)){
                     $values[$col] = Utl::array_filter_recursive($values[$col],  function($value){
-                            return (!empty($value)) || $value === 0; //$value !== '' || ;//(!empty($value));
+                            return (!empty($value)) || $value === 0;
                     });
                 }
                 $values[$col] = json_encode($values[$col]);

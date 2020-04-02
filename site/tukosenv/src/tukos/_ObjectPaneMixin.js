@@ -43,41 +43,41 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
                 urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: this.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
                 return all(data).then(lang.hitch(this, function(data){
                     return Pmg.serverDialog(urlArgs, {data: data}, noLoadingIcon ? defaultDoneMessage : {widget: this.parent, att: 'title', defaultMessage: defaultDoneMessage}).then(lang.hitch(this, function(response){
-    	                	if (response['data'] === false){
-    	                        this.inServerDialog = false;
-    	                		return response;
-    	                    }else if(response['data'] !== undefined){
-    	                        this.markIfChanged = this.watchOnChange = false;
-    	                        this.watchContext = 'server';
-    	                        return when(this.emptyWidgets(emptyBeforeSet), lang.hitch(this, function(){;
-    	                            this.watchOnChange = true;
-    	                            this.markIfChanged = (markResponseIfChanged  ? true : false);
-    	                            return when(this.setWidgets(response['data']), lang.hitch(this, function(){
-    	                                if (response['title'] && dcl.contains(this.domNode.parentNode, 'dijitTabPane')){
-    	                                    Pmg.tabs.setCurrentTabTitle(response['title']);
-    	                                }
-    	                                setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
-    	                                	if (!this.markIfChanged){
-        	                                    this.resetChangedWidgets();
-    	                                	}
-    	                                	this.markIfChanged = true;
-    	                                	this.watchContext = 'user';
-    	                                }, 0));
-    	                                ready(function(){
-    	                                    if (Pmg.tabs){
-    		                                	Pmg.tabs.currentPane().resize();	                                    	
-    	                                    }
-    	                                });
-    	                                this.inServerDialog = false;
-    	                                return response;
-    	                            }));
-    	                        }));
-    	                    }else{
-    	                    	this.resetChangedWidgets();
-    	                        this.inServerDialog = false;
-    	                    	return response;
-    	                    }
-    	                }),
+	                    	if (response['data'] === false){
+	    	                        this.inServerDialog = false;
+	    	                		return response;
+		                    }else if(response['data'] !== undefined){
+		                        this.markIfChanged = this.watchOnChange = false;
+		                        this.watchContext = 'server';
+		                        return when(this.emptyWidgets(emptyBeforeSet), lang.hitch(this, function(){;
+		                            this.watchOnChange = true;
+		                            this.markIfChanged = (markResponseIfChanged  ? true : false);
+		                            return when(this.setWidgets(response['data']), lang.hitch(this, function(){
+		                                if (response['title'] && dcl.contains(this.domNode.parentNode, 'dijitTabPane')){
+		                                    Pmg.tabs.setCurrentTabTitle(response['title']);
+		                                }
+		                                setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
+		                                	if (!this.markIfChanged){
+	    	                                    this.resetChangedWidgets();
+		                                	}
+		                                	this.markIfChanged = true;
+		                                	this.watchContext = 'user';
+		                                }, 0));
+		                                ready(function(){
+		                                    if (Pmg.tabs){
+			                                	Pmg.tabs.currentPane().resize();	                                    	
+		                                    }
+		                                });
+		                                this.inServerDialog = false;
+		                                return response;
+		                            }));
+		                        }));
+		                    }else{
+		                    	this.resetChangedWidgets();
+		                        this.inServerDialog = false;
+		                    	return response;
+		                    }
+	    	                }),
     	                lang.hitch(this, function(error){
                     		this.inServerDialog = false;
     	                })
@@ -85,30 +85,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
                 }));
             }
         }, 
-        widgetChangeServerDialog: function(widget){
-            var valuesToPost = {'input': {}};
-            for (var i in widget.onChangeServerAction.inputWidgets){
-                var theWidgetName = widget.onChangeServerAction.inputWidgets[i];
-                valuesToPost.input[theWidgetName] = widget.valueOf('#' + theWidgetName);
-            }
-            if (widget.onChangeServerAction.outputWidgets){
-                valuesToPost.output = widget.onChangeServerAction.outputWidgets;
-            }
-
-            var url = {action: 'hasChanged', query:{widget: widget.widgetName}};
-            if (widget.onChangeServerAction.urlArgs){
-                url = utils.mergeRecursive(url, widget.onChangeServerAction.urlArgs);
-            }
-            this.serverDialog(url, valuesToPost, [], 'action done' /*messages.actionDone*/, true); 
-        },
-
-        widgetWatchServerAction: function(widget, actionDescriptions, newValue){
-            var url = {action:  'Process', query: {widget: widget.widgetName}};
-            if (actionDescriptions.urlArgs){
-                url = utils.mergeRecursive(url, actionDescriptions.urlArgs);
-            }
-            this.serverDialog(url, this.changedValues(), [], messages.actionDone, true); 
-        },
         tabContextId: function(){
             return this.contextPaths[0][this.contextPaths[0].length -1]['id'];
         }

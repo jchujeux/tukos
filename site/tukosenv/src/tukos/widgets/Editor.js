@@ -198,7 +198,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
             return (deferred ? (deferred.isResolved() ? this.serverValue : deferred) : this.serverValue);
         },
         startup: function(){
-        	if (this.style && typeof this.style === 'object'){// richtext only supports string notation
+        	if (utils.isObject(this.style)){// richtext only supports string notation
                 var style = this.style, changeStyle = lang.hitch(this, this.changeStyle);
                 delete this.style;
             }

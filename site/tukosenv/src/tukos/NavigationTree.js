@@ -150,7 +150,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", 
         save: function(){
         	var changesToSend = {}, index, parentid;
         	utils.forEach(this.model.changesCache.changedIds, function(change, id){
-        		//changesToSend[id] = (index = (parentid = change.currentParentId).indexOf('@')) > -1 ? parentid.substring(index + 1) : parentid;
         		var currentParentId = change.currentParentId;
         		changesToSend[id] = typeof currentParentId === 'string' && (index = (parentid = currentParentId).indexOf('@')) > -1 ? parentid.substring(index + 1) : currentParentId;
         	});

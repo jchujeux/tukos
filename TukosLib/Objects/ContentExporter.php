@@ -139,7 +139,7 @@ trait ContentExporter {
 	    $bodyAtts = 'style="margin:0; padding: 0;" onload="subst()"';
 	    $headerDivAtts = null;
 	    if (!empty($atts['contentmargin'])){
-	        $htmlToPdfOptions = '--margin-top ' . $atts['contentmargin'] . ' ';
+	        $htmlToPdfOptions = ' --margin-top ' . $atts['contentmargin'] . ' ';
 	        $offset = !empty($atts['marginoffset']) ? $atts['marginoffset'] : 30;
 	        $coef = !empty($atts['margincoef']) ? $atts['margincoef'] : 1.3;
 	        $headerDivOptions = 'style="height:' . intval($offset + $coef * ($atts['contentmargin'] - $offset)) . 'mm;overflow:hidden;"';
@@ -148,21 +148,21 @@ trait ContentExporter {
 	        $htmlToPdfOptions .= '-O landscape ';
 	    }
 	    if ($atts['smartshrinking'] === 'off'){
-	        $htmlToPdfOptions .= '--disable-smart-shrinking ';
+	        $htmlToPdfOptions .= ' --disable-smart-shrinking ';
 	    }
 	    if ($atts['zoom'] != 100){
 	        $zoomValue = floatval($atts['zoom'])/100;
-	        $htmlToPdfOptions .= '--zoom ' . $zoomValue . ' ';
+	        $htmlToPdfOptions .= ' --zoom ' . $zoomValue . ' ';
 	    }
 	    if (!empty($atts['fileheader'])){
 	        $headerFileName = $dirFileName . 'header.htm';
 	        $this->buildHtmlFile($headerFileName, $atts['fileheader'], $this->htmlHeaderScript, $bodyAtts, $headerDivAtts);
-	        $htmlToPdfOptions .= '--header-html ' . $headerFileName . ' ';
+	        $htmlToPdfOptions .= ' --header-html ' . $headerFileName . ' ';
 	    }
 	    if (!empty($atts['filefooter'])){
 	        $footerFileName = $dirFileName . 'footer.htm';
 	        $this->buildHtmlFile($footerFileName, $atts['filefooter'], $this->htmlHeaderScript, $bodyAtts, '');
-	        $htmlToPdfOptions .= '--footer-html ' . $footerFileName . ' ';
+	        $htmlToPdfOptions .= ' --footer-html ' . $footerFileName . ' ';
 	    }
 	    if (!empty($atts['filecover'])){
 	        $coverFileName = $dirFileName . 'cover.htm';

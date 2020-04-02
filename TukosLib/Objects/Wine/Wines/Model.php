@@ -6,7 +6,7 @@
 namespace TukosLib\Objects\Wine\Wines;
 
 use TukosLib\Objects\Wine\Wine;
-use TukosLib\Objects\Wine\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 
 class Model extends AbstractModel {
     function __construct($objectName, $translator=null){

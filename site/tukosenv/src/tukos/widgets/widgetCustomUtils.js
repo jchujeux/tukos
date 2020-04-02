@@ -10,38 +10,31 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                 styleheight ={root: 'style', att: 'height', name: messages.height, units: sizeUnits},
                 minHeight = {root: 'style', att: 'minHeight', name: messages.minHeight, units: sizeConstraintUnits},
                 maxHeight = {root: 'style', att: 'maxHeight', name: messages.maxHeight, units: sizeConstraintUnits},
+                valueAtt = {att: 'value', name: Pmg.message('value'), type: 'TextBox'},
 
                 width = {stylewidth: stylewidth},
+                valueAndWidth = {value: valueAtt, stylewidth: stylewidth},
                 height = {styleheight: styleheight},
                 widthAndHeight = {stylewidth: stylewidth, styleheight: styleheight},
                 widthConstraints = {stylewidth: stylewidth, minWidth: minWidth, maxWidth: maxWidth},
+                valueAndWidthConstraints = lang.mixin({value: valueAtt}, widthConstraints),
                 heightConstraints = {stylewidth: stylewidth, styleheight: styleheight, minHeight: minHeight, maxHeight: maxHeight},
+                valueAndHeightConstraints = lang.mixin({value: valueAtt}, heightConstraints),
                 widthAndHeightConstraints = {stylewidth: stylewidth, minWidth: minWidth, maxWidth: maxWidth, styleheight: styleheight, minHeight: minHeight, maxHeight: maxHeight},
-
-                height = {styleheight:{root: 'style', att: 'height', name: messages.height, units: sizeUnits}},
-/*
-                heightConstraints = {
-                    styleheight:{root: 'style', att: 'height', name: messages.height, units: sizeUnits},
-                    minHeight: {root: 'style', att: 'minHeight', name: messages.minHeight, units: sizeConstraintUnits},
-                    maxHeight: {root: 'style', att: 'maxHeight', name: messages.maxHeight, units: sizeConstraintUnits},
-                },
-*/
                 dgridCustomAtts = {
-                    maxHeight: {att: 'maxHeight', name: messages.maxHeight, units: sizeConstraintUnits}, //minHeight: {att: 'minHeight', name: messages.minHeight, units: sizeConstraintUnits}, height: {att: 'height', name: messages.height, units: sizeConstraintUnits}, 
-                    //minWidth: {att: 'minWidth', name: messages.minWidth, units: sizeConstraintUnits}, maxWidth: {att: 'maxWidth', name: messages.maxWidth, units: sizeConstraintUnits}, width: {att: 'width', name: messages.width, units: sizeConstraintUnits}, 
+                    maxHeight: {att: 'maxHeight', name: messages.maxHeight, units: sizeConstraintUnits}, 
                     allowApplicationFilter: {att: 'allowApplicationFilter', name: messages.allowApplicationFilter, units: filtersUnits},
                     hideServerFilters: {att: 'hideServerFilters', name: messages.hideServerFilters, units: filtersUnits}
                 },
-
                 widgetsCustomAtts = {
-                    TextBox: width,  NumberTextBox: width,  CurrencyTextBox: width,  TimeTextBox: width /*constraints: {timePattern: 'HH:mm:ss', clickableIncrement: 'T00:15:00', visibleRange: 'T01:00:00'}*/, //CheckBox, 
-                    TukosNumberBox: width, TukosCurrencyBox: width,
-                    Textarea: heightConstraints,  //Select: {autoWidth: true/false, maxHeight, // not used //Button: "dijit/form/", // no need to customize
-                    TukosDateBox:widthConstraints,  //Editor: {}, // no need to customize
-                    FormattedTextBox: heightConstraints, MultiSelect: widthConstraints, 
-                    StoreSelect: widthConstraints, ObjectSelect:  widthConstraints,  ObjectSelectMulti:  widthConstraints,  ObjectSelectDropDown: widthConstraints,
-                    NumberUnitBox: width, DateTimeBox: width,  SimpleDgrid: dgridCustomAtts,  StoreDgrid: dgridCustomAtts, OverviewDgrid: dgridCustomAtts, MobileOverviewGrid: dgridCustomAtts,
-                    ContextTree: width, NavigationTree: widthAndHeightConstraints, PieChart: width, ColumnsChart: width,  Chart: width, Uploader: width, Downloader: width, StoreCalendar: widthAndHeight, StoreSimpleCalendar: widthAndHeight
+                    TextBox: valueAndWidth,  NumberTextBox: valueAndWidth,  CurrencyTextBox: valueAndWidth,  TimeTextBox: valueAndWidth /*constraints: {timePattern: 'HH:mm:ss', clickableIncrement: 'T00:15:00', visibleRange: 'T01:00:00'}*/, //CheckBox, 
+                    TukosNumberBox: valueAndWidth, TukosCurrencyBox: valueAndWidth,
+                    Textarea: valueAndHeightConstraints,  //Select: {autoWidth: true/false, maxHeight, // not used //Button: "dijit/form/", // no need to customize
+                    TukosDateBox:valueAndHeightConstraints,  //Editor: {}, // no need to customize
+                    FormattedTextBox: valueAndHeightConstraints, MultiSelect: valueAndWidthConstraints, 
+                    StoreSelect: valueAndWidthConstraints, ObjectSelect:  valueAndWidthConstraints,  ObjectSelectMulti:  valueAndWidthConstraints,  ObjectSelectDropDown: valueAndWidthConstraints,
+                    NumberUnitBox: valueAndWidth, DateTimeBox: valueAndWidth,  SimpleDgrid: dgridCustomAtts,  StoreDgrid: dgridCustomAtts, OverviewDgrid: dgridCustomAtts, MobileOverviewGrid: dgridCustomAtts,
+                    ContextTree: valueAndWidth, NavigationTree: widthAndHeightConstraints, PieChart: width, ColumnsChart: width,  Chart: width, Uploader: width, Downloader: width, StoreCalendar: widthAndHeight, StoreSimpleCalendar: widthAndHeight
                 },
                     
                 widgetCustomDialogDescription = {
@@ -62,14 +55,16 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                         }
                     }
                 },
-        
                 widgetCustomDialog = false,
                 widgetTypesAtts = {};
-
     return {
-        
-    
-    	customizationContextMenuItems: function(widget, column){
+        sizeAtt: function(attName){
+        	return {att: attName, type: 'NumberUnitBox', name: Pmg.message(attName), units: sizeUnits};
+        },
+        yesOrNoAtt: function(attName){
+        	return {att: attName, type: 'StoreSelect', name: Pmg.message(attName), storeArgs: {data: [{id: '', name: ''}, {id: 'yes', name: Pmg.message('yes')}, {id: 'no', name: Pmg.message('no')}]}};
+        },
+        customizationContextMenuItems: function(widget, column){
     		var self = this, widgetType = column ? column.widgetType : widget.widgetType;
     		return (widgetsCustomAtts[widgetType] || widget.customizableAtts) ? [{atts: {label: messages.customizeWidget, onClick: function(evt){ lang.hitch(self, self.customDialogCallback)(widget, evt, column);}}}] : [];
     	},
@@ -158,11 +153,12 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
         applyCustom: function(){
             var widget = this.widget, widgetPane = widget.pane, pane = widgetCustomDialog.pane, attTarget = pane.valueOf('att'), attInfo = this.customAtts[attTarget], att = attInfo.att, attRoot = attInfo.root || att, 
                 oldAtt = widget.get(attRoot), attObject = (oldAtt === '' && attRoot !== att ? {} : oldAtt), oldAttValue = (attRoot === att ? attObject : attObject[att]), newAttValue = this.newAttValue(), newAtt;
-            if (oldAttValue !== newAttValue){
+            //if (oldAttValue !== newAttValue){
                 newAtt = attRoot === att ? newAttValue : utils.newObj([[att, newAttValue]]);//{[att]: newAttValue});
                 widget.set(attRoot, newAtt);
-                lang.setObject((widget.itemCustomization || 'customization') + '.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot, newAtt, widgetPane);
-            }
+                lang.setObject((widget.itemCustomization || 'customization.') + (attRoot === 'value' ? ('data.value.' + widget.widgetName) : ('widgetsDescription.' + widget.widgetName + '.atts.' + attRoot)), newAtt, widgetPane);
+                //lang.setObject((widget.itemCustomization || 'customization') + '.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot, newAtt, widgetPane);
+            //}
         },
 
         applyGridEditorCustom: function(){
@@ -217,7 +213,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                     paneGetWidget('NumberUnitBox').unitField.watch('value', lang.hitch(self, self.attValueUnitWatchCallback));
                     paneGetWidget('apply').onClickFunction = (column ? lang.hitch(self, self.applyGridEditorCustom) : lang.hitch(self, self.applyCustom));
                     lang.hitch(self, self.setWidgetTypeAtts)(widget);
-                    widgetCustomDialog.open({x: evt.clientX, y: evt.clientY});
+                    widgetCustomDialog.open({parent: widget, x: evt.clientX, y: evt.clientY});
                 });
             });
         },   

@@ -26,7 +26,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/on", "tuko
 	    	var style = this.bodyNode.style, bodyHeight = parseInt(window.getComputedStyle(document.body).getPropertyValue('height')), viewHeight = parseInt(window.getComputedStyle(this.form.domNode.parentNode).getPropertyValue('height')),
 	    		maxHeight, newMaxHeight;
 			if (viewHeight !== this.previousViewHeight){
-		    	maxHeight = style.maxHeight === '' ? 0 : parseInt(style.maxHeight), newMaxHeight;
+		    	maxHeight = style.maxHeight === '' ? 0 : parseInt(style.maxHeight);
 		    	style.maxHeight = (maxHeight + bodyHeight - viewHeight) + 'px';
 		    	newMaxHeight = parseInt(style.maxHeight);
 		    	this.previousViewHeight = viewHeight;
@@ -98,7 +98,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/on", "tuko
                     });
                 }
             }else{
-                //var result = (this.clickedRow.data[field] ? this.clickedRow.data[field] : '');
                 var result = this.clickedRowValues()[field];
                 return (typeof result === "undefined" || result === null) ? '' : result;
             }

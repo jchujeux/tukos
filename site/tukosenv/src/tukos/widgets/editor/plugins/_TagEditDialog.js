@@ -4,8 +4,8 @@ define (
 
     var colorIconClass = "dijitEditorIcon dijitEditorIconHiliteColor",
         sizeUnits = utils.storeData(['auto', 'cm', '%', 'em', 'px']), thicknessUnits = utils.storeData(['cm', 'em', 'px']), hAlignStoreData = Pmg.messageStoreData(['default', 'left', 'center', 'right']),
-        vAlignStoreData = Pmg.messageStoreData(['top', 'middle', 'bottom']), displayStoreData = Pmg.messageStoreData(['block', 'inline', 'none']),
-    	description = {backgroundColor: 'colorDescription', borderColor: 'colorDescription', color: 'colorDescription', textAlign: 'hAlignDescription', verticalAlign: 'vAlignDescription', width: 'sizeDescription',
+        vAlignStoreData = Pmg.messageStoreData(['top', 'middle', 'bottom']), displayStoreData = Pmg.messageStoreData(['block', 'inline', 'none']), pageBreakInsideStoreData = Pmg.messageStoreData(['auto', 'avoid']), 
+    	description = {backgroundColor: 'colorDescription', borderColor: 'colorDescription', color: 'colorDescription', pageBreakInside: 'pageBreakInsideDescription', textAlign: 'hAlignDescription', verticalAlign: 'vAlignDescription', width: 'sizeDescription',
     				   height: 'sizeDescription', margin: 'sizeDescription', display: 'displayDescription', paddingLeft: 'sizeDescription', paddingRight: 'sizeDescription', paddingBottom: 'sizeDescription', paddingTop: 'sizeDescription',
     				   placeHolder: 'domAttDescription', border: 'domAttDescription', cellPadding: 'domAttDescription', cellSpacing: 'domAttDescription'},
 	    domAttValue = {
@@ -110,6 +110,9 @@ define (
         storeSelectDescription: function(attName, storeData){
         	return {type: 'StoreSelect', atts: {label: Pmg.message(attName), style: {width: '10em'}, storeArgs: {data: storeData}, attValueModule: styleAttValue}};
         },
+        pageBreakInsideDescription: function(attName){
+        	return this.storeSelectDescription(attName, pageBreakInsideStoreData);
+        },
         hAlignDescription: function(attName){
         	return this.storeSelectDescription(attName, hAlignStoreData);
         },
@@ -127,9 +130,14 @@ define (
         	return {type: 'TextBox', atts: {label: Pmg.message(attName), style: {width: '5em'}, attValueModule: domAttValue}};
         },
          close: function(){
-            this.editor.endEdit();
+            var handler = this.editor._tablePluginHandler;
+        	 this.editor.endEdit();
             this.button.closeDropDown(true);
-            this.editor.focus();
+            if (this.editor.focused){
+            	this.editor.focus();
+            }
+            this.editor._tablePluginHandler.availableCurrentlySet = false;
+            setTimeout(function(){handler.checkAvailable();}, 100);
         },
         cancel: function(){
         	this.close();

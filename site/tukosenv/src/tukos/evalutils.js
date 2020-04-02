@@ -1,7 +1,6 @@
-define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferred", "dojo/when", "dijit/registry", "tukos/utils", "tukos/hiutils", "tukos/dateutils", "tukos/PageManager"], 
-		function(dct, domstyle, lang, Deferred, when, registry, utils, hiutils, dutils, Pmg){
+define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferred", "dojo/when", "dojo/string", "dijit/registry", "tukos/utils", "tukos/hiutils", "tukos/dateutils", "tukos/PageManager"], 
+		function(dct, domstyle, lang, Deferred, when, string, registry, utils, hiutils, dutils, Pmg){
     return {
-
            functionNamePattern: "([^.]?)([a-zA-Z0-9]+)(\\()",
            
           eval: function(body, args){
@@ -11,7 +10,6 @@ define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferre
                 return eval(body);
             }
         },
-
         nameToFunction: function(name){
             return name.replace(new RegExp(this.functionNamePattern), function(match, p1, p2, p3){
                 var name = p1 + p2;

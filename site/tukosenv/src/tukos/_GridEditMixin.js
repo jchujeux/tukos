@@ -13,7 +13,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             	this.setColArgsFunctions(args.newColumnArgs);
             }
             this.deleted = [];
-            this.maxId = this.maxServerId = 0;
+            this.maxId = this.maxServerId = this.newRowPrefixId = 0;
             this.isNotUserEdit = 0;
         },
         
@@ -33,10 +33,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 var editor = evt.editor, column = evt.column;
                 editor.widgetType = column.widgetType;
                 if (!editor.contextMenu){
-                    mutils.buildContextMenu(editor,{
-                        atts: {targetNodeIds: [editor.domNode]}, 
-                        items: lang.hitch(wcutils, wcutils.customizationContextMenuItems)(editor, column)
-                    });
+                    mutils.buildContextMenu(editor,{type: 'DynamicMenu', atts: {targetNodeIds: [editor.domNode]}, items: lang.hitch(wcutils, wcutils.customizationContextMenuItems)(editor, column)});
                 }
             	//focusUtil.focus(editor.containerNode);// required for LazyEditor which is a ContentCOntainer and then does not get focused by default. Focus is required for onBlur to be activated and shared editor be removed
             }));
@@ -45,7 +42,22 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             	console.log('in dgrid-editor-hide');
             }));
         },
-        
+        newRowPrefixNamedId: function(id){
+        	var newRowPrefix = this.newRowPrefix;
+        	if (id && newRowPrefix && id.indexOf(newRowPrefix) === 0){
+        		return this.store.filter({id: id}).fetchSync()[0].name + ' (' + Pmg.message(newRowPrefix) + ' ' + id.substring(newRowPrefix.length) + ')';
+        	}else{
+        		return Pmg.namedId(id);
+        	}
+        },
+        newRowPrefixNamedIdItem: function(id){
+        	var newRowPrefix = this.newRowPrefix;
+        	if (id && newRowPrefix && id.indexOf(newRowPrefix) === 0){
+        		return {id: id, name: this.store.filter({id: id}).fetchSync()[0].name + ' (' + Pmg.message(newRowPrefix) + ' ' + id.substring(newRowPrefix.length) + ')'};
+        	}else{
+        		return {id: id, name: Pmg.namedId(id)};
+        	}
+        },
         emptyRowItem: function(idPropertyValue){
             var emptyItem = {};
             emptyItem[this.collection.idProperty] = idPropertyValue;
@@ -89,30 +101,35 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             return (this.dirty[id] && this.dirty[id][field] !== undefined ? this.dirty[id][field] : (row[field] ? row[field] : ''));    
         },
         getNewId: function(){
-            this.maxId += 1;
-            return this.maxId;
+            if (this.newRowPrefix){
+            	this.newRowPrefixId += 1;
+            	return this.newRowPrefix + this.newRowPrefixId;
+            }else{
+            	this.maxId += 1;
+                return this.maxId;
+            }
         },
-        
+        getLastNewRowPrefixId: function(){
+        	return this.newRowPrefix ? this.newRowPrefixId : '';
+        },
         updateDirty: function(idPropertyValue, field, value){
-            var collection = this.collection, grid = this;
-            this.inherited(arguments);
-            collection.get(idPropertyValue).then(function(item){
-                item[field] = value;
-                //collection.put(item);
+            var collection = this.collection, grid = this, collectionRow = this.collection.getSync(idPropertyValue);
+            if (utils.drillDown(this, ['dirty', idPropertyValue, field], undefined) !== value){
+                this.inherited(arguments);
+                collectionRow[field] = value;
                 if (!grid.noRefreshOnUpdateDirty){
-                    //grid.refresh({keepScrollPosition: true});
-                	//grid.refreshCell(grid(idPropertyValue, field));
                 	sutils.refreshFormulaCells(grid);
                 }
-            });
-            if (!this.isNotUserEdit){
-            	if (this.onChangeNotify){
-            		var item = lang.mixin(lang.clone(this.dirty[idPropertyValue]), {idg: idPropertyValue, connectedIds: this.collection.getSync(idPropertyValue).connectedIds});
-                	this.notifyWidgets({action: 'update',  item: item, sourceWidget: this});            		
-            	}
-                this.setSummary();
+                if (!this.isNotUserEdit){
+                	if (this.onChangeNotify){
+                		var item = lang.mixin(lang.clone(this.dirty[idPropertyValue]), {idg: idPropertyValue, connectedIds: this.collection.getSync(idPropertyValue).connectedIds});
+                    	this.notifyWidgets({action: 'update',  item: item, sourceWidget: this});            		
+                	}
+                    this.onCellChangeLocalAction(idPropertyValue, this.columns[field], value);
+                    this.setSummary();
+                }
+                wutils.markAsChanged(this, 'noStyle');            	
             }
-            wutils.markAsChanged(this, 'noStyle');
         },
                 
         deleteDirty: function(idPropertyValue){
@@ -128,6 +145,51 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             this.setSummary();
         },
 
+        onCellChangeLocalAction: function(idPropertyValue, column, newValue){
+            var editorArgs = column.editorArgs;
+        	if (typeof column.localDataChangeActionFunctions == "undefined"){
+                column.localDataChangeActionFunctions = {};
+                //column.parent = column.grid = this;
+                //column.form = this.form;
+                var localAction = editorArgs.onChangeLocalAction || (editorArgs.onWatchLocalAction && editorArgs.onWatchLocalAction['value']);
+                if (localAction){
+                    this.form.buildLocalActionFunctions(column.localDataChangeActionFunctions, localAction);
+                }
+            }
+            var localActionFunctions = column.localDataChangeActionFunctions;
+            if (!utils.empty(localActionFunctions)){
+            	var sourceCell = this.cell(idPropertyValue, column.field), idPropertyValue, sourceWidget = this.getEditorInstance(column.field) || sourceCell.element.widget || sourceCell.element.input,
+            		allowedNestedRowWatchActions = this.allowedNestedRowWatchActions;
+            	this.noRefreshOnUpdateDirty = true;
+                this.nestedRowWatchActions = this.nestedRowWatchActions || 0;
+                column.nestedWatchActions = column.nestedWatchActions || 0;
+            	for (var colName in localActionFunctions){
+                    var targetCell = this.cell(idPropertyValue, colName), widgetActionFunctions =  localActionFunctions[colName], result, source = sourceWidget;
+                    for (var att in widgetActionFunctions){
+                    	if (att === 'value' || att === 'localActionStatus'){
+                            if ((allowedNestedRowWatchActions === undefined || (this.nestedRowWatchActions <= allowedNestedRowWatchActions)) && column.nestedWatchActions < 1){
+	                        	this.nestedRowWatchActions += 1;
+	                        	column.nestedWatchActions += 1;
+	                        	//if (this.nestedRowWatchActions > 1 || !sourceWidget){
+	                        		source = sourceWidget || sourceCell;
+	                        		if (!source.parent){
+	                        			source = lang.mixin(source, {parent: this, form: this.form, valueOf: wutils.valueOf, setValueOf: wutils.setValueOf, setValuesOf: wutils.setValuesOf});
+	                        		}
+	                        	//}
+	                        	var result = widgetActionFunctions[att].action(source, targetCell, newValue);
+	                        	if (att === 'value'){
+	                            	this.updateDirty(idPropertyValue, colName, result);
+	                        	}
+	                        	this.nestedRowWatchActions += -1;
+	                        	column.nestedWatchActions += -1;
+                            }
+                        }
+                    }
+                }
+            	this.noRefreshOnUpdateDirty = false;
+                setTimeout(lang.hitch(this, this.refresh), 0);
+            }
+        },
         prepareInitRow: function(init){
             for (var col in this.initialRowValue){
                 init[col] = this.initialRowValue[col];
@@ -153,7 +215,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             });
             this.noRefreshOnUpdateDirty = noRefresh;
         },
-        
         lastRowId: function(){
             var maxRowId = 0;
             this.collection.forEach(function(object){
@@ -163,7 +224,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             });
             return maxRowId;
         },
-
         createNewRow: function(item, currentRowData, where){
             var noRefresh = this.noRefreshOnUpdateDirty;
         	this.noRefreshOnUpdateDirty = true;
@@ -175,7 +235,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                     item.rowId = this.lastRowId() + 1;
                 }
             }
-            if (this.initialId){
+            if (this.initialId || this.newRowPrefix){
                 item.id = this.getNewId();
             }else{
                 //delete item.id;
@@ -193,7 +253,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             this.isNotUserEdit += -1;
             this.noRefreshOnUpdateDirty = noRefresh;
         },
-        
         addRow: function(where, item){
             var init={};
             this.prepareInitRow(init);
@@ -204,7 +263,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             }
             return item;
         },
-        
         updateRow: function(item){
         	var idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {}, noRefresh = this.noRefreshOnUpdateDirty;
         	this.isNotUserEdit += 1;
@@ -226,7 +284,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         	}
         	this.isNotUserEdit += -1;
         },
-
         copyItem: function(item){
             var newItem = lang.clone(item), noCopyCols = this.noCopyCols;
             for (var col in noCopyCols){
@@ -299,7 +356,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         deleteRowItem: function(item){
             var noRefresh = this.noRefreshOnUpdateDirty;
             this.noRefreshOnUpdateDirty = true;
-        	if (item.id != undefined && (this.initialId ? item.id <= this.maxServerId : true)){
+        	if (item.id != undefined && (this.newRowPrefix ? item.id.substring(0,3) !== this.newRowPrefix : true) && (this.initialId ? item.id <= this.maxServerId : true)){
                 var toSendOnDelete = {id: item.id, '~delete': true};
             	if (this.sendOnDelete){
             		this.sendOnDelete.forEach(function(col){
@@ -352,11 +409,11 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         },
 
         _getValue: function(){// Caution: only returns modified (from dirty) and deleted (from deleted) to send back those modified values to the server
-            var rowCount = 0, result = new Array, j = 0, sendOnSave = this.sendOnSave || [], sendOnDelete = this.sendOnDelete || [], noSendOnSave = utils.array_flip(this.noSendOnSave || []), dirtyToSend;
+            var rowCount = 0, result = new Array, j = 0, sendOnSave = this.sendOnSave || [], noSendOnSave = utils.flip(this.noSendOnSave || []), dirtyToSend;
             for (var i in this.dirty){
                 dirtyToSend = {};
             	utils.forEach(this.dirty[i], function(value, col){
-                	if (!noSendOnSave[col]){
+                	if (!noSendOnSave.hasOwnProperty(col)){
                 		dirtyToSend[col] = value;
                 	}
                 });
@@ -445,6 +502,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 }
             });
             this.maxId = this.maxServerId = maxId;
+            this.newRowPrefixId = 0;
             this.deleted = [];
             this.noRefreshOnUpdateDirty = noRefresh;
             this.set('collection', this.store.getRootCollection());

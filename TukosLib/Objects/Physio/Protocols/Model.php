@@ -17,7 +17,7 @@ class Model extends CalendarsModel {
         		'periodend'   => 'VARCHAR(20) DEFAULT NULL'
         ];
         AbstractModel::__construct($objectName, $translator, 'physioprotocols', ['parentid' => ['physioprescriptions']], ['sources', 'sessions'], $colsDefinition, [], [], ['custom']);
-        $this->gridsIdCols = ['sources' => ['tukosparent']];
+        $this->gridsIdCols = array_merge($this->gridsIdCols, ['sources' => ['tukosparent']]);
     }
 }
 ?>

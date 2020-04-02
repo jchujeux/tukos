@@ -12,6 +12,12 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         capitalize: function(string){
         	return  typeof string !== 'string' ? '' : (string.charAt(0).toUpperCase() + string.slice(1));
         },
+        typeOf: function(item){
+        	return item === null ? "null" : typeof item;
+        },
+        isObject: function(item){
+        	return item !== null && typeof item === 'object';
+        },
         newObj: function(sourceArray){
         	var result = {};
         	sourceArray.forEach(function(item){
@@ -25,7 +31,10 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         	return result;
         },
         empty: function(obj) {
-            for(var key in obj) {
+            if (!obj){
+            	return true;
+            }
+        	for(var key in obj) {
                 if(obj.hasOwnProperty(key))
                     return false;
             }
@@ -38,10 +47,12 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                 }
             }
         },
+/*
         assign: function(object, property, value){
             object[property] = value;
             return object;
         },
+*/
         filter: function(object){
             for (var key in object){
                 if (object.hasOwnProperty(key)){
@@ -64,25 +75,24 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         },
         object_search: function(needle, object){
             for (var key in object){
-                if (object.hasOwnProperty(key) && object[key] === 'needle'){
+                if (object.hasOwnProperty(key) && object[key] === needle){
                     return key;
                 }
             }
             return false;
         },
-/*
-        object_walk(object, callback){
-        	if (Array.isArray(object)){
-        		object.forEach(function())
-        	}
-        	for (var key in object){
-        		if (object.hasOwnProperty){
-        			callback(value, key);
-        			if (typeof )
+        drillDown: function(object, path, notFoundValue){
+        	var pointer = object, property;
+        	while (path.length){
+        		property = path.shift();
+        		if (!pointer.hasOwnProperty(property)){
+        			return notFoundValue;
+        		}else{
+        			pointer = pointer[property];
         		}
         	}
+        	return pointer;
         },
-*/
         replace: function (comparisonOperator, arrayToSearch, searchProperty, searchValue, returnProperty, cache, ignoreCase, ignoreAccent){
         	var search = function (row){
         		var targetValue = String(row[searchProperty]), sourceValue = String(searchValue);
@@ -122,7 +132,7 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
             return array2.indexOf(elm) === -1;
           })
         },
-        array_flip: function(input){
+        flip: function(input){
         	var key, result = {};
         	for (key in input){
         		if (input.hasOwnProperty(key)){
@@ -148,7 +158,7 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         },
         merge: function (target, source){//Use the returned value to be sure to get the modified value in all cases
             this.wasModified = false;
-            if (typeof target === 'object' && typeof source === 'object'){
+            if (this.isObject(target) && this.isObject(source)){
                 for (var i in source){
                     if (target[i] !== source[i]){
                         this.wasModified = true;
@@ -164,13 +174,12 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                 return source;
             }
         }, 
-
         mergeRecursive: function (target, source){//Use the returned value to be sure to get the modified value in all cases
             var self = this;
             this.wasModified = false;
             var mergeRecursive = function(target, source){
                 for (var i in source){    
-                    if (typeof target[i] === 'object' && typeof source[i] === 'object'){
+                    if (self.isObject(target[i]) && self.isObject(source[i])){
                         mergeRecursive(target[i], source[i]);
                     }else{
                         if (target[i] !== source[i]){
@@ -180,7 +189,7 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                     }
                 }
             }
-            if (typeof source === 'object' && typeof target === 'object'){
+            if (this.isObject(target) && this.isObject(source)){
                 mergeRecursive(target, source);
                return target;
             }
@@ -191,11 +200,10 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                 return source;
             }
         }, 
-
         deleteRecursive: function(target, source){// a "poor's man" approach to undo of mergeRecursive: deletes leaves that were modified by a mergeRecursive with the same target and source.
             var deleteRecursive = function(target, source){
                 for (var i in source){    
-                    if (target[i] && typeof target[i] === 'object' && typeof source[i] === 'object'){
+                    if (this.isObject(target[i]) && typeof source[i] === 'object'){
                         target[i] = deleteRecursive(target[i], source[i]);
                     }else{
                         delete(target[i]);
@@ -209,7 +217,6 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                 return undefined;
             }
         }, 
-
     	storeData: function(ids){
     		var store = [{id: '', name: ''}];
     		ids.forEach(function(id){
@@ -224,7 +231,7 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         	}
         	return result;
         },
-    	transform: function(value, formatType, formatOptions){
+    	transform: function(value, formatType, formatOptions, Pmg){
             if ((typeof value == 'string' && value != '') || typeof value === 'number'){
                 switch (formatType){
                 	case 'string':
@@ -246,8 +253,14 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                         var minutes = parseInt(value);
                         return this.pad(parseInt(minutes / 60), 2) + ':' +  this.pad(minutes % 60, 2);
                         break;
+                    case 'secondsToHHMMSS':
+                    	var seconds = parseInt(value), minutes, hours;
+                    	return this.pad(hours = parseInt(seconds / 3600), 2) + ':' + this.pad(minutes = parseInt((seconds - hours * 3600) / 60), 2) + ':' + this.pad(seconds % 60, 2);
+                    	break;
                     case 'tHHMMSSToHHMM':
                     	return value.substring(1,6);
+                    case 'tHHMMSSToHHMMSS':
+                    	return value.substring(1,9);
                     case 'numberunit':
                      	var values = JSON.parse(value), count = values[0], unit=values[1], localUnit = messages[unit] || unit;
                         value = count + ' ' + localUnit + (count > 1 ? 's' : '');
@@ -261,6 +274,12 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                     case 'image':
                         value = '<img src="' + value + '" >';
                         break;
+                    case 'number':
+                    	value = number.format(value, formatOptions);
+                    	break;
+                    case 'translate':
+                    	value = Pmg.message(value, (formatOptions || {}).object);
+                    	break;
                     default: 
                         if (!isNaN(value)){
                             if (value % 1 !== 0){
@@ -271,7 +290,6 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
             }
             return value;
         },
-        
         unTransform: function(value, formatType){// from yyyy-mm-dd hh:mm:ss to yyyy-mm-ddThh:mm:ssZ
             if (typeof value == 'string' && value != ''){
                 switch (formatType){
@@ -314,7 +332,6 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                 return '';
             }
         },
-
         sum: function(arrayOrObject){
             if (typeof arrayOrObject === 'object'){
                 var result = 0;
@@ -333,7 +350,6 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                 result += isNaN(value) ? 0 : value;
             }
         },
-        
         hashId: function(){// see https://gist.github.com/fiznool/73ee9c7a11d1ff80b81c#file-hashid-js-L11
           var alphabet= '23456789abdegjkmnpqrvwxyz', alphabet_length = alphabet.length, id_length = 8, rtn = '';
           for (var i = 0; i < id_length; i++) {
@@ -341,7 +357,6 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
           }
           return rtn;
         },
-        
         uniqueId: function(previous){// see https://gist.github.com/fiznool/73ee9c7a11d1ff80b81c#file-hashid-js-L11             
             var unique_retries = 9999, retries = 0, id;
             previous = previous || previousUniqueIds;
@@ -354,11 +369,9 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
             }
             return id;
         },
-        
         inject: function(valueOrArrayToInject, intoArray, atIndex){
             return intoArray.slice(0, atIndex).concat(valueOrArrayToInject).concat(intoArray.slice(atIndex));
         },
-        
         debounce: function(func, wait, immediate) {
         	var timeout;
         	return function(){
@@ -373,7 +386,6 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         		if (callNow) func.apply(context, args);
         	};
         },
-
         throttle: function(func, limit) {
         	var wait = false;
         	return function(){

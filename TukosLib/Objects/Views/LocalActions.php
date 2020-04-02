@@ -2,16 +2,24 @@
 namespace TukosLib\Objects\Views;
 
 trait LocalActions{
-
-    function watchLocalAction($att){
+    function watchLocalActionString(){
+        return <<<EOT
+lang.setObject('customization.widgetsDescription.' + sWidget.pane.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription.' + sWidget.widgetName + '.atts.value', 
+    sWidget.get('serverValue') || sWidget.get('value'), sWidget.pane.form);
+return true;
+EOT;
+    }
+    function watchLocalActionTemplate($widgetName, $localActionString){
         return ['value' => [
-                $att  => ['localActionStatus' => [
-                        'action' => "lang.setObject('customization.widgetsDescription.' + sWidget.pane.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription." . $att . ".atts.value', newValue, sWidget.pane.form);return true;",
-                ]],
-                'update' => ['hidden' => [
-                        'action' => "return false;"
-                ]],
+            $widgetName  => ['localActionStatus' => [
+                'action' => $localActionString
+            ]],
+            'update' => ['hidden' => ['action' => "return false;"]],
         ]];
+        
+    }
+    function watchLocalAction($widgetName){
+        return $this->watchLocalActionTemplate($widgetName, $this->watchLocalActionString());
     }
     function watchCheckboxLocalAction($att){
         return ['checked' => [

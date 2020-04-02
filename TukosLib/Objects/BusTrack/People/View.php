@@ -1,5 +1,5 @@
 <?php
-namespace TukosLib\Objects\BusTrack\Customers;
+namespace TukosLib\Objects\BusTrack\People;
 
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
@@ -11,14 +11,14 @@ class View extends AbstractView {
         $customDataWidgets = [
             'firstname'  => ViewUtils::textBox($this, 'Firstname'),
             'title'      => ViewUtils::textBox($this, 'Civility'),
-        	'clientid'	 => ViewUtils::textBox($this, 'Clientid'),
+        	//'clientid'	 => ViewUtils::textBox($this, 'Clientid'),
             'email'      => ViewUtils::textBox($this, 'email', ['atts' => ['edit' =>  ['placeHolder' => 'xxx@yyy']]]),
             'telmobile'  => ViewUtils::textBox($this, 'Telmobile'),
             'street'     => ViewUtils::textBox($this, 'Streetaddress'),
             'postalcode' => ViewUtils::textBox($this, 'Postalcode'),
             'city'       => ViewUtils::textBox($this, 'City'),
             'country'    => ViewUtils::storeSelect('country', $this, 'Country'),
-            'postaladdress'     => ViewUtils::textBox($this, 'Postaladdress'),
+            'postaladdress'     => ViewUtils::textArea($this, 'Postaladdress'),
         ];
 
         $subObjects['bustrackquotes'] = [
@@ -28,6 +28,11 @@ class View extends AbstractView {
         ];
         $subObjects['bustrackinvoices'] = [
             'atts' => ['title' => $this->tr('bustrackinvoices'), 'storeType' => 'LazyMemoryTreeObjects'],
+            'filters' => ['parentid' => '@id'],
+            'allDescendants' => 'hasChildrenOnly'
+        ];
+        $subObjects['bustrackpayments'] = [
+            'atts' => ['title' => $this->tr('bustrackpayments'), 'storeType' => 'LazyMemoryTreeObjects'],
             'filters' => ['parentid' => '@id'],
             'allDescendants' => 'hasChildrenOnly'
         ];

@@ -2,21 +2,21 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/p
 		function(declare, lang, Deferred, all, when, utils){
 	return {
             widgetsPath: {
-                TextBox: "dijit/form/", NumberTextBox: "dijit/form/", CurrencyTextBox: "dijit/form/", CheckBox: "dijit/form/", TimeTextBox: "tukos/widgets/", Textarea: "dijit/form/", Select: "dijit/form/", Button: "dijit/form/",
+                TextBox: "dijit/form/", NumberTextBox: "dijit/form/", CurrencyTextBox: "dijit/form/", CheckBox: "tukos/widgets/", TimeTextBox: "tukos/widgets/", Textarea: "dijit/form/", Select: "dijit/form/", Button: "dijit/form/",
                 DropDownButton: "dijit/form/", RadioButton: "dijit/form/", Menu: "dijit/", MenuItem: "dijit/", PopupMenuItem: "dijit/", PopupMenuBarItem: "dijit/", DropDownMenu: "dijit/", ContentPane: "dijit/layout/",
                 TukosDateBox: "tukos/", Editor: "tukos/widgets/", LazyEditor: "tukos/widgets/",
                 FormattedTextBox: "tukos/widgets/", MultiSelect: "tukos/", StoreSelect: "tukos/", ObjectSelect: "tukos/", ObjectSelectMulti: "tukos/", ObjectSelectDropDown: "tukos/",
-                TukosNumberBox: "tukos/", TukosCurrencyBox: "tukos/", NumberUnitBox: "tukos/", DateTimeBox: "tukos/", TukosButton: "tukos/widgets/", DropDownTextBox: "tukos/widgets/", ColorPickerTextBox: "tukos/widgets/",
-                RestSelect: "tukos/", ObjectExport: "tukos/", ObjectSave: "tukos/", ObjectReset: "tukos/", ObjectProcess: "tukos/", ObjectNew: "tukos/", ObjectEdit: "tukos/", ObjectDelete: "tukos/", ObjectDuplicate: "tukos/",
-                ObjectCalendar: "tukos/", ObjectFieldClear: "tukos/", OverviewAction: "tukos/", OverviewEdit: "tukos/",  TukosDgrid: "tukos/", SimpleDgrid: "tukos/",  StoreDgrid: "tukos/", OverviewDgrid: "tukos/", ReadonlyGrid: "tukos/",
-                BasicGrid: "tukos/", ContextTree: "tukos/", NavigationTree: "tukos/", PieChart: "tukos/", ColumnsChart: "tukos/", Chart: "tukos/", GoldenSheetahSync: "tukos/",
+                TukosNumberBox: "tukos/", TukosCurrencyBox: "tukos/", NumberUnitBox: "tukos/", DateTimeBox: "tukos/", TukosButton: "tukos/widgets/", DropDownTextBox: "tukos/widgets/", 
+                ColorPickerTextBox: "tukos/widgets/", RestSelect: "tukos/", ObjectExport: "tukos/", ObjectSave: "tukos/", ObjectReset: "tukos/", ObjectProcess: "tukos/", ObjectNew: "tukos/", ObjectEdit: "tukos/", ObjectDelete: "tukos/", 
+                ObjectDuplicate: "tukos/", ObjectCalendar: "tukos/", ObjectFieldClear: "tukos/", OverviewAction: "tukos/", OverviewEdit: "tukos/",  TukosDgrid: "tukos/", SimpleDgrid: "tukos/",  StoreDgrid: "tukos/", 
+                OverviewDgrid: "tukos/", ReadonlyGrid: "tukos/", BasicGrid: "tukos/", ContextTree: "tukos/", NavigationTree: "tukos/", PieChart: "tukos/", ColumnsChart: "tukos/", Chart: "tukos/",
                 SimpleUploader: "tukos/widgets/", Uploader: "tukos/widgets/", Downloader: "tukos/widgets/", StoreCalendar: "tukos/widgets/calendar/", StoreSimpleCalendar: "tukos/widgets/calendar/", 
                 widgetsHider: "tukos/widgets/", HorizontalLinearGauge: "tukos/widgets/dgauges/",
                 ObjectEditor: "tukos/widgets/", HtmlContent: "tukos/widgets/", StoreComboBox: "tukos/", TukosTextarea: "tukos/widgets/", ColorButton: "tukos/widgets/", ComboBox: "dijit/form/",
                 MobileTextBox: "tukos/mobile/TukosTextarea*", MobileButton: "dojox/mobile/Button*",
                 MobileFormattedTextBox: "tukos/mobile/FormattedTextBox*", MobileEditor: "tukos/mobile/Editor*", MobileLazyEditor: "tukos/mobile/LazyEditor*", MobileObjectReset: "tukos/mobile/ObjectAction*",
                 MobileObjectAction: "tukos/mobile/ObjectAction*", MobileOverviewGrid: "tukos/mobile/OverviewGrid*", MobileOverviewAction: "tukos/mobile/OverviewAction*", MobileStoreSelect: "tukos/mobile/StoreSelect*",
-                MobileSliderSelect: "tukos/mobile/SliderSelect*", MobileTimePicker: "tukos/mobile/TimePicker*", MobileNumberBox: "tukos/mobile/NumberPicker*"
+                MobileSliderSelect: "tukos/mobile/SliderSelect*", MobileTimePicker: "tukos/mobile/TimePicker*", MobileNumberBox: "tukos/mobile/NumberPicker*"/*, TukosCheckBox: "tukos/Widgets/Checkbox*"*/
             },
             loadedWidgets: {}, loadingWidgets: {},
 

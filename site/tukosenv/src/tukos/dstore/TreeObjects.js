@@ -22,7 +22,7 @@ define([
         },
 
         mayHaveChildren: function (object) {
-            return 'hasChildren' in object ? object.hasChildren : this.getChildren(object).fetchSync().length;//this.root.filter(this.getCollectionFilter().eq('parentid', object.id)).length > 0;
+            return 'hasChildren' in object ? object.hasChildren : (object.id ? this.getChildren(object).fetchSync().length : false);//this.root.filter(this.getCollectionFilter().eq('parentid', object.id)).length > 0;
         },
 
         getRootCollection: function (filters) {

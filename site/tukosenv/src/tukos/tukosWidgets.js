@@ -18,7 +18,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
 			RichTextarea:
 				'<div class="tukosWidget" value="${value}" style="width: ${width};border:1px solid;border-color:#b5bcc7;" width="${width}"' +
 				'data-dojo-type="dijit/InlineEditBox" data-dojo-props="editor:\'dijit/Editor\', renderAsHtml:true, autoSave:false, editorParams:{height: \'\', extraPlugins: [\'dijit/_editor/plugins/AlwaysShowToolbar\']}"></div>',
-			Checkbox: '<input class="tukosWidget" data-dojo-type="dijit/form/CheckBox" value="ok" />',
+			CheckBox: '<input class="tukosWidget" data-dojo-type="dijit/form/CheckBox" value="ok" />',
 			SendMailButton: 
 				'<button data-dojo-type="dijit/form/Button" type="button" ><span>${name}</span>' +
 					'<script type="dojo/on" data-dojo-event="click">var tukosForms=require("tukos/tukosForms");tukosForms.sendFormMail(this);</script>' +
@@ -50,7 +50,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
 			DateTextBox: ['width', 'backgroundColor', 'color', 'value'],
 			TimeTextBox: ['width', 'backgroundColor', 'color', 'value'], 
 			NumberSpinner: ['width', 'backgroundColor', 'color', 'value', 'increment', 'min', 'max', 'digits'],
-			Checkbox: [],
+			CheckBox: [],
 			MultiCheckInput: ['width', 'backgroundColor', 'color', 'value', 'values', 'numCols', 'orientation', 'uniquechoice'],
 			MultiGridCheckInput: ['width', 'backgroundColor', 'color', 'values', 'topics', 'uniquechoice'],
 			DropdownList: ['width', 'values'],

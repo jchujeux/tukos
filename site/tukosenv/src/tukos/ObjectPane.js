@@ -55,20 +55,13 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/Co
             }
         },
         onClose: function(){
-            var feedback;
-        	if (feedback = this.userHasChanged()){
-                var tab = this.parent;
-                Pmg.confirmForgetChanges(feedback).then(
-                		function(){
-                			tab.getParent().removeChild(tab);
-                			tab.destroyRecursive();
-                		}, 
-                		function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
-                );
-                return false;
-            }else{
-            	return true;
-            }        	
+            var tab = this.parent, closeAction = function(){
+    			tab.getParent().removeChild(tab);
+    			tab.destroyRecursive();
+            	
+            };
+            this.checkChangesDialog(closeAction);
+            return false;
         }
     }); 
 });

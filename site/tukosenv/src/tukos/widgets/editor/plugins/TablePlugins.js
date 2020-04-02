@@ -18,7 +18,7 @@ define([
 
     dojo.experimental("dojox.editor.plugins.TablePlugins");
 
-    var tableAtts = ['backgroundColor', 'borderColor', 'textAlign', 'width', 'border', 'cellPadding', 'cellSpacing'],
+    var tableAtts = ['backgroundColor', 'borderColor', 'pageBreakInside', 'textAlign', 'width', 'border', 'cellPadding', 'cellSpacing'],
     	cellAtts = tableAtts.concat('verticalAlign');
     var TableHandler = declare(_Plugin, {
         // summary:
@@ -586,12 +586,10 @@ var ModifyTable = declare("dojox.editor.plugins.ModifyTable", TablePlugins, {
             };
         }
 });
-
 var ModifyTableSelection = declare("dojox.editor.plugins.ModifyTableSelection", TablePlugins, {
-
         _initButton: function(){
             this.inherited(arguments);
-            var editor = this.editor, getTableInfo = this.getTableInfo, getSelectedCells = this.getSelectedCells, prepareTable = this.prepareTable, onChangeWorksheetCheckBox = this.onChangeWorksheetCheckBox
+            var editor = this.editor, getTableInfo = this.getTableInfo, getSelectedCells = this.getSelectedCells, prepareTable = this.prepareTable, onChangeWorksheetCheckBox = this.onChangeWorksheetCheckBox,
         		copySelected = this.copySelected, emptySelected = this.emptySelected, pasteAtSelected = this.pasteAtSelected;
             this.button.loadDropDown = function(callback){
                 require(["tukos/widgets/editor/plugins/_EditorModifyTableSelectionDialog"], lang.hitch(this, function(ModifyTableSelectionDialog){
@@ -606,7 +604,6 @@ var ModifyTableSelection = declare("dojox.editor.plugins.ModifyTableSelection", 
             };
         }
 });
-
 _Plugin.registry["modifyTableSelection"] = function(args) {
 	return new ModifyTableSelection(args);
 };
@@ -616,6 +613,5 @@ _Plugin.registry["modifyTable"] = function(args) {
 _Plugin.registry["insertTable"] = function(args) {
 	return new InsertTable(args);
 };
-
 return TablePlugins;
 });

@@ -15,7 +15,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 headerRowLayout = {linesAndRowsRow: {tableAtts: {cols: 4, customClass: 'labelsAndValues', label: Pmg.message('insertTable'), showLabels: true, orientation: 'horiz'}, widgets: ['rows', 'columns', 'isWorksheet', 'sheetName']}};
             return this._dialogAtts(headerRowWidgetsDescription, headerRowLayout,  actions, actionsRowLayout, this.editableAtts);
         },
-        defaultAttsValue: {rows: 2, columns: 2, textAlign: 'default', width: '100%', border: 1, cellPadding: 0, cellSpacing: 0}, 
+        defaultAttsValue: {rows: 2, columns: 2, pageBreakInside: 'avoid', textAlign: 'default', width: '100%', border: 1, cellPadding: 0, cellSpacing: 0}, 
         insert: function(){
             var table = dct.create('table'), tbody = dct.create('tbody', null, table), includedAtts = this.includedAtts, pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget),
             	isWorksheet = paneGetWidget('isWorksheet').get('checked'), rows = paneGetWidget('rows').get('value') || 1, columns = paneGetWidget('columns').get('value') || 1, firstRow = 0, firstCol = 0;

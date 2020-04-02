@@ -12,9 +12,7 @@ class View extends EditView{
     function __construct($actionController){
         parent::__construct($actionController);
 
-        $this->dataLayout   = [
-            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false,  'content' => '', 'orientation' => 'vert'],
-            'contents' => [
+        $customContents = [
                 'row1' => [
                     'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'label' => $this->view->tr('Socioadmin'), 'orientation' => 'vert', 'labelWidth' => 75, 'widgetWidths' => ['30%', '40%', '30%']],
                     'contents' => [
@@ -33,22 +31,9 @@ class View extends EditView{
                             ]
                         ],
                     ]
-                ],
-                'row3' => [
-                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'/*, 'spacing' => '0'*/],
-                    'widgets' => ['worksheet', 'comments'],
-                ],
-                'row4' => [
-                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'/*, 'spacing' => '0'*/],
-                    'widgets' => [ 'sptprograms', 'bustrackinvoices', 'physiocdcs', 'physioassesments', 'physioprescriptions', 'calendarsentries'],
-                ],
-                'row5' => [
-                     'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 60],
-                     'widgets' => ['permission', 'grade', 'contextid', 'updated', 'updator', 'created', 'creator']
-                ],
-            ]
+                ]
         ];
-
+        $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowcomments', 'rowsubobjects', 'rowbottom', 'rowacl'], $this->dataLayout['contents']));
     }
 }
 ?>

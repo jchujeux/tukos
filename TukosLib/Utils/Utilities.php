@@ -1,6 +1,5 @@
 <?php
 namespace TukosLib\Utils;
-use TukosLib\TukosFramework as Tfk;
 
 class Utilities{
     public static function nullToBlank($value){
@@ -109,7 +108,7 @@ class Utilities{
     }
 
    /*
-    * Returns subArray[remainingKeys[0]][remainingKeys[1]]...remainingKeys[last]] if found, or else [];
+    * Returns subArray[remainingKeys[0]][remainingKeys[1]]...remainingKeys[last]] if found, or else $notFoundValues;
     */
     public static function drillDown($subArray, $remainingKeys, $notFoundValue=null){
         if (empty($remainingKeys) || ! is_array($remainingKeys)){
@@ -252,24 +251,8 @@ class Utilities{
    /*
     * This version does overwrite both numeric keys and string keys whereas array_merge_recursive converts those to arrays rather than overwriting
     * (provided by Brian in the php manual). Implementation for two arrays arguments only
-    * JCH: added $deleteCallback which unsets in $paArray1 $paArray2 subarrays that evaluate to true.
     */
-/*
-    public static function array_merge_recursive_replace($paArray1, $paArray2, $deleteCallback = null){
-        if (!(is_array($paArray1) or is_object($paArray1)) or !(is_array($paArray2) or is_object($paArray2))) { return $paArray2; }
-        foreach ($paArray2 AS $sKey2 => $sValue2)
-        {
-            if ($deleteCallback !== null && call_user_func($deleteCallback, $sValue2)){
-                unset($paArray1[$sKey2]);
-            }else{
-                $paArray1[$sKey2] = Self::array_merge_recursive_replace(@$paArray1[$sKey2], $sValue2);
-            }
-        }
-        return $paArray1;
-    }
-*/
-
-    public static function array_merge_recursive_replace($paArray1, $paArray2, $replace = '~replace', $delete = '~delete'){
+    public static function array_merge_recursive_replace($paArray1, $paArray2, $subOnly = false, $replace = '~replace', $delete = '~delete'){
     	if (!(is_array($paArray1) or is_object($paArray1))){
         	return is_array($paArray2) ? Self::bypass_recursive($paArray2, $replace) :$paArray2;
         }
@@ -284,7 +267,9 @@ class Utilities{
             }else if($sValue2 === $delete){
                 unset($paArray1[$sKey2]);
             }else{
-                $paArray1[$sKey2] = Self::array_merge_recursive_replace(@$paArray1[$sKey2], $sValue2, $replace, $delete);
+                if (!$subOnly || isset($paArray1[$sKey2])){
+                    $paArray1[$sKey2] = Self::array_merge_recursive_replace(@$paArray1[$sKey2], $sValue2, false, $replace, $delete);
+                }
             }
         }
         return $paArray1;

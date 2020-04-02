@@ -19,51 +19,47 @@ trait SubObjectGet {
         }
         return $colsToSend;
     }
-
-    private static function filterParentCols($filters){
-        $filterParentCols = [];
-        foreach ($filters as $col => $filter){
-            if (is_string($filter) && $filter[0] === '@'){
-                $filterParentCols[] = substr($filter, 1);
-            }
-        }
-        return $filterParentCols;
-    }
-
     private static function setQuery($filters, $value, $contextPathId){
-        $query = $contextPathId ? ['contextpathid' => $contextPathId] : [];
-        $substituteCharacter = '@';
-        $substitute = function($filterValue) use ($substituteCharacter, $value){
-    		if (is_string($filterValue) && $filterValue[0] === $substituteCharacter){
-        		$filterTarget = substr($filterValue, 1);
-    			if (array_key_exists($filterTarget, $value)){
-    				$filterValue = $value[$filterTarget];
-    			}else{
-    				$filterValue = '';
-    			}
-    		}
+        $where = $contextPathId ? ['contextpathid' => $contextPathId] : [];
+        $join = [];
+        $substitute = function($filterValue) use ($value){
+            if (is_string($filterValue) && $pos = strpos($filterValue, '@') !== false){
+                switch ($pos){
+                    case 0:
+                        $filterValue = Utl::getItem(substr($filterValue, 1), $value, '');
+                        break;
+                    default:
+                        $filterValue = preg_replace_callback("/@(\w+)/", function($matches) use ($value) {
+                            return Utl::getItem($matches[1], $value, 0);}, $filterValue);
+                }
+            }
     		return $filterValue;
         };
         foreach ($filters as $col => $filter){
             if (is_string($col) && $col[0] === '&'){
             	break;
             }else if (is_array($filter)){
-            	//$query[$col] =  self::substitute($filter, $value);
-            	$query[$col] = Utl::map_array_recursive($filter, $substitute);
+                $filter = Utl::map_array_recursive($filter, $substitute);
+                reset($filter);
+                if (key($filter) === 'tukosJoin'){
+                    $join[] = $filter['tukosJoin'];
+                }else{
+                    $where[$col] = $filter;
+                }
             }else{
-            	if ($filter[0] === $substituteCharacter){
+            	if ($filter[0] === '@'){
             		$filterTarget = substr($filter, 1);
             		if (empty($value[$filterTarget])){//the target col value in the parent object is not defined => can't identify its descendants and subObject itself is undefined
-            			$query[$col] = -1;//to ensure no row is returned
+            			$where[$col] = -1;//to ensure no row is returned
             		}else{
-            			$query[$col] = $value[$filterTarget];
+            			$where[$col] = $value[$filterTarget];
             		}
             	}else{
-            		$query[$col] = $filter;
+            		$where[$col] = $filter;
             	}
             }
         }
-        return $query;
+        return empty($join) ? ['where' => $where] : ['tukosJoin' => $join, 'where' => $where];
     }
 
     

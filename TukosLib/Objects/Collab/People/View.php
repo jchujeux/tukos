@@ -29,7 +29,7 @@ class View extends AbstractView {
             'postalcode' => ViewUtils::textBox($this, 'Postalcode'),
             'city'       => ViewUtils::textBox($this, 'City'),
             'country'    => ViewUtils::storeSelect('country', $this, 'Country'),
-            'postaladdress'     => ViewUtils::textBox($this, 'Postaladdress'),
+            'postaladdress'     => ViewUtils::textArea($this, 'Postaladdress'),
         		'birthdate'  => ViewUtils::tukosDateBox($this, 'Birthdate'),
         ];
         $subObjects['tasks'] = [

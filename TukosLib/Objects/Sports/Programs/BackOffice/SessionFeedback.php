@@ -9,7 +9,6 @@ use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\DateTimeUtilities as Dutl;
 use TukosLib\Objects\Sports\Programs\SessionsFeedbackUtils;
 use TukosLib\Utils\Feedback;
-use TukosLib\Utils\Dropbox;
 
 class SessionFeedback extends ObjectTranslator{
     use SessionsFeedbackUtils;
@@ -18,14 +17,16 @@ class SessionFeedback extends ObjectTranslator{
         $this->isMobile = Tfk::$registry->isMobile; 
         $this->user     = Tfk::$registry->get('user');
         $this->objectsStore     = Tfk::$registry->get('objectsStore');
+        $this->programsModel = $this->objectsStore->objectModel('sptprograms');
+        $this->sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
         $this->view  = $this->objectsStore->objectView('sptsessions');
         $this->instantiateVersion($query['version']);
         $this->dataWidgets = $this->version->getFormDataWidgets();
         foreach ($this->version->hideIfEmptyWidgets as $name){
             $this->dataWidgets[$name]['atts']['edit']['disabled'] = true;
-            /*$this->dataWidgets[$name]['atts']['edit']['onWatchLocalAction'] = ['value' => [
-                $name => ['hidden'=> ['triggers' => ['server' => true, 'user' => true], 'action' => 'return true;']],
-            ]];*/
+        }
+        if (empty($query['sessionid'])){
+            $this->dataWidgets['sessionid']['atts']['edit']['hidden'] = true;
         }
         if ($presentation = Utl::getItem('presentation', $query)){
             switch($presentation){
@@ -33,13 +34,15 @@ class SessionFeedback extends ObjectTranslator{
                     foreach($this->version->numberWidgets() as $name){
                         $this->dataWidgets[$name]['atts']['edit']['mobileWidgetType'] = 'MobileTextBox';
                     }
-                    foreach($this->version->ratingWidgets() as $name){
-                        $this->dataWidgets[$name]['atts']['edit']['mobileWidgetType'] = 'MobileStoreSelect';
-                    }
                     $this->dataWidgets['duration']['atts']['edit']['mobileWidgetType'] = 'TimeTextBox';
+                    break;
+                default:
+                    foreach($this->version->ratingWidgets() as $name){
+                        $this->dataWidgets[$name]['atts']['edit']['mobileWidgetType'] = 'MobileSliderSelect';
+                    }
             }
         }
-        $this->dataElts = array_values(array_diff(array_keys($this->dataWidgets), ['sportsman', 'startdate']));
+        $this->dataElts = array_values(array_diff(array_keys($this->dataWidgets), ['sportsman'/*, 'startdate'*/]));
         $this->dataLayout = [
             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'orientation' => 'vert', 'showLabels' => true],
             'contents' => [
@@ -47,9 +50,8 @@ class SessionFeedback extends ObjectTranslator{
                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'label' => '<b>' . $this->view->tr('Athletefeedback') . '</b>'],
                     'contents' => [
                         'col2' => [
-                            'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true],
-                            'widgets' => ['sportsman', 'startdate'],
-                            
+                            'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true],
+                            'widgets' => ['id', 'sportsman', 'startdate', 'sessionid'],
                         ]
                     ]
                 ],
@@ -100,107 +102,104 @@ class SessionFeedback extends ObjectTranslator{
         }
         $query['targetdb'] = rawurlencode($query['targetdb']);
         $actionWidgets['send'] = ['atts' => ['urlArgs' => ['query' => $query]]];
-            //['form' => $query['form'], 'version' => $query['version'], 'object' => $query['object'], 'parentid' => $query['parentid'], 'date' => $query['date'], 'targetdb' => rawurlencode($query['targetdb'])]]]];
         $actionWidgets['reset'] = ['atts' => ['urlArgs' => ['query' => $query]]];
-            //['form' => $query['form'], 'version' => $query['version'], 'object' => $query['object'], 'parentid' => $query['parentid'], 'date' => $query['date'], 'targetdb' => rawurlencode($query['targetdb'])]]]];
         return $actionWidgets;
     }
     function getTitle(){
         return $this->tr('sessiontrackingformtitle');
     }
     function sendOnSave(){
-        return [/*'startdate'*/];
+        return [/*'startdate', 'sessionid'*/];
     }
     function sendOnReset(){
-        return [/*'startdate'*/];
+        return [/*'startdate', 'sessionid'*/];
     }
-    function get($query, $formValues = []){
-        $query = array_merge($query, $formValues);
+    function get($query){
         Feedback::add($this->tr('Pleaseprovidesessionfeedback'));
         return $this->getPerformedSession($query);
     }
     function save($query, $valuesToSave){
-        $this->updatePerformedSession($query, $valuesToSave);
-        return $valuesToSave;
+        return $this->updatePerformedSession($query, $valuesToSave);
     }
     public function getPerformedSession($query){
         $programId = $query['parentid'];
-        $sessionDate = $query['date'];
         $programInformation = $this->getProgramInformation($programId);
-        $sportsmanName = SUtl::translatedExtendedName(Tfk::$registry->get('objectsStore')->objectModel('people'), $programInformation['parentid']);
-        $performedSession = ['id' => 'xxx', 'sportsman' => $sportsmanName, 'startdate' => $sessionDate];
-        if (!empty($dropboxFilePath = $programInformation['dropboxFilePath'])){
-            if ($this->downloadDropboxFile($dropboxFilePath, $programInformation['updator'])){
-                if ($this->setWorksheetRow($sessionDate)){
-                    $performedSession = array_merge($performedSession, $this->version->sheetRowToForm($this)); 
-                }
-                $this->workbook->close();
-            }
+        if (!empty($id = Utl::getItem('id', $query))){
+            $performedSession = $this->sessionsModel->getOne(['where' => $this->user->filter(['id' => $id], 'sptsessions'), 'cols' => $this->version->formObjectWidgets()]);
+            $performedSession['sportsman'] = $programInformation['parentid'];
         }else{
-            $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
-            $performedSession = array_merge($performedSession, 
-                $sessionsModel->getOne(['where' => $this->user->filter(['parentid' => $programId, 'startdate' => $sessionDate, 'mode' => 'performed'], 'sptsessions'), 'cols' => $this->version->formCols()]),
-                $sessionsModel->getOne(['where' => $this->user->filter(['parentid' => $programId, 'startdate' => Dutl::mondayThisWeek($sessionDate), 'mode' => 'performed'], 'sptsessions'), 'cols' => $this->version->formWeeklyCols]));
-            if (!$duration = Utl::getItem('duration', $performedSession)){
-                $performedSession['duration'] = 0;
-            }
+            $sessionId = Utl::getItem('sessionid', $query, '');
+            $performedSession = ['id' => '', 'sportsman' => $programInformation['parentid'], 'startdate' => $query['date'], 'sessionid' => $sessionId, 'name' => rawurldecode($query['name']), 'sport' => rawurldecode($query['sport'])];
+            $performedSession = array_merge($performedSession,
+                $this->sessionsModel->getOne(['where' => $this->user->filter(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'sessionid' => $sessionId, 'mode' => 'performed']),
+                    'sptsessions'), 'cols' => $this->version->formObjectWidgets()]));
         }
-        $query['name'] = rawurldecode($query['name']);
-        foreach(['name', 'sport'] as $property){
-            if (empty($performedSession[$property])&& !empty($query[$property])){
-                $performedSession[$property] = $query[$property];
+        $performedSession['sportsman'] = SUtl::translatedExtendedName(Tfk::$registry->get('objectsStore')->objectModel('people'), $performedSession['sportsman']);
+        if (!$duration = Utl::getItem('duration', $performedSession)){
+            $performedSession['duration'] = 0;
+        }
+        if ($weeklies = $programInformation['weeklies']){
+            $weekOf = Dutl::mondayThisWeek($performedSession['startdate']);
+            foreach($weeklies as $item){
+                if ($item['weekof'] === $weekOf){
+                    foreach ($this->version->formWeeklyCols as $col){
+                        if (!empty($item[$col])){
+                            $performedSession[$col] = $item[$col];
+                        }
+                    }
+                    break;
+                }
             }
         }
         return $performedSession;
     }
     public function updatePerformedSession($query, $values){
-        $programInformation = $this->getProgramInformation($query['parentid']);
-        if (!empty($dropboxFilePath = $programInformation['dropboxFilePath'])){
-            if ($this->downloadDropboxFile($dropboxFilePath, $programInformation['updator'])){
-                if ($this->setWorksheetRow($query['date'])){
-                    $cellsUpdated = $this->version->formToSheetRow($values, $this);
-                    if (!empty($cellsUpdated)){
-                        $this->workbook->updateSheet(1, $this->sheet);
-                        $this->workbook->close();
-                        $returnData = Dropbox::uploadFile($dropboxFilePath, $this->dropboxAccessToken);
-                        Feedback::add($this->tr('nbcellsupdated') . ': ' . $cellsUpdated);
-                    }else{
-                        $this->workbook->close();
-                        Feedback::add($this->tr('Noupdateneeded'));
-                    }
+        $programInformation = $this->getProgramInformation($programId = $query['parentid']);
+        $weeklyValues = Utl::extractItems($this->version->formWeeklyCols, $values);
+        $savedCount = count($values);
+        $id = $query['id'];
+        if ($savedCount){
+            if (empty($id)){
+                $where = Utl::getItems(['parentid', 'startdate', 'sessionid', 'mode'], array_merge($query, $values, ['mode' => 'performed']));
+                $id = $this->sessionsModel->updateOne($values, ['where' => $this->user->filter($where)], true, false, 
+                    ['name' => $query['name'], 'sport' => $query['sport'], 'permission' => 'PU', 'startdate' => $query['date'], 'mode' => 'performed', 'parentid' => $query['parentid'], 'sportsman' => $programInformation['parentid']])['id'];
+            }else{
+                if (!$this->sessionsModel->updateOne($values, ['where' => $this->user->filter(['id' => $id])])){
+                    $saveCount = 0;
                 }
             }
-        }else{
-            $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
-            /*$values['mode'] = 'performed';
-            $values['parentid'] = $programId;
-            $values['sportsman'] = $programInformation['parentid'];*/
-            $weeklyValues = Utl::extractItems($this->version->formWeeklyCols, $values);
-            $savedCount = 0;
-            if (!empty($values)){
-                $sessionsModel->updateOne($values, ['where' => $this->user->filter(['parentid' => $query['parentid'], 'startdate' => $query['date'], 'mode' => 'performed'])], true, false, 
-                    ['name' => $query['name'], 'sport' => $query['sport'], 'permission' => 'PU', 'startdate' => $query['date'], 'mode' => 'performed', 'parentid' => $query['parentid'], 'sportsman' => $programInformation['parentid']]);
-                $savedCount += count($values);
-            }
-            if (!empty($weeklyValues)){
-                $weeklySessionDate = Dutl::mondayThisWeek($query['date']);
-                $sessionsModel->updateOne($weeklyValues, ['where' => $this->user->filter(['parentid' => $query['parentid'], 'startdate' => $weeklySessionDate, 'mode' => 'performed'])], true, false, 
-                    ['sport' => 'rest', 'permission' => 'PU', 'startdate' => $weeklySessionDate, 'mode' => 'performed', 'parentid' => $query['parentid']]);
-                $savedCount += count($weeklyValues);
-            };
-            Feedback::add($this->tr('nbcellsupdated') . ': ' . $savedCount);
         }
+        if (!empty($weeklyValues)){
+            if ($weeklies = $programInformation['weeklies']){
+                $sessionDate = $this->sessionsModel->getOne(['where' => ['id' => $id], 'cols' => ['startdate']])['startdate'];
+                $weeklyValues['weekof'] = $weekOf = Dutl::mondayThisWeek($sessionDate);
+                $wasUpdated = false;
+                $maxRowId = 0;
+                foreach($weeklies as &$item){
+                    if ($item['weekof'] ===  $weekOf){
+                        $item = array_merge($item, $weeklyValues);
+                        $wasUpdated = true;
+                        break;
+                    }
+                    if ($item['rowId'] > $maxRowId){
+                        $maxRowId = $item['rowId'];
+                    }
+                }
+                if (!$wasUpdated){
+                    $weeklyValues['rowId'] = $maxRowId + 1;
+                    $weeklies[] = $weeklyValues;
+                }
+                if ($this->programsModel->updateOne(['weeklies' => json_encode($weeklies)], ['where' => ['id' => $programId]])){
+                    $savedCount += count($weeklyValues) - 1;
+                }
+            }
+        }
+        Feedback::add($this->tr('nbcellsupdated') . ': ' . $savedCount);
+        return $id;
     }
     function getProgramInformation($programId){
-        $programsModel = $this->objectsStore->objectModel('sptprograms');
-        $programInformation = $programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['parentid', 'custom', 'updator']],
-            ['custom' => ['edit', 'tab', 'widgetsDescription', 'sessionstracking', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription', 'filepath', 'atts', 'value']]);
-        $programInformation['dropboxFilePath'] = $programsModel->getCombinedCustomization(['id' => $programId], 'edit', null,
-            ['widgetsDescription', 'sessionstracking', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription', 'filepath', 'atts', 'value']);
+        $programInformation = $this->programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['parentid', 'weeklies']], ['weeklies' => []]);
         return $programInformation;
-    }
-    function downloadDropboxFile($dropboxFilePath, $userId){
-        return ($this->dropboxAccessToken = $this->user->getDropboxUserAccessToken($userId)) && !empty($this->localFilePath = Dropbox::downloadFile($dropboxFilePath, $this->dropboxAccessToken));
     }
 }
 ?>

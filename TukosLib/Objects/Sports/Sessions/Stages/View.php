@@ -2,14 +2,12 @@
 namespace TukosLib\Objects\Sports\Sessions\Stages;
 
 use TukosLib\Objects\AbstractView;
-use TukosLib\Objects\Sports\Sessions\templatesViewMixin;
-use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Objects\Sports\Sessions\TemplatesViewMixin;
 use TukosLib\Objects\ViewUtils;
-use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
 
-    use templatesViewMixin;
+    use TemplatesViewMixin;
     
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Parent', 'Description');

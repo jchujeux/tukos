@@ -21,7 +21,7 @@ class Model extends AbstractModel {
         		'weeksafter'   => 'INT(11) DEFAULT NULL',
         ];
         parent::__construct($objectName, $translator, 'calendars', ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], ['sources'], $colsDefinition, [], [], ['worksheet', 'custom']);
-        $this->gridsIdCols = ['sources' => ['tukosparent']];
+        $this->gridsIdCols = array_merge($this->gridsIdCols, ['sources' => ['tukosparent']]);
     }
 
     public function initializeExtended($init = []){

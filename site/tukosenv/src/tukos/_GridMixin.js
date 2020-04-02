@@ -18,39 +18,43 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                  header: []
             };
         },
-
         canEditRow: function(object){
             return !this.grid.disabled && ((typeof object.canEdit === "undefined") || object.canEdit);
         }, 
-
-        renderNamedId: function(object, value, node){
-            return this.grid._renderContent(this, object, Pmg.namedId(value));
+        formatId: function(id, object){
+        	var newRowPrefix = this.grid.newRowPrefix;
+        	if (newRowPrefix && id.indexOf(newRowPrefix) === 0){
+        		return Pmg.message(newRowPrefix) + ' ' + id.substring(newRowPrefix.length);
+        	}else{
+        		return id || '';
+        	}
         },
-
+        formatContent: function(value, object){
+        	return this.formatType ? utils.transform(value, this.formatType, this.formatOptions, Pmg) : value;
+        },
+        renderNamedId: function(object, value, node){
+            var grid = this.grid, newRowPrefixGridName = utils.drillDown(this, ['editorArgs', 'storeArgs', 'storeDgrid']);
+        	return this.grid._renderContent(this, object, newRowPrefixGridName ? grid.form.getWidget(newRowPrefixGridName).newRowPrefixNamedId(value) : Pmg.namedId(value));
+        },
         renderNamedIdExtra: function(object, value, node){
             return this.grid._renderContent(this, object, Pmg.namedIdExtra(value));
         },
         renderNameExtra: function(object, value, node){
             return this.grid._renderContent(this, object, Pmg.namedExtra(value));
         },
-        
         renderStoreValue: function(object, value, node){
             return this.grid._renderContent(this, object, value ? utils.findReplace(this.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value);
         },
-        
         renderCheckBox: function(object, value, node){
         	return this.grid._renderContent(this, object, value ? '☑' : '☐', {textAlign: 'center'});
         },
-        
         renderColorPicker: function(object, value, node){
-        	//return this.grid._renderContent(this, object, ColorPicker.format(value), {backgroundColor: value});
         	return this.grid._renderContent(this, object, '', {backgroundColor: value});
         },
-
         renderContent: function(object, value, node){
             var grid = this.grid, row = grid.row(object);
             var result = ((value === undefined || value === null) ? "" : sutils.evalFormula(grid, value, this.field, row.data.idg));
-            result = utils.transform(result, this.formatType, this.formatOptions);
+            result = utils.transform(result, this.formatType, this.formatOptions, Pmg);
             return grid._renderContent(this, object, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {});
         },
         
@@ -85,7 +89,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
         		case 'ObjectSelectDropDown':
         			return Pmg.namedId(value);
         		default:
-        			return utils.transform(value, column.formatType, column.formatOptions);
+        			return utils.transform(value, column.formatType, column.formatOptions, Pmg);
         	}
         },
         colDisplayedTitle: function(colName){
@@ -182,6 +186,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                 }
                 mutils.setContextMenuItems(this, menuItems[colItems].concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this)));
         },
+/*
         editInNewTabSelector: function(grid){
             var theFields = [];
             for (var col in grid.columns){
@@ -195,7 +200,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                 return '';
             }
         },
-        
+*/        
         cellValueOf: function(field, idPropertyValue){
             if (idPropertyValue){
                 if (this.collection.getSync){

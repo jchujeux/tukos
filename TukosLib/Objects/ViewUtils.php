@@ -108,7 +108,7 @@ class ViewUtils{
         if (count($objects) === 1){
             return self::objectSelect($view, $label, $objects[0], $custom); 
         }else{
-            $editAtts = ['label' => $label/*, 'items' => []*/];
+            $editAtts = ['label' => $view->tr($label)];
             foreach ($objects as $object){
                 $editAtts['items'][$object] = ['label' => $view->tr($object), 'object' => $object, 'dropdownFilters' => ['contextpathid' => '$tabContextId']];
             }
@@ -138,12 +138,24 @@ class ViewUtils{
     static public function timeTextBox($view, $label, $custom=[]){
         return  Utl::array_merge_recursive_replace(['type' => 'timeTextBox' , 'atts' => ['edit' =>  ['label' => $view->tr($label)]]], $custom);
     }
+    static public function secondsTextBox($view, $label, $custom=[]){
+        return  Utl::array_merge_recursive_replace(['type' => 'timeTextBox' , 'atts' => [
+            'edit' =>  ['label' => $view->tr($label), 'constraints' => ['timePattern' => 'HH:mm:ss', 'clickableIncrement' => 'T00:15:00', 'visibleRange' => 'T01:00:00']],
+            'storeedit' => ['formatType' => 'tHHMMSSToHHMMSS'],
+            'overview' => ['formatType' => 'secondssToHHMMSS']
+        ],
+            'objToEdit' => ['secondsToTime' => ['class' => self::dutl]],
+            'editToObj' => ['timeToSeconds' => ['class' => self::dutl]],
+            'objToStoreEdit' => ['secondsToTime' => ['class' => self::dutl]],
+            'storeEditToObj' => ['timeToSeconds' => ['class' => self::dutl]],
+        ], $custom);
+    }
     static public function minutesTextBox($view, $label, $custom=[]){
         return  Utl::array_merge_recursive_replace(['type' => 'timeTextBox' , 'atts' => [
-                'edit' =>  ['label' => $view->tr($label), 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:15', 'visibleRange' => 'T01:00']],
-                'storeedit' => ['formatType' => 'tHHMMSSToHHMM'],
-                'overview' => ['formatType' => 'minutesToHHMM']
-            ], 
+            'edit' =>  ['label' => $view->tr($label), 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:15', 'visibleRange' => 'T01:00']],
+            'storeedit' => ['formatType' => 'tHHMMSSToHHMM'],
+            'overview' => ['formatType' => 'minutesToHHMM']
+        ],
             'objToEdit' => ['minutesToTime' => ['class' => self::dutl]],
             'editToObj' => ['timeToMinutes' => ['class' => self::dutl]],
             'objToStoreEdit' => ['minutesToTime' => ['class' => self::dutl]],
@@ -192,30 +204,33 @@ class ViewUtils{
             $custom
         );
     }
-
-    public static function widgetsArrayDescription($widgets, $editOnly = true){
+    public static function widgetsArrayDescription($colsDescription, $editOnly = true){
         $result = [];
-        foreach ($widgets as $col => $widget){
-            if (isset($widget['type'])){
-                $result[$col] = Widgets::description($widget, $editOnly);
+        foreach ($colsDescription as $col => $colDescription){
+            if (isset($colDescription['type'])){
+                $result[$col] = Widgets::description($colDescription, $editOnly);
             }else{
-                $result[$col] = $widget;
+                $result[$col] = $colDescription;
             }
         }
         return $result;
     }
-
     public static function jsonGrid($view, $label, $colsDescription, $custom=[]){
-         return  Utl::array_merge_recursive_replace([
-                'type' => 'SimpleDgrid', 
+        return  Utl::array_merge_recursive_replace([
+                'type' => 'SimpleDgrid',
                 'atts' => ['edit' =>  [
-                        'label' => $view->tr($label), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => true,
-                        'colsDescription' => self::widgetsArrayDescription($colsDescription, false),
-                    ],
-                ],
+                    'label' => $view->tr($label), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => true,
+                    'colsDescription' => self::widgetsArrayDescription($colsDescription, false),
+                ]],
                 'objToEdit' => ['toNumeric' => ['class' => 'TukosLib\Utils\Utilities', 'id']],
                 'editToObj' => ['toAssociative' => ['class' => 'TukosLib\Utils\Utilities', 'id']],
             ],
+            $custom
+        );
+    }
+    public static function basicGrid($view, $label, $columns, $custom=[]){
+        return  Utl::array_merge_recursive_replace(
+            ['type' => 'BasicGrid', 'atts' => ['edit' => ['label' => $view->tr($label), 'storeType' => 'MemoryTreeObjects', 'columns' => $columns]]],
             $custom
         );
     }

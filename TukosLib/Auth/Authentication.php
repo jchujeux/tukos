@@ -75,15 +75,5 @@ class Authentication{
             $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(Tfk::tr('SUCCESSFULAUTHENTICATION')));
         }
     }
-/*
-    public function checkBackOfficeCredentials($dialogue){
-        $username = $dialogue->context->getPost('username');
-        if (empty(Tfk::$registry->get('verifyUser')->getUser($username, $dialogue->context->getPost('password')))){
-            return false;
-        }else{
-            return $username;
-        }
-    }
-*/    
 } 
 ?>

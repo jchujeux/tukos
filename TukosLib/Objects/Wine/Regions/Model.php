@@ -5,7 +5,7 @@
  */
 namespace TukosLib\Objects\Wine\Regions;
 
-use TukosLib\Objects\Wine\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 
 class Model extends AbstractModel {
     function __construct($objectName, $translator=null){

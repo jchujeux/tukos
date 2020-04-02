@@ -125,7 +125,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
                 }else{
                     if (typeof filter == 'string'){
                         result[col] = (filter.charAt(0) == '@' ? this.form.valueOf(filter.substring(1)) : filter);
-                    }else if (typeof filter === 'object'){
+                    }else if (utils.isObject(filter)){
                         if (filter[0] === '='){
                             result[col] = filter[1];
                         }

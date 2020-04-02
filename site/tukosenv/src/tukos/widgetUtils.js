@@ -66,50 +66,27 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                 if (attr === 'value' && form.markIfChanged && arrayUtil.indexOf(form.postElts, widget.widgetName)!= -1){
                    this.markAsChanged(widget);
                 }
-                if ( form.watchOnChange){
-                    if (!form.inWatchCallback){
-                        form.inWatchCallback = 0;
-                        form.mayNeedResize = false;
-                    }
-                    if (!widget.inWatchCallback){
-                        widget.inWatchCallback = true;
-                        form.inWatchCallback +=1;
-                        if (attr === 'value' && form.watchContext === 'user'){
-                            if (widget.onChangeServerAction && !widget.inOnChangeServerAction){
-                                form.widgetChangeServerDialog(widget);
-                            }
-                            if (widget.onChangeLocalAction){
-                                if (utils.empty(widget.localActionFunctions['value'])){
-                                    form.buildLocalActionFunctions(widget.localActionFunctions['value'], widget.onChangeLocalAction);
-                                }
-                                form.widgetWatchLocalAction(widget, widget.localActionFunctions['value'], value);
-                            }
+                form.mayNeedResize = false;
+                if (attr === 'value' && form.watchContext === 'user'){
+                    if (widget.onChangeLocalAction){
+                        if (utils.empty(widget.localActionFunctions['value'])){
+                            form.buildLocalActionFunctions(widget.localActionFunctions['value'], widget.onChangeLocalAction);
                         }
-                        if (widget.onWatchServerAction && widget.onWatchServerAction[attr]){
-                            form.widgetWatchServerAction(widget, widget.onWatchServerAction[attr], value);
-                        } 
-                        if (widget.onWatchLocalAction && widget.onWatchLocalAction[attr]){
-                            if (utils.empty(widget.localActionFunctions[attr])){
-                                form.buildLocalActionFunctions(widget.localActionFunctions[attr], widget.onWatchLocalAction[attr]);
-                            }
-                            form.widgetWatchLocalAction(widget, widget.localActionFunctions[attr], value);
-                            //form.mayNeedResize = true;
-                        } 
-                        widget.inWatchCallback = false;
-                        form.inWatchCallback += -1;
+                        form.widgetWatchLocalAction(widget, 'value', widget.localActionFunctions['value'], value);
                     }
-                    if (form.inWatchCallback === 0){
-                        form.inWatchCallback = false;
-                        if (form.mayNeedResize){
-                            form.resize();// as some elements may have become hidden / unhidden during server or local actions
-                            form.mayNeedResize = false;
-                        }
+                }
+                if (widget.onWatchLocalAction && widget.onWatchLocalAction[attr]){
+                    if (utils.empty(widget.localActionFunctions[attr])){
+                        form.buildLocalActionFunctions(widget.localActionFunctions[attr], widget.onWatchLocalAction[attr]);
                     }
+                    form.widgetWatchLocalAction(widget, attr, widget.localActionFunctions[attr], value);
+                } 
+                if (form.mayNeedResize){
+                    form.resize();// as some elements may have become hidden / unhidden during local actions
+                    form.mayNeedResize = false;
                 }
             }
         },
-        
-
         subWidgetWatchCallback: function(widget, subWidget, attr, oldValue, value){
             if (oldValue != value){
                 if (! widget.inSubWidgetWatchCallback){
@@ -162,7 +139,6 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                 return form.valueOf(realName);
             }
         },
-
         setValueOf: function(name, value){
             var specialCharacters = '$@#',
                 firstChar = name[0],
@@ -175,7 +151,7 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                     case '$':
                         console.log('special character $ not supported in widgetUtils.setValueOf()');
                         return;
-                    case '@ ':
+                    case '@':
                         this.form.setValueOf(realName, value);
                         return;
                 }
@@ -186,6 +162,12 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
             }else{
                 this.form.setValueOf(realName, value);
             }
+        },
+        setValuesOf: function(data){
+        	utils.forEach(data, lang.hitch(this, function(value, name){
+        		this.setValueOf(name, value);
+        	}));
         }
     }
+
 });

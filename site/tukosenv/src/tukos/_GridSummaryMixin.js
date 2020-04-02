@@ -1,5 +1,5 @@
-define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/utils", "tukos/evalutils", "tukos/widgetUtils"], function (declare, lang, dct, utils, eutils, wutils) {
-    return declare("tukos._GridSummaryMixin",null, {
+define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/utils", "tukos/evalutils", "tukos/widgetUtils", "tukos/PageManager"], function (declare, lang, dct, utils, eutils, wutils, Pmg) {
+    return declare(null, {
         // summary:
         //      A mixin for dgrid components which renders
         //      a row with summary information (e.g. totals).
@@ -61,7 +61,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
             var summaryCol = this.summaryRow.cols[column.field];
             if (summaryCol){
                 var value = item[column.field] || '', atts = summaryCol.atts;
-                cell.appendChild(document.createTextNode(atts && atts.formatType ? utils.transform(value, atts.formatType, atts.formatOptions) : value));
+                cell.appendChild(document.createTextNode(atts && atts.formatType ? utils.transform(value, atts.formatType, atts.formatOptions, Pmg) : value));
             }
         },
          

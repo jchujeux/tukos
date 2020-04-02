@@ -6,24 +6,17 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom", "dijit/form/Butto
             var self = this, form = this.form;
             this.resetDialogue = function(){
                 var setResetValues = function(){
-                    var sendOnReset = {};
+                    var sendOnReset = {}, idValue = form.valueOf('id');
                     if (form.sendOnReset){
                     	form.sendOnReset.forEach(function(widgetName){
                     		sendOnReset[widgetName] = form.valueOf(widgetName);
                     	});
                     }
                 	Pmg.setFeedback(Pmg.message('actionDoing'));
-                    return self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Reset'), query: self.urlArgs ? lang.mixin({id: form.valueOf('id')}, self.urlArgs.query) : {id: form.valueOf('id')}}, 
-                    	sendOnReset, self.form.get('dataElts')); 
+                    return self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Reset'), 
+                    	query: self.urlArgs ? (idValue ? lang.mixin({id: idValue}, self.urlArgs.query) : self.urlArgs.query) : (idValue ? {id: idValue} : {})}, sendOnReset, self.form.get('dataElts'), null, idValue ? false : true); 
                 }
-                if (!self.form.hasChanged()){
-                    return setResetValues();
-                }else{
-                	Pmg.confirmForgetChanges({widgets: true}).then(
-                            function(){return setResetValues()},
-                            function(){Pmg.setFeedback(Pmg.message('actionCancelled'));
-                    });
-                }
+                form.checkChangesDialog(setResetValues);
             }
             this.on("click", function(evt){
                 evt.stopPropagation();

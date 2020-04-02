@@ -12,7 +12,7 @@ class View extends CalendarsView {
     function __construct($objectName, $translator=null){
         AbstractView::__construct($objectName, $translator, 'Prescription', 'Description');
 		$this->doNotEmpty = ['displayeddate'];
-        $this->setGridWidget('calendarsentries', 'startdatetime', 'enddatetime');
+        $this->setGridWidget('calendarsentries');
 
         $this->dataWidgets['parentid']['atts']['edit']['onChangeLocalAction'] = ['parentid' => ['localActionStatus' =>
 				"var changedSessionsEntries = sWidget.form.hasChanged('sessionsentries');\n" .

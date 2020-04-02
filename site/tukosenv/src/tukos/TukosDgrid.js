@@ -17,7 +17,7 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
             }
         },
         setColArgsFunctions: function(colArgs){
-            ['formatter', 'get', 'renderCell', 'canEdit'].forEach(
+            ['formatter', 'get', 'renderCell', 'canEdit', 'renderHeaderCell'].forEach(
                 function(col, index, array){
                     if (colArgs[col]){
                         colArgs[col] = (typeof this[colArgs[col]] === 'function') ? this[colArgs[col]] : eutils.eval(colArgs[col]);
@@ -89,11 +89,6 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
                     if (column.displayedValue == undefined){
                         column.displayedValue = [];
                     }
-                    this.isNotUserEdit += 1;
-                    this.onDataChangeLocalAction(this.getEditorInstance(column.field) || evt.cell.element.widget || evt.cell.element.input, evt.value);
-                    this.isNotUserEdit += -1;
-
-                    //this.formulaCache = {};
                 }
             }));
 
@@ -107,60 +102,9 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
 
             this.on(on.selector(".dgrid-row, .dgrid-header", "contextmenu"), lang.hitch(this, this.contextMenuCallback));
         },
-
         _setAllowApplicationFilter: function(newValue){
         	wutils.watchCallback(this, 'allowApplicationFilter', this.allowApplicationFilter, newValue);
         	this.allowApplicationFilter = newValue;
-        },
-        
-/*        
-        refresh: function(){
-        	this.inherited(arguments);
-        	console.log('refreshing ' + this.widgetName);
-        },
-*/        
-        onDataChangeLocalAction: function(widget, newValue){
-            if (typeof widget.localDataChangeActionFunctions == "undefined"){
-                widget.localDataChangeActionFunctions = {};
-                widget.parent = widget.grid = this;
-                widget.form = this.form;
-                var localAction = widget.onChangeLocalAction || (widget.onWatchLocalAction && widget.onWatchLocalAction['value']);
-                if (localAction){
-                    this.buildDataChangeLocalActionFunctions(widget.localDataChangeActionFunctions, localAction);
-                }
-            }
-            var localActionFunctions = widget.localDataChangeActionFunctions;
-            if (!utils.empty(localActionFunctions)){
-            	this.noRefreshOnUpdateDirty = true;
-            	for (var widgetName in localActionFunctions){
-                    var targetWidget = this.getEditorInstance(widgetName) || this.cell(this.clickedRowIdPropertyValue(), widgetName).element.widget;
-                    var widgetActionFunctions =  localActionFunctions[widgetName];
-                    for (var att in widgetActionFunctions){
-                        when (targetWidget, lang.hitch(this, function(targetWidget){
-                        	var result = widgetActionFunctions[att].action(widget, targetWidget, newValue);
-                        	if (att === 'value'){
-                            	this.setCellValueOf(result, widgetName);
-                            }
-                        }));
-                    }
-                }
-            	this.noRefreshOnUpdateDirty = false;
-                setTimeout(lang.hitch(this, this.refresh), 0);
-            }
-        },
-
-
-        buildDataChangeLocalActionFunctions: function(localActionFunctions, actionDescriptions){
-            for (var widgetName in actionDescriptions){
-                localActionFunctions[widgetName] = {};
-                var description = actionDescriptions[widgetName];
-                for (var att in description){
-                    localActionFunctions[widgetName][att] = {};
-                    attDescription = description[att];
-                    localActionFunctions[widgetName][att].triggers = attDescription.triggers ? attDescription.triggers : {server: false, user: true};
-                    localActionFunctions [widgetName][att].action = eutils.eval((attDescription.action ? attDescription.action : attDescription), 'sWidget, tWidget, newValue');
-                }
-            }
         },
         onFilterChange: function(filterWidget){
             lang.setObject('widgetsDescription.' + this.widgetName + '.atts.columns.' + filterWidget.col + '.filter', filterWidget.get('value'), this.pane.customization);        	

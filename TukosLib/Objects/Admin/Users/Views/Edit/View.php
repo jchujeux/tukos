@@ -16,7 +16,7 @@ class View extends EditView{
             'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 80],
             'widgets' => ['id', 'parentid', 'name', 'password', 'rights', 'language', 'environment', 'targetdb', 'tukosorganization', 'dropboxaccesstoken', 'dropboxbackofficeaccess']
         ];
-        $this->dataLayout['contents']['row2'] = [
+        $this->dataLayout['contents']['rowcomments'] = [
             'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['10%', '20%', '10%', '30%', '30%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
             'widgets' => ['modules', 'customviewids', 'customcontexts', 'pagecustom', 'comments'],
         ];

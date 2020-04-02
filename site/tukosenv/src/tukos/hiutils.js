@@ -145,7 +145,8 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
 		});    		
     },
     postProcess: function(content, targetFormat){
-    	return this._inProcess(content, targetFormat === 'tukosform' ? ['pagebreak', 'pagenumber', 'numberofpages', 'tukosContainer'] : ['pagebreak', 'pagenumber', 'numberofpages']).replace(/break-after: page/g, 'page-break-after: always');
+    	return this._inProcess(content, targetFormat === 'tukosform' ? ['pagebreak', 'pagenumber', 'numberofpages', 'tukosContainer'] : ['pagebreak', 'pagenumber', 'numberofpages'])
+    		.replace(/break-after: page/g, 'page-break-after: always').replace(/break-inside/g, 'page-break-inside');
     },
     pagebreakNode: function(node){
         dct.place(dct.create('p', {style: {pageBreakAfter: 'always'}}), node, 'replace');

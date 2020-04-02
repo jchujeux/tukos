@@ -23,7 +23,8 @@ class Model extends AbstractModel {
             'downpay' => "DECIMAL (5, 2)",
             'status' =>  'VARCHAR(50)  DEFAULT NULL',
         ];
-        parent::__construct($objectName, $translator, 'bustrackquotes', ['parentid' => ['bustrackcustomers']], ['items'], $colsDefinition, [], ['status'], ['worksheet', 'custom', 'history'], ['name', 'parentid', 'reference']);
+        parent::__construct($objectName, $translator, 'bustrackquotes', ['parentid' => ['bustrackpeople']], ['items'], $colsDefinition, [], ['status'], ['worksheet', 'custom', 'history'], ['name', 'parentid', 'reference']);
+        $this->gridsIdCols =  array_merge($this->gridsIdCols, ['items' => ['catalogid']]);
     }    
 
     function initialize($init=[]){

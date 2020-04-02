@@ -28,7 +28,12 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
 			return tag(tagName, key, atts, htmlTagN('mrow', n, atts, innerHTML), label);
 		},
 		mfenced = function(open, close, key, atts, innerHTML, label){
-			return tag('mfenced', key || {chr: open}, string.substitute("open='${open}' close='${close}'", {open: open, close: close}) + (atts ? (' ' + atts) : ''), htmlTag('mrow', null, innerHTML));
+			//return tag('mfenced', key || {chr: open}, string.substitute("open='${open}' close='${close}'", {open: open, close: close}) + (atts ? (' ' + atts) : ''), htmlTag('mrow', null, innerHTML));
+			if (open){
+				return tag('mrow', key || {chr: open}, atts, htmlTag('mo', null, open) + htmlTag('mrow', null, innerHTML) + (close ? htmlTag('mo', null, close) : ''));
+			}else{
+				return tag('mo', {chr: close}, atts, close, label);
+			}
 		},
 		mfrac = function(key, atts, innerHTML, label){
 			return tag('mfrac', key || 'f', atts, htmlTag('mrow', null, innerHTML) + htmlTag('mrow', null, innerHTML), label);
