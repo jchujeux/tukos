@@ -1,18 +1,16 @@
 define(["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom-construct",  "dojo/dom-style", "dojo/Deferred",  "dijit/_WidgetBase", "dojox/charting/Chart",
-        "dojox/charting/themes/ThreeD"/*, "dojox/charting/axis2d/Default"*/, "dojox/charting/StoreSeries", "dojo/json", "dojo/store/Observable", "dojo/store/Memory", "dstore/Memory", "dojo/ready", "tukos/utils"], 
-function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, StoreSeries, JSON, Observable, Memory, DMemory, ready, utils){
+        "dojox/charting/themes/ThreeD", "dojox/charting/StoreSeries", "dojo/json", "dojo/store/Observable", "dojo/store/Memory"/*, "dstore/Memory"*/, "dojo/ready", "tukos/utils", "tukos/widgets/widgetCustomUtils"], 
+function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, JSON, Observable, Memory/*, DMemory*/, ready, utils, wcutils){
     var classesPath = {
         Default:  "dojox/charting/plot2d/", Columns: "dojox/charting/plot2d/", ClusteredColumns: "dojox/charting/plot2d/", Lines: "dojox/charting/plot2d/", Areas: "dojox/charting/plot2d/", Pie: "dojox/charting/plot2d/",
-        //Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "dojox/charting/widget/", Axis2d:  "*dojox/charting/axis2d/Default", Tooltip: "dojox/charting/action2d/", ReadonlyGrid: "tukos/"
-        Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "dojox/charting/widget/", Axis2d:  "*dojox/charting/axis2d/Default", Tooltip: "dojox/charting/action2d/", BasicGrid: "tukos/"
+        Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "tukos/widgets/", Axis2d:  "*dojox/charting/axis2d/Default", Tooltip: "dojox/charting/action2d/", BasicGrid: "tukos/"
     };
-
 	return declare(Widget, {
         
         constructor: function(args){
-            args.onLoadDeferred = new Deferred();
+        	args.customizableAtts = lang.mixin({chartHeight: wcutils.sizeAtt('chartHeight'), showTable: wcutils.yesOrNoAtt('showTable'), tableWidth: wcutils.sizeAtt('tableWidth')}, args.customizableAtts);
+        	args.onLoadDeferred = new Deferred();
         },
-        
         postCreate: function(){
             var requiredClasses = {};
             this.inherited(arguments);
@@ -36,7 +34,6 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
                 requiredClasses[this.legend.type] = this.classLocation(this.legend.type);
             }
             if (this.tableAtts){
-            	//['ReadonlyGrid'] = this.classLocation('ReadonlyGrid');
             	requiredClasses['BasicGrid'] = this.classLocation('BasicGrid');
             }
             var requiredTypes = Object.keys(requiredClasses);
@@ -97,10 +94,9 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
             	this.set('value', this.value);
             }));
         },
-        
         createTableWidget: function(){
-        	this.tableWidget = new this.chartClasses['BasicGrid'](lang.mixin(this.tableAtts, {hidden: this.showTable !== 'yes', form: this.form, collection: new DMemory({data: []})}), this.tableNode);
-        	this.tableWidget.customizationPath = this.itemCustomization || 'customization' + '.widgetsDescription.' + this.widgetName + '.atts.tableAtts.';
+        	this.tableWidget = new this.chartClasses['BasicGrid'](lang.mixin(this.tableAtts, {hidden: this.showTable !== 'yes', form: this.form/*, collection: new DMemory({data: []})*/}), this.tableNode);
+        	this.tableWidget.customizationPath = 'customization.widgetsDescription.' + this.widgetName + '.atts.tableAtts.';
             this.tableWidget.on("dgrid-columnstatechange", lang.hitch(this, function(evt){
                 setTimeout(lang.hitch(this, function(){this.set('value', this.value);}), 100);
             }));
@@ -108,7 +104,6 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
                 setTimeout(lang.hitch(this, function(){this.set('value', this.value);}), 100);
             }));
         },
-
         _setValueAttr: function(value){
             var value = value || '', store = this.store, idProperty = this.store.idProperty, kwArgs = this.kwArgs || {}, tooltips={};
             this._set("value", value);
@@ -148,7 +143,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
                     chart.render();
                     chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
                     if (this.legend && !this.legendWidget){
-                        this.legendWidget = new this.chartClasses[this.legend.type](lang.mixin({chart: chart}, this.legend.options || {}), this.legendNode); 
+                        var legendWidget = this.legendWidget = new this.chartClasses[this.legend.type](lang.mixin({chart: chart, chartWidgetName: this.widgetName, form: this.form}, this.legend.options || {}), this.legendNode); 
                     }
                 }));
             }
@@ -161,8 +156,6 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme/*, Axis2d*/, St
             var classPath = classesPath[classType];
         	return classPath.charAt(0) === '*' ? classPath.substring(1) : classPath +  classType;
         }
-
-
     });
 }); 
 

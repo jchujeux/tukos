@@ -13,8 +13,8 @@ define(["dojo", "dojox/date/posix", "tukos/utils"], function(dojo, ISODates, uti
         	return duration[0] * 3600 + duration[1] * 60 + parseInt(duration[2]);
         },
         secondsToTime: function(seconds){
-        	var seconds = parseInt(seconds);
-        	return 'T' + utils.pad(hours = parseInt(seconds / 3600), 2) + ':' + utils.pad((seconds - 3600 * hours) / 60, 2) + ':' + utils.pad(seconds % 60, 2);
+        	var seconds = parseInt(seconds), hours;
+        	return 'T' + utils.pad(hours = parseInt(seconds / 3600), 2) + ':' + utils.pad(parseInt((seconds - 3600 * hours) / 60), 2) + ':' + utils.pad(seconds % 60, 2);
         },
         durationString: function(fromDate, toDate, duration, correction, format){// format: '[number, interval]', where interval can be 'day', 'week', etc. if correction is true, then the durationString returned is the ceiling (nearest higher integer number of units)
             if (fromDate && toDate){

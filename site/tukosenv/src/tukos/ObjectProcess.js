@@ -17,7 +17,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dijit/form/Button", "dijit/re
                         if (self.allowSave){
                             self.valuesToSend = lang.mixin(self.valuesToSend, form.changedValues());
                         }
-                        theId = registry.byId(self.form.id + 'id').get('value');
+                        var theId = registry.byId(self.form.id + 'id').get('value');
                         if (self.allowSave || (theId != '' && !self.needToSaveBeforeProcess())){
                             if (self.dialogDescription){
                                 if (self.tooltipDialog){

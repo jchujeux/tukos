@@ -2,7 +2,7 @@
 namespace TukosLib\Objects\Sports\Exercises;
 
 use TukosLib\Objects\Sports\Sports;
-use TukosLib\Objects\Sports\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {

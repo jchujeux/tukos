@@ -33,12 +33,11 @@ define([
             },
     		rlike: function (value, required, object) {
     			//return (required === '' ? '.*' : required).test(value, object);
-    			return require === '' ? true : (new RegExp(required)).test(value, object);
+    			return required === '' ? true : (new RegExp(required)).test(value, object);
     		},
     		notrlike: function(value, required, object){
             	console.log('notrlike to be implemented');
             	return (new RegExp(required === '' ? '([^\s]*)' : ('^((?!(' + required + ')).)*$'))).test(value,object);
-    			return true;
     		}, 
     		between: function(col, value){
     			var values = json.parse(value); 

@@ -10,15 +10,6 @@ class HttpUtilities{
             ob_end_clean();
             readfile($fileName);
             return false;// this is required so as not to send anything (e.g. Feedback) in the response (in the downloaded file) after successful download
-        /*if ($fileHandle = fopen($fileName, 'r')){
-            self::setHeaderAndCookie(['name' => basename($fileName), 'type' => $contentType, 'size' => filesize($fileName)], $downloadToken);
-            while (!feof($fileHandle)){
-                $buffer = fread($fileHandle, 2048);
-                echo $buffer;
-            }
-            fclose($fileHandle);
-            unlink($fileName);
-            return false;// this is required so as not to send anything (e.g. Feedback) in the response after successful download*/
         }else{
             Feedback::add($this->tr('errorgeneratingfile'));
             return [];

@@ -6,7 +6,7 @@
 namespace TukosLib\Objects\Wine\Stock;
 
 use TukosLib\Objects\Wine\Wine;
-use TukosLib\Objects\Wine\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {

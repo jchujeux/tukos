@@ -248,7 +248,7 @@ class PageView extends Translator{
            		'onOpenAction' =>
            			"var setValueOf = lang.hitch(this, this.setValueOf);\n" .
            			"this.watchOnChange = false;\n" .
-           			"utils.forEach(Pmg.getCustom(''), function(value, widgetName){\n" .
+           			"utils.forEach(Pmg.getCustom('newPageCustomization'), function(value, widgetName){\n" .
            				"setValueOf(widgetName, value)\n" .
            			"});" .
            			"this.watchOnChange = true;\n"

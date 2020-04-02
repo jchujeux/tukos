@@ -59,8 +59,8 @@ class Model extends AbstractModel{
     }
 
     public function insertExtended($values, $init=false, $jsonFilter = false){
-        if (empty($values['name']) || empty($values['password'])){
-        	Feedback::add($this->tr('neednamepassword'));
+        if (empty($values['name'])){
+        	Feedback::add($this->tr('needname'));
         	return false;
         }else if (!empty($this->getOne(['where' => ['name' => $values['name']], 'cols' => ['name']]))){
         	Feedback::add($this->tr('useralreadyexists'));
@@ -73,7 +73,17 @@ class Model extends AbstractModel{
         	$authenticationInfo['username'] = $userName = Utl::extractItem('name', $authenticationInfo);
         	$configStore = Tfk::$registry->get('configStore');
         	if (empty($configStore->getOne(['where' => ['username' => $userName], 'table' => 'users', 'cols' => ['username']]))){
-        		$configStore->insert($authenticationInfo, ['table' => 'users']);
+        	    if (empty($authenticationInfo['password'])){
+        	        Feedback::add($this->tr('newuserneedpassword'));
+        	        return false;
+        	    }else{
+        	        $configStore->insert($authenticationInfo, ['table' => 'users']);
+        	    }
+        	}else{
+        	    if (!empty($authenticationInfo['password'])){
+        	        Feedback::add($this->tr('userexistsnopassword'));
+        	        return false;
+        	    }
         	}
         	Utl::extractItem('targetdb', $values);
         	if (empty(Utl::getItem('tukosorganization', $values))){

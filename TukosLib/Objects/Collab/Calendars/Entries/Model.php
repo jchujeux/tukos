@@ -31,7 +31,7 @@ class Model extends AbstractModel {
         ];
         parent::__construct(
             $objectName, $translator, 'calendarsentries', ['parentid' => Tfk::$registry->get('user')->allowedModules()], ['participants'], $colsDefinition);
-        $this->gridsIdCols =  ['participants' => ['participants']];
+        $this->gridsIdCols =  array_merge($this->gridsIdCols, ['participants' => ['participants']]);
     }   
     function initialize($init=[]){
         return parent::initialize(array_merge(['duration' => json_encode([1, 'hour'])], $init));

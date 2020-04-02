@@ -4,7 +4,9 @@ namespace TukosLib\Objects\Sports\Programs\Views\Edit;
 
 trait ViewActionStrings{
 
-  protected function onViewOpenAction(){
+    protected $_gcUrl = 'http://localhost:12021/${athlete}?since=${synchrostart}&before=${synchroend}&metadata=${metadata}&metrics=${metrics}';
+    
+    protected function onViewOpenAction(){
         return <<<EOT
 ['loadchart', 'performedloadchart'].forEach(lang.hitch(this, function(widgetName){    
     var widget = this.getWidget(widgetName);
@@ -43,20 +45,20 @@ EOT;
   }
   protected function exportCustomContent($tr){
       $this->view->addToTranslate(['session', 'sportimage', 'content']);
-      $object = $this->objectName;
       return <<<EOT
-var self = this, html = '', selectedWeeks = this.valueOf('optionalweeks'), tableAtts = 'style="text-align:center; border-collapse: collapse;border-spacing: 0; border: 0;width:100%;"', cellBorderStyle = 'border: solid;border-color: Black;',
-    customAtts = this.form.getWidget('calendar').get('customization').items,  backgroundColor = customAtts.style.backgroundColor, imagesAtts = customAtts.img;
+    var self = this, form = this.form, html = '', selectedWeeks = this.getWidget('optionalweeks').get('value'), 
+        tableAtts = 'style="text-align:center; border-collapse: collapse;border-spacing: 0; border: 0;width:100%;"', cellBorderStyle = 'border: solid;border-color: Black;',
+        customAtts = form.getWidget('calendar').get('customization').items,  backgroundColor = customAtts.style.backgroundColor, imagesAtts = customAtts.img;
     thAtts = 'style="' + cellBorderStyle + '"',  tdAtts = thAtts,   
     buildWeeklyTable = lang.hitch(this, function(mode, title, firstDay, lastDay, weekOfTheYear, weekOfProgram, selectedCols){
     var colsFormat = {session: 'string', duration: 'tHHMMSSToHHMM', intensity: 'string', sport: 'string', sportimage: 'image', stress: 'string', content: 'string'},
-        i = 1, sessionsWidget = this.form.getWidget('sptsessions'), filter = new sessionsWidget.store.Filter(), intensityColorFlag = this.valueOf('rowintensitycolor'),
+        i = 1, sessionsWidget = form.getWidget('sptsessions'), filter = new sessionsWidget.store.Filter(), intensityColorFlag = this.valueOf('rowintensitycolor'),
         contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'],
         presentation = self.valueOf('presentation');
     selectedCols.unshift('session');    
     var numberOfCols = selectedCols.length, rowContent = [], rows = [];
     selectedCols.forEach(function(col){
-        rowContent.push({tag: 'th', atts: thAtts, content: sessionsWidget.columns[col] ? sessionsWidget.colDisplayedTitle(col) : Pmg.message(col, '$object')});
+        rowContent.push({tag: 'th', atts: thAtts, content: sessionsWidget.columns[col] ? sessionsWidget.colDisplayedTitle(col) : Pmg.message(col, 'sptprograms')});
     });
     rows.push({tag: 'tr', content: rowContent});
     sessionsWidget.store.filter(filter.gte('startdate', firstDay).lte('startdate', lastDay)[mode === 'performed' ? 'eq' : 'ne']('mode', 'performed').gt('duration', 'T00:00:00')).sort('startdate').forEach(function(session){
@@ -116,7 +118,7 @@ var self = this, html = '', selectedWeeks = this.valueOf('optionalweeks'), table
                 {tag: 'table', atts: tableAtts, content: {tag: 'tr', content: [
                     {tag: 'td', atts: 'style="width: 10%;"', content: utils.transform(imagesAtts.imagesDir + 'TDSLogoBlackH64.jpg', 'image')},
                     {tag: 'td', atts: 'style="text-align:center; color: White; font-size: large; font-weight: bold; width: 90%"', content: 
-                      '{$tr('trainingplan', 'escapeSQuote')}' + ': ' + this.form.valueOf('name') + '<br>' + title + ' - ' + (presentation === 'persession' 
+                      '{$tr('trainingplan', 'escapeSQuote')}' + ': ' + form.valueOf('name') + '<br>' + title + ' - ' + (presentation === 'persession' 
                         ? ''
                         : ('{$tr('week')} ' + weekOfTheYear + ': {$tr('fromdate')} ' + utils.transform(firstDay, 'date') + ' {$tr('todate')} ' + utils.transform(lastDay, 'date') + ' (')) + 
                      '{$tr('week')} ' + weekOfProgram + ' / ' + this.valueOf('weeksinprogram') + (presentation === 'persession' ? '' : ')')}
@@ -133,22 +135,22 @@ selectedWeeks.forEach(function(selectedWeek){
         previousWeekOfTheYear = parseInt(weekOfTheYear) - 1, previousWeekOfProgram = parseInt(weekOfProgram) - 1;
     switch(selectedWeek){
         case 'plannedthisweek' : 
-            html += buildWeeklyTable('', '{$tr('plannedsessions')}', firstDay, lastDay, weekOfTheYear, weekOfProgram, self.valueOf('plannedcolstoinclude'));
+            html += buildWeeklyTable('', '{$tr('plannedsessions')}', firstDay, lastDay, weekOfTheYear, weekOfProgram, self.getWidget('plannedcolstoinclude').get('value'));
             break;
         case 'performedthisweek': 
-            html += buildWeeklyTable('performed', '{$tr('performedsessions')}', firstDay, lastDay, weekOfTheYear, weekOfProgram, self.valueOf('performedcolstoinclude'));
+            html += buildWeeklyTable('performed', '{$tr('performedsessions')}', firstDay, lastDay, weekOfTheYear, weekOfProgram, self.getWidget('performedcolstoinclude').get('value'));
             break;
         case 'plannedlastweek' : 
             html += buildWeeklyTable('', '{$tr('plannedsessions')}', dutils.formatDate(dojo.date.add(new Date(firstDay), 'week', -1)), dutils.formatDate(dojo.date.add(new Date(lastDay), 'week', -1)),
-                        previousWeekOfTheYear, previousWeekOfProgram, self.valueOf('plannedcolstoinclude'));
+                        previousWeekOfTheYear, previousWeekOfProgram, self.getWidget('plannedcolstoinclude').get('value'));
             break;
         case 'performedlastweek': 
             html += buildWeeklyTable('performed', '{$tr('performedsessions')}', dutils.formatDate(dojo.date.add(new Date(firstDay), 'week', -1)), dutils.formatDate(dojo.date.add(new Date(lastDay), 'week', -1)),
-                        previousWeekOfTheYear, previousWeekOfProgram, self.valueOf('performedcolstoinclude'));
+                        previousWeekOfTheYear, previousWeekOfProgram, self.getWidget('performedcolstoinclude').get('value'));
             break;
     }
 });
-console.log('generated html: ' + html);
+//console.log('generated html: ' + html);
 this.getWidget('weeklytable').set('value', html);
 EOT;
   }
@@ -199,10 +201,10 @@ EOT;
 		pane.setWidgets({hidden: {newname: true, newacl: true, createcalendar: true, hide: true}, value: {googlecalid: response.googlecalid}});
 		this.set('label', label);
 		pane.resize();
-	}));"
+	}));
 EOT;
   }
-  protected function googleSyncUpdateAclOnClickAction(){
+  protected function googleConfUpdateAclOnClickAction(){
       return <<<EOT
 	var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');
 	this.set('label', Pmg.loading(label));
@@ -213,7 +215,7 @@ EOT;
 	}));
 EOT;
   }
-  protected function googleSyncDeleteCalendarOnClickAction(){
+  protected function googleConfDeleteCalendarOnClickAction(){
       return <<<EOT
 	var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');
 	this.set('label', Pmg.loading(label));
@@ -228,14 +230,14 @@ EOT;
 	}));
 EOT;
   }
-  protected function googleSyncHideOnClickAction(){
+  protected function googleConfHideOnClickAction(){
     return <<<EOT
       var pane = this.pane;
       pane.setWidgets({hidden: {name: true, acl: true, deletecalendar: true, newname: true, newacl: true, createcalendar: true, updateacl: true, hide: true}});
       pane.resize();
 EOT;
   }
-  protected function googleSyncOnOpenAction(){
+  protected function googleConfOnOpenAction(){
       return <<<EOT
     var pane = this, googlecalid = pane.form.getWidget('googlecalid').get('value');
 	pane.watchOnChange = false;
@@ -244,25 +246,130 @@ EOT;
 	});
 EOT;
   }
-  protected function sessionsTrackingOnOpenAction(){
+  protected function _urlChangeLocalActionString($tr){
       return <<<EOT
-    var filePath = this.valueOf('filepath'), getWidget = lang.hitch(this, this.getWidget), disabled = filePath ? false : true;
-	['downloadperformedsessions', 'uploadperformedsessions', 'removeperformedsessions'].forEach(function(name){
-	    getWidget(name).set('disabled', disabled);
-	});
+    var synchroStart = pane.valueOf('synchrostart'), synchroEnd = pane.valueOf('synchroend'), gcMetricsToInclude = pane.getWidget('gcmetricstoinclude'), gcLink = pane.getWidget('gclink'),
+        gcUrl = string.substitute("{$this->_gcUrl}", {athlete: pane.valueOf('gcathlete'), synchrostart: synchroStart.replace(/-/g, '/'), synchroend: synchroEnd.replace(/-/g, '/'),
+            metadata: 'Sport,Workout_Title', metrics: gcMetricsToInclude.get('displayedValue').join(',')});
+    gcLink.set('value', string.substitute(Pmg.message('gclinkmessage', 'sptprograms'), 
+        {url: gcUrl, gcmetricstoinclude: '{$tr('gcmetricstoinclude')}', gcinput: '{$tr('gcinput')}', gcimport: '{$tr('gcimport')}', gcactivitiesmetrics: '{$tr('gcactivitiesmetrics')}', gcsync: '{$tr('gcsync')}'}));
 EOT;
   }
-  protected function sessionsTrackingActionButtonsOnClickAction($action){
+  protected function sessionsTrackingOnOpenAction($tr){
+      $this->view->addToTranslate(['gclinkmessage', 'nomatch', 'newsession', 'synced', 'bicycle', 'swimming', 'running', 'other']);
       return <<<EOT
-	var pane = this.pane, parentW = pane.attachedWidget, form = parentW.form, getWidget = lang.hitch(form, form.getWidget), paneValueOf = lang.hitch(pane, pane.valueOf), formValueOf = lang.hitch(form, form.valueOf), 
-        label = this.get('label'), urlArgs = parentW.urlArgs;
-	this.set('label', Pmg.loading(label));
-	form.serverDialog({action: 'Process', query: {id: formValueOf('id'), params: {process: '$action', save: true}}}, 
-            lang.mixin(parentW.valuesToSend, {filepath: paneValueOf('filepath'), version: paneValueOf('version')}), form.get('postElts'), Pmg.message('actionDone')).then(lang.hitch(this, function(response){
-	    console.log('server action completed');
-	    this.set('label', label);
-	    pane.close();
-	}));
+    var form = this.form, pane = this;
+    pane.setWidgets({value: {gcsynchrostart: form.valueOf('synchrostart'), gcsynchroend: form.valueOf('synchroend')}});
+    {$this->_urlChangeLocalActionString($tr)};
+EOT;
+  }
+  protected function urlChangeLocalActionString($tr){
+      return <<<EOT
+    var pane = sWidget.pane;
+    {$this->_urlChangeLocalActionString($tr)};
+EOT;
+  }
+  protected function urlChangeLocalAction($widgetName, $tr, $customFlag = true){
+      return $this->watchLocalActionTemplate($widgetName, $this->urlChangeLocalActionString($tr) . ($customFlag ? $this->watchLocalActionString() : ''));
+  }
+  protected function gcimportOnClickAction($tr){
+      return <<<EOT
+  var pane = this.pane, gcMetricsToInclude = pane.getWidget('gcmetricstoinclude'), gcActivitiesMetrics = pane.getWidget('gcactivitiesmetrics'), gcMetricsOptions = gcMetricsToInclude.getOptions(),
+      permanentGcOptions = gcActivitiesMetrics.permanentGcOptions, colsDescription = gcActivitiesMetrics.colsDescription,
+      gcColumns = {}, form = pane.form, tukosSessions = form.getWidget('sptsessions'), synchroStart = pane.valueOf('gcsynchrostart'), synchroEnd = pane.valueOf('gcsynchroend'),
+      tukosSessionsStore = tukosSessions.store, gcCollection = gcActivitiesMetrics.get('collection'), gcDates = [], gcInput = pane.valueOf('gcinput').split(/\\n/g), gcInputLabels = gcInput.shift().split(', '), 
+      gcInputColNames = utils.flip(lang.mixin(lang.mixin({}, permanentGcOptions), gcMetricsOptions)), data = [], id = 1;
+  gcActivitiesMetrics.nonGcCols.forEach(function(name){
+      gcColumns[name] = colsDescription[name];
+  });
+  utils.forEach(permanentGcOptions, function(translatedName, name){
+      gcColumns[name] = colsDescription[name];
+  });
+  gcMetricsToInclude.get('value').forEach(function(name){
+      gcColumns[name] = colsDescription[name];
+      gcColumns[name].label = gcColumns[name].label.replace(/[_()]/g, ' ');
+  });
+  gcActivitiesMetrics.set('columns', gcColumns);
+  gcInput.forEach(function(activityString){
+    if (activityString){
+        var row = {id: id}, activity = activityString.split(',');    
+        activity.forEach(function(value, i){
+            var col = gcInputColNames[gcInputLabels[i]], description = colsDescription[col];
+            if (col){
+                switch (description.gcToTukos){
+                    case '/to-':
+                        row[col] = value.replace(/[/]/g, '-');
+                        break;
+                    case 'secondsToTime':
+                        row[col] = dutils.secondsToTime(value);
+                        break;
+                    case 'number':
+                        row[col] = Number.parseFloat(value).toFixed(description.formatOptions.places);
+                        break;
+                    case 'sliceOne':
+                        row[col] = value.slice(1, -1);
+                        break;
+                    case 'sliceOneAndGcToTukos':
+                        row[col] = description.gcToTukosOptions.map[value.slice(1, -1)];
+                        break;
+                    default:
+                        row[col] = value;
+                }
+            }
+        });
+        utils.array_unique_push(row.date, gcDates);        
+        data.push(row);    
+        id += 1;
+    }
+  });
+  gcCollection.setData(data);  
+  gcDates.forEach(function(date){
+    var gcActivities = gcCollection.filter({date: date}).sort('time').fetchSync();
+    var tukosSessions = tukosSessionsStore.filter({startdate: date, mode: 'performed'}).sort('sessionid').fetchSync();
+    for (var i = 0; i < gcActivities.length; i++){
+        if (i < tukosSessions.length){
+            gcActivities[i].tukosid = tukosSessions[i].id || Pmg.message('newsession', 'sptprograms');
+            gcActivities[i].tukosIdProp = tukosSessions[i][tukosSessionsStore.idProperty];
+        }else{
+            gcActivities[i].tukosid = Pmg.message('nomatch', 'sptprograms');
+        }
+        gcActivities[i].sessionid = i+1;
+    }
+  });
+  gcActivitiesMetrics.set('collection', gcCollection);
+  gcActivitiesMetrics.selectAll();
+EOT;
+  }
+  protected function gcsyncOnClickAction(){
+      return <<<EOT
+  var self = this, pane = this.pane, gcActivitiesMetrics = pane.getWidget('gcactivitiesmetrics'), selection = gcActivitiesMetrics.get('selection'), gcCollection = gcActivitiesMetrics.get('collection'), gcColumns = gcActivitiesMetrics.columns, 
+      form = pane.form, sessions = form.getWidget('sptsessions'), sessionsStore = sessions.store;
+  utils.forEach(selection, function(isSelected, idProp){
+      if (isSelected){
+        var gcActivity = gcCollection.getSync(idProp), itemToSync = {}, associatedSessionRow = gcActivity.tukosIdProp ? sessions.row(gcActivity.tukosIdProp).data : {};
+        utils.forEach(gcColumns, function(column, gcName){
+            var sessionColName = column.sessionsColName;
+            if (sessionColName && (!utils.in_array(sessionColName, ['name', 'sport']) || !associatedSessionRow[sessionColName])){
+                itemToSync[sessionColName] = gcActivity[gcName];
+            }
+        });
+        if (!utils.empty(itemToSync)){
+            itemToSync[sessionsStore.idProperty] = gcActivity.tukosIdProp;
+            itemToSync.sessionid = gcActivity.sessionid;
+        }
+        if (gcActivity.tukosIdProp){
+            sessions.updateRow(itemToSync);
+            gcActivity.tukosid = gcActivity.tukosid + ' (' + Pmg.message('synced', 'sptprograms') + ')';
+        }else{
+            itemToSync.mode = 'performed';
+            itemToSync.startdate = gcActivity.date;
+            sessions.addRow(undefined, itemToSync);
+            gcActivity.tukosIdProp = itemToSync[sessionsStore.idProperty];
+            gcActivity.tukosid = Pmg.message('newsession', 'sptprograms') + ' (' + Pmg.message('synced', 'sptprograms') + ')';
+        }
+      }
+  });
+  gcActivitiesMetrics.set('collection', gcCollection);
 EOT;
   }
 }

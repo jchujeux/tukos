@@ -11,7 +11,7 @@ class View extends EditView{
 
     function __construct($actionController){
         parent::__construct($actionController);
-        $this->dataLayout['contents']['row2'] = [
+        $this->dataLayout['contents']['rowcomments'] = [
             'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['20%', '8%', '50%', '30%']],
             'widgets' => ['incidentswf', 'incidentssla', 'comments', 'worksheet']
         ];

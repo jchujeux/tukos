@@ -22,6 +22,7 @@ use TukosLib\Objects\ContentExporter;
 use TukosLib\Objects\ItemsExporter;
 use TukosLib\Objects\ItemsImporter;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Objects\StoreUtilities as SUtl;
 
 use TukosLib\TukosFramework as Tfk;
 
@@ -31,6 +32,7 @@ abstract class AbstractModel extends ObjectTranslator {
     
   //these are the minimal cols required in the $store  table for any Tukos object, with associated keys definition, to be completed with object specific cols definitions
     protected $permissionOptions = ['NOTDEFINED', 'PR', 'RO', 'PU', 'ACL'];
+    protected $aclOptions = ['0' => 'none', '1' => 'read', '2' => 'update', '3' => 'delete'];
     protected $gradeOptions = ['TEMPLATE', 'NORMAL', 'GOOD', 'BEST'];
     protected $timeIntervalOptions =  ['', 'year', 'quarter', 'month', 'week', 'weekday', 'day', 'hour', 'minute', 'second'];// corresponds to intersection of php strToTime & dojo.date supported intervals
     protected $useItemsCache = true;
@@ -39,7 +41,6 @@ abstract class AbstractModel extends ObjectTranslator {
     public static function translationSets(){// for cases where an object need specific translation sets (e.g. 'countrycodes' for the people object
         return [];
     }
-    
     function __construct ($objectName, $translator, $tableName, $idColsObjects, $jsonCols, $colsDefinition, $colsIndexes = [], $colsToTranslate = [], $optionalCols=['custom'], $extendedNameCols = ['name']) {
     	$this->configStatusOptions = array_keys(Directory::configStatusRange());
     	$this->store  = $store = Tfk::$registry->get('store');
@@ -48,12 +49,9 @@ abstract class AbstractModel extends ObjectTranslator {
         parent::__construct($objectName, $translator);
         $this->objectName = $objectName;
         $this->tableName = $tableName;
-
-        $this->idColsObjects = Utl::array_merge_recursive_replace($this->tukosModel->idColsObjects, $idColsObjects);
+        $this->idColsObjects = Utl::array_merge_recursive_replace($this->tukosModel->idColsObjects, array_merge(['id' => $objectName],$idColsObjects));
         $this->idCols = array_keys($this->idColsObjects);
-        $this->objectIdCols = array_diff($this->idCols, $this->tukosModel->idCols);
-        $this->gridsIdCols = [];
-        
+        $this->gridsIdCols = ['acl' => ['userid']];
         $this->colsDescription = empty($colsDefinition) ? [] : array_merge([ 'id'  =>  'INT(11) PRIMARY KEY'], $colsDefinition);
         if (!empty($this->colsDescription)){
             if (!$store->tableExists($this->tableName)){
@@ -67,8 +65,8 @@ abstract class AbstractModel extends ObjectTranslator {
         $this->objectExtendedNameCols = array_diff($this->extendedNameCols, $this->tukosExtendedNameCols);
         
         $this->absentOptionalCols = array_diff(self::optionalCols, $optionalCols);
-        $this->jsonCols = array_merge(array_intersect(['worksheet', 'custom'], $optionalCols), $jsonCols);
-        $this->jsonColsFilters = ['worksheet' => true];
+        $this->jsonCols = array_merge(['acl'], array_intersect(['worksheet', 'custom'], $optionalCols), $jsonCols);
+        $this->jsonColsFilters = ['acl' => true, 'worksheet' => true];
         
         $this->textColumns = array_merge(
             array_diff($this->tukosModel->textColumns, $this->absentOptionalCols),
@@ -76,57 +74,51 @@ abstract class AbstractModel extends ObjectTranslator {
             );
         $this->maxSizeCols = array_merge(
             array_diff($this->tukosModel->maxSizeCols, $this->absentOptionalCols),
-            array_diff(array_keys(array_filter($colsDefinition, function($def){return in_array(strtolower(substr($def, 0, 4)), $this->tukosModel->_largeColumns);})), $jsonCols)
+            array_diff(array_keys(array_filter($colsDefinition, function($def){return in_array(strtolower(substr($def, 0, 8)), $this->tukosModel->_largeColumns);})), $jsonCols)
         );
-        
         $this->objectCols = array_keys($colsDefinition);
         $this->allCols = array_merge(array_diff($this->tukosModel->sharedObjectCols, $this->absentOptionalCols), $this->objectCols);
         $this->colsToTranslate = array_merge(['permission', 'grade', 'configstatus'], $colsToTranslate);
     }
-    
     public function setUseItemsCache($newValue){
         $this->useItemsCache = $newValue;
     }
-    
     public static function emptyItemsCache(){// empties the cache for all objects, not only for this object
         ItemsCache::emptyCache();
     }
-    
     public function setInits(){
         if (!property_exists($this, 'init')){
-            $this->init = ['permission' =>  'RO', 'contextid' => $this->user->getContextId($this->objectName), 'comments' => '', 'grade' => 'NORMAL', 'configstatus' => 'users'];
+            $this->init = ['permission' =>  'RO', 'contextid' => $this->user->getContextId($this->objectName)/*, 'comments' => ''*/, 'grade' => 'NORMAL', 'configstatus' => 'users'];
         }
     }
-
     public function initialize($init=[]){
         $this->setInits();
         return array_merge ($this->init, $init);
     }
-
     public function initializeExtended($init=[]){
         $result = $this->initialize($init, true);
         $this->addItemIdCols($result);
         return $result;
     }
-    
-    
     function options($property){
         $name = $property . 'Options';
-        return $this->$name;
+        if (isset($this->$name)){
+            return $this->$name;
+        }else{
+            if (!isset($this->staticDomainClassName)){
+                $pathArray = explode('\\', get_Class($this));
+                array_splice($pathArray, 3, count($pathArray), [$pathArray[2]]);
+                $this->staticDomainClassName = implode('\\', $pathArray);
+            }
+            return $this->$name = $this->staticDomainClassName::$$name;
+        }
     }
-
+    
     public function errorModelAction(){
         Feedback::add($this->tr('errormodelaction'));
     }
-/*
     public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
-    	return $this->_getOne($atts, $jsonColsPaths, $jsonNotFoundValue);
-    }
-    	
-    public function _getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
-*/    		 
-    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
-    	$atts['table'] = $this->tableName;
+    	$atts = ['table' => $this->tableName] + $atts;
 		$missingCols = ($this->useItemsCache ? ItemsCache::missingCols($atts) : $atts['cols']);
 		if (empty($missingCols)){
             $result = ItemsCache::getOne($atts);
@@ -172,7 +164,7 @@ abstract class AbstractModel extends ObjectTranslator {
     }
 
     public function getAll ($atts){
-        $atts['table'] = $this->tableName;
+    	$atts = ['table' => $this->tableName] + $atts;
     	if ($allDescendants = Utl::extractItem('allDescendants', $atts, false)){
     		if (isset($atts['range'])){
             	Tfk::error_message('info', 'combining range and allDescendants is not supported. Continuing at your own risks - atts: ', $atts);
@@ -205,7 +197,9 @@ abstract class AbstractModel extends ObjectTranslator {
                 $presentMaxSizeCols = array_intersect($atts['cols'], $this->maxSizeCols);
                 foreach ($presentMaxSizeCols as $key => $col){
                     //$atts['cols'][$key] = 'if(length(' . $col . ') > ' . $fieldsMaxSize . ', concat("#tukos{id:", tukos.id, ",object:' . $this->objectName . ',col:' . $col . '}"),' . $col . ') ' . $col;
-                    $atts['cols'][$key] = [$col => "if(length(${col}) > $fieldsMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$this->objectName,col:${col}}\"),${col})${col}"];
+                    //$extCol = "tukos.$col";
+                    $extCol = SUtl::colsPrefix($col, $this->tableName) . "$col";
+                    $atts['cols'][$key] = "if(length($extCol) > $fieldsMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$this->objectName,col:$col}\"),$extCol) as $col";
                 }
             }
         }
@@ -232,7 +226,7 @@ abstract class AbstractModel extends ObjectTranslator {
         if ((empty($atts) || empty($atts['where'])) && !empty($values['id'])){
             $atts['where'] = ['id' => $values['id']];
         }
-        $defCols = ['id', 'permission', 'updator', 'updated'];
+        $defCols = ['id', 'permission', 'acl', 'updator', 'updated'];
         if (in_array('history', $this->allCols)){
             $defCols[] = 'history';
         }
@@ -251,11 +245,11 @@ abstract class AbstractModel extends ObjectTranslator {
         return $atts;
     }
     
-    protected function activeJsonColsDefaultPath($item){
-        $presentJsonCols = array_intersect(array_keys($item), $this->jsonCols);
+    protected function activeJsonColsDefaultPath($presentCols, $newItem){
+        $presentJsonCols = array_intersect($presentCols, $this->jsonCols);
         $activeJsonCols = [];
         foreach ($presentJsonCols as $jsonCol){
-            if (is_array($item[$jsonCol])){
+            if (!is_string(Utl::getItem($jsonCol, $newItem))){
                 $activeJsonCols[$jsonCol] = [];
             }
         }
@@ -267,7 +261,7 @@ abstract class AbstractModel extends ObjectTranslator {
             unset($newValues['configstatus']);
         }
         $atts = $this->completeUpdateAtts($newValues, $atts);
-        $oldValues = $this->getOne($atts, $this->activeJsonColsDefaultPath($newValues));
+        $oldValues = $this->getOne($atts, $this->activeJsonColsDefaultPath($atts['cols'], $newValues));
         if (empty($oldValues)){
             if ( $insertIfNoOld){
                 return $this->insert($newValues, $init);
@@ -277,7 +271,7 @@ abstract class AbstractModel extends ObjectTranslator {
             }
         }else{
             if (!empty($newValues['updated']) && $newValues['updated'] < $oldValues['updated']){
-                Feedback::add([[$this->tr('theuser') => $oldValues['updator']], ['updatedat' => $oldValues['updated']], ['afteryouredit' => null]]);
+                Feedback::add([[$this->tr('theuser') => $oldValues['updator']], [$this->tr('updatedat') => $oldValues['updated']], [$this->tr('afteryouredit') => null]]);
                 return false;
             }
             if ($this->user->hasUpdateRights($oldValues)){
@@ -392,7 +386,6 @@ abstract class AbstractModel extends ObjectTranslator {
             return false;
         }
     }
-
     function append($values, $cols=false, $separator="\n"){
         if (! empty($values['id'])){
             $id = Utl::extractItem('id', $values);
@@ -411,8 +404,7 @@ abstract class AbstractModel extends ObjectTranslator {
                 $this->updateOne($newValues);
             }
         }
-    }   
-
+    }
     public function setReference(&$values, $reference){
 	    $dateCol = $reference['dateCol'];
 	    $refCol = $reference['referenceCol'];
@@ -420,7 +412,7 @@ abstract class AbstractModel extends ObjectTranslator {
     	if (!empty($values[$dateCol])){
 	    	$refDate = str_replace('-', '', $values[$dateCol]);
 	    	$latest = $this->getOne([
-	    			'where' => [['col' => 'id', 'opr' => '>', 'values' => 0], ['col' => $refCol, 'opr' => 'like', 'values' => 'TDS' . $refDate . '%']],
+	    			'where' => [['col' => 'id', 'opr' => '>', 'values' => 0], ['col' => $refCol, 'opr' => 'like', 'values' => $refPrefix . $refDate . '%']],
 	    			'cols' => [$refCol], 'orderBy' => [$refCol => 'DESC']
 	    	]);
 	    	if (empty($latest)){
@@ -431,7 +423,6 @@ abstract class AbstractModel extends ObjectTranslator {
 	    	}
 	    }
     }
-    
     public function insert($values, $init = false, $jsonFilter = false, $reference = null){
         if (is_array($init)){
             $values = array_merge($this->initialize(), $init, $values);
@@ -465,7 +456,6 @@ abstract class AbstractModel extends ObjectTranslator {
 
         return $values;
     }
-    
     public function insertExtended($values, $init=false, $jsonFilter = false){
         if (is_array($init)){
             $values = array_merge($this->initializeExtended(), $init, $values);
@@ -475,7 +465,6 @@ abstract class AbstractModel extends ObjectTranslator {
         $this->processLargeCols($values);
         return $this->insert(array_intersect_key($values, array_flip($this->allCols)), false, $jsonFilter);        
     }
-
     public function duplicate($ids, $cols=['*']){
         $result = [];
         foreach ($ids as $id){
@@ -484,7 +473,6 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         return $result;
     }
-
     public function duplicateOneExtended($id, $cols, $jsonColsPaths = [], $jsonNotFoundValue=null){
         $duplicate =  $this->getOne(['where' => ['id' => $id], 'cols' => array_diff($cols, ['id', 'created', 'creator', 'updated', 'updator', 'history'])], $jsonColsPaths, $jsonNotFoundValue);
         $initial = array_intersect_key($this->initialize(), $duplicate);
@@ -496,49 +484,24 @@ abstract class AbstractModel extends ObjectTranslator {
         $this->addItemIdCols($duplicate);
         return $duplicate;
     }
-
-/*    
-    public function delete ($where, $item = []){
-        $old = $this->getOne(['where' => $where, 'cols' => ['id', 'updator', 'permission', 'updated']]);
-        if ($this->user->hasUpdateRights($old)){
-            if ($updated = Utl::getItem('updated', $item)){
-                if ($old['updated'] > $updated){
-                    Feedback::add([[$this->tr('theuser') => $old['updator']], ['updatedat' => $old['updated']], ['afteryouredit' => null]]);
-                    return false;
-                }
-            }
-            $atts = ['where' => $where, 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]];
-            return $this->updateItems([], $atts, false);
-        }else{
-            Feedback::add($this->tr('nodeleterightsfor') . ': ' . $old['id']);
-        }
-    }
-*/
     public function delete ($where, $item = []){
         $oldItems = $this->getAll(['where' => $where, 'cols' => ['id', 'updator', 'permission', 'updated']]);
-/*
-        if (($updated = Utl::getItem('updated', $item)) && $oldItems[0]['updated'] > $updated){
-            Feedback::add([[$this->tr('theuser') => $oldItems[0]['updator']], ['updatedat' => $oldItems[0]['updated']], ['afteryouredit' => null]]);
+        foreach($oldItems as $old){
+            if ($this->user->hasDeleteRights($old)){
+                $toDelete[] = $old['id'];
+            }else{
+                $noRightToDelete[] = $old['id'];
+            }
+        }
+        if (!empty($noRightToDelete)){
+            Feedback::add($this->tr('nodeleterightsfor') . ': ' . json_encode($noRightToDelete));
+        }
+        if (empty($toDelete)){
+            Feedback::add($this->tr('noitemwasdeleted'));
             return false;
         }else{
-*/
-            foreach($oldItems as $old){
-                if ($this->user->hasUpdateRights($old)){
-                    $toDelete[] = $old['id'];
-                }else{
-                    $noRightToDelete[] = $old['id'];
-                }
-            }
-            if (!empty($noRightToDelete)){
-                Feedback::add($this->tr('nodeleterightsfor') . ': ' . json_encode($noRightToDelete));
-            }
-            if (empty($toDelete)){
-                Feedback::add($this->tr('noitemwasdeleted'));
-                return false;
-            }else{
-                return $this->updateItems([], ['where' => [['col' => 'id', 'opr' => 'in', 'values' => $toDelete]], 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]]);
-            }
-//        }
+            return $this->updateItems([], ['where' => [['col' => 'id', 'opr' => 'in', 'values' => $toDelete]], 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]]);
+        }
     }
     public function summary($activeUserFilters = null){
         return [

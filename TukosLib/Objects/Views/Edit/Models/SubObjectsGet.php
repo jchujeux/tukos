@@ -18,7 +18,7 @@ class SubObjectsGet extends SubObjects{
                 $response['data']['initialRowValue'][$widgetName] = Utl::array_merge_recursive_replace($getClass->initialize('objToStoreEdit'), $subObject['initialRowValue']);
                 $subObject['filters'] = array_merge($subObject['filters'], $editModelGet->user->getCustomView($editModelGet->model->objectName, 'edit', $editModelGet->paneMode, ['widgetsDescription', $widgetName, 'atts', 'columns', 'filter']));
                 $subObjectValue = $getClass->getGrid(
-                    ['where' => self::setQuery($subObject['filters'], $response['data']['value'], $contextPathId)], 
+                    self::setQuery($subObject['filters'], $response['data']['value'], $contextPathId), 
                     self::colsToSend($editModelGet, $subObject, $widgetName),
                     (isset($subObject['allDescendants']) ? $subObject['allDescendants'] : false), 
                     'objToStoreEdit'

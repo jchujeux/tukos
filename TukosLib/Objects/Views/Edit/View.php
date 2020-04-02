@@ -46,22 +46,26 @@ class View {
                     'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
                     'widgets' => array_values(array_diff(array_merge($this->_firstDataElts, $this->view->addedDataWidgetsElts), $this->view->_exceptionCols['edit'])),
                 ],
-                'row2' => [
+                'rowcomments' => [
                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['30%', '70%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
                     'widgets' => (isset($this->view->dataWidgets['worksheet']) ? ['worksheet', 'comments'] : ['comments']),
                 ],
-                'row3' => [
+                'rowsubobjects' => [
                     'tableAtts' =>  ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0'],
                     'widgets' => array_values(array_diff(array_keys($this->view->subObjects), $this->view->_exceptionCols['edit'])),
                 ],
-                'row4' => [
+                'rowbottom' => [
                     'tableAtts' => ['cols' => 8, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 60],
                     'widgets' => array_values(array_diff($this->_lastDataElts, $this->view->_exceptionCols['edit'])),
                 ],
-                'row5' => [
+                'rowacl' => [
+                    'tableAtts' =>  ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0'],
+                    'widgets' => ['acl'],
+                ],
+                'rowhistory' => [
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0',],
                     'widgets' =>  (in_array('history', $this->view->model->allCols) ? ['history'] : []),
-                ],
+                ]
             ],
         ];
             
@@ -103,6 +107,9 @@ class View {
             'actionLayout'  => $this->actionLayout,
             'style' => ['padding' => '0px']
         ];
+        if (isset($this->view->allowedNestedWatchActions)){
+            $defAtts['allowedNestedWatchActions'] = $this->view->allowedNestedWatchActions;
+        }
         if (isset($this->onOpenAction)){
             $defAtts['onOpenAction'] = $this->onOpenAction;
         }

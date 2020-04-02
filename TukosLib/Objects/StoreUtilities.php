@@ -26,7 +26,8 @@ class StoreUtilities {
         if (empty($ids)){
         		return [];
         }else{
-			$values = self::extendedNameCols($ids);
+			$result = [];
+            $values = self::extendedNameCols($ids);
 	        $extendedNameColsCache = [];
 	    	$objectStore = Tfk::$registry->get('objectsStore');
 	        foreach ($values as $objectName => $objectValues){
@@ -62,7 +63,7 @@ class StoreUtilities {
     
     function objectTranslatedExtendedNames($model, $storeAtts){
     	$objectName = $model->objectName;
-    	$storeAtts['cols'] = array_merge(['id'], $model->extendedNameCols);
+    	$storeAtts['cols'] = array_merge(Utl::getItem('cols', $storeAtts, ['id']), $model->extendedNameCols);
     	$values = Utl::toAssociative($model->translateAll($model->getAll($storeAtts)), 'id');
     	if (empty($values)){
     		return [];
@@ -89,13 +90,14 @@ class StoreUtilities {
 	    		}
 	    	}
 			$result = [];
-			foreach ($values as $id => $extendedNameValues){
-				$presentExtendedNameIdCols = array_intersect($extendedNameIdCols, array_keys($extendedNameValues));
+			foreach ($values as $id => $value){
+				$extendedNameValues = Utl::extractItems($model->extendedNameCols, $value);
+			    $presentExtendedNameIdCols = array_intersect($extendedNameIdCols, array_keys($extendedNameValues));
 		        foreach ($presentExtendedNameIdCols as $col){
 					$idColValue = $extendedNameValues[$col];
 		        	$extendedNameValues[$col] = implode(' ', self::extendedNameColsForId($idColValue, $extraValues, $extendedNameColsCache));
 		        }	
-		        $result[$id] = ['name' => implode(' ', $extendedNameValues)];
+		        $result[$id] = array_merge(['name' => implode(' ', $extendedNameValues)], $value);
 			}
 			return $result;
     	}
@@ -184,9 +186,11 @@ class StoreUtilities {
     }
     
     public static function transformGet($queryAtts, $objectName){
+/*
         $hasObjectCols = self::$hasObjectCols;
         $hasTukosCols = self::$hasTukosCols;
     	self::resetCols();
+*/
         if (!empty($queryAtts['orderBy'])){
             $queryAtts['orderBy'] = self::transformOrderBy($queryAtts['orderBy'], $objectName);
         }
@@ -196,6 +200,7 @@ class StoreUtilities {
             $queryAtts['groupBy'] = self::transformCols($queryAtts['groupBy'], $objectName);
         }
         if (!self::$hasTukosCols){
+            self::resetCols();
             return $queryAtts;
         }
         if (self::$hasObjectCols){
@@ -206,18 +211,22 @@ class StoreUtilities {
         if ($objectName !== self::$tukosTableName){
         	$queryAtts['where'][self::$tukosTableName . '.object'] = $objectName;
         }
+/*
         self::$hasObjectCols = $hasObjectCols;
         self::$hasTukosCols = $hasTukosCols;
+*/
+        self::resetCols();
         return $queryAtts;
     }
  
      public static function transformUpdate(&$item, $queryAtts, $objectName){
-        self::resetCols();
+        //self::resetCols();
         $queryAtts['where'] = self::transformWhere($queryAtts['where'], $objectName);
         if (!empty($item)){
             $item = self::transformItem($item, $objectName, $queryAtts);
         }
         if (!self::$hasTukosCols){
+            self::resetCols();
             return $queryAtts;
         }
         if (self::$hasObjectCols){
@@ -226,6 +235,7 @@ class StoreUtilities {
             $queryAtts['table'] = self::$tukosTableName;
         }
         $queryAtts['where'][self::$tukosTableName . '.object'] = $objectName;
+        self::resetCols();
         return $queryAtts;
     }
   
@@ -275,7 +285,6 @@ class StoreUtilities {
         foreach ($where as $key => $condition){
             if (is_string($key)){// is an elementary condition
                 if (is_array($condition)){// transform from [$col => [$opr, $value]] into ['col' => $col, 'opr' => $opr, 'values' => $values]
-                    //$transformedWhere[] = ['col' => $colWhere($key), 'opr' => $condition[0], 'values' => $condition[1]];                 
                     if (!empty($condition[0])){
                 		$transformedWhere[] = self::longFilter($colWhere($key), $condition);
                     }
@@ -288,9 +297,13 @@ class StoreUtilities {
                 	if (isset($condition['col'])){
                 		$condition['col'] = $colWhere($condition['col']);
                 	}
-                	//if ($condition['opr'] === 'IN SELECT'){
                 	if (in_array($condition['opr'], ['IN SELECT', 'NOT IN SELECT', 'EXISTS', 'NOT EXISTS']) && is_array($condition['values'])){
-                		$condition['values'] = self::transformGet($condition['values'], $condition['values']['table']);
+                	    $hasObjectCols = self::$hasObjectCols;
+                	    $hasTukosCols = self::$hasTukosCols;
+                	    self::resetCols();
+                	    $condition['values'] = self::transformGet($condition['values'], $condition['values']['table']);
+                	     self::$hasObjectCols = $hasObjectCols;
+                	     self::$hasTukosCols = $hasTukosCols;
                 	}
                     $transformedWhere[] = $condition;
                 }else{//is a nested condition

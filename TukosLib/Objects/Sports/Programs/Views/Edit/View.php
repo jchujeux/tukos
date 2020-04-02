@@ -6,6 +6,7 @@ use TukosLib\Objects\Views\Edit\View as EditView;
 use TukosLib\Objects\Views\LocalActions;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
+use TukosLib\Objects\Sports\GoldenCheetah as GC;
 
 class View extends EditView{
 
@@ -18,9 +19,7 @@ class View extends EditView{
         $qtr = function($string) use ($tr){
             return $tr($string, 'escapeSQuote');
         };
-        $this->dataLayout   = [
-            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false,  'content' => ''],
-            'contents' => [
+        $customContents = [
 
             	'row1' => [
                     'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true],
@@ -41,6 +40,10 @@ class View extends EditView{
                                 'row3' => [
                                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                                     'widgets' => ['performedloadchart', 'weekperformedloadchart']],
+                                'row4' => [
+                                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+                                    'widgets' => ['weeklies']
+                                ]
                             ]],
                         'col2' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 
@@ -51,15 +54,10 @@ class View extends EditView{
                 'row3' => [
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0'],
                     'widgets' => ['sptsessions'],
-                ],
-                'row4' => [
-                     'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 60],
-                     'widgets' => ['permission', 'grade', 'contextid', 'updated', 'updator', 'created', 'creator']
-                ],
-            ]
+                ]
         ];
-
-        $this->onOpenAction = $this->onViewOpenAction() . $this->view->gridWidgetOpenAction;
+        $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
+        $this->onOpenAction = $this->onViewOpenAction() .  $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies');
         $plannedOptionalCols = ['name', 'duration', 'intensity', 'sport', 'sportimage', 'stress', 'distance', 'elevationgain', 'content']; $plannedColOptions = [];
         $performedOptionalCols = ['name', 'duration', 'sport', 'sportimage', 'distance', 'elevationgain', 'perceivedeffort', 'sensations', 'mood', 'athletecomments', 'coachcomments']; $plannedColOptions = [];
         $optionalWeeks = ['performedthisweek', 'plannedthisweek', 'performedlastweek', 'plannedlastweek']; $weekOptions;
@@ -70,7 +68,7 @@ class View extends EditView{
             $performedColOptions[$col] = $this->view->tr($col);
         }
         foreach($optionalWeeks as $week){
-           $weekOptions[$week] = $this->view->tr($week);
+           $weekOptions[$week] = $tr($week);
        }
        $this->actionWidgets['export']['atts']['dialogDescription'] = [
             'paneDescription' => [
@@ -168,8 +166,6 @@ class View extends EditView{
            'conditionDescription' => $this->googleSyncConditionDescription($qtr('needgooglecalid'), $qtr('youneedtoselectagooglecalid')),
        ]];
        $this->actionLayout['contents']['actions']['widgets'][] = 'googlesync';
-       //$this->actionWidgets['goldenSheetahSync'] =  ['type' => 'GoldenSheetahSync', 'atts' => ['label' => $this->view->tr('GoldenSheetahSync')]];
-       //$this->actionLayout['contents']['actions']['widgets'][] = 'goldenSheetahSync';
        $this->actionWidgets['googleconf'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Googleconf'), 'allowSave' => true]];
 		$this->actionLayout['contents']['actions']['widgets'][] = 'googleconf';
 		$this->actionWidgets['googleconf']['atts']['dialogDescription'] = [
@@ -209,11 +205,11 @@ class View extends EditView{
 		                    ]])),
 		            'createcalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('createcalendar'), 'hidden' => true, 'onClickAction' => $this->googleConfCreateCalendarOnClickAction(),
 		            ]],
-		            'updateacl' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('updateacl'), 'hidden' => true, 'onClickAction' => $this->googleSyncUpdateAclOnClickAction(),
+		            'updateacl' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('updateacl'), 'hidden' => true, 'onClickAction' => $this->googleConfUpdateAclOnClickAction(),
 		            ]],
-		            'deletecalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('deletecalendar'), 'hidden' => true, 'onClickAction' => $this->googleSyncDeleteCalendarOnClickAction(),
+		            'deletecalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('deletecalendar'), 'hidden' => true, 'onClickAction' => $this->googleConfDeleteCalendarOnClickAction(),
 		            ]],
-		            'hide' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('hide'), 'hidden' => true, 'onClickAction' => $this->googleSyncHideOnClickAction(),
+		            'hide' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('hide'), 'hidden' => true, 'onClickAction' => $this->googleConfHideOnClickAction(),
 		            ]],
 		        ],
 		        'layout' => [
@@ -241,57 +237,101 @@ class View extends EditView{
 		                ],
 		            ],
 		        ],
-		        'onOpenAction' => $this->googleSyncOnOpenAction(),
+		        'onOpenAction' => $this->googleConfOnOpenAction(),
 		    ]];
+		$durationFormat = ['renderCell' => 'renderContent', 'formatType' => 'secondsToHHMMSS']; $numberFormat = ['renderCell' => 'renderContent', 'formatType' => 'number', 'formatOptions' => ['places' => 0]];
 		$this->actionWidgets['sessionstracking'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Sessionstracking'), 'allowSave' => true, 'includeWidgets' => ['parentid', 'synchrostart', 'synchroend']]];
 		$this->actionLayout['contents']['actions']['widgets'][] = 'sessionstracking';
 		$this->actionWidgets['sessionstracking']['atts']['dialogDescription'] = [
-		    'closeOnBlur' => true,
+		    //'closeOnBlur' => true,
 		    'paneDescription' => [
 		        'widgetsDescription' => [
-		            'filepath' => Widgets::textBox(Widgets::complete(['label' => $tr('sessionstrackingfilepath'), 'style' => ['width' => '30em'], 'onWatchLocalAction' => Utl::array_merge_recursive_replace($this->watchLocalAction('filepath'), 
-		                ['value' => ['downloadperformedsessions' => ['localActionStatus' =>
-		                    "var getWidget = lang.hitch(sWidget.form, sWidget.form.getWidget), disabled = newValue ? false : true;" .
-		                    "['downloadperformedsessions', 'uploadperformedsessions', 'removeperformedsessions'].forEach(function(name){" .
-		                    "    getWidget(name).set('disabled', disabled);" .
-		                    "});"
-		                ]]])])),
 		            'eventformurl' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showeventtrackingformurl'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('eventformurl')])),
 		            'formlogo' => Widgets::textBox(Widgets::complete(['label' => $tr('trackingformlogo'), 'style' => ['width' => '15em'], 'onWatchLocalAction' => $this->watchLocalAction('formlogo')])),
 		            'formpresentation' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['MobileTextBox', 'default'], $tr)], 'label' => $tr('formpresentation'),
 		                'onWatchLocalAction' => $this->watchLocalAction('formpresentation')])),
-		            'version' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['V1', 'V2'], $tr, [false, 'ucfirst', false])], 'label' => $tr('version'),
+		            'version' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['V2'], $tr, [false, 'ucfirst', false])], 'label' => $tr('version'),
 		                'value' => $this->view->model->defaultSessionsTrackingVersion, 'onWatchLocalAction' => $this->watchLocalAction('version')])),
-		            'downloadperformedsessions' => $this->sessionsTrackingActionWidgetDescription('downloadPerformedSessions'),
-		            'uploadperformedsessions' => $this->sessionsTrackingActionWidgetDescription('uploadPerformedSessions'),
-		            'removeperformedsessions' => $this->sessionsTrackingActionWidgetDescription('removePerformedSessions'),
-		            'close' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('close'), 'onClickAction' =>
-		                "this.pane.close();\n"
-		            ]],
+		            'gcathlete' => Widgets::textBox(Widgets::complete(['title' => $tr('Gcathlete'), 'style' => ['width' => '15em'], 'onWatchLocalAction' => $this->urlChangeLocalAction('gcathlete', $tr)])),
+		            'gcsynchrostart' => Widgets::tukosDateBox(['title' => $tr('synchrostart'), 'onWatchLocalAction' => $this->urlChangeLocalAction('gcsynchrostart', $tr, false)]),
+		            'gcsynchroend' => Widgets::tukosDateBox(['title' => $tr('synchroend'), 'onWatchLocalAction' => $this->urlChangeLocalAction('gcsynchrostart', $tr, false)]),
+		            'gcmetricstoinclude' => Widgets::multiSelect(Widgets::complete(['title' => $tr('gcmetricstoinclude'), 'options' => GC::metricsOptions($tr), 'style' => ['height' => '150px'], 
+		                'onWatchLocalAction' =>  $this->urlChangeLocalAction('gcmetricstoinclude', $tr)])),
+		            'gcactivitiesmetrics' => Widgets::basicGrid(Widgets::complete(['label' => $tr('gcactivitiesmetrics'), 'allowSelectAll' => true, 'dynamicColumns' => true, 'adjustLastColumn' => false, 
+		                'colsDescription' => GC::metricsColsDescription($tr), 'nonGcCols' => GC::nonGcCols(), 'permanentGcOptions' => GC::permanentGcOptions()])),
+		            'gclink' => Widgets::htmlContent(['title' => $tr('gclink'), 'readonly' => true]),
+		            'gcinput' => Widgets::textArea(Widgets::complete(['title' => $tr('gcinput')])),
+		            'gcimport' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('gcimport'), 'onClickAction' => $this->gcimportOnClickAction($tr)]],
+		            'gcsync' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('gcsync'), 'onClickAction' => $this->gcsyncOnClickAction($tr)]],
+		            'close' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('close'), 'onClickAction' => "this.pane.close();\n"]],
 		        ],
 		        'layout' => [
-		            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
+		            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
 		            'contents' => [
 		                'row1' => [
-		                    'tableAtts' =>['cols' =>1,  'customClass' => 'labelsAndValues', 'showLabels' => true],
-		                    'widgets' => ['filepath'],
-		                ],
-		                'row2' => [
-		                    'tableAtts' =>['cols' =>4,  'customClass' => 'labelsAndValues', 'showLabels' => true],
+		                    'tableAtts' =>['cols' => 4,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
 		                    'widgets' => ['eventformurl', 'formlogo', 'formpresentation', 'version'],
 		                ],
+		                'headerRow' => [
+		                    'tableAtts' => ['cols' =>  1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 
+		                    'contents' => [
+		                        'title' => [
+		                            'tableAtts' => ['cols' =>  1, 'customClass' => 'labelsAndValues', 'label' => $tr('gcsynchronization')]
+		                        ]
+		                ]],
+		                'row2' => [
+		                    'tableAtts' =>['cols' => 4,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
+		                    'widgets' => ['gcathlete', 'gcsynchrostart', 'gcsynchroend'],
+		                ],
 		                'row3' => [
+		                    'tableAtts' =>['cols' => 2,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'widgetWidths' => ['10%', '90%']],
+		                    'contents' => [
+		                        'col1' => [
+		                            'tableAtts' =>['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+		                            'widgets' => ['gcmetricstoinclude']
+		                        ],
+		                        'col2' => [
+		                            'tableAtts' => ['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => false],
+		                            'contents' => [
+		                                'row1' => [
+		                                    'tableAtts' => ['cols' => 2,  'customClass' => 'labelsAndValues', 'showLabels' => false],
+		                                    'contents' => [
+		                                        'col1' => [
+		                                            'tableAtts' => ['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => false],
+		                                            'widgets' => ['gclink']
+		                                        ],
+		                                        'col2' => [
+		                                            'tableAtts' => ['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => false],
+		                                            'widgets' => ['gcimport', 'gcsync']
+		                                        ]
+		                                    ]
+		                                ],
+		                                'row2' => [
+		                                    'tableAtts' => ['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+		                                    'widgets' => ['gcinput'],
+		                                ],
+		                            ],
+		                        ]
+		                    ],
+		                ],
+		                'row4' => [
+		                    'tableAtts' =>['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+		                    'widgets' => ['gcactivitiesmetrics'],
+		                ],
+		                'row5' => [
 		                    'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => false],
-		                    'widgets' => ['close', 'downloadperformedsessions', 'uploadperformedsessions', 'removeperformedsessions'],
+		                    'widgets' => ['close'],
 		                ],
 		            ],
 		        ],
-		        'onOpenAction' => $this->sessionsTrackingOnOpenAction(),
+		        'onOpenAction' => $this->sessionsTrackingOnOpenAction($tr),
 		    ]];
 	}
+/*
 	private function sessionsTrackingActionWidgetDescription($action){
 	    return ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr($action), 'onClickAction' => $this->sessionsTrackingActionButtonsOnClickAction($action)
 	        ]];
 	}
+*/
 }
 ?>

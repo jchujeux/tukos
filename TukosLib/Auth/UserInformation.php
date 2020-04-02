@@ -33,18 +33,18 @@ class UserInformation{
             $this->userInfo = SUtl::$store->getOne([/*can't use Users\Model here as AbstractModel relies on $this->userInfo */
                 'table' => $tu, 'join' => [['inner', $tk,  $tk . '.id = ' . $tu . '.id']],
                 'where' => SUtl::transformWhere($where, $tu),
-                //'cols'  => SUtl::transformCols(['id', 'parentid', 'name', 'password', 'rights', 'modules', 'contextid', 'language', 'environment', 'tukosorganization', 'customviewids', 'customcontexts', 'pagecustom'], $tu)
                 'cols'  => ['*']
             ]);
             if (empty($this->userInfo)){
+                Feedback::add(Tfk::tr('Username') . ': ' . $where['name']);
                 return false;
             }
-            $this->unallowedModules  = ($this->rights() === 'SUPERADMIN' || $this->userInfo['modules'] === null) ? [] : json_decode($this->userInfo['modules'], true);
+            $this->unallowedModules  = ($this->isSuperAdmin() || $this->userInfo['modules'] === null) ? [] : json_decode($this->userInfo['modules'], true);
             if ($where['name'] === 'tukosBackOffice'){
                 $this->allowedModules = ['contexts', 'backoffice'];
             }else{
                 $this->allowedModules =  array_diff($this->objectModules, $this->unallowedModules);
-                if ($where['name'] !== 'tukosscheduler' && $this->isSuperAdmin()){
+                if ($this->isSuperAdmin()){
                     SUtl::$store->addMissingColsIfNeeded (SUtl::$tukosModel->colsDescription, $tk);
                 }
             }            
@@ -162,40 +162,42 @@ class UserInformation{
                 break;
         }
     }
-
-   /*
-    * Add condition to the where clause for $store->getXXX so as 
-    * not to retrieve private values if not being superadmin and not being its updator
-    */
+    function fullColName($colName, $tableName = ''){
+        return ($tableName === '' ? '' : $tableName . '.') . $colName;
+    }
     function filterPrivate($where, $tableName=''){
         switch ($this->rights()){
             case 'SUPERADMIN':
                 break;
             case 'ADMIN':
             case 'ENDUSER' :
-                $permissionCol = ($tableName === '' ? '' : $tableName . '.') . 'permission';
-                $updatorCol = ($tableName === '' ? '' : $tableName . '.') . 'updator';
-                $where[] = [['col' => $permissionCol, 'opr' => 'NOT LIKE', 'values' => 'PR'],
-                            ['col' => $updatorCol   , 'opr' => 'LIKE', 'values' => $this->id(), 'or' => true],
-                           ];
+/*
+                $where[] = [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RO,PU']],
+                ['col' => $this->fullColName('updator'), 'opr' => 'LIKE', 'values' => $this->id(), 'or' => true],
+                ['col' => $this->fullColName('acl'), 'opr' => 'RLIKE', 'values' => $this->id() . '","permission":"[123]"', 'or' => true]
+                ];
+*/
+                $where[] = [
+                    [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RO','PU']], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
+                    ['col' => $this->fullColName('updator'), 'opr' => 'LIKE', 'values' => $this->id(), 'or' => true],
+                    ['col' => $aclName, 'opr' => 'RLIKE', 'values' => $this->id() . '","permission":"[123]"', 'or' => true]
+                ];
                 break;
         }
         return $where;  
     }
     function filterReadOnly($where, $tableName = ''){
         if ($this->rights()!== "SUPERADMIN"){
-            $permissionCol = ($tableName === '' ? '' : $tableName . '.') . 'permission';
-            $updatorCol = ($tableName === '' ? '' : $tableName . '.') . 'updator';
-            $where[] =[['col' => $permissionCol, 'opr' => '=', 'values' => 'PU'], ['col' => $updatorCol, 'opr' => '=', 'values' => $this->id(), 'or' => true]];
+            $where[] = [
+                [['col' => $this->fullColName('permission'), 'opr' => '=', 'values' => 'PU'], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"[01]"']], 
+                ['col' => $this->fullColName('updator'), 'opr' => '=', 'values' => $this->id(), 'or' => true],
+                ['col' => $this->fullColName('acl'), 'opr' => 'RLIKE', 'values' => $this->id(). '","permission":"[23]"', 'or' => true]
+            ];
         }
         return $where;
     }
-   /*
-    * Add condition to the where clause for $store->getXXX so as 
-    * not to retrieve values not in current user context as well as values with negative ids (considered deleted)
-    */
     function filterContext($where, $objectName='', $tableName=''){// $tableName is needed in queries involving joins as contextid may then appear in different tables
-        $col = ($tableName === '' ? '' : $tableName . '.') . 'contextid';
+        $col = $this->fullColName('contextid');
         if (isset($where['contextpathid'])){
             $contextPathId = Utl::extractItem('contextpathid', $where);
         }else if(!empty($objectName)){
@@ -208,7 +210,6 @@ class UserInformation{
         }
         return $where;  
     }
-
     function filter($where, $objectName='', $tableName=''){
         if (isset($where['id']) && $where['id'] === $this->id()){
         	return $where;//so that a user can always access his own item
@@ -216,9 +217,27 @@ class UserInformation{
     		return $this->filterContext($this->filterPrivate($where, $tableName), $objectName, $tableName);
         }
     }
-
+    public function aclRights ($userId, $acl){
+        if (!empty($acl)){
+            $rights = false;
+            foreach ($acl as $rule){
+                if ($rule['userid'] === $userId){
+                    $rights = $rights = Utl::getItem('permission', $rule, false);
+                    break;
+                }
+            }
+            return $rights;
+        }else{
+            return false;
+        }
+    }
     public function hasUpdateRights($item){
-        return $this->rights() === "SUPERADMIN" || $item['updator'] === $this->id() || $item['permission'] === 'PU' || $item['id'] === $this->id();
+        $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
+        return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 1)) || $aclRights > 1 || $item['id'] === $this->id();
+    }
+    public function hasDeleteRights($item){
+        $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
+        return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 2)) || $aclRights > 2;
     }
     public function getDropboxUserAccessToken($userId){
         if (is_string($this->userInfo['custom'])){

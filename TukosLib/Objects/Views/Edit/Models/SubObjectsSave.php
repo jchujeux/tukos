@@ -11,13 +11,21 @@ use TukosLib\TukosFramework as Tfk;
 class SubObjectsSave extends SubObjects{
 
     public static function save($editModelSave, $valuesToSave, $newSavedId){
-        $idsSaved = [];
+        $idsSaved = []; $newRowsMapping = []; $newRowPrefixArray = [];
         foreach ($valuesToSave as $widgetName => $values){
             $subObject = $editModelSave->view->subObjects[$widgetName];
+            $dataWidgets = Utl::array_merge_recursive_replace($subObject['view']->dataWidgets, Utl::getItem('colsDescription', $subObject['atts'], []));
             $subObjectModel = $editModelSave->objectsStore->objectModel($subObject['object']);
-            $deleteValues = [];
-            $idsDeleted = [];
+            $deleteValues = []; $idsDeleted = []; $widgetsMapping = [];
             $saveSubObject = $editModelSave->objectsStore->objectViewModel($editModelSave->controller, 'Edit', 'Save', ['view' => $subObject['view'], 'model' => $subObject['model']]);
+            foreach ($dataWidgets as $colName => $widget){
+                if ($widget['type'] === 'ObjectSelect' && $gridName = Utl::drillDown($widget['atts'], ['storeedit', 'editorArgs', 'storeArgs', 'storeDgrid'], null)){
+                    $widgetsMapping[$colName] = $gridName;
+                }                
+            }
+            if ($newRowPrefix = Utl::getItem('newRowPrefix', $subObject['atts'])){
+                $newRowPrefixArray[$widgetName] = $newRowPrefix;
+            }
             foreach ($values as $key => $rowValues){
                 if (!empty($rowValues['~delete'])){
                     $deleteValues[] = $rowValues;
@@ -29,9 +37,25 @@ class SubObjectsSave extends SubObjects{
                             $rowValues[$filteredIdCol] = $newSavedId;
                         }
                     }
+                    if ($newRowPrefix && (strpos(Utl::getItem('id', $rowValues, ''), $newRowPrefix) === 0)){
+                        $newId = Utl::extractItem('id', $rowValues);
+                    }else{
+                        $newId = '';
+                    }
+                    foreach ($widgetsMapping as $colName => $widgetGridName){
+                        if (($prefix = Utl::getItem($widgetGridName, $newRowPrefixArray, false)) && strpos(Utl::getItem($colName, $rowValues, ''), $prefix) === 0){
+                            $rowValues[$colName] = Utl::drillDown($newRowsMapping, [$widgetGridName, $rowValues[$colName]], null);
+                        }
+                    }
                     $idSaved = $saveSubObject->saveOne($rowValues, 'storeEditToObj');
                     if ($idSaved){
                         $idsSaved[] = $idSaved;
+                        if ($newId){
+                            if (!isset($newRowsMapping[$widgetName])){
+                                $newRowsMapping[$widgetName] = [];
+                            }
+                            $newRowsMapping[$widgetName][$newId] = $idSaved;
+                        }
                     }
                 }
 

@@ -11,20 +11,21 @@ use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
 
-	use CalendarsViewUtils;
+	use CalendarsViewUtils, ViewActionStrings;
 	
 	function __construct($objectName, $translator=null){
 	    $stressOptionsString = "['" . implode("','", Sports::$stressOptions) . "']";
 	    parent::__construct($objectName, $translator, 'Sportsman', 'Title');
 		$this->doNotEmpty = ['displayeddate', 'synchrostart', 'synchroend'];
 		
-		$this->setGridWidget('sptsessions', 'startdate', 'startdate');
+		$this->setGridWidget('sptsessions');
 		$chartCols = ['duration' => 'lines', 'distance' => 'lines', 'elevationgain' => 'lines', 'load' => 'cluster', 'intensity' => 'cluster', 'stress' => 'cluster', 'perceivedload' => 'cluster', 'perceivedeffort' => 'cluster', 
 		    'sensations' => 'cluster', 'mood' => 'cluster', 'fatigue' => 'cluster'];
 		$chartColsTLabel = [];
 		foreach($chartCols as $col => $plot){
 		    $chartColsTLabel[$col] = $this->tr($col);
 		}
+		$chartColsTLabelString = json_encode($chartColsTLabel);
 		$chartColsLegendUnit = ['duration' => '(mn)', 'distance' => '(km)', 'elevationgain' => '(dam)'];
 		$plannedPresentCols = ['duration', 'distance', 'elevationgain', 'intensity', 'load', 'stress'];
 		$performedPresentCols = ['duration', 'distance', 'elevationgain', 'perceivedeffort', 'perceivedload', 'sensations', 'mood', 'fatigue'];
@@ -37,116 +38,43 @@ class View extends AbstractView {
 		    $tDaysOfWeek[] = $this->tr($day);
 		}
 		$tDaysOfWeek = json_encode($tDaysOfWeek);
-        $loadChartLocalActionString = <<<EOT
-	tWidget.plots.week.values = dutils.difference(tWidget.form.valueOf('fromdate'), newValue, 'week') + 1;
-	tWidget.chart.addPlot('week', tWidget.plots.week);
-	tWidget.chart.render();
-	return true;
-EOT;
-        $weekLoadChartLocalActionString = function($plannedOrPerformed, $presentCols, $colsTLabel) use ($tDaysOfWeek, $tDayOfWeek, $tDateOfDay){
-            if ($plannedOrPerformed === 'planned'){
-                $weekLoadChart = 'weekloadchart';
-                $sessionsFilter = 'ne';
-            }else{
-                $weekLoadChart = 'weekperformedloadchart';
-                $sessionsFilter = 'eq';
-            }
-            $presentColsString = json_encode($presentCols);
-            $colsTLabelString = json_encode($colsTLabel);
-            return <<<EOT
-  dojo.ready(function(){
-	var date = new Date(sWidget.form.valueOf('displayeddate')), weekLoadChartWidget = sWidget.form.getWidget('$weekLoadChart'), dayDate, chartItem, chartData = [], normalizedDuration = 120,
-	    gridWidget = sWidget.form.getWidget('sptsessions'), dayType = weekLoadChartWidget.get('daytype'), filter = new gridWidget.store.Filter(), daysOfWeek = $tDaysOfWeek, presentCols = $presentColsString, colsTLabel = $colsTLabelString;
-	for (i = 1; i <= 7; i++){
-	  dayDate = dutils.formatDate(dutils.getDayOfWeek(i, date));
-	  chartItem = {day: dayType === 'dayofweek' ? daysOfWeek[i-1] : dayDate};
-      presentCols.forEach(function(col){
-        chartItem[col] = 0;
-      });
-	  gridWidget.collection.filter(filter.eq('startdate', dayDate)['$sessionsFilter']('mode', 'performed')).forEach(function(item){
-	    if (item.sport !== 'rest'){
-            presentCols.forEach(function(col){//duration must come first, perceivedLoad must comes after perceivedeffort, load after intensity
-                chartItem[col] = Number(item[col]);                
-                chartItem[col + 'Tooltip'] = colsTLabel[col] + ': ';
-                switch (col){
-                    case 'duration':
-                        chartItem.duration = dutils.seconds(item.duration, 'time') / 60;
-	                    chartItem.durationTooltip += utils.transform(chartItem.duration, 'minutesToHHMM');
-                        break;
-                    case 'distance':
-                        chartItem.distanceTooltip += chartItem[col] + ' km';
-                        break;
-                    case 'elevationgain':
-                        chartItem.elevationgainTooltip += chartItem.elevationgain + ' m';
-                        chartItem.elevationgain = chartItem.elevationgain / 10;
-                        break;
-                    case 'load':
-                        chartItem.load = chartItem.intensity * chartItem.duration / normalizedDuration;
-                        chartItem.loadTooltip += chartItem.load;
-                        break;
-                    case 'perceivedload':
-                        chartItem.perceivedload = chartItem.perceivedeffort * chartItem.duration / normalizedDuration;
-                        chartItem.perceivedloadTooltip += chartItem.perceivedload;
-                        break;
-                    case 'fatigue':
-                        chartItem.fatigue = chartItem.sensations && chartItem.mood ? 11 - (chartItem.sensations + chartItem.mood) / 2 : 0;
-                        chartItem.fatigueTooltip += chartItem.fatigue;
-                        break;
-                    default:
-                        chartItem[col + 'Tooltip'] += chartItem[col];
-                }
-            });	       
-        }
-	  });
-	  chartData.push(chartItem);
-	}
-	weekLoadChartWidget.set('value', {store: chartData, axes: {x: {title: dayType === 'dayofweek' ? '$tDayOfWeek' : '$tDateOfDay'}}});
-  });
-  return true;
-EOT;
+        $weekLoadChartLocalAction = function($plannedOrPerformed, $presentCols) use ($tDaysOfWeek, $tDayOfWeek, $tDateOfDay, $chartColsTLabelString){
+            return $this->weekLoadChartLocalAction($plannedOrPerformed, $presentCols, $tDaysOfWeek, $tDayOfWeek, $tDateOfDay, $chartColsTLabelString);
         };
-        $synchroStartLocalActionString = function($displayeddate, $synchnextmonday){
-		    $displayedDateValue = $displayeddate === "newValue" ? "newValue" : ("sWidget.valueOf('$displayeddate')");
-		    $synchNextMondayValue = $synchnextmonday === 'newValue' ? "newValue === 'YES'" : ("sWidget.valueOf('$synchnextmonday') === 'YES'");
-		    return <<<EOT
-	dojo.ready(function(){
-    	var synchroWeeksBefore = parseInt(sWidget.valueOf('#synchroweeksbefore')), synchroWeeksAfter = parseInt(sWidget.valueOf('#synchroweeksafter')),
-    		displayeddate = $displayedDateValue, form = sWidget.form;
-    	if (Number.isInteger(synchroWeeksBefore)){
-            form.getWidget('synchrostart').set('value', dutils.formatDate(dutils.dateAdd(dutils.getDayOfWeek(1, new Date(displayeddate)), 'week', -synchroWeeksBefore)));
-    	}
-    	if (Number.isInteger(synchroWeeksAfter)){
-    		var nextMonday = $synchNextMondayValue;
-    		form.getWidget('synchroend').set('value', dutils.formatDate(dutils.dateAdd(dutils.getDayOfWeek(nextMonday ? 1 : 7, new Date(displayeddate)), 'week', nextMonday ? synchroWeeksAfter + 1 : synchroWeeksAfter)));
-    	}
-	});
-	return true;
-EOT;
-		};
-		$loadChartCustomization = function($idProperty, $idPropertyStoreData){
+        $dateChangeLocalAction = function($serverTrigger) use ($weekLoadChartLocalAction, $plannedPresentCols,$performedPresentCols){
+            return [
+                'loadchart' => ['localActionStatus' => ['triggers' => ['server' => $serverTrigger, 'user' => true], 'action' => $this->loadChartLocalAction()]],
+                'performedloadchart' => ['localActionStatus' => ['triggers' => ['server' => $serverTrigger, 'user' => true], 'action' => $this->loadChartLocalAction()]],
+                'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalAction('planned', $plannedPresentCols),]],
+                'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalAction('performed', $performedPresentCols),]],
+                'synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $this->synchroStartLocalAction('newValue', '#synchnextmonday'),]],
+                'weeklies' => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter')
+            ];
+        };
+        $loadChartCustomization = function($idProperty, $idPropertyStoreData){
 		    $idPropertyType = $idProperty.'type';
 		    return [
-		    'chartHeight' => ['att' => 'chartHeight', 'type' => 'NumberUnitBox', 'name' => $this->tr('chartHeight'),
-		        'units' => [['id' => '', 'name' => ''], ['id' => 'auto', 'name' => 'auto'], ['id' => '%', 'name' => '%'], ['id' => 'em', 'name' => 'em'], ['id' => 'px', 'name' => 'px']]],
-		        $idPropertyType => ['att' =>  $idPropertyType, 'type' => 'StoreSelect', 'name' => $this->tr($idPropertyType),
+		    //'chartHeight' => ['att' => 'chartHeight', 'type' => 'NumberUnitBox', 'name' => $this->tr('chartHeight'),
+		      //  'units' => [['id' => '', 'name' => ''], ['id' => 'auto', 'name' => 'auto'], ['id' => '%', 'name' => '%'], ['id' => 'em', 'name' => 'em'], ['id' => 'px', 'name' => 'px']]],
+		    $idPropertyType => ['att' =>  $idPropertyType, 'type' => 'StoreSelect', 'name' => $this->tr($idPropertyType),
 		            'storeArgs' => ['data' => $idPropertyStoreData]],
-		        'showTable' => ['att' =>  'showTable', 'type' => 'StoreSelect', 'name' => $this->tr('showTable'),
-		        'storeArgs' => ['data' => Utl::idsNamesStore(['yes', 'no'], $this->tr)]],
-		    'tableWidth' => ['att' => 'tableWidth', 'type' => 'NumberUnitBox', 'name' => $this->tr('tableWidth'),
-		        'units' => [['id' => '', 'name' => ''], ['id' => 'auto', 'name' => 'auto'], ['id' => '%', 'name' => '%'], ['id' => 'em', 'name' => 'em'], ['id' => 'px', 'name' => 'px']]]
+		    //'showTable' => ['att' =>  'showTable', 'type' => 'StoreSelect', 'name' => $this->tr('showTable'),
+		        //'storeArgs' => ['data' => Utl::idsNamesStore(['yes', 'no'], $this->tr)]],
+		    //'tableWidth' => ['att' => 'tableWidth', 'type' => 'NumberUnitBox', 'name' => $this->tr('tableWidth'),
+		        //'units' => [['id' => '', 'name' => ''], ['id' => 'auto', 'name' => 'auto'], ['id' => '%', 'name' => '%'], ['id' => 'em', 'name' => 'em'], ['id' => 'px', 'name' => 'px']]]
 		];};
 
 		$programLoadChartIdPropertyStoreData = [['id' => 'weekoftheyear', 'name' => $tWeekOfTheYear], ['id' =>  'weekofprogram', 'name' =>  $this->tr('weekofprogram')]];
 
 		$weekLoadChartIdPropertyStoreData = [['id' => 'dayofweek', 'name' => $tDayOfWeek], ['id' =>  'dateofday', 'name' =>  $tDateOfDay]];
 
-		$loadChartDescription = function($chartName, $idProperty, $idPropertyType, $sortAttribute, $xTitle, $presentCols, $chartCols, $chartColsTLabel, $chartColsLegendUnit, $idPropertyTypeLocalActionString, $customizableAtts){
+		$loadChartDescription = function($chartName, $idProperty, $idPropertyType, $sortAttribute, $xTitle, $presentCols, $idPropertyTypeLocalActionString, $customizableAtts) use ($chartCols, $chartColsTLabel, $chartColsLegendUnit){
 		    $tableAttsColumns = [$idProperty => ['label' => $this->tr($idProperty), 'field' => $idProperty, 'width' => 65]]; $series = []; $linesAxisLabel = ''; $clusterAxisLabel = '';
 		    foreach($presentCols as $col){
 		        $plot = $chartCols[$col];
 		        $colLabel = $chartColsTLabel[$col];
 		        $tableAttsColumns[$col] = ['label' => $colLabel . ' ' . Utl::getItem($col, $chartColsLegendUnit, ''), 'field' => $col, 'width' => 60];
-		        $series[$colLabel] = ['value' => ['y' => $col, 'text' => $idProperty, 'tooltip' => $col . 'Tooltip'], 'options' => ['plot' => $plot]];
+		        $series[$col] = ['value' => ['y' => $col, 'text' => $idProperty, 'tooltip' => $col . 'Tooltip'], 'options' => ['plot' => $plot, 'label' => $colLabel, 'legend' => $colLabel]];
 		        if ($plot === 'lines'){
 		            $linesAxisLabel .= $colLabel . Utl::getItem($col, $chartColsLegendUnit, '') . ' ';
 		        }else{
@@ -203,13 +131,7 @@ EOT;
 					]
 				]
 			),
-			'displayeddate' => $this->displayedDateDescription(['atts' => ['edit' => ['onWatchLocalAction' => ['value' => [
-			    'loadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $loadChartLocalActionString,]],
-			    'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalActionString('planned', $plannedPresentCols, $chartColsTLabel),]],
-			    'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalActionString('performed', $performedPresentCols, $chartColsTLabel),]],
-			    'performedloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $loadChartLocalActionString,]],
-			    'synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $synchroStartLocalActionString('newValue', '#synchnextmonday'),]],
-			]]]]]),
+			'displayeddate' => $this->displayedDateDescription(['atts' => ['edit' => ['onWatchLocalAction' => ['value' => $dateChangeLocalAction(true)]]]]),
             'googlecalid' => ViewUtils::textBox($this, 'Googlecalid', ['atts' => ['edit' => ['readonly' => true]]]),
             'sportsmanemail' => ViewUtils::textBox($this, 'Email', ['atts' => ['edit' => ['disabled' => true, 'hidden' => true]]]),
 			'lastsynctime' => ViewUtils::timeStampDataWidget($this, 'Lastsynctime', ['atts' => ['edit' => ['disabled' => true]]]),
@@ -230,17 +152,17 @@ EOT;
                         ]],
                 ]]]]]),
 			'synchnextmonday' => viewUtils::storeSelect('synchnextmonday', $this, 'Synchnextmonday', null, ['atts' => ['edit' => ['style' => ['width' => '4em'], 'onWatchLocalAction' => ['value' => [
-					'synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $synchroStartLocalActionString('#displayeddate', 'newValue'),]],
+					'synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $this->synchroStartLocalAction('#displayeddate', 'newValue'),]],
 			]]]]]),
 			'questionnairetime'  =>  ViewUtils::timeStampDataWidget($this, 'QuestionnaireTime', ['atts' => ['edit' => ['disabled' => true]]]),
-		    'loadchart' => $loadChartDescription('loadchart', 'week', 'weekoftheyear', 'weekof', $tWeekOfTheYear, $plannedPresentCols, $chartCols, $chartColsTLabel, $chartColsLegendUnit,
+		    'loadchart' => $loadChartDescription('loadchart', 'week', 'weekoftheyear', 'weekof', $tWeekOfTheYear, $plannedPresentCols,
 		        "Pmg.setFeedback('savecustomforeffect', null, null, true); return true;", $loadChartCustomization('week', $programLoadChartIdPropertyStoreData)),
-		    'weekloadchart' => $loadChartDescription('weekloadchart', 'day', 'dateofday', 'dayofweek', $tDayOfWeek, $plannedPresentCols, $chartCols, $chartColsTLabel, $chartColsLegendUnit,
-		        $weekLoadChartLocalActionString('planned', $plannedPresentCols, $chartColsTLabel), $loadChartCustomization('day', $weekLoadChartIdPropertyStoreData)),
-		    'performedloadchart' => $loadChartDescription('performedloadchart', 'week', 'weekoftheyear', 'weekof', $tWeekOfTheYear, $performedPresentCols, $chartCols, $chartColsTLabel, $chartColsLegendUnit,
+		    'weekloadchart' => $loadChartDescription('weekloadchart', 'day', 'dateofday', 'dayofweek', $tDayOfWeek, $plannedPresentCols,
+		        $weekLoadChartLocalAction('planned', $plannedPresentCols), $loadChartCustomization('day', $weekLoadChartIdPropertyStoreData)),
+		    'performedloadchart' => $loadChartDescription('performedloadchart', 'week', 'weekoftheyear', 'weekof', $tWeekOfTheYear, $performedPresentCols,
 		        "Pmg.setFeedback('savecustomforeffect', null, null, true); return true;", $loadChartCustomization('week', $programLoadChartIdPropertyStoreData)),
-		    'weekperformedloadchart' => $loadChartDescription('weekperformedloadchart', 'day', 'dateofday', 'dayofweek', $tDayOfWeek, $performedPresentCols, $chartCols, $chartColsTLabel, $chartColsLegendUnit,
-		        $weekLoadChartLocalActionString('performed', $performedPresentCols, $chartColsTLabel), $loadChartCustomization('day', $weekLoadChartIdPropertyStoreData)),
+		    'weekperformedloadchart' => $loadChartDescription('weekperformedloadchart', 'day', 'dateofday', 'dayofweek', $tDayOfWeek, $performedPresentCols,
+		        $weekLoadChartLocalAction('performed', $performedPresentCols), $loadChartCustomization('day', $weekLoadChartIdPropertyStoreData)),
 		    'worksheet' => ['atts' => ['edit' => ['dndParams' => ['accept' => ['dgrid-row', 'quarterhour']]/*, 'copyOnly' => true, 'selfAccept' => false*/]]],
 			'calendar' => $this->calendarWidgetDescription([
 				'type' => 'StoreSimpleCalendar', 
@@ -258,20 +180,25 @@ EOT;
 						'startTime' => 'startdate', 'duration' => 'duration', 'summary' => 'name', 'comments' => 'comments', 'intensity' => 'intensity', 'stress' => 'stress', 'sport' => 'sport', 'warmup' => 'warmup', 
 						'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode'
 					]],
-					'onWatchLocalAction' => ['date' => [
-					    'loadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $loadChartLocalActionString]],
-					    'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalActionString('planned', $plannedPresentCols, $chartColsTLabel)]],
-					    'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalActionString('performed', $performedPresentCols, $chartColsTLabel)]],
-					    'performedloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $loadChartLocalActionString]],
-					    'synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $synchroStartLocalActionString('newValue', '#synchnextmonday'),]],
-				]]]]], 
+					'onWatchLocalAction' => ['date' => $dateChangeLocalAction(false)]]]], 
 				'fromdate', 'todate'),
+		    'weeklies' => ViewUtils::JsonGrid($this, 'Weeklies', [
+    		        'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+    		        'weekof' => viewUtils::tukosDateBox($this, 'Weekof'),
+    		        'athleteweeklyfeeling'    => ViewUtils::textArea($this, 'AthleteWeeklyFeeling'),
+    		        'coachweeklycomments'  => ViewUtils::textArea($this, 'CoachWeeklyComments'),
+    		    ],
+    	        ['atts' => ['edit' => [
+    	            'sort' => [['property' => 'weekof', 'descending' => true]], 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'weekof', 'endDateTimeCol' => 'weekof',
+    	            'onWatchLocalAction' => ['allowApplicationFilter' => ['weeklies' => $this->dateChangeGridLocalAction("tWidget.form.valueOf('displayeddate')", 'tWidget', 'newValue')]]
+    	        ]]]
+	        ),
 		];
 	
 		$subObjects = [
 			'sptsessions' => [
 				'atts' => [
-					'title' => $this->tr('Sessions'), /*'storeType' => 'LazyMemoryTreeObjects',  */ 'allDescendants' => true, 'allowApplicationFilter' => 'yes',
+				    'title' => $this->tr('Sessions'), /*'storeType' => 'LazyMemoryTreeObjects',  */ 'allDescendants' => true, 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'startdate', 'endDateTimeCol' => 'startdate',
 					'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
 					'onChangeNotify' => [
 						'calendar' => [
@@ -288,11 +215,11 @@ EOT;
 					],
 					'sort' => [['property' => 'startdate', 'descending' => false]],
 					'onWatchLocalAction' => [
-					    'allowApplicationFilter' => ['sptsessions' => $this->allowApplicationFilterChangeGridWidgetLocalAction],
+					    'allowApplicationFilter' => ['sptsessions' => $this->dateChangeGridLocalAction("tWidget.form.valueOf('displayeddate')", 'tWidget', 'newValue')],
 					    'collection' => [
 					        'calendar' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => 'tWidget.currentView.invalidateLayout();return true;']],
-					        'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalActionString('planned', $plannedPresentCols, $chartColsTLabel),]],
-					        'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalActionString('performed', $performedPresentCols, $chartColsTLabel),]],
+					        'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalAction('planned', $plannedPresentCols),]],
+					        'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $weekLoadChartLocalAction('performed', $performedPresentCols),]],
 					    ]],
 				    'renderCallback' => "if (rowData.mode === 'performed'){domstyle.set(node, 'fontStyle', 'italic');}",
 				    //'sendOnHidden' => ['athleteweeklyfeeling', 'coachweeklycomments']
@@ -329,8 +256,8 @@ EOT;
 				 'allDescendants' => true, 
 			],
 		];
-		$this->customize($customDataWidgets, $subObjects, [ 'grid' => ['calendar', 'displayeddate', 'loadchart'], 'get' => ['displayeddate', 'weekloadchart', 'weekperformedloadchart'],
-		    'post' => ['displayeddate', 'weekloadchart', 'weekperformedloadchart', 'synchrostart', 'synchroend']]);
+		$this->customize($customDataWidgets, $subObjects, [ 'grid' => ['calendar', 'displayeddate', 'loadchart', 'weeklies'], 'get' => ['displayeddate', 'weekloadchart', 'weekperformedloadchart'],
+		    'post' => ['displayeddate', 'weekloadchart', 'weekperformedloadchart', 'synchrostart', 'synchroend']], ['weeklies' => []]);
 	}
 }
 ?>

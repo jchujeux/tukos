@@ -10,10 +10,10 @@ define([
 	'dojo/keys',
 	'dojo/query',
 	'dgrid/Grid',
-	'tukos/widgets/WidgetsLoader',
+	'tukos/widgets/WidgetsLoader', 'tukos/_WidgetsExtend',
 	//'tukos/widgetUtils',
 	'dojo/_base/sniff'
-], function (declare, lang, Deferred, when, domConstruct, domClass, on, has, keys, query, Grid, WidgetsLoader/*, wutils*/) {
+], function (declare, lang, Deferred, when, domConstruct, domClass, on, has, keys, query, Grid, WidgetsLoader, _WidgetsExtend/*, wutils*/) {
 
 	return declare(null, {
 		constructor: function () {
@@ -185,7 +185,7 @@ define([
 				}
 			}
 
-			for (i = 0; i < this._editorColumnListeners.length; i++) {
+			for (var i = 0; i < this._editorColumnListeners.length; i++) {
 				this._editorColumnListeners[i].remove();
 			}
 
@@ -525,7 +525,6 @@ define([
 					});
 					// also register a focus listener
 				}
-
 				if (editor === 'textarea') {
 					tagName = 'textarea';
 				}
@@ -533,12 +532,7 @@ define([
 					tagName = 'input';
 					tagArgs.type = editor;
 				}
-				cmp = node = domConstruct.create(tagName, lang.mixin(tagArgs, {
-					className: 'dgrid-input',
-					name: column.field,
-					tabIndex: isNaN(column.tabIndex) ? -1 : column.tabIndex
-				}, args));
-
+				cmp = node = lang.mixin(lang.mixin(domConstruct.create(tagName, lang.mixin(tagArgs, {className: 'dgrid-input',	name: column.field,	tabIndex: isNaN(column.tabIndex) ? -1 : column.tabIndex})), _WidgetsExtend), args);
 				if (has('ie') < 9) {
 					// IE<9 doesn't fire change events for all the right things,
 					// and it doesn't bubble.
@@ -554,7 +548,6 @@ define([
 							self._handleEditorChange(evt, column);
 						});
 					}
-
 					if (editOn) {
 						// Shared editor handlers are maintained in _editorColumnListeners, since they're not per-row
 						this._editorColumnListeners.push(listener);

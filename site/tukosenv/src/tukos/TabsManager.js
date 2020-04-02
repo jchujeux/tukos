@@ -9,7 +9,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
                 for (var i in openedTabs){
                     var theTab = openedTabs[i];
                     if (theTab.form && (tabChange = theTab.form.userHasChanged())){
-                        //changedTabs.push(theTab.get('title'));
                         if (tabChange.widgets){
                         	changedTabs.widgets.push(theTab.get('title'));
                         }
@@ -18,14 +17,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
                         }
                     }
                 }
-/*
-                if (!utils.empty(changedTabs)){
-                    var theMessage = Pmg.message('tabschangednotsaved') + ': <br>' + changedTabs.join(', ');
-                    var theDialog = new Dialog({title: Pmg.message('Unsaved changes'), content: theMessage});
-                    theDialog.show();
-                    return theMessage;
-                }
-*/
                 if (!utils.empty(changedTabs.widgets)){
                 	theMessage = Pmg.message('tabsvalueschangednotsaved') + ': <br>' + changedTabs.widgets.join(', ');
                 }

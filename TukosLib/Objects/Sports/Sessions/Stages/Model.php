@@ -2,9 +2,7 @@
 namespace TukosLib\Objects\Sports\Sessions\Stages;
 
 use TukosLib\Objects\Sports\Sports;
-use TukosLib\Objects\Sports\AbstractModel;
-use TukosLib\Utils\Utilities as Utl;
-use TukosLib\TukosFramework as Tfk;
+use TukosLib\Objects\AbstractModel;
 
 class Model extends AbstractModel {
 

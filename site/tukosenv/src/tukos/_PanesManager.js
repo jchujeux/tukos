@@ -23,7 +23,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             var refreshAction = function(){
                 var query = {};
                 if (!theForm){
-                	var paneId = currentPane.id, panesConfig = Pmg.getCustom().panesConfig, paneConfig;
+                	var paneId = currentPane.id, panesConfig = Pmg.getCustom('panesConfig'), paneConfig;
                 	panesConfig.some(function(config){
                 		if (config.name === paneId){
                 			paneConfig = config;
@@ -57,17 +57,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             if (keepOptions || !theForm){
                 return refreshAction();
             }else{
-                return this.checkChangesDialog(theForm, lang.hitch(this, refreshAction));
-            }
-        },
-        checkChangesDialog: function(form, action){
-            if (!form.userHasChanged()){
-                return action();
-            }else{
-                return Pmg.confirmForgetChanges().then(
-                    function(){return action()},
-                    function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
-                );
+                //return this.checkChangesDialog(theForm, lang.hitch(this, refreshAction));
+                return theForm.checkChangesDialog(refreshAction);
             }
         },
         currentPane: function(){

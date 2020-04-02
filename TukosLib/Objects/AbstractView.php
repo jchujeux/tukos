@@ -5,7 +5,6 @@
  */
 namespace TukosLib\Objects;
 
-use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Objects\ObjectTranslator;
@@ -24,21 +23,31 @@ abstract class AbstractView extends ObjectTranslator{
         $this->model = $objectsStore->objectModel($this->objectName, $this->tr);
         $this->user  = Tfk::$registry->get('user');
         $this->sendOnSave = $this->sendOnDelete = ['updated'];
-        $this->mustGetCols = ['id', 'parentid', 'updated', 'permission', 'updator'];
+        $this->mustGetCols = ['id', 'name', 'parentid', 'updated', 'permission', 'updator'];
 
         $this->dataWidgets = [
             'id' => ViewUtils::textBox($this, 'Id', [
                     'atts' => [
                         'edit' =>  ['readOnly' => true, 'style' => ['width' => '6em', 'backgroundColor' => 'WhiteSmoke']],
-                        'storeedit' => ['width' => 60, 'onClickFilter' => ['id'], 'renderExpando' => true, 'formatter' => '', 'renderCell' => '', 'editOn' => 'dblClick'],
-                        'overview'  => ['width' => 60, 'onClickFilter' => ['id']],
+                        'storeedit' => ['width' => 60, 'renderExpando' => true, 'formatter' => 'formatId', 'renderCell' => '', 'editOn' => 'dblClick'],
+                        'overview'  => ['width' => 60],
                     ]
                 ]
             ), 
             'parentid'  => ViewUtils::objectSelectMulti($parentObjects, $this, $parentWidgetTitle),
-            'name'      => ViewUtils::textBox($this, $nameWidgetTitle, [/*'atts' => ['edit' => ['style' => ['width' => '20em']]],*/ 'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]),
+            'name'      => ViewUtils::textBox($this, $nameWidgetTitle, ['atts' => ['storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
             'comments'  => ViewUtils::lazyEditor($this, 'CommentsDetails', ['atts' => ['edit' => ['height' => '400px']]]),
-            'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [false, 'ucfirst', false], ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
+            'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [false, 'ucfirst', false], ['atts' => 
+                [/*'edit' => ['onWatchLocalAction' => ['value' => ['acl' => ['hidden' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return newValue === 'ACL' ? false : true"]]]]],*/
+                 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]
+            ]),
+            'acl' => ViewUtils::JsonGrid($this, 'Acl', [
+                    'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'userid' => ViewUtils::objectSelect($this, 'User', 'users'),
+                'permission'  => ViewUtils::storeSelect('acl', $this, 'Permission', [true, 'ucfirst', true])
+                ],
+                ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]
+            ),
             'grade' => ViewUtils::storeSelect('grade', $this, 'Grade', null, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             'contextid'  => [
                 'type' => 'objectSelectDropDown', 
@@ -80,7 +89,7 @@ abstract class AbstractView extends ObjectTranslator{
             $this->subObjects = $subObjects;
         }
         $this->_exceptionCols = array_merge($this->_exceptionCols, $exceptionCols);
-        $this->jsonColsPathsView     = $jsonColsPathsView;
+        $this->jsonColsPathsView     = array_merge(['acl' => []], $jsonColsPathsView);
 
         if (in_array('custom', $this->model->allCols)){
             $this->dataWidgets['custom'] = ['type' => 'textArea', 'atts' => ['edit' => ['label' => $this->tr('itemcustom')], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]];
@@ -103,19 +112,6 @@ abstract class AbstractView extends ObjectTranslator{
 
         if (in_array('history', $this->model->allCols)){
             $historyGridCols = array_diff($this->gridCols(), ['created', 'creator', 'history']);
-/*
-            $this->dataWidgets['history'] = [
-                'type' => 'storeDgrid', 
-                'atts' => ['edit' => [
-                        'label' => $this->tr('history'),
-                        'object' => $this->objectName,
-                        'colsDescription' => $this->widgetsDescription($historyGridCols, false), 
-                        'objectIdCols' => array_values(array_intersect($historyGridCols, $this->model->idCols)),
-                        'maxHeight' => '300px', 'colspan' => 1, 'disabled' => true,
-                    ]
-                ],
-            ];
-*/
             $this->dataWidgets['history'] = [
                 'type' => 'simpleDgrid',
                 'atts' => ['edit' =>[

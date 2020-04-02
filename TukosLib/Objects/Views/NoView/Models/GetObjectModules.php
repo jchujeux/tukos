@@ -3,8 +3,6 @@
 namespace TukosLib\Objects\Views\NoView\Models;
 
 use TukosLib\Objects\Views\Models\AbstractViewModel;
-use TukosLib\Utils\Utilities as Utl;
-use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\TukosFramework as Tfk;
 
 class GetObjectModules extends AbstractViewModel{

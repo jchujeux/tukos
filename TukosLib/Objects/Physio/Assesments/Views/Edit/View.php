@@ -12,30 +12,17 @@ class View extends EditView{
     function __construct($actionController){
         parent::__construct($actionController);
 
-        $this->dataLayout   = [
-            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false,  'content' => '', 'orientation' => 'vert'],
-            'contents' => [
-                'row1' => [
-                     'tableAtts' => ['cols' => 8, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 60],
-                     'widgets' => ['id', 'parentid', 'patient', 'prescriptor', 'name', 'physiotherapist', 'assesmenttype', 'assesmentdate']
-                ],
-                'row2' => [
-                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
-                    'widgets' => ['assesment'],
-                ],
-                'row3' => [
-                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
-                    'widgets' => ['worksheet', 'comments'],
-                ],
-                'row4' => [
-                     'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 60],
-                     'widgets' => ['permission', 'grade', 'contextid', 'updated', 'updator', 'created', 'creator']
-                ],
+        $customContents = [
+            'row1' => [
+                 'tableAtts' => ['cols' => 8, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 60],
+                 'widgets' => ['id', 'parentid', 'patient', 'prescriptor', 'name', 'physiotherapist', 'assesmenttype', 'assesmentdate']
+            ],
+            'row2' => [
+                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+                'widgets' => ['assesment'],
             ]
         ];
-        if (isset($this->view->dataWidgets['configstatus'])){
-            $this->dataLayout['contents']['row4']['widgets'][] = 'configstatus';
-        }
+        $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowcomments', 'rowbottom', 'rowacl'], $this->dataLayout['contents']));
          $this->actionWidgets['export']['atts']['dialogDescription'] = [
             //'title'   => $this->view->tr('weeklyprogram'),
             'paneDescription' => [

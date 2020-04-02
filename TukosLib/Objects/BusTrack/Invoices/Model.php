@@ -14,6 +14,8 @@ class Model extends AbstractModel {
 
     function __construct($objectName, $translator=null){
         $colsDefinition =  [
+            'organization' => 'INT(11) NULL DEFAULT NULL',
+            //'invoicedorganization' => 'MEDIUMINT NULL DEFAULT NULL',
             'reference' => 'VARCHAR(50)  DEFAULT NULL',
             'relatedquote' => 'INT(11) NULL DEFAULT NULL',
             'invoicedate' => 'date NULL DEFAULT NULL',
@@ -23,20 +25,22 @@ class Model extends AbstractModel {
         	'pricewot'   => "DECIMAL (5, 2)",
             'pricewt'   => "DECIMAL (5, 2)",
             'todeduce' => "DECIMAL (5, 2)",
+            'lefttopay' => "DECIMAL (5, 2)",
             'status' =>  'VARCHAR(50)  DEFAULT NULL',
         ];
-        parent::__construct($objectName, $translator, 'bustrackinvoices', ['parentid' => ['bustrackcustomers'], 'relatedquote' => ['bustrackquotes']], ['items'], $colsDefinition, [], ['status'], ['worksheet', 'custom', 'history'], ['name', 'parentid', 'reference']);
+        parent::__construct($objectName, $translator, 'bustrackinvoices', ['parentid' => ['bustrackpeople', 'bustrackorganizations'], 'organization' => ['bustrackorganizations'],
+            'relatedquote' => ['bustrackquotes']], ['items'], $colsDefinition, [], ['status'], ['custom', 'history'], ['name', 'parentid', 'reference']);
+        $this->gridsIdCols =  array_merge($this->gridsIdCols, ['items' => ['catalogid']]);
     }    
 
     function initialize($init=[]){
-        return parent::initialize(array_merge(['reference' => 'ABCAAAAMMJJXX', 'invoicedate' => date('Y-m-d'), 'quantity' => 1, 'vatrate' => 0.085], $init));
+        return parent::initialize(array_merge(['reference' => 'ABCAAAAMMJJXX', 'invoicedate' => date('Y-m-d')], $init));
     }
     public function insert($values, $init = false, $jsonFilter = false, $reference = null){
     	$paneMode = isset($this->paneMode) ? $this->paneMode : 'Tab';
-    	$refPrefix = $this->user->getCustomView($this->objectName, 'edit', $paneMode, ['widgetsDescription', 'export', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription', 'referenceprefix', 'atts', 'value']);
-    	if (empty($refPrefix)){
-    		$refPrefix = '';
-    	}
+    	//$refPrefix = $this->user->getCustomView($this->objectName, 'edit', $paneMode, ['widgetsDescription', 'export', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription', 'referenceprefix', 'atts', 'value']);
+        $organization = Utl::getItem('organization', $values);
+    	$refPrefix = empty($organization) ? 'XXX' : Tfk::$registry->get('objectsStore')->objectModel('organizations')->getOne(['where' => ['id' => $organization], 'cols' => ['trigram']])['trigram'];
     	return parent::insert($values, $init, $jsonFilter, ['dateCol' => 'invoicedate', 'referenceCol' => 'reference', 'prefix' => $refPrefix]);
     }
 

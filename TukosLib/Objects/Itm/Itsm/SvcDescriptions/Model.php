@@ -1,7 +1,7 @@
 <?php
 namespace TukosLib\Objects\Itm\Itsm\SvcDescriptions;
 
-use TukosLib\Objects\Itm\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
@@ -25,7 +25,7 @@ class Model extends AbstractModel {
             ['parentid' => ['organizations'], 'deliverymgr' => ['people'], 'customerrep' => ['people'], 'itsystem' => ['itsystems']],
             ['supportgroups', 'incidentssla', 'incidentswf'], $colsDefinition
         );
-        $this->gridsIdCols =  ['supportgroups' => ['team', 'period'], 'incidentssla' => ['sla'], 'incidentswf' => ['assignedto'], ];
+        $this->gridsIdCols =  array_merge($this->gridsIdCols, ['supportgroups' => ['team', 'period'], 'incidentssla' => ['sla'], 'incidentswf' => ['assignedto']]);
     }
 
     function initialize($init=[]){

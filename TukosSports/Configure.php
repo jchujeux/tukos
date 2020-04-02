@@ -56,8 +56,9 @@ class Configure{
                 '#scripts' => [['#scriptsoutputs' => []]], '#health' => [['#healthtables' => []]],
             ]],
             'collab' => [['#people' => [], '#organizations' => []/*, '#teams' => []*/, '#notes' => []/*, '#documents' => []*/, '#calendars' => [['#calendarsentries' => []]], '#tasks' => []]],
-            'bustrack' => [['#bustrackcatalog' => [], '#bustrackcustomers' => [], '#bustrackquotes' => [], '#bustrackinvoices' => []]],
-        	'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [], '#sptsessionsstages' => [], '#sptexercises' => []]],
+            'bustrack' => [['#bustrackcatalog' => [], 'bustrackcustomers' => [['#bustrackpeople' => [], '#bustrackorganizations' => []]], '#bustrackquotes' => [], '#bustrackinvoices' => [['#bustrackinvoicesitems' => []]], '#bustrackpayments' => [['#bustrackpaymentsitems' => []]],
+                '#bustrackcategories' => [], '#bustrackdashboards' => []]],
+            'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [], '#sptsessionsstages' => [], '#sptexercises' => []]],
             'physio' => [['#physiopatients' => [], '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
             '#help' => [['guidedtour' => ['type' => 'MenuItem', 'atts' => [
                 'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtour')]]])]]]]]],

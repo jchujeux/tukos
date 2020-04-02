@@ -13,11 +13,12 @@ class Save extends AbstractAction{
         $this->getViewModel  = $controller->objectsStore->objectViewModel($controller, 'Edit', 'Get');
     }
     function response($query){
-        $newValues = $this->saveViewModel->save($query);
-        if ($newValues){
+        $savedId = $this->saveViewModel->save($query);
+        if ($savedId){
             //return $newValues;
 
             $response = [];
+            $query['id'] = $savedId;
             $this->getViewModel->respond($response, $query);
             return $response;
 

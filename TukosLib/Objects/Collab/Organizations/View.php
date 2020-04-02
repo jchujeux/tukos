@@ -16,6 +16,13 @@ class View extends AbstractView {
         $customDataWidgets = [
             'segment' => ViewUtils::storeSelect('segment', $this, 'Segment'),
             'logo'    => ViewUtils::textBox($this, 'Logo'),
+            'trigram' => ViewUtils::textBox($this, 'Trigram', ['atts' => ['edit' => ['style' => ['width' => '3em']]]]),
+            'headofficeaddress' => ViewUtils::textArea($this, 'HeadOfficeAddress'),
+            'invoicingaddress' => ViewUtils::textArea($this, 'InvoicingAddress'),
+            'vatid' => ViewUtils::textBox($this, 'Vatid'),
+            'legalid' => ViewUtils::textBox($this, 'LegalId'),
+            'judicialform' => ViewUtils::textBox($this, 'JudicialForm'),
+            'sharecapital' => ViewUtils::textBox($this, 'ShareCapital')
         ];
         $subObjects['people']        = ['atts' => ['title' => $this->tr('People')]           , 'filters' => ['parentid' => '@id'], 'allDescendants' => true];
         $subObjects['organizations'] = ['atts' => ['title' => $this->tr('sub-organizations')], 'filters' => ['parentid' => '@id'], 'allDescendants' => true];

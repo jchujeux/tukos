@@ -30,20 +30,22 @@ class Main{
 	            }catch(\Exception $e){
 	                Feedback::add(Tfk::tr('errorrespondingrequest') . ': ' . $e->getMessage());
 	                $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
+	                $dialogue->sendResponse();
 	            }            
 	            if ($streamsStore = Tfk::$registry->isInstantiated('streamsStore')){
 	                Tfk::$registry->get('streamsStore')->waitOnStreams();
 	            }
-	            $storeProfiles = Tfk::$registry->get('store')->getProfiles();
-	            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
-	            file_put_contents(Tfk::$tukosTmpDir . '/tukosstoreprofiles.html', $storeProfilesOutput);
-	            $storeProfiles = Tfk::$registry->get('configStore')->getProfiles();
-	            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
-	            file_put_contents(Tfk::$tukosTmpDir . '/tukosconfigstoreprofiles.html', $storeProfilesOutput);
             }else{
             	$authentication->logoutUser($dialogue, 'usersitemdoesnotexistforusername');
+            	//$dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
             	$dialogue->sendResponse();
             }
+            $storeProfiles = Tfk::$registry->get('store')->getProfiles();
+            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
+            file_put_contents(Tfk::$tukosTmpDir . '/tukosstoreprofiles.html', $storeProfilesOutput);
+            $storeProfiles = Tfk::$registry->get('configStore')->getProfiles();
+            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
+            file_put_contents(Tfk::$tukosTmpDir . '/tukosconfigstoreprofiles.html', $storeProfilesOutput);
         }else{
             $dialogue->sendResponse();
         }

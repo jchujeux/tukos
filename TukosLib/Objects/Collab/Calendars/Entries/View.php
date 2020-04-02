@@ -63,7 +63,7 @@ class View extends AbstractView {//dateTimeString(fromDateString, durationString
 					'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
 					'participants' => ViewUtils::objectSelect($this, 'participants', 'people'),
 				],
-				['atts' => ['edit' => ['objectIdCols' => ['participants'], 'sort' => [['property' => 'rowId', 'descending' => false]],]]]
+				['atts' => ['edit' => ['sort' => [['property' => 'rowId', 'descending' => false]],]]]
 			),
 			'backgroundcolor' => viewUtils::colorPickerTextBox($this, 'BackgroundColor'),
 		];

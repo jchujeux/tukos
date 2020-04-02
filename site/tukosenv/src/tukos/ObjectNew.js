@@ -3,11 +3,10 @@ define (["dojo/_base/declare", "dojo/when", "dijit/form/Button", "dijit/popup", 
     return declare(Button, {
         postCreate: function(){
             this.inherited(arguments);
-            var self = this, form = self.form;
+            var self = this, form = self.form, handle;
             this.on("click", function(evt){
                 evt.stopPropagation();
                 evt.preventDefault();
-
                 var setNewValues = function(){
                     var dropDown = self.dropDown,
                         newAction = function(dupid){
@@ -22,27 +21,33 @@ define (["dojo/_base/declare", "dojo/when", "dijit/form/Button", "dijit/popup", 
                     		newAction(newValue);
                     	};
                     if(dropDown){
-                    	popup.open({popup: dropDown, around: self.domNode});
-            			focusUtil.focus(dropDown.domNode);
+                    	setTimeout(function(){
+                        	popup.open({popup: dropDown, around: self.domNode});
+                			focusUtil.focus(dropDown.domNode);
+                    	}, 300);
                     }else{
                         when(mutils.buildMenu(mutils.newObjectMenuDescription(self.form.object, onNewAction, onTemplateAction)), function(dropDown){
                         	self.dropDown = dropDown;
-                            dropDown.on('blur', function(){popup.close(dropDown);});
-                        	popup.open({popup: dropDown, around: self.domNode});
-                			focusUtil.focus(dropDown.domNode);
+                            handle = dropDown.on('blur', function(){popup.close(dropDown);});
+                        	setTimeout(function(){
+                                popup.open({popup: dropDown, around: self.domNode});
+                    			focusUtil.focus(dropDown.domNode);                        		
+                        	}, 300);
                         });
                     	
                     }
                 };
-                if(!self.form.userHasChanged()){
-                    setNewValues();
-                }else{
-                    Pmg.setFeedback('');
-                    Pmg.confirmForgetChanges().then(
-                    		function(){setTimeout(function(){setNewValues();}, 400)}, 
-                    		function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
+                form.checkChangesDialog(setNewValues);
+/*
+                if (form.userHasChanged()){
+                    Pmg.confirmForgetChanges(changes).then(
+                        function(){setNewValues(true);},
+                        function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
                     );
+                }else{
+                	setNewValues();
                 }
+*/
             });
         }
     });

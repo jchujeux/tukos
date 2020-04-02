@@ -9,27 +9,9 @@ define([
 	/*=====, 'dstore/Store'=====*/
 ], function (declare, TreeObjects, Pmg /*=====, Store=====*/) {
     return declare(TreeObjects, {
-/*
-    	constructor: function () {
-            this.root = this;
-        },
-        getCollectionFilter: function(){
-            return this.collectionFilter;
-        },
-*/
-
         mayHaveChildren: function (object) {
             return 'hasChildren' in object ? object.hasChildren : false;
         },
-/*
-        getRootCollection: function (filters) {
-            var ids = [];
-            this.root.forEach(function(object){
-                ids.push(object.id);
-            });
-            return this.root.filter(this.getCollectionFilter(filters).ni('parentid', ids));
-        },
-*/
         getChildren: function (object, options) {
             var self    = this;
             Pmg.serverDialog(this.childrenUrlArgs(object.id)).then(

@@ -17,13 +17,13 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/on",
                 var self = this;
                 var addedItems = [
                         {atts: {label: messages.insertrowbefore  ,   onClick: function(evt){self.addRow('before')}}}, 
-                        {atts: {label: messages.addrowatend    ,   onClick: function(evt){self.addRow('append')}}}, 
+                        {atts: {label: messages.addrow    ,   onClick: function(evt){self.addRow('append')}}}, 
                         {atts: {label: messages.copyrow,   onClick: function(evt){self.copyRow(evt)}}}, 
                         {atts: {label:messages.deleterow,   onClick: function(evt){self.deleteRow()}}}
                 ];
                 this.contextMenuItems.row = this.contextMenuItems.row.concat(addedItems);
                 this.contextMenuItems.idCol = this.contextMenuItems.idCol.concat(addedItems);
-                this.contextMenuItems.header.push({atts: {label: messages.addrowatend   ,   onClick: function(evt){self.addRow('append')}}});
+                this.contextMenuItems.header.push({atts: {label: messages.addrow   ,   onClick: function(evt){self.addRow('append')}}});
                 if (this.columnsEdit){
                     this.contextMenuItems.header.push({atts: {label: messages.insertcolumn, onClick: function(evt){self.addColumn()}}});
                     this.contextMenuItems.header.push({atts: {label: messages.deletecolumn, onClick: function(evt){self.deleteColumn()}}});

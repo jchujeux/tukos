@@ -1,11 +1,13 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dojo/Deferred", "dojo/dom-style", "dijit/layout/ContentPane", "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
-        "tukos/widgets/HtmlContent", "tukos/widgets/DnDWidget"], 
-  function(declare, lang, ready, when, Deferred, domStyle, ContentPane, Pmg, WidgetsLoader, HtmlContent, DnD){
+        "tukos/widgets/HtmlContent", "tukos/widgets/DnDWidget", "tukos/widgets/widgetCustomUtils"], 
+  function(declare, lang, ready, when, Deferred, domStyle, ContentPane, Pmg, WidgetsLoader, HtmlContent, DnD, wcutils){
 	var editor, isPlaced = false;
 	return declare([ContentPane, DnD], {
 		postCreate: function(){
 			this.inherited(arguments);
-    		this.htmlContent = new HtmlContent({style: {width: '100%', height: this.editorToContentHeight(this.height) || "auto"}, value: this.value || ''});           	
+        	this.customizableAtts = lang.mixin({height: wcutils.sizeAtt('height')}, this.customizableAtts);
+    		this.htmlContent = new HtmlContent({style: {width: '100%', height: this.height || "auto"}, value: this.value || ''});           	
+        	this.watch('height', function(attr, oldValue, newValue){this.htmlContent.set('style', {height: newValue})});
 			this.addChild(this.htmlContent);
 			this.onClickHandle = this.on('click', this.onClickCallback);
 			this.viewSource = false;
@@ -15,10 +17,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			if (!this.disabled && !this.readOnly){
 				if (!editor){
 					when(WidgetsLoader.loadWidget('Editor'), lang.hitch(this, function(Editor){
-						editor = new Editor({style: {width: '100%'}/*, onChange: function(evt){
-							editor.lazyEditor.set('value', editor.get('value'));
-							editor.lazyEditor.set('serverValue', editor.get('serverValue'));
-						}*/}, dojo.doc.createElement("div"));
+						editor = new Editor({style: {width: '100%'}}, dojo.doc.createElement("div"));
 						editor.startup();//JCH: needed for OverviewDgrid editor instantiation in colValues
 						this.placeEditor();
 					}));
@@ -62,7 +61,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			console.log('calling onBlurCallback - isPlaced: ' + isPlaced);
 			this.onBlurHandle.remove();
 			if (editor && this.getIndexOfChild(editor) > -1/* && editor.isFullscreen !== true*/){//case where focus not via onClick, e.g. onDrop
-				htmlContent.set('style', {height: this.editorToContentHeight(editor.get('height'))});
+				//htmlContent.set('style', {height: this.editorToContentHeight(editor.get('height'))});
 				this.viewSource = editor.isInViewSource();
 				editor.set('value', (newValue = editor.get('value')));// to make sure the Editor onWatch is triggered, that untranslates if needed into serverValue
 				this.set('value', newValue);

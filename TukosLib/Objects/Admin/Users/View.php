@@ -24,8 +24,7 @@ class View extends AbstractView {
             'password'   => ViewUtils::textBox($this, 'Password', ['atts' => ['edit' =>  ['type' => 'password']], 'editToObj' => ['md5' => []]]),
             'rights'     => ViewUtils::storeSelect('rights', $this, 'Rights'),
             'modules'    => ['type' => 'multiSelect',  
-                'atts' => ['edit' =>  ['title' => $this->tr('UnallowedModules'), 'options' => $moduleOptions, 'style' => ['height' => '500px']], 'storeedit' => ['style' => ['height' => '5em']]],
-                'objToEdit' => ['json_decode' => [true]], 'editToObj' => ['json_encode' => []]
+                'atts' => ['edit' =>  ['title' => $this->tr('UnallowedModules'), 'options' => $moduleOptions, 'style' => ['height' => '500px']], 'storeedit' => ['style' => ['height' => '5em']]]
             ], 
             'language'   => ViewUtils::storeSelect('language', $this, 'Language'),
             'environment'   => ViewUtils::storeSelect('environment', $this, 'Environment'),

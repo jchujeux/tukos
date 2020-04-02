@@ -6,7 +6,6 @@ use TukosLib\Objects\Views\Edit\View as EditView;
 use TukosLib\Objects\Views\LocalActions;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
-use TukosLib\TukosFramework as Tfk;
 
 class View extends EditView{
 
@@ -15,47 +14,29 @@ class View extends EditView{
 	function __construct($actionController){
        parent::__construct($actionController);
 
-        $this->dataLayout   = [
-            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false,  'content' => ''],
-            'contents' => [
-                'row1' => [
-                    'tableAtts' => ['cols' => 9, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 80],
-                    'widgets' => ['id', 'parentid', 'name', 'reference', 'quotedate', 'status']
-                ],
-                'row2' => [
-                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['60%', '40%']],      
-                    'contents' => [              
-                        'col1' => [
-                        	'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
-                       		'contents' => [
-                       			'row1' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => [ 'items']],
-                       			'row2' => ['tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => [ 'discountpc', 'discountwt', 'downpay', 'pricewot', 'pricewt']],
-                       		]
-                       	],
-                        'col2' => [
-                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 
-                            'widgets' => ['catalog'],
-                       ],
-                    ]
-                ],
-                'row3' => [
-                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0'],
-                    'widgets' => ['comments'],
-                ],
-                'row4' => [
-                     'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 60],
-                     'widgets' => ['permission', 'grade', 'contextid', 'updated', 'updator', 'created', 'creator']
-                ],
+        $customContents = [
+            'row1' => [
+                'tableAtts' => ['cols' => 9, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 80],
+                'widgets' => ['id', 'parentid', 'name', 'reference', 'quotedate', 'status']
+            ],
+            'row2' => [
+                'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['60%', '40%']],      
+                'contents' => [              
+                    'col1' => [
+                    	'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
+                   		'contents' => [
+                   			'row1' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => [ 'items']],
+                   			'row2' => ['tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => [ 'discountpc', 'discountwt', 'downpay', 'pricewot', 'pricewt']],
+                   		]
+                   	],
+                    'col2' => [
+                        'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 
+                        'widgets' => ['catalog'],
+                   ],
+                ]
             ]
         ];
-/*
-		$this->onOpenAction =
-			"var widget = this.getWidget('discountwt'), discountwt = widget.get('value');\n" .
-			"if (!isNaN(discountwt) && discountwt != null && discountwt > 0){\n" .
-				"this.setValueOf('discountpc', discountwt / (this.valueOf('pricewt') + discountwt));\n" . 
-			"}"
-		;
-*/        
+        $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowcomments', 'rowbottom', 'rowacl'], $this->dataLayout['contents']));
         $this->actionWidgets['export']['atts']['dialogDescription'] = [
             'paneDescription' => [
                 'widgetsDescription' => [

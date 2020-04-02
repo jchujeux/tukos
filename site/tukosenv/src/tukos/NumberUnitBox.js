@@ -1,10 +1,10 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/_WidgetBase", "dijit/_FocusMixin", "dijit/form/NumberTextBox", "tukos/StoreSelect", "tukos/widgetUtils", "dijit/registry", "dojo/json"], 
-function(declare, lang, domstyle, Widget, _FocusMixin, NumberTextBox, StoreSelect, wutils, registry, JSON){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/_WidgetBase", "dijit/_FocusMixin", "dijit/form/TextBox", "tukos/StoreSelect", "tukos/widgetUtils", "dijit/registry", "dojo/json"], 
+function(declare, lang, domstyle, Widget, _FocusMixin, TextBox, StoreSelect, wutils, registry, JSON){
     return declare([Widget, _FocusMixin], {
         postCreate: function(){
             this.inherited(arguments);
             var self = this;
-            this.numberField = new NumberTextBox(this.number, dojo.doc.createElement('div'));
+            this.numberField = new TextBox(this.number, dojo.doc.createElement('div'));
             this.numberField.watch('value', lang.hitch(wutils, wutils.subWidgetWatchCallback, this, this.numberField));
             this.domNode.appendChild(this.numberField.domNode); 
             this.unitField = new StoreSelect(this.unit, dojo.doc.createElement('div')); 

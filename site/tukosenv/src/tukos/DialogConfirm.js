@@ -29,9 +29,9 @@ define(['dojo/_base/lang', 'dojo/_base/declare', 'dojo/_base/Deferred', 'dojo/do
             this.inherited(arguments);            
             var label, div, remember = false;            
             div = construct.create('div', {className: 'dijitDialogPaneContent dialogConfirm'}, this.domNode, 'last');            
-            require(['dijit/form/Button', 'dijit/form/CheckBox'], lang.hitch(this, function(Button, Checkbox){
+            require(['dijit/form/Button', 'dijit/form/CheckBox'], lang.hitch(this, function(Button, CheckBox){
                 if (this.hasSkipCheckBox) {
-                    this.skipCheckBox = new Checkbox({checked: false}, construct.create('div'));
+                    this.skipCheckBox = new CheckBox({checked: false}, construct.create('div'));
                     div.appendChild(this.skipCheckBox.domNode);
                     label = construct.create('label', {'for': this.skipCheckBox.id, innerHTML: 'Remember my decision and do not ask again.<br/>'}, div);
                 }

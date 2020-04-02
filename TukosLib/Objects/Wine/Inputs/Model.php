@@ -6,7 +6,7 @@
 namespace TukosLib\Objects\Wine\Inputs;
 
 use TukosLib\Objects\Wine\Wine;
-use TukosLib\Objects\Wine\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
 

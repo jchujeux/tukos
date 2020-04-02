@@ -21,7 +21,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/Editor
             this.document.body.style[property] = value;
         },
         startup: function(){
-        	if (this.style && typeof this.style === 'object'){// richtext only supports string notation
+        	if (utils.isObject(this.style)){// richtext only supports string notation
                 var style = this.style, changeStyle = lang.hitch(this, this.changeStyle);
                 delete this.style;
             }

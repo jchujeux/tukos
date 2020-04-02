@@ -7,8 +7,17 @@ class Model extends AbstractModel {
     protected $segmentOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'MULTI'];
     function __construct($objectName, $translator=null){
     
-        $colsDefinition = ['segment' =>  'VARCHAR(50)  DEFAULT NULL',
-                              'logo' =>  'VARCHAR(150)  DEFAULT NULL',];
+        $colsDefinition = [
+            'segment' =>  'VARCHAR(50)  DEFAULT NULL',
+            'logo' =>  'VARCHAR(150)  DEFAULT NULL',
+            'trigram' =>  'CHAR(3)  DEFAULT NULL',
+            'headofficeaddress' => 'VARCHAR(255) DEFAULT NULL',
+            'invoicingaddress' => 'VARCHAR(255) DEFAULT NULL',
+            'vatid' => 'VARCHAR(31) DEFAULT NULL',
+            'legalid' => 'VARCHAR(31) DEFAULT NULL',
+            'judicialform' => 'VARCHAR(31) DEFAULT NULL',
+            'sharecapital' => 'VARCHAR(31) DEFAULT NULL'
+        ];
         parent::__construct($objectName, $translator, 'organizations', ['parentid' => ['organizations']], [], $colsDefinition, [], ['segment']);
     }
 }

@@ -23,16 +23,13 @@ class Widgets{
             return self::$widget($args['atts'], false);
         }
     }
-
     public static function textBox($atts, $editOnly = true){
         $defAtts = [
-            //'edit' => ['style' => ['width' => 'auto', 'width' => '20em', 'maxWidth' => '30px']],
-            'storeedit' => [/*'editorArgs' => ['style' => ['width' => '10em']],'width' => 200,  */'editOn' => 'click'],
+            'storeedit' => ['editOn' => 'click'],
             'overview' => ['width' => 200],
         ];
         return ['type' =>'TextBox', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function formattedTextBox($atts, $editOnly = true){
         $defAtts = [
             'storeedit' => ['width' => 200, 'editOn' => 'click'],
@@ -40,7 +37,6 @@ class Widgets{
         ];
         return ['type' =>'FormattedTextBox', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-    
     public static function colorPickerTextBox($atts, $editOnly = true){
     	$defAtts = [
     			'edit' => ['style' => ['width' => '7em']],
@@ -48,9 +44,7 @@ class Widgets{
     			'overview' => ['width' => 80, 'renderCell' => 'renderColorPicker'],
     	];
     	return ['type' =>'ColorPickerTextBox', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
-    	 
     }
-
     public static function htmlContent($atts, $editOnly = true){
         $defAtts = [
             'edit' => [],
@@ -59,7 +53,6 @@ class Widgets{
         ];
         return ['type' =>'HtmlContent', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function objectEditor($atts, $editOnly = true){
         $defAtts = [
             'storeedit' => ['editorArgs' => ['style' => ['width' => '10em']], 'width' => 200, 'editOn' => 'click'],
@@ -67,7 +60,6 @@ class Widgets{
         ];
         return ['type' =>'ObjectEditor', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function numberTextBox($atts, $editOnly = true){
         $defAtts = [
             'storeedit' => ['editorArgs' => ['style' => ['width' => '3em']], 'width' => 60, 'editOn' => 'click'],
@@ -75,7 +67,6 @@ class Widgets{
         ];
         return ['type' =>'NumberTextBox', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-    
     public static function tukosNumberBox($atts, $editOnly = true){
         $defAtts = [
             'storeedit' => ['editorArgs' => ['style' => ['width' => '5em']], 'width' => 60, 'editOn' => 'click'],
@@ -83,7 +74,6 @@ class Widgets{
         ];
         return ['type' =>'TukosNumberBox', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-    
     public static function currencyTextBox($atts, $editOnly = true){
         $defAtts = [
             'storeedit' => ['editorArgs' => ['style' => ['width' => '4em']], 'width' => 70, 'editOn' => 'click'],
@@ -91,7 +81,6 @@ class Widgets{
         ];
         return ['type' =>'CurrencyTextBox', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function tukosCurrencyBox($atts, $editOnly = true){
         $defAtts = [
             'storeedit' => ['editorArgs' => ['style' => ['width' => '4em']], 'width' => 70, 'editOn' => 'click'],
@@ -99,24 +88,21 @@ class Widgets{
         ];
         return ['type' =>'TukosCurrencyBox', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function checkBox($atts, $editOnly = true){
         $defAtts = [
             'storeedit' => ['width' => 50/*, 'editOn' => 'click'*/, 'renderCell' => 'renderCheckBox'],
+            'overview' => ['width' => 50/*, 'editOn' => 'click'*/, 'renderCell' => 'renderCheckBox'],
         ];
         return ['type' =>'CheckBox', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function textArea($atts, $editOnly = true){
         $defAtts = ['storeedit' => ['editOn' => 'click']];
         return ['type' =>'Textarea', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-    
     public static function tukosTextArea($atts, $editOnly = true){
         $defAtts = ['storeedit' => ['editOn' => 'click']];
         return ['type' =>'TukosTextarea', 'atts' => ($editOnly ? $atts : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-    
     public static function tukosDateBox($atts, $editOnly = true){
         $defAtts = [
             'edit' => ['style' => ['width' => '6em']],
@@ -125,7 +111,6 @@ class Widgets{
         ];
         return ['type' =>'TukosDateBox', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function timeTextBox($atts, $editOnly = true){
         $defAtts = ['edit' => ['constraints' => ['timePattern' => 'HH:mm:ss', 'clickableIncrement' => 'T00:15:00', 'visibleRange' => 'T01:00:00']],
                     'storeedit' => ['width' => 100, 'editOn' => 'click'],
@@ -142,7 +127,6 @@ class Widgets{
                    ];
         return ['type' =>'DateTimeBox', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts)) ];
     }
-
     public static function editor($atts, $editOnly = true){
         $defAtts = [
             'edit' => [/*'style' => ['fontFamily' => 'courier']*/],
@@ -157,11 +141,10 @@ class Widgets{
     	];
     	return ['type' =>'LazyEditor', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-    
     public static function objectSelect($atts, $editOnly = true){
         $defAtts = [
             'edit' => [
-                'title' => '', 'placeHolder' => Tfk::tr('Select a name'), 'searchAttr' => 'name', 'searchDelay' => 500, 'required' => false,  /*'labelProperty' => 'name','pageSize' => 500,*/
+                'title' => '', 'placeHolder' => Tfk::tr('Select a name'), 'searchAttr' => 'name', 'searchDelay' => 500, 'required' => false,
             	'style' => ['width' => "auto", 'minWidth' => '5em', 'maxWidth' => '15em'], 'fetchProperties' => ['sort' => [['attribute' => 'name', 'descending' => false]]], 'ignoreCase' => true,
             ],
             'storeedit' => ['width' => 110, 'editOn' => 'click', 'renderCell' => 'renderNamedId'],
@@ -169,7 +152,6 @@ class Widgets{
         ];
         return ['type' => 'ObjectSelect', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function restSelect($atts, $editOnly = true){
     	$defAtts = [
     			'edit' => [
@@ -181,7 +163,6 @@ class Widgets{
     	];
     	return ['type' => 'RestSelect', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-    
     public static function objectSelectMulti($atts, $editOnly = true){
         $defAtts = [
             'edit'      => ['title' => '', 'placeHolder' => Tfk::tr('Select a name'), 'style' => ['width' => '12em']],
@@ -194,7 +175,6 @@ class Widgets{
             return ['type' => 'ObjectSelectMulti', 'atts' => Utl::array_merge_recursive_replace($defAtts, $atts)];
         }
     }
-
     public static function storeSelect($atts, $editOnly = true){
         $defAtts = [
             'edit' => [
@@ -208,10 +188,6 @@ class Widgets{
         return ['type' => 'StoreSelect', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
 
     }
-
-   /*
-    * provides a widget combining a numberTextBox and a storeSelect (to select the unit for the numeric value)
-    */
     public static function numberUnitBox($atts, $editOnly = true){
         $defAtts = ['edit' => ['title' => '', 
                                'number' => ['style' => ['width' => '3em']],
@@ -224,21 +200,15 @@ class Widgets{
         ];
         return ['type' => 'NumberUnitBox', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function simpleUploader($atts, $editOnly = true){
         return ['type' =>'SimpleUploader', 'atts' => $atts];
     }
     public static function uploader($atts, $editOnly = true){
     	return ['type' =>'Uploader', 'atts' => $atts];
     }
-    
     public static function downloader($atts, $editOnly = true){
         return ['type' =>'Downloader', 'atts' => $atts];
     }
-
-    /*
-     * Provides description for a dijit/MultiSelect widget  
-     */
     public static function multiSelect($atts, $editOnly = true){
         return ['type' => 'MultiSelect', 'atts' => $atts];
     }
@@ -278,7 +248,6 @@ class Widgets{
         ];
         return ['type' => 'ObjectSelectDropDown', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function colorPalette($atts, $editOnly = true){// supposed to be used in edit mode only
     	$defAtts = [
     			'edit' => [],
@@ -306,22 +275,18 @@ class Widgets{
         ]];
         return ['type' => 'Chart', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function chart($atts, $editOnly = true){
         $defAtts = ['edit' => ['title' => '', 'idProperty' => 'id', 'kwArgs' => [],]];
         return ['type' => 'Chart', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-    
     public static function horizontalSlider($atts, $editOnly = true){
         $defAtts = ['edit' => []];
         return ['type' => 'HorizontalSlider', 'atts' =>($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
     public static function horizontalLinearGauge($atts, $editOnly = true){
         $defAtts = ['edit' => []];
         return ['type' => 'HorizontalLinearGauge', 'atts' =>($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-    
     public static function StoreCalendar($atts, $editOnly = true){
         $defAtts = ['edit' => ['dateInterval' => 'day',  'createOnGridClick' => true, 'style' => ['position' => 'relative',  'width' => '1000px', 'height' => '1000px',  'storeArgs' => ['data' => null]]]];
         return ['type' => 'StoreCalendar',  'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];

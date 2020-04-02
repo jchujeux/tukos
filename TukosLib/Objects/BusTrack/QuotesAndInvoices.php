@@ -2,6 +2,7 @@
 namespace TukosLib\Objects\BusTrack;
 
 use TukosLib\Objects\ViewUtils;
+use TukosLib\Objects\BusTrack\ViewActionStrings as VAS;
 
 trait QuotesAndInvoices {
 
@@ -11,7 +12,18 @@ trait QuotesAndInvoices {
 		'catalogid'    => ViewUtils::objectSelect($this, $labels['catalogid'], 'bustrackcatalog', ['atts' => ['storeedit' => ['width' => 100]]]),
 		'name'  => ViewUtils::textBox($this, $labels['name']),
 		'comments' => ViewUtils::editor($this, $labels['comments']),
-		'quantity'  => ViewUtils::textBox($this, $labels['quantity'], ['atts' => [
+	      'category' => ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
+	          'storeArgs' => ['cols' => ['vatfree']],
+	          'onWatchLocalAction' => ['value' => ['vatfree' => ['value' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItem('vatfree') ? 'YES' : '';"]]]]
+	      ]]]),
+	      'vatfree' => ViewUtils::CheckBox($this, 'vatfree', ['atts' => [
+	          'edit' => ['onWatchLocalAction' => [
+	              'checked' => ['vatfree' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => true], 'action' => VAS::vatfreeLocalAction()]]]]],
+	          'storeedit' => ['editorArgs' => ['onWatchLocalAction' => [
+	              'checked' => '~delete',
+	              'value'   => ['vatfree' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => true], 'action' => VAS::vatfreeLocalAction()]]]]
+	          ]]]]),
+	    'quantity'  => ViewUtils::textBox($this, $labels['quantity'], ['atts' => [
 				'edit' =>  ['style' => ['width' => '4em'], 'onChangeLocalAction' => ['quantity' => ['localActionStatus' =>
 						"var reduction = 1 - sWidget.valueOf('#discount'), priceWot = newValue * sWidget.valueOf('#unitpricewot') * reduction, priceWt = newValue * sWidget.valueOf('#unitpricewt') * reduction;\n" .
 						"sWidget.setValueOf('#pricewot', priceWot);\n" .
@@ -77,7 +89,8 @@ trait QuotesAndInvoices {
 				'storeedit' => ['formatType' => 'currency', 'width' => 80]]])
 		],
 		['atts' => ['edit' => [
-				'objectIdCols' => ['catalogid'], 'sort' => [['property' => 'rowId', 'descending' => false]],
+		    'initialRowValue' => ['vatrate' => 0.085],
+		    'sort' => [['property' => 'rowId', 'descending' => false]],
 				'summaryRow' => ['cols' => [
 						'name' => ['content' =>  ['Total']],
 						'pricewot' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#pricewot#);"]]],
@@ -85,10 +98,10 @@ trait QuotesAndInvoices {
 				]],
 				'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
 				'onDropMap' => [
-						'catalog' => ['fields' => ['catalogid' => 'id', 'name' => 'name', 'comments' => 'comments', 'unitpricewot' => 'unitpricewot', 'vatrate' => 'vatrate', 'unitpricewt' => 'unitpricewt']],
+						'catalog' => ['fields' => [
+						    'catalogid' => 'id', 'name' => 'name', 'comments' => 'comments', 'category' => 'category', 'vatfree' => 'vatfree', 'unitpricewot' => 'unitpricewot', 'vatrate' => 'vatrate', 'unitpricewt' => 'unitpricewt']],
 				],
 				'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' =>
-						//"var discountPc = sWidget.form.valueOf('discountpc');" .
 						"var discountWt = sWidget.form.valueOf('discountwt'), priceWt = sWidget.summary.pricewt - discountWt, discountPc = discountWt / sWidget.summary.pricewt;\n" .
 						"sWidget.form.setValueOf('pricewt', priceWt);\n" .
 						"sWidget.form.setValueOf('pricewot', sWidget.summary.pricewot * (1 - discountPc));\n" .
@@ -147,7 +160,7 @@ trait QuotesAndInvoices {
 				]],
 		]]);
 	}
-	protected function priceWt(){return ViewUtils::tukosCurrencyBox($this, 'Totalwt', ['atts' => [
+	protected function priceWt($isInvoice = false){return ViewUtils::tukosCurrencyBox($this, 'Totalwt', ['atts' => [
 				'edit' => ['onChangeLocalAction' => [
 						'pricewt'  => ['localActionStatus' =>
 								"var form = sWidget.form, itemsW = form.getWidget('items'), newVal = isNaN(newValue) ? '' : newValue;\n" .
@@ -156,6 +169,7 @@ trait QuotesAndInvoices {
 								"form.setValueOf('discountpc', newVal == '' ? '' : newDiscount);\n" .
 								"form.setValueOf('discountwt' , itemsW.summary.pricewt  -  newVal);\n" .
 								"form.setValueOf('pricewot', itemsW.summary.pricewot * (1 -  newDiscount));\n" .
+						        ($isInvoice ? "form.setValueOf('lefttopay', newValue - (form.getWidget('paymentsitems').summary ||{summary: 0.0}).amount);\n" : "") .
 								"}\n" .
 								"return true;"
 						],

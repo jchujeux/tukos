@@ -5,7 +5,7 @@
  */
 namespace TukosLib\Objects\Wine\Dashboards;
 
-use TukosLib\Objects\Wine\AbstractModel;
+use TukosLib\Objects\AbstractModel;
 use TukosLib\Objects\ObjectTranslator;
 use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Utils\Utilities as Utl;
@@ -39,7 +39,6 @@ class Model extends AbstractModel {
         parent::__construct($objectName, $translator, 'winedashboards', ['parentid' => ['winecellars']], [], $colsDefinition,  [], [], ['custom']);
         $this->wTr = (new ObjectTranslator('wines'))->tr;
     }
-    
     public function currentKPIs($cellarid = null){
         $tk = SUtl::$tukosTableName;
         $results = SUtl::$tukosModel->store->query(
@@ -102,13 +101,10 @@ class Model extends AbstractModel {
             Utl::increment2D($kpis['quantitypersugarperregion']   , $result[$region], $result['sugar'], $result['sum(quantity)']);
             Utl::increment2D($kpis['countpervintageperregion']    , $result[$region], $result['vintage'], $result['count(*)']);
             Utl::increment2D($kpis['quantitypervintageperregion'] , $result[$region], $result['vintage'], $result['sum(quantity)']);
-
         }
         return $kpis;
     }
-
     function processOne($where){
-        
         $where = $this->user->filter($where, $this->objectName);
         $values = $this->getOne(['where' => $where, 'cols' => ['parentid']]);
         if (isset($values['parentid'])){
@@ -126,13 +122,12 @@ class Model extends AbstractModel {
 
             $kpiValues = Utl::jsonEncodeArray($kpiValues);
             $this->updateOne($kpiValues, ['where' => $where]);
-            Feedback::add('Process Done. New KPIs created');
+            Feedback::add($this->tr('Dashboard updated'));
         }else{
             Feedback::add('Cellar Id not set');
         }
         return [];
     }
-
     public function getOneExtended ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
         $wTr = $this->wTr;
         $result = parent::getOneExtended($atts);
@@ -155,6 +150,5 @@ class Model extends AbstractModel {
         }
         return $result;
     }
-
 }
 ?>

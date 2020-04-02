@@ -6,19 +6,19 @@ use TukosLib\Utils\Utilities as Utl;
 
 trait CalendarsViewUtils {
 	
-	
-	
-	protected function setGridWidget($name, $startDateTimeProperty, $endDateTimeProperty){
+	protected function dateChangeGridLocalAction($dateValue, $targetWidget, $allowApplicationFilterValue){
+        return ['collection' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->gridWidgetFilterActionString($dateValue, $targetWidget, $allowApplicationFilterValue)]];
+    }
+    public function gridOpenAction($gridWidgetName){
+        return <<<EOT
+  var tWidget = this.getWidget('$gridWidgetName'), dateValue = this.valueOf('displayeddate');
+  tWidget.set('collection', function(){
+    {$this->gridWidgetFilterActionString('dateValue', 'tWidget', 'tWidget.allowApplicationFilter')}}());
+EOT;
+    }
+	protected function setGridWidget($name){
 		$this->gridWidgetName = $name;
-		$this->startDateTimeProperty = $startDateTimeProperty;
-		$this->endDateTimeProperty = $endDateTimeProperty;
-		$this->dateChangeGridWidgetLocalAction = ['collection' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->gridWidgetFilterActionString('newValue', 'tWidget', 'tWidget.allowApplicationFilter')]];
-		$this->allowApplicationFilterChangeGridWidgetLocalAction = ['collection' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->gridWidgetFilterActionString("tWidget.valueOf('displayeddate')", 'tWidget', 'newValue')]];
-		$this->gridWidgetOpenAction = 
-			"var tWidget = this.getWidget('" . $this->gridWidgetName . "'), tDate = this.valueOf('displayeddate');" .
-			"tWidget.set('collection', function(){\n" . $this->gridWidgetFilterActionString('tDate', 'tWidget', 'tWidget.allowApplicationFilter') . "}())";
 	}
-
 	protected function calendarWidgetDescription($custom = [], $start = 'periodstart', $end = 'periodend'){
 		return Utl::array_merge_recursive_replace([
 			'type' => 'storeCalendar', 'atts' => ['edit' => [
@@ -35,7 +35,7 @@ trait CalendarsViewUtils {
 							"}\n" .
 							"return newDisplayedDate;"
 						]],
-						$this->gridWidgetName => $this->dateChangeGridWidgetLocalAction,
+				    $this->gridWidgetName => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter'),
 				]],
 			]]],
 			$custom
@@ -48,23 +48,25 @@ trait CalendarsViewUtils {
 				   'value' => date('Y-m-d'),
 						'onWatchLocalAction' => ['value' => [
 							'calendar' => ['date' => ['triggers' => ['server' => false, 'user' => true], 'action' => "return newValue;" ]],
-							$this->gridWidgetName => $this->dateChangeGridWidgetLocalAction,
+						    $this->gridWidgetName => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter'),
 						]],
 			]]]),
 			$custom);
 	}
 	
-	private function gridWidgetFilterActionString($dateValue, $targetWidget, $allowApplicationFilterValue){
-		return
-			"var date = $dateValue, store = $targetWidget.store, allowApplicationFilter = $allowApplicationFilterValue;\n" .
-			"if (allowApplicationFilter === 'yes'){\n" .
-				"var mondayStamp = dutils.getDayOfWeek(1, typeof date === 'string' ? dutils.parseDate(date) : dutils.parseDate(dutils.formatDate(date)));\n" .
-				"var nextMondayStamp = dojo.date.add(mondayStamp, 'week', 1);\n" .
-				"store.applicationCollectionFilter = (new store.Filter()).gte('$this->startDateTimeProperty', dutils.toISO(mondayStamp)).lt('$this->endDateTimeProperty',dutils.toISO(nextMondayStamp));\n" .
-			"}else{\n" .
-				"store.applicationCollectionFilter = new store.Filter();\n" .
-			"}" .
-			"return store.getRootCollection();\n";
+	private function gridWidgetFilterActionString($dateValue, $tWidget, $allowApplicationFilterValue){
+		return <<<EOT
+  var date = $dateValue, allowApplicationFilter = $allowApplicationFilterValue, store = $tWidget.store, startDateTimeCol = $tWidget.startDateTimeCol, endDateTimeCol = $tWidget.endDateTimeCol;
+  if (allowApplicationFilter === 'yes'){
+	var mondayStamp = dutils.getDayOfWeek(1, typeof date === 'string' ? dutils.parseDate(date) : dutils.parseDate(dutils.formatDate(date)));
+	var nextMondayStamp = dojo.date.add(mondayStamp, 'week', 1);
+	//store.applicationCollectionFilter = new store.Filter().gte(startDateTimeCol, dutils.toISO(mondayStamp)).lt(endDateTimeCol,dutils.toISO(nextMondayStamp));
+    store.applicationCollectionFilter = new store.Filter().or(new store.Filter().eq(startDateTimeCol, undefined), new store.Filter().gte(startDateTimeCol, dutils.toISO(mondayStamp)).lt(endDateTimeCol,dutils.toISO(nextMondayStamp)));
+  }else{
+	store.applicationCollectionFilter = new store.Filter();
+  }
+  return store.getRootCollection();
+EOT;
 	}
 }
 ?>

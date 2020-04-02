@@ -90,25 +90,28 @@ class TranslatorsManager {
     }
 */
     function translator($translatorName, $setsPath){
-        $this->translatorPaths[$translatorName] = $setsPath;//array_map("strtolower", $setsPath);
+        $this->translatorPaths[$translatorName] = $setsPath;
         return function($key, $mode = null) use ($translatorName){
-            //return is_string($key) ?'#{' . implode('|', [$key, $mode, $translatorName]) . '}': $key;
             if (is_string($key)) {
-                return '#{' . implode('|', [$key, $mode, $translatorName]) . '}';
+                return '#{' . implode('|', [$key, json_encode($mode), $translatorName]) . '}@';
             }else if (is_array($key)){
-                $translation = '';
-                foreach ($key as $subKey){
-                    $translation .= ($subKey[0] === 'no' ? $subKey[1] : '#{' . implode('|', [$subKey[1], $mode, $translatorName]) . '}');
+                if (is_array($key[0])){//case where one would send e.g. [['yes', 'totranslate'], ['no', 'tonottranslate']]. We most probably don't use this (?)
+                    $translation = '';
+                    foreach ($key as $subKey){
+                        $translation .= ($subKey[0] === 'no' ? $subKey[1] : '#{' . implode('|', [$subKey[1], $mode, $translatorName]) . '}@');
+                    }
+                    return $translation;
+                }else{//assumes [$string, $mode or [$mode1, mode2, ...]] is sent, e.g. ['Just_Do_It', '_To '] or ['Just_Do_It', ['_To ', 'ucfirst']]
+                    $translation =  '#{' . implode('|', [$key[0], json_encode($key[1]), $translatorName]) . '}@';
+                    return $translation;
                 }
-                return $translation;
             }else{
                 return $key;
             }
         };
     }
-    
     function substituteTranslations($template){
-        $names = []; $setNames = []; $pattern = "/[#]{([^}]*)}/";
+        $names = []; $setNames = []; $pattern = "/[#]{([^}]*)}@/";
         preg_match_all($pattern, $template, $matches);
         if (!empty($matches[1])){
             $matchesToTranslate = array_unique($matches[1]);
@@ -126,9 +129,16 @@ class TranslatorsManager {
                                    empty($nameTranslation = $nameTranslations[reset($activeSets)]))
                     ? $name
                     : preg_replace('/([^\\\\])"/', '$1\\"', $nameTranslation);
-                    //: preg_replace('/([^\\\\])(["\'])/', '$1\\\\$2', $nameTranslation);
+                    $mode = json_decode(json_decode('"' . $mode . '"', true), true);// because $mode is a substring of $template which is json encoded
                 if (!empty($mode)){
-                    $translation = $this->transform($translatedName, $mode);
+                    if (is_array($mode)){
+                        $translation = $translatedName;
+                        foreach($mode as $subMode){
+                            $translation = $this->transform($translation, $subMode);
+                        }
+                    }else{
+                        $translation = $this->transform($translatedName, $mode);
+                    }
                 }else if (strtoupper($name) === $name){
                     $translation = mb_strtoupper($translatedName);
                 }else if(ctype_upper($name[0])){
@@ -137,7 +147,7 @@ class TranslatorsManager {
                     $translation = $translatedName;
                 }
                 $replacements[] = $translation;
-                $match = "#{" . $match . "}";
+                $match = "#{" . $match . "}@";
             }
             return str_replace($matchesToTranslate, $replacements, $template);
         }else{
@@ -195,16 +205,22 @@ class TranslatorsManager {
         switch ($mode){
             case 'escapeSQuote':
                 return Utl::escapeSQuote($translation);
-                break;
             case 'ucfirst':
                 return ucfirst(mb_strtolower($translation));
-                break;
             case 'ucwords':
                 return ucwords(mb_strtolower($translation));
-                break;
             case 'none':
-            default:
+            case null:
+            case '':
                 return $translation;
+            default://assumes it is an array describing the transformation, e.g. ['replace', ['(', ')'], ' ']
+                switch ($mode[0]){
+                    case 'replace':
+                        return str_replace($mode[1], $mode[2], $translation);
+                    default:
+                        return $translation;
+                        
+                }
         }
     }
 }

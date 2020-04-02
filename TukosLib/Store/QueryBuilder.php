@@ -83,31 +83,9 @@ class QueryBuilder{
             }
         }
     }
-
     function simpleWhere($query, $col, $value){
         $query->where($col . ' = :' . $this->bindKey($query, $value));
     }
-/*    
-    function complexWhere($query, $conditions, $leftParen='', $rightParen='', $isOr= false){
-        if (is_string($conditions)){// is a plain where condition
-            $query->where($conditions);
-        }else{
-            $isOr = Utl::extractItem('.or', $conditions);
-            reset($conditions);
-            $firstKey = key($conditions);
-            if (is_string($firstKey)){//reached an elementary condition
-                $this->complexWhereElement($query, $conditions, $leftParen, $rightParent);
-
-            }else{// is a nested condition
-                end($conditions);
-                $lastKey = key($conditions);
-                foreach ($conditions as $key => $condition){
-                    $this->complexWhere($query, $condition, ($key === $firstKey ? '(' : ''), ($key === $lastKey ? ')' : ''), $isOr);
-                }
-            }
-        }
-    }
-*/    
     function complexWhere($query, $conditions){
         if (is_string($conditions)){
             return $conditions;
@@ -132,7 +110,6 @@ class QueryBuilder{
             }
         }
     }
-    
     function complexWhereElement($query, $condition/*, $leftParen, $rightParen*/){
         $col = Utl::getItem('col', $condition, '');
         $opr = $condition['opr'];
@@ -194,7 +171,21 @@ class QueryBuilder{
         }
         return $query;
     }
-    
+    function tukosJoin($query, $joins){
+        $processJoin = function ($join, $spec, $cond = null) use ($query){
+            $join = strtoupper(ltrim("$join JOIN"));
+            $cond = $cond ? 'ON ' . $cond : '';
+            $query->from[0][] = rtrim("$join $spec $cond");
+        };
+        if (is_array($joins[0])){
+            foreach ($joins as $join){
+                $processJoin($join[0], $join[1], $join[2]);
+            }
+        }else{
+            $processJoin($joins[0], $joins[1], $joins[2]);
+        }
+        return $query;
+    }    
     function distinct($query, $trueOrFalse){
         $query->distinct($trueOrFalse);
     }
