@@ -19,7 +19,7 @@ class Model extends AbstractModel {
                 'warmdown'     =>  'longtext',
             	'sessionid' => 'VARCHAR(10) DEFAULT NULL',
             	'sportsman' => 'INT(11) DEFAULT NULL', 
-            	//'difficulty' => 'VARCHAR(10) DEFAULT NULL',
+            	'difficulty' => 'VARCHAR(10) DEFAULT NULL',
             	'warmupdetails' =>  'longtext',
                 'mainactivitydetails' =>  'longtext',
                 'warmdowndetails'     =>  'longtext',
@@ -39,7 +39,7 @@ class Model extends AbstractModel {
         parent::__construct(
             $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, [], 
             [/*'startdate', 'duration', 'intensity', 'stress', 'sport', 'sensations','perceivedeffort','mood','mode'*/], 
-            ['worksheet', 'custom']
+            ['custom']
         );
     }   
     function initialize($init=[]){

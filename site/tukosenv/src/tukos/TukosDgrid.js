@@ -89,9 +89,10 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
                     if (column.displayedValue == undefined){
                         column.displayedValue = [];
                     }
+                    this.isUserEdit = true;
                 }
             }));
-
+/*
             this.on("keydown", function(event){
             	switch (event.keyCode){
             		case keys.RIGHT_ARROW:
@@ -99,7 +100,7 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
             		default:
             	}
             });
-
+*/
             this.on(on.selector(".dgrid-row, .dgrid-header", "contextmenu"), lang.hitch(this, this.contextMenuCallback));
         },
         _setAllowApplicationFilter: function(newValue){

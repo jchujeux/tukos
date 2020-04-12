@@ -1,5 +1,5 @@
 <?php
-namespace TukosLib\Objects\BusTrack\Categories;
+namespace TukosLib\Objects\Sports\Exercises\Levels;
 
 use TukosLib\Objects\AbstractModel;
 
@@ -7,9 +7,9 @@ class Model extends AbstractModel {
     
     function __construct($objectName, $translator=null){
         $colsDefinition =  [
-            'vatfree'      => "VARCHAR(31) DEFAULT NULL"
+            'level'      => "MEDIUMINT DEFAULT NULL"
         ];
-        parent::__construct($objectName, $translator, 'bustrackcategories', ['parentid' => ['organizations']], [], $colsDefinition, [], ['custom']);
+        parent::__construct($objectName, $translator, 'sptexerciseslevels', ['parentid' => ['organizations']], [], $colsDefinition, [], ['custom']);
     }
     function initialize($init=[]){
         return parent::initialize(array_merge(['date' => date('Y-m-d')], $init));

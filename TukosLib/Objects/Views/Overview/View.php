@@ -4,7 +4,7 @@ namespace TukosLib\Objects\Views\Overview;
 
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
-use TukosLib\TukosFramework as Tfk;
+use TukosLib\Objects\Directory;
 
 class View {
 
@@ -89,7 +89,9 @@ class View {
             'contextPaths'  => $this->view->user->customContextAncestorsPaths($this->view->objectName),
             'viewMode'      => 'Overview',
         		'paneMode' => $this->paneMode,
-            'customviewid'  => $this->user->customViewId($this->objectName, 'overview', $this->paneMode),
+            'objectDomain' => Directory::getObjDomain($this->view->objectName),
+            'customviewid'  => $this->user->customViewId($this->objectName, 'overview', $this->paneMode, 'user'),
+            'tukosviewid'  => $this->user->customViewId($this->objectName, 'overview', $this->paneMode, 'tukos'),
             'widgetsDescription' => array_merge ($this->view->widgetsDescription($this->dataElements, true), $this->actionWidgets),                         
             'dataLayout'  => $this->dataLayout,
             'actionLayout'  => $this->actionLayout,

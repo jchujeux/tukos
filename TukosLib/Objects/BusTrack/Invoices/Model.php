@@ -14,7 +14,8 @@ class Model extends AbstractModel {
 
     function __construct($objectName, $translator=null){
         $colsDefinition =  [
-            'organization' => 'INT(11) NULL DEFAULT NULL',
+            'organization' => 'MEDIUMINT NULL DEFAULT NULL',
+            'contact' => 'MEDIUMINT NULL DEFAULT NULL',
             //'invoicedorganization' => 'MEDIUMINT NULL DEFAULT NULL',
             'reference' => 'VARCHAR(50)  DEFAULT NULL',
             'relatedquote' => 'INT(11) NULL DEFAULT NULL',

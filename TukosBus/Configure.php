@@ -53,10 +53,15 @@ class Configure{
             '#bustrackpayments' => [['#bustrackpaymentsitems' => []]],
             '#bustrackdashboards' => [], 
             '#bustrackcategories' => [], 
-        	'@help' => [['overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],]],
-        ];
+        	'@help' => [
+        	    ['overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],
+        	     'guidedtour' => ['type' => 'MenuItem', 'atts' => [
+        	        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtour')]]])]]]],
+        	     'tutotukos' => ['type' => 'MenuItem', 'atts' => [
+        	        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Tutotukos')]]])]]]]
+        ]]];
         $this->transverseModules = ['help'];
-        $this->objectModulesDefaultContextName = [];
+        $this->objectModulesDefaultContextName = ['tukos' => 'tukos', 'customviews' => 'tukos'];
         $this->setobjectModulesDefaultContextName($this->modulesMenuLayout);
         $this->objectModules = array_keys($this->objectModulesDefaultContextName);
         
@@ -64,6 +69,9 @@ class Configure{
         
         $this->accordion = [
         ];
+        
+        $this->noPageCustomForAll = true;
+        $this->noContextCustomForAll = true;
         
         if (Tfk::$registry->mode === 'interactive'){
             Tfk::$registry->set('dialogue', function(){
@@ -87,7 +95,6 @@ class Configure{
     function setobjectModulesDefaultContextName($modulesLayout){
         static $depth = 0;
         static $contextName = 0;
-        $this->objectModulesDefaultContextName['tukos'] = 'tukos';
         $depth += 1;
         if (is_array($modulesLayout)){
             foreach($modulesLayout as $key => $layout){

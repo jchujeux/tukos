@@ -14,7 +14,7 @@ trait QuotesAndInvoices {
 		'comments' => ViewUtils::editor($this, $labels['comments']),
 	      'category' => ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
 	          'storeArgs' => ['cols' => ['vatfree']],
-	          'onWatchLocalAction' => ['value' => ['vatfree' => ['value' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItem('vatfree') ? 'YES' : '';"]]]]
+	          'onWatchLocalAction' => ['value' => ['vatfree' => ['value' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? 'YES' : '';"]]]]
 	      ]]]),
 	      'vatfree' => ViewUtils::CheckBox($this, 'vatfree', ['atts' => [
 	          'edit' => ['onWatchLocalAction' => [

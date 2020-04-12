@@ -23,7 +23,7 @@ return true;
 EOT;
     }
     public static function vatRateLocalAction($unitPriceOnly= false){
-        $priceStringNoVat =  self::priceStringNoVat($unitPriceOnly);
+        //$priceStringNoVat =  self::priceStringNoVat($unitPriceOnly);
         $priceStringVat =  self::priceStringVat($unitPriceOnly, "newValue");
         return <<<EOT
 if (newValue){
@@ -101,6 +101,14 @@ if (fieldsValues.paymenttype){
     paymentsItemsGrid.setSummary();
 }
 pane.close();
+EOT;
+    }
+    public static function catalogIdLocalAction(){
+        return <<<EOT
+var pane = sWidget.form, form = pane.form || pane, catalog = form.getWidget('catalog'), offerItem = catalog ? catalog.get('collection').filter({id: newValue}).fetchSync()[0] : sWidget.getItem();
+['name', 'category', 'vatfree', 'vatrate', 'unitpricewot', 'unitpricewt'].forEach(function(widgetName){
+    sWidget.setValueOf(widgetName, offerItem[widgetName]);
+});
 EOT;
     }
 }

@@ -31,6 +31,9 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
                             {type: 'checkbox', style: {width: '30px'}, onchange: lang.partial(
                                     function(stringPath, key, change){
                                         lang.setObject(stringPath, change.currentTarget.checked, selectedLeaves);
+                                        if (atts.checkBoxChangeCallback){
+                                        	atts.checkBoxChangeCallback();
+                                        }
                                     },
                                     stringPath,
                                     key
@@ -242,7 +245,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
     },
 
     setParams: function(paramsString, panes){
-        var itemsParams = this.itemsParams(paramsString), items = {}, objects = {}, result = {},
+        var itemsParams = this.itemsParams(paramsString), items = {}, result = {},
              params = {}, properties = itemsParams.properties, itemsProperties = itemsParams.itemsProperties;
         utils.forEach(panes, function(pane, paneKey){
         	var paneParams = (params[paneKey] = {}), paneProperties = properties[paneKey], paneItemsProperties = itemsProperties[paneKey];
@@ -253,12 +256,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
             utils.forEach(paneItemsProperties, function(paneItemProperties, widgetName){
                 var item = paneParams[widgetName] || (paneParams[widgetName] = pane.valueOf(widgetName, true));
                 if (item !== '' && typeof item !== 'undefined'){
-                    if (items[item]){
-                        items[item] = utils.array_unique_merge(items[item], paneItemProperties);
-                    }else{
-                        items[item] = paneItemProperties;
-                        objects[item] = pane.getWidget(widgetName).object;
-                    }
+                    items[item] = utils.array_unique_merge(items[item] || [], paneItemProperties);
                 }else{
                 	paneItemProperties.forEach(function(property){
                         result[paneKey + widgetName + separator + property] = item === '' ? '' : paneKey + widgetName + separator + property;
@@ -268,7 +266,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         });
         return all(result).then(function(result){
             if (!utils.empty(items)){
-                return Pmg.serverDialog({object: 'users', view: 'NoView', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'GetItems'}}}, {data: {items: items, objects: objects}}, messages.actionDone).then(
+                return Pmg.serverDialog({object: 'users', view: 'NoView', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'GetItems'}}}, {data: items}, messages.actionDone).then(
                     function (response){
                         var itemsResults = response.data;
                         utils.forEach(panes, function(pane, paneKey){

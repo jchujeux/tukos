@@ -1,7 +1,7 @@
 define(["dojo/ready", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", "dojo/json",
 		"dgrid/List", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/utils"],
 function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, List, _WidgetsExtend, _WidgetsFormExtend, utils){
-    var stores, tabs,
+    var stores, tabs, openedBrowserTabs = {},
         objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
 		lang.extend(_WidgetBase, _WidgetsExtend);//for this to work in all cases, no require for a widget should be made before this statement executes, above in PageManager, and in modules required in evalUtils (which _WidgetsExtend depends on)
@@ -25,7 +25,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
 	           stores = new StoresManager();
 	           buildForm.initialize();
 	           self.requestUrl = function(urlArgs){//functions depending on utils located here so that utils can be located in the require above and then can depend on PageManager
-	               return string.substitute(urlTemplate, {dialogueUrl: self.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
+	               return string.substitute(urlTemplate, {dialogueUrl: self.get('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
 	           };
            });
 	   },
@@ -42,7 +42,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             	stores = new StoresManager();
             	buildPage.initialize();
                 self.requestUrl = function(urlArgs){//functions depending on utils locateed here so that utils can be located in the require above and then can depend on PageManager
-                    return string.substitute(urlTemplate, {dialogueUrl: self.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
+                    return string.substitute(urlTemplate, {dialogueUrl: self.get('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
                 };
                 self.addExtendedIdsToCache = function(newExtendedIds){
                     self.cache.extendedIds = utils.merge(self.cache.extendedIds, newExtendedIds);
@@ -123,10 +123,9 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
 			);
 			return promise;			
 		},
-        getItem: function(item){
+        get: function(item){
             return this.cache[item];
         },
-        
         setCopiedCell: function(copiedCell){
             this.copiedCell = copiedCell;
         },
@@ -140,7 +139,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         },
 /*
         requestUrl: function(urlArgs){
-            return string.substitute(urlTemplate, {dialogueUrl: this.getItem('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
+            return string.substitute(urlTemplate, {dialogueUrl: this.get('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
         },
 */
         openExternalUrl: function(url){//deprecated - to eliminate from existing editor content if present
@@ -153,7 +152,10 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             return false;
         },
         editorGotoUrl: function(url, event){
-            window.open(url, url);
+            if (openedBrowserTabs[url]){
+            	openedBrowserTabs[url].close();
+            }
+        	openedBrowserTabs[url] = window.open(url, url);
             event.stopPropagation();
             return false;
         },
@@ -246,9 +248,12 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         itemName: function(id){
             return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].name : '') : '');
         },
-        objectName: function(id){
+        objectName: function(id, domain){
             //return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].object : '') : '');
-            return id ? (utils.drillDown(this.cache.extendedIds, [id, 'object']) || utils.drillDown(this.cache.extras, [id, 'object'])) : '';
+            var objectName = id ? (utils.drillDown(this.cache.extendedIds, [id, 'object']) || utils.drillDown(this.cache.extras, [id, 'object'])) : '';
+            if (objectName && domain){
+            	return utils.drillDown(this.cache.objectsDomainAliases, [objectName, domain], objectName);
+            }
         },
         addExtrasToCache: function(newExtras){
         	this.cache.extras = lang.mixin(this.cache.extras, newExtras);
@@ -340,10 +345,21 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         
         addCustom: function(path, value){
         	lang.setObject(path, value, this.cache.newPageCustomization);
+        	lang.setObject(path, value, this.cache.pageChangesCustomization);
         },
-        
-        getCustom: function(property){
-        	return this.cache.newPageCustomization[property];
+        getCustom: function(args){
+        	if (args && typeof args === 'object'){
+        		var pageTukosOrUserOrChangesCustomization = 'page' + utils.capitalize(args.tukosOrUserOrChanges) + 'Customization';
+        		return args.property ? this.cache[pageTukosOrUserOrChangesCustomization][args.property] : this.cache[pageTukosOrUserOrChangesCustomization];
+        	}else{
+            	return args ? this.cache.newPageCustomization[args] : this.cache.newPageCustomization;
+        	}
+        },
+        setCustom: function(args, value){
+        	if (args && typeof args === 'object'){
+        		var pageTukosOrUserOrChangesCustomization = 'page' + utils.capitalize(args.tukosOrUserOrChanges) + 'Customization';
+        		this.cache[pageTukosOrUserOrChangesCustomization] = value;
+        	}
         }
     }
 });

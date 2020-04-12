@@ -4,7 +4,7 @@ define (
 
     var colorIconClass = "dijitEditorIcon dijitEditorIconHiliteColor",
         sizeUnits = utils.storeData(['auto', 'cm', '%', 'em', 'px']), thicknessUnits = utils.storeData(['cm', 'em', 'px']), hAlignStoreData = Pmg.messageStoreData(['default', 'left', 'center', 'right']),
-        vAlignStoreData = Pmg.messageStoreData(['top', 'middle', 'bottom']), displayStoreData = Pmg.messageStoreData(['block', 'inline', 'none']), pageBreakInsideStoreData = Pmg.messageStoreData(['auto', 'avoid']), 
+        vAlignStoreData = Pmg.messageStoreData(['top', 'middle', 'bottom']), displayStoreData = Pmg.messageStoreData(['block', 'inline', 'inline-table', 'none']), pageBreakInsideStoreData = Pmg.messageStoreData(['auto', 'avoid']), 
     	description = {backgroundColor: 'colorDescription', borderColor: 'colorDescription', color: 'colorDescription', pageBreakInside: 'pageBreakInsideDescription', textAlign: 'hAlignDescription', verticalAlign: 'vAlignDescription', width: 'sizeDescription',
     				   height: 'sizeDescription', margin: 'sizeDescription', display: 'displayDescription', paddingLeft: 'sizeDescription', paddingRight: 'sizeDescription', paddingBottom: 'sizeDescription', paddingTop: 'sizeDescription',
     				   placeHolder: 'domAttDescription', border: 'domAttDescription', cellPadding: 'domAttDescription', cellSpacing: 'domAttDescription'},

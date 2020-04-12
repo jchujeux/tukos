@@ -8,9 +8,6 @@ namespace TukosLib\Objects\Collab\People;
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
 
-use TukosLib\Utils\Utilities as Utl;
-use TukosLib\TukosFramework as Tfk;
-
 class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
@@ -29,8 +26,26 @@ class View extends AbstractView {
             'postalcode' => ViewUtils::textBox($this, 'Postalcode'),
             'city'       => ViewUtils::textBox($this, 'City'),
             'country'    => ViewUtils::storeSelect('country', $this, 'Country'),
-            'postaladdress'     => ViewUtils::textArea($this, 'Postaladdress'),
-        		'birthdate'  => ViewUtils::tukosDateBox($this, 'Birthdate'),
+            'postaladdress'     => ViewUtils::textArea($this, 'Postaladdress', ['atts' => [
+                'edit' =>  ['onChangeLocalAction' => [
+                    'invoicingaddress'    => ['localActionStatus' => <<<EOT
+var invoicingAddress = tWidget.get('value');
+if (!invoicingAddress || oldValue === invoicingAddress){
+    tWidget.set('value', newValue);
+}
+EOT
+                    ]
+                ]]]]),
+            'invoicingaddress'  => ViewUtils::textArea($this, 'Invoicingaddress', ['atts' => [
+                'edit' =>  ['onChangeLocalAction' => [
+                    'postaladdress'    => ['localActionStatus' => <<<EOT
+if (!tWidget.get('value')){
+    tWidget.set('value', newValue);
+}
+EOT
+                    ]
+                ]]]]),
+            'birthdate'  => ViewUtils::tukosDateBox($this, 'Birthdate'),
         ];
         $subObjects['tasks'] = [
             'atts'  => ['title' => $this->tr('Assigned tasks'),],

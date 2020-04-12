@@ -18,7 +18,7 @@ class View extends AbstractView {
             'postalcode' => ViewUtils::textBox($this, 'Postalcode'),
             'city'       => ViewUtils::textBox($this, 'City'),
             'country'    => ViewUtils::storeSelect('country', $this, 'Country'),
-            'postaladdress'     => ViewUtils::textArea($this, 'Postaladdress'),
+            'invoicingaddress'     => ViewUtils::textArea($this, 'Invoicingaddress'),
         ];
 
         $subObjects['bustrackquotes'] = [

@@ -7,7 +7,7 @@ use TukosLib\TukosFramework as Tfk;
 
 class PageCustomSave extends AbstractAction{
     function response($query){
-        return $this->user->updateUserInfo($this->dialogue->getValues());
+        return $this->user->updatePageCustom($this->dialogue->getValues(), $query['tukosOrUser']);
     }
 }
 ?>

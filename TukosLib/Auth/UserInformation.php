@@ -1,14 +1,7 @@
 <?php
-/**
- *
- * Provides user properties to the tukos environment
- *
- */
 namespace TukosLib\Auth;
 
-use TukosLib\Objects\Admin\Users\CustomViews\UserCustomization;
 use TukosLib\Auth\ContextCustomization;
-use TukosLib\Objects\AbstractModel;
 use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Objects\Directory;
 use TukosLib\Utils\Utilities as Utl;
@@ -30,17 +23,25 @@ class UserInformation{
         try {
             $tk = SUtl::$tukosTableName;
             $tu = 'users';
-            $this->userInfo = SUtl::$store->getOne([/*can't use Users\Model here as AbstractModel relies on $this->userInfo */
+            ($userName = $where['name']) === 'tukos' ? $getFunc = 'getOne' : list($getFunc, $where) = ['getAll', [['col' => 'name', 'opr' => 'IN', 'values' => [$userName, 'tukos']]]];
+            $usersInfo = SUtl::$store->$getFunc([/*can't use Users\Model here as AbstractModel relies on $this->userInfo */
                 'table' => $tu, 'join' => [['inner', $tk,  $tk . '.id = ' . $tu . '.id']],
                 'where' => SUtl::transformWhere($where, $tu),
                 'cols'  => ['*']
             ]);
-            if (empty($this->userInfo)){
-                Feedback::add(Tfk::tr('Username') . ': ' . $where['name']);
-                return false;
+            if ($userName === 'tukos'){
+                $this->userInfo = $this->tukosInfo = $usersInfo;
+            }else{
+                if (count($usersInfo === 2)){
+                    $this->tukosInfo = $usersInfo[0]['name'] === 'tukos' ? $usersInfo[$key = 0] : $usersInfo[$key = 1];
+                    $this->userInfo = $usersInfo[1 - $key];
+                }else{
+                    Feedback::add(Tfk::tr('Username') . ': ' . $where['name']);
+                    return false;
+                }
             }
             $this->unallowedModules  = ($this->isSuperAdmin() || $this->userInfo['modules'] === null) ? [] : json_decode($this->userInfo['modules'], true);
-            if ($where['name'] === 'tukosBackOffice'){
+            if ($userName === 'tukosBackOffice'){
                 $this->allowedModules = ['contexts', 'backoffice'];
             }else{
                 $this->allowedModules =  array_diff($this->objectModules, $this->unallowedModules);
@@ -57,7 +58,6 @@ class UserInformation{
             Tfk::setEnvironment($this->userInfo['environment']);
             Tfk::setTranslator($this->language);
             $this->contextModel = $this->objectsStore->objectModel('contexts', null);/* here and not in __construct  as else creates infinite loop recursion */
-            $this->pageCustomization = array_merge(['fieldsMaxSize' => 100000], empty($pageCustom = $this->userInfo['pagecustom']) ? [] : json_decode($pageCustom, true));
             return true;
         }catch(\Exception $e){
             //Tfk::debug_mode('log', Tfk::tr('errorgettinguserinformation'), $e->getMessage());
@@ -189,7 +189,7 @@ class UserInformation{
     function filterReadOnly($where, $tableName = ''){
         if ($this->rights()!== "SUPERADMIN"){
             $where[] = [
-                [['col' => $this->fullColName('permission'), 'opr' => '=', 'values' => 'PU'], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"[01]"']], 
+                [['col' => $this->fullColName('permission'), 'opr' => '=', 'values' => 'PU'], ['col' => ($this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"[01]"']], 
                 ['col' => $this->fullColName('updator'), 'opr' => '=', 'values' => $this->id(), 'or' => true],
                 ['col' => $this->fullColName('acl'), 'opr' => 'RLIKE', 'values' => $this->id(). '","permission":"[23]"', 'or' => true]
             ];
@@ -257,88 +257,126 @@ class UserInformation{
             return false;
         }
     }
-    private function customViewIds(){
-        if (!property_exists($this, 'customViewIds')){
-            if (!empty($this->userInfo['customviewids'])){
-                $this->customViewIds = json_decode($this->userInfo['customviewids'], true);
+    private function customViewIds($tukosOrUser){
+        $tukosOrUser === 'tukos' ? list($viewIds, $info) = ['tukosViewIds', 'tukosInfo'] : list($viewIds, $info) = ['customViewIds', 'userInfo'];
+        if (!property_exists($this, $viewIds)){
+            if (!empty($this->$info['customviewids'])){
+                $this->$viewIds = json_decode($this->$info['customviewids'], true);
             }else{
-                $this->customViewIds = [];
+                $this->$viewIds = [];
             }
-            $this->customViewsNotFound = [];
         }
-        return $this->customViewIds;
+        return $this->$viewIds;
     }
-    public function customViewId($objectName, $view, $paneMode = 'Tab'){
-        $customViewIds = $this->customViewIds();
-        return Utl::drillDown($customViewIds, [strtolower($objectName), strtolower($view), strtolower($paneMode)]);
+    public function tukosOrUserViewId($objectName, $view, $tukosOrUser, $paneMode = 'Tab'){
+        return Utl::drillDown($this->customViewIds($tukosOrUser), [strtolower($objectName), strtolower($view), strtolower($paneMode)]);
     }
-    
+    public function customViewId($objectName, $view, $paneMode = 'Tab', $tukosOrUser = 'user'){
+        return $this->tukosOrUserViewId($objectName, $view, $tukosOrUser, $paneMode);
+    }
     public function getCustomView($objectName, $view, $paneMode = 'Tab', $keys = [], $notFoundValue=[]){
         $customViewId = $this->customViewId($objectName, $view, $paneMode);
-        if (empty($customViewId)){
-                return [];
+        $tukosViewId = $customViewId === ($tukosViewId = $this->userName() === 'tukos' ? 0 : $this->customViewId($objectName, $view, $paneMode, 'tukos')) ? 0 : $tukosViewId;
+        
+        $getParams = empty($customViewId) 
+            ? (empty($tukosViewId) ? [] : list($getFunc, $where) = ['getOne', ['id' => $tukosViewId]])
+            : (empty($tukosViewId) ? list($getFunc, $where) = ['getOne', ['id' => $customViewId]] : list($getFunc, $where) = ['getAll', [['col' => 'id', 'opr' => 'IN', 'values' => [$tukosViewId, $customViewId]]]]);
+        if (empty($getParams)){
+            return [];
         }else{
-            $result = $this->objectsStore->objectModel('customviews')->getOne(
-                ['where' => ['id' => $customViewId], 'cols' => ['customization']], ['customization' => $keys], $notFoundValue
-            );
-            if (empty($result)){
-                if (!in_array($customViewId, $this->customViewsNotFound)){
-                    $this->customViewsNotFound[] = $customViewId;
-                    Feedback::add(Tfk::tr('CustomViewNotFound' . ' - id: ' . $customViewId));
+            $result = $this->objectsStore->objectModel('customviews')->$getFunc(['where' => $where, 'cols' => ['id', 'customization']], ['customization' => $keys], $notFoundValue);
+            if ($getFunc === 'getAll'){
+                if (count($result) === 2){
+                    //$tukosCustom = Utl::drillDown(json_decode(Utl::getItem('customization', $result[$key = ($result[0]['id'] === $tukosViewId ? 0 : 1)], '[]', '[]'), true), $keys, []);
+                    //$userCustom = Utl::drillDown(json_decode(Utl::getItem('customization', $result[1 - $key], '[]', '[]'), true), $keys, []);
+                    $tukosCustom = Utl::getItem('customization', $result[$key = ($result[0]['id'] === $tukosViewId ? 0 : 1)], [], []);
+                    $userCustom = Utl::getItem('customization', $result[1 - $key], [], []);
+                    SUtl::addIdCol($customViewId); SUtl::addIdCol($tukosViewId);
+                    return Utl::array_merge_recursive_replace($tukosCustom, $userCustom);
+                }else if(count($result === 1)){
+                    Feedback::add(Tfk::tr('CustomViewNotFound') . ' - id: ' . $result[0]['id'] === $tukosViewId ? $customViewId : $tukosViewId);
+                    SUtl::addIdCol($result[0]['id']);
+                    return Utl::getItem('customization', $result[0], [], [])
+                    ;
+                }else{
+                    Feedback::add(Tfk::tr('CustomViewNotFound') . " - id: $customViewId, $tukosViewId");
+                    return [];
+                    
                 }
-                $customViewId = null;
-                return [];
             }else{
-                SUtl::addIdCol($customViewId);
-                return is_null($result['customization']) ? [] : $result['customization'];
+                if (empty($result)){
+                    Feedback::add(Tfk::tr('CustomViewNotFound') . " - id: {$where['id']}");
+                    return [];
+                }else{
+                    SUtl::addIdCol($where['id']);
+                    return Utl::getItem('customization', $result, [], []);
+                }
             }
         }
     }
-    function setCustomViewId($objectName, $view, $paneMode, $customViewId){
+    function setCustomViewId($objectName, $view, $paneMode, $customViewId, $tukosOrUser = 'user'){
         $objectName = strtolower($objectName);
         $view = strtolower($view);
         $paneMode = strtolower($paneMode);
         $this->objectsStore->objectModel('users')->updateOne(
-            ['customviewids' => [$objectName => [$view => [$paneMode => $customViewId]]]], 
-            ['where' => ['id' => $this->id()]], 
+            ['customviewids' => [$objectName => [$view => [$paneMode => $customViewId]]]],
+            ['where' => $tukosOrUser === 'user' ? ['id' => $this->id()] : ['name' => 'tukos']],
             true, true
-        );
-        //$customViewIds = $this->customViewIds();/* to make sure $this->customViewIds is initialized*/
-        $this->customViewIds = Utl::array_merge_recursive_replace($this->customViewIds(), [$objectName => [$view => [$paneMode => $customViewId]]]);
+            );
+        $this->customViewIds = Utl::array_merge_recursive_replace($this->customViewIds($tukosOrUser), [$objectName => [$view => [$paneMode => $customViewId]]]);
     }
-    public function updateCustomView($objectName, $view, $paneMode, $newValues){
+    public function updateCustomView($objectName, $view, $paneMode, $newValues, $tukosOrUser = 'user'){
         $paneMode = strtolower($paneMode); $view = strtolower($view);
-        $customViewId = $this->customViewId($objectName, $view, $paneMode);
+        $customViewId = $this->customViewId($objectName, $view, $paneMode, $tukosOrUser);
         if (empty($customViewId)){
+/*
             $result = $this->objectsStore->objectModel('customviews')->insert(
                 ['name' => 'new', 'vobject' => $objectName, 'view' => $view, 'panemode' => $paneMode, 'customization' => $newValues], 
                 true, true
             );
-            $this->setCustomViewId($objectName, $view, $paneMode, $result['id']);
+            $this->setCustomViewId($objectName, $view, $paneMode, $result['id'], $tukosOrUser);
             return ['customviewid' => $result['id']];
+*/
+            Feedback::add('updateCustomView: inserting a new view not supposed to happen');
         }else{
-            $result = $this->objectsStore->objectModel('customviews')->updateOne(
+            $this->objectsStore->objectModel('customviews')->updateOne(
                 ['vobject' => $objectName, 'view' => strtolower($view), 'panemode' => strtolower($paneMode), 'customization' => $newValues], 
                 ['where' => ['id' => $customViewId]], 
                 true, true
             );
-            return [];
         }
     }
-    public function pageCustomization(){
-        return $this->pageCustomization;
+    public function pageCustomization($tukosOrUser = 'combined'){
+        if (!property_exists($this, 'pageCustomization')){
+            $this->pageUserCustomization = json_decode(Utl::getItem('pagecustom', $this->userInfo, '[]', '[]'), true);
+            if ($this->userName() !== 'tukos'){
+                $this->pageTukosCustomization = json_decode(Utl::getItem('pagecustom', $this->tukosInfo, '[]', '[]'), true);
+                $this->pageCustomization = Utl::array_merge_recursive_replace($this->pageTukosCustomization, $this->pageUserCustomization);
+            }else{
+                $this->pageCustomization = $this->pageTukosCustomization = $this->pageUserCustomization;
+            }
+            $this->pageCustomization = array_merge(['fieldsMaxSize' => 100000], $this->pageCustomization);
+        }
+        switch($tukosOrUser){
+            case 'combined': return $this->pageCustomization; break;
+            case 'tukos'   : return $this->pageTukosCustomization; break;
+            case 'user'    : return $this->pageUserCustomization;
+        }
     }
-    public function updateUserInfo($pageCustom){
-        $this->pageCustomization = array_merge($this->pageCustomization, $pageCustom);
-        $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => json_encode($this->pageCustomization)], ['where' => ['id' => $this->id()]]);
+    public function updatePageCustom($pageCustom, $tukosOrUser){
+        if ($tukosOrUser === 'user'){
+            $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => json_encode(Utl::array_filter_recursive(array_merge($this->pageCustomization('user'), $pageCustom)))], ['where' => ['id' => $this->id()]]);
+        }else{
+            $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => json_encode(Utl::array_filter_recursive(array_merge($this->pageCustomization('tukos'), $pageCustom)))], ['where' => ['name' => 'tukos']]);
+        }
         Feedback::add(Tfk::tr('serveractiondone'));
         return [];
     }
     public function fieldsMaxSize(){
-        return intval(Utl::getItem('fieldsMaxSize', $this->pageCustomization));
+        return intval(Utl::getItem('fieldsMaxSize', $this->pageCustomization()));
     }
     public function historyMaxItems(){
-        return IntVal(Utl::getItem('historyMaxItems', $this->pageCustomization));
+        return IntVal(Utl::getItem('historyMaxItems', $this->pageCustomization()));
     }
 }
 ?>

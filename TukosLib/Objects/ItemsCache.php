@@ -1,10 +1,6 @@
 <?php
 namespace TukosLib\Objects;
 
-use TukosLib\Utils\Utilities as Utl;
-
-use TukosLib\TukosFramework as Tfk;
-
 class ItemsCache {
 
     private static $itemsCache = [];
@@ -12,11 +8,9 @@ class ItemsCache {
     private static $itemsCacheExtras = [];
     private static $idCacheExtras = [];
 
-    
     protected static function whereId($where, $table){
         return (isset($where['id']) ? $where['id'] : json_encode([$where, $table]));
     }
-
     protected static function colsInCache($idOrWhereId){
         if (isset(self::$itemsCache[$idOrWhereId])){
             return array_keys(self::$itemsCache[$idOrWhereId]);
@@ -26,7 +20,6 @@ class ItemsCache {
             return array_keys(self::$itemsCache[self::$idCache[$idOrWhereId]]);
         }
     }
-
     protected static function valuesInCache($idOrWhereId){
         if (isset(self::$itemsCache[$idOrWhereId])){
             return self::$itemsCache[$idOrWhereId];
@@ -36,30 +29,25 @@ class ItemsCache {
             return self::$itemsCache[self::$idCache[$idOrWhereId]];
         }
     }
-
     public static function emptyCache(){
         self::$itemsCache = [];
     }
-    
     public static function missingCols($atts){
         return array_diff($atts['cols'], self::colsInCache(self::whereId($atts['where'], $atts['table'])));
     }
-
     public static function insert($values){
         $whereId = $values['id'];
         self::$idCache[$whereId] = $whereId;
         return self::$itemsCache[$whereId] = $values;
-    }    
-            
+    }
     public static function getOne($atts){
         return array_intersect_key(self::valuesInCache(self::whereId($atts['where'], $atts['table'])), array_flip($atts['cols']));
     }
-
     public static function updateOne($values, $idOrWhereId){
         if (empty(self::$idCache[$idOrWhereId])){
             self::$idCache[$idOrWhereId] = $idOrWhereId;
         }else{
-            $whereId = self::$idCache[$idOrWhereId];
+            self::$idCache[$idOrWhereId];
         }
         if (empty(self::$itemsCache[$idOrWhereId])){
             self::$itemsCache[$idOrWhereId] = $values;
@@ -67,13 +55,11 @@ class ItemsCache {
             self::$itemsCache[$idOrWhereId] = array_merge(self::$itemsCache[$idOrWhereId], $values);
         }
     }
-    
     public static function mergeOne($values, $atts){
         $whereId = self::whereId($atts['where'], $atts['table']);
         self::updateOne($values, $whereId);
         return array_intersect_key(self::$itemsCache[$whereId], array_flip($atts['cols']));
     }
-    
     public static function cacheExtra($value, $name, $atts){
         $whereId = self::whereId($atts['where'], $atts['table']);
         if (empty(self::$idCacheExtras[$whereId])){
@@ -86,7 +72,6 @@ class ItemsCache {
         }
         return $whereId;
     }
-
     public static function getExtrafromCache($name, $idOrWhereId){
         if (isset(self::$itemsCacheExtras[$idOrWhereId])){
             $extra = self::$itemsCacheExtras[$idOrWhereId];

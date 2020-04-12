@@ -34,15 +34,18 @@ class View extends AbstractView {
             'dropboxbackofficeaccess' => ViewUtils::storeSelect('dropboxbackofficeaccess', $this, 'dropboxbackofficeaccess'),
             'customviewids' => [
                 'type' => 'objectEditor', 
-                'atts' => ['edit' => ['title' => $this->tr('Custom views'), 'keyToHtml' => 'capitalToBlank', 'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px',  'overflow' => 'auto']]],
+                'atts' => ['edit' => ['title' => $this->tr('Custom views'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true, 'isEditTabWidget' => true*/, 
+                    'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px',  'overflow' => 'auto']]],
                 'objToEdit' => ['json_decode' => [true],  'map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]],
             ],
             'customcontexts' => ['type' => 'objectEditor',
-                'atts' => ['edit' =>  ['title' => $this->tr('Custom contexts'), 'keyToHtml' => 'capitalToBlank', 'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px', 'overflow' => 'auto']]],
+                'atts' => ['edit' =>  ['title' => $this->tr('Custom contexts'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true, 'isEditTabWidget' => true*/,
+                    'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px', 'overflow' => 'auto']]],
                 'objToEdit' => ['json_decode' => [true],  'map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]
             ]],
             'pagecustom' => ['type' => 'objectEditor',    
-                 'atts' => ['edit' =>  ['title' => $this->tr('Pagecustom'), 'keyToHtml' => 'capitalToBlank', 'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px', 'overflow' => 'auto']]],
+                'atts' => ['edit' =>  ['title' => $this->tr('Pagecustom'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true, 'isEditTabWidget' => true*/, 
+                    'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px', 'overflow' => 'auto']]],
                 'objToEdit' => ['json_decode' => [true],  'map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]
             ]],
         ];

@@ -27,30 +27,35 @@ class Page extends Translator{
 
         $isOkAccordion = true;
         $appConfig= Tfk::$registry->get('appConfig');
+        if (property_exists($appConfig, 'noPageCustomForAll') && $appConfig->noPageCustomForAll){
+            $pageView->addToPageManagerArgs('noPageCustomForAll', true);
+        }
         $pageCustom = $this->user->pageCustomization();
         $panesCustomization = isset($pageCustom['panesConfig']) ? Utl::toAssociative($pageCustom['panesConfig'], 'name') : [];
         foreach ($appConfig->accordion as $configRequest){
-        	if ($this->user->isAllowed($configRequest['object'], [])){
-	        	if (($view = $configRequest['view']) === 'Edit' || $view === 'Overview'){
-	            	$description = ['formContent' => ['object' => $configRequest['object'], 'viewMode' => $view, 'paneMode' => 'accordion', 'action' => 'Tab']];
-	            }else{
-	            	$configRequest['mode'] = 'accordion';
-	            	$description = $dialogueController->response($configRequest, [], true);
-	            }
-	            if (!empty($configRequest['title'])){
-	            	$description['title'] = $this->tr($configRequest['title']);
-	            }
-	            $id = $description['id'] = 'pane_' . $configRequest['pane'];
-	            if (isset($panesCustomization[$id]) && isset($panesCustomization[$id]['selected']) && $panesCustomization[$id]['selected'] === 'on'){
-	            	$description['selected'] = true;
-	            }
-	            if (!empty($configRequest['config'])){
-	            	$description['config'] = $configRequest['config'];
-	            }
-	            $pageView->addAccordionPane($description);
-        	}
+            if ($this->user->isAllowed($configRequest['object'], [])){
+                if (($view = $configRequest['view']) === 'Edit' || $view === 'Overview'){
+                    $description = ['formContent' => ['object' => $configRequest['object'], 'viewMode' => $view, 'paneMode' => 'accordion', 'action' => 'Tab']];
+                }else{
+                    $configRequest['mode'] = 'accordion';
+                    $description = $dialogueController->response($configRequest, [], true);
+                }
+                if (!empty($configRequest['title'])){
+                    $description['title'] = $this->tr($configRequest['title']);
+                }
+                $id = $description['id'] = 'pane_' . $configRequest['pane'];
+                if (isset($panesCustomization[$id]) && isset($panesCustomization[$id]['selected']) && $panesCustomization[$id]['selected'] === 'on'){
+                    $description['selected'] = true;
+                }
+                if (!empty($configRequest['config'])){
+                    $description['config'] = $configRequest['config'];
+                }
+                $pageView->addAccordionPane($description);
+            }
         }
-
+        if (property_exists($appConfig, 'noContextCustomForAll')){
+            $pageView->addToPageManagerArgs('noContextCustomForAll', $appConfig->noContextCustomForAll);
+        }
         $request['mode'] = $request['action'] = 'Tab';
         $isOkTab = $pageView->addTab(array_merge($dialogueController->response($request, $query), ['selected' => true]));
 

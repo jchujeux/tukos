@@ -20,7 +20,7 @@ class View extends EditView{
        $customContents = [
             'row1' => [
                 'tableAtts' => ['cols' => 9, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 80],
-                'widgets' => ['id', 'organization', 'relatedquote', 'parentid', 'name', 'reference', 'invoicedate', 'status']
+                'widgets' => ['id', 'organization', 'contact', 'relatedquote', 'parentid', 'name', 'reference', 'invoicedate', 'status']
             ],
             'row2' => [
                 'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['60%', '40%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
@@ -104,13 +104,14 @@ class View extends EditView{
         $this->actionWidgets['quickentry']['atts']['dialogDescription'] = [
             //'closeOnBlur' => true,
             'paneDescription' => [
-                //'allowedNestedWatchActions' => 0,
                 'widgetsDescription' => [
                     'customer' => Widgets::description(ViewUtils::objectSelectMulti(['bustrackpeople', 'bustrackorganizations'], $this->view, 'Customer')),
                     'date' => Widgets::tukosDateBox(Widgets::complete(['title' => $tr('Date'), 'value' => date('Y-m-d')])),
                     'name' => Widgets::textBox(Widgets::complete(['title' => $tr('Description'), 'style' => ['width' => '15em']])),
+                    'catalogid'    => Widgets::description(ViewUtils::objectSelect($this->view, 'CatalogId', 'bustrackcatalog', ['atts' => ['edit' => ['storeArgs' => ['storeDgrid' => 'catalog'], 'onChangeLocalAction' => [
+                        'catalogid' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => VAS::catalogIdLocalAction()]]]]]])),
                     'category' => Widgets::ObjectSelect(Widgets::complete(['title' => $tr('Category'), 'object' => 'bustrackcategories', 'style' => ['width' => '15em'], 'storeArgs' => ['cols' => ['vatfree']],
-                        'onWatchLocalAction' => ['value' => ['vatfree' => ['checked' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItem('vatfree') ? true : false;"]]]]])),
+                        'onWatchLocalAction' => ['value' => ['vatfree' => ['checked' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? true : false;"]]]]])),
                     'vatfree' => Widgets::checkBox(Widgets::complete(['title' => $tr('vatfree'), 'onWatchLocalAction' => [
                         'checked' => ['vatfree' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => VAS::vatfreeLocalAction()]]]]])),
                     'vatrate' => Widgets::tukosNumberBox(Widgets::complete(['title' => $tr('vatrate') . ' %', 'value' => 0.085, 'style' => ['width' => '4em'],
@@ -150,7 +151,7 @@ class View extends EditView{
                         'reference' => ['hidden' => "return newValue !== 'paymenttype1';"],
                         'slip' => ['hidden' => "return newValue !== 'paymenttype1';"]
                     ]])),
-                    'reference' =>  Widgets::TextBox(Widgets::complete(['title' => $tr('Checknumber'), 'hidden' => true])),
+                    'reference' =>  Widgets::TextBox(Widgets::complete(['title' => $tr('paymentreference'), 'hidden' => true])),
                     'slip' =>  Widgets::TextBox(Widgets::complete(['title' => $tr('CheckSlipnumber'), 'hidden' => true])),
                     'close' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('close'), 'onClickAction' => "this.pane.close();\n"]],
                     'synchronize' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('Synchronize'), 'onClickAction' => VAS::synchronizeOnClickAction()]],
@@ -160,7 +161,7 @@ class View extends EditView{
                     'contents' => [
                         'row1' => [
                             'tableAtts' =>['cols' => 4,  'customClass' => 'labelsAndValues', 'showLabels' => true],
-                            'widgets' => ['customer', 'name', 'date'],
+                            'widgets' => ['customer', 'catalogid', 'name', 'date'],
                         ],
                         'row2' => [
                             'tableAtts' =>['cols' => 8,  'customClass' => 'labelsAndValues', 'showLabels' => true],
@@ -189,10 +190,8 @@ EOT
         $this->actionWidgets['quickpayment']['atts']['dialogDescription'] = [
             //'closeOnBlur' => true,
             'paneDescription' => [
-                //'allowedNestedWatchActions' => 0,
                 'widgetsDescription' => [
                     'customer' => Widgets::description(ViewUtils::objectSelectMulti(['bustrackpeople', 'bustrackorganizations'], $this->view, 'Customer')),
-                    //'destinatory' => Widgets::objectSelect(Widgets::complete(['title' => $tr('Paidby'),'object' => 'bustrackpeople'])),
                     'organization' => Widgets::objectSelect(Widgets::complete(['title' => $tr('Payingorganization'),'object' => 'bustrackorganizations'])),
                     'date' => Widgets::tukosDateBox(Widgets::complete(['title' => $tr('Date'), 'value' => date('Y-m-d')])),
                     'name' => Widgets::textBox(Widgets::complete(['title' => $tr('Description'), 'style' => ['width' => '15em']])),
@@ -202,7 +201,7 @@ EOT
                         'reference' => ['hidden' => "return newValue !== 'paymenttype1';"],
                         'slip' => ['hidden' => "return newValue !== 'paymenttype1';"]
                     ]])),
-                    'reference' =>  Widgets::TextBox(Widgets::complete(['title' => $tr('Checknumber'), 'hidden' => true])),
+                    'reference' =>  Widgets::TextBox(Widgets::complete(['title' => $tr('paymentreference'), 'hidden' => true])),
                     'slip' =>  Widgets::TextBox(Widgets::complete(['title' => $tr('CheckSlipnumber'), 'hidden' => true])),
                     'close' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('close'), 'onClickAction' => "this.pane.close();\n"]],
                     'synchronize' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('Synchronize'), 'onClickAction' => VAS::synchronizePaymentOnClickAction()]],

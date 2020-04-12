@@ -15,9 +15,11 @@ class View extends AbstractView {
 		$tr = $this->tr;
         $labels = $this->model->itemsLabels;
         //$this->sendOnSave = array_merge($this->sendOnSave, ['organization']);
+		//$this->allowedNestedWatchActions = 0;
 		$customDataWidgets = [
 		    'comments' => ['atts' => ['edit' => ['height' => '150px']]],
 		    'organization' => ViewUtils::objectSelect($this, 'Invoicingorganization', 'organizations'),
+		    'contact' => ViewUtils::objectSelect($this, 'Invoicingcontact', 'people'),
 		    'reference' =>  ViewUtils::textBox($this, 'Reference', ['atts' => ['edit' => ['disabled' => true]]]),
             'relatedquote' => ViewUtils::objectSelect($this, 'Relatedquote', 'bustrackquotes', [
             	'atts' => ['edit' => ['onChangeServerAction' => [
@@ -43,7 +45,7 @@ class View extends AbstractView {
             'items' => [
                 'object' => 'bustrackinvoicesitems', 'filters' => ['parentid' => '@id'],
                 'atts' => ['title' => $tr('bustrackinvoicesitems'), 'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], 'newRowPrefix' => 'new',
-                    'colsDescription' => ['parentid' => ['atts' => ['editorArgs' => ['storeArgs' => ['storeDgrid' => 'payments']]]]],
+                    'colsDescription' => ['parentid' => ['atts' => ['editorArgs' => ['storeArgs' => ['storeDgrid' => 'payments']]]], 'catalogid' => ['atts' => ['editorArgs' => ['storeArgs' => ['storeDgrid' => 'catalog']]]]],
                     'summaryRow' => ['cols' => [
                         'name' => ['content' =>  ['Total']],
                         'pricewot' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#pricewot#);"]]],
@@ -53,6 +55,7 @@ class View extends AbstractView {
                         'catalog' => ['fields' => [
                             'catalogid' => 'id', 'name' => 'name', 'comments' => 'comments', 'unitpricewot' => 'unitpricewot', 'vatrate' => 'vatrate', 'unitpricewt' => 'unitpricewt', 'category' => 'category', 'vatfree' => 'vatfree']]
                     ],
+                    'allowedNestedRowWatchActions' => 0,
                     'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' =>
                         "var discountWt = sWidget.form.valueOf('discountwt'), priceWt = sWidget.summary.pricewt - discountWt, discountPc = discountWt / sWidget.summary.pricewt, paymentsItems = sWidget.form.getWidget('paymentsitems');\n" .
                         "sWidget.form.setValueOf('pricewt', priceWt);\n" .

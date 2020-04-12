@@ -41,7 +41,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
         },
         setValueOf: function(widgetName, value){
             var widget = registry.byId(this.id + widgetName);
-            if (widget && widget.inWatchCallback !== 'value'){
+            if (widget){
                 widget.set('value', value, '');
             }
         },
@@ -184,7 +184,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
                 }
             }
         },
-        widgetWatchLocalAction: function(widget, watchedAtt, localActionFunctions, newValue){
+        widgetWatchLocalAction: function(widget, watchedAtt, localActionFunctions, newValue, oldValue){
             var allowedNestedWatchActions = this.allowedNestedWatchActions, nestedWidgetWatchActions = widget.nestedWatchActions = widget.nestedWatchActions || {},
             	self = this;
             this.nestedWatchActions = this.nestedWatchActions || 0;
@@ -198,7 +198,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
                     	this.nestedWatchActions += 1;
                         nestedWidgetWatchActions[watchedAtt] += 1;
                         if (actionFunction.triggers[this.watchContext]){
-                            var newAtt = actionFunction.action(widget, targetWidget, newValue);
+                            var newAtt = actionFunction.action(widget, targetWidget, newValue, oldValue);
                             if (newAtt != undefined && widget){
                                 if (targetWidget && newAtt !== targetWidget.get(att)){
                                     targetWidget.set(att, newAtt);
@@ -223,13 +223,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
                     var attDescription = description[att];
                     localActionFunctions[widgetName][att].triggers = attDescription.triggers ? attDescription.triggers : {server: false, user: true};
                     var action = (attDescription.action ? attDescription.action : attDescription);
-                    localActionFunctions [widgetName][att].action = (typeof action === 'string') ? eutils.eval(action, 'sWidget, tWidget, newValue') : action;
+                    localActionFunctions [widgetName][att].action = (typeof action === 'string') ? eutils.eval(action, 'sWidget, tWidget, newValue, oldValue') : action;
                 }
             }
         },
         
         buildSubWidgetLocalActionFunction: function(action){
-        	return eutils.eval(action, 'widget, oldValue, newValue')
+        	return eutils.eval(action, 'widget, oldValue, newValue, oldValue')
         },
         serverAction: function(urlArgs, options){
             var self = this, widgetsName, requestOptions= {};

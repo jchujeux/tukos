@@ -15,12 +15,17 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                 customDialog = targetPane.customDialog = new TukosTooltipDialog({paneDescription: {form: form, 
                     widgetsDescription: {
                         newCustomContent: {type: 'ObjectEditor', atts: {label: messages.newCustomContent, keyToHtml: 'capitalToBlank', style: {maxWidth: '600px', maxHeight: '600px', overflow: 'auto'}}},
+                        tukosCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'tukosCustomView', hidden: true}}, 
+                        tukosCustomViewLabel: {type: 'HtmlContent', atts: {value: Pmg.message('tukosCustomView'), hidden: true, disabled: true}},
+                        tukosCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, hidden: true,
+                        	onChange: lang.hitch(this, this.defaultCustomViewChange, 'tukos')}},
                         defaultCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'defaultCustomView'}}, 
                         defaultCustomViewLabel: {type: 'HtmlContent', atts: {value: messages.defaultCustomView, disabled: true}},
-                        defaultCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, onChange: lang.hitch(this, this.defaultCustomViewChange)}},
+                        defaultCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, onChange: lang.hitch(this, this.defaultCustomViewChange, 'user')}},
                         itemCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'itemCustomView'}}, 
                         itemCustomViewLabel: {type: 'HtmlContent', atts: {style: {width: '180px'}, value: messages.itemCustomView}},
-                        itemCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', mode: form.paneMode, dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, onChange: lang.hitch(this, this.itemCustomViewChange)}},
+                        itemCustomView: {type: 'ObjectSelect', 
+                        	atts: {object: 'customviews', mode: form.paneMode, dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, onChange: lang.hitch(this, this.itemCustomViewChange)}},
                         itemCustomButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'itemCustom'}}, 
                         itemCustomLabel: {type: 'HtmlContent', atts: {}},
                         save: {type: 'TukosButton', atts: {label: messages.save, onClick: lang.hitch(this, this.saveCallback)}},
@@ -28,7 +33,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                         newCustomView: {type: 'TukosButton', atts: {label: messages.newCustomView, onClick: lang.hitch(this, this.newCustomView)}},
                         more: {type: 'TukosButton', atts: {label: messages.more, onClick:lang.hitch(this, this.moreCallback)}},
                         less: {type: 'TukosButton', atts: {label: messages.less, hidden: true, onClick:lang.hitch(this, this.lessCallback)}},
-                        defaultCustomViewContent: {type: 'ObjectEditor', atts: {title: messages.defaultCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto', paddingRight: '25px'}, keyToHtml: 'capitalToBlank'}},
+                        tukosCustomViewContent: {type: 'ObjectEditor', 
+                        	atts: {title: Pmg.message('tukosCustomViewContent'), hasCheckboxes: true, hidden: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto', paddingRight: '25px'}, keyToHtml: 'capitalToBlank'}},
+                        defaultCustomViewContent: {type: 'ObjectEditor', 
+                        	atts: {title: messages.defaultCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto', paddingRight: '25px'}, keyToHtml: 'capitalToBlank'}},
                         itemCustomViewContent: {type: 'ObjectEditor', atts: {title: messages.itemCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto'}, keyToHtml: 'capitalToBlank'}},
                         itemCustomContent: {type: 'ObjectEditor', atts: {title: messages.itemCustomContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto'}, keyToHtml: 'capitalToBlank'}},
                         customContentDelete: {type: 'TukosButton', atts: {title: messages.forselectedcustom, label: messages.customContentDelete,  onClick: lang.hitch(this, self.deleteCallback)}}
@@ -42,7 +50,8 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                                     row1: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, labelWidth: 100, orientation: 'vert'},  widgets: ['newCustomContent']},
                                     row2: {
                                         tableAtts: {cols: 3, customClass: 'labelsAndValues', id: targetPane.id + 'viewsSettings', showLabels: false},
-                                        widgets: ['defaultCustomViewButton', 'defaultCustomViewLabel', 'defaultCustomView', 'itemCustomViewButton', 'itemCustomViewLabel',  'itemCustomView', 'itemCustomButton', 'itemCustomLabel']
+                                        widgets: ['tukosCustomViewButton', 'tukosCustomViewLabel', 'tukosCustomView', 'defaultCustomViewButton', 'defaultCustomViewLabel', 'defaultCustomView', 
+                                        		  'itemCustomViewButton', 'itemCustomViewLabel',  'itemCustomView', 'itemCustomButton', 'itemCustomLabel']
                                     },
                                     row3: {
                                         tableAtts: {cols: 5, customClass: 'labelsAndValues', showLabels: false, label: messages.selectAction},  
@@ -50,7 +59,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                                     }
                                 }
                             },
-                            col2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['defaultCustomViewContent', 'itemCustomViewContent', 'itemCustomContent']},
+                            col2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['tukosCustomViewContent', 'defaultCustomViewContent', 'itemCustomViewContent', 'itemCustomContent']},
                             col3: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['customContentDelete']}
                         }      
                     },
@@ -67,12 +76,16 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         setVisibility: function(args){
-            var  targetPane = this.currentPane(), form = targetPane.form || targetPane, pane = targetPane.customDialog.pane, viewMode = form.viewMode, isOverview = (viewMode === 'Overview'), isReadOnly = form.readOnly;
-                    paneGetWidget = lang.hitch(pane, pane.getWidget);
+            var  targetPane = this.currentPane(), form = targetPane.form || targetPane, pane = targetPane.customDialog.pane, viewMode = form.viewMode, isOverview = (viewMode === 'Overview'), isReadOnly = form.readOnly,
+                 paneGetWidget = lang.hitch(pane, pane.getWidget);
+            paneGetWidget('tukosCustomView').set('value',  form.tukosviewid ? form.tukosviewid : '', false);
             paneGetWidget('defaultCustomView').set('value',  form.customviewid ? form.customviewid : '', false);
             paneGetWidget('itemCustomView').set('value',  form.itemcustomviewid ? form.itemcustomviewid : '', false);
             if ('hideMore' in args){
-                ['defaultCustomViewContent', 'customContentDelete'].forEach(function(widgetName){
+                if (Pmg.get('userRights') === 'SUPERADMIN'){
+                	paneGetWidget('tukosCustomViewContent').set('hidden', args.hideMore);
+                }
+            	['tukosCustomViewContent', 'defaultCustomViewContent', 'customContentDelete'].forEach(function(widgetName){
                     paneGetWidget(widgetName).set('hidden', args.hideMore);
                 });
                 ['itemCustomViewContent', 'itemCustomContent'].forEach(function(widgetName){
@@ -83,11 +96,16 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                 paneGetWidget('more').set('hidden', !args.hideMore);
                 paneGetWidget('less').set('hidden', args.hideMore);
             }
+            if (Pmg.get('userRights') === 'SUPERADMIN'){
+            	['tukosCustomView', 'tukosCustomViewButton', 'tukosCustomViewLabel'].forEach(function(widgetName){
+                    paneGetWidget(widgetName).set('hidden', false);
+            	});
+            }
             if ('hideEmptyNewCustom' in args){
                 var hideNewCustom = utils.empty(form.customization) ? true : false,
                       isNewItem = (form.valueOf('id') === '');
                 paneGetWidget('newCustomContent').set('value', form.customization);
-                ['newCustomContent', 'defaultCustomViewButton', 'save'].forEach(function(widgetName){
+                ['newCustomContent', 'tukosCustomViewButton', 'defaultCustomViewButton', 'save'].forEach(function(widgetName){
                     paneGetWidget(widgetName).set('hidden', hideNewCustom);
                 });
                 ['itemCustomLabel'].forEach(function(widgetName){
@@ -102,6 +120,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                 var viewsSettingsWidget = registry.byId(targetPane.id + 'viewsSettings'), itemCustomLabelWidget = paneGetWidget('itemCustomLabel');
                 viewsSettingsWidget.set('label',  (hideNewCustom ? messages.customViewsSettings : messages.selectSaveOption));
                 viewsSettingsWidget.set('cols',  (hideNewCustom ? 2 : 3));
+                paneGetWidget('tukosCustomViewButton').set('disabled', (form.tukosviewid ? false : true));
                 paneGetWidget('defaultCustomViewButton').set('disabled', (form.customviewid ? false : true));
                 paneGetWidget('itemCustomViewButton').set('disabled', (form.itemcustomviewid && !isReadOnly ? false : true));
                 paneGetWidget('itemCustomButton').set('disabled', isReadOnly);
@@ -109,23 +128,27 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                 itemCustomLabelWidget.set('value',  isNewItem ?  '<i>' + messages.newItemCustom + '</i>' : messages.itemCustom);
                 itemCustomLabelWidget.set('colspan', isNewItem ? 3 : 2);
             }
+            if (Pmg.get('userRights') !== 'SUPERADMIN'){
+            	['tukosCustomView', 'tukosCustomViewContent', 'tukosCustomViewButton', 'tukosCustomViewLabel'].forEach(function(widgetName){
+                    paneGetWidget(widgetName).set('hidden', true);
+            	});
+            }
         }, 
-
-        defaultCustomViewChange: function(newValue){
-            var targetPane = this.currentPane(), form = targetPane.form || targetPane;
-            form.customviewid = newValue;
-        	Pmg.refresh(targetPane, 'TabDefaultCustomViewIdSave', {customviewid: newValue}, {values: true, customization: true}).then(lang.hitch(this, function(){
+        defaultCustomViewChange: function(tukosOrUser, newValue){
+            var targetPane = this.currentPane(), form = targetPane.form || targetPane, formViewAtt = tukosOrUser === 'tukos' ? 'tukosviewid' : 'customviewid', 
+            	viewButton = tukosOrUser === 'tukos' ? 'tukosCustomViewButton' : 'defaultCustomViewButton';
+            form[formViewAtt] = newValue;
+        	Pmg.refresh(targetPane, 'TabDefaultCustomViewIdSave', {customviewid: newValue, tukosOrUser: tukosOrUser}, {values: true, customization: true}).then(lang.hitch(this, function(){
                 var pane= targetPane.customDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
-                paneGetWidget('defaultCustomViewButton').set('disabled', ((form.customviewid && form.customviewid !== '') ? false : true));
+                paneGetWidget(viewButton).set('disabled', (newValue ? false : true));
                 if (paneGetWidget('more').get('hidden')){
                 	this.moreCallback();
                 }
                 if (targetPane.isAccordion()){
-                	Pmg.addCustom('customviewid', newValue);
+                	Pmg.addCustom(formViewAtt, newValue);
                 }
             }));
         },
-
         itemCustomViewChange: function(newValue){
             var targetPane = this.currentPane(), form = targetPane.form || targetForm, custom = utils.setObject([form.viewMode, form.paneMode], {itemcustomviewid: newValue});
             Pmg.refresh(targetPane, 'TabSave', {id: lang.hitch(form, form.valueOf)('id'), custom: custom}, {values: true, customization: true}).then(lang.hitch(this, function(){
@@ -139,48 +162,51 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                 }
            }));
         },
-
         newCustomView: function(){
-            var targetPane = this.currentPane(), form = targetPane.form, object = form.object, view = form.viewMode;
+            var targetPane = this.currentPane(), form = targetPane.form, vobject = form.object.toLowerCase(), view = form.viewMode.toLowerCase(), paneMode = form.paneMode.toLowerCase();;
             Pmg.tabs.request({object: 'customviews', view:  'Edit', action: 'Tab'}).then(
                 function(){
                     ready(function(){
                         var targetPane = Pmg.tabs.currentPane(), form = targetPane.form;
-                        form.getWidget('vobject').set('value', object);
-                        form.getWidget('view').set('value',  view);
+                        form.setValueOf('vobject', vobject);
+                        form.setValueOf('view', view);
+                        form.setValueOf('panemode', paneMode);
                     });
             });
             targetPane.customDialog.close();
         },
-
         saveCallback: function(){
             var close = true, targetPane = this.currentPane(), form = targetPane.form, customDialog = targetPane.customDialog, pane = customDialog.pane;
             switch (customDialog.get('value').saveOption){
-                case 'defaultCustomView':
-                    Pmg.refresh(targetPane, 'TabDefaultCustomViewSave', form.customization, {values: true});
-                    break;
-                case 'itemCustomView': 
-                    Pmg.tabs.refresh('TabItemCustomViewSave', {id: form.itemcustomviewid/*, vobject: form.object, view: form.viewMode*/, customization: form.customization}, {values: true});
-                    break;
-                case 'itemCustom': 
-                    Pmg.tabs.refresh('TabSave', {custom: utils.setObject([form.viewMode.toLowerCase(), form.paneMode.toLowerCase()], form.customization)}, {values: true});
-                    break;
-                default:
-                    close = false;
-                    Pmg.alert({title: messages.missingEntry, content: messages.mustSelectSaveOption}, pane.blurCallback);
+            case 'tukosCustomView':
+                Pmg.refresh(targetPane, 'TabDefaultCustomViewSave', {customization: form.customization, tukosOrUser: 'tukos'}, {values: true});
+                break;
+            case 'defaultCustomView':
+                Pmg.refresh(targetPane, 'TabDefaultCustomViewSave', {customization: form.customization, tukosOrUser: 'user'}, {values: true});
+                break;
+            case 'itemCustomView': 
+                Pmg.tabs.refresh('TabItemCustomViewSave', {id: form.itemcustomviewid/*, vobject: form.object, view: form.viewMode*/, customization: form.customization}, {values: true});
+                break;
+            case 'itemCustom': 
+                Pmg.tabs.refresh('TabSave', {custom: utils.setObject([form.viewMode.toLowerCase(), form.paneMode.toLowerCase()], form.customization)}, {values: true});
+                break;
+            default:
+                close = false;
+                Pmg.alert({title: messages.missingEntry, content: messages.mustSelectSaveOption}, pane.blurCallback);
             }
+            /* here empty the newCustomContent ?*/
             if (close){
                 this.setVisibility({hideMore: true});
                 customDialog.close();
             }
         },
-
         moreCallback: function(){
-            var targetPane = this.currentPane(), targetNode = this.currentPaneNode(), form = targetPane.form || targetPane, id = form.valueOf('id'),  customDialog = targetPane.customDialog, pane = customDialog.pane, getWidget = lang.hitch(pane, pane.getWidget);
+            var targetPane = this.currentPane(), targetNode = this.currentPaneNode(), form = targetPane.form || targetPane, id = form.valueOf('id'),  customDialog = targetPane.customDialog, pane = customDialog.pane, 
+            	getWidget = lang.hitch(pane, pane.getWidget);
             this.setVisibility({hideMore: false});
             Pmg.serverDialog({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'CustomViewMore', query: id ? {id: id} : {}}).then(
                 function(response){
-                    ['defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
+                    ['tukosCustomView', 'defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
                         var contentName = customSet + 'Content'
                         getWidget(contentName).set('value', response[contentName] || {});
                     });
@@ -190,7 +216,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
                 }
             );
         },
-        
         lessCallback: function(){
         	this.setVisibility({hideMore: true});
         	var customDialog = this.currentPane().customDialog;
@@ -198,13 +223,11 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         	customDialog.close();
         	customDialog.open({around: this.currentPaneNode()});
         },
-
- 
         deleteCallback: function(){
             var targetPane = this.currentPane(), form =targetPane.form || targetPane, pane =targetPane.customDialog.pane,
                   getWidget = lang.hitch(pane, pane.getWidget),
                  toDelete  = {};
-            ['defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
+            ['tukosCustomView', 'defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
                 var contentName = customSet + 'Content'
                 var selectedLeaves = getWidget(contentName).get('selectedLeaves');
                 if (selectedLeaves && !utils.empty(selectedLeaves)){
@@ -215,11 +238,11 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
             if (utils.empty(toDelete)){
                 Pmg.alert({title: messages.missingEntry, content: messages.noCustomToDelete}, this.blurCallback);
             }else{
+                if (toDelete.tukosCustomView){toDelete.tukosCustomView.viewId = form.tukosviewid;}
                 if (toDelete.defaultCustomView){toDelete.defaultCustomView.viewId = form.customviewid;}
                 if (toDelete.itemCustomView){toDelete.itemCustomView.viewId = form.itemcustomviewid;}                   
-                Pmg.tabs.refresh('CustomDelete', toDelete, {values: true, customization: true}).then(
+                Pmg.tabs.refresh('TabCustomDelete', toDelete, {values: true, customization: true}).then(
                     function(response){
-                        //console.log('in delectecallback response');
                         var customContent = response.customContent;
                         for (var customSet in customContent){
                             getWidget(customSet + 'Content').set('value', customContent[customSet]);

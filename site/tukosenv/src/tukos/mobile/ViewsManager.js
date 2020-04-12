@@ -52,7 +52,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_PanesManager", "tukos/
         	return this.currentPane().heading.domNode;
         },
         navigationView: function(){
-        	this.selectPane(this._navigationView || (this._navigationView = this.create({title: Pmg.message('NavigationView'), navigationContent: Pmg.getItem('menuBarDescription')})), -1, 'slidev');
+        	this.selectPane(this._navigationView || (this._navigationView = this.create({title: Pmg.message('NavigationView'), navigationContent: Pmg.get('menuBarDescription')})), -1, 'slidev');
         }
     }); 
 });

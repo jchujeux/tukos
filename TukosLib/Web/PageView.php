@@ -5,19 +5,19 @@ use Aura\View\Template;
 use Aura\View\EscaperFactory;
 use Aura\View\TemplateFinder;
 use Aura\View\HelperLocator;
-
-//use TukosLib\Web\Dialogue;
-
+use TukosLib\Web\PageCustomization;
 use TukosLib\Utils\Translator;
 use TukosLib\utils\Feedback;
 use TukosLib\Utils\Widgets;
 use TukosLib\Objects\StoreUtilities as SUtl;
-
+use TukosLib\Objects\Directory;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class PageView extends Translator{
 
+    use PageCustomization;
+    
     protected $tabContent, $tabTitle; 
     
     public function __construct($controller){
@@ -27,7 +27,6 @@ class PageView extends Translator{
     	$this->leftPaneButtons = '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showHideLeftPane">' . $this->tr('showhideleftpane') . '</button>'.
     							 '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showMaxLeftPane">' . $this->tr('maximinimizeleftpane') . '</button>';
     	$this->pageManagerArgs = [
-
             'contextTreeAtts' => array_merge($this->user->contextTreeAtts($this->tr), ['style' => ['width' => '15em', 'backgroundColor' => '#F8F8F8']]),
             'sortParam' => 'sort',
             'dialogueUrl' => Tfk::$registry->dialogueUrl,
@@ -39,7 +38,9 @@ class PageView extends Translator{
     	$this->isMobile = Tfk::$registry->isMobile;
 
     }
-
+    function addToPageManagerArgs($attribute, $value){
+        $this->pageManagerArgs[$attribute] = $value;
+    }
     function addAccordionPane($description){
         if (empty($description)){
             return false;
@@ -85,7 +86,6 @@ class PageView extends Translator{
                 'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectanitem'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'Edit'), 'object' => $object, 'mode' => 'Tab'], true),
             ],
             'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'Overview'), 'label' => $this->tr('overview')]],
-            //'massedit' => ['type' => 'MenuItem',      'atts' => ['onTriggerUrlArgs' => $this->onTriggerUrlArgs($object, 'massedit'), 'label' => $this->tr('massedit')]],
         ];
     }
 
@@ -103,10 +103,12 @@ class PageView extends Translator{
             $layout['atts']['moduleName'] = $module;
         }
         $theDescription[$module]['atts'] = $layout['atts'];
-        $context = $this->user->customContextId($module);
-        if ($context){
-            SUtl::addIdCol($context);
-        	$theDescription[$module]['atts']['context'] = $context;
+        $contexts = ['tukosContext' => $this->user->customContextId($module, 'tukos'), 'userContext' => $this->user->customContextId($module, 'user'), 'activeContext' => $this->user->getContextId($module)];
+        foreach($contexts as $name => $contextId){
+            if ($contextId){
+                SUtl::addIdCol($contextId);
+                $theDescription[$module]['atts'][$name] = $contextId;
+            }
         }
         $theDescription[$module]['type'] = $layout['type'];
         if (isset($layout['popup'])){
@@ -137,7 +139,6 @@ class PageView extends Translator{
             }
         }
     }
-
     public function menuBarDescription($modulesMenuLayout){
         $theDescription = [];
         foreach ($modulesMenuLayout as $key => $layout){
@@ -148,118 +149,13 @@ class PageView extends Translator{
         }
         return ['items' => $theDescription];
     }
-
     function welcomeConnect($logoutUrl){
         return $this->tr('Welcome') . ', <span id="pageusername" style="text-decoration:underline; color:blue; cursor:pointer">' .
                $this->user->username() . '</span> <a href="' . $logoutUrl . '" />' . $this->tr('logout') . '</a>';
     }
-    
-    private function pageCustomDialogDescription($customValues){
-       return [
-           'title'   => $this->tr('pagecustomization'),
-           'paneDescription' => [
-       	   		'id' => 'tukos_page_custom_dialog',
-           		'widgetsDescription' => [
-                   'hideLeftPane' => Widgets::storeSelect(Widgets::complete(
-                        ['storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $this->tr)], 'title' => $this->tr('hideleftpane'),
-                         'onWatchLocalAction' => ['value' => ['hideLeftPane' => ['localActionStatus' => [
-                                        'triggers' => ['user' => true],
-                                        'action' => "domstyle.set('leftPanel', 'display', (newValue === 'NO' ? 'block' : 'none'));" .
-                                                    "setTimeout(function(){registry.byId('appLayout').resize();}, 100);" .
-                                                    "return true;",
-                    ]]]]])),
-                	'leftPaneWidth' => Widgets::textBox(Widgets::complete(['label' => $this->tr('Leftpanewidth'), 'onWatchLocalAction' => 
-                			['value' => ['leftPaneWidth' => ['localActionStatus' => [
-                					'triggers' => ['user' => true],
-                					'action' => "domstyle.set('leftPanel', 'width', newValue);" .
-                								"Pmg.addCustom('leftPaneWidth', newValue);" .
-                                                "setTimeout(function(){registry.byId('appLayout').resize();}, 100);" .
-                                                "return true;",
-                			]]]]
-                	])),
-           			'panesConfig' => Widgets::simpleDgrid(Widgets::complete(
-           				['label' => $this->tr('panes'), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => true, 'style' => ['width' => '500px'],
-                         'colsDescription' => [
-           					'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-           					//'name'  => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('panename')]]), false),
-           					'name'  => Widgets::description(Widgets::storeSelect([
-           						'edit' => ['storeArgs' => ['data' => $this->accordionStoreData], 'label' => $this->tr('panename')],
-           					]), false),
-                         	'selected' => Widgets::description(Widgets::checkBox([
-           						//'storeedit' => ['editOn' => 'click'], 
-           						'edit' => ['label' => $this->tr('selected'), 'onChangeLocalAction' => ['selected' => ['localActionStatus' => [
-           											"if (newValue){\n" .
-           												"var grid = sWidget.grid, collection = grid.collection, idp = collection.idProperty, dirty = grid.dirty;\n" .
-           												"console.log('newValue is true');\n" .
-           												"collection.fetchSync().forEach(function(item){\n" .
-           											    	"var idv = item[idp], dirtyItem = dirty[idv];\n" .
-           											    	"if ((dirtyItem && dirtyItem.hasOwnProperty('selected') && dirtyItem.selected) || item.selected){\n" .
-           											        	"grid.updateDirty(idv, 'selected', false);\n" .
-           											    	"}\n" .
-           												"})\n;" .
-           											"}\n" .
-           											"return true;\n"
-           						]]]],
-           					]), false),
-                         	'present' => Widgets::description(Widgets::storeSelect([
-                         		'edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $this->tr)], 'label' => $this->tr('presentpane')]
-                         	]), false),
-		                	'id' => Widgets::description(Widgets::objectSelect([
-		                		'edit' => ['label' => $this->tr('id'), 'object' => 'calendars'], 
-		                		'storeedit' => ['canEdit' => '(function(item, cellValue){console.log("I am here");if(item.hasId){return true;}else{return false;}})']
-		                	]), false),
-                         ]])),
-           		    'fieldsMaxSize' => Widgets::textBox(Widgets::complete(['label' => $this->tr('Fieldsmaxsize'), 'onWatchLocalAction' =>
-           		        ['value' => ['fieldsMaxSize' => ['localActionStatus' => [
-           		            'triggers' => ['user' => true],
-           		            'action' => "Pmg.addCustom('fieldsMaxSize', newValue); return true;"
-           		        ]]]]
-           		    ])),
-           		    'historyMaxItems' => Widgets::textBox(Widgets::complete(['label' => $this->tr('HistoryMaxItems'), 'onWatchLocalAction' =>
-           		        ['value' => ['historyMaxItems' => ['localActionStatus' => [
-           		            'triggers' => ['user' => true],
-           		            'action' => "Pmg.addCustom('historyMaxItems', newValue); return true;"
-           		        ]]]]
-           		    ])),
-           		    'ignoreCustomOnClose' => Widgets::storeSelect(Widgets::complete(
-           		        ['storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $this->tr)], 'title' => $this->tr('ignoreCustomOnClose'),
-           		            'onWatchLocalAction' => ['value' => ['ignoreCustomOnClose' => ['localActionStatus' => [
-           		                'triggers' => ['user' => true],
-           		                'action' => "Pmg.addCustom('ignoreCustomOnClose', newValue); return true;"
-           		            ]]]]])),
-           		    'cancel' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('close'), 'onClickAction' => 'this.pane.close();']],
-                    'action' => ['type' => 'TukosButton', 'atts' => ['label' => $this->tr('save'), 'onClickAction' => 
-                        	"Pmg.setFeedback('" . Tfk::tr('saving') . " ... ');this.pane.serverAction( {object: 'users', view: 'NoView', action: 'PageCustomSave'}, {'excludeWidgets': ['cancel', 'action']});this.pane.close();" 
-                     ]],
-                ],
-                'layout' => [
-                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
-                    'contents' => [
-                       'row1' => [
-                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
-                            'widgets' => ['hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose'],
-                        ],
-                       'row2' => [
-                            'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false],
-                            'widgets' => ['cancel', 'action'],
-                        ],
-                    ],
-                ], 
-           		'onOpenAction' =>
-           			"var setValueOf = lang.hitch(this, this.setValueOf);\n" .
-           			"this.watchOnChange = false;\n" .
-           			"utils.forEach(Pmg.getCustom('newPageCustomization'), function(value, widgetName){\n" .
-           				"setValueOf(widgetName, value)\n" .
-           			"});" .
-           			"this.watchOnChange = true;\n"
-           ],                     
-        ];
-    }
-    
     function addToPageManager($args){
         $this->pageManagerArgs = Utl::array_merge_recursive_replace($this->pageManagerArgs, $args);
     }
-
     function render($modulesMenuLayout){
         $template = new Template(new EscaperFactory, new TemplateFinder, new HelperLocator);
         $packagesLocation = ['dojo', 'dijit', 'dojox', 'dstore', 'dgrid', 'tukos', 'dojoFixes', 'redips'];
@@ -270,10 +166,11 @@ class PageView extends Translator{
         $template->tukosLocation = Tfk::moduleLocation('tukos');
         $template->dgridLocation = Tfk::moduleLocation('dgrid');
         $template->dojoBaseLocation = Tfk::dojoBaseLocation();
-        $template->language = $translatorsStore = Tfk::$registry->get('translatorsStore')->getLanguage();
+        $template->language = Tfk::$registry->get('translatorsStore')->getLanguage();
         $template->loadingMessage = $this->tr('Loading') . '...';
         $this->pageManagerArgs['menuBarDescription'] = $this->menuBarDescription($modulesMenuLayout);
-        
+        $this->pageManagerArgs['objectsDomainAliases'] = Directory::objectsDomainAliases();
+        $this->pageManagerArgs['userRights'] = $this->user->rights();
         
         if ($this->pageManagerArgs['isMobile'] = $this->isMobile){
             $this->pageManagerArgs['headerContent'] = 'This is mobile tukos!';
@@ -283,28 +180,23 @@ class PageView extends Translator{
                 '<table width="100%"><tr><td> ${buttons}<b>Tukos 2.0</b><span id="tukosHeaderLoading"></span></td><td align="center"><b><i>${header} ${ownerorg}</i></b></td><td align="right">${welcome}</td></table>', [
                     'buttons' => empty($this->pageManagerArgs['accordionDescription']) ? '' : $this->leftPaneButtons, 'header' => $this->tr(Tfk::$registry->appName . 'HeaderBanner', 'none'),
                     'ownerorg' => $this->tr($this->user->tukosOrganization(), 'none'), 'welcome' => $this->welcomeConnect(Tfk::$registry->pageUrl . 'auth/logout')]
-                );
-            
+            );
             $this->pageManagerArgs['userEditUrl'] = ['object' => 'users', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['id' => $this->user->id()]];
-            
-            $this->pageManagerArgs['pageCustomization'] = $this->user->PageCustomization();
-            if (isset($this->pageManagerArgs['pageCustomization']['panesConfig'])){
-                SUtl::addItemsIdCols($this->pageManagerArgs['pageCustomization']['panesConfig'], ['id']);
+            foreach (['combined' => 'pageCustomization', 'user' => 'pageUserCustomization', 'tukos' => 'pageTukosCustomization'] as $mode => $pageModeCustomization){
+                $this->pageManagerArgs[$pageModeCustomization] = $this->user->PageCustomization($mode);
+                if (isset($this->pageManagerArgs[$pageModeCustomization]['panesConfig'])){
+                    SUtl::addItemsIdCols($this->pageManagerArgs[$pageModeCustomization]['panesConfig'], ['id']);
+                }
             }
             $this->pageManagerArgs['pageCustomDialogDescription'] = $this->pageCustomDialogDescription($this->pageManagerArgs['pageCustomization']);
             $pageTemplate = 'PageTemplate.php';
         }
-
-        //Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));
         $this->pageManagerArgs = array_merge($this->pageManagerArgs, ['extras' => Tfk::getExtras()],
             array_filter(['extendedIds' => SUtl::translatedExtendedIdCols(), 'messages' => Tfk::$registry->get('translatorsStore')->getSetsMessages(['page', 'common']), 'feedback' => Feedback::get()])
         );
-
         $template->pageManagerArgs = json_encode($this->pageManagerArgs);
-        
         $finder = $template->getTemplateFinder();
         $finder->setPaths([dirname(__FILE__)]);
-        
         $this->dialogue->response->setContent (Tfk::$registry->get('translatorsStore')->substituteTranslations($template->fetch($pageTemplate)));
     }
 }

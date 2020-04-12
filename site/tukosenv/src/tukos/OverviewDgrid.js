@@ -7,7 +7,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
     function(declare, lang, when, on, dct, string, query, DnD, utils, Pmg, TukosDgrid, Request, WidgetsLoader, TextBox, Button, TooltipDialog, popup, messages){
     return declare([TukosDgrid, DnD], {
         constructor: function(args){
-            args.storeArgs.sortParam = args.storeArgs.sortParam || Pmg.getItem('sortParam');
+            args.storeArgs.sortParam = args.storeArgs.sortParam || Pmg.get('sortParam');
             if (!args.storeArgs.target){
                args.storeArgs.object = args.object;
                args.storeArgs.mode = args.form.mode || 'Tab';

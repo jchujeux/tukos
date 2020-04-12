@@ -38,7 +38,7 @@ class View extends EditView{
 	            			],
 	            			'row1' => [
 	            				'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-	            				'widgets' => ['level1filter', 'level2filter', 'level3filter']
+	            				'widgets' => ['level1', 'level2', 'level3']
 	            			],
 	            			'row2' => [
 	            				'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0'],

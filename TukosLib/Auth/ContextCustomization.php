@@ -1,7 +1,4 @@
 <?php
-/**
- *
- */
 namespace TukosLib\Auth;
 
 use TukosLib\Utils\Utilities as Utl;
@@ -10,21 +7,20 @@ use TukosLib\TukosFramework as Tfk;
 
 trait ContextCustomization {
 
+    
     function customContexts(){
         if (!property_exists($this, 'customContextIds')){
-            if (!empty($this->userInfo['customcontexts'])){
-                $this->customContextIds = json_decode($this->userInfo['customcontexts'], true);
-            }else{
-                $this->customContextIds = [];
-            }
+            $this->customUserContextIds = json_decode(Utl::getItem('customcontexts', $this->userInfo, "[]", "[]"), true);
+            $this->customTukosContextIds = json_decode(Utl::getItem('customcontexts', $this->tukosInfo, "[]", "[]"), true);
+            $this->customContextIds = array_merge($this->customTukosContextIds, $this->customUserContextIds);
         }
     }
-    function customContextId($module){
+    function customContextId($module, $tukosOrUser){//returns the customized context for this module or null
         $this->customContexts();
-        return (isset($this->customContextIds[$module]) ? $this->customContextIds[$module] : null);
+        $tukosOrUserContexts = ['tukos' => 'customTukosContextIds', 'user' => 'customUserContextIds'][$tukosOrUser];
+        return Utl::getItem($module, $this->$tukosOrUserContexts, null);
+        //return (isset($this->customContextIds[$module]) ? $this->customContextIds[$module] : null);
     }
-
-
     private function moduleCustomContextId($module, $modulesLayout){
         static $contextId = false;
         if (is_array($modulesLayout)){
@@ -43,31 +39,27 @@ trait ContextCustomization {
             }
         }
         return $contextId;
-    }
-        
+    } 
     private function setContextId($module){
         $this->customContexts();
         $contextId = $this->moduleCustomContextId($module, $this->modulesMenuLayout);
         if ($contextId === true){//module was found and has no customization in its ancestors
-            return $this->contextModel->getContextId('name', $this->objectModulesDefaultContextName[$module]);
+            return $this->contextModel->getContextId('name', Utl::getItem($module, $this->objectModulesDefaultContextName, $module, $module));
         }else if ($contextId === false){//module was not found: default to root
             return $this->contextModel->rootId;
         }else{
             return $this->contextModel->getContextId('id', $contextId);
         }
     }
-
-    public function forceContextId($module, $contextId){
+    public function forceContextId($module, $contextId){//hack for translations
     	$this->moduleContextId[$module] = $contextId;
     }
-    
-    public function getContextId($module){// if customization is present returns the customized value, else returns the default one
+    public function getContextId($module){// returns the contextid for this module looking into the ancestor customization path, with default as fallback.
         if (!isset($this->moduleContextId[$module])){
             $this->moduleContextId[$module] = $this->setContextId($module);
         }
         return $this->moduleContextId[$module];
     }
-
     public function customContextAncestorsPaths($module){
         $customContextId = $this->getContextId($module);
         $contextAncestors = [];
@@ -83,21 +75,15 @@ trait ContextCustomization {
             return [$returnedPath];
         }
     }
-    
-    function updateModuleContext($moduleContext){
-        $contextid = (empty($moduleContext['contextid']) ? '' : $moduleContext['contextid']);
+    function updateModuleContext($module, $contexts){
         $this->customContexts();
-        $this->objectsStore->objectModel('users')->updateOne(
-            ['customcontexts' => [$moduleContext['module'] => $contextid]], 
-            ['where' => ['id' => $this->id()]], 
-            true, true
-        );
-        if (!empty($contextid)){
-            $this->customContextIds[$moduleContext['module']] = $contextid;
-        }else if(isset($this->customContextIds[$moduleContext['module']])){
-            unset($this->customContextNames[$moduleContext['module']]);
+        $tukosOrUserContextsIds = ['tukosContext' => 'customTukosContextIds', 'userContext' => 'customUserContextIds'];
+        foreach($contexts as $name => $contextId){
+            $contextIds = $tukosOrUserContextsIds[$name];
+            $this->$contextIds[$module] = $contextId;
+            $this->objectsStore->objectModel('users')->updateOne(['customcontexts' => [$module => $contextId]], ['where' => $name === 'tukos' ? ['name' => 'tukosContext'] : ['id' => $this->id()]], true, true);
         }
-        return $moduleContext;
+        return ['data' => ['activeContext' => $this->getContextId($module)]];
     }
 }
 ?>

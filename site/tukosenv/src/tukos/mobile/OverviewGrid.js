@@ -2,7 +2,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/on", "tuko
     function(declare, lang, ready, on, BasicGrid, Request, mutils, wcutils, _GridUserFilterMixin, utils, Pmg){
     return declare([BasicGrid, _GridUserFilterMixin], {
         constructor: function(args){
-            lang.mixin(args.storeArgs, {storeParam: Pmg.getItem('sortParam'), target: Pmg.requestUrl(args.storeArgs)});
+            lang.mixin(args.storeArgs, {storeParam: Pmg.get('sortParam'), target: Pmg.requestUrl(args.storeArgs)});
             args.store = lang.mixin(new Request(args.storeArgs), {postFetchAction: lang.hitch(this, this.postFetchAction)});
             args.collection = args.store.filter({contextpathid: args.form.tabContextId});
             for (var i in args.columns){
@@ -77,7 +77,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/on", "tuko
 	        }else{
 	            var id = grid.cellValueOf(field);
 	            if (id){
-	                object = Pmg.objectName(id);
+	                object = Pmg.objectName(id, grid.form.objectDomain);
 	                query.id = id;
 	            }
 	        }

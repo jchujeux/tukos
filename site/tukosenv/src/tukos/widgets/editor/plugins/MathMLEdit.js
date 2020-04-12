@@ -1,7 +1,7 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-class", "dojo/ready", "dojo/when", "dojo/string", "dojo/keys", "dijit/_editor/_Plugin", "dijit/form/DropDownButton", "dijit/layout/ContentPane",
 	"dijit/registry", "dijit/popup", "dojox/editor/plugins/EntityPalette", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/hiutils", "tukos/menuUtils", "tukos/PageManager", "tukos/widgets/editor/plugins/_HtmlSourceInserter"], 
 function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, ContentPane, registry, popup, EntityPalette, TooltipDialog, utils, hiutils, mutils, Pmg, _HtmlSourceInserter) {
-	var textTags = ['mi','mo', 'mn', 'mtext'],
+	var textTags = ['mi','mo', 'mn', 'mtext'], openingParenthesis = {')': '(', ']': '[', '}': '{', '|': '|'},
 		isTextTag = function(tag){
 			return textTags.indexOf(tag) > -1;
 		},
@@ -215,26 +215,32 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
         				_insert(mfenced(key, '').s);
         				handled = true;
         			},
-        			closeParentFence = function(){
-        				var parentFence = eSelection.getAncestorElement(anchorNode, 'mfenced');
-    					if (parentFence){
-    						parentFence.setAttribute('close', key);
-    						eSelection.selectElement(parentFence);
-    						eSelection.collapse();
-    						return true;
-    					}
+        			closeParentFence = function(key){
+        				var parentNode = parent;
+        				while(parentNode){
+        					if(parentNode.tagName === 'mrow' && (parentNode.firstChild ||{}).tagName === 'mo' && parentNode.firstChild.textContent === openingParenthesis[key] && 
+        						(parentNode.childNodes.length === 1 || parentNode.lastChild.tagName !== 'mo' || parentNode.lastChild.textContent !== key)){
+        						dct.create('mo', {innerHTML: key}, parentNode, 'last');
+        						eSelection.selectElement(parentNode);
+        						eSelection.collapse();
+        						handled = true;
+        						return true;
+        					}
+        					parentNode = parentNode.parentNode;
+        				}
+    					return false;
         			},
         			closeFence = function(key){
-    					if (!closeParentFence()){
+    					if (!closeParentFence(key)){
             				_insert(mfenced('', key).s);
+            				handled = true;
     					}
-        				handled = true;
         			},
 					openOrCloseFence = function(key){
-    					if (!closeParentFence()){
+    					if (!closeParentFence(key)){
             				_insert(mfenced(key, '').s);
+            				handled = true;
     					}
-        				handled = true;
 					};
         		if (eSelection.hasAncestorElement('math') && enclosingTagName !== 'mtext'){
                 	if (key.length === 1){

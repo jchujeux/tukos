@@ -144,7 +144,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             }else{
                 var id = grid.cellValueOf(field);
                 if (id){
-                    object = Pmg.objectName(id);
+                    object = Pmg.objectName(id, grid.form.objectDomain);
                     query.id = id;
                 }
             }
