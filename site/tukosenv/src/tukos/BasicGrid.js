@@ -223,7 +223,7 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         editInNewTab: function(){
             var grid = this, field  = grid.clickedCell.column.field, id = grid.clickedRowValues()[grid.clickedCell.column.field];
             if (id){
-                Pmg.tabs.gotoTab({object: Pmg.objectName(id), view: 'Edit', mode: 'Tab', action: 'Tab', query: {id: id}});
+                Pmg.tabs.gotoTab({object: Pmg.objectName(id, grid.form.objectDomain), view: 'Edit', mode: 'Tab', action: 'Tab', query: {id: id}});
             }
             if (!utils.empty(query)){
             }

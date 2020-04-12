@@ -28,7 +28,7 @@ class Model extends AbstractModel {
         $tk = SUtl::$tukosTableName;
         $results = SUtl::$tukosModel->store->query(<<<EOT
             SELECT `bustrackinvoices`.`id`, `t2`.`name` as `invoicename`, `$tk`.`name`, `bustrackpaymentsitems`.`amount`, `bustrackpayments`.`date`, `bustrackpayments`.`paymenttype`, `bustrackpayments`.`reference` as `paymentreference`,
-                `bustrackpayments`.`slip`, `t3`.`name` as `category`, `bustrackinvoicesitems`.`vatfree`, `bustrackinvoicesitems`.`vatrate`, `bustrackinvoices`.`reference`, `bustrackinvoices`.`invoicedate`
+                `bustrackpayments`.`slip`, `t3`.`name` as `category`, `bustrackinvoicesitems`.`vatfree`, `bustrackinvoicesitems`.`vatrate`, `bustrackinvoices`.`lefttopay`, `bustrackinvoices`.`reference`, `bustrackinvoices`.`invoicedate`
             FROM `bustrackpaymentsitems`
                 INNER JOIN `$tk` on `$tk`.`id` = `bustrackpaymentsitems`.`id`
                 INNER JOIN (`$tk` as `t0` INNER JOIN `bustrackpayments`) on (`t0`.`id` = `bustrackpayments`.`id` AND `$tk`.`parentid` = `bustrackpayments`.`id`)

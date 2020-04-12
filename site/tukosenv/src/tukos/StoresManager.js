@@ -26,7 +26,7 @@ define (["dojo/_base/declare", "dojo/string", "dojo/store/Memory", "dojo/store/C
                     this.i += 1;               	
                 }
 */
-                args.sortParam = args.sortParam || Pmg.getItem('sortParam');
+                args.sortParam = args.sortParam || Pmg.get('sortParam');
                 this.stores[theStore] = {myStore: new Observable(new (action === 'ObjectSelect' ? ObjectSelectStore : ActionRequestStore)(args))};
                 return this.stores[theStore].myStore;
             }else{

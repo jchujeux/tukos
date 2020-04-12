@@ -59,6 +59,7 @@ class Directory{
     	'sptsessions'   => 'Sports\Sessions',
         'sptsessionsstages' => 'Sports\Sessions\Stages',
     	'sptexercises'		=> 'Sports\Exercises',
+        'sptexerciseslevels' => 'Sports\Exercises\Levels',
         'physiopatients'    => 'Physio\Patients',
         'physioprescriptions' => 'Physio\Prescriptions',
         'physioassesments' => 'Physio\Assesments',
@@ -76,12 +77,15 @@ class Directory{
         'bustrackdashboards' => 'BusTrack\Dashboards',
         'help'              => 'Help',
         ];
+    private static $objectsDomainALiases = ['people' => ['bustrack' => 'bustrackpeople', 'sports' => 'sptathletes', 'physio' => 'physiopatients'], 'organizations' => ['bustrack' => 'bustrackorganizations', 'wine' => 'winegrowers']];
     private static $configStatusRange = ['tukos' => 3, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'users' => 10001];
     
+    public static function objectsDomainAliases(){
+        return self::$objectsDomainALiases;
+    }
     public static function configStatusRange(){
     	return self::$configStatusRange;
     }
-    
     public static function getObjDir($object){
         return self::$directory[strtolower($object)];
     }

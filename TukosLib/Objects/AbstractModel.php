@@ -150,7 +150,6 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         return $result;
     }
-
     public function getOneExtended($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
         $value = $this->getOne($atts, $jsonColsPaths, $jsonNotFoundValue);
         if (!empty($value)){
@@ -158,12 +157,10 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         return $value;
     }
-
     public function foundRows(){
         return $this->foundRows;
     }
-
-    public function getAll ($atts){
+    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null){
     	$atts = ['table' => $this->tableName] + $atts;
     	if ($allDescendants = Utl::extractItem('allDescendants', $atts, false)){
     		if (isset($atts['range'])){
@@ -173,11 +170,8 @@ abstract class AbstractModel extends ObjectTranslator {
     			$atts['where'][] = ['opr' => 'NOT EXISTS', 'values' => 'SELECT 1 FROM tukos as t1 WHERE tukos.parentid = t1.id AND object="' . $this->tableName . '"'];
     		}
         }
-
         $values = $this->getItems($atts);
-
         $this->foundRows = $this->store->foundRows();
-        
         if (!empty($values)){
             if ($allDescendants){
                 if ($allDescendants === 'hasChildrenOnly' && empty($atts['where']['parentid'])){// for items with children matching $atts, set the 'hasChildren' property to true for processing at the StoreDgrid level
@@ -186,6 +180,13 @@ abstract class AbstractModel extends ObjectTranslator {
                 }else{// add all descendants items to $salue
                     $this->addDescendants($values, $atts);
                 }
+            }
+        }
+        if ($jsonColsPaths){
+            $jsonCols = array_keys($jsonColsPaths);
+            forEach ($values as &$value){
+                $this->jsonDecode($value, $jsonCols);
+                $this->drillDown($value, $jsonColsPaths, $jsonNotFoundValues);
             }
         }
         return $values;
@@ -374,9 +375,8 @@ abstract class AbstractModel extends ObjectTranslator {
             }
             
             $this->jsonEncode($differences, $jsonFilter);
-            //$this->jsonEncode($differences, true);
             
-            $update = $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $oldValues['id']]]);
+            $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $oldValues['id']]]);
 
             $updatedRow = ['id' => $oldValues['id'], 'updated' => $updated, 'updator' => $updator];
 

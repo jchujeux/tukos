@@ -67,11 +67,14 @@ class Configure{
             'itm' => [['itsm' => [['#itsvcdescs' => [['#itslatargets' => []]], '#itincidents' => []]], '#itsystems' => [], '#networks' => [], 
                        '#hosts' => [['#macaddresses' => [], '#hostsdetails' => [], '#servicesdetails' => []]], '#connexions' => [],
             ]],
-            'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [['#sptsessionsstages' => []]], '#sptexercises' => []]],
+            'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [['#sptsessionsstages' => []]], '#sptexercises' => [['#sptexerciseslevels' => []]]]],
             'physio' => [['#physiopatients' => [], '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
-            '#help' => [['guidedtour' => ['type' => 'MenuItem', 'atts' => [
-                'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtour')]]])]]]]]],
-        ];
+            '#help' => [[
+                'guidedtour' => ['type' => 'MenuItem', 'atts' => [
+                    'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtour')]]])]]]],
+                'tutotukos' => ['type' => 'MenuItem', 'atts' => [
+                    'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Tutotukos')]]])]]]]
+        ]]];
         $this->transverseModules = ['admin', 'collab', 'help'];
         $this->objectModulesDefaultContextName = [];
         $this->setobjectModulesDefaultContextName($this->modulesMenuLayout);

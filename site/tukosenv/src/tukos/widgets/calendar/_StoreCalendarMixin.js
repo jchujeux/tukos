@@ -10,6 +10,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
         postCreate: function(){
             this.inherited(arguments);
             this.isNotUserEdit = 0;
+            //this.isUserEdit = false;
             var observedSet = this.store.query();
             if (this.onCalendarChange){
                 observedSet.observe(lang.hitch(this, this[this.onCalendarChange]), true);
@@ -233,7 +234,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
             if (!(this.inSetNotify || this.inNotifyWidgets)){
 	        	this.inSetNotify +=1;
             //if (!this.inNotifyWidget){
-	            this.isNotUserEdit += 1;
+	            //this.isNotUserEdit += 1;
 	            var self = this, calItemId = ((args.item || {}).connectedIds || {})[this.widgetName], isNotConnected = !calItemId && calItemId !== 0, action = args.action;
 	            action = (isNotConnected && action === 'update') ? 'add' : ((!isNotConnected && action === 'add') ? 'update' : action);
 	            if (action === 'create' || action === 'add'){
@@ -266,14 +267,14 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
 		                }
 	                }
 	             }
-	             this.isNotUserEdit += -1;
+	             //this.isNotUserEdit += -1;
 	             this.inSetNotify += -1;
             }
        },
 
         _setValueAttr: function(value){// only serves to empty the calendar store
             if (value === '' && this.nextItemId > 0){
-                this.isNotUserEdit += 1;
+                //this.isNotUserEdit += 1;
                 var self = this;
                 this.noNotifyWidgets = true;
                 this.store.query().forEach(function(item){
@@ -281,7 +282,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
                 });
                 this.noNotifyWidgets = false;
                 this.nextItemId = 0;
-                this.isNotUserEdit += -1;
+                //this.isNotUserEdit += -1;
             }
         }
     

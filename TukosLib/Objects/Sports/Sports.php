@@ -12,14 +12,14 @@ class Sports {
     public static $sportOptions = ['bicycle', 'running', 'swimming', 'climbing', 'elliptic', 'bodybuilding', 'rest', 'other'];
     public static $stagetypeOptions = ['warmup', 'mainactivity', 'warmdown', 'various'];
     public static $level1Options = ['muscular', 'aerobic', 'proprioception', 'stretching', 'specific'],
-    $level2Options = [
+        $level2Options = [
     		'calf' => ['level1' => 'muscular'], 'thigh' => ['level1' => 'muscular'], 'pelvis' => ['level1' => 'muscular'], 'torso' => ['level1' => 'muscular'], 'triceps' => ['level1' => 'muscular'], 'biceps' => ['level1' => 'muscular'],
     		'pectoral' => ['level1' => 'muscular'], 'back' => ['level1' => 'muscular'], 'globalMS' => ['level1' => 'muscular'], 'globalMI' => ['level1' => 'muscular'],	'coremuscle' => ['level1' => 'muscular'],
     		'loadedsport' => ['level1' => 'aerobic'], 'carriedsport' => ['level1' => 'aerobic'], 'knee' => ['level1' => 'proprioception'], 'ankle' => ['level1' => 'proprioception'], 'global' => ['level1' => 'proprioception'],
     		'uppermembers' => ['level1' => 'stretching'], 'lowermembers' => ['level1' => 'stretching'],
     		'running' => ['level1' => 'specific'], 'trail' => ['level1' => 'specific'], 'othersports' => ['level1' => 'specific'], 'physicalquality' => ['level1' => 'specific']
-    ],
-    $level3Options = [
+        ],
+        $level3Options = [
     		'withmaterial' => ['level1' => ['muscular', 'aerobic', 'proprioception', 'specific']], 'withoutmaterial' => ['level1' => ['muscular', 'aerobic', 'proprioception', 'specific']],
     		'active' => ['level1' => 'stretching'], 'passive' => ['level1' => 'stretching']
     ];
@@ -38,5 +38,6 @@ class Sports {
     public static $moodOptions = ['10' => 'supermood', '9' => 'verygoodmood',  '8' => 'goodmood', '7' => 'aboveaveragemood', '6' => 'averagemood', '5' => 'belowaveragemood', '4' => 'ratherbadmood',
         '3' => 'badmood', '2' => 'verybadmood', '1' => 'extremelybadmood'];
     public static $sessionidOptions = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5'];
+    public static $levelOptions = ['1' => 'Bodypart', '2' => 'Exercisetype', '3' => 'Equipment'];
 }
 ?>

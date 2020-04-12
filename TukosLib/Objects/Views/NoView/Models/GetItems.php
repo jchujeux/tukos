@@ -3,6 +3,7 @@
 namespace TukosLib\Objects\Views\NoView\Models;
 
 use TukosLib\Objects\Views\Models\AbstractViewModel;
+use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
@@ -10,14 +11,14 @@ use TukosLib\TukosFramework as Tfk;
 class GetItems extends AbstractViewModel{
 
    function get($query){
-        $itemsAndObjects = $this->dialogue->getValues();
-        $itemsProperties = $itemsAndObjects['items'];
-        $objectNames = $itemsAndObjects['objects'];
+        $itemsProperties = $this->dialogue->getValues();
         $result = [];
+        $objectNames = Utl::toAssociative(SUtl::$store->getAll(['table' => SUtl::$tukosTableName, 'where' => [['col' => 'id', 'opr' => 'IN', 'values' => array_keys($itemsProperties)]], 'cols' => ['id', 'object']]), 'id');
         foreach ($itemsProperties as $id => $properties){
             try{
-                $values = Tfk::$registry->get('objectsStore')->objectModel($objectNames[$id])->getOne(['where' => ['id' => $id], 'cols' => $properties]);
-                $view = Tfk::$registry->get('objectsStore')->objectView($objectNames[$id]);
+                $objectName = $objectNames[$id]['object'];
+                $values = Tfk::$registry->get('objectsStore')->objectModel($objectName)->getOne(['where' => ['id' => $id], 'cols' => $properties]);
+                $view = Tfk::$registry->get('objectsStore')->objectView($objectName);
                 $result[$id] = $this->convert($values, $view->dataWidgets, 'objToEdit', false, false, true);
             }catch(\Exception $e){
                 Feedback::add(utl::sentence(array_merge(['couldnotretrieveapropertyamong', '['], $properties, [']', 'for', $objectNames[$id], 'item', $id]), $this->view->tr));

@@ -10,7 +10,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
 
         editInNewTab: function(widget){
             var value = this.valueOf(widget['widgetName']);
-            Pmg.tabs.gotoTab({object: (Pmg.objectName(value) || this.object), view: 'Edit', mode: Pmg.isMobile() ? 'Mobile' : 'Tab', action: 'Tab', query: {id: value}});
+            Pmg.tabs.gotoTab({object: (Pmg.objectName(value, this.objectDomain) || this.object), view: 'Edit', mode: Pmg.isMobile() ? 'Mobile' : 'Tab', action: 'Tab', query: {id: value}});
         },
         showInNavigator: function(widget){
         	Pmg.showInNavigator(this.valueOf(widget['widgetName']));

@@ -2,6 +2,7 @@
 namespace TukosLib\Objects\Views\Edit;
 
 use TukosLib\Objects\Views\Edit\SubObjects;
+use TukosLib\Objects\Directory;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
 
@@ -95,6 +96,7 @@ class View {
             'viewMode'      => 'Edit',
         		'paneMode' => $this->paneMode,
             'customviewid'  => $this->user->customViewId($this->objectName, 'edit', $this->paneMode),
+            'tukosviewid'  => $this->user->customViewId($this->objectName, 'edit', $this->paneMode, 'tukos'),
             'postElts'      => $this->editPostCols(),
         	'sendOnSave'	=> $this->view->sendOnSave(),
         	'sendOnDelete'	=> $this->view->sendOnDelete(),
@@ -102,6 +104,7 @@ class View {
         	'dataElts'      => $dataElts,
             'widgetsDescription'      => array_merge ($this->view->widgetsDescription($dataElts, true), (isset($this->view->actionWidgets) ? $this->view->actionWidgets : $this->actionWidgets)),
             'objectIdCols'  => array_intersect($this->view->model->idCols, $dataElts),
+            'objectDomain' => Directory::getObjDomain($this->view->objectName),
             'subObjects'    => array_keys($this->view->subObjects),
             'dataLayout'    => $this->dataLayout,
             'actionLayout'  => $this->actionLayout,

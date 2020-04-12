@@ -50,7 +50,10 @@ define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom-attr", "dojo/on", "
                 return this.inherited(arguments);
             }
         },
-        getItem: function(property){
+        getItem: function(){
+        	return this.item;
+        },
+        getItemProperty: function(property){
         	return this.item[property];
         }
     }); 

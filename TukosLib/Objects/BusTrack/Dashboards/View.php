@@ -24,10 +24,17 @@ class View extends AbstractView {
             'paymentslog' => ViewUtils::basicGrid($this, 'Paymentsdetails', [
                 'id' => ['label' => $tr('invoice'), 'width' => '60'], 'name' => ['label' => $tr('Description')], 'amount' => ['label' => $tr('Amount'), 'formatType' => 'currency'], 'date' => ['label' => $tr('Date'), 'formatType' => 'date'], 
                 'paymenttype' => ['label' => $tr('Paymenttype')], 'paymentreference' => ['label' => $tr('PaymentReference')], 'slip' => ['label' => $tr('CheckSlipNumber')], 'vatfree' => ['label' => $tr('Vatfree'), 'formatType' => 'translate'], 
-                'vatrate' => ['label' => $tr('Vatrate'), 'formatType' => 'percent'], 'reference' => ['label' => $tr('Invoicereference')], 'invoicedate' => ['label' => $tr('InvoiceDate'), 'formatType' => 'date']
+                'vatrate' => ['label' => $tr('Vatrate'), 'formatType' => 'percent'], 'lefttopay' => ['label' => $tr('Lefttopay'), 'formatType' => 'currency'], 'reference' => ['label' => $tr('Invoicereference')], 
+                'invoicedate' => ['label' => $tr('InvoiceDate'), 'formatType' => 'date']
              ], ['atts' => ['edit' => ['objectIdCols' => ['id']]]])
         ];
-        $this->customize($customDataWidgets);
+        $subObjects['bustrackinvoices'] = [
+            'atts' => ['title' => $this->tr('pendinginvoices'), 'storeType' => 'LazyMemoryTreeObjects'],
+            'filters' => ['organization' => '@parentid', [['col' => 'lefttopay', 'opr' => '>', 'values' => '0.00']]],
+            'allDescendants' => 'hasChildrenOnly'
+        ];
+        
+        $this->customize($customDataWidgets, $subObjects);
     }
     
     function tableAtts($description){

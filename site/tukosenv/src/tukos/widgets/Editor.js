@@ -1,6 +1,3 @@
-/*
- *  loads plugins required by tukos & a few enhancements
- */
 define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/has", "dojo/dom", "dojo/dom-style", "dojo/dom-class", "dojo/when", "dojo/aspect", "dijit/Editor",  "dijit/_editor/RichText",
          "tukos/widgets/editor/ShortCutKeys", "tukos/PageManager", "tukos/expressions",
          "dijit/_editor/plugins/FontChoice", "dijit/_editor/plugins/TextColor", "tukos/widgets/editor/plugins/LinkDialog",  "dojoFixes/dijit/_editor/plugins/FullScreen",

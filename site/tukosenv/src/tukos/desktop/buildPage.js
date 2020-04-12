@@ -3,14 +3,15 @@ define(["dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/ready", "dijit/re
 function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, ContentPane, AccordionContainer, NavigationMenu, TabsManager, AccordionManager, TabOnClick, Pmg) {
 	return {
 		initialize: function(){
-			var self = this, obj = Pmg.cache, appLayout = new BorderContainer({design: 'sidebar'}, "appLayout");
-			var pageCustomization = obj.pageCustomization || {}, hideLeftPane = pageCustomization.hideLeftPane === 'YES', leftPaneWidth = pageCustomization.leftPaneWidth || "12%", panesConfig = pageCustomization.panesConfig || [],
-				newPageCustomization = obj.newPageCustomization = lang.clone(pageCustomization);;
-			var leftAccordion = new AccordionContainer({id: 'leftPanel', region: "left", 'class': "left", splitter: true, style: {width: leftPaneWidth, padding: "0px", display: (hideLeftPane ? "none" : "block")}});
+			var self = this, obj = Pmg.cache, appLayout = new BorderContainer({design: 'sidebar'}, "appLayout"), pageCustomization = obj.pageCustomization || {}, hideLeftPane = pageCustomization.hideLeftPane === 'YES', 
+				leftPaneWidth = pageCustomization.leftPaneWidth || "12%", panesConfig = pageCustomization.panesConfig || [], newPageCustomization = obj.newPageCustomization = lang.clone(pageCustomization),
+				leftAccordion = new AccordionContainer({id: 'leftPanel', region: "left", 'class': "left", splitter: true, style: {width: leftPaneWidth, padding: "0px", display: (hideLeftPane ? "none" : "block")}});
 			appLayout.addChild(leftAccordion);
 			this.accordion   = new AccordionManager({container: leftAccordion});
 			var contentHeader = new ContentPane({id: 'tukosHeader', region: "top", 'class': "edgePanel", style: "padding: 0px;", content: obj.headerContent});
-			contentHeader.on('contextmenu', lang.hitch(this, this.contextMenuCallback));
+			if (Pmg.get('userRights') === 'SUPERADMIN' || Pmg.getCustom('pageCustomForAll') === 'YES' || (!Pmg.get('noPageCustomForAll') && Pmg.getCustom('pageCustomForAll') !== 'NO')){
+				contentHeader.on('contextmenu', lang.hitch(this, this.contextMenuCallback));
+			}
 			contentHeader.addChild(new NavigationMenu(obj.menuBarDescription));
 			appLayout.addChild(contentHeader);
 
@@ -40,11 +41,12 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
 			if (newPanesConfig.length > 0){
 				Pmg.addCustom('panesConfig', newPanesConfig);
 			}
+			obj.pageChangesCustomization = {};
 			ready(function(){
 			   if (!hideLeftPane){
 			   	self.lazyCreateAccordion();
 			   }
-				   appLayout.startup();
+			   appLayout.startup();
 			   var leftPaneButton = registry.byId('showHideLeftPane'), leftPaneMaxButton = registry.byId('showMaxLeftPane'), displayStatus = domStyle.get('leftPanel', 'display'), isMaximized = false;
 			   if (leftPaneButton){
 			       leftPaneButton.set("iconClass", displayStatus === 'none' ? "ui-icon tukos-right-arrow" : "ui-icon tukos-left-superarrow");

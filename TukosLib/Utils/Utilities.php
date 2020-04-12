@@ -31,7 +31,6 @@ class Utilities{
         		? (!empty($fromArray[$atKey]) || $emptyValue === 'nochange' ? $fromArray[$atKey] : $emptyValue) 
         		: $absentValue;
     }
-
     public static function getItems($atKeys, $fromArray, $excludeAbsent = true, $absentValue = null, $emptyValue = 'nochange'){
         $result = [];
         $keys = ($excludeAbsent ? array_intersect($atKeys, array_keys($fromArray)) : $atKeys);
@@ -40,7 +39,6 @@ class Utilities{
         }
         return $result;
     }
-    
     public static function concat($values, $separator = ' ', $trimAt = 255){
         $result = implode($separator, $values);
         if (strlen($result) > $trimAt){
@@ -48,7 +46,6 @@ class Utilities{
         }  
         return $result;
     }
-
    /*
     * Adds $value to $array[$key], initializing it when necessary
     */
@@ -59,7 +56,6 @@ class Utilities{
             $array[$key] = $value;
         }
     }   
-    
    /*
     * Increments 2D array value, initializing it if necessary
     */
@@ -70,12 +66,10 @@ class Utilities{
         self::increment($array[$rowKey], $colKey, $value);
         return $array;
     }
-
    /*
     * converts an object into an associative array (no check made on the proper object format for this). Intended to be used to convert Json objects containing associative array information
     */
     public static function objectToArray($object){
-
         $result = [];
         foreach ($object as $key => $value) {
             $valueType = gettype($value);
@@ -94,7 +88,6 @@ class Utilities{
    /*
     * If multidimensional array, transforms into a 1D array via json encoding the sub-arrays
     */
-
     public static function jsonEncodeArray($array){ 
         $jsonArray = [];
         foreach ($array as $key => $value){
@@ -106,7 +99,6 @@ class Utilities{
         }
         return $jsonArray;
     }
-
    /*
     * Returns subArray[remainingKeys[0]][remainingKeys[1]]...remainingKeys[last]] if found, or else $notFoundValues;
     */
@@ -126,7 +118,6 @@ class Utilities{
             }
         }
     }
-
     public static function drillDownReplace(&$subArray, &$subArrayFilter, $replaceValue){
         if (is_array($subArrayFilter)){
             foreach ($subArrayFilter as $key => &$value){
@@ -140,7 +131,6 @@ class Utilities{
             }
         }
     }
-
     public static function drillDownDelete(&$subArray, &$subArrayFilter, $deleteCallback = null){
         if (is_array($subArrayFilter)){
             foreach ($subArrayFilter as $key => &$value){
@@ -166,8 +156,6 @@ class Utilities{
             unset($subArray);
         }
     }
-
-
     public static function array_filter_recursive($array, $callback = null){
         foreach ($array as $key => &$value){
             if (is_array($value)){
@@ -175,7 +163,9 @@ class Utilities{
             }
         }
         if ($callback === null){
-            return array_filter($array);
+            return array_filter($array, function($value){
+                return (!empty($value)) || $value === 0;
+            });
         }else{
             return array_filter($array, $callback);
         }

@@ -23,7 +23,7 @@ define (["dijit/registry", "tukos/expressions", "dojo/request", "tukos/PageManag
         	widget.set('label', Pmg.loading(label));
         	data.content = this.contentToProcess();
 	    	//request("https://localhost/tukos/index20.php/tukosApp/Dialogue/backoffice/NoView/NoMode/SendEmail", 
-	    	request("https://" + Pmg.getItem('tukosFormsDomainName') + "/tukos/index20.php/tukosApp/Dialogue/backoffice/NoView/NoMode/SendEmail", 
+	    	request("https://" + Pmg.get('tukosFormsDomainName') + "/tukos/index20.php/tukosApp/Dialogue/backoffice/NoView/NoMode/SendEmail", 
         			{method: 'POST', handleAs: 'json', data: data}).then(
         		function(response){
         			console.log('the response is: ' + response);

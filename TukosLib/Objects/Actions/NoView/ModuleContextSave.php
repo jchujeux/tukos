@@ -8,7 +8,7 @@ use TukosLib\TukosFramework as Tfk;
 class ModuleContextSave extends AbstractAction{
     function response($query){
         $valuesToSave = $this->dialogue->getValues();
-        return $this->user->updateModuleContext($valuesToSave);
+        return $this->user->updateModuleContext($query['module'], $valuesToSave);
         //return [];
     }
 }

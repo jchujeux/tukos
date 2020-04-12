@@ -7,14 +7,12 @@ use TukosLib\Objects\ViewUtils;
 class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
-        parent::__construct($objectName, $translator, 'Parent', 'Description');
+        parent::__construct($objectName, $translator, 'Organization', 'Description');
         $customDataWidgets = [
             'name'      => ['atts' => ['edit' =>  ['style' => ['width' => '40em']]],],
-            'level1'    => ViewUtils::storeSelect('level1', $this, 'Level1'),
-            'level2'    => ViewUtils::storeSelect('level2', $this, 'Level2', null, ['atts' => ['edit' => ['dropdownFilters' => ['level1' => '@level1']]]]),
-            'level3'    => ViewUtils::storeSelect('level3', $this, 'Level3', null, ['atts' => ['edit' => ['dropdownFilters' => ['level1' => '@level1']]]]),
-            'visual'  => ViewUtils::lazyEditor($this, 'Visual'),
-            'protocol'  => ViewUtils::lazyEditor($this, 'Protocol'),
+            'level1'    => ViewUtils::objectSelect($this, 'Level1', 'sptexerciseslevels', ['atts' => ['edit' => ['dropdownFilters' => ['level' => 1, 'parentid' => '@parentid']]]]),
+            'level2'    => ViewUtils::objectSelect($this, 'Level2', 'sptexerciseslevels', ['atts' => ['edit' => ['dropdownFilters' => ['level' => 2]]]]),
+            'level3'    => ViewUtils::objectSelect($this, 'Level3', 'sptexerciseslevels', ['atts' => ['edit' => ['dropdownFilters' => ['level' => 3]]]]),
         ];
         $this->mustGetCols = array_merge($this->mustGetCols, ['level1', 'level2', 'level3', 'comments']);
         $this->customize($customDataWidgets);

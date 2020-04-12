@@ -11,7 +11,7 @@ class View extends AbstractView {
         $customDataWidgets = [
             'category' => ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
                 'storeArgs' => ['cols' => ['vatfree']],
-                'onWatchLocalAction' => ['value' => ['vatfree' => ['checked' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItem('vatfree') ? true : false;"]]]]
+                'onWatchLocalAction' => ['value' => ['vatfree' => ['checked' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? true : false;"]]]]
             ]]]),
             'vatfree' => ViewUtils::checkBox($this, 'vatfree', ['atts' => ['edit' => [
                 'onWatchLocalAction' => ['checked' => ['vatfree' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => VAS::vatfreeLocalAction(true)]]]]]]]),

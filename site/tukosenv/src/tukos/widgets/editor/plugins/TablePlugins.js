@@ -1,24 +1,9 @@
-define([
-	"dojo/_base/declare",
-	"dojo/_base/array",
-    "dojo/_base/lang",
-	"dojo/_base/Color",
-	"dojo/aspect",
-    "dojo/ready",
-    "dojo/dom-construct",
-	"dojo/dom-attr",
-	"dojo/dom-style",
-	"dojo/dom-class",
-	"dojo/keys",
-	"dijit/_editor/_Plugin",
-	"dijit/_WidgetBase",
-	"tukos/expressions",
-	"tukos/PageManager"
-], function(declare, array, lang, Color, aspect, ready, dct, domAttr, domStyle, dcl, keys, _Plugin, _WidgetBase, expressions, Pmg) {
+define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base/Color", "dojo/aspect", "dojo/ready", "dojo/dom-construct",	"dojo/dom-attr", "dojo/dom-style", "dojo/dom-class", "dojo/keys", "dijit/_editor/_Plugin",
+	"dijit/_WidgetBase", "tukos/expressions", "tukos/PageManager"], function(declare, array, lang, Color, aspect, ready, dct, domAttr, domStyle, dcl, keys, _Plugin, _WidgetBase, expressions, Pmg) {
 
     dojo.experimental("dojox.editor.plugins.TablePlugins");
 
-    var tableAtts = ['backgroundColor', 'borderColor', 'pageBreakInside', 'textAlign', 'width', 'border', 'cellPadding', 'cellSpacing'],
+    var tableAtts = ['backgroundColor', 'borderColor', 'pageBreakInside', 'display', 'textAlign', 'width', 'border', 'cellPadding', 'cellSpacing'],
     	cellAtts = tableAtts.concat('verticalAlign');
     var TableHandler = declare(_Plugin, {
         // summary:

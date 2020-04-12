@@ -147,8 +147,9 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         	}
         },
         array_unique_merge: function(array1, array2){
-            array2.forEach(function(value){
-                if (this.in_array(array1, value)){
+            var self = this;
+        	array2.forEach(function(value){
+                if (self.in_array(value, array1)){
                     return;
                 }else{
                     array1.push(value);

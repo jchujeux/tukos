@@ -11,10 +11,13 @@ class View extends AbstractView {
         parent::__construct($objectName, $translator, 'Invoice', 'Description');
         $labels = Bustrack::$labels;
         $customDataWidgets = [
-            'catalogid'    => ViewUtils::objectSelect($this, $labels['catalogid'], 'bustrackcatalog', ['atts' => ['storeedit' => ['width' => 100]]]),
+            'catalogid'    => ViewUtils::objectSelect($this, 'CatalogId', 'bustrackcatalog', ['atts' => ['edit' => [
+                'storeArgs' => ['cols' => ['name', 'category', 'vatfree', 'vatrate', 'unitpricewot', 'unitpricewt']], 
+                'onChangeLocalAction' => ['catalogid' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => VAS::catalogIdLocalAction()]]]]]]),
+            //'catalogid'    => ViewUtils::objectSelect($this, $labels['catalogid'], 'bustrackcatalog', ['atts' => ['storeedit' => ['width' => 100]]]),
             'category' => ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
                 'storeArgs' => ['cols' => ['vatfree']],
-                'onWatchLocalAction' => ['value' => ['vatfree' => ['value' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItem('vatfree') ? 'YES' : '';"]]]]
+                'onWatchLocalAction' => ['value' => ['vatfree' => ['value' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? 'YES' : '';"]]]]
             ]]]),
             'vatfree' => ViewUtils::checkBox($this, 'vatfree', ['atts' => [
                 'edit' => ['onWatchLocalAction' => [

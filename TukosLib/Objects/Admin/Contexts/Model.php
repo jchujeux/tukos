@@ -40,7 +40,7 @@ class Model extends AbstractModel {
         return parent::getOne($atts, $jsonColsKeys, $jsonNotFoundValue);
     }
 
-    public function getAll ($atts){ //$where, $cols, $orderBy, $range
+    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null){
         $unallowed = $this->user->unallowedModules();
         if (!empty($unallowed)){
             $atts['where'][] = ['col' => 'name', 'opr' => 'NOT IN', 'values' => $unallowed];

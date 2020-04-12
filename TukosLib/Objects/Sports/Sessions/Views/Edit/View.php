@@ -15,7 +15,7 @@ class View extends EditView{
         $customContents = [
             'row1' => [
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-                'widgets' => ['id', 'parentid', 'name', 'sessionid', 'startdate', 'duration', 'intensity', 'stress', 'sport', 'sportsman', 'googleid']
+                'widgets' => ['id', 'parentid', 'name', 'sessionid', 'startdate', 'duration', 'intensity', 'stress', 'difficulty', 'sport', 'sportsman', 'googleid']
             ],
             'row1b' => [
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
@@ -43,7 +43,7 @@ class View extends EditView{
 	            			],
 	            			'row1' => [
 	            				'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-	            				'widgets' => ['level1filter', 'level2filter', 'level3filter']
+	            				'widgets' => ['level1', 'level2', 'level3']
 	            			],
 	            			'row2' => [
 	            				'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0'],

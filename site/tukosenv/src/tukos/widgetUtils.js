@@ -60,30 +60,31 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
         },
 
         watchCallback: function(widget, attr, oldValue, value){
-            //console.log('in watchCallback');
             var form = widget.form;
             if (oldValue !== value && form){
                 if (attr === 'value' && form.markIfChanged && arrayUtil.indexOf(form.postElts, widget.widgetName)!= -1){
                    this.markAsChanged(widget);
                 }
-                form.mayNeedResize = false;
-                if (attr === 'value' && form.watchContext === 'user'){
-                    if (widget.onChangeLocalAction){
-                        if (utils.empty(widget.localActionFunctions['value'])){
-                            form.buildLocalActionFunctions(widget.localActionFunctions['value'], widget.onChangeLocalAction);
-                        }
-                        form.widgetWatchLocalAction(widget, 'value', widget.localActionFunctions['value'], value);
-                    }
-                }
-                if (widget.onWatchLocalAction && widget.onWatchLocalAction[attr]){
-                    if (utils.empty(widget.localActionFunctions[attr])){
-                        form.buildLocalActionFunctions(widget.localActionFunctions[attr], widget.onWatchLocalAction[attr]);
-                    }
-                    form.widgetWatchLocalAction(widget, attr, widget.localActionFunctions[attr], value);
-                } 
-                if (form.mayNeedResize){
-                    form.resize();// as some elements may have become hidden / unhidden during local actions
+                if (form.watchOnChange){
                     form.mayNeedResize = false;
+                    if (attr === 'value' && form.watchContext === 'user'){
+                        if (widget.onChangeLocalAction){
+                            if (utils.empty(widget.localActionFunctions['value'])){
+                                form.buildLocalActionFunctions(widget.localActionFunctions['value'], widget.onChangeLocalAction);
+                            }
+                            form.widgetWatchLocalAction(widget, 'value', widget.localActionFunctions['value'], value, oldValue);
+                        }
+                    }
+                    if (widget.onWatchLocalAction && widget.onWatchLocalAction[attr]){
+                        if (utils.empty(widget.localActionFunctions[attr])){
+                            form.buildLocalActionFunctions(widget.localActionFunctions[attr], widget.onWatchLocalAction[attr]);
+                        }
+                        form.widgetWatchLocalAction(widget, attr, widget.localActionFunctions[attr], value, oldValue);
+                    } 
+                    if (form.mayNeedResize){
+                        form.resize();// as some elements may have become hidden / unhidden during local actions
+                        form.mayNeedResize = false;
+                    }
                 }
             }
         },
@@ -98,7 +99,7 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                         if (utils.empty(subWidget.localActionFunctions[attr])){
                             subWidget.localActionFunctions[attr] = widget.form.buildSubWidgetLocalActionFunction(subWidget.onWatchLocalAction[attr]);
                         }
-                        subWidget.localActionFunctions[attr](widget, oldValue, value);
+                        subWidget.localActionFunctions[attr](widget, oldValue, value, oldValue);
                     }
                     var newWidgetValue = widget.get(attr);
                     widget.set(attr, newWidgetValue);

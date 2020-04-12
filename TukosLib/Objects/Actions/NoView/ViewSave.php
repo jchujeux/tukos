@@ -10,7 +10,7 @@ class ViewSave extends AbstractAction{
         $valuesToSave = $this->dialogue->getValues();
         reset($valuesToSave);
         $view = key($valuesToSave);
-        return $this->user->updateCustomView($this->objectName, $view, $valuesToSave[$view]);
+        return $this->user->updateCCustomView($this->objectName, $view, $valuesToSave[$view]);
     }
 }
 ?>

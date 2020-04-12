@@ -10,14 +10,12 @@ class Model extends AbstractModel {
 	
     function __construct($objectName, $translator=null){
         $colsDefinition = [
-            'level1' => 'VARCHAR(30)  DEFAULT NULL',
-            'level2' => 'VARCHAR(30)  DEFAULT NULL',
-            'level3' =>  'VARCHAR(30)  DEFAULT NULL',
-            'visual' =>  'longtext DEFAULT NULL',
-            'protocol' =>  'longtext DEFAULT NULL',
+            'level1' => 'MEDIUMINT  DEFAULT NULL',
+            'level2' => 'MEDIUMINT  DEFAULT NULL',
+            'level3' =>  'MEDIUMINT  DEFAULT NULL',
         ];
         parent::__construct(
-            $objectName, $translator, 'sptexercises',  ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], [], $colsDefinition, [], [], ['custom']
+            $objectName, $translator, 'sptexercises',  ['parentid' => ['organizations']], [], $colsDefinition, [], [], ['custom']
         );
     }   
 }
