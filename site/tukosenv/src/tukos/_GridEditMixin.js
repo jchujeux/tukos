@@ -115,7 +115,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         },
         updateDirty: function(idPropertyValue, field, value){
             var collection = this.collection, grid = this, collectionRow = this.collection.getSync(idPropertyValue), oldValue;
-            if ((oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined) || collectionRow[field]) !== value){
+            if ((oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)/* || collectionRow[field]*/) !== value){
                 this.inherited(arguments);
                 collectionRow[field] = value;
                 if (!grid.noRefreshOnUpdateDirty){
@@ -258,9 +258,9 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             this.prepareInitRow(init);
             item = utils.merge(init, item||{});
             this.createNewRow(item, (where === 'before' ? this.clickedRow.data : {}), where);
-            if (!this.noRefreshOnUpdateDirty){
-            	this.refresh({keepScrollPosition: true});
-            }
+            //if (!this.noRefreshOnUpdateDirty){
+            	//this.refresh({keepScrollPosition: true});
+            //}
             return item;
         },
         updateRow: function(item){
@@ -488,13 +488,20 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                     //this.isNotUserEdit += -1;
                 }
             }else{//current memory store needs to be updated with contents of current object, then saved (to empty dirty)
-                for (var row in value){
+/*
+            	for (var row in value){
                     for (var col in value[row]){
                         this.updateDirty(row, col, value[row][col]);
                     }
                 }
+*/
+                this.store.setData([]);
+                this.dirty = {};
+            	for (var row in value){
+                	this.store.addSync(value[row]);
+                }
                 console.log('_GridEditMixin: thought this was not in use!!')
-                this.save();
+                //this.save();
             }
             var maxId = 0;
             this.store.forEach(function(row){

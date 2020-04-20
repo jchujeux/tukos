@@ -22,21 +22,20 @@ class Authentication{
     }
     public function isAuthenticated($dialogue, $request, $query){
         switch ($request['object']){
-            case 'auth':
+            case 'Auth':
                 switch ($request['view']){
-                    case 'loginValidation':
+                    case 'LoginValidation':
                         $this->checkUserCredentials($dialogue);
                         break;
-                    case 'logout':
+                    case 'Logout':
                         $this->session->destroy();
                         $dialogue->response->headers->set("Location",  $_SERVER['HTTP_REFERER']);
                         $dialogue->response->setStatusCode(302);
-                        $login = new LoginPage(Tfk::$registry->pageUrl);
-
+                        new LoginPage(Tfk::$registry->pageUrl);
                         break;
                 }
                 return false;
-            case 'backoffice':
+            case 'Backoffice':
                 if (isset($query['targetdb'])){
                     Tfk::$registry->get('appConfig')->dataSource['dbname'] = Cipher::decrypt(rawurldecode($query['targetdb']), Tfk::$registry->get('appConfig')->ckey);
                 }
@@ -44,7 +43,7 @@ class Authentication{
             default:// receiving a tukos application request check if authorized
                 $segment = $this->session->getSegment(Tfk::$registry->appName);
                 if ($segment->status !== 'VALID'){
-                    $login = new LoginPage(Tfk::$registry->pageUrl);
+                    new LoginPage(Tfk::$registry->pageUrl);
                     return false;
                 }else{
                     $this->session->commit();
@@ -59,7 +58,7 @@ class Authentication{
         $this->session->start();
         $this->session->destroy();
         $dialogue->response->setStatusCode(302);
-        $login = new LoginPage(Tfk::$registry->pageUrl, $message);
+        new LoginPage(Tfk::$registry->pageUrl, $message);
     }
     public function checkUserCredentials ($dialogue){
     	$username = $dialogue->context->getPost('username');

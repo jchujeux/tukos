@@ -3,6 +3,7 @@ namespace TukosLib\Objects\BusTrack\Invoices;
 
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\BusTrack\QuotesAndInvoices;
+use TukosLib\Objects\BusTrack\ViewActionStrings as VAS;
 use TukosLib\Objects\ViewUtils;
 
 
@@ -15,25 +16,30 @@ class View extends AbstractView {
 		$tr = $this->tr;
         $labels = $this->model->itemsLabels;
         //$this->sendOnSave = array_merge($this->sendOnSave, ['organization']);
-		//$this->allowedNestedWatchActions = 0;
+		$this->allowedNestedWatchActions = 0;
 		$customDataWidgets = [
 		    'comments' => ['atts' => ['edit' => ['height' => '150px']]],
 		    'organization' => ViewUtils::objectSelect($this, 'Invoicingorganization', 'organizations'),
 		    'contact' => ViewUtils::objectSelect($this, 'Invoicingcontact', 'people'),
 		    'reference' =>  ViewUtils::textBox($this, 'Reference', ['atts' => ['edit' => ['disabled' => true]]]),
             'relatedquote' => ViewUtils::objectSelect($this, 'Relatedquote', 'bustrackquotes', [
-            	'atts' => ['edit' => ['onChangeServerAction' => [
-            		'inputWidgets' => ['relatedquote'],
-            		'urlArgs' => ['query' => ['params' => json_encode(['getOne' => 'getQuoteChanged'])]],
-            ]]]]),
+            	'atts' => ['edit' => [
+            	    //'onChangeServerAction' => ['inputWidgets' => ['relatedquote'], 'urlArgs' => ['query' => ['params' => json_encode(['getOne' => 'getQuoteChanged'])]]],
+            	    'onChangeLocalAction' => ['items' => ['localActionStatus' => Vas::relatedQuoteAction()]]
+            ]]]),
         	'invoicedate' => ViewUtils::tukosDateBox($this, 'Invoicedate'),
-            //'items'  => $this->items($labels),
 			'discountpc' => $this->discountPc($labels),
         	'discountwt' => $this->discountWt(),
 			'pricewot' => $this->priceWot(),
 			'pricewt' => $this->priceWt(true),
-		    'todeduce' => ViewUtils::tukosCurrencyBox($this, 'Todeduce', ['atts' => ['edit' => ['disabled' => true]]]),
-		    'lefttopay' => ViewUtils::tukosCurrencyBox($this, 'LeftToPay', ['atts' => ['edit' => ['disabled' => true]]]),
+		    'todeduce' => ViewUtils::tukosCurrencyBox($this, 'Todeduce', ['atts' => [
+		        'edit' => ['disabled' => true],
+		        'overview' => ['hidden' => true]
+		    ]]),
+		    'lefttopay' => ViewUtils::tukosCurrencyBox($this, 'LeftToPay', ['atts' => [
+		        'edit' => ['disabled' => true],
+		        'overview' => ['hidden' => true],
+		    ]]),
             'status'   => ViewUtils::storeSelect('status', $this, 'Status'),
         ];
 
@@ -71,8 +77,10 @@ class View extends AbstractView {
             'payments' => [
                 'object' => 'bustrackpayments',
                 'atts'  => ['title' => $tr('bustrackpayments'), 'newRowPrefix' => 'new'],
-                'filters' => [['tukosJoin' =>
-                    ['inner', '(`tukos`  as `t0`, `bustrackpaymentsitems`)', '`t0`.`parentid` = `bustrackpayments`.`id` AND `bustrackpaymentsitems`.`invoiceid` = @id AND `t0`.`id` = `bustrackpaymentsitems`.`id`']]],
+                'filters' => [
+                    ['tukosJoin' => ['inner', '(`tukos`  as `t0`, `bustrackpaymentsitems`)', '`t0`.`parentid` = `bustrackpayments`.`id` AND `bustrackpaymentsitems`.`invoiceid` = @id AND `t0`.`id` = `bustrackpaymentsitems`.`id`']],
+                    ['groupBy' => ['tukos.id']],
+                ],
                 'allDescendants' => true,
             ],
             'paymentsitems' => [
@@ -84,7 +92,7 @@ class View extends AbstractView {
                         'name' => ['content' =>  ['Total']],
                         'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]]
                     ]],
-                    'onWatchLocalAction' => ['summary' => ['paymentsitems' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' =>
+                    'onWatchLocalAction' => ['summary' => ['paymentsitems' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' =>
                         "sWidget.form.setValueOf('todeduce', sWidget.summary.amount);\n" .
                         "sWidget.form.setValueOf('lefttopay', sWidget.form.valueOf('pricewt') - sWidget.summary.amount);\n" .
                         "return true;"

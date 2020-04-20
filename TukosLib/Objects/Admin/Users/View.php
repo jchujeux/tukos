@@ -14,6 +14,7 @@ use TukosLib\TukosFramework as Tfk;
 class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
+        $utl = 'TukosLib\Utils\Utilities';
         parent::__construct($objectName, $translator, 'Associated People', 'Username');
         $modules = Tfk::$registry->get('appConfig')->objectModules;
         $moduleOptions = [];
@@ -36,17 +37,17 @@ class View extends AbstractView {
                 'type' => 'objectEditor', 
                 'atts' => ['edit' => ['title' => $this->tr('Custom views'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true, 'isEditTabWidget' => true*/, 
                     'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px',  'overflow' => 'auto']]],
-                'objToEdit' => ['json_decode' => [true],  'map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]],
+                'objToEdit' => ['jsonDecode' => ['class' => $utl],  'map_array_recursive' => ['class' => $utl, $this->tr]],
             ],
             'customcontexts' => ['type' => 'objectEditor',
                 'atts' => ['edit' =>  ['title' => $this->tr('Custom contexts'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true, 'isEditTabWidget' => true*/,
                     'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px', 'overflow' => 'auto']]],
-                'objToEdit' => ['json_decode' => [true],  'map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]
+                'objToEdit' => ['jsonDecode' => ['class' => $utl],  'map_array_recursive' => ['class' => $utl, $this->tr]
             ]],
             'pagecustom' => ['type' => 'objectEditor',    
                 'atts' => ['edit' =>  ['title' => $this->tr('Pagecustom'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true, 'isEditTabWidget' => true*/, 
-                    'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px', 'overflow' => 'auto']]],
-                'objToEdit' => ['json_decode' => [true],  'map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]
+                    'style' => ['maxHeight' =>  '500px', 'width' => '100%', 'overflow' => 'auto']]],
+                'objToEdit' => ['jsonDecode' => ['class' => $utl],  'map_array_recursive' => ['class' => $utl, $this->tr]
             ]],
         ];
 

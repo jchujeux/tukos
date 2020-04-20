@@ -85,6 +85,29 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
                 }));
             }
         }, 
+        widgetChangeServerDialog: function(widget){
+            var valuesToPost = {'input': {}};
+            for (var i in widget.onChangeServerAction.inputWidgets){
+                var theWidgetName = widget.onChangeServerAction.inputWidgets[i];
+                valuesToPost.input[theWidgetName] = widget.valueOf('#' + theWidgetName);
+            }
+            if (widget.onChangeServerAction.outputWidgets){
+                valuesToPost.output = widget.onChangeServerAction.outputWidgets;
+            }
+
+            var url = {action: 'hasChanged', query:{widget: widget.widgetName}};
+            if (widget.onChangeServerAction.urlArgs){
+                url = utils.mergeRecursive(url, widget.onChangeServerAction.urlArgs);
+            }
+            this.serverDialog(url, valuesToPost, [], 'action done' /*messages.actionDone*/, true); 
+        },
+        widgetWatchServerAction: function(widget, actionDescriptions, newValue){
+            var url = {action:  'Process', query: {widget: widget.widgetName}};
+            if (actionDescriptions.urlArgs){
+                url = utils.mergeRecursive(url, actionDescriptions.urlArgs);
+            }
+            this.serverDialog(url, this.changedValues(), [], messages.actionDone, true); 
+        },
         tabContextId: function(){
             return this.contextPaths[0][this.contextPaths[0].length -1]['id'];
         }

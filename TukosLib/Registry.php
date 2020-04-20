@@ -35,7 +35,6 @@ class Registry{
             $this->loader->add('Aura\Session\\'  , $auraDir . 'package/Aura.Session/src/');
             $this->loader->add('Aura\Http\\'     , $auraDir . 'package/Aura.Http/src/');
             $this->loader->add('Aura\Router\\', $auraDir . 'package/Aura.Router/src/');
-            $this->loader->add('Aura\Uri\\', $auraDir . 'package/Aura.Uri/src/');
             $this->loader->add('Detection\\', Tfk::$vendorDir['MobileDetect']);
             $this->setHttpServices();
         }else{
@@ -43,12 +42,10 @@ class Registry{
         }
         $this->loader->add('Aura\Sql\\'         , $auraDir . 'package/Aura.Sql/src/');
         $this->loader->add('Aura\SqlQuery', Tfk::$vendorDir['auraV2']);
-        //$this->loader->add('Aura\Intl\\'     , Tfk::$auraDir . 'package/Aura.Intl/src/');
         
         $this->loader->add('Zend\\'       , Tfk::$vendorDir['zend']);
         $this->loader->add('Pear\\'       , Tfk::$vendorDir['pear']);
         $this->loader->add('ManuelLemos\\', Tfk::$phpVendorDir);
-        //$this->loader->add('PaulButler\\' , Tfk::$phpVendorDir);
         $this->loader->add('Ifsnop\\'     , Tfk::$phpVendorDir);
         $this->loader->add('PHPMailer\\'  , Tfk::$phpVendorDir);
         $this->loader->add('Html2Text\\'  , Tfk::$phpVendorDir);        
@@ -70,32 +67,22 @@ class Registry{
         $map->add('tukosObject'     , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}');
         $map->add('tukosController' , Tfk::publicDir . 'index20.php/{:application}/{:controller}/');
         $map->add('tukosBase'       , Tfk::publicDir . 'index20.php/{:application}/');
+        $map->add('tukosDefault'       , Tfk::publicDir . 'index20.php/{:application}');
         
-        // get the route based on the path and server
         $this->route = $map->match($this->inComingUriPath, $_SERVER);
         if ($this->route && $this->route->values['application']){
-            $this->request = $this->route->values;
+            $this->request = array_merge(['controller' => 'Page', 'object' => 'Help', 'view' => 'Overview'], $this->route->values);
+            foreach($this->request as &$value){
+                $value = ucfirst($value);
+            }
             $this->appName = $this->setAppName($this->request['application']);
-            if (isset($this->request['controller'])){
-                $this->controller = $this->request['controller'];
-            }else{
-            	$this->controller = "page";
-            }
-            if (isset($this->request['object'])){
-               $this->objectName = $this->request['object'];
-            }else{
-                $this->objectName = "help";
-            }
-            //if ($this->isMobile = strpos(strtolower(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : $this->controller), 'mobilepage') === false ? false : true){
+            $this->controller = $this->request['controller'];
             if ($this->isMobile = (new MobileDetect)->isMobile());
             $this->pageUrl          = $map->generate('tukosController', ['application' => $this->appName, 'controller' => ($this->isMobile ? 'Mobile' : '') . 'Page']);
             $this->dialogueUrl      = $map->generate('tukosController', ['application' => $this->appName, 'controller' => 'Dialogue']);
             $this->appUrl          = $map->generate('tukosBase', ['application' => $this->appName]);
         }
-        $this->container->set('urlFactory', new \Aura\Uri\Url\Factory($_SERVER));
-        $urlFactory = $this->get('urlFactory');
-        $url = $urlFactory->newCurrent();
-        $this->urlQuery = $url->query->getArrayCopy();
+        $this->urlQuery = $_GET;
     }        
     public function setAppName($appName){
         return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus'][strtolower($appName)];

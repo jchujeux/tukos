@@ -19,7 +19,7 @@ if (Tfk::$registry->route) {
 
         Tfk::$registry->set('appConfig', new $configure()); 
 
-        $mainExec = new $mainController(Tfk::$registry->request, Tfk::$registry->urlQuery);
+        new $mainController(Tfk::$registry->request, Tfk::$registry->urlQuery);
     }else{
         echo "No application was found for that URI path.";
     }

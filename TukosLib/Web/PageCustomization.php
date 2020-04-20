@@ -19,6 +19,17 @@ trait PageCustomization{
                         'onWatchLocalAction' => $this->watchLocalAction('pageCustomForAll')])),
                     'contextCustomForAll' => Widgets::storeSelect(Widgets::complete(['storeArgs' =>['data' => Utl::idsNamesStore(['YES', 'NO'], $tr)], 'title' => $tr('contextCustomForAll'),
                         'onWatchLocalAction' => $this->watchLocalAction('contextCustomForAll')])),
+                    'defaultTukosUrls' => Widgets::simpleDgrid(Widgets::complete(['label' => $tr('defaultTukosUrls'), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => false, 'noDeleteRow' => true,
+                        'style' => ['width' => '500px'], 'colsDescription' => [
+                            //'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                            'app'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['TukosApp', 'TukosBus', 'TukosSports'], $tr)], 'label' => $tr('tukosAppName'),
+                                'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
+                            'path' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('defaultUrlPath'),
+                                'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
+                            'query' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('defaultUrlQuery'),
+                                'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
+                        ],
+                    ])),
                     'hideLeftPane' => Widgets::storeSelect(Widgets::complete(['storeArgs' =>['data' => Utl::idsNamesStore(['YES', 'NO'], $tr)], 'title' => $tr('hideleftpane'),'onWatchLocalAction' => $this->hideLeftPaneAction()])),
                     'leftPaneWidth' => Widgets::textBox(Widgets::complete(['label' => $tr('Leftpanewidth'), 'onWatchLocalAction' => $this->leftPaneWidthAction()])),
                     'panesConfig' => Widgets::simpleDgrid(Widgets::complete(['label' => $tr('panes'), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => true, 'style' => ['width' => '500px'],
@@ -47,7 +58,7 @@ trait PageCustomization{
                         ],
                         'row2' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 250],
-                            'widgets' => ['pageCustomForAll', 'contextCustomForAll','hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose'],
+                            'widgets' => ['pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose'],
                         ],
                         'row3' => [
                             'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false],
@@ -71,7 +82,17 @@ trait PageCustomization{
     private function watchLocalAction($widgetName){
         return [
             'value' => [$widgetName => ['localActionStatus' => ['triggers' => ['user' => true], 'action' =>
-            "Pmg.addCustom('$widgetName', newValue);sWidget.setValueOf('newPageCustom',Pmg.getCustom({tukosOrUserOrChanges: 'changes'}));return true;"]]]
+                "Pmg.addCustom('$widgetName', newValue);sWidget.setValueOf('newPageCustom',Pmg.getCustom({tukosOrUserOrChanges: 'changes'}));return true;"]]]
+        ];
+    }
+    private function gridWatchLocalAction($widgetName){
+        return [
+            'value' => [$widgetName => ['localActionStatus' => ['triggers' => ['user' => true], 'action' => <<<EOT
+var form = sWidget.parent.form, formGetWidget = lang.hitch(form, form.getWidget), grid = formGetWidget('$widgetName'); 
+Pmg.addCustom('$widgetName', grid.dirty);
+form.setValueOf('newPageCustom',Pmg.getCustom({tukosOrUserOrChanges: 'changes'}));return true;
+EOT
+            ]]]
         ];
     }
     private function fillDialogActionString($mode){
@@ -155,17 +176,17 @@ EOT
 var pane = this.pane, setValueOf = lang.hitch(pane, pane.setValueOf);
 Pmg.setFeedback('$saving');
 Pmg.serverDialog({object: 'users', view: 'NoView', action: 'PageCustomSave', query: {tukosOrUser: '$tukosOrUser'}}, {data: Pmg.getCustom({tukosOrUserOrChanges: 'changes'})}).then(function(response){
+    //Pmg.setCustom({'tukosOrUserOrChanges': '$tukosOrUser'}, utils.mergeRecursive(Pmg.getCustom({tukosOrUserOrChanges: '$tukosOrUser'}), Pmg.getCustom({tukosOrUserOrChanges: 'changes'})));    
     Pmg.setCustom({'tukosOrUserOrChanges': '$tukosOrUser'}, lang.mixin(Pmg.getCustom({tukosOrUserOrChanges: '$tukosOrUser'}), Pmg.getCustom({tukosOrUserOrChanges: 'changes'})));    
     Pmg.setCustom({tukosOrUserOrChanges: 'changes'}, {});    
     setValueOf('newPageCustom', {});
     if (pane.valueOf('tukosOrUser') === '$tukosOrUser'){
-        form.emptyWidgets(['hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose']);
+        form.emptyWidgets(['pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose']);
         utils.forEach(Pmg.getCustom({tukosOrUserOrChanges: '$tukosOrUser'}), function(value, widgetName){
             setValueOf(widgetName, value);
         });
     }
-});
-this.pane.close();
+    pane.close();});
 EOT
         ;
     }

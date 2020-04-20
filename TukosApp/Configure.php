@@ -19,7 +19,7 @@ class Configure{
 
     function __construct(){
 
-        $this->appDir  = dirname(__FILE__);
+        //$this->appDir  = dirname(__FILE__);
         $key =  'XZK@w0kw' . getenv('MYSQL_ENV_VAR');
         $this->ckey = MD5($key);
         $this->dataSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname'   => 'tukos20'];

@@ -20,8 +20,7 @@ trait SubObjectGet {
         return $colsToSend;
     }
     private static function setQuery($filters, $value, $contextPathId){
-        $where = $contextPathId ? ['contextpathid' => $contextPathId] : [];
-        $join = [];
+        $query = ['where' => $contextPathId ? ['contextpathid' => $contextPathId] : []];
         $substitute = function($filterValue) use ($value){
             if (is_string($filterValue) && $pos = strpos($filterValue, '@') !== false){
                 switch ($pos){
@@ -41,25 +40,32 @@ trait SubObjectGet {
             }else if (is_array($filter)){
                 $filter = Utl::map_array_recursive($filter, $substitute);
                 reset($filter);
+                if (in_array($key = key($filter), ['tukosJoin', 'groupBy'], true)){
+                    $query[$key][] = $filter[$key];
+                }else{
+                    $query['where'][$col] = $filter;
+                }
+/*
                 if (key($filter) === 'tukosJoin'){
                     $join[] = $filter['tukosJoin'];
                 }else{
                     $where[$col] = $filter;
                 }
+*/
             }else{
             	if ($filter[0] === '@'){
             		$filterTarget = substr($filter, 1);
             		if (empty($value[$filterTarget])){//the target col value in the parent object is not defined => can't identify its descendants and subObject itself is undefined
-            			$where[$col] = -1;//to ensure no row is returned
+            			$query['where'][$col] = -1;//to ensure no row is returned
             		}else{
-            			$where[$col] = $value[$filterTarget];
+            			$query['where'][$col] = $value[$filterTarget];
             		}
             	}else{
-            		$where[$col] = $filter;
+            		$query['where'][$col] = $filter;
             	}
             }
         }
-        return empty($join) ? ['where' => $where] : ['tukosJoin' => $join, 'where' => $where];
+        return $query;
     }
 
     

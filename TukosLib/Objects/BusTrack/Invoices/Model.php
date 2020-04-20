@@ -25,8 +25,8 @@ class Model extends AbstractModel {
         	'discountwt' => "DECIMAL (5, 2)",
         	'pricewot'   => "DECIMAL (5, 2)",
             'pricewt'   => "DECIMAL (5, 2)",
-            'todeduce' => "DECIMAL (5, 2)",
-            'lefttopay' => "DECIMAL (5, 2)",
+            //'todeduce' => "DECIMAL (5, 2)",
+            //'lefttopay' => "DECIMAL (5, 2)",
             'status' =>  'VARCHAR(50)  DEFAULT NULL',
         ];
         parent::__construct($objectName, $translator, 'bustrackinvoices', ['parentid' => ['bustrackpeople', 'bustrackorganizations'], 'organization' => ['bustrackorganizations'],
@@ -38,8 +38,6 @@ class Model extends AbstractModel {
         return parent::initialize(array_merge(['reference' => 'ABCAAAAMMJJXX', 'invoicedate' => date('Y-m-d')], $init));
     }
     public function insert($values, $init = false, $jsonFilter = false, $reference = null){
-    	$paneMode = isset($this->paneMode) ? $this->paneMode : 'Tab';
-    	//$refPrefix = $this->user->getCustomView($this->objectName, 'edit', $paneMode, ['widgetsDescription', 'export', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription', 'referenceprefix', 'atts', 'value']);
         $organization = Utl::getItem('organization', $values);
     	$refPrefix = empty($organization) ? 'XXX' : Tfk::$registry->get('objectsStore')->objectModel('organizations')->getOne(['where' => ['id' => $organization], 'cols' => ['trigram']])['trigram'];
     	return parent::insert($values, $init, $jsonFilter, ['dateCol' => 'invoicedate', 'referenceCol' => 'reference', 'prefix' => $refPrefix]);
@@ -60,7 +58,6 @@ class Model extends AbstractModel {
         		$invoice['items'] = $oldInvoice['items'];
         	}
         }
-        //$optionalCols = ['rowId' => 'string',  'catalogid' => 'string', 'comments' => 'string'];
         $colsFormatType = ['rowId' => 'string',  'catalogid' => 'string', 'name' => 'string', 'comments' => 'string', 'quantity' => 'string', 'unitpricewot' => 'currency', 'unitpricewt' => 'currency',
         	'discount' => 'percent', 'pricewot' => 'currency', 'vatrate' => 'percent', 'pricewt' => 'currency'];
         $optionalCols = ['rowId', 'catalogid', 'comments'];

@@ -17,15 +17,22 @@ class View extends AbstractView {
             'reference' =>  ViewUtils::textBox($this, 'Paymentreference'),
             'slip' =>  ViewUtils::textBox($this, 'CheckSlipNumber'),
             'amount'  => ViewUtils::tukosCurrencyBox($this, 'Amount', ['atts' => [
-                'storeedit' => ['formatType' => 'currency', 'width' => 80]]])
+                'storeedit' => ['formatType' => 'currency', 'width' => 80],
+                'overview' => ['formatType' => 'currency', 'width' => 80],
+            ]]),
+            'unassigned'  => ViewUtils::tukosCurrencyBox($this, 'UnassignedAmount', ['atts' => [
+                'edit' => ['disabled' => true],
+                'storeedit' => ['formatType' => 'currency', 'width' => 80],
+                'overview' => ['hidden' => true]
+            ]])
         ];
-        $subObjects['items'] = ['object' => 'bustrackpaymentsitems', 'filters' => ['parentid' => '@id'], 'allDescendants' => true, 'atts' => ['title' => $this->tr('paymentItems'),
+        $subObjects['items'] = ['object' => 'bustrackpaymentsitems', 'filters' => ['parentid' => '@id'], 'allDescendants' => true, 'atts' => ['title' => $this->tr('bustrackpaymentsitems'),
             'summaryRow' => ['cols' => [
                 'name' => ['content' =>  ['Total']],
                 'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]]
             ]],
-            'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' =>
-                "sWidget.form.setValueOf('amount', sWidget.summary.amount);\n" .
+            'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' =>
+                "sWidget.form.setValueOf('unassigned', sWidget.form.valueOf('amount') - sWidget.summary.amount);\n" .
                 "return true;"
             ]]]]]];
         $this->customize($customDataWidgets, $subObjects);

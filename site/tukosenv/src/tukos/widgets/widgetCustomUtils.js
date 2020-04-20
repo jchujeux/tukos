@@ -13,6 +13,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                 valueAtt = {att: 'value', name: Pmg.message('value'), type: 'TextBox'},
 
                 width = {stylewidth: stylewidth},
+                value = {value: valueAtt},
                 valueAndWidth = {value: valueAtt, stylewidth: stylewidth},
                 height = {styleheight: styleheight},
                 widthAndHeight = {stylewidth: stylewidth, styleheight: styleheight},
@@ -27,7 +28,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                     hideServerFilters: {att: 'hideServerFilters', name: messages.hideServerFilters, units: filtersUnits}
                 },
                 widgetsCustomAtts = {
-                    TextBox: valueAndWidth,  NumberTextBox: valueAndWidth,  CurrencyTextBox: valueAndWidth,  TimeTextBox: valueAndWidth /*constraints: {timePattern: 'HH:mm:ss', clickableIncrement: 'T00:15:00', visibleRange: 'T01:00:00'}*/, //CheckBox, 
+                    CheckBox: value, TextBox: valueAndWidth,  NumberTextBox: valueAndWidth,  CurrencyTextBox: valueAndWidth,  TimeTextBox: valueAndWidth,
                     TukosNumberBox: valueAndWidth, TukosCurrencyBox: valueAndWidth,
                     Textarea: valueAndHeightConstraints,  //Select: {autoWidth: true/false, maxHeight, // not used //Button: "dijit/form/", // no need to customize
                     TukosDateBox:valueAndHeightConstraints,  //Editor: {}, // no need to customize
