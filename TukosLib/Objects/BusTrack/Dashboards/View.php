@@ -3,7 +3,8 @@ namespace TukosLib\Objects\BusTrack\Dashboards;
 
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
- 
+use TukosLib\Objects\BusTrack\Dashboards\ViewActionStrings as VAS;
+
 class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
@@ -13,28 +14,39 @@ class View extends AbstractView {
             'comments' => ['atts' => ['edit' => ['height' => '100px']]],
             'startdate' => ViewUtils::tukosDateBox($this, 'Periodstart'),
             'enddate' => ViewUtils::tukosDateBox($this, 'Periodend'),
+            'paymentsflag' => ViewUtils::checkBox($this, 'Paymentsflag', ['atts' => ['edit' => ['onWatchLocalAction' => VAS::flagLocalAction('paymentsflag')]]]),
+            'pendinginvoicesflag' => ViewUtils::checkBox($this, 'Pendinginvoicesflag', ['atts' => ['edit' => ['onWatchLocalAction' => VAS::flagLocalAction('pendinginvoicesflag')]]]),
+            'unassignedpaymentsflag' => ViewUtils::checkBox($this, 'Unassignedpaymentsflag', ['atts' => ['edit' => ['onWatchLocalAction' => VAS::flagLocalAction('unassignedpaymentsflag')]]]),
             'paymentscount'  => ViewUtils::textBox($this, 'Paymentscount', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '4em']]]]),
             'paidvatfree'  => ViewUtils::tukosCurrencyBox($this, 'Paidvatfree', ['atts' => ['edit' => ['disabled' => true]]]),
             'paidwithvatwot'  => ViewUtils::tukosCurrencyBox($this, 'Paidwithvatwot', ['atts' => ['edit' => ['disabled' => true]]]),
             'paidvat'  => ViewUtils::tukosCurrencyBox($this, 'Paidvat', ['atts' => ['edit' => ['disabled' => true]]]),
             'paidwot'  => ViewUtils::tukosCurrencyBox($this, 'Paidwot', ['atts' => ['edit' => ['disabled' => true]]]),
             'paidwt'  => ViewUtils::tukosCurrencyBox($this, 'Paidwt', ['atts' => ['edit' => ['disabled' => true]]]),
+            'pendingamount'  => ViewUtils::tukosCurrencyBox($this, 'Pendingamount', ['atts' => ['edit' => ['disabled' => true]]]),
+            'unassignedamount'  => ViewUtils::tukosCurrencyBox($this, 'Unassignedamount', ['atts' => ['edit' => ['disabled' => true]]]),
             'paidwotpercategory' => ['type' => 'pieChart', 'atts' => ['edit' => 
                 ['title' => $this->tr('paidwotpercategory'), 'showTable' => 'yes', 'tableWidth' => '30%', 'tableAtts' => $this->tableAtts('category'), 'series' => ['thePlot' => ['value' => ['y' => 'amount', 'text' => 'category']]]]]],
             'paymentslog' => ViewUtils::basicGrid($this, 'Paymentsdetails', [
-                'id' => ['label' => $tr('invoice'), 'width' => '60'], 'name' => ['label' => $tr('Description')], 'amount' => ['label' => $tr('Amount'), 'formatType' => 'currency'], 'date' => ['label' => $tr('Date'), 'formatType' => 'date'], 
-                'paymenttype' => ['label' => $tr('Paymenttype')], 'paymentreference' => ['label' => $tr('PaymentReference')], 'slip' => ['label' => $tr('CheckSlipNumber')], 'vatfree' => ['label' => $tr('Vatfree'), 'formatType' => 'translate'], 
-                'vatrate' => ['label' => $tr('Vatrate'), 'formatType' => 'percent'], 'lefttopay' => ['label' => $tr('Lefttopay'), 'formatType' => 'currency'], 'reference' => ['label' => $tr('Invoicereference')], 
-                'invoicedate' => ['label' => $tr('InvoiceDate'), 'formatType' => 'date']
-             ], ['atts' => ['edit' => ['objectIdCols' => ['id']]]])
+                'invoiceid' => ['label' => $tr('Invoice'), 'renderCell' => 'renderNamedId', 'width' => ''], 'customer' => ['label' => $tr('Customer'), 'renderCell' => 'renderNamedId', 'width' => '220'], 
+                'invoicedate' => ['label' => $tr('InvoiceDate'), 'formatType' => 'date', 'width' => '100'], 'invoiceamount' => ['label' => $tr('Invoiceamount'), 'formatType' => 'currency', 'width' => '80'], 
+                'paymentitemname' => ['label' => $tr('Paymentitem'), 'width' => '200'], 'paymentitemamount' => ['label' => $tr('Paidamount'), 'formatType' => 'currency', 'width' => '80'], 
+                'vatfree' => ['label' => $tr('Vatfree'), 'formatType' => 'translate', 'width' => '70'], 'vatrate' => ['label' => $tr('Vatrate'), 'formatType' => 'percent', 'width' => '70'], 
+                'paymentid' => ['label' => $tr('Payment'), 'width' => '70'], 'paymentdate' => ['label' => $tr('Date'), 'formatType' => 'date', 'width' => '100'], 'paymenttype' => ['label' => $tr('Paymenttype'), 'width' => '130'],
+                'paymentreference' => ['label' => $tr('PaymentReference'), 'width' => '150'], 'slip' => ['label' => $tr('CheckSlipNumber'), 'width' => '150'],
+            ], ['atts' => ['edit' => ['objectIdCols' => ['invoiceid', 'customer', 'paymentid']]]]),
+            'pendinginvoiceslog' => ViewUtils::basicGrid($this, 'Pendinginvoices', [
+                'id' => ['label' => $tr('Invoice'), 'renderCell' => 'renderNamedId'], 'customer' => ['label' => $tr('Customer'), 'renderCell' => 'renderNamedId'], 'name' => ['label' => $tr('Description')],
+                'contact' => ['label' => $tr('Contact'), 'renderCell' => 'renderNamedId'], 'invoicedate' => ['label' => $tr('Invoicedate'), 'formatType' => 'date', 'width' => '100'], 
+                'pricewt' => ['label' => $tr('Pricewt'), 'formatType' => 'currency', 'width' => '80'], 'lefttopay' => ['label' => $tr('Lefttopay'), 'formatType' => 'currency', 'width' => '80']
+            ], ['atts' => ['edit' => ['objectIdCols' => ['id', 'parentid', 'contact']]]]),
+            'unassignedpaymentslog' => ViewUtils::basicGrid($this, 'Unassignedpayments', [
+                'id' => ['label' => $tr('Payment'), 'renderCell' => 'renderNamedId'], 'customer' => ['label' => $tr('Customer'), 'renderCell' => 'renderNamedId'], 'name' => ['label' => $tr('Description')],
+                'date' => ['label' => $tr('Date'), 'formatType' => 'date', 'width' => '80'], 'paymenttype' => ['label' => $tr('Paymenttype')], 'amount' => ['label' => $tr('Amount'), 'formatType' => 'currency', 'width' => '80'], 
+                'unassignedamount' => ['label' => $tr('Unassignedamount'), 'formatType' => 'currency', 'width' => '80']
+            ], ['atts' => ['edit' => ['objectIdCols' => ['id', 'parentid']]]])
         ];
-        $subObjects['bustrackinvoices'] = [
-            'atts' => ['title' => $this->tr('pendinginvoices'), 'storeType' => 'LazyMemoryTreeObjects'],
-            'filters' => ['organization' => '@parentid', [['col' => 'lefttopay', 'opr' => '>', 'values' => '0.00']]],
-            'allDescendants' => 'hasChildrenOnly'
-        ];
-        
-        $this->customize($customDataWidgets, $subObjects);
+        $this->customize($customDataWidgets, [], ['grid' => ['paidwotpercategory', 'paymentslog', 'pendinginvoiceslog', 'unassignedpaymentslog']]);
     }
     
     function tableAtts($description){

@@ -203,7 +203,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         moreCallback: function(){
             var targetPane = this.currentPane(), targetNode = this.currentPaneNode(), form = targetPane.form || targetPane, id = form.valueOf('id'),  customDialog = targetPane.customDialog, pane = customDialog.pane, 
             	getWidget = lang.hitch(pane, pane.getWidget);
-            this.setVisibility({hideMore: false});
+            this.setVisibility({hideMore: false, hideEmptyNewCustom: true});
             Pmg.serverDialog({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'CustomViewMore', query: id ? {id: id} : {}}).then(
                 function(response){
                     ['tukosCustomView', 'defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
@@ -217,7 +217,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
             );
         },
         lessCallback: function(){
-        	this.setVisibility({hideMore: true});
+        	this.setVisibility({hideMore: true, hideEmptyNewCustom: true});
         	var customDialog = this.currentPane().customDialog;
         	customDialog.pane.resize();
         	customDialog.close();

@@ -68,6 +68,9 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                 if (form.watchOnChange){
                     form.mayNeedResize = false;
                     if (attr === 'value' && form.watchContext === 'user'){
+                        if (widget.onChangeServerAction && !widget.inOnChangeServerAction){
+                            form.widgetChangeServerDialog(widget);
+                        }
                         if (widget.onChangeLocalAction){
                             if (utils.empty(widget.localActionFunctions['value'])){
                                 form.buildLocalActionFunctions(widget.localActionFunctions['value'], widget.onChangeLocalAction);

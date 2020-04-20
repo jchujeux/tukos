@@ -12,11 +12,11 @@ trait QuotesAndInvoices {
 		'catalogid'    => ViewUtils::objectSelect($this, $labels['catalogid'], 'bustrackcatalog', ['atts' => ['storeedit' => ['width' => 100]]]),
 		'name'  => ViewUtils::textBox($this, $labels['name']),
 		'comments' => ViewUtils::editor($this, $labels['comments']),
-	      'category' => ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
+	    'category' => ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
 	          'storeArgs' => ['cols' => ['vatfree']],
 	          'onWatchLocalAction' => ['value' => ['vatfree' => ['value' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? 'YES' : '';"]]]]
 	      ]]]),
-	      'vatfree' => ViewUtils::CheckBox($this, 'vatfree', ['atts' => [
+	    'vatfree' => ViewUtils::CheckBox($this, 'vatfree', ['atts' => [
 	          'edit' => ['onWatchLocalAction' => [
 	              'checked' => ['vatfree' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => true], 'action' => VAS::vatfreeLocalAction()]]]]],
 	          'storeedit' => ['editorArgs' => ['onWatchLocalAction' => [
@@ -124,7 +124,8 @@ trait QuotesAndInvoices {
 								"return true;"
 						],
 				]],
-				'storeedit' => ['formatType' => 'percent', 'width' => 80]
+		    'storeedit' => ['formatType' => 'percent', 'width' => 80],
+		    'overview' => ['formatType' => 'percent', 'width' => 80]
 		]]);
 	}
 	protected function discountWt(){
@@ -141,7 +142,8 @@ trait QuotesAndInvoices {
 								"return true;"
 						],
 				]],
-				'storeedit' => ['formatType' => 'currency', 'width' => 80]
+				'storeedit' => ['formatType' => 'currency', 'width' => 80],
+		        'overview' => ['formatType' => 'currency', 'width' => 80]
 		]]);
 	}
 	protected function priceWot(){
@@ -158,6 +160,7 @@ trait QuotesAndInvoices {
 								"return true;"
 						],
 				]],
+		    'overview' => ['formatType' => 'currency', 'width' => 80]
 		]]);
 	}
 	protected function priceWt($isInvoice = false){return ViewUtils::tukosCurrencyBox($this, 'Totalwt', ['atts' => [
@@ -174,6 +177,7 @@ trait QuotesAndInvoices {
 								"return true;"
 						],
 				]],
+	           'overview' => ['formatType' => 'currency', 'width' => 80]
 		]]);
 	}
 }

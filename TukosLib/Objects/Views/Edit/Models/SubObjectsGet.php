@@ -10,9 +10,9 @@ use TukosLib\TukosFramework as Tfk;
 
 class SubObjectsGet extends SubObjects{
     use SubObjectGet;
-
-    public static function getData(&$response, $editModelGet, $contextPathId){
-        foreach ($editModelGet->view->subObjects as $widgetName => $subObject){
+    public static function getData(&$response, $editModelGet, $contextPathId, $cols = null){
+        $subObjects = empty($cols) ? $editModelGet->view->subObjects : Utl::getItems($cols, $editModelGet->view->subObjects);
+        foreach ($subObjects as $widgetName => $subObject){
             if (empty($subObject['noServerGet'])){
                 $getClass = $editModelGet->objectsStore->objectViewModel($editModelGet->controller, 'Edit', 'Get', ['view' => $subObject['view'], 'model' => $subObject['model']]);
                 $response['data']['initialRowValue'][$widgetName] = Utl::array_merge_recursive_replace($getClass->initialize('objToStoreEdit'), $subObject['initialRowValue']);

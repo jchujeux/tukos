@@ -8,7 +8,9 @@ class Utilities{
     public static function blankToNull($value){
     	return  ($value === '' ? null : $value);
     }
-    
+    public static function jsonDecode($json, $assoc=true){
+        return is_array($json) ? $json : json_decode($json, $assoc);
+    }
     public static function extractItem($atKey, &$fromArray, $absentValue = null, $emptyValue = 'nochange'){
         if (array_key_exists($atKey, $fromArray)){
             $item = $fromArray[$atKey];

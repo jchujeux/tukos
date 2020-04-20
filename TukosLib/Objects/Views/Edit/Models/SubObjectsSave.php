@@ -3,10 +3,7 @@ namespace TukosLib\Objects\Views\Edit\Models;
 
 use TukosLib\Objects\Views\Edit\Models\SubObjects;
 use TukosLib\Objects\Views\Models\Delete as DeleteModel;
-use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
-
-use TukosLib\TukosFramework as Tfk;
 
 class SubObjectsSave extends SubObjects{
 

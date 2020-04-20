@@ -21,7 +21,12 @@ class Main{
         	SUtl::instantiate();
             $user = Tfk::$registry->get('user');
             if ($user->setUser(['name' => $username])){/* so as $user has the proper rights and other initialization information*/
-	            try{
+                if ($request['controller'] === 'Page'){
+                    list($request, $query) = $user->getCustomTukosUrl($request, $query);
+                    //$request = $user->customizeRequest($request);
+                    //$query = $user->customizeQuery($query);
+                }
+                try{
 	                $controllerClass = 'TukosLib\\Controllers\\' . $request['controller'];
 	                $controller = new $controllerClass();
 	                if($controller->respond($request, $query)){
@@ -32,7 +37,7 @@ class Main{
 	                $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
 	                $dialogue->sendResponse();
 	            }            
-	            if ($streamsStore = Tfk::$registry->isInstantiated('streamsStore')){
+	            if (Tfk::$registry->isInstantiated('streamsStore')){
 	                Tfk::$registry->get('streamsStore')->waitOnStreams();
 	            }
             }else{

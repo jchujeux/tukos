@@ -21,7 +21,7 @@ class AbstractAction {
     }
     function response($query){
         return $this->controller->objectsStore->objectViewModel($this->controller, $this->request['view'], 
-                                                                empty($actionModel = Utl::getItem('actionModel', Utl::getItem('params', $query, []))) ? $this->request['action'] : $actionModel)->get($query);
+            empty($actionModel = Utl::getItem('actionModel', Utl::getItem('params', $query, []))) ? $this->request['action'] : $actionModel)->get($query);
     }
 }
 ?>

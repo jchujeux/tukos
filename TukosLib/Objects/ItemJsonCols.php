@@ -7,8 +7,6 @@ namespace TukosLib\Objects;
 
 use TukosLib\Utils\Utilities as Utl;
 
-use TukosLib\TukosFramework as Tfk;
-
 trait ItemJsonCols {
 
     protected function jsonDecode(&$values, $jsonCols){

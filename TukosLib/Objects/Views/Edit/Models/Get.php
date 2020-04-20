@@ -4,10 +4,8 @@ namespace TukosLib\Objects\Views\Edit\Models;
 
 use TukosLib\Objects\Views\Models\Get as ViewsGetModel;
 use TukosLib\Objects\Views\Edit\Models\SubObjectsGet;
-use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Feedback;
-use TukosLib\TukosFramework as Tfk;
 
 class Get extends ViewsGetModel {
 
@@ -72,7 +70,7 @@ class Get extends ViewsGetModel {
         if (empty($query)){
             $value = $this->initialize('objToEdit');
             $customMode = 'object';
-            $feedback = $this->view->tr('donenewobject');
+            $allowCustomValue = true;
         }else if(isset($query['dupid'])){
             $dupId = $query['dupid'];
             $value = $this->duplicate($dupId, 'objToEdit');
@@ -82,15 +80,20 @@ class Get extends ViewsGetModel {
             }
             $response['forceMarkIfChanged'] = true;
             $customMode = 'object';
+            $allowCustomValue = false;
             Feedback::add([$this->view->tr('doneduplicateditem') => $dupId]);
         }else{
-            $where = isset($query['storeatts']['where']) ? $query['storeatts']['where'] : $query;
+            $storeAtts = Utl::extractItem('storeatts', $query, []);
+            $where = Utl::getItem('where', $storeAtts, $query);
+            $cols = Utl::getItem('cols', $storeAtts, $cols);
             $value = $this->getOne($where, $this->unHiddenEditCols($where, $cols), 'objToEdit');
             if (isset($value['id'])){
             	$customMode = 'item';
+            	$allowCustomValue = false;
             }else{
             	$value = $this->initialize('objToEdit', isset($query['storeatts']['init']) ? $query['storeatts']['init'] : []);
             	$customMode = 'object';
+            	$allowCustomValue = true;
             }
         }
     	$response['data']['value'] = $value;
@@ -105,17 +108,24 @@ class Get extends ViewsGetModel {
         		$response['itemCustomization'] = $itemCustomization;
         	}
         }
-        $response = $this->mergeCustomization($response, $customMode, Utl::getItem('id', $response['data']['value']));
+        $response = $this->mergeCustomization($response, $customMode, $allowCustomValue);
     }
     
-    protected function mergeCustomization($response, $customMode, $itemId = null){
-    	return Utl::array_merge_recursive_replace(
+    protected function mergeCustomization($response, $customMode, $allowCustomValue){
+        if (!$allowCustomValue){
+            $value = $response['data']['value'];
+        }
+        $response = Utl::array_merge_recursive_replace(
     		$response, 
     		$customMode === 'object'
     				? $this->user->getCustomView($this->objectName, 'edit', $this->paneMode, [])
-    				: $this->model->getCombinedCustomization(['id' => $itemId], 'edit', $this->paneMode, []),
+    				: $this->model->getCombinedCustomization(['id' => Utl::getItem('id', $value)], 'edit', $this->paneMode, []),
     	    true
     	);
+        if (!$allowCustomValue){
+            $response['data']['value'] = $value;
+        }
+        return $response;
     }
 }
 ?>

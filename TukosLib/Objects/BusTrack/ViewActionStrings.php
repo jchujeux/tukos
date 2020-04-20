@@ -1,7 +1,6 @@
 <?php
 namespace TukosLib\Objects\BusTrack;
 
-
 class ViewActionStrings{
 
     public static function priceStringNoVat($unitPriceOnly){
@@ -109,6 +108,34 @@ var pane = sWidget.form, form = pane.form || pane, catalog = form.getWidget('cat
 ['name', 'category', 'vatfree', 'vatrate', 'unitpricewot', 'unitpricewt'].forEach(function(widgetName){
     sWidget.setValueOf(widgetName, offerItem[widgetName]);
 });
+EOT;
+    }
+    public static function relatedQuoteAction(){
+        return <<<EOT
+if (tWidget.store.totalLength > 0){
+    Pmg.alert({title: Pmg.message('nonemptyitems'), content: Pmg.message('Cannotimportquoteifnonemptyitems')});
+    return false;
+}
+Pmg.serverDialog({object: 'bustrackquotes', view: 'Edit', action: 'GetItem', query: {id: newValue, storeatts: JSON.stringify({cols: ['name', 'parentid', 'items', 'discountpc', 'discountwt', 'pricewot', 'pricewt']})}}).then(
+    function(response){
+        var form = sWidget.form, setValueOf = lang.hitch(form, form.setValueOf), item = response.data.value, items;       
+        if (item.items){
+            item.items.forEach(function(item){
+                delete item.rowId;
+                delete item.id;
+                tWidget.addRow(undefined, item);
+            });
+            tWidget.setSummary();
+        }
+        delete item.items;
+        delete item.id;
+        utils.forEach(item, function(value, widgetName){
+            setValueOf(widgetName, value);
+        });
+        Pmg.setFeedback(Pmg.message('actionDone'));
+    }
+);
+return true;
 EOT;
     }
 }

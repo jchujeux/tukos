@@ -56,14 +56,14 @@ class Configure{
         	'@help' => [
         	    ['overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],
         	     'guidedtour' => ['type' => 'MenuItem', 'atts' => [
-        	        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtour')]]])]]]],
+        	        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('GuidedtourTukosBus')]]])]]]],
         	     'tutotukos' => ['type' => 'MenuItem', 'atts' => [
-        	        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Tutotukos')]]])]]]]
+        	        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('TutotukosTukosBus')]]])]]]]
         ]]];
         $this->transverseModules = ['help'];
         $this->objectModulesDefaultContextName = ['tukos' => 'tukos', 'customviews' => 'tukos'];
         $this->setobjectModulesDefaultContextName($this->modulesMenuLayout);
-        $this->objectModules = array_keys($this->objectModulesDefaultContextName);
+        $this->objectModules = array_merge(array_keys($this->objectModulesDefaultContextName), ['people', 'organizations', 'physiopatients']);
         
         $this->mailConfig = ['host' => 'localhost', 'software' => 'Mercury'];
         
