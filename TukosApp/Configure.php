@@ -62,7 +62,7 @@ class Configure{
             ]],
             'collab' => [['#people' => [], '#organizations' => [], '#teams' => [], '#notes' => [], '#documents' => [], '#calendars' => [['#calendarsentries' => []]], '#tasks' => []]],
             'bustrack' => [['#bustrackcatalog' => [], 'bustrackcustomers' => [['#bustrackpeople' => [], '#bustrackorganizations' => []]], '#bustrackquotes' => [], '#bustrackinvoices' => [['#bustrackinvoicesitems' => []]], '#bustrackpayments' => [['#bustrackpaymentsitems' => []]], 
-                '#bustrackcategories' => [], '#bustrackdashboards' => []]],
+                '#bustrackcategories' => [], '#bustrackdashboards' => [], '#bustrackreconciliations' => []]],
             'wine' => [['#wines' => [['#wineappellations' => [], '#wineregions' => []]], '#winegrowers' => [], '#winecellars' => [['#wineinputs' => [], '#wineoutputs' => [], '#winestock' => [], '#winedashboards' => []]]]],
             'itm' => [['itsm' => [['#itsvcdescs' => [['#itslatargets' => []]], '#itincidents' => []]], '#itsystems' => [], '#networks' => [], 
                        '#hosts' => [['#macaddresses' => [], '#hostsdetails' => [], '#servicesdetails' => []]], '#connexions' => [],

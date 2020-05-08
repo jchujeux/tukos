@@ -1,7 +1,7 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/on", "dgrid/OnDemandGrid", "dgrid/Selector", "dgrid/extensions/DijitRegistry", "dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer",
-	"tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager"], 
-function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resizer, utils, eutils, mutils, wcutils, Pmg){
-    return declare([Grid, DijitRegistry, Hider, Resizer, Selector], {
+	"tukos/_GridSummaryMixin", "tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager"], 
+function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resizer, _GridSummaryMixin, utils, eutils, mutils, wcutils, Pmg){
+    return declare([Grid, DijitRegistry, Hider, Resizer, Selector, _GridSummaryMixin], {
         constructor: function(args){
             var self = this;
         	for (var i in args.columns){
@@ -33,7 +33,7 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         	this.inherited(arguments);
         	if (!this.collection){
         		require(["dstore/Memory"], function(Memory){
-        			self.collection = new Memory({data: []});
+        			self.collection = new Memory({idProperty: self.idProperty || 'id', data: []});
         		});
         	}
             ['maxHeight', 'maxWidth', 'minWidth', 'width'].forEach(function(att){
@@ -194,9 +194,13 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         		return this.clickedRow.data;
         	}
         },
+        cellValue: function(row, field){
+            return row[field] || '';    
+        },
         _setValue: function(value){
         	this.collection.setData(value ? value : [])
         	this.set('collection', this.collection);
+        	this.setSummary();
         },
         _setColumns: function(columns){
         	var staticColsProperties = this.params.columns;
@@ -211,7 +215,6 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
     		this.inherited(arguments);
         },
         contextMenuCallback: function(evt){
-            console.log('contextmenucallback');
         	var row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column, clickedColumn = this.clickedColumn = this.column(evt);
                 var menuItems = lang.clone(this.contextMenuItems);
                 var colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';

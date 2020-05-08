@@ -54,14 +54,8 @@ class View extends AbstractView {
         $loadChartCustomization = function($idProperty, $idPropertyStoreData){
 		    $idPropertyType = $idProperty.'type';
 		    return [
-		    //'chartHeight' => ['att' => 'chartHeight', 'type' => 'NumberUnitBox', 'name' => $this->tr('chartHeight'),
-		      //  'units' => [['id' => '', 'name' => ''], ['id' => 'auto', 'name' => 'auto'], ['id' => '%', 'name' => '%'], ['id' => 'em', 'name' => 'em'], ['id' => 'px', 'name' => 'px']]],
 		    $idPropertyType => ['att' =>  $idPropertyType, 'type' => 'StoreSelect', 'name' => $this->tr($idPropertyType),
 		            'storeArgs' => ['data' => $idPropertyStoreData]],
-		    //'showTable' => ['att' =>  'showTable', 'type' => 'StoreSelect', 'name' => $this->tr('showTable'),
-		        //'storeArgs' => ['data' => Utl::idsNamesStore(['yes', 'no'], $this->tr)]],
-		    //'tableWidth' => ['att' => 'tableWidth', 'type' => 'NumberUnitBox', 'name' => $this->tr('tableWidth'),
-		        //'units' => [['id' => '', 'name' => ''], ['id' => 'auto', 'name' => 'auto'], ['id' => '%', 'name' => '%'], ['id' => 'em', 'name' => 'em'], ['id' => 'px', 'name' => 'px']]]
 		];};
 
 		$programLoadChartIdPropertyStoreData = [['id' => 'weekoftheyear', 'name' => $tWeekOfTheYear], ['id' =>  'weekofprogram', 'name' =>  $this->tr('weekofprogram')]];
@@ -69,7 +63,7 @@ class View extends AbstractView {
 		$weekLoadChartIdPropertyStoreData = [['id' => 'dayofweek', 'name' => $tDayOfWeek], ['id' =>  'dateofday', 'name' =>  $tDateOfDay]];
 
 		$loadChartDescription = function($chartName, $idProperty, $idPropertyType, $sortAttribute, $xTitle, $presentCols, $idPropertyTypeLocalActionString, $customizableAtts) use ($chartCols, $chartColsTLabel, $chartColsLegendUnit){
-		    $tableAttsColumns = [$idProperty => ['label' => $this->tr($idProperty), 'field' => $idProperty, 'width' => 65]]; $series = []; $linesAxisLabel = ''; $clusterAxisLabel = '';
+		    $tableAttsColumns = ['id' => ['field' => 'id'], $idProperty => ['label' => $this->tr($idProperty), 'field' => $idProperty, 'width' => 65]]; $series = []; $linesAxisLabel = ''; $clusterAxisLabel = '';
 		    foreach($presentCols as $col){
 		        $plot = $chartCols[$col];
 		        $colLabel = $chartColsTLabel[$col];

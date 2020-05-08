@@ -9,6 +9,7 @@ use TukosLib\Objects\BusTrack\ViewActionStrings as VAS;
 class View extends AbstractView {
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Invoice', 'Description');
+        $this->sendOnSave = array_merge($this->sendOnSave, ['parentid']);
         $labels = Bustrack::$labels;
         $customDataWidgets = [
             'catalogid'    => ViewUtils::objectSelect($this, 'CatalogId', 'bustrackcatalog', ['atts' => ['edit' => [

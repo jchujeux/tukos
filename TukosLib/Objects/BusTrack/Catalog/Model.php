@@ -10,9 +10,9 @@ class Model extends AbstractModel {
         $colsDefinition =  [
             'category'      => "MEDIUMINT DEFAULT NULL",
             'vatfree'      => "VARCHAR(31) DEFAULT NULL",
-            'unitpricewot' 	=> "DECIMAL (5, 2)",
+            'unitpricewot' 	=> "DECIMAL (10, 2)",
         	'vatrate' 		=> "DECIMAL (5, 4)",
-        	'unitpricewt'	=> "DECIMAL (5, 2)",
+        	'unitpricewt'	=> "DECIMAL (10, 2)",
         ];
         parent::__construct($objectName, $translator, 'bustrackcatalog', ['parentid' => ['organizations'], 'category' => ['bustrackcategories']], [], $colsDefinition, [], ['worksheet', 'custom']);
     }

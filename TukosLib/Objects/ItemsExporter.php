@@ -39,7 +39,7 @@ trait ItemsExporter{
 				foreach($modifyValues as $col => $value){
 				    $item[$col] = $value;
 				}
-				$item['id'] = $ids[$item['id']];
+				//$item['id'] = $ids[$item['id']];
 			}
 			unset($item);
 			$fileHandle = fopen($fileName, "w");

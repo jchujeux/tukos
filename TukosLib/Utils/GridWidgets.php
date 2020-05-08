@@ -83,7 +83,7 @@ trait  GridWidgets{
             	$defAtts['columns']['selected'] = self::colGridAtts(Utl::extractItem('selected', $atts['columns']), 'selected', 'storeedit');
             }
             foreach ($atts['colsDescription'] as $col => $element){
-                $defAtts['columns'][$col] = self::colGridAtts($element, $col, 'storeedit');
+                $defAtts['columns'][$col] = isset($element['type']) ? self::colGridAtts($element, $col, 'storeedit') : $element;
             }
             unset($atts['colsDescription']);
             return ['type' => 'StoreDgrid', 'atts'=>  Utl::array_merge_recursive_replace($defAtts, $atts)];

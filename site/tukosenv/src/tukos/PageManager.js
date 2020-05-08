@@ -45,7 +45,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
                     return string.substitute(urlTemplate, {dialogueUrl: self.get('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
                 };
                 self.addExtendedIdsToCache = function(newExtendedIds){
-                    self.cache.extendedIds = utils.merge(self.cache.extendedIds, newExtendedIds);
+                    self.cache.extendedIds = utils.merge(self.cache.extendedIds, newExtendedIds || []);
                 };
                 self.addMessagesToCache = function(messages, object){
                 	if (!utils.empty(messages)){
@@ -168,7 +168,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         },
         serverDialog: function(urlArgs, options, feedback, returnDeferred){//if returnDeferred is true, the returnedDfD.response.getHeader() will be available to extract header information
             var self = this, isObjectFeedback = utils.isObject(feedback), defaultFeedback = isObjectFeedback ? feedback.defaultFeedback : feedback;
-            options = lang.mixin({method: 'POST', timeout: 180000, handleAs: 'json'},  options);
+            options = lang.mixin({method: 'POST', timeout: 18000, handleAs: 'json'},  options);
             if (options.data){
                 options.data = JSON.stringify(options.data);
                 options.method = 'POST';
@@ -181,12 +181,8 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             dfdOrPromise.then(
             	function(response){
                     response = response || {};
-                    if (response.extendedIds){
-                        self.addExtendedIdsToCache(response.extendedIds);
-                    }
-                    if (response.messages){
-                    	self.addMessagesToCache(response.messages, urlArgs.object);
-                    }
+                    self.addExtendedIdsToCache(response.extendedIds);
+                    self.addMessagesToCache(response.messages, urlArgs.object);
                     self.addExtrasToCache(response.extras);
                     if (defaultFeedback !== false){
                         self.setFeedback(response['feedback'], defaultFeedback);
@@ -256,7 +252,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             }
         },
         addExtrasToCache: function(newExtras){
-        	this.cache.extras = lang.mixin(this.cache.extras, newExtras);
+        	this.cache.extras = lang.mixin(this.cache.extras, newExtras || []);
         },
         getExtra: function(id){
         	return this.cache.extras[id];

@@ -366,10 +366,8 @@ class UserInformation{
     }
     public function updatePageCustom($pageCustom, $tukosOrUser){
         if ($tukosOrUser === 'user'){
-            //$this->objectsStore->objectModel('users')->updateOne(['pagecustom' => json_encode(Utl::array_filter_recursive(array_merge($this->pageCustomization('user'), $pageCustom)))], ['where' => ['id' => $this->id()]]);
             $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => $pageCustom], ['where' => ['id' => $this->id()]], false, true);
         }else{
-            //$this->objectsStore->objectModel('users')->updateOne(['pagecustom' => json_encode(Utl::array_filter_recursive(array_merge($this->pageCustomization('tukos'), $pageCustom)))], ['where' => ['name' => 'tukos']]);
             $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => $pageCustom], ['where' => ['name' => 'tukos']], false, true);
         }
         Feedback::add(Tfk::tr('serveractiondone'));
@@ -383,8 +381,8 @@ class UserInformation{
     }
     public function getCustomTukosUrl($request, $query){
         if (!isset(Tfk::$registry->route->values['object']) && ($customTukosUrl = Utl::getItem(Tfk::$registry->appName, Utl::toAssociative(Utl::getItem('defaultTukosUrls', $this->pageCustomization(), []), 'app')))){
-            if ($customUrlPath = Utl::getItem('path', $customTukosUrl)){
-                $request = array_merge($request, array_combine(['object', 'view'], explode('/', $customUrlPath)));
+            if ($customUrlObject = Utl::getItem('object', $customTukosUrl)){
+                $request = array_merge($request, ['object' => ucfirst($customUrlObject), 'view' => ucfirst(Utl::getItem('view', $customTukosUrl, 'overview'))]);
             }
             if ($customUrlQuery = Utl::getItem('query', $customTukosUrl)){
                 $conditions = explode(',', $customUrlQuery); $customQuery = [];
@@ -397,31 +395,5 @@ class UserInformation{
         }
         return [$request, $query];
     }
-/*
-    public function getDefaultTukosUrl($appName, $pathOrQuery){
-        if (!property_exists($this, 'defaultTukosUrls')){
-            $this->defaultTukosUrls = Utl::toAssociative(Utl::getItem('defaultTukosUrls', $this->pageCustomization(), []), 'app');
-        }
-        return Utl::drillDown($this->defaultTukosUrls, [$appName, $pathOrQuery], false);
-    }
-    public function customizeRequest($request){
-        $result =  (isset(Tfk::$registry->route->values['object']) || empty($defaultUrlPath = $this->getDefaultTukosUrl(Tfk::$registry->appName, 'path'))) 
-            ? $request
-            : array_merge($request, array_combine(['object', 'view'], explode('/', $defaultUrlPath)));
-        return $result;
-    }
-    public function customizeQuery($query){
-        if (isset(Tfk::$registry->route->values['object']) || empty($defaultUrlQuery = $this->getDefaultTukosUrl(Tfk::$registry->appName, 'query'))){
-            return $query;
-        }else{
-            $conditions = explode(',', $defaultUrlQuery); $defaultQuery = [];
-            foreach($conditions as $condition){
-                list($key, $value) = explode('=', $condition);
-                $defaultQuery[$key] = $value;
-            }
-            return array_merge($query, $defaultQuery);
-        }
-    }
-*/
 }
 ?>

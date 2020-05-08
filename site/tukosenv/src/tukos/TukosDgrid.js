@@ -114,7 +114,7 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
         	if (event.keyCode === 13) {
     			var grid = this.grid;
 				grid.onFilterChange(this);
-				grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
+				grid.set('collection', grid.store.filter({contextpathid: (grid.form.form || grid.form).tabContextId()}));
 			}        	
         },
         showFilters: function(){

@@ -10,6 +10,7 @@ class View extends AbstractView {
 	function __construct($objectName, $translator=null){
 		parent::__construct($objectName, $translator, 'Organization', 'Lastname');
 		$customDataWidgets = [
+		    'segment' => ViewUtils::storeSelect('segment', $this, 'Segment'),
 		    'headofficeaddress' => ViewUtils::textArea($this, 'HeadOfficeAddress'),
 		    'invoicingaddress' => ViewUtils::textArea($this, 'InvoicingAddress'),
 		    'vatid' => ViewUtils::textBox($this, 'Vatid'),

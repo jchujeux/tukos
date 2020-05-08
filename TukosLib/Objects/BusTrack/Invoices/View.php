@@ -13,7 +13,7 @@ class View extends AbstractView {
     
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Customer', 'Description');
-		$tr = $this->tr;
+        $tr = $this->tr;
         $labels = $this->model->itemsLabels;
         //$this->sendOnSave = array_merge($this->sendOnSave, ['organization']);
 		$this->allowedNestedWatchActions = 0;
@@ -38,7 +38,7 @@ class View extends AbstractView {
 		    ]]),
 		    'lefttopay' => ViewUtils::tukosCurrencyBox($this, 'LeftToPay', ['atts' => [
 		        'edit' => ['disabled' => true],
-		        'overview' => ['hidden' => true],
+		        'overview' => ['formatType' => 'currency', 'width' => 80]
 		    ]]),
             'status'   => ViewUtils::storeSelect('status', $this, 'Status'),
         ];
@@ -62,13 +62,14 @@ class View extends AbstractView {
                             'catalogid' => 'id', 'name' => 'name', 'comments' => 'comments', 'unitpricewot' => 'unitpricewot', 'vatrate' => 'vatrate', 'unitpricewt' => 'unitpricewt', 'category' => 'category', 'vatfree' => 'vatfree']]
                     ],
                     'allowedNestedRowWatchActions' => 0,
-                    'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' =>
-                        "var discountWt = sWidget.form.valueOf('discountwt'), priceWt = sWidget.summary.pricewt - discountWt, discountPc = discountWt / sWidget.summary.pricewt, paymentsItems = sWidget.form.getWidget('paymentsitems');\n" .
-                        "sWidget.form.setValueOf('pricewt', priceWt);\n" .
-                        "sWidget.form.setValueOf('pricewot', sWidget.summary.pricewot * (1 - discountPc));\n" .
-                        "sWidget.form.setValueOf('discountpc', discountWt === '' ? '' : discountPc);\n" .
-                        "if (paymentsItems.summary){sWidget.form.setValueOf('lefttopay', priceWt - paymentsItems.summary.amount);}\n" .
-                        "return true;"
+                    'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => <<<EOT
+var discountWt = sWidget.form.valueOf('discountwt'), priceWt = sWidget.summary.pricewt - discountWt, discountPc = discountWt / sWidget.summary.pricewt, paymentsItems = sWidget.form.getWidget('paymentsitems');
+sWidget.form.setValueOf('pricewt', priceWt);
+sWidget.form.setValueOf('pricewot', sWidget.summary.pricewot * (1 - discountPc));
+sWidget.form.setValueOf('discountpc', discountWt === '' ? '' : discountPc);
+sWidget.form.setValueOf('lefttopay', priceWt - utils.drillDown(paymentsItems, ['summary', 'amount'], 0));
+return true;
+EOT
                     ]]]],
                 ],
                 'allDescendants' => true,

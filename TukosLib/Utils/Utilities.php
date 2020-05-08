@@ -57,7 +57,13 @@ class Utilities{
         }else{
             $array[$key] = $value;
         }
-    }   
+    }
+    public function incrementArray($array1, $array2){
+        foreach ($array2 as $key => $value){
+            self::increment($array1, $key, $value);
+        }
+        return $array1;
+    }
    /*
     * Increments 2D array value, initializing it if necessary
     */

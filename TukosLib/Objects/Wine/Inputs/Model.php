@@ -16,7 +16,7 @@ class Model extends AbstractModel {
                             'entrydate'     =>  "date",
                             'status'        => "ENUM ('" . implode("','", Wine::$statusOptions) . "')",
                             'vintage'       => 'INT(11) NOT NULL',
-                            'cost'          =>  "DECIMAL (5, 2)",
+                            'cost'          =>  "DECIMAL (10, 2)",
                             'whereobtained' =>  "ENUM ('" . implode("','", Wine::$whereObtainedOptions) ."')",
                             'format'        =>  "ENUM ('" . implode("','", Wine::$formatOptions) ."')",
                             'quantity'      =>  'INT(11) NOT NULL',];

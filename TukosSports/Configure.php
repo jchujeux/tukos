@@ -57,7 +57,7 @@ class Configure{
             ]],
             'collab' => [['#people' => [], '#organizations' => []/*, '#teams' => []*/, '#notes' => []/*, '#documents' => []*/, '#calendars' => [['#calendarsentries' => []]], '#tasks' => []]],
             'bustrack' => [['#bustrackcatalog' => [], 'bustrackcustomers' => [['#bustrackpeople' => [], '#bustrackorganizations' => []]], '#bustrackquotes' => [], '#bustrackinvoices' => [['#bustrackinvoicesitems' => []]], '#bustrackpayments' => [['#bustrackpaymentsitems' => []]],
-                '#bustrackcategories' => [], '#bustrackdashboards' => []]],
+                '#bustrackcategories' => [], '#bustrackdashboards' => [], '#bustrackreconciliations' => []]],
             'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [], '#sptsessionsstages' => [], '#sptexercises' => [['#sptexerciseslevels' => []]]]],
             'physio' => [['#physiopatients' => [], '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
             '#help' => [[

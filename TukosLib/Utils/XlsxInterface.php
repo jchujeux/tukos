@@ -50,8 +50,15 @@ class XlsxInterface{
     public function updateSheet($sheetNumber, $sheetXmlObject){
         return $this->zip->addFromString('xl/worksheets/sheet' . $sheetNumber . '.xml', $sheetXmlObject->asXml());
     }
+    public function numberOfRows($sheet){
+        return count($sheet->sheetData->row);
+    }
     public function getCell($sheet, $row, $col){
-        return $sheet->sheetData->row[$row-1]->c[$col-1];
+        $xmlRow = $row - 1;
+        while($sheet->sheetData->row[$xmlRow]['r'][0] != $row){
+            $xmlRow += -1;
+        }
+        return $sheet->sheetData->row[$xmlRow]->c[$col-1];
     }
     public function getCellValue($sheet, $row, $col){
         $cell = $this->getCell($sheet, $row, $col);
