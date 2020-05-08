@@ -8,7 +8,11 @@ trait ViewActionStrings{
       return <<<EOT
 	tWidget.plots.week.values = dutils.difference(tWidget.form.valueOf('fromdate'), newValue, 'week') + 1;
 	tWidget.chart.addPlot('week', tWidget.plots.week);
-	tWidget.chart.render();
+	try{
+        tWidget.chart.render();
+    }catch(err){
+        console.log('Error rendering chart in localChartAction for widget: ' + tWidget.widgetName);
+    }
 	return true;
 EOT;
   }

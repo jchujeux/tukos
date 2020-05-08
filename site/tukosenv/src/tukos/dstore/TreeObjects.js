@@ -26,11 +26,14 @@ define([
         },
 
         getRootCollection: function (filters) {
-            var ids = [];
+            var ids = [], filters = this.getCollectionFilter(filters);
             this.root.forEach(function(object){
-                ids.push(object.id);
+                if (object.id){
+                	ids.push(object.id);
+                }
             });
-            return this.root.filter(this.getCollectionFilter(filters).ni('parentid', ids));
+            return this.root.filter(ids.length === 0 ? filters : filters.ni('parentid', ids));
+            //return this.root.filter(this.getCollectionFilter(filters).ni('parentid', ids));
         },
         
         getFullCollection: function(filters){

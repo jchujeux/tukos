@@ -13,7 +13,13 @@ class Duplicate extends AbstractAction{
     }
     function response($query){
         $selectedIds = $this->dialogue->getValues()['ids'];
+        if (method_exists($this->model, 'bulkPreProcess')){
+            $this->model->bulkPreProcess();
+        }
         $result = $this->model->duplicate($selectedIds, array_filter($this->view->allowedGetCols(), function($col){return $col !== 'history';}));
+        if (method_exists($this->model, 'bulkPostProcess')){
+            $this->model->bulkPostProcess();
+        }
         Feedback::add([$this->view->tr('DoneIdsCreated') => $result]);
         return [];
     }

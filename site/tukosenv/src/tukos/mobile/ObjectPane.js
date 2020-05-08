@@ -10,6 +10,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
         	this.inherited(arguments);
             this.widgetType = "MobileObjectPane";
             this.widgetsName = [];
+            this.customization = {};
             this.widgets = [];
             this.instantiatingWidgets = {};
             this.layout(this.dataLayout, lang.hitch(wutils, wutils.setWatchers));

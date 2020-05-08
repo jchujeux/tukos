@@ -24,8 +24,12 @@ trait PageCustomization{
                             //'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                             'app'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['TukosApp', 'TukosBus', 'TukosSports'], $tr)], 'label' => $tr('tukosAppName'),
                                 'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
-                            'path' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('defaultUrlPath'),
+                            'object'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore($this->user->allowedModules(), $tr)], 'label' => $tr('module'),
                                 'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
+                            'view'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['edit', 'overview'], $tr)], 'label' => $tr('view'),
+                                'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
+                            //'path' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('defaultUrlPath'),
+                            //    'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
                             'query' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('defaultUrlQuery'),
                                 'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
                         ],
@@ -98,7 +102,7 @@ EOT
     private function fillDialogActionString($mode){
         return <<<EOT
 var form = ('$mode' === 'open' ? this : sWidget.form), setValueOf = lang.hitch(form, form.setValueOf), 
-    widgets = ['pageCustomForAll', 'contextCustomForAll', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose'];
+    widgets = ['pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose'];
 form.watchOnChange = false;
 form.emptyWidgets(widgets);
 utils.forEach(Pmg.getCustom('$mode' === 'open' || !newValue ? undefined : {tukosOrUserOrChanges: newValue === 'allusers' ? 'tukos' : 'user'}), function(value, widgetName){
@@ -110,7 +114,7 @@ widgets.forEach(function(widgetName){
 });
 if ('$mode' === 'open'){
     if (Pmg.get('userRights')!== 'SUPERADMIN'){
-        ['pageCustomForAll', 'contextCustomForAll', 'tukosOrUser', 'saveall'].forEach(function(widgetName){
+        ['pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'tukosOrUser', 'saveall'].forEach(function(widgetName){
             form.getWidget(widgetName).set('hidden', true);
         });
         form.resize();

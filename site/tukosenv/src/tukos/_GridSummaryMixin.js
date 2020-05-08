@@ -9,13 +9,9 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
 
         setSummary: function(){
         	if (this.summaryRow){
-            	//utils.debounce(lang.hitch(this, function(){
-        			var oldSummary = this.summary;
-        			this.set('summary', this.getStoreSummary(this.collection, this.summaryRow.cols));
-        			wutils.watchCallback(this, 'summary', oldSummary, this.summary);
-        			console.log('set summary');
-        			//}, 100
-        		//));
+    			var oldSummary = this.summary;
+    			this.set('summary', this.getStoreSummary(this.collection, this.summaryRow.cols));
+    			wutils.watchCallback(this, 'summary', oldSummary, this.summary);
         	}
     	},
     
@@ -39,7 +35,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
                 this._setSummary(this.summary);
             }
         },
-         
         _updateColumns: function () {
             this.inherited(arguments);
             if (this.summary) {
@@ -48,7 +43,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
                 this._setSummary(this.summary);
             }
         },
-         
         _renderSummaryCell: function (item, cell, column) {
             // summary:
             //      Simple method which outputs data for each
@@ -64,7 +58,6 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
                 cell.appendChild(document.createTextNode(atts && atts.formatType ? utils.transform(value, atts.formatType, atts.formatOptions, Pmg) : value));
             }
         },
-         
         _setSummary: function (data) {
             // summary:
             //      Given an object whose keys map to column IDs,
@@ -72,14 +65,12 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
             //      provided data.
              
             var tableNode = this.summaryTableNode;
-             
             this.summary = data;
              
             // Remove any previously-rendered summary row
             if (tableNode) {
                 dct.destroy(tableNode);
             }
-             
             // Render row, calling _renderSummaryCell for each cell
             tableNode = this.summaryTableNode =
                 this.createRowCells('td',

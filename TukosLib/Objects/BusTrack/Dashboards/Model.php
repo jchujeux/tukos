@@ -12,34 +12,55 @@ class Model extends AbstractModel {
         $colsDefinition = [
             'startdate' => 'date NULL DEFAULT NULL',
             'enddate' => 'date NULL DEFAULT NULL',
+            'startdatependinginvoices' => 'date NULL DEFAULT NULL',
             'paymentsflag' => 'VARCHAR(7) DEFAULT NULL',
             'pendinginvoicesflag' => 'VARCHAR(7) DEFAULT NULL',
-            'unassignedpaymentsflag' => 'VARCHAR(7) DEFAULT NULL',
-            'paymentscount'  => 'MEDIUMINT DEFAULT NULL',
-            'paidvatfree' => "DECIMAL (5, 2)",
-            'paidwithvatwot' => "DECIMAL (5, 2)",
-            'paidvat' => "DECIMAL (5, 2)",
-            'paidwotpercategory' => 'longtext',
+            'paymentsdetailsflag' => 'VARCHAR(7) DEFAULT NULL',
+            'detailsvatfree' => "DECIMAL (10, 2)",
+            'detailswithvatwot' => "DECIMAL (10, 2)",
+            'detailsvat' => "DECIMAL (10, 2)",
+            'detailswot' => "DECIMAL (10, 2)",
+            'detailswt' => "DECIMAL (10, 2)",
+            'unasvatfree' => "DECIMAL (10, 2)",
+            'unaswithvatwot' => "DECIMAL (10, 2)",
+            'unasvat' => "DECIMAL (10, 2)",
+            'unaswot' => "DECIMAL (10, 2)",
+            'unaswt' => "DECIMAL (10, 2)",
+            'expvatfree' => "DECIMAL (10, 2)",
+            'expwithvatwot' => "DECIMAL (10, 2)",
+            'expvat' => "DECIMAL (10, 2)",
+            'expwot' => "DECIMAL (10, 2)",
+            'expwt' => "DECIMAL (10, 2)",
+            'unexpvatfree' => "DECIMAL (10, 2)",
+            'unexpwithvatwot' => "DECIMAL (10, 2)",
+            'unexpvat' => "DECIMAL (10, 2)",
+            'unexpwot' => "DECIMAL (10, 2)",
+            'unexpwt' => "DECIMAL (10, 2)",
+            'totalvatfree' => "DECIMAL (10, 2)",
+            'totalwithvatwot' => "DECIMAL (10, 2)",
+            'totalvat' => "DECIMAL (10, 2)",
+            'totalwot' => "DECIMAL (10, 2)",
+            'totalwt' => "DECIMAL (10, 2)",
+            'totalwotpercategory' => 'longtext',
             'invoicesclosedcount' => 'MEDIUMINT DEFAULT NULL',
             'invoicesopenedcount' => 'MEDIUMINT DEFAULT NULL',
             'invoicesongoingcount' => 'MEDIUMINT DEFAULT NULL',
-            'invoicesduewot' => "DECIMAL (5, 2)",
-            'pendingamount' => "DECIMAL (5, 2)",
-            'unassignedamount' => "DECIMAL (5, 2)",
+            'invoicesduewot' => "DECIMAL (10, 2)",
+            'pendingamount' => "DECIMAL (10, 2)",
             'paymentslog' => 'longtext',
             'pendinginvoiceslog' => 'longtext',
-            'unassignedpaymentslog' => 'longtext'
+            'paymentsdetailslog' => 'longtext'
         ];
         parent::__construct($objectName, $translator, 'bustrackdashboards', ['parentid' => ['organizations']], [], $colsDefinition,  [], [], ['custom']);
+        $this->categoriesModel = Tfk::$registry->get('objectsStore')->objectModel('bustrackcategories');
     }
-    public function paymentsKPIs($organization, $startDate, $endDate){
-        $tk = SUtl::$tukosTableName; $nonCategorized = $this->tr('noncategorized');
+    public function paymentsDetailsKPIs($organization, $startDate, $endDate){
+        $tk = SUtl::$tukosTableName;
         $results = SUtl::$tukosModel->store->query(<<<EOT
             SELECT `bustrackinvoices`.`id` as `invoiceid`, `t2`.`name` as `invoicename`, `bustrackinvoices`.`reference` as `invoicereference`, `t2`.`parentid` as `customer`,`bustrackinvoices`.`invoicedate`, 
                    `bustrackinvoices`.`pricewt` as `invoiceamount`, 
-                   `bustrackpayments`.`id` as `paymentid`, `t0`.`name` as `paymentname`, `bustrackpayments`.`date` as `paymentdate`, `bustrackpayments`.`paymenttype`, 
-                   `bustrackpayments`.`reference` as `paymentreference`, `bustrackpayments`.`slip`,
-                   `$tk`.`name` as `paymentitemname`, `bustrackpaymentsitems`.`amount` as `paymentitemamount`, IFNULL(`t3`.`name`, '$nonCategorized') as `category`, `bustrackinvoicesitems`.`vatfree`, `bustrackinvoicesitems`.`vatrate`
+                   `bustrackpayments`.`id` as `paymentid`, `t0`.`name` as `paymentname`, `bustrackpayments`.`date` as `paymentdate`, 
+                   `$tk`.`name` as `paymentitemname`, `bustrackpaymentsitems`.`amount` as `paymentitemamount`, IFNULL(`t3`.`id`, 0) as `category`, `bustrackinvoicesitems`.`vatfree`, `bustrackinvoicesitems`.`vatrate`
             FROM `bustrackpaymentsitems`
                 INNER JOIN `$tk` on `$tk`.`id` = `bustrackpaymentsitems`.`id`
                 INNER JOIN (`$tk` as `t0` INNER JOIN `bustrackpayments`) on (`t0`.`id` = `bustrackpayments`.`id` AND `$tk`.`parentid` = `bustrackpayments`.`id`)
@@ -50,22 +71,21 @@ class Model extends AbstractModel {
 EOT
         );
         $results = $results->fetchAll(\PDO::FETCH_ASSOC);
-        $kpis['paymentscount'] = 0; $kpis['paidvatfree'] = 0; $kpis['paidwithvatwot'] = 0; $kpis['paidvat'] = 0; 
-        $kpis['paidwotpercategory'] = [];
+        $kpis['detailsvatfree'] = 0; $kpis['detailswithvatwot'] = 0; $kpis['detailsvat'] = 0; 
+        $kpis['detailswotpercategory'] = [];
         
         foreach ($results as $result){
-            $kpis['paymentscount'] += 1;
             if (empty($result['vatfree'])){
                 $paidwot = $result['paymentitemamount']/ (1 + $result['vatrate']);
-                $kpis['paidwithvatwot'] += $paidwot;
-                $kpis['paidvat'] += $paidwot * $result['vatrate'];
-                Utl::increment($kpis['paidwotpercategory'], $result['category'], $paidwot);
+                $kpis['detailswithvatwot'] += $paidwot;
+                $kpis['detailsvat'] += $paidwot * $result['vatrate'];
+                Utl::increment($kpis['detailswotpercategory'], $result['category'], $paidwot);
             }else{
-                $kpis['paidvatfree'] += $result['paymentitemamount'];
-                Utl::increment($kpis['paidwotpercategory'], $result['category'], $result['paymentitemamount']);
+                $kpis['detailsvatfree'] += $result['paymentitemamount'];
+                Utl::increment($kpis['detailswotpercategory'], $result['category'], $result['paymentitemamount']);
             }
         }
-        $kpis['paymentslog'] = $results;
+        $kpis['paymentsdetailslog'] = $results;
         return $kpis;
     }
     public function pendingInvoicesKPIs($organization, $startDate, $endDate){
@@ -86,64 +106,87 @@ EOT
         }
         return ['pendingamount' => $pendingAmount, 'pendinginvoiceslog' => $results];
     }
-    public function unassignedPaymentsKPIs($organization, $startDate, $endDate){
+    public function paymentsKPIs($organization, $startDate, $endDate){
         $results = SUtl::$tukosModel->store->query(<<<EOT
-            SELECT `bustrackpayments`.`id`, t0.`parentid` as `customer`, `t0`.`name`, `bustrackpayments`.`date`, `bustrackpayments`.`paymenttype`, 
-                   `bustrackpayments`.`amount`, IFNULL(`bustrackpayments`.`amount` - sum(`bustrackpaymentsitems`.`amount`), `bustrackpayments`.`amount`)  as `unassignedamount`
+            SELECT `bustrackpayments`.`id`, t0.`parentid` as `customer`, `t0`.`name`, `bustrackpayments`.`date`, `bustrackpayments`.`paymenttype`,
+                   `bustrackpayments`.`reference` as `paymentreference`, `bustrackpayments`.`slip`,  `bustrackpayments`.`isexplained`,
+                   `bustrackpayments`.`amount`, `bustrackpayments`.`amount` - IFNULL(sum(`bustrackpaymentsitems`.`amount`), 0)  as `unassignedamount`, `bustrackpayments`.`category`
             FROM `bustrackpayments`
                 INNER JOIN (`tukos` as `t0`) ON `t0`.`id` = `bustrackpayments`.`id`
                 LEFT JOIN(`bustrackpaymentsitems`, `tukos` as `t1`) ON `t1`.`id` = `bustrackpaymentsitems`.`id` AND `t1`.`parentid` = `bustrackpayments`.`id`
             WHERE (`bustrackpayments`.`date` >= '$startDate' AND `bustrackpayments`.`date` <= '$endDate')
             GROUP BY `bustrackpayments`.`id`
-            HAVING `unassignedamount` <> 0 OR `unassignedamount` IS NULL
 EOT
             );
-        $results = $results->fetchAll(\PDO::FETCH_ASSOC); $unassignedAmount = 0;
+        $results = $results->fetchAll(\PDO::FETCH_ASSOC);
+        $kpis['unexpvatfree'] = 0; $kpis['unexpwithvatwot'] = 0; $kpis['unexpvat'] = 0;
+        $kpis['expvatfree'] = 0; $kpis['expwithvatwot'] = 0; $kpis['expvat'] = 0;
+        $kpis['unaswotpercategory'] = [];
         foreach ($results as $result){
-            $unassignedAmount += $result['unassignedamount'];
+            $categoryId = Utl::getItem('category', $result, 0, 0);
+            $vatRate = $this->categoriesModel->vatRate($organization, $categoryId);
+            $expOrUnexp = $result['isexplained'] === 'YES' ? 'exp' : 'unexp';
+            if ($vatRate){
+                $kpis[$expOrUnexp . 'withvatwot'] += $paidwot = $result['unassignedamount'] / (1 + $vatRate);
+                $kpis[$expOrUnexp . 'vat'] += $paidwot * $vatRate;
+                Utl::increment($kpis['unaswotpercategory'], $categoryId, $paidwot);
+            }else{
+                $kpis[$expOrUnexp . 'vatfree'] += $result['unassignedamount'];
+                Utl::increment($kpis['unaswotpercategory'], $categoryId, $result['unassignedamount']);
+            }
         }
-        return ['unassignedamount' => $unassignedAmount, 'unassignedpaymentslog' => $results];
+        $kpis['paymentslog'] = $results;
+        return $kpis;
     }
     function processOne($where){
-        $where = $this->user->filter($where, $this->objectName); $newValues = ['paymentslog' => '', 'pendinginvoiceslog' => '', 'unassignedpaymentslog' => ''];
-        $values = $this->getOne(['where' => $where, 'cols' => ['parentid', 'startdate', 'enddate', 'paymentsflag', 'pendinginvoicesflag', 'unassignedpaymentsflag']]);
+        $where = $this->user->filter($where, $this->objectName); $newValues = ['paymentslog' => '', 'pendinginvoiceslog' => '', 'paymentsdetailslog' => ''];
+        $values = $this->getOne(['where' => $where, 'cols' => ['parentid', 'startdate', 'enddate', 'startdatependinginvoices', 'paymentsflag', 'pendinginvoicesflag', 'paymentsdetailsflag']]);
         if (!empty($values['parentid']) && !empty($values['startdate'])){
             if (empty($values['enddate'])){$values['enddate'] = date('Y-m-d');}
-            if ($values['paymentsflag'] !== 'YES'){
-                $newValues = array_merge($newValues, $this->paymentsKPIs($values['parentid'], $values['startdate'], $values['enddate']));
-                $newValues['paidwotpercategory']     = Utl::toStoreData($newValues['paidwotpercategory'], 'category', 'amount');
+            if ($values['paymentsdetailsflag'] !== 'YES'){
+                $newValues = array_merge($newValues, $this->paymentsDetailsKPIs($values['parentid'], $values['startdate'], $values['enddate']));
             }
             if ($values['pendinginvoicesflag'] !== 'YES'){
-                $newValues = array_merge($newValues, $this->pendingInvoicesKPIs($values['parentid'], $values['startdate'], $values['enddate']));
+                $newValues = array_merge($newValues, $this->pendingInvoicesKPIs($values['parentid'], empty($startDate = $values['startdatependinginvoices']) ? $values['startdate'] : $startDate, $values['enddate']));
             }
-            if ($values['unassignedpaymentsflag'] !== 'YES'){
-                $newValues = array_merge($newValues, $this->unassignedPaymentsKPIs($values['parentid'], $values['startdate'], $values['enddate']));
+            if ($values['paymentsflag'] !== 'YES'){
+                $newValues = array_merge($newValues, $this->paymentsKPIs($values['parentid'], $values['startdate'], $values['enddate']));
             }
             if (!empty($newValues)){
+                $newValues['totalwotpercategory'] = Utl::incrementArray(Utl::extractItem('detailswotpercategory', $newValues, [], []), Utl::extractItem('unaswotpercategory', $newValues, [], []));
                 $newValues = Utl::jsonEncodeArray($newValues);
-                $this->updateOne($newValues, ['where' => $where]);
+                foreach (['details', 'exp', 'unexp'] as $prefix){
+                    $newValues["{$prefix}wot"] = $newValues["{$prefix}vatfree"] + $newValues["{$prefix}withvatwot"];
+                    $newValues["{$prefix}wt"] = $newValues["{$prefix}wot"] + $newValues["{$prefix}vat"];
+                }
+                foreach (['vatfree', 'withvatwot', 'vat', 'wot', 'wt'] as $label){
+                    $newValues["total{$label}"] = $newValues["details{$label}"] + $newValues["exp{$label}"] + $newValues["unexp{$label}"];
+                }
+                $this->updateOne($newValues, ['where' => $where])['id'];
                 Feedback::add($this->tr('Dashboard updated'));
             }else{
-                Feedback::add($this->tr('Nothingslectednochange'));
+                Feedback::add($this->tr('Nothingselectednochange'));
             }
         }else{
-            Feedback::add($this->tr('Need organization, startdate and enddate'));
+            Feedback::add($this->tr('Needorgastartend'));
+            return false;
         }
         return [];
     }
     public function getOneExtended ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
         $result = parent::getOneExtended($atts);
-        $result['paidwot'] = $result['paidvatfree'] + $result['paidwithvatwot'];
-        $result['paidwt'] = $result['paidwot'] + $result['paidvat'];
-        $kpiCol = 'paidwotpercategory';
-        if (!empty($result[$kpiCol])){
-            $values = json_decode($result[$kpiCol], true);
-            $result[$kpiCol] = ['store' => $values];
+        $totalWotPerCategory = json_decode($result['totalwotpercategory'], true);
+        $organization = $result['parentid'];
+        $namedPerCategory = [];
+        if (!empty($totalWotPerCategory)){
+            foreach($totalWotPerCategory as $id => $item){
+                $namedPerCategory[$this->categoriesModel->tName($organization, $id)] = $item;
+            }
+            $result['totalwotpercategory'] = ['store' => Utl::toStoreData($namedPerCategory, 'category', 'amount')];
         }
-        if (!empty($result['paymentslog'])){
-            $result['paymentslog'] = json_decode($result['paymentslog'], true);
-            foreach ($result['paymentslog'] as &$item){
-                $item['paymenttype'] = $this->tr($item['paymenttype']);
+        if (!empty($result['paymentsdetailslog'])){
+            $result['paymentsdetailslog'] = json_decode($result['paymentsdetailslog'], true);
+            foreach ($result['paymentsdetailslog'] as &$item){
                 Tfk::addExtra($item['invoiceid'], ['name' => Utl::extractItem('invoicename', $item) . '-' . Utl::extractItem('invoicereference', $item), 'object' => 'bustrackinvoices']);
                 Tfk::addExtra($item['paymentid'], ['name' => Utl::getItem('paymentname', $item), 'object' => 'bustrackpayments']);
                 SUtl::addItemIdCols($item, ['customer']);
@@ -151,14 +194,17 @@ EOT
         }
         if (!empty($result['pendinginvoiceslog'])){
             $result['pendinginvoiceslog'] = json_decode($result['pendinginvoiceslog'], true);
-            SUtl::addItemsIdCols($result, ['customer']);
-        }
-        if (!empty($result['unassignedpaymentslog'])){
-            $result['unassignedpaymentslog'] = json_decode($result['unassignedpaymentslog'], true);
-            foreach ($result['unassignedpaymentslog'] as &$item){
-                $item['paymenttype'] = $this->tr($item['paymenttype']);
-                Tfk::addExtra($item['id'], ['name' => Utl::getItem('name', $item), 'object' => 'bustrackpayments']);
+            foreach ($result['pendinginvoiceslog'] as &$item){
+                Tfk::addExtra($item['id'], ['name' => Utl::extractItem('name', $item) . '-' . Utl::extractItem('reference', $item), 'object' => 'bustrackinvoices']);
                 SUtl::addItemIdCols($item, ['customer']);
+            }
+        }
+        if (!empty($result['paymentslog'])){
+            $result['paymentslog'] = json_decode($result['paymentslog'], true);
+            foreach ($result['paymentslog'] as &$item){
+                $item['paymenttype'] = $this->tr($item['paymenttype']);
+                Tfk::addExtra($item['id'], ['name' => Utl::extractItem('name', $item), 'object' => 'bustrackpayments']);
+                SUtl::addItemIdCols($item, ['customer', 'category']);
             }
         }
         return $result;

@@ -93,13 +93,13 @@ class Model extends AbstractModel {
                         $normalizationDuration = 600;
                         while($mondayDate <= $lastMondayDate){
                             $weekNumber += 1;
-                            $numberOfSessions = 0;
-                            $chartItem = ['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'load' => 0, 'intensity' => 0, 'duration' => 0, 'stress' => 0,
-                                'distance' => 0, 'elevationgain' => 0
+                            //$numberOfSessions = 0;
+                            $chartItem = ['id' => $weekNumber, 'week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'load' => 0, 'intensity' => 0,
+                                'duration' => 0, 'stress' => 0, 'distance' => 0, 'elevationgain' => 0
                             ];
                             while(!empty($session) && $session['startdate'] < $nextMondayDate){
                                 if ($session['sport'] != 'rest'){
-                                    $numberOfSessions += 1;
+                                    //$numberOfSessions += 1;
                                     $chartItem['distance'] += floatval($session['distance']);
                                     $chartItem['elevationgain'] += floatval($session['elevationgain']);
                                     $intensity = intval($session['intensity']);//array_search($session['intensity'], Sports::$intensityOptions);
@@ -168,11 +168,11 @@ class Model extends AbstractModel {
                 $normalizationDuration = 600;
                 while($mondayDate <= $lastMondayDate){
                     $weekNumber += 1;
-                    $numberOfSessions = 0;
-                    $chartItem = ['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'distance' => 0, 'elevationgain' => 0, 'duration' => 0, 
-                        'perceivedeffort' => 0, 'perceivedload' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0];
+                    //$numberOfSessions = 0;
+                    $chartItem = ['id' => $weekNumber, 'week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'distance' => 0, 'elevationgain' => 0,
+                        'duration' => 0, 'perceivedeffort' => 0, 'perceivedload' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0];
                     while(!empty($session) && $session['startdate'] < $nextMondayDate){
-                        $numberOfSessions += 1;
+                        //$numberOfSessions += 1;
                         $duration = empty($duration = $session['duration']) ? 0 : $duration;
                         $chartItem['distance'] += floatval($session['distance']);
                         $chartItem['elevationgain'] += floatval($session['elevationgain']);

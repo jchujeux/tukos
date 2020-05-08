@@ -28,6 +28,9 @@ class Process extends AbstractAction{
             if (empty($query['params']['noprocess'])){
                 $this->processViewModel = $this->objectsStore->objectViewModel($this->controller, 'Edit', 'Process');
                 $response = $this->processViewModel->process($query);
+                if ($response === false){
+                    return [];
+                }
             }
             if (empty($query['params']['noget'])){
                 $this->getViewModel     = $this->objectsStore->objectViewModel($this->controller, 'Edit', 'Get');

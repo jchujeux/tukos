@@ -9,6 +9,7 @@ class View extends AbstractView {
     
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Payment', 'Description');
+        $this->sendOnSave = array_merge($this->sendOnSave, ['parentid', 'invoiceid']);
         $labels = Bustrack::$labels;
         $customDataWidgets = [
             'invoiceid'     => ViewUtils::objectSelect($this, $labels['invoice'], 'bustrackinvoices', ['atts' => ['storeedit' => ['width' => 100]]]),

@@ -13,6 +13,9 @@ class SubObjectsSave extends SubObjects{
             $subObject = $editModelSave->view->subObjects[$widgetName];
             $dataWidgets = Utl::array_merge_recursive_replace($subObject['view']->dataWidgets, Utl::getItem('colsDescription', $subObject['atts'], []));
             $subObjectModel = $editModelSave->objectsStore->objectModel($subObject['object']);
+            if (method_exists($subObjectModel, 'bulkPreProcess')){
+                $subObjectModel->bulkPreProcess($editModelSave->objectName);
+            }
             $deleteValues = []; $idsDeleted = []; $widgetsMapping = [];
             $saveSubObject = $editModelSave->objectsStore->objectViewModel($editModelSave->controller, 'Edit', 'Save', ['view' => $subObject['view'], 'model' => $subObject['model']]);
             foreach ($dataWidgets as $colName => $widget){
@@ -60,6 +63,15 @@ class SubObjectsSave extends SubObjects{
             if (! empty($deleteValues)){
                 $deleteSubObject = new DeleteModel($editModelSave->controller,  ['view' => $subObject['view'], 'model' => $subObjectModel]);
                 $idsDeleted = $deleteSubObject->deleteMultiple($deleteValues);
+            }
+        }
+        if (!empty($idsSaved) || !empty($deleteValues)){
+            foreach($valuesToSave as $widgetName => $values){
+                $subObject = $editModelSave->view->subObjects[$widgetName];
+                $subObjectModel = $editModelSave->objectsStore->objectModel($subObject['object']);
+                if (method_exists($subObjectModel, 'bulkPostProcess')){
+                    $subObjectModel->bulkPostProcess($editModelSave->objectName);
+                }
             }
         }
         return ['saved' => $idsSaved, 'deleted' => $idsDeleted];

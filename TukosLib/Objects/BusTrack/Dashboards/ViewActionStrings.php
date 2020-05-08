@@ -4,9 +4,9 @@ namespace TukosLib\Objects\BusTrack\Dashboards;
 class ViewActionStrings{
 
     protected  static $widgets = [
-        'paymentsflag' => "['paymentscount', 'paidvatfree', 'paidwithvatwot', 'paidvat', 'paidwot', 'paidwt', 'paidwotpercategory', 'paymentslog']",
+        'paymentsdetailsflag' => "['paidvatfree', 'paidwithvatwot', 'paidvat', 'paidwot', 'paidwt', 'paidwotpercategory', 'paymentsdetailslog']",
         'pendinginvoicesflag' => "['pendingamount', 'pendinginvoiceslog']",
-        'unassignedpaymentsflag' => "['unassignedamount', 'unassignedpaymentslog']"
+        'paymentsflag' => "['paymentslog']"
     ];
     
     static function flagLocalActionString($flagName){
@@ -17,7 +17,7 @@ sWidget.set('value', newValue ? 'YES' : '');
 {$widgets[$flagName]}.forEach(function(widgetName){
     form.getWidget(widgetName).set('hidden', newValue);
 });
-console.log('checkbox action was triggerred - $flagName = ' + newValue);
+form.getWidget('totalamount').set('hidden', form.getWidget.get('paymentsdetailsflag') === 'YES' && form.getWidget.get('paymentsflag') === 'YES');
 form.resize();
 return true;
 EOT;
@@ -35,8 +35,8 @@ var form = this, getWidget = lang.hitch(form, form.getWidget);
 {$widgets['pendinginvoicesflag']}.forEach(function(widgetName){
     form.getWidget(widgetName).set('hidden', getWidget('pendinginvoicesflag').get('checked'));
 });
-{$widgets['unassignedpaymentsflag']}.forEach(function(widgetName){
-    form.getWidget(widgetName).set('hidden', getWidget('unassignedpaymentsflag').get('checked'));
+{$widgets['paymentsdetailsflag']}.forEach(function(widgetName){
+    form.getWidget(widgetName).set('hidden', getWidget('paymentsdetailsflag').get('checked'));
 });
 form.resize();
 EOT;

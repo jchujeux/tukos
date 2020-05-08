@@ -10,10 +10,9 @@ define([
 	'dojo/keys',
 	'dojo/query',
 	'dgrid/Grid',
-	'tukos/widgets/WidgetsLoader', 'tukos/_WidgetsExtend',
-	//'tukos/widgetUtils',
+	'tukos/widgets/WidgetsLoader', 'tukos/_WidgetsExtend', 'tukos/utils', 'tukos/evalutils',
 	'dojo/_base/sniff'
-], function (declare, lang, Deferred, when, domConstruct, domClass, on, has, keys, query, Grid, WidgetsLoader, _WidgetsExtend/*, wutils*/) {
+], function (declare, lang, Deferred, when, domConstruct, domClass, on, has, keys, query, Grid, WidgetsLoader, _WidgetsExtend, utils, eutils) {
 
 	return declare(null, {
 		constructor: function () {
@@ -47,9 +46,26 @@ define([
 		getEditorInstances: function(){
 			return this._editorInstances;
 		},
-		
+		_loadAndCreateSharedEditor: function(col, editor){
+			return when(WidgetsLoader.loadWidget(editor), lang.hitch(this, function(editor){
+				col.column.editor = editor;
+				return this._createSharedEditor(col.column, col.originalRenderCell);
+			}));
+		},
 		getEditorInstance: function(colId){
-			var col = this._editorInstancesColumns[colId];
+			var col = this._editorInstancesColumns[colId], column = col.column, alternateEditors = column.alternateEditors, editorName, editorInstance, alternateEditor;
+			this._editorInstances[colId] = this._editorInstances[colId] || {};
+			if (alternateEditors && (editorName = (column.editorSelectorFunction || (column.editorSelectorFunction =  eutils.eval(column.editorSelector)))(this))){
+				alternateEditor = {editor: alternateEditors[editorName].type, editorArgs: alternateEditors[editorName].atts};
+				lang.mixin(column, alternateEditor);
+			}else{
+				lang.mixin(column, col.defaultEditor);
+				editorName = 'default';
+			}
+			return this._editorInstances[colId][editorName] || (col 
+					? (this._editorInstances[colId][editorName] = (typeof column.editor === 'string' ? this._loadAndCreateSharedEditor(col, column.editor) : this._createSharedEditor(column, col.originalRenderCell)))
+					: col);
+/*
 			return this._editorInstances[colId] || (col 
 				? (this._editorInstances[colId] = typeof col.column.editor === 'string'
 					? when(WidgetsLoader.loadWidget(col.column.editor), lang.hitch(this, function(editor){
@@ -59,8 +75,8 @@ define([
 					: this._createSharedEditor(col.column, col.originalRenderCell)
 				  )
 				: col);
+*/
 		},
-		
 		insertRow: function () {
 			this._editorRowListeners = {};
 			var rowElement = this.inherited(arguments);
@@ -218,9 +234,8 @@ define([
 
 			if (editOn) {
 				// Create one shared widget/input to be swapped into the active cell.
-				this._editorInstancesColumns[column.id] = {column: column, originalRenderCell: originalRenderCell};
-			}
-			else if (isWidget) {
+				this._editorInstancesColumns[column.id] = {column: column, originalRenderCell: originalRenderCell, defaultEditor:{editor: column.editor, editorArgs: lang.clone(column.editorArgs)}};
+			}else if (isWidget) {
 				// Append to array iterated in removeRow
 				this._alwaysOnWidgetColumns.push(column);
 			}

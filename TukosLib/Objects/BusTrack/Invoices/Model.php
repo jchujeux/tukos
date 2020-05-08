@@ -3,6 +3,7 @@ namespace TukosLib\Objects\BusTrack\Invoices;
 
 use TukosLib\Objects\AbstractModel;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Utils\HtmlUtilities as HUtl;
 use TukosLib\TukosFramework as Tfk;
 
@@ -22,11 +23,11 @@ class Model extends AbstractModel {
             'invoicedate' => 'date NULL DEFAULT NULL',
         	'items'  => 'longtext',
         	'discountpc' => "DECIMAL (5, 4)",
-        	'discountwt' => "DECIMAL (5, 2)",
-        	'pricewot'   => "DECIMAL (5, 2)",
-            'pricewt'   => "DECIMAL (5, 2)",
-            //'todeduce' => "DECIMAL (5, 2)",
-            //'lefttopay' => "DECIMAL (5, 2)",
+        	'discountwt' => "DECIMAL (10, 2)",
+        	'pricewot'   => "DECIMAL (10, 2)",
+            'pricewt'   => "DECIMAL (10, 2)",
+            //'todeduce' => "DECIMAL (10, 2)",
+            'lefttopay' => "DECIMAL (10, 2)",
             'status' =>  'VARCHAR(50)  DEFAULT NULL',
         ];
         parent::__construct($objectName, $translator, 'bustrackinvoices', ['parentid' => ['bustrackpeople', 'bustrackorganizations'], 'organization' => ['bustrackorganizations'],
@@ -47,30 +48,38 @@ class Model extends AbstractModel {
         $dateFormat = $this->user->dateFormat();
         $atts = $valuesAndAtts['atts'];
         $invoice = $valuesAndAtts['values'];
-
-        $oldInvoice = $this->getOne(['where' => $this->user->filter(['id' => $query['id']], $this->objectName),'cols' => ['items']], ['items' => []]);
-		
-        if (isset($oldInvoice['items'])){
-        	if (!empty($invoice['items'])){
-        		$invoice['items'] = Utl::toAssociative($invoice['items'], 'id');
-        		$invoice['items'] = Utl::array_merge_recursive_replace($oldInvoice['items'], $invoice['items']);
-        	}else{
-        		$invoice['items'] = $oldInvoice['items'];
-        	}
-        }
         $colsFormatType = ['rowId' => 'string',  'catalogid' => 'string', 'name' => 'string', 'comments' => 'string', 'quantity' => 'string', 'unitpricewot' => 'currency', 'unitpricewt' => 'currency',
-        	'discount' => 'percent', 'pricewot' => 'currency', 'vatrate' => 'percent', 'pricewt' => 'currency'];
+            'discount' => 'percent', 'pricewot' => 'currency', 'vatrate' => 'percent', 'pricewt' => 'currency'];
         $optionalCols = ['rowId', 'catalogid', 'comments'];
         $absentOptionalCols = array_filter($optionalCols, function($col) use ($atts){
             return $atts[$col] !== 'on';
         });
         $selectedColsFormatType = array_diff_key($colsFormatType, array_flip($absentOptionalCols));
-        $hasDiscountCol = false;
-        foreach($invoice['items'] as $item){
+        $colsToRetrieve = array_merge(array_keys($selectedColsFormatType), ['id']);
+        $hasRowIdCol = array_search('rowId', $colsToRetrieve);
+        if ($hasRowIdCol){
+            array_splice($colsToRetrieve, $hasRowIdCol, 1);
+        }
+        $invoiceItemsModel = Tfk::$registry->get('objectsStore')->objectModel('bustrackinvoicesitems');
+        $items = Utl::toAssociative($invoiceItemsModel->getAll(['where' => ['parentid' => $invoice['id']], 'cols' => $colsToRetrieve]), 'id');
+        if (!empty($items)){
+        	if (!empty($invoice['items'])){
+        		$invoice['items'] = Utl::toAssociative($invoice['items'], 'id');
+        		$invoice['items'] = Utl::array_merge_recursive_replace($items, $invoice['items']);
+        	}else{
+        		$invoice['items'] = $items;
+        	}
+        }
+        $hasDiscountCol = false; $i = 0;
+        foreach($invoice['items'] as &$item){
         	if (isset($item['discount']) && $item['discount'] > 0){
         		$hasDiscountCol = true;
         		break;
         	}
+        	if ($hasRowIdCol){
+        	    $item['rowId'] = $i += $i;
+        	}
+        	
         }
         if (!$hasDiscountCol){
         	unset($selectedColsFormatType['discount']);
@@ -146,5 +155,38 @@ class Model extends AbstractModel {
         $invoice['todeduce'] = Utl::extractItem('downpay', $invoice);
         return $invoice;
 	}
+	public function updateForPaymentsItems($invoicesIds){
+	    $inValue = implode(',', $invoicesIds);
+	    $results = SUtl::$tukosModel->store->query(<<<EOT
+            SELECT `bustrackinvoices`.`id`, IFNULL(`bustrackinvoices`.`pricewt` - sum(`bustrackpaymentsitems`.`amount`), `pricewt`) as `lefttopay`
+            FROM `bustrackinvoices`
+                INNER JOIN (`tukos` as `t0`) ON `t0`.`id` = `bustrackinvoices`.`id`
+                LEFT JOIN(`bustrackpaymentsitems`, `tukos` as `t1`) ON `t1`.`id` = `bustrackpaymentsitems`.`id` AND `bustrackpaymentsitems`.`invoiceid` = `bustrackinvoices`.`id`
+            WHERE (`bustrackinvoices`.`id` IN ($inValue))
+            GROUP BY `bustrackinvoices`.`id`
+EOT
+	        );
+	    $results = $results->fetchAll(\PDO::FETCH_ASSOC);
+	    foreach($results as $result){
+	        $this->updateOne($result);
+	    }
+	}
+    public function updateForInvoicesItems($invoicesIds){
+        $inValue = implode(',', $invoicesIds);
+        $results = SUtl::$tukosModel->store->query(<<<EOT
+SELECT `bustrackinvoices`.`id`, IFNULL(sum(`bustrackinvoicesitems`.`pricewot`), 0) as `pricewot`, IFNULL(sum(`bustrackinvoicesitems`.`pricewt`), 0) as `pricewt`, 
+        IFNULL(IFNULL(sum(`bustrackinvoicesitems`.`pricewt`), 0) - sum(`bustrackpaymentsitems`.`amount`), @pricewt) as `lefttopay`
+   FROM `bustrackinvoices`
+      INNER JOIN (`tukos` as `t0`) ON `t0`.`id` = `bustrackinvoices`.`id`
+      LEFT JOIN(`bustrackinvoicesitems`, `tukos` as `t1`) ON `t1`.`id` = `bustrackinvoicesitems`.`id` AND `t1`.`parentid` = `bustrackinvoices`.`id`
+      LEFT JOIN(`bustrackpaymentsitems`, `tukos` as `t2`) ON `t2`.`id` = `bustrackpaymentsitems`.`id` AND `bustrackpaymentsitems`.`invoiceid` = `bustrackinvoices`.`id`
+WHERE (`bustrackinvoices`.`id` IN ($inValue))
+EOT
+            );
+        $results = $results->fetchAll(\PDO::FETCH_ASSOC);
+        foreach($results as $result){
+            $this->updateOne($result);
+        }
+    }
 }
 ?>

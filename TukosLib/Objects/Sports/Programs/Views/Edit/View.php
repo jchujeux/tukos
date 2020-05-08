@@ -239,7 +239,7 @@ class View extends EditView{
 		        ],
 		        'onOpenAction' => $this->googleConfOnOpenAction(),
 		    ]];
-		$durationFormat = ['renderCell' => 'renderContent', 'formatType' => 'secondsToHHMMSS']; $numberFormat = ['renderCell' => 'renderContent', 'formatType' => 'number', 'formatOptions' => ['places' => 0]];
+		//$durationFormat = ['renderCell' => 'renderContent', 'formatType' => 'secondsToHHMMSS']; $numberFormat = ['renderCell' => 'renderContent', 'formatType' => 'number', 'formatOptions' => ['places' => 0]];
 		$this->actionWidgets['sessionstracking'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Sessionstracking'), 'allowSave' => true, 'includeWidgets' => ['parentid', 'synchrostart', 'synchroend']]];
 		$this->actionLayout['contents']['actions']['widgets'][] = 'sessionstracking';
 		$this->actionWidgets['sessionstracking']['atts']['dialogDescription'] = [
@@ -327,11 +327,5 @@ class View extends EditView{
 		        'onOpenAction' => $this->sessionsTrackingOnOpenAction($tr),
 		    ]];
 	}
-/*
-	private function sessionsTrackingActionWidgetDescription($action){
-	    return ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr($action), 'onClickAction' => $this->sessionsTrackingActionButtonsOnClickAction($action)
-	        ]];
-	}
-*/
 }
 ?>

@@ -79,6 +79,8 @@ abstract class AbstractModel extends ObjectTranslator {
         $this->objectCols = array_keys($colsDefinition);
         $this->allCols = array_merge(array_diff($this->tukosModel->sharedObjectCols, $this->absentOptionalCols), $this->objectCols);
         $this->colsToTranslate = array_merge(['permission', 'grade', 'configstatus'], $colsToTranslate);
+        $this->isBulkProcessing = false;
+        $this->bulkParentObject = null;
     }
     public function setUseItemsCache($newValue){
         $this->useItemsCache = $newValue;
@@ -271,10 +273,12 @@ abstract class AbstractModel extends ObjectTranslator {
                 return false;
             }
         }else{
+/*
             if (!empty($newValues['updated']) && $newValues['updated'] < $oldValues['updated']){
                 Feedback::add([[$this->tr('theuser') => $oldValues['updator']], [$this->tr('updatedat') => $oldValues['updated']], [$this->tr('afteryouredit') => null]]);
                 return false;
             }
+*/
             if ($this->user->hasUpdateRights($oldValues)){
                 return $this->_update($oldValues, $newValues, $jsonFilter);
             }else{
@@ -348,7 +352,7 @@ abstract class AbstractModel extends ObjectTranslator {
         return $updatedRows;
     }
     
-    private function _update($oldValues, $newValues, $jsonFilter = false){
+    public function _update($oldValues, $newValues, $jsonFilter = false){
         $oldUpdator = Utl::extractItem('updator', $oldValues);
         $oldHistory = Utl::extractItem('history', $oldValues);
 
@@ -379,7 +383,9 @@ abstract class AbstractModel extends ObjectTranslator {
             $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $oldValues['id']]]);
 
             $updatedRow = ['id' => $oldValues['id'], 'updated' => $updated, 'updator' => $updator];
-
+            if (method_exists($this, 'processUpdateForBulk')){
+                $this->processUpdateForBulk($oldValues, $newValues);
+            }
             return $updatedRow;
 
         }else{
@@ -453,7 +459,9 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         $this->jsonEncode($values, $jsonFilter);
         $this->insertItem($values);
-
+        if (method_exists($this, 'processInsertDeleteForBulk')){
+            $this->processInsertDeleteForBulk($values);
+        }
         return $values;
     }
     public function insertExtended($values, $init=false, $jsonFilter = false){
@@ -485,10 +493,14 @@ abstract class AbstractModel extends ObjectTranslator {
         return $duplicate;
     }
     public function delete ($where, $item = []){
-        $oldItems = $this->getAll(['where' => $where, 'cols' => ['id', 'updator', 'permission', 'updated']]);
+        $cols = $cols =['id', 'updator', 'permission', 'updated'];
+        $oldItems = $this->getAll(['where' => $where, 'cols' => property_exists($this, 'additionalColsForBulkDelete') ? array_merge($cols, $this->additionalColsForBulkDelete) : $cols]);
         foreach($oldItems as $old){
             if ($this->user->hasDeleteRights($old)){
                 $toDelete[] = $old['id'];
+                if (method_exists($this, 'processInsertDeleteForBulk')){
+                    $this->processInsertDeleteForBulk($old);
+                }
             }else{
                 $noRightToDelete[] = $old['id'];
             }
@@ -508,6 +520,17 @@ abstract class AbstractModel extends ObjectTranslator {
         		'filteredrecords' => is_null($activeUserFilters) ? $this->foundRows() : $this->getAll(['where' => $this->user->filter($activeUserFilters, $this->objectName), 'cols' => ['count(*)']])[0]['count(*)'],
         		'totalrecords' => $this->getAll(['where' => $this->user->filter([], $this->objectName), 'cols' => ['count(*)']])[0]['count(*)']
         ];
+    }
+    public function bulkPreProcess($parentObjectName = ''){
+        $this->bulkParentObject = strtolower($parentObjectName);
+        $this->isBulkProcessing = true;
+    }
+    public function bulkPostProcess(){
+        if (method_exists($this, '_postProcess')){
+            $this->_postProcess();
+        }
+        $this->isBulkProcess = false;
+        $this->bulkParentObject = null;
     }
 }
 ?>

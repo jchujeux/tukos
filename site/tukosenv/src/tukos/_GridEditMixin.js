@@ -38,10 +38,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 }
             	//focusUtil.focus(editor.containerNode);// required for LazyEditor which is a ContentCOntainer and then does not get focused by default. Focus is required for onBlur to be activated and shared editor be removed
             }));
-            
-            this.on("dgrid-editor-hide", lang.hitch(this, function(evt){
-            	console.log('in dgrid-editor-hide');
-            }));
         },
         newRowPrefixNamedId: function(id){
         	var newRowPrefix = this.newRowPrefix;
@@ -263,15 +259,23 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             //}
             return item;
         },
-        updateRow: function(item){
+        updateRow: function(item, replace){
         	var idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {}, noRefresh = this.noRefreshOnUpdateDirty;
         	//this.isNotUserEdit += 1;
         	this.noRefreshOnUpdateDirty = true;
-        	utils.forEach(item, lang.hitch(this, function(value, col){
-        		if (value !== storeItem[col] && col !== 'connectedIds'){
-        			this.updateDirty(idPropertyValue, col, value);
-        		}
-        	}));
+        	if(replace){
+            	utils.forEach(storeItem, lang.hitch(this, function(value, col){
+            		if (value !== item[col] && !utils.in_array(col, ['connectedIds', 'idg', 'rowId', 'id'])){
+            			this.updateDirty(idPropertyValue, col, item[col] || '');
+            		}
+            	}));        		
+        	}else{
+            	utils.forEach(item, lang.hitch(this, function(value, col){
+            		if (value !== storeItem[col] && col !== 'connectedIds'){
+            			this.updateDirty(idPropertyValue, col, value);
+            		}
+            	}));       		
+        	}
         	if (this.onChangeNotify){
         		if (storeItem.connectedIds){
         			item.connectedIds = storeItem.connectedIds;
@@ -377,7 +381,12 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             this.deleteDirty(idgToDelete);
             this.noRefreshOnUpdateDirty = noRefresh;
         },
-        
+        deleteRows: function(rows){
+        	var self = this;
+        	rows.forEach(lang.hitch(this, function(row){
+        		this.deleteRowItem(row);
+        	}));
+        },
         moveRow: function(itemToMove, currentRowData, where){
             if ('rowId' in this.columns){
                 var noRefresh = this.noRefreshOnUpdateDirty;
@@ -459,34 +468,51 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             this.refresh({keepScrollPosition: true});
             return true;
         },
-
         _setValue: function(value){
-        	var noRefresh = this.noRefreshOnUpdateDirty;
+        	var noRefresh = this.noRefreshOnUpdateDirty, resetCounters = true, idp = this.collection.idProperty;
         	this.noRefreshOnUpdateDirty = true;
         	this.formulaCache = {};
             if (value == ''){//the Memory store needs to be emptied
                 this.store.setData([]); 
                 this.dirty = {};
             }else if(value instanceof Array){//a new  memory store needs to be filled in with the array value
-                this.store.setData(value); 
-                //if (this.onChangeNotify && !this.isNotUserEdit){
-                if (this.onChangeNotify/* && this.isUserEdit*/){
-                    this.notifyWidgets({action: 'create'});
-                }
-                this.dirty = {};
-                if (this.form && this.form.markIfChanged){
-                    //this.isNotUserEdit += 1;
-                    this.store.forEach(lang.hitch(this, function(row){
-                        if (!this.isSubObject ||!row['id']){
-                            for (var i in row){
-                                if (i != 'idg' && i !== 'updator' && i !== 'updated' && i !== 'canEdit' && i !== 'connectedIds'){// warging: there may be other read-only fields to exclude from dirty here
-                                    this.updateDirty(row['idg'], i, row[i]);
+            	if (this.form.markIfChanged && this.initialId){// is to be considered as a change, not reflecting then server store content
+            		var rowsToDelete = [];
+            		this.store.forEach(lang.hitch(this, function(row){
+            			for (var r in value){
+            				var rValue = value[r];
+            				if (row.id === rValue.id){
+            		            rValue[idp] = row[idp];
+            					this.updateRow(rValue, true);
+            					delete value[r];
+            					return;
+            				}
+            			}
+            			rowsToDelete.push(row);
+            		}));
+            		this.deleteRows(rowsToDelete);
+            		for (var r in value){
+            			this.addRow(null, value[r]);
+            		}
+            		resetCounters = false;
+            	}else{
+                	this.store.setData(value); 
+                    if (this.onChangeNotify/* && this.isUserEdit*/){
+                        this.notifyWidgets({action: 'create'});
+                    }
+                    this.dirty = {};
+                    if (this.form && this.form.markIfChanged){
+                        this.store.forEach(lang.hitch(this, function(row){
+                            if (!this.isSubObject ||!row['id']){
+                                for (var i in row){
+                                    if (i != 'idg' && i !== 'updator' && i !== 'updated' && i !== 'canEdit' && i !== 'connectedIds'){// warging: there may be other read-only fields to exclude from dirty here
+                                        this.updateDirty(row['idg'], i, row[i]);
+                                    }
                                 }
                             }
-                        }
-                    }));
-                    //this.isNotUserEdit += -1;
-                }
+                        }));
+                    }          		
+            	}
             }else{//current memory store needs to be updated with contents of current object, then saved (to empty dirty)
 /*
             	for (var row in value){
@@ -503,15 +529,20 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 console.log('_GridEditMixin: thought this was not in use!!')
                 //this.save();
             }
-            var maxId = 0;
+            if (resetCounters){
+                this.newRowPrefixId = 0;
+                this.deleted = [];
+            }
+            var maxId = this.maxId = 0;
             this.store.forEach(function(row){
                 if (row.id > maxId){
                     maxId = row.id;
                 }
             });
-            this.maxId = this.maxServerId = maxId;
-            this.newRowPrefixId = 0;
-            this.deleted = [];
+            this.maxId = maxId;
+            if (!this.form.markIfChanged && maxId > this.maxServerId){
+            	this.maxServerId = maxId;
+            }
             this.noRefreshOnUpdateDirty = noRefresh;
             this.set('collection', this.store.getRootCollection());
             this.setSummary();

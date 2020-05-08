@@ -163,18 +163,22 @@ trait QuotesAndInvoices {
 		    'overview' => ['formatType' => 'currency', 'width' => 80]
 		]]);
 	}
-	protected function priceWt($isInvoice = false){return ViewUtils::tukosCurrencyBox($this, 'Totalwt', ['atts' => [
+	protected function priceWt($isInvoice = false){
+	    return ViewUtils::tukosCurrencyBox($this, 'Totalwt', ['atts' => [
 				'edit' => ['onChangeLocalAction' => [
-						'pricewt'  => ['localActionStatus' =>
-								"var form = sWidget.form, itemsW = form.getWidget('items'), newVal = isNaN(newValue) ? '' : newValue;\n" .
-								"if (itemsW && itemsW.summary){\n" .
-								"var newDiscount = 1 - newVal / itemsW.summary.pricewt;\n" .
-								"form.setValueOf('discountpc', newVal == '' ? '' : newDiscount);\n" .
-								"form.setValueOf('discountwt' , itemsW.summary.pricewt  -  newVal);\n" .
-								"form.setValueOf('pricewot', itemsW.summary.pricewot * (1 -  newDiscount));\n" .
-						        ($isInvoice ? "form.setValueOf('lefttopay', newValue - (form.getWidget('paymentsitems').summary ||{summary: 0.0}).amount);\n" : "") .
-								"}\n" .
-								"return true;"
+						'pricewt'  => ['localActionStatus' => <<<EOT
+var form = sWidget.form, itemsW = form.getWidget('items'), newVal = isNaN(newValue) ? '' : newValue;
+if (itemsW && itemsW.summary){
+    var newDiscount = 1 - newVal / itemsW.summary.pricewt;
+	form.setValueOf('discountpc', newVal == '' ? '' : newDiscount);
+	form.setValueOf('discountwt' , itemsW.summary.pricewt  -  newVal);
+	form.setValueOf('pricewot', itemsW.summary.pricewot * (1 -  newDiscount));
+	if ($isInvoice){
+        form.setValueOf('lefttopay', newValue - utils.drillDown(form.getWidget('paymentsitems'), ['summary', 'amount'], 0));
+    }
+}
+return true;
+EOT
 						],
 				]],
 	           'overview' => ['formatType' => 'currency', 'width' => 80]

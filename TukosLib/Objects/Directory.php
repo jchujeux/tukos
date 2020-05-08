@@ -75,6 +75,7 @@ class Directory{
         'bustrackpaymentsitems' => 'BusTrack\Payments\Items',
         'bustrackcategories' => 'BusTrack\Categories',
         'bustrackdashboards' => 'BusTrack\Dashboards',
+        'bustrackreconciliations' => 'BusTrack\Reconciliations',
         'help'              => 'Help',
         ];
     private static $objectsDomainALiases = ['people' => ['bustrack' => 'bustrackpeople', 'sports' => 'sptathletes', 'physio' => 'physiopatients'], 'organizations' => ['bustrack' => 'bustrackorganizations', 'wine' => 'winegrowers']];

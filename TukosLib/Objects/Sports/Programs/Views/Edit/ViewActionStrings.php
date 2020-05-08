@@ -12,7 +12,11 @@ trait ViewActionStrings{
     var widget = this.getWidget(widgetName);
         widget.plots.week.values = dutils.difference(this.valueOf('fromdate'), this.valueOf('displayeddate'), 'week')+1;
     widget.chart.addPlot('week', widget.plots.week);
+	try{
     widget.chart.render();
+    }catch(err){
+        console.log('Error rendering chart in onViewOpenAction for widget: ' + widget.widgetName);
+    }
 }));
 EOT;
   }
@@ -208,7 +212,7 @@ EOT;
       return <<<EOT
 	var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');
 	this.set('label', Pmg.loading(label));
-	pane.serverAction( {action: 'Process', query: {id: true, params: {process: 'updateAcl', noget: true}}, {includeWidgets: ['googlecalid', 'acl']}).then(lang.hitch(this, function(){
+	pane.serverAction( {action: 'Process', query: {id: true, params: {process: 'updateAcl', noget: true}}}, {includeWidgets: ['googlecalid', 'acl']}).then(lang.hitch(this, function(){
 		console.log('server action completed');
 		this.set('label', label);
 		pane.resize();
@@ -248,7 +252,7 @@ EOT;
   }
   protected function _urlChangeLocalActionString($tr){
       return <<<EOT
-    var synchroStart = pane.valueOf('synchrostart'), synchroEnd = pane.valueOf('synchroend'), gcMetricsToInclude = pane.getWidget('gcmetricstoinclude'), gcLink = pane.getWidget('gclink'),
+    var synchroStart = pane.valueOf('gcsynchrostart'), synchroEnd = pane.valueOf('gcsynchroend'), gcMetricsToInclude = pane.getWidget('gcmetricstoinclude'), gcLink = pane.getWidget('gclink'),
         gcUrl = string.substitute("{$this->_gcUrl}", {athlete: pane.valueOf('gcathlete'), synchrostart: synchroStart.replace(/-/g, '/'), synchroend: synchroEnd.replace(/-/g, '/'),
             metadata: 'Sport,Workout_Title', metrics: gcMetricsToInclude.get('displayedValue').join(',')});
     gcLink.set('value', string.substitute(Pmg.message('gclinkmessage', 'sptprograms'), 

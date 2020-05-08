@@ -5,6 +5,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/re
             this.inherited(arguments);
             this.widgetType = "TukosPane";
             this.widgetsName = [];
+            this.customization = {};
             this.changedWidgets = {};
             this.userChangedWidgets = {};
             if (this.layout){

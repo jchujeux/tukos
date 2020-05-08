@@ -53,6 +53,7 @@ class Configure{
             '#bustrackpayments' => [['#bustrackpaymentsitems' => []]],
             '#bustrackdashboards' => [], 
             '#bustrackcategories' => [], 
+            '#bustrackreconciliations' => [],
         	'@help' => [
         	    ['overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],
         	     'guidedtour' => ['type' => 'MenuItem', 'atts' => [
@@ -63,7 +64,7 @@ class Configure{
         $this->transverseModules = ['help'];
         $this->objectModulesDefaultContextName = ['tukos' => 'tukos', 'customviews' => 'tukos'];
         $this->setobjectModulesDefaultContextName($this->modulesMenuLayout);
-        $this->objectModules = array_merge(array_keys($this->objectModulesDefaultContextName), ['people', 'organizations', 'physiopatients']);
+        $this->objectModules = array_merge(array_keys($this->objectModulesDefaultContextName), ['users', 'people', 'organizations', 'physiopatients']);
         
         $this->mailConfig = ['host' => 'localhost', 'software' => 'Mercury'];
         

@@ -95,7 +95,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, J
             }));
         },
         createTableWidget: function(){
-        	this.tableWidget = new this.chartClasses['BasicGrid'](lang.mixin(this.tableAtts, {hidden: this.showTable !== 'yes', form: this.form/*, collection: new DMemory({data: []})*/}), this.tableNode);
+        	this.tableWidget = new this.chartClasses['BasicGrid'](lang.mixin(this.tableAtts, {hidden: this.showTable !== 'yes', form: this.form}), this.tableNode);
         	this.tableWidget.customizationPath = 'customization.widgetsDescription.' + this.widgetName + '.atts.tableAtts.';
             this.tableWidget.on("dgrid-columnstatechange", lang.hitch(this, function(evt){
                 setTimeout(lang.hitch(this, function(){this.set('value', this.value);}), 100);
@@ -118,8 +118,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, J
                 		dst.set(tableNode, {display: "block"});
                 		dst.set(tableNode.parentNode, {width: this.tableWidth || '20%'});
                 		this.tableWidget.set('maxHeight', tableHeight);
-                		this.tableWidget.collection.setData(value.store);
-                		this.tableWidget.set('collection', this.tableWidget.collection);
+                		this.tableWidget.set('value', value.store);
                 	}else{
                 		if (tableNode){
                     		dst.set(tableNode, {display: "none"});   
@@ -140,8 +139,12 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, J
                         	tooltips[seriesName] = new this.chartClasses['Tooltip'](chart, series.options.plot);
                         }
                     }
-                    chart.render();
-                    chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
+                    try {
+                        chart.render();
+                        chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
+                    }catch(err){
+                        console.log('error while rendering or resizing chart for widget: ' + this.widgetName);
+                    }
                     if (this.legend && !this.legendWidget){
                         var legendWidget = this.legendWidget = new this.chartClasses[this.legend.type](lang.mixin({chart: chart, chartWidgetName: this.widgetName, form: this.form}, this.legend.options || {}), this.legendNode); 
                     }

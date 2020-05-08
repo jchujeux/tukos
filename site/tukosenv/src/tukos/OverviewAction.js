@@ -26,7 +26,7 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
                                 self.dialogDescription.paneDescription.form = self.form;
                                 self.dialogDescription.paneDescription.tabContextId = lang.hitch(self.form, self.form.tabContextId);
                                 self.tooltipDialog = new TukosTooltipDialog(self.dialogDescription);
-                                self.tooltipDialog.on('blur', self.tooltipDialog.close);
+                                //self.tooltipDialog.on('blur', self.tooltipDialog.close);
                                 self.tooltipDialog.open({around: self.domNode});
                             });
                         }

@@ -8,10 +8,8 @@ define(["dojo/_base/declare", "dijit/form/Button", "tukos/evalutils"],
                 evt.preventDefault();
                 if (this.onClickAction){
                     if(!this.onClickFunction){
-                        this.onClickFunction = eutils.eval(this.onClickAction, 'evt');
+                        this.onClickFunction = this.onClickFunction || eutils.eval(this.onClickAction, 'evt');
                     }
-                }
-                if (this.onClickFunction){
                     this.onClickFunction(evt);
                 }
             });
