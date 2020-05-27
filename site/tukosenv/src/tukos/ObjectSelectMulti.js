@@ -20,10 +20,15 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuIte
                 }           	
             }
         },
+        postCreate: function(){
+        	this.inherited(arguments);
+        	this.object = this.defaultObject;
+        },
         openDropDown: function(){
             var self = this;
             var onChangeCallBack = function(newValue){
                 self.set('value', newValue);
+                self.object = newValue ? this.object : self.defaultObject;
                 self.closeDropDown();
             }
             var mouseOverCallBack = function(evt){
@@ -71,7 +76,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuIte
                 this.inherited(arguments);
             }
          },
-
         format: function(value){
             if (value == 0 || value == ''){
                 return "";
@@ -82,6 +86,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuIte
         parse: function(displayedValue){
             var matchArray = displayedValue.match(/(.*)\((\d*)\)$/);
             return (matchArray ? matchArray[2] : '');
+        },
+        _setValueAttr: function(value){
+        	this.inherited(arguments);
+        	this.object = value ? Pmg.objectName(value) : this.defaultObject;
         }
 
     });

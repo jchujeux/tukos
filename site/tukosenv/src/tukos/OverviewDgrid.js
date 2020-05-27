@@ -87,9 +87,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
         },
         instantiateColValueWidget: function(grid, field){
             var widgetDescription = grid.colValueWidgetsDescription[field];    
-        	if (widgetDescription.type !== 'LazyEditor'){
-                	lang.setObject('atts.style.width', '100%', widgetDescription);
-            }
+        	switch (widgetDescription.type){
+        		case 'CheckBox': lang.setObject('atts.style', {marginLeft: '40%'}, widgetDescription); break;
+        		case 'LazyEditor': break;
+        		default: lang.setObject('atts.style.width', '100%', widgetDescription); break;
+        	}
             widgetDescription.atts.placeHolder = messages.entertargetvalue;
             widgetDescription.atts.allowManualInput = true;
         	when (WidgetsLoader.instantiate(widgetDescription.type, widgetDescription.atts), function(widget){

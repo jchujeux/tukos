@@ -133,7 +133,7 @@ class StoreUtilities {
     }
     
     function extendedNameCols($ids){
-    	$objectNamesAndIds = Utl::toAssociativeGrouped(Tfk::$registry->get('tukosModel')->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $ids]], 'cols' => ['id', 'object']]), 'object', 'true');
+    	$objectNamesAndIds = Utl::toAssociativeGrouped(Tfk::$registry->get('tukosModel')->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $ids]], 'cols' => ['id', 'object'], 'union' => 'merge']), 'object', 'true');
     	$objectStore = Tfk::$registry->get('objectsStore');
     	$extraIds = $values = [];
     	foreach ($objectNamesAndIds as $objectName => $objectIds){
@@ -185,16 +185,16 @@ class StoreUtilities {
         self::$hasTukosCols = false;
     }
     
-    public static function transformGet($queryAtts, $objectName){
-/*
-        $hasObjectCols = self::$hasObjectCols;
-        $hasTukosCols = self::$hasTukosCols;
-    	self::resetCols();
-*/
+    public static function transformGet($queryAtts, $objectName, $maxSizeCols = [], $fieldMaxSize = 0){
         if (!empty($queryAtts['orderBy'])){
-            $queryAtts['orderBy'] = self::transformOrderBy($queryAtts['orderBy'], $objectName);
+            if (isset($queryAtts['union'])){
+                if (array_intersect($orderByKeys = array_keys($queryAtts['orderBy']), $queryAtts['cols']) !== $orderByKeys){
+                    $queryAtts['union'] = false;
+                }
+            }
+            $queryAtts['orderBy'] = self::transformOrderBy($queryAtts['orderBy'], $objectName, Utl::getItem('union', $queryAtts));
         }
-        $queryAtts['cols'] = self::transformCols($queryAtts['cols'], $objectName);
+        $queryAtts['cols'] = self::transformCols($queryAtts['cols'], $objectName, $maxSizeCols, $fieldMaxSize);
         $queryAtts['where'] = self::transformWhere(self::deletedFilter($queryAtts['where']), $objectName);
         if (!empty($queryAtts['groupBy'])){
             $queryAtts['groupBy'] = self::transformCols($queryAtts['groupBy'], $objectName);
@@ -211,10 +211,6 @@ class StoreUtilities {
         if ($objectName !== self::$tukosTableName){
         	$queryAtts['where'][self::$tukosTableName . '.object'] = $objectName;
         }
-/*
-        self::$hasObjectCols = $hasObjectCols;
-        self::$hasTukosCols = $hasTukosCols;
-*/
         self::resetCols();
         return $queryAtts;
     }
@@ -256,22 +252,28 @@ class StoreUtilities {
         }
     }
 
-    public static  function transformOrderBy($orderBy, $objectName){
-        $transformedOrderBy = [];
-        foreach ($orderBy as $col => $direction){
-            $transformedOrderBy[] = self::colsPrefix($col, $objectName) . $col . ' ' . $direction;
+    public static  function transformOrderBy($orderBy, $objectName, $union){
+        if ($union){
+            return $orderBy;
+        }else{
+           $transformedOrderBy = [];
+            foreach ($orderBy as $col => $direction){
+                $transformedOrderBy[] = self::colsPrefix($col, $objectName) . $col . ' ' . $direction;
+            }
+            return $transformedOrderBy;
         }
-        return $transformedOrderBy;
     }
 
-    public static function transformCols($cols, $objectName){
+    public static function transformCols($cols, $objectName, $maxSizeCols = [], $fieldMaxSize = null){
         $transformedCols = [];
         foreach ($cols as $col){
             if (is_array($col)){
-                $template = reset($col);
                 $transformedCols[] = Utl::substitute(reset($col), [self::colsPrefix($colString = key($col), $objectName) . $colString]);
             }else{
-                $transformedCols[] = self::colsPrefix($col, $objectName) . $col;
+                $extCol = self::colsPrefix($col, $objectName) . $col;
+                $transformedCols[] = in_array($col, $maxSizeCols)
+                    ? "if(length($extCol) > $fieldMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$objectName,col:$col}\"), $extCol) as $col"
+                    : "$extCol as $col";
             }
         }
         return $transformedCols;

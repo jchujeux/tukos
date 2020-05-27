@@ -51,8 +51,13 @@ trait  GridWidgets{
             }
             return ['type' => 'SimpleDgrid', 'atts'=>  Utl::array_merge_recursive_replace($defAtts, $atts)];
         }else{
-            Tfk::debug_mode('log', 'SimpleDgrid intended for use only in edit mode');
-            return '';
+            //Tfk::debug_mode('log', 'SimpleDgrid intended for use only in edit mode');
+            //return '';
+            $defAtts = [
+                'storeedit' => ['editOn' => 'click'],
+                'overview' => [],
+            ];
+            return ['type' => 'TextArea', 'atts' => Utl::array_merge_recursive_replace($defAtts, $atts)];
         }
     }
     public static function sheetGrid($atts, $editOnly = true){

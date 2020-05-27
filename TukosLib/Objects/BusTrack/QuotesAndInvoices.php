@@ -117,9 +117,7 @@ trait QuotesAndInvoices {
 						'discountpc'  => ['localActionStatus' =>
 								"var form = sWidget.form, itemsW = form.getWidget('items'), newVal = isNaN(newValue) ? '' : newValue;\n" .
 								"if (itemsW && itemsW.summary){\n" .
-								"form.setValueOf('pricewot', itemsW.summary.pricewot * (1 -  newVal));\n" .
 								"form.setValueOf('pricewt' , itemsW.summary.pricewt * (1 -  newVal));\n" .
-								"form.setValueOf('discountwt', newVal == '' ? '' : itemsW.summary.pricewt * newVal);\n" .
 								"}\n" .
 								"return true;"
 						],
@@ -135,9 +133,7 @@ trait QuotesAndInvoices {
 								"var form = sWidget.form, itemsW = form.getWidget('items'), newVal = isNaN(newValue) ? '' : newValue;\n" .
 								"if (itemsW && itemsW.summary){\n" .
 									"var newDiscount = newVal / itemsW.summary.pricewt;\n" .
-									"form.setValueOf('discountpc', newVal == '' ? '' : newDiscount);\n" .
 									"form.setValueOf('pricewt' , itemsW.summary.pricewt  -  newVal);\n" .
-									"form.setValueOf('pricewot', itemsW.summary.pricewot * (1 -  newDiscount));\n" .
 								"}\n" .
 								"return true;"
 						],
@@ -153,8 +149,6 @@ trait QuotesAndInvoices {
 								"var form = sWidget.form, itemsW = form.getWidget('items'), newVal = isNaN(newValue) ? '' : newValue;\n" .
 								"if (itemsW && itemsW.summary){\n" .
 								"var newDiscount = 1 - newVal / itemsW.summary.pricewot;\n" .
-								"form.setValueOf('discountpc', newVal == '' ? '' : newDiscount);\n" .
-								"form.setValueOf('discountwt' , itemsW.summary.pricewt * newDiscount);\n" .
 								"form.setValueOf('pricewt', itemsW.summary.pricewt * (1 -  newDiscount));\n" .
 								"}\n" .
 								"return true;"

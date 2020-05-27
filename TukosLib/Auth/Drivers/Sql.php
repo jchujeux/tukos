@@ -10,11 +10,9 @@ class Sql{
     }
     public function getUser($username, $password){
         $configStore = Tfk::$registry->get('configStore');
-        return $configStore->getOne(['where' => [$this->config['username_col'] => $username, $this->config['password_col'] => $password], 'cols' => ['targetdb'], 'table' => 'users']);
+        return $configStore->getOne(['where' => [$this->config['username_col'] => $username, $this->config['password_col'] => $password], 'cols' => ['targetdb'], 'table' => 'usersauth']);
     }
     public function targetDb ($username, $password){
-    	//$configStore = Tfk::$registry->get('configStore');
-   		//$result = $configStore->getOne(['where' => [$this->config['username_col'] => $username, $this->config['password_col'] => $password], 'cols' => ['targetdb'], 'table' => 'users']);
 	    $result = $this->getUser($username, $password);
 	    if (is_array($result)){
 	        return empty($targetDb = $result['targetdb']) ? Tfk::$registry->get('appConfig')->dataSource['dbname'] : $targetDb;

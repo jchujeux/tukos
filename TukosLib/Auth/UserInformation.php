@@ -23,11 +23,13 @@ class UserInformation{
         try {
             $tk = SUtl::$tukosTableName;
             $tu = 'users';
-            ($userName = $where['name']) === 'tukos' ? $getFunc = 'getOne' : list($getFunc, $where) = ['getAll', [['col' => 'name', 'opr' => 'IN', 'values' => [$userName, 'tukos']]]];
+            ($userName = $where['name']) === 'tukos' ? $getFunc = 'getOne' : list($getFunc, $where) = ['getAll', ['object' => 'users', ['col' => 'name', 'opr' => 'IN', 'values' => [$userName, 'tukos']]]];
             $usersInfo = SUtl::$store->$getFunc([/*can't use Users\Model here as AbstractModel relies on $this->userInfo */
                 'table' => $tu, 'join' => [['inner', $tk,  $tk . '.id = ' . $tu . '.id']],
                 'where' => SUtl::transformWhere($where, $tu),
-                'cols'  => ['*']
+                'cols' => ['tukos.id', 'password', 'rights', 'modules', 'language', 'environment', 'tukosorganization', 'customviewids', 'customcontexts', 'pagecustom', 'dropboxaccesstoken', 'dropboxbackofficeaccess', 'parentid', 'name', 
+                           'contextid', 'custom'],
+                'union' => 'merge'
             ]);
             if ($userName === 'tukos'){
                 $this->userInfo = $this->tukosInfo = $usersInfo;
@@ -36,7 +38,7 @@ class UserInformation{
                     $this->tukosInfo = $usersInfo[0]['name'] === 'tukos' ? $usersInfo[$key = 0] : $usersInfo[$key = 1];
                     $this->userInfo = $usersInfo[1 - $key];
                 }else{
-                    Feedback::add(Tfk::tr('Username') . ': ' . $where['name']);
+                    Feedback::add(Tfk::tr('Username') . ': ' . $userName);
                     return false;
                 }
             }
@@ -51,8 +53,8 @@ class UserInformation{
             }            
             $this->ckey = $this->userInfo['password'];
             $translatorsStore = Tfk::$registry->get('translatorsStore');
-            if (isset($this->userInfo['language'])){
-                $translatorsStore->setLanguage($this->userInfo['language']);
+            if ($language = Utl::getItem('language', $this->userInfo)){
+                $translatorsStore->setLanguage($language);
             }
             $this->language = $translatorsStore->getLanguageCol();
             Tfk::setEnvironment($this->userInfo['environment']);
@@ -343,7 +345,7 @@ class UserInformation{
             $this->objectsStore->objectModel('customviews')->updateOne(
                 ['vobject' => $objectName, 'view' => strtolower($view), 'panemode' => strtolower($paneMode), 'customization' => $newValues], 
                 ['where' => ['id' => $customViewId]], 
-                true, true
+                true, false
             );
         }
     }

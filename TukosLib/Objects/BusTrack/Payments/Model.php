@@ -22,7 +22,8 @@ class Model extends AbstractModel {
             'category'      => "MEDIUMINT DEFAULT NULL",
             'organization' => 'MEDIUMINT NULL DEFAULT NULL',
         ];
-        parent::__construct($objectName, $translator, 'bustrackpayments', ['parentid' => ['bustrackpeople', 'bustrackorganizations']], [], $colsDefinition, [], ['worksheet', 'custom']);
+        parent::__construct($objectName, $translator, 'bustrackpayments', ['parentid' => ['bustrackpeople', 'bustrackorganizations']], [], $colsDefinition, [], [], ['custom'], ['parentid', 'amount', 'date', 'name']);
+        $this->setDeleteChildren();
     }
     function initialize($init=[]){
         return parent::initialize(array_merge(['date' => date('Y-m-d')], $init));

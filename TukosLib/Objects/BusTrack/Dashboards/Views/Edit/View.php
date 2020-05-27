@@ -3,7 +3,6 @@
 namespace TukosLib\Objects\BusTrack\Dashboards\Views\Edit;
 
 use TukosLib\Objects\Views\Edit\View as EditView;
-use TukosLib\Objects\BusTrack\Dashboards\ViewActionStrings as VAS;
 
 class View extends EditView{
 
@@ -29,10 +28,6 @@ class View extends EditView{
                                             'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'labelWidth' => 150],
                                             'widgets' => ['startdate', 'startdatependinginvoices', 'enddate']
                                         ],
-                                        'row3' => [
-                                            'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'labelWidth' => 100],
-                                            'widgets' => ['paymentsflag', 'pendinginvoicesflag', 'paymentsdetailsflag']
-                                        ]
                                     ]
                                 ],
                                 'col2' => [
@@ -90,7 +85,6 @@ class View extends EditView{
             'includeWidgets' => ['parentid', 'startdate', 'enddate']
         ]);
         $this->actionLayout['contents']['actions']['widgets'][] = 'process';
-        //$this->onOpenAction = VAS::openActionString();
     }
 }
 ?>

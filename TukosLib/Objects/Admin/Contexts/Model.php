@@ -40,12 +40,12 @@ class Model extends AbstractModel {
         return parent::getOne($atts, $jsonColsKeys, $jsonNotFoundValue);
     }
 
-    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null){
+    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
         $unallowed = $this->user->unallowedModules();
         if (!empty($unallowed)){
             $atts['where'][] = ['col' => 'name', 'opr' => 'NOT IN', 'values' => $unallowed];
         }
-        return parent::getAll($atts);
+        return parent::getAll($atts, $jsonColsPaths, $jsonNotFoundValues, $processLargeCols);
     }
 
     public function getContextId($colToSearch, $targetValue){

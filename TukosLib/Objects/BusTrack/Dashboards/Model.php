@@ -13,9 +13,6 @@ class Model extends AbstractModel {
             'startdate' => 'date NULL DEFAULT NULL',
             'enddate' => 'date NULL DEFAULT NULL',
             'startdatependinginvoices' => 'date NULL DEFAULT NULL',
-            'paymentsflag' => 'VARCHAR(7) DEFAULT NULL',
-            'pendinginvoicesflag' => 'VARCHAR(7) DEFAULT NULL',
-            'paymentsdetailsflag' => 'VARCHAR(7) DEFAULT NULL',
             'detailsvatfree' => "DECIMAL (10, 2)",
             'detailswithvatwot' => "DECIMAL (10, 2)",
             'detailsvat' => "DECIMAL (10, 2)",
@@ -59,8 +56,9 @@ class Model extends AbstractModel {
         $results = SUtl::$tukosModel->store->query(<<<EOT
             SELECT `bustrackinvoices`.`id` as `invoiceid`, `t2`.`name` as `invoicename`, `bustrackinvoices`.`reference` as `invoicereference`, `t2`.`parentid` as `customer`,`bustrackinvoices`.`invoicedate`, 
                    `bustrackinvoices`.`pricewt` as `invoiceamount`, 
-                   `bustrackpayments`.`id` as `paymentid`, `t0`.`name` as `paymentname`, `bustrackpayments`.`date` as `paymentdate`, 
-                   `$tk`.`name` as `paymentitemname`, `bustrackpaymentsitems`.`amount` as `paymentitemamount`, IFNULL(`t3`.`id`, 0) as `category`, `bustrackinvoicesitems`.`vatfree`, `bustrackinvoicesitems`.`vatrate`
+                   `bustrackpayments`.`id` as `paymentid`, `t0`.`name` as `paymentname`, `bustrackpayments`.`date` as `paymentdate`, `$tk`.`id` as `paymentitemid`, 
+                   `$tk`.`name` as `paymentitemname`, `bustrackpaymentsitems`.`amount` as `paymentitemamount`, IFNULL(`t3`.`id`, 0) as `category`, `bustrackinvoicesitems`.`vatfree`, `bustrackinvoicesitems`.`vatrate`,
+                   `bustrackinvoicesitems`.`category`
             FROM `bustrackpaymentsitems`
                 INNER JOIN `$tk` on `$tk`.`id` = `bustrackpaymentsitems`.`id`
                 INNER JOIN (`$tk` as `t0` INNER JOIN `bustrackpayments`) on (`t0`.`id` = `bustrackpayments`.`id` AND `$tk`.`parentid` = `bustrackpayments`.`id`)
@@ -125,7 +123,8 @@ EOT
         foreach ($results as $result){
             $categoryId = Utl::getItem('category', $result, 0, 0);
             $vatRate = $this->categoriesModel->vatRate($organization, $categoryId);
-            $expOrUnexp = $result['isexplained'] === 'YES' ? 'exp' : 'unexp';
+            //$expOrUnexp = $result['isexplained'] === 'YES' ? 'exp' : 'unexp';
+            $expOrUnexp = empty($result['isexplained']) ? 'unexp' : 'exp';
             if ($vatRate){
                 $kpis[$expOrUnexp . 'withvatwot'] += $paidwot = $result['unassignedamount'] / (1 + $vatRate);
                 $kpis[$expOrUnexp . 'vat'] += $paidwot * $vatRate;
@@ -140,18 +139,14 @@ EOT
     }
     function processOne($where){
         $where = $this->user->filter($where, $this->objectName); $newValues = ['paymentslog' => '', 'pendinginvoiceslog' => '', 'paymentsdetailslog' => ''];
-        $values = $this->getOne(['where' => $where, 'cols' => ['parentid', 'startdate', 'enddate', 'startdatependinginvoices', 'paymentsflag', 'pendinginvoicesflag', 'paymentsdetailsflag']]);
+        $values = $this->getOne(['where' => $where, 'cols' => ['parentid', 'startdate', 'enddate', 'startdatependinginvoices']]);
         if (!empty($values['parentid']) && !empty($values['startdate'])){
-            if (empty($values['enddate'])){$values['enddate'] = date('Y-m-d');}
-            if ($values['paymentsdetailsflag'] !== 'YES'){
-                $newValues = array_merge($newValues, $this->paymentsDetailsKPIs($values['parentid'], $values['startdate'], $values['enddate']));
+            if (empty($values['enddate'])){
+                $values['enddate'] = date('Y-m-d');
             }
-            if ($values['pendinginvoicesflag'] !== 'YES'){
-                $newValues = array_merge($newValues, $this->pendingInvoicesKPIs($values['parentid'], empty($startDate = $values['startdatependinginvoices']) ? $values['startdate'] : $startDate, $values['enddate']));
-            }
-            if ($values['paymentsflag'] !== 'YES'){
-                $newValues = array_merge($newValues, $this->paymentsKPIs($values['parentid'], $values['startdate'], $values['enddate']));
-            }
+            $newValues = array_merge($newValues, $this->paymentsDetailsKPIs($values['parentid'], $values['startdate'], $values['enddate']));
+            $newValues = array_merge($newValues, $this->pendingInvoicesKPIs($values['parentid'], empty($startDate = $values['startdatependinginvoices']) ? $values['startdate'] : $startDate, $values['enddate']));
+            $newValues = array_merge($newValues, $this->paymentsKPIs($values['parentid'], $values['startdate'], $values['enddate']));
             if (!empty($newValues)){
                 $newValues['totalwotpercategory'] = Utl::incrementArray(Utl::extractItem('detailswotpercategory', $newValues, [], []), Utl::extractItem('unaswotpercategory', $newValues, [], []));
                 $newValues = Utl::jsonEncodeArray($newValues);
@@ -189,7 +184,7 @@ EOT
             foreach ($result['paymentsdetailslog'] as &$item){
                 Tfk::addExtra($item['invoiceid'], ['name' => Utl::extractItem('invoicename', $item) . '-' . Utl::extractItem('invoicereference', $item), 'object' => 'bustrackinvoices']);
                 Tfk::addExtra($item['paymentid'], ['name' => Utl::getItem('paymentname', $item), 'object' => 'bustrackpayments']);
-                SUtl::addItemIdCols($item, ['customer']);
+                SUtl::addItemIdCols($item, ['customer', 'category']);
             }
         }
         if (!empty($result['pendinginvoiceslog'])){

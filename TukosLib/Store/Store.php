@@ -90,10 +90,36 @@ class Store {
         return $this->foundRows;
     }
     function getAll($atts){
+        $union = Utl::getItem('union', $atts);
         $query = $this->query->build('newSelect', $atts);
         $result = $this->hook->fetchAll($query, $query->getBindValues());
         $this->setFoundRows($atts, count($result));
-
+        if ($union === 'merge'){
+            if (count($result) > 1 && isset($result[0]['id'])){
+                $mergeLhsKey = []; $mergeRhsKey = [];
+                foreach($result as $key => &$item){
+                    $userOrConfig = Utl::extractItem('database', $item);
+                    if (($id = $item['id']) < 10000){
+                        if ($userOrConfig === 'user'){
+                            $mergeRhsKey[$id] = $key;
+                        }else{
+                            $mergeLhsKey[$id] = $key;
+                        }
+                    }
+                }
+                foreach($mergeRhsKey as $id => $rhsKey){
+                    if ($lhsKey = Utl::getItem($id, $mergeLhsKey)){
+                        $result[$lhsKey] = array_merge($result[$lhsKey], array_filter($result[$rhsKey]));
+                        unset($result[$rhsKey]);
+                    }
+                }
+                $result = array_values($result);
+            }else{
+                foreach($result as &$item){
+                    unset($item['database']);
+                }
+            }
+        }
         return $result;
     }
     function getAssoc($atts){
@@ -112,8 +138,20 @@ class Store {
      * Returns false if object not found, else returns the object as an array
      */
      function getOne($atts){
-        $query = $this->query->build('newSelect', $atts);
-        return  $this->hook->fetchOne($query, $query->getBindValues());
+        $union = Utl::getItem('union', $atts);
+         $query = $this->query->build('newSelect', $atts);
+        $result = $this->hook->fetchAll($query, $query->getBindValues());
+        if ($union === 'merge' && count($result) > 1){
+            $db0 = Utl::extractItem('database', $result[0]);
+            if ($db0){
+                $db1 = Utl::extractItem('database', $result[1]);
+                if ($db0 !== $db1){
+                    return $db0 = 'user' ? array_merge($result[1], array_filter($result[0])) : array_merge($result[0], array_filter($result[1]));
+                }
+            }
+        }
+        return empty($result) ? false : $result[0];
+        //return  $this->hook->fetchOne($query, $query->getBindValues());
     }
     function getPairs($atts){
         $query = $this->query->build('newSelect', $atts);

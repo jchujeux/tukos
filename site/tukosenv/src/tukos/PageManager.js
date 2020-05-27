@@ -249,6 +249,8 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             var objectName = id ? (utils.drillDown(this.cache.extendedIds, [id, 'object']) || utils.drillDown(this.cache.extras, [id, 'object'])) : '';
             if (objectName && domain){
             	return utils.drillDown(this.cache.objectsDomainAliases, [objectName, domain], objectName);
+            }else{
+            	return objectName;
             }
         },
         addExtrasToCache: function(newExtras){

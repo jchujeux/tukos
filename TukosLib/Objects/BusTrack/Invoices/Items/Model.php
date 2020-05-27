@@ -24,33 +24,51 @@ class Model extends AbstractModel {
         parent::__construct($objectName, $translator, 'bustrackinvoicesitems', ['parentid' => ['bustrackinvoices'], 'category' => ['bustrackcategories']], [], $colsDefinition, [], ['custom']);
         $this->invoicesIdsToProcess = [];
         $this->additionalColsForBulkDelete = ['parentid', 'pricewt'];
+        $this->processUpdateForBulk = 'processUpdateForBulk';
+        $this->processInsertForBulk = 'processInsertForBulk';
+        $this->processDeleteForBulk = 'processDeleteForBulk';
+        $this->_postProcess = '_postProcess';
+        $this->bulkIsSuspended = false;
     }
     function initialize($init=[]){
     	return parent::initialize(array_merge(['vatrate' => 0.085], $init));
     }
-    public function processInsertDeleteForBulk($values){
-        $amountChanged = Utl::getItem('pricewt', $values, false, false);
-        $invoiceId = Utl::getItem('parentid', $values);
-        if ($this->bulkParentObject !== 'bustrackinvoices' && ($amountChanged || !empty($invoiceId))){
-            $this->invoicesIdsToProcess = array_unique(array_merge($this->invoicesIdsToProcess, [$invoiceId]));
-        }
-        if (!$this->isBulkProcessing){
-            $this->_postProcess();
+    public function suspendBulkProcess(){
+        $this->bulkIsSuspended = true;
+    }
+    public function resumeBulkProcess(){
+        $this->bulkIsSuspended = false;
+    }
+    public function processInsertForBulk($values){
+        if (!$this->bulkIsSuspended){
+            $amountChanged = Utl::getItem('pricewt', $values, false, false);
+            $invoiceId = Utl::getItem('parentid', $values);
+            if ($this->bulkParentObject !== 'bustrackinvoices' && ($amountChanged || !empty($invoiceId))){
+                $this->invoicesIdsToProcess = array_unique(array_merge($this->invoicesIdsToProcess, [$invoiceId]));
+            }
+            if (!$this->isBulkProcessing){
+                $this->_postProcess();
+            }
         }
     }
+    public function processDeleteForBulk($values){
+        $this->processInsertForBulk($values);
+    }
     public function processUpdateForBulk($oldValues, $newValues){
-        $amountChanged = Utl::getItem('pricewt', $newValues) != Utl::getItem('amount', $oldValues);
-        $newInvoiceId = Utl::getItem('parentid', $newValues);
-        $invoiceIdChanged =  $newInvoiceId != $oldInvoiceId = Utl::getItem('parentid', $oldValues);
-        if ($this->bulkParentObject !== 'bustrackinvoices' && ($amountChanged || $invoiceIdChanged)){
-            $this->invoicesIdsToProcess = array_unique(array_merge($this->invoicesIdsToProcess, array_filter($invoiceIdChanged ? [$oldInvoiceId, $newInvoiceId] : [$newInvoiceId])));
-        }
-        if (!$this->isBulkProcessing){
-            $this->_postProcess();
+        if (!$this->bulkIsSuspended){
+            $amountChanged = Utl::getItem('pricewt', $newValues) != Utl::getItem('amount', $oldValues);
+            $newInvoiceId = Utl::getItem('parentid', $newValues);
+            $invoiceIdChanged =  $newInvoiceId != $oldInvoiceId = Utl::getItem('parentid', $oldValues);
+            if ($this->bulkParentObject !== 'bustrackinvoices' && ($amountChanged || $invoiceIdChanged)){
+                $this->invoicesIdsToProcess = array_unique(array_merge($this->invoicesIdsToProcess, array_filter($invoiceIdChanged ? [$oldInvoiceId, $newInvoiceId] : [$newInvoiceId])));
+            }
+            if (!$this->isBulkProcessing){
+                $this->_postProcess();
+            }
         }
     }
     public function _postProcess(){
-        if (!empty($this->invoicesIdsToProcess)){
+        if (!$this->bulkIsSuspended && !empty($this->invoicesIdsToProcess)){
             Tfk::$registry->get('objectsStore')->objectModel('bustrackinvoices')->updateForInvoicesItems($this->invoicesIdsToProcess);
             $this->invoicesIdsToProcess = [];
         }

@@ -32,7 +32,7 @@ class View extends AbstractView {
                 'storeArgs' => ['cols' => ['vatfree']],
                 'onWatchLocalAction' => ['value' => ['vatfree' => ['checked' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? true : false;"]]]]
             ]]]),
-            'organization' => ViewUtils::objectSelect($this, 'Invoicingorganization', 'organizations'),
+            'organization' => ViewUtils::objectSelect($this, 'Paidorganization', 'organizations'),
         ];
         $subObjects['items'] = ['object' => 'bustrackpaymentsitems', 'filters' => ['parentid' => '@id'], 'allDescendants' => true, 'atts' => ['title' => $this->tr('bustrackpaymentsitems'),
             'summaryRow' => ['cols' => [

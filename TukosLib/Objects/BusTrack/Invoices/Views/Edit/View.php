@@ -7,6 +7,7 @@ use TukosLib\Objects\Views\LocalActions;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
 use TukosLib\Objects\BusTrack\ViewActionStrings as VAS;
+use TukosLib\Objects\BusTrack\Invoices\Views\Edit\ViewActionStrings as EVAS;
 use TukosLib\Objects\BusTrack\BusTrack;
 use TukosLib\Objects\ViewUtils;
 
@@ -45,22 +46,20 @@ class View extends EditView{
             'paneDescription' => [
                 'widgetsDescription' => [
                 	'template' => ['atts' => ['value' => Utl::utf8('<br>${§invoicetable}<br>${$@comments}')]],
-                	'referenceprefix' => Widgets::textBox(['label' => $this->view->tr('referenceprefix'), 'style' => ['width' => '6em'], 'onWatchLocalAction' => $this->watchLocalAction('referenceprefix')]),
-                	'daysduedate' => Widgets::tukosNumberBox(['label' => $this->view->tr('daysduedate'), 'style' => ['width' => '4em'], 'onWatchLocalAction' => $this->watchLocalAction('daysduedate')]),
-                		'rowId' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showrowId'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('rowId')])),
                    	'catalogid' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showcatalogid'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('catalogid')])),
                    	'comments' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showcomments'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('comments')])),
                    	'discount' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showdiscount'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('discount')])),
                 		'update' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('prepare'), 'hidden' => true, 'onClickAction' => 
                         "this.pane.serverAction(" .
                         	"{action: 'Process', query: {id: true, params: " . json_encode(['process' => 'invoiceTable', 'noget' => true]) . "}}, " .
-                        	"{includeWidgets: ['daysduedate', 'rowId', 'catalogid', 'comments'], " .
+                        	"{includeWidgets: ['catalogid', 'comments'], " .
                     		  "includeFormWidgets: ['id', 'name', 'parentid', 'reference', 'invoicedate', 'items', 'discountwt', 'pricewot', 'pricewt', 'todeduce']}).then(lang.hitch(this, function(){\n" .
                             "this.pane.previewContent();" .
                             "this.set('hidden', true);" .
                         "}));"  
                     ]],
                     'invoicetable'  => Widgets::editor(Widgets::complete(['title' => $this->view->tr('invoicetable'), 'hidden' => true])),
+                    'paymenttable'  => Widgets::htmlContent(Widgets::complete(['title' => $this->view->tr('paymenttable'), 'hidden' => true])),
                 ],
                 'layout' => [
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
@@ -76,7 +75,7 @@ class View extends EditView{
                                 ],
                                'addedRow1' => [
                                     'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 50],
-                                    'widgets' => ['daysduedate', 'referenceprefix', 'rowId', 'catalogid', 'comments', 'discount'],
+                                    'widgets' => ['catalogid', 'comments', 'discount'],
                                 ],
                                 'addedRow2' => [
                                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
@@ -84,19 +83,13 @@ class View extends EditView{
                                 ],
                                 'addedRow3' => [
                                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
-                                    'widgets' => ['invoicetable'],
+                                    'widgets' => ['invoicetable', 'paymenttable'],
                                 ],
                             ],
                         ],
                     ],
                 ],                          
-                'onOpenAction' => 
-                    "return this.serverAction(" .
-                    	"{action: 'Process', query: {id: true, params: " . json_encode(['process' => 'invoiceTable', 'noget' => true]) . "}}, " .
-                    	"{includeWidgets: ['daysduedate', 'rowId', 'catalogid', 'comments'], " .
-						 "includeFormWidgets: ['id', 'name', 'parentid', 'reference', 'invoicedate', 'items', 'discountwt', 'pricewot', 'pricewt', 'todeduce']}).then(function(){"  .
-                        	"return true;" .
-                    "});" 
+                'onOpenAction' => EVAS::onExportOpen($tr),
             ]
         ];
         $this->actionWidgets['quickentry'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Quickentry'), 'allowSave' => true]];
@@ -131,20 +124,22 @@ class View extends EditView{
                         "sWidget.setValueOf('#pricewt', quantity *  newValue);\n" .
                         "return true;\n"
                     ]]])),
-                    'quantity'  => Widgets::textBox(Widgets::complete(['title' => $tr('quantity'), 'style' => ['width' => '4em'], 'onChangeLocalAction' => ['quantity' => ['localActionStatus' =>
+                    'quantity'  => Widgets::textBox(Widgets::complete(['title' => $tr('quantity'), 'value' => 1, 'style' => ['width' => '4em'], 'onChangeLocalAction' => ['quantity' => ['localActionStatus' =>
                         "var priceWot = newValue * sWidget.valueOf('#unitpricewot'), priceWt = newValue * sWidget.valueOf('#unitpricewt');\n" .
                         "sWidget.setValueOf('#pricewot', priceWot);\n" .
                         "sWidget.setValueOf('#pricewt', priceWt);\n" .
                         "return true;\n"
                     ]]])),
                     'pricewot'  => Widgets::tukosCurrencyBox(Widgets::complete(['title' => $tr('pricewot'), 'style' => ['width' => '4em'], 'onChangeLocalAction' => ['pricewot' => ['localActionStatus' =>
-                        "var quantity = sWidget.valueOf('#quantity'), unitPriceWot = sWidget.valueOf('#unitpricewot');\n" .
-                        "sWidget.setValueOf('pricewt', newValue * (1 + sWidget.valueOf('#vatrate')));\n" .
+                        "var quantity = sWidget.valueOf('#quantity'), unitPriceWot = sWidget.valueOf('#unitpricewot'), vatFactor = 1 + sWidget.valueOf('#vatrate');\n" .
+                        "sWidget.setValueOf('pricewt', newValue * vatFactor);\n" .
+                        "if (quantity){sWidget.setValueOf('#unitpricewt', newValue * vatFactor / quantity);sWidget.setValueOf('#unitpricewot', newValue / quantity);}\n" .
                         "return true;\n"
                     ]]])),
                     'pricewt'  => Widgets::tukosCurrencyBox(Widgets::complete(['title' => $tr('pricewt'), 'style' => ['width' => '4em'], 'onChangeLocalAction' => ['pricewt' => ['localActionStatus' =>
                         "var quantity = sWidget.valueOf('#quantity'), unitPriceWt = sWidget.valueOf('#unitpricewt'), vatFactor = 1 + Number(sWidget.valueOf('#vatrate'));\n" .
                         "sWidget.setValueOf('pricewot', newValue / vatFactor);\n" .
+                        "if (quantity){sWidget.setValueOf('#unitpricewt', newValue / quantity);sWidget.setValueOf('#unitpricewot', newValue / quantity / vatFactor);}\n" .
                         "return true;\n"
                     ]]])),
                     'paymenttype' => Widgets::StoreSelect(Widgets::complete(['title' =>$tr('paymentType'), 'storeArgs' => ['data' => Utl::idsNamesStore(BusTrack::$paymentTypeOptions, $tr)], 'onChangeLocalAction' => [

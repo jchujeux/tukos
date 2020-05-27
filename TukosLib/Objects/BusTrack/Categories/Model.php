@@ -16,7 +16,7 @@ class Model extends AbstractModel {
             'vatrate' 		=> "DECIMAL (5, 4)",
             'criteria' => "longtext DEFAULT NULL"
         ];
-        parent::__construct($objectName, $translator, 'bustrackcategories', ['parentid' => ['organizations']], ['criteria'], $colsDefinition, [], ['custom']);
+        parent::__construct($objectName, $translator, 'bustrackcategories', ['parentid' => ['organizations']], ['criteria'], $colsDefinition, [], [], ['custom']);
         $this->defaultVatRates = [];
     }
     public function defaultVatRate($organization = ''){

@@ -1,8 +1,4 @@
 <?php
-/**
- *
- * Provide methods to deal with parent - child methods for object items
- */
 namespace TukosLib\Objects;
 
 use TukosLib\Utils\Utilities as Utl;
@@ -17,8 +13,10 @@ trait Store {
         return $item;
     }
 
-    public function getItems($atts){
-        $transformedGet = SUtl::transformGet($atts, $this->tableName);
+    public function getItems($atts, $processLargeCols){
+        $fieldsMaxSize = 0;
+        $transformedGet = SUtl::transformGet($atts, $this->tableName, 
+            $processLargeCols ? (!empty($fieldsMaxSize = $this->user->fieldsMaxSize()) ? ($atts['cols'] === '*' ? $this->maxSizeCols : array_intersect($atts['cols'], $this->maxSizeCols)) : []) : [], $fieldsMaxSize);
         $items = $this->store->getAll($transformedGet);
         return $items;
     }

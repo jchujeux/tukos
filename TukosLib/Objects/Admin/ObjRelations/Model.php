@@ -13,7 +13,7 @@ class Model extends AbstractModel {
 
     protected $relationsOptions = ["is a component of", "is associated with", "uses", "is a new version of", "will be replaced by ", "belongsTo"];
     protected $_colsDefinition = ['relatedid'     =>  "INT(11) NOT NULL"];
-    protected $_colsIndexes =   [['relatedis']];
+    protected $_colsIndexes =   [['relatedid']];
     
     function __construct($objectName, $translator=null){
         $user  = Tfk::$registry->get('user');

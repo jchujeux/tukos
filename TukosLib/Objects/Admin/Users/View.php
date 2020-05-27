@@ -51,7 +51,7 @@ class View extends AbstractView {
             ]],
         ];
 
-        $this->customize($customDataWidgets, []/*$subObjects*/, ['get' => ['password'], 'grid' => ['password']]);
+        $this->customize($customDataWidgets, []/*$subObjects*/, ['get' => ['password'], 'grid' => ['password', 'targetdb']]);
         
         $this->paneWidgets = [
             'log' => [

@@ -13,7 +13,8 @@ class View extends AbstractView {
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Customer', 'Description');
 		$labels = $this->model->itemsLabels;
-        $customDataWidgets = [
+		$this->allowedNestedWatchActions = 1;
+		$customDataWidgets = [
             'reference' =>  ViewUtils::textBox($this, 'Reference', ['atts' => ['edit' => ['disabled' => true]]]),
             'quotedate' => ViewUtils::tukosDateBox($this, 'Quotedate'),
             'items'  => $this->items($labels),

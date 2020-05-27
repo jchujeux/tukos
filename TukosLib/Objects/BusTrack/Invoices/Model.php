@@ -9,7 +9,7 @@ use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {
     public $statusOptions = ['draft', 'waiting', 'paid', 'dispute', 'litigation', 'abandonned'];
-    public $itemsLabels = ['rowId' => 'rowId', 'catalogid' => 'CatalogId', 'name' => 'Service', 'comments' => 'Details', 'quantity' => 'Quantity', 'unitpricewot' => 'Unitpricewot',  'unitpricewt' => 'Unitpricewt',
+    public $itemsLabels = ['catalogid' => 'CatalogId', 'name' => 'Service', 'comments' => 'Details', 'quantity' => 'Quantity', 'unitpricewot' => 'Unitpricewot',  'unitpricewt' => 'Unitpricewt',
     		'discount' => 'Discount', 'pricewot' => 'Pricewot', 'vatrate' => 'VATRate', 'pricewt' => 'Pricewt'
     ];
 
@@ -33,6 +33,7 @@ class Model extends AbstractModel {
         parent::__construct($objectName, $translator, 'bustrackinvoices', ['parentid' => ['bustrackpeople', 'bustrackorganizations'], 'organization' => ['bustrackorganizations'],
             'relatedquote' => ['bustrackquotes']], ['items'], $colsDefinition, [], ['status'], ['custom', 'history'], ['name', 'parentid', 'reference']);
         $this->gridsIdCols =  array_merge($this->gridsIdCols, ['items' => ['catalogid']]);
+        $this->setDeleteChildren(['bustrackinvoicesitems']);
     }    
 
     function initialize($init=[]){
@@ -48,50 +49,34 @@ class Model extends AbstractModel {
         $dateFormat = $this->user->dateFormat();
         $atts = $valuesAndAtts['atts'];
         $invoice = $valuesAndAtts['values'];
-        $colsFormatType = ['rowId' => 'string',  'catalogid' => 'string', 'name' => 'string', 'comments' => 'string', 'quantity' => 'string', 'unitpricewot' => 'currency', 'unitpricewt' => 'currency',
+        $colsFormatType = ['catalogid' => 'string', 'name' => 'string', 'comments' => 'string', 'quantity' => 'string', 'unitpricewot' => 'currency', 'unitpricewt' => 'currency',
             'discount' => 'percent', 'pricewot' => 'currency', 'vatrate' => 'percent', 'pricewt' => 'currency'];
-        $optionalCols = ['rowId', 'catalogid', 'comments'];
+        $optionalCols = ['catalogid', 'comments'];
         $absentOptionalCols = array_filter($optionalCols, function($col) use ($atts){
             return $atts[$col] !== 'on';
         });
         $selectedColsFormatType = array_diff_key($colsFormatType, array_flip($absentOptionalCols));
         $colsToRetrieve = array_merge(array_keys($selectedColsFormatType), ['id']);
-        $hasRowIdCol = array_search('rowId', $colsToRetrieve);
-        if ($hasRowIdCol){
-            array_splice($colsToRetrieve, $hasRowIdCol, 1);
-        }
         $invoiceItemsModel = Tfk::$registry->get('objectsStore')->objectModel('bustrackinvoicesitems');
-        $items = Utl::toAssociative($invoiceItemsModel->getAll(['where' => ['parentid' => $invoice['id']], 'cols' => $colsToRetrieve]), 'id');
-        if (!empty($items)){
-        	if (!empty($invoice['items'])){
-        		$invoice['items'] = Utl::toAssociative($invoice['items'], 'id');
-        		$invoice['items'] = Utl::array_merge_recursive_replace($items, $invoice['items']);
-        	}else{
-        		$invoice['items'] = $items;
-        	}
-        }
-        $hasDiscountCol = false; $i = 0;
-        foreach($invoice['items'] as &$item){
+        $items = $invoiceItemsModel->getAll(['where' => ['parentid' => $invoice['id']], 'cols' => $colsToRetrieve]);
+        $hasDiscountCol = false;
+        foreach($items as $item){
         	if (isset($item['discount']) && $item['discount'] > 0){
         		$hasDiscountCol = true;
         		break;
         	}
-        	if ($hasRowIdCol){
-        	    $item['rowId'] = $i += $i;
-        	}
-        	
         }
         if (!$hasDiscountCol){
         	unset($selectedColsFormatType['discount']);
         }
         $numberOfCols = count($selectedColsFormatType);
 
-        $thAtts = 'style="border: 1px solid;border-collapse: collapse;" ';
+        $thAtts = 'style="border: 1px solid;border-collapse: collapse;padding: 2px;min-width:80px;" ';
         
-        $thNameAtts = sprintf('style="border: 1px solid;border-collapse: collapse;width: %1$s" ', in_array('comments', $absentOptionalCols) ? '40%' : '20%');
-        $tdAtts = 'style="border: 1px solid;border-collapse: collapse;" ';
-        $tdAttsLeft = 'style="border: 1px solid;border-collapse: collapse;text-align: left;padding-left: 10px;" ';
-        $tdNumberAtts = 'style="border: 1px solid;border-collapse: collapse;text-align: right;padding-right: 10px;" ';
+        $thNameAtts = sprintf('style="border: 1px solid;border-collapse: collapse;padding: 2px;width: %1$s" ', in_array('comments', $absentOptionalCols) ? '40%' : '20%');
+        $tdAtts = 'style="border: 1px solid;border-collapse: collapse;padding: 2px;" ';
+        $tdAttsLeft = 'style="border: 1px solid;border-collapse: collapse;padding: 2px;text-align: left;padding-left: 10px;" ';
+        $tdNumberAtts = 'style="border: 1px solid;border-collapse: collapse;padding: 2px;text-align: right;padding-right: 10px;" ';
         $getTdAtts = function ($formatType) use ($tdAtts, $tdNumberAtts){
         		return $formatType === 'string' ? $tdAtts : $tdNumberAtts;
         };
@@ -100,51 +85,50 @@ class Model extends AbstractModel {
             $rowContent[] = ['tag' => 'th', 'atts' => ($col === 'name' || $col === 'comments') ? $thNameAtts : $thAtts, 'content' => $this->tr($this->itemsLabels[$col])];
         });
         $rows = [['tag' => 'tr', 'content' => $rowContent]];
-        foreach ($invoice['items'] as $item){
+        foreach ($items as $item){
             $rowContent = [];
             array_walk($selectedColsFormatType, function($formatType, $col) use (&$rowContent, $getTdAtts, $item){
                 $rowContent[] = ['tag' => 'td', 'atts' => $getTdAtts($formatType), 'content' => isset($item[$col]) ? Utl::format($item[$col], $formatType, $this->tr) : ''];
             });
             $rows[] = ['tag' => 'tr', 'content' => $rowContent];
         }
+        $numberOfRows = 4 + ($invoice['discountwt'] > 0 ? 1 : 0);
         $rows[] = ['tag' => 'tr', 'content' => [['tag' => 'td', 'atts' => 'colspan="' . $numberOfCols . '" style="border: 0px;"',  'content' => '&nbsp; ']]];
-       	$dueDateContent = $atts['daysduedate'] > 0 ? $this->tr('invoiceduedate') . ': ' . date($dateFormat, time() + 24 * 60 * 60 * $atts['daysduedate']) : '' ;
-        $toDeduceContent = $invoice['todeduce'] > 0 ? '<b>' . $this->tr('Todeduce') . '</b>: ' . Utl::format($invoice['todeduce'], 'currency') : '';
-       	if ($invoice['discountwt'] > 0){
+        $numberOfCols3 = $numberOfCols - 3;
+        $rows[] = ['tag' => 'tr', 'content' => [
+            ['tag' => 'td', 'atts' => "colspan=\"$numberOfCols3\" rowspan=\"$numberOfRows\" style=\"border: 0px;text-align: left;line-height: 80%\"",  'content' => "<small>{$this->tr('Paymentconditions')}</small>"],
+            ['tag' => 'td', 'atts' => "colspan=\"3\" style=\"border: 0px;\"",  'content' => '&nbsp; '],
+        ]];
+        if ($invoice['discountwt'] > 0){
 			$rows[] = ['tag' => 'tr', 'content' => [
-				['tag' => 'td', 'atts' => 'colspan="' . ($numberOfCols - 3) . '" ' , 'content' => ''], 
 				['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => $this->tr('Globaldiscountwt')],
 				['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format(-$invoice['discountwt'], 'currency')]]
 			];
        	}
        	$rows[] = ['tag' => 'tr', 'content' => [
-	        ['tag' => 'td', 'atts' => 'colspan="' . ($numberOfCols - 3) . '" ', 'content' => $dueDateContent],
 			['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => $this->tr('Totalwot')],
 	    	['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format($invoice['pricewot'], 'currency')]]
 	    ];
        	$rows[] = ['tag' => 'tr', 'content' => [
-            ['tag' => 'td', 'atts' => 'colspan="' . ($numberOfCols - 3) . '" ', 'content' => ""],
        		['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => $this->tr('tax')], 
         	['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format($invoice['pricewt'] - $invoice['pricewot'], 'currency')]]
         ];
         $rows[] = ['tag' => 'tr', 'content' => [
-            ['tag' => 'td', 'atts' => 'colspan="' . ($numberOfCols - 3) . '" ', 'content' => ''],
         	['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => '<b>' . $this->tr('Totalwt') . '</b>'],
         	['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format($invoice['pricewt'], 'currency')]]
         ];
+/*
         if ($invoice['todeduce'] > 0){
         	$rows[] = ['tag' => 'tr', 'content' => [
-        			['tag' => 'td', 'atts' => 'colspan="' . ($numberOfCols - 3) . '" ' , 'content' => ''],
         			['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => $this->tr('Todeduce')],
         			['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format(-$invoice['todeduce'], 'currency')]]
         	];
         	$rows[] = ['tag' => 'tr', 'content' => [
-        			['tag' => 'td', 'atts' => 'colspan="' . ($numberOfCols - 3) . '" ' , 'content' => ''],
         			['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => '<b>' . $this->tr('Remainingbalance') . '</b>'],
         			['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format($invoice['pricewt'] - $invoice['todeduce'], 'currency')]]
         	];
         }
-        
+*/        
         $atts['invoicetable'] = HUtl::buildHtml(['tag' => 'table', 'atts' => 'style="text-align:center; border: solid; border-collapse: collapse;width:100%;"', 'content' => $rows]);
         
         return ['data' => ['value' => $atts]];

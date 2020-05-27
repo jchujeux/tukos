@@ -46,14 +46,14 @@ class Configure{
         Tfk::setTranslator();
 
         $this->modulesMenuLayout = [
-			'#bustrackcatalog' => [],
+            '#bustrackcategories' => [],
+            '#bustrackcatalog' => [],
             'bustrackcustomers' => [['#bustrackpeople' => [], '#bustrackorganizations' => []]],
         	'#bustrackquotes' => [],
             '#bustrackinvoices' => [['#bustrackinvoicesitems' => []]],
             '#bustrackpayments' => [['#bustrackpaymentsitems' => []]],
-            '#bustrackdashboards' => [], 
-            '#bustrackcategories' => [], 
             '#bustrackreconciliations' => [],
+            '#bustrackdashboards' => [], 
         	'@help' => [
         	    ['overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],
         	     'guidedtour' => ['type' => 'MenuItem', 'atts' => [

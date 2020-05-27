@@ -28,7 +28,7 @@ class View extends AbstractView {
             'laststart'  => ViewUtils::timeStampDataWidget($this, 'Last start', ['atts' => ['edit' => ['disabled' => true]]]),
             'lastend'    => ViewUtils::timeStampDataWidget($this, 'Last end', ['atts' => ['edit' => ['disabled' => true]]]),
         ];
-        $subObjects['scriptsoutputs']    = ['atts' => ['title'     => $this->tr('Scripts outputs')],
+        $subObjects['scriptsoutputs']    = ['atts' => ['title'     => $this->tr('Scripts outputs'), 'sort' => [['property' => 'updated', 'descending' => true]]],
                                             'filters'   => ['parentid' => '@id'],
                                        'allDescendants' => false];
         $this->customize($customDataWidgets, $subObjects);

@@ -10,7 +10,6 @@ class View extends AbstractView {
     
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Organization', 'Description');
-        $tr = $this->tr;
         $customDataWidgets = [
             'comments' => ['atts' => ['edit' => ['height' => '80px']]],
             'startdate' => ViewUtils::tukosDateBox($this, 'Periodstart'),
@@ -20,18 +19,21 @@ class View extends AbstractView {
                 //'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                 'id' => ['field' => 'id', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'renderExpando' => true],
                 'parentid' => ['field' => 'parentid', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-                'paymentid' => Widgets::description(ViewUtils::ObjectSelect($this, 'Paymentid', 'bustrackpayments'), false),
+                'paymentid' => Widgets::description(ViewUtils::ObjectSelect($this, 'Paymentid', 'bustrackpayments', ['atts' => [
+                    'edit' => ['style' => ['width' => '200px'], 'dropdownFilters' => [['col' => 'isexplained', 'opr' => '<>', 'values' => 'YES'], ['col' => 'isexplained', 'opr' => '<>', 'values' => 1]]],
+                    'storeedit' => ['width' => 200]
+                ]]), false),
                     //'id' => ['label' => $tr('Paymentid'), 'field' => 'id', 'width' => 80],
                 //'date' => ['label' => $tr('date'), 'field' => 'date', 'width' => 100],
                 'date' => Widgets::description(ViewUtils::tukosDateBox($this, 'date'), false),
                 //'description' => ['label' => $tr('description'), 'field' => 'description', 'width' => 600],
                     'description' =>  Widgets::description(ViewUtils::textArea($this, 'description', ['atts' => [
-                        'edit' => ['style' => ['width' => '600px']], 'storeedit' => ['width' => 600], 'overview' => ['width' => 600]]]), false),
+                        'edit' => ['style' => ['width' => '500px']], 'storeedit' => ['width' => 500], 'overview' => ['width' => 500]]]), false),
                     //'amount' => ['label' => $tr('amount'), 'field' => 'amount', 'renderCell' => 'renderContent', 'formatType' => 'currency', 'width' => 80],
                     'amount' => Widgets::description(ViewUtils::tukosCurrencyBox($this, 'Amount', ['atts' => ['storeedit' => ['formatType' => 'currency', 'width' => 80]]]), false),
                 'isexplained' => Widgets::description(ViewUtils::checkBox($this, 'Isexplained', ['atts' => ['storeedit' => ['width' => 80]]]), false),
                     'customer' => Widgets::description(ViewUtils::objectSelectMulti(['bustrackpeople', 'bustrackorganizations'], $this, 'Customer', ['atts' => ['edit' => ['style' => ['width' => '100px']]]]), false),
-                    'category' => Widgets::description(ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories'), false),
+                    'category' => Widgets::description(ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => ['dropdownFilters' => ['parentid' => '@parentid']]]]), false),
                     'paymenttype' => Widgets::description(ViewUtils::storeSelect('paymentType', $this, 'paymenttype'), false),
                     'reference' =>  Widgets::description(ViewUtils::textBox($this, 'Paymentreference'), false),
                     'slip' =>  Widgets::description(ViewUtils::textBox($this, 'CheckSlipNumber'), false),

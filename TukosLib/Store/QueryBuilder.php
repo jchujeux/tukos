@@ -14,17 +14,41 @@ class QueryBuilder{
 
     public function __construct($config){
         $this->queryFactory = new QueryFactory($config['datastore'], QueryFactory::COMMON);
+        $this->dbName = $config['dbname'];
     }
 
     function build($queryMethod, $atts, $bindQuery = null){  //$table, $where=[], $columns = ['*'], $order=[], $range=[], $groupBy=[], $joins=[]){
+        $allowUnion = Utl::extractItem('union', $atts);
         $query = $this->queryFactory->$queryMethod();
         $this->bindQuery = empty($bindQuery) ? $query : $bindQuery;// so that bind can be attached to the main query in case of subquery
+        $this->dbNamePrefix = '';
+        $this->dbCol = '';
+        if ($isUnion = ($allowUnion && $this->isUnion($queryMethod, $atts))){
+            $this->dbCol = "'user' as 'database'";
+            $removedAtts = Utl::extractItems(['orderBy', 'limit', 'range'], $atts);
+        }
         foreach ($atts as $method => $arguments){
             $this->$method($query, $arguments);
         }
+        if ($isUnion){
+            $this->dbCol = "'config'";
+            foreach($removedAtts as $name => $value){
+                $atts[$name] = $value;
+            }
+            //$atts['table'] = Tfk::$registry->get('configStore')->dbName . '.' . $atts['table'];
+            $this->dbNamePrefix = Tfk::$registry->get('configStore')->dbName . '.';
+            $query->union();
+            foreach ($atts as $method => $arguments){
+                $this->$method($query, $arguments);
+            }
+        }
+        
         return $query;
     }
-    
+    function isUnion ($queryMethod, $atts){
+        //return false;
+        return $queryMethod === 'newSelect' && Tfk::$registry->get('configStore')->dbName !== $this->dbName && Tfk::$registry->get('configStore')->tableExists($atts['table']);
+    }
     function bindKey($query, $value){
         static $j = 0;
         $bindKey = 'wvalue' . $j;
@@ -39,7 +63,7 @@ class QueryBuilder{
         $tableKeyWord = ['Aura\SqlQuery\Common\Select' => 'from', 'Aura\SqlQuery\Common\Update' => 'table', 'Aura\SqlQuery\Common\Insert' => 'into', 'Aura\SqlQuery\Common\Delete' => 'from'];
         $queryObject = get_class($query);
         $queryKeyword = $tableKeyWord[$queryObject];
-        $query->$queryKeyword($table);
+        $query->$queryKeyword($this->dbNamePrefix . $table);
     }
 
     function range($query, $range){
@@ -53,6 +77,9 @@ class QueryBuilder{
         }
     }
     function cols($query, $cols){
+        if ($this->dbCol){
+            $cols[] = $this->dbCol;
+        }
         $query->cols($cols);
     }
 
@@ -150,7 +177,7 @@ class QueryBuilder{
         if (in_array($opr, ['NOT IN SELECT', '<>', 'NOT RLIKE', 'NOT BETWEEN'])){
             $whereString = "($whereString OR $col IS NULL )";
         }
-        if ($or = Utl::getItem('or', $condition) === null){
+        if (Utl::getItem('or', $condition) === null){
             return $whereString;
         }else{
             return [Utl::getItem('or', $condition), $whereString];
@@ -164,7 +191,7 @@ class QueryBuilder{
     function join($query, $joins){
         if (is_array($joins[0])){
             foreach ($joins as $join){
-                $query->join($join[0], $join[1], $join[2]);
+                $query->join($join[0], $this->dbNamePrefix . $join[1], $join[2]);
             }
         }else{
             $query->join($joins[0], $joins[1], $joins[2]);

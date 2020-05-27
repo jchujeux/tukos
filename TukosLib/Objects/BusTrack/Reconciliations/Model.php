@@ -16,7 +16,8 @@ class Model extends AbstractModel {
             'enddate' => 'date NULL DEFAULT NULL',
             'paymentslog' => 'longtext',
         ];
-        parent::__construct($objectName, $translator, 'bustrackreconciliations', ['parentid' => ['bustrackpeople', 'bustrackorganizations']], ['paymentslog'], $colsDefinition, [], ['worksheet', 'custom']);
+        parent::__construct($objectName, $translator, 'bustrackreconciliations', ['parentid' => ['bustrackpeople', 'bustrackorganizations']], ['paymentslog'], $colsDefinition, [], [], ['custom']);
+        $this->gridsIdCols = array_merge($this->gridsIdCols, ['paymentslog' => ['paymentid', 'customer', 'category', 'invoiceid', 'invoiceitemid']]);
     }
     function initialize($init=[]){
         return parent::initialize(array_merge(['date' => date('Y-m-d')], $init));
@@ -39,12 +40,20 @@ class Model extends AbstractModel {
         $dateCol = 1; $paymentCol = 4; $descriptionCol = 2; $row = 11;
         $startDate = Utl::getItem('startdate', $values, '1900-01-01');
         $endDate = Utl::getItem('enddate', $values, '9999-12-31', '9999-12-31');
-        $categoriesModel = Tfk::$registry->get('objectsStore')->objectModel('bustrackcategories');
-        $modelObjects = ['organizations' => Tfk::$registry->get('objectsStore')->objectModel('bustrackorganizations'), 'people' => Tfk::$registry->get('objectsStore')->objectModel('bustrackpeople')];
+        $objectsStore = Tfk::$registry->get('objectsStore');
+        $categoriesModel = $objectsStore->objectModel('bustrackcategories');
+        $modelObjects = ['organizations' => $objectsStore->objectModel('bustrackorganizations'), 'people' => $objectsStore->objectModel('bustrackpeople')];
+        $invoicesModel = $objectsStore->objectModel('bustrackinvoices');
+        $invoicesItemsModel = $objectsStore->objectModel('bustrackinvoicesitems');
+        $paymentsModel = $objectsStore->objectModel('bustrackpayments');
         $categories = $categoriesModel->getCategories($organization);
         $categoriesFilters = [];
         $getPattern = function($items, $boundary = '\b'){
-            return "/($boundary" . implode("$boundary|$boundary", $items) . "$boundary)/i";
+            return "/(.*)($boundary" . implode("$boundary|$boundary", $items) . "$boundary)(.*)/is";
+        };
+        $getSqlPattern = function($items){
+            $beginWord = "[[:<:]]"; $endWord = "[[:>:]]";
+            return "$beginWord" . implode("$endWord|$beginWord", $items) . "$endWord";
         };
         $toUpper = function($item){
             $item['name'] = strtoupper($item['name']);
@@ -53,17 +62,28 @@ class Model extends AbstractModel {
         foreach ($categories as $id => $category){
             $criterias = $categoriesModel->criterias($organization, $id);
             if (!empty($criterias)){
-                $where = [];
-                forEach($criterias as $criteria){
-                    $where[$criteria['attribute']] = $criteria['value'];
+                $where = []; $whereModel = ''; $categoriesFilters[$id] = [];
+                foreach($criterias as $criteria){
+                    if ($model = Utl::getItem('customertype', $criteria)){
+                        $whereModel = $model;
+                        if ($value = Utl::getItem('value', $criteria)){
+                            $where[$criteria['attribute']] = $criteria['value'];
+                        }
+                        $valueItems = [];
+                    }else{
+                        $valueItems = array_map('trim', explode(',', $criteria['value']));
+                    }
                 }
-                if ($model = Utl::getItem('customertype', $criteria)){
-                    $items = Utl::toAssociative(array_map($toUpper, $modelObjects[$model]->getAll(['where' => $where, 'cols' => ['id', 'name']])), 'name');
-                    $categoriesFilters[$id] = ['pattern' => $getPattern(array_keys($items)), 'items' => $items];
-                }else{
-                    $items = array_map('trim', explode(',', $criteria['value']));
-                    $categoriesFilters[$id] = ['pattern' => $getPattern($items)];
+                if (!empty($whereModel)){
+                    $items = Utl::toAssociative(array_map($toUpper, $modelObjects[$whereModel]->getAll(['where' => $where, 'cols' => ['id', 'name'], 'union' => false])), 'name');
+                    if (!empty($items)){
+                        $categoriesFilters[$id] = ['customerPattern' => $getPattern(array_keys($items)), 'sqlCustomerPattern' => $getSqlPattern(array_keys($items)), 'items' => $items];
+                    }
                 }
+                if (!empty($valueItems)){
+                    $categoriesFilters[$id] = array_merge($categoriesFilters[$id], ['valuePattern' => $getPattern($valueItems), 'valueSqlPattern' => $getSqlPattern($valueItems)]);
+                }
+                $categoriesFilters[$id] = array_merge($categoriesFilters[$id], Utl::getItems(['removematch', 'searchpayments', 'searchinvoices'], $criteria));
             }
         }
         $getDate = function($row) use ($workbook, $sheet, $dateCol){
@@ -73,10 +93,10 @@ class Model extends AbstractModel {
         while ($row <= $numberOfRows && $getDate($row) > $endDate){$row +=1;};
         while ($row <= $numberOfRows && $startDate <= ($date = $getDate($row))){
             if ($amount = $workbook->getCellValue($sheet, $row, $paymentCol)){
-                $matches = []; $customer = ''; $category = ''; $slip = ''; $isExplained = '';
+                $id +=1;
+                $matches = []; $customerMatches = []; $customerId = ''; $valueMatches = []; $category = ''; $slip = ''; $isExplained = ''; $paymentId = ''; $invoiceId = ''; $invoiceItemId = '';
                 $description = $workbook->getCellValue($sheet, $row, $descriptionCol);
                 $paymentTypeMatch = preg_match($paymentIdentifierPattern, $description, $matches) ? $matches[1] : 'other';
-                //$description = substr($description, strlen($matches[1]));
                 $description = $matches ? $matches[2] : $description;
                 switch($paymentTypeMatch){
                     case $paymentIdentifiers[1]:
@@ -87,18 +107,45 @@ class Model extends AbstractModel {
                         break;
                     case $paymentIdentifiers[3]: 
                         foreach ($categoriesFilters as $categoryId => $filter){
-                            if (preg_match($filter['pattern'], str_replace('.', '', $description), $matches)){
-                                $customer = isset($filter['items']) ? $filter['items'][strtoupper($matches[1])]['id'] : '';
+                            $hasValueMatch = 0;
+                            $customerId = (isset($filter['customerPattern']) && preg_match($filter['customerPattern'], str_replace('.', '', $description), $customerMatches)) ? $filter['items'][strtoupper($customerMatches[2])]['id'] : '';
+                            if ($customerId && (!isset($filter['valuePattern']) || $hasValueMatch = preg_match($filter['valuePattern'], str_replace('.', '', $description), $valueMatches))){
+                                if ($customerId && isset($filter['removematch'])){
+                                    $description = $customerMatches[1] . $customerMatches[3];
+                                }
                                 $category = (string)$categoryId;
                                 $isExplained = 'YES';
+                                $where = $customerId ? ['parentid' => $customerId] : [];
+                                if (isset($filter['searchpayments'])){
+                                    if ($hasValueMatch){
+                                        $where = array_merge($where, [['col' => 'name', 'opr' => 'RLIKE', 'values' => $filter['valueSqlPattern']]]);
+                                    }
+                                    $existingPayments = $paymentsModel->getAll(['where' => array_merge($where, ['date' => $date, 'amount' => $amount]), 'cols' => ['id']]);
+                                    $paymentId = Utl::drillDown($existingPayments, [0, 'id']);
+                                    if (count($existingPayments)> 1){
+                                        Feedback::add("{$this->tr('Severalpaymentsfound')}: $id - {$this->tr('Selectedid')}: $paymentId");
+                                    }
+                                }
+                                if (isset($filter['searchinvoices'])){
+                                    $existingInvoices = $invoicesModel->getAll(['where' => array_merge($where, ['pricewt' => $amount]), 'cols' => ['id'], 'orderBy' => ['invoicedate' =>  'DESC']/*, 'union' => false*/]);
+                                    $invoiceId = Utl::drillDown($existingInvoices, [0, 'id']);
+                                    if (count($existingInvoices)>= 1){
+                                        Feedback::add("{$this->tr('Severalinvoicesfound')}: $id - {$this->tr('Mostrecentselected')}: $invoiceId");
+                                    }
+                                    $invoiceId = Utl::drillDown($existingInvoices, [0, 'id']);
+                                    if ($invoiceId){
+                                        $existingInvoiceItemId = $invoicesItemsModel->getOne(['where' => ['parentid' => $invoiceId, 'pricewt' => $amount], 'cols' => ['id']]);
+                                        $invoiceItemId = Utl::getItem('id', $existingInvoiceItemId);
+                                    }
+                                }
                                 break;
                             }
                         }
                         break;
                 };
-                $paymentsToReturn[] = $paymentsRow = ['id' => $id += 1, 'date' => $date, 'description' => $description, 'amount' => $amount, 'customer' => $customer, 'paymenttype' => 'paymenttype' . $paymentTypeId[$paymentTypeMatch], 
-                    'category' => $category, 'slip' => $slip, 'isexplained' => $isExplained];
-                SUtl::addItemIdCols($paymentsRow, ['customer', 'category']);
+                $paymentsToReturn[] = $paymentsRow = ['id' => $id, 'date' => $date, 'description' => $description, 'amount' => $amount, 'customer' => $customerId, 'paymenttype' => 'paymenttype' . $paymentTypeId[$paymentTypeMatch], 
+                    'category' => $category, 'slip' => $slip, 'isexplained' => $isExplained, 'paymentid' => $paymentId, 'invoiceid' => $invoiceId, 'invoiceitemid' => $invoiceItemId];
+                SUtl::addItemIdCols($paymentsRow, ['paymentid', 'customer', 'category', 'invoiceid', 'invoiceitemid']);
             }
             $row += 1;
         }
@@ -116,48 +163,60 @@ class Model extends AbstractModel {
         $categoriesModel = $objectsStore->objectModel('bustrackcategories');
         $organization = $values['organization'];
         $payments = $values['payments'];
+        $existingPaymentsIds = [];
         foreach($payments as &$payment){
             if($date = Utl::getItem('date', $payment)){
-                $description = Utl::getItem('description', $payment);
-                $existingPayment = $paymentsModel->getOne(['where' => ['date' => $date, 'name' => $description], 'cols' => ['id']]);
-                if (!empty($existingPayment)){
-                    Feedback::add("{$this->tr('paymentalreadyexists')}: id = {$existingPayment['id']}");
-                    $payment['paymentid'] = $existingPayment['id'];
-                }else{
-                    $category = Utl::getItem('category', $payment);
-                    $customer = Utl::getItem('customer', $payment);
-                    $amount = Utl::getItem('amount', $payment);
-                    if(Utl::getItem('createinvoice', $payment, false, false)){
+                //$description = Utl::getItem('description', $payment); $amount = number_format(Utl::getItem('amount', $payment), 2); $category = Utl::getItem('category', $payment); $customer = Utl::getItem('customer', $payment);
+                $description = Utl::getItem('description', $payment); $amount = Utl::getItem('amount', $payment); $category = Utl::getItem('category', $payment); $customer = Utl::getItem('customer', $payment);
+                if (!$paymentId = Utl::getItem('paymentid', $payment)){
+                    $existingPayment = $paymentsModel->getOne(['where' => ['date' => $date, 'name' => $description, 'amount' => $amount], 'cols' => ['id']]);
+                    if (!empty($existingPayment)){
+                        $existingPaymentsIds[] = $payment['paymentid'] = $paymentId = $existingPayment['id'];
+                    }
+                }
+                if(Utl::getItem('createinvoice', $payment, false, false)){
+                    if ($category && $customer){
                         $vatRate = $categoriesModel->vatRate($organization, $category);
-                        $payment['invoiceid'] = $invoiceId = $invoicesModel->insert(['parentid' => $customer, 'name' => $description, 'invoicedate' => $date, 'pricewt' => $payment['amount'],
+                        $payment['invoiceid'] = $invoiceId = $invoicesModel->insert(['parentid' => $customer, 'organization' => $organization, 'name' => $description, 'invoicedate' => $date, 'pricewt' => $payment['amount'],
                             'organization' => $organization], true)['id'];
                         $payment['invoiceitemid'] = $invoiceItemId = $invoicesItemsModel->insert(['parentid' => $invoiceId, 'name' => $description, 'category' => $category,
                             'vatfree' => $categoriesModel->vatFree($organization, $category),'vatrate' => $vatRate, 'pricewt' => $amount,
                             'pricewot' => $amount / (1 + $vatRate)
                         ], true)['id'];
                     }else{
-                        $invoiceItemId = Utl::getItem('invoiceitemid', $payment);
-                        $invoiceId = Utl::getItem('invoiceid', $payment);
+                        $invoiceItemId = '';
+                        Feedback::add($this->tr('RowNeedsCategoryInvoiceNotCreated') . ": {$payment['id']}");
                     }
-                    $unassignedAmount = $invoiceItemId ? 0.0 : $amount;
+                }else{
+                    $invoiceItemId = Utl::getItem('invoiceitemid', $payment);
+                    $invoiceId = Utl::getItem('invoiceid', $payment);
+                }
+                $unassignedAmount = $invoiceItemId ? 0.0 : $amount;
+                if ($paymentId){
+                    $paymentsModel->updateOne(array_filter(['id' => $paymentId, 'parentid' => $customer, 'date' => $date, 'paymenttype' => Utl::getItem('paymenttype', $payment), 'reference' => Utl::getItem('reference', $payment),
+                        'slip' => Utl::getItem('slip', $payment), 'amount' => $amount, 'unassignedamount' => $unassignedAmount, 'category' => $category, 'organization' => $organization,
+                        'name' => $description, 'isexplained' => Utl::getItem('isexplained', $payment)
+                    ]));
+                }else{
                     $insertedPayment = $paymentsModel->insert(['parentid' => $customer, 'date' => $date, 'paymenttype' => Utl::getItem('paymenttype', $payment), 'reference' => Utl::getItem('reference', $payment),
-                        'slip' => Utl::getItem('slip', $payment), 'amount' => $amount, 'unassignedamount' => $unassignedAmount, 'category' => $category, 'organization' => $organization, 
+                        'slip' => Utl::getItem('slip', $payment), 'amount' => $amount, 'unassignedamount' => $unassignedAmount, 'category' => $category, 'organization' => $organization,
                         'name' => $description, 'isexplained' => Utl::getItem('isexplained', $payment)
                     ], true);
+                    $paymentId = $payment['paymentid'] = $insertedPayment['id'];
                     if ($invoiceItemId){
-                        $paymentsItemsModel->insert(['parentid' => $insertedPayment['id'], 'name' => $description, 'amount' => $amount, 'invoiceid' => $invoiceId, 'invoiceitemid' => $invoiceItemId], true);
+                        $paymentsItemsModel->insert(['parentid' => $paymentId, 'name' => $description, 'amount' => $amount, 'invoiceid' => $invoiceId, 'invoiceitemid' => $invoiceItemId], true);
                     }
-                    $payment['paymentid'] = $insertedPayment['id'];
-                    SUtl::addItemIdCols($payment, ['paymentid', 'customer', 'category', 'invoiceid', 'invoiceitemid']);
                 }
+                SUtl::addItemIdCols($payment, ['paymentid', 'customer', 'category', 'invoiceid', 'invoiceitemid']);
             }else{
                 Feedback::add($this->tr('RowNeedsDateIgnored') . ": {$payment['id']}");
             }
         }
-        if (!empty($payments)){
-            $this->updateOne(['id' => $id, 'paymentslog' => Utl::toAssociative($payments, 'id')]);
+        if (!empty($existingPaymentsIds)){
+            Feedback::add("{$this->tr('Existingpaymentsselected')}: " . implode(',', $existingPaymentsIds));
+            
         }
-        return [];
+        return ['data' => ['paymentslog' => $payments]];
     }
 }
 ?>
