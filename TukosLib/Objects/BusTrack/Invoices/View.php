@@ -16,7 +16,7 @@ class View extends AbstractView {
         $tr = $this->tr;
         $labels = $this->model->itemsLabels;
         //$this->sendOnSave = array_merge($this->sendOnSave, ['organization']);
-		$this->allowedNestedWatchActions = 0;
+		$this->allowedNestedWatchActions = 10;
 		$customDataWidgets = [
 		    'comments' => ['atts' => ['edit' => ['height' => '150px']]],
 		    'organization' => ViewUtils::objectSelect($this, 'Invoicingorganization', 'organizations'),

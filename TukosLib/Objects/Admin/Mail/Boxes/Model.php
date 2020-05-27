@@ -204,7 +204,7 @@ class Model extends AbstractModel{
 
     
 
-    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null){
+    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
         //$accountIds = $this->accountIds($atts['where']);
         $whereAccounts = (empty($atts['where']['parentid']) ? ['id' => 'default'] : ['id' => $atts['where']['parentid']]);
         if ($whereAccounts['id'] === 'default'){

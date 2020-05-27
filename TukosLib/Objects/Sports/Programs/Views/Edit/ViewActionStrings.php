@@ -52,9 +52,9 @@ EOT;
       return <<<EOT
     var self = this, form = this.form, html = '', selectedWeeks = this.getWidget('optionalweeks').get('value'), 
         tableAtts = 'style="text-align:center; border-collapse: collapse;border-spacing: 0; border: 0;width:100%;"', cellBorderStyle = 'border: solid;border-color: Black;',
-        customAtts = form.getWidget('calendar').get('customization').items,  backgroundColor = customAtts.style.backgroundColor, imagesAtts = customAtts.img;
-    thAtts = 'style="' + cellBorderStyle + '"',  tdAtts = thAtts,   
-    buildWeeklyTable = lang.hitch(this, function(mode, title, firstDay, lastDay, weekOfTheYear, weekOfProgram, selectedCols){
+        customAtts = form.getWidget('calendar').get('customization').items,  backgroundColor = customAtts.style.backgroundColor, imagesAtts = customAtts.img,
+        thAtts = 'style="' + cellBorderStyle + '"',  tdAtts = thAtts,   
+        buildWeeklyTable = lang.hitch(this, function(mode, title, firstDay, lastDay, weekOfTheYear, weekOfProgram, selectedCols){
     var colsFormat = {session: 'string', duration: 'tHHMMSSToHHMM', intensity: 'string', sport: 'string', sportimage: 'image', stress: 'string', content: 'string'},
         i = 1, sessionsWidget = form.getWidget('sptsessions'), filter = new sessionsWidget.store.Filter(), intensityColorFlag = this.valueOf('rowintensitycolor'),
         contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'],

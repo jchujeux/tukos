@@ -13,8 +13,10 @@ class CheckOrphanIds {
         try{
             $options = new \Zend_Console_Getopt(
                 ['app-s'		=> 'tukos application name (not needed in interactive mode)',
+                 'db-s'		    => 'tukos application database name (not needed in interactive mode)',
                  'class=s'      => 'this class name',
                  'parentid-s'   => 'parent id (optional)',
+                 'db-s'         => 'database name(optional)'
                 ]);
             $ids     = [];
             $idCols  = [];
@@ -39,17 +41,19 @@ class CheckOrphanIds {
                               'comments'        => 'the following ids are orphan: ' . implode(', ', $orphanIds) . '<br>They are referenced in the following objects:',
                              ];
                 foreach ($objectsToConsider as $objectName){
-                    $model = $objectsStore->objectModel($objectName);
-                    $modelIdCols = $model->idCols;
-                    $where = [];
-                    $or = null;
-                    foreach ($modelIdCols as $col){
-                        $where[] = ['col' => $col, 'opr' => 'IN', 'values' => $orphanIds, 'or' => $or];
-                        $or = true;
-                    }
-                    $modelIds = $model->getAll(['where' => [['col' => 'id', 'opr' => '>', 'values' => 0], $where], 'cols' => ['id']]);
-                    if ($modelIds){
-                        $objValue['comments'] .= '<br>' . $objectName . ': ' . implode(', ', array_column($modelIds, 'id'));
+                    if ($store->tableExists($objectName)){
+                        $model = $objectsStore->objectModel($objectName);
+                        $modelIdCols = $model->idCols;
+                        $where = [];
+                        $or = null;
+                        foreach ($modelIdCols as $col){
+                            $where[] = ['col' => $col, 'opr' => 'IN', 'values' => $orphanIds, 'or' => $or];
+                            $or = true;
+                        }
+                        $modelIds = $model->getAll(['where' => [['col' => 'id', 'opr' => '>', 'values' => 0], $where], 'cols' => ['id']]);
+                        if ($modelIds){
+                            $objValue['comments'] .= '<br>' . $objectName . ': ' . implode(', ', array_column($modelIds, 'id'));
+                        }
                     }
                 }
                 echo $objValue['comments'];

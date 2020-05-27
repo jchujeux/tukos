@@ -120,7 +120,7 @@ abstract class AbstractModel extends ObjectTranslator {
         Feedback::add($this->tr('errormodelaction'));
     }
     public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
-    	$atts = ['table' => $this->tableName] + $atts;
+    	$atts = ['table' => $this->tableName, 'union' => 'merge'] + $atts;
 		$missingCols = ($this->useItemsCache ? ItemsCache::missingCols($atts) : $atts['cols']);
 		if (empty($missingCols)){
             $result = ItemsCache::getOne($atts);
@@ -162,8 +162,8 @@ abstract class AbstractModel extends ObjectTranslator {
     public function foundRows(){
         return $this->foundRows;
     }
-    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null){
-    	$atts = ['table' => $this->tableName] + $atts;
+    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
+         $atts = ['table' => $this->tableName, 'union' => Utl::extractItem('union', $atts, 'merge')] + $atts;
     	if ($allDescendants = Utl::extractItem('allDescendants', $atts, false)){
     		if (isset($atts['range'])){
             	Tfk::error_message('info', 'combining range and allDescendants is not supported. Continuing at your own risks - atts: ', $atts);
@@ -172,7 +172,7 @@ abstract class AbstractModel extends ObjectTranslator {
     			$atts['where'][] = ['opr' => 'NOT EXISTS', 'values' => 'SELECT 1 FROM tukos as t1 WHERE tukos.parentid = t1.id AND object="' . $this->tableName . '"'];
     		}
         }
-        $values = $this->getItems($atts);
+        $values = $this->getItems($atts, $processLargeCols);
         $this->foundRows = $this->store->foundRows();
         if (!empty($values)){
             if ($allDescendants){
@@ -195,6 +195,7 @@ abstract class AbstractModel extends ObjectTranslator {
     }
     
     public function getAllExtended($atts){
+/*
         if ($atts['cols'] !== '*'){
             if (!empty($fieldsMaxSize = $this->user->fieldsMaxSize())){
                 $presentMaxSizeCols = array_intersect($atts['cols'], $this->maxSizeCols);
@@ -202,11 +203,12 @@ abstract class AbstractModel extends ObjectTranslator {
                     //$atts['cols'][$key] = 'if(length(' . $col . ') > ' . $fieldsMaxSize . ', concat("#tukos{id:", tukos.id, ",object:' . $this->objectName . ',col:' . $col . '}"),' . $col . ') ' . $col;
                     //$extCol = "tukos.$col";
                     $extCol = SUtl::colsPrefix($col, $this->tableName) . "$col";
-                    $atts['cols'][$key] = "if(length($extCol) > $fieldsMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$this->objectName,col:$col}\"),$extCol) as $col";
+                    $atts['cols'][$key] = "if(length($extCol) > $fieldsMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$this->objectName,col:$col}\"),$extCol)";
                 }
             }
         }
-        $items = $this->getAll($atts);
+*/
+        $items = $this->getAll($atts, [], null, true, true);
         $this->addItemsIdCols($items);
         return $items;
     }
@@ -380,11 +382,17 @@ abstract class AbstractModel extends ObjectTranslator {
             
             $this->jsonEncode($differences, $jsonFilter);
             
-            $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $oldValues['id']]]);
+            $updatedCount = $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $oldValues['id']]]);
+            if (!$updatedCount){// means no old item was found, insert the differences instead (is an update of a tukosconfig item in the user database), but still consider as an update
+                $differences['id']      = $oldValues['id'];
+                $differences['created'] = date('Y-m-d H:i:s');
+                $differences['creator'] = $this->user->id();
+                $this->insertItem($differences);
+            }
 
             $updatedRow = ['id' => $oldValues['id'], 'updated' => $updated, 'updator' => $updator];
-            if (method_exists($this, 'processUpdateForBulk')){
-                $this->processUpdateForBulk($oldValues, $newValues);
+            if (property_exists($this, 'processUpdateForBulk') && method_exists($this, $processUpdateForBulk = $this->processUpdateForBulk)){
+                $this->$processUpdateForBulk($oldValues, $newValues);
             }
             return $updatedRow;
 
@@ -459,8 +467,8 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         $this->jsonEncode($values, $jsonFilter);
         $this->insertItem($values);
-        if (method_exists($this, 'processInsertDeleteForBulk')){
-            $this->processInsertDeleteForBulk($values);
+        if (property_exists($this, 'processInsertForBulk') && method_exists($this, $processInsertForBulk = $this->processInsertForBulk)){
+            $this->$processInsertForBulk($values);
         }
         return $values;
     }
@@ -471,7 +479,7 @@ abstract class AbstractModel extends ObjectTranslator {
             $values = array_merge($this->initializeExtended(), $values);
         }
         $this->processLargeCols($values);
-        return $this->insert(array_intersect_key($values, array_flip($this->allCols)), false, $jsonFilter);        
+        return $this->insert(array_intersect_key($values, array_flip(array_merge($this->allCols, ['configstatus']))), false, $jsonFilter);        
     }
     public function duplicate($ids, $cols=['*']){
         $result = [];
@@ -494,12 +502,15 @@ abstract class AbstractModel extends ObjectTranslator {
     }
     public function delete ($where, $item = []){
         $cols = $cols =['id', 'updator', 'permission', 'updated'];
-        $oldItems = $this->getAll(['where' => $where, 'cols' => property_exists($this, 'additionalColsForBulkDelete') ? array_merge($cols, $this->additionalColsForBulkDelete) : $cols]);
+        $oldItems = $this->getAll(['where' => $where, 'cols' => property_exists($this, 'additionalColsForBulkDelete') ? array_merge($cols, $this->additionalColsForBulkDelete) : $cols], [], null, true, false);
+        if ($restoreIsBulkProcessing = !$this->isBulkProcessing){
+            $this->isBulkProcessing = true;
+        }
         foreach($oldItems as $old){
             if ($this->user->hasDeleteRights($old)){
                 $toDelete[] = $old['id'];
-                if (method_exists($this, 'processInsertDeleteForBulk')){
-                    $this->processInsertDeleteForBulk($old);
+                if (property_exists($this, 'processDeleteForBulk') && method_exists($this, $processDeleteForBulk = $this->processDeleteForBulk)){
+                    $this->$processDeleteForBulk($old);
                 }
             }else{
                 $noRightToDelete[] = $old['id'];
@@ -510,9 +521,42 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         if (empty($toDelete)){
             Feedback::add($this->tr('noitemwasdeleted'));
-            return false;
+            $result = false; false;
         }else{
-            return $this->updateItems([], ['where' => [['col' => 'id', 'opr' => 'in', 'values' => $toDelete]], 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]]);
+            $result = $this->updateItems([], ['where' => [['col' => 'id', 'opr' => 'in', 'values' => $toDelete]], 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]]);
+        }
+        if ($restoreIsBulkProcessing){
+            $this->isBulkProcessing = true;
+            if ($result){
+                $this->bulkPostProcess();
+            }
+        }
+        return $result;
+    }
+    public function setDeleteChildren($childrenObjectsToSuspendBulk = []){
+        $this->processDeleteForBulk = 'processDeleteChildrenForBulk';
+        $this->_postProcess = '_postProcessDeleteChildren';
+        $this->parentIdsToPostProcessDelete = [];
+        $this->childrenObjectsToSuspendBulk = $childrenObjectsToSuspendBulk;
+    }
+    public function processDeleteChildrenForBulk($values){
+        $this->parentIdsToPostProcessDelete = array_unique(array_merge($this->parentIdsToPostProcessDelete, [$values['id']]));
+    }
+    public function _postProcessDeleteChildren(){
+        if (!empty($ids = $this->parentIdsToPostProcessDelete)){
+            $objectNamesAndIds = Utl::toAssociativeGrouped(Tfk::$registry->get('tukosModel')->getAll(['where' => [['col' => 'parentid', 'opr' => 'IN', 'values' => $ids]], 'cols' => ['id', 'object']]), 'object', 'true');
+            $objectStore = Tfk::$registry->get('objectsStore');
+            foreach ($objectNamesAndIds as $objectName => $objectIds){
+                $model = $objectStore->objectModel($objectName);
+                if ((array_search($objectName, $this->childrenObjectsToSuspendBulk) !== false) && method_exists($model, 'suspendBulkProcess')){
+                    $model->suspendBulkProcess();
+                }
+                $model->delete([['col' => 'id', 'opr' => 'IN', 'values' => $objectIds]]);
+                if (method_exists($model, 'resumeBulkProcess')){
+                    $model->resumeBulkProcess();
+                }
+            }
+            $this->parentIdsToPostProcessDelete = [];
         }
     }
     public function summary($activeUserFilters = null){
@@ -526,10 +570,10 @@ abstract class AbstractModel extends ObjectTranslator {
         $this->isBulkProcessing = true;
     }
     public function bulkPostProcess(){
-        if (method_exists($this, '_postProcess')){
-            $this->_postProcess();
+        if (property_exists($this, '_postProcess') && method_exists($this, $_postProcess = $this->_postProcess)){
+            $this->$_postProcess();
         }
-        $this->isBulkProcess = false;
+        $this->isBulkProcessing = false;
         $this->bulkParentObject = null;
     }
 }

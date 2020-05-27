@@ -20,11 +20,17 @@ EOT;
         }
     });
 	this.set('label', Pmg.loading(label));
-    form.serverDialog({action: 'Process', object: 'bustrackreconciliations', view: 'edit', query: {id: form.valueOf('id'), params: JSON.stringify({process: 'syncPayments'})}}, 
-            //lang.mixin({payments: paymentsToSync, organization: form.valueOf('parentid'), updated: form.valueOf('updated')}, form.changedValues()), []).then( 
-            {payments: paymentsToSync, organization: form.valueOf('parentid'), updated: form.valueOf('updated')}, []).then( 
+    Pmg.serverDialog({action: 'Process', object: 'bustrackreconciliations', view: 'edit', query: {id: form.valueOf('id'), params: {process: 'syncPayments', noget: true}}}, 
+            {data: {payments: paymentsToSync, organization: form.valueOf('parentid')}}).then( 
         function(response){
+            //paymentsLog.set('value', response.data.paymentslog);            
+            var updatedPayments = response.data.paymentslog;		  
+            utils.forEach(updatedPayments, function(payment){
+                //store.putSync(payment);
+                paymentsLog.updateRow(payment);
+            });
 		    self.set('label', label);
+		    //pane.resize();
         },
         function(error){
             console.log('error');

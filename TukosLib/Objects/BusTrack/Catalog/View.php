@@ -9,6 +9,7 @@ class View extends AbstractView {
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Organization', 'Description');
         $customDataWidgets = [
+            'name' => ['atts' => ['edit' => ['style' => ['width' => ['40em']]]]],
             'category' => ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
                 'storeArgs' => ['cols' => ['vatfree']],
                 'onWatchLocalAction' => ['value' => ['vatfree' => ['checked' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? true : false;"]]]]

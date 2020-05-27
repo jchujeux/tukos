@@ -21,7 +21,7 @@ class GetItems extends AbstractViewModel{
                 $view = Tfk::$registry->get('objectsStore')->objectView($objectName);
                 $result[$id] = $this->convert($values, $view->dataWidgets, 'objToEdit', false, false, true);
             }catch(\Exception $e){
-                Feedback::add(utl::sentence(array_merge(['couldnotretrieveapropertyamong', '['], $properties, [']', 'for', $objectNames[$id], 'item', $id]), $this->view->tr));
+                Feedback::add(utl::sentence(array_merge(['couldnotretrieveapropertyamong', '['], $properties, [']', 'for', $objectNames[$id]['object'], 'item', $id]), $this->view->tr));
                 Feedback::add($e->getMessage());
             }            
         } 

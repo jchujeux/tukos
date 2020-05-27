@@ -53,18 +53,23 @@ define([
 			}));
 		},
 		getEditorInstance: function(colId){
-			var col = this._editorInstancesColumns[colId], column = col.column, alternateEditors = column.alternateEditors, editorName, editorInstance, alternateEditor;
-			this._editorInstances[colId] = this._editorInstances[colId] || {};
-			if (alternateEditors && (editorName = (column.editorSelectorFunction || (column.editorSelectorFunction =  eutils.eval(column.editorSelector)))(this))){
-				alternateEditor = {editor: alternateEditors[editorName].type, editorArgs: alternateEditors[editorName].atts};
-				lang.mixin(column, alternateEditor);
+			var col = this._editorInstancesColumns[colId];
+			if (col){
+				var column = col.column, alternateEditors = column.alternateEditors, editorName, editorInstance, alternateEditor;
+				this._editorInstances[colId] = this._editorInstances[colId] || {};
+				if (alternateEditors && (editorName = (column.editorSelectorFunction || (column.editorSelectorFunction =  eutils.eval(column.editorSelector)))(this))){
+					alternateEditor = {editor: alternateEditors[editorName].type, editorArgs: alternateEditors[editorName].atts};
+					lang.mixin(column, alternateEditor);
+				}else{
+					lang.mixin(column, col.defaultEditor);
+					editorName = 'default';
+				}
+				return this._editorInstances[colId][editorName] || (col 
+						? (this._editorInstances[colId][editorName] = (typeof column.editor === 'string' ? this._loadAndCreateSharedEditor(col, column.editor) : this._createSharedEditor(column, col.originalRenderCell)))
+						: col);
 			}else{
-				lang.mixin(column, col.defaultEditor);
-				editorName = 'default';
+				return false;
 			}
-			return this._editorInstances[colId][editorName] || (col 
-					? (this._editorInstances[colId][editorName] = (typeof column.editor === 'string' ? this._loadAndCreateSharedEditor(col, column.editor) : this._createSharedEditor(column, col.originalRenderCell)))
-					: col);
 /*
 			return this._editorInstances[colId] || (col 
 				? (this._editorInstances[colId] = typeof col.column.editor === 'string'

@@ -81,9 +81,11 @@ class Model extends AbstractModel {
                 $okToStart = Tfk::isInteractive() || $this->okToStart($scriptInfo);
                 if ($okToStart){ 
                     $scriptName = $scriptInfo['path'] . $scriptInfo['scriptname'];
-                    $parameters = $scriptInfo['parameters'];
-                    if (!strpos($parameters, '--parentid')){
-                    	$parameters .= ' --parentid ' . $scriptInfo['id'];
+                    if (!strpos($scriptInfo['parameters'], '--parentid')){
+                        $scriptInfo['parameters'] .= ' --parentid ' . $scriptInfo['id'];
+                    }
+                    if (!strpos($scriptInfo['parameters'], '--db')){
+                        $scriptInfo['parameters'] .= ' --db ' . Tfk::$registry->get('appConfig')->dataSource['dbname'];
                     }
                     $replace = [
                     	'/^ *([^ ]*)(.*)/' => function($matches){return $matches[1] . ' --app ' . Tfk::$registry->appName. ' ' . $matches[2];},

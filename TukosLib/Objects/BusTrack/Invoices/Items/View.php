@@ -70,7 +70,7 @@ class View extends AbstractView {
                 'edit' => ['onChangeLocalAction' => ['pricewot' => ['localActionStatus' =>
                     "var quantity = sWidget.valueOf('#quantity'), unitPriceWot = sWidget.valueOf('#unitpricewot');\n" .
                     "sWidget.setValueOf('discount', (quantity && unitPriceWot) ? 1 - newValue / quantity / unitPriceWot : '');\n" .
-                    "sWidget.setValueOf('pricewt', newValue * (1 + sWidget.valueOf('#vatrate')));\n" .
+                    "sWidget.setValueOf('pricewt', newValue * (1 + Number(sWidget.valueOf('#vatrate'))));\n" .
                     "return true;\n"
                 ]]],
                 'storeedit' => ['formatType' => 'currency', 'width' => 80]]]),

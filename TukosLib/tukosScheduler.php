@@ -11,9 +11,10 @@ $phpDir = dirname(__DIR__) . '/';
 require $phpDir . 'TukosLib/TukosFramework.php';
 require $phpDir . 'TukosLib/cmdenv.php';
 
-$params = getopt('', ['app:', 'class:']);
+$params = getopt('', ['app:', 'class:', 'parentid:', 'db:']);
 
 $appName = $params['app'];
+$dbName = $params['db'];
 
 Tfk::initialize('commandLine', $appName, $phpDir);
 
@@ -21,9 +22,12 @@ $configure =  '\\' . $appName . '\\Configure';
 
 Tfk::$registry->set('appConfig', new $configure());
 $appConfig = Tfk::$registry->get('appConfig');
-if (!empty($tukosSchedulerDb = Tfk::$registry->get('configStore')->getOne(['where' => [$appConfig->configSource['username_col'] => 'tukosscheduler'], 'cols' => ['targetdb'], 'table' => 'users'])['targetdb'])){
+$appConfig->dataSource['dbname'] = $dbName;
+/*
+if (!empty($tukosSchedulerDb = Tfk::$registry->get('configStore')->getOne(['where' => [$appConfig->configSource['username_col'] => 'tukosscheduler'], 'cols' => ['targetdb'], 'table' => 'usersauth'])['targetdb'])){
     $appConfig->dataSource['dbname'] = $tukosSchedulerDb;
 }
+*/
 Tfk::setTranslator();
 SUtl::instantiate();
 $user = Tfk::$registry->get('user');

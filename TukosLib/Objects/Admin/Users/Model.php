@@ -54,7 +54,7 @@ class Model extends AbstractModel{
     
     public function getOneExtended ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
     	$result = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
-    	$result['targetdb'] = Tfk::$registry->get('configStore')->getOne(['where' => ['username' => $result['name']], 'table' => 'users', 'cols' => ['targetdb']])['targetdb'];
+    	$result['targetdb'] = Tfk::$registry->get('configStore')->getOne(['where' => ['username' => $result['name']], 'table' => 'usersauth', 'cols' => ['targetdb']])['targetdb'];
     	return $result;
     }
 
@@ -72,12 +72,12 @@ class Model extends AbstractModel{
         	$authenticationInfo = Utl::getItems(['name', 'password', 'targetdb'], $values);
         	$authenticationInfo['username'] = $userName = Utl::extractItem('name', $authenticationInfo);
         	$configStore = Tfk::$registry->get('configStore');
-        	if (empty($configStore->getOne(['where' => ['username' => $userName], 'table' => 'users', 'cols' => ['username']]))){
+        	if (empty($configStore->getOne(['where' => ['username' => $userName], 'table' => 'usersauth', 'cols' => ['username']]))){
         	    if (empty($authenticationInfo['password'])){
         	        Feedback::add($this->tr('newuserneedpassword'));
         	        return false;
         	    }else{
-        	        $configStore->insert($authenticationInfo, ['table' => 'users']);
+        	        $configStore->insert($authenticationInfo, ['table' => 'usersauth']);
         	    }
         	}else{
         	    if (!empty($authenticationInfo['password'])){
@@ -129,16 +129,16 @@ class Model extends AbstractModel{
 				}
     		}
     	    $configStore = Tfk::$registry->get('configStore');
-        	if (empty($configStore->getOne(['where' => ['username' => $newName], 'table' => 'users', 'cols' => ['username']]))){
+        	if (empty($configStore->getOne(['where' => ['username' => $newName], 'table' => 'usersauth', 'cols' => ['username']]))){
         		if (empty($authInfo['username'])){
         			$authInfo['username'] = $existingAuthInfo['name'];
         		}
         		if (empty($authInfo['password'])){
         			$authInfo['password'] = $existingAuthInfo['password'];
         		}
-        		$configStore->insert($authInfo, ['table' => 'users']);
+        		$configStore->insert($authInfo, ['table' => 'usersauth']);
         	}else{
-        		$configStore->update($authInfo, ['table' => 'users', 'where' => ['username' => $newName]]);
+        		$configStore->update($authInfo, ['table' => 'usersauth', 'where' => ['username' => $newName]]);
         	}
     		if (Utl::extractItem('password', $newValues, false)){
     			Feedback::add($this->tr('passwordupdated'));
@@ -172,7 +172,7 @@ class Model extends AbstractModel{
 /*    
     public function delete ($where, $item = []){
     	$username = $this->getOne(['where' => $where, 'cols' => ['name']])['name'];
-    	Tfk::$registry->get('configStore')->delete(['table' => 'users', 'where' => ['username' => $username]]);
+    	Tfk::$registry->get('configStore')->delete(['table' => 'usersauth', 'where' => ['username' => $username]]);
     	parent::delete($where, $item);
     }
 */

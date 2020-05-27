@@ -96,11 +96,12 @@ class Model extends ObjectTranslator {
         $this->store->update($values, ['table' => $this->objectName, 'where' => ['id' => $values['id']]]);
         return ['id' => $values['id']];
     }
-    public function updateOneExtended ($values, $where=[]){
-        return $this->updateOne($values);
+    public function updateOneExtended ($values, $atts=[]){
+        return $this->updateOne($values, $atts);
     }
-    public function updateAll ($values, $where){
-        return $this->store->update($values, ['table' => $this->objectName, 'where' => $where]);
+    public function updateAll ($values, $atts){
+        $atts['table'] = $this->objectName;
+        return $this->store->update($values, $atts);
     }
     public function duplicate($ids, $cols=['*']){
         Feedback::add('TranslationsDuplicateNotImplemented');

@@ -105,7 +105,7 @@ EOT;
     public static function catalogIdLocalAction(){
         return <<<EOT
 var pane = sWidget.form, form = pane.form || pane, catalog = form.getWidget('catalog'), offerItem = catalog ? catalog.get('collection').filter({id: newValue}).fetchSync()[0] : sWidget.getItem();
-['name', 'category', 'vatfree', 'vatrate', 'unitpricewot', 'unitpricewt'].forEach(function(widgetName){
+['name', 'category', 'vatfree', 'vatrate', 'unitpricewot', 'unitpricewt', 'comments'].forEach(function(widgetName){
     sWidget.setValueOf(widgetName, offerItem[widgetName]);
 });
 EOT;

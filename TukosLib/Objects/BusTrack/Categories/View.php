@@ -10,10 +10,11 @@ class View extends AbstractView {
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Organization', 'Description');
         $customDataWidgets = [
-            'vatfree' => ViewUtils::checkBox($this, 'vatfree', ['atts' => ['edit' => [
-                'onWatchLocalAction' => ['checked' => ['vatfree' => ['value' => ['triggers' => ['user' => true, 'server' => true], 'action' => "return newValue ? 'vatfree' : '';"]]]]]]]),
+            'name' => ['atts' => ['edit' => ['style' => ['width' => ['30em']]]]],
+            'vatfree' => ViewUtils::checkBox($this, 'vatfree'/*, ['atts' => ['edit' => [
+                'onWatchLocalAction' => ['checked' => ['vatfree' => ['value' => ['triggers' => ['user' => true, 'server' => true], 'action' => "return newValue ? 'vatfree' : '';"]]]]]]]*/),
             'vatrate' => ViewUtils::tukosNumberBox($this, 'Vatrate', ['atts' => [
-                'edit' => ['title' => $this->tr('Vatrate') . ' %', 'constraints' => ['type' => 'percent', 'pattern' => '#.####%'], 'editOptions' => ['pattern' => '#.####%']],
+                'edit' => ['title' => $this->tr('Vatrate') . ' %', 'style' => ['width' => '10em'], 'constraints' => ['type' => 'percent', 'pattern' => '#.####%'], 'editOptions' => ['pattern' => '#.####%']],
                 'storeedit' => ['formatType' => 'percent', 'width' => 80],
                 'overview' => ['formatType' => 'percent', 'width' => 80]
             ]]),
@@ -22,10 +23,13 @@ class View extends AbstractView {
                 'customertype'    => ViewUtils::storeSelect('customerType', $this, 'Customertype'),                'attribute'  => ViewUtils::storeSelect('attributeType', $this, 'Filterattribute'),
                 'value'  => ViewUtils::textBox($this, 'Filtervalue', ['atts' => ['storeedit' => ['alternateEditors' => ['segment' => Widgets::description(ViewUtils::storeSelect('segment', $this, 'Segment'), true)], 
                     'editorSelector' => $this->editorSelector()]]]),
+                'removematch' => ViewUtils::checkBox($this, 'Removematch', ['atts' => ['storeedit' => ['width' => 80]]]),
+                'searchpayments' => ViewUtils::checkBox($this, 'SearchPayments', ['atts' => ['storeedit' => ['width' => 80]]]),
+                'searchinvoices' => ViewUtils::checkBox($this, 'SearchInvoices', ['atts' => ['storeedit' => ['width' => 80]]]),
             ]),
          ];
         $subObjects['bustrackcategories'] = ['atts' => ['title' => $this->tr('Categories')], 'filters' => ['parentid' => '@parentid'], 'allDescendants' => true];
-        $this->customize($customDataWidgets, $subObjects, ['grid' => ['criteria']], ['criteria' => []]);
+        $this->customize($customDataWidgets, $subObjects, [], ['criteria' => []]);
     }
     function editorSelector(){
         return <<<EOT

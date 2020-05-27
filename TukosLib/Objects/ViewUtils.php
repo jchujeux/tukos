@@ -53,7 +53,7 @@ class ViewUtils{
     static public function currencyTextBox($view, $label, $custom = []){
         return Utl::array_merge_recursive_replace([
         		'type' => 'currencyTextBox',
-            	'atts' => ['edit' => ['title' => $view->tr($label) .':', 'style' => ['width' => '5em'], 'lang' => 'fr-fr', 'currency' => 'EUR']],
+            	'atts' => ['edit' => ['title' => $view->tr($label), 'style' => ['width' => '5em'], 'lang' => 'fr-fr', 'currency' => 'EUR']],
         		'objToEdit' => ['floatval' => []],  'objToStoreEdit' => ['floatval' => []],],
             $custom
         );
@@ -61,7 +61,7 @@ class ViewUtils{
     static public function tukosCurrencyBox($view, $label, $custom = []){
         return Utl::array_merge_recursive_replace([
         		'type' => 'tukosCurrencyBox',
-        		'atts' => ['edit' => ['title' => $view->tr($label) .':', 'style' => ['width' => '5em'], 'lang' => 'fr-fr', 'currency' => 'EUR']],
+        		'atts' => ['edit' => ['title' => $view->tr($label), 'style' => ['width' => '5em'], 'lang' => 'fr-fr', 'currency' => 'EUR']],
         		'objToEdit' => ['floatval' => []],  'objToStoreEdit' => ['floatval' => []],],
             $custom
         );
@@ -74,7 +74,7 @@ class ViewUtils{
         	], $custom);
     }
     static public function checkBox($view, $label, $custom=[]){
-        return Utl::array_merge_recursive_replace(['type' => 'checkBox', 'atts' => ['edit' => ['label' => $view->tr($label)]]], $custom);
+        return Utl::array_merge_recursive_replace(['type' => 'checkBox', 'atts' => ['edit' => ['label' => $view->tr($label), 'value' => 'YES']]], $custom);
     }
     static public function editor($view, $label, $custom=[]){
            return Utl::array_merge_recursive_replace([
@@ -108,7 +108,7 @@ class ViewUtils{
         if (count($objects) === 1){
             return self::objectSelect($view, $label, $objects[0], $custom); 
         }else{
-            $editAtts = ['label' => $view->tr($label)];
+            $editAtts = ['label' => $view->tr($label), 'defaultObject' => $objects[0]];
             foreach ($objects as $object){
                 $editAtts['items'][$object] = ['label' => $view->tr($object), 'object' => $object, 'dropdownFilters' => ['contextpathid' => '$tabContextId']];
             }

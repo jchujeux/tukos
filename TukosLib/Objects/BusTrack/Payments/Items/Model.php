@@ -14,12 +14,17 @@ class Model extends AbstractModel {
             'invoiceitemid' => "MEDIUMINT DEFAULT NULL",
             'amount'   => "DECIMAL (10, 2)"
         ];
-        parent::__construct($objectName, $translator, 'bustrackpaymentsitems', ['parentid' => ['bustrackpayments'], 'invoiceid' => ['bustrackinvoices'], 'invoiceitemid' => ['bustrackinvoicesitems']], [], $colsDefinition, [], ['worksheet', 'custom']);
+        parent::__construct($objectName, $translator, 'bustrackpaymentsitems', ['parentid' => ['bustrackpayments'], 'invoiceid' => ['bustrackinvoices'], 'invoiceitemid' => ['bustrackinvoicesitems']], [], $colsDefinition, [], [], ['custom']);
         $this->invoicesIdsToProcess = [];
         $this->paymentsIdsToProcess = [];
         $this->additionalColsForBulkDelete = ['parentid', 'invoiceid', 'amount'];
+        $this->processUpdateForBulk = 'processUpdateForBulk';
+        $this->processInsertForBulk = 'processInsertForBulk';
+        $this->processDeleteForBulk = 'processDeleteForBulk';
+        $this->_postProcess = '_postProcess';
+        $this->bulkIsSuspended = false;
     }
-    public function processInsertDeleteForBulk($values){
+    public function processInsertForBulk($values){
         $amountChanged = Utl::getItem('amount', $values, false, false);
         $invoiceId = Utl::getItem('invoiceid', $values);
         $paymentId = Utl::getItem('parentid', $values);
@@ -32,6 +37,9 @@ class Model extends AbstractModel {
         if (!$this->isBulkProcessing){
             $this->_postProcess();
         }
+    }
+    public function processDeleteForBulk($values){
+        $this->processInsertForBulk($values);
     }
     public function processUpdateForBulk($oldValues, $newValues){
         $amountChanged = Utl::getItem('amount', $newValues) != Utl::getItem('amount', $oldValues);

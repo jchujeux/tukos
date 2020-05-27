@@ -118,7 +118,7 @@ class Model extends AbstractModel{
         return ['parentid' => $atts['where']['parentid'], 'mailboxname' => $result['draftsfolder'], 'from' => $this->fromLabel($result)];
     }
 
-    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null){
+    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
         $mailbox = $this->mailboxesObj->getMailbox($atts['where'][$this->accountIdCol], $atts['where'][$this->mailboxNameCol]);
         if ($mailbox){
             if ($atts['cols'] === ['*']){

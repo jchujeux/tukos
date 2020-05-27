@@ -122,7 +122,9 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 		var item = lang.mixin(lang.clone(this.dirty[idPropertyValue]), {idg: idPropertyValue, connectedIds: this.collection.getSync(idPropertyValue).connectedIds});
                     	this.notifyWidgets({action: 'update',  item: item, sourceWidget: this});            		
                 	}
-                    this.onCellChangeLocalAction(idPropertyValue, this.columns[field], value, oldValue);
+                    if (this.columns[field]){
+                    	this.onCellChangeLocalAction(idPropertyValue, this.columns[field], value, oldValue);
+                    }
                     this.setSummary();
                     this.isUserEdit = false;
                 }
@@ -147,7 +149,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             var editorArgs = column.editorArgs;
         	if (typeof column.localDataChangeActionFunctions == "undefined"){
                 column.localDataChangeActionFunctions = {};
-                var localAction = editorArgs.onChangeLocalAction || (editorArgs.onWatchLocalAction && editorArgs.onWatchLocalAction['value']);
+                var localAction = editorArgs.onChangeLocalAction || (editorArgs.onWatchLocalAction && (editorArgs.onWatchLocalAction['value'] || editorArgs.onWatchLocalAction['checked']));
                 if (localAction){
                     this.form.buildLocalActionFunctions(column.localDataChangeActionFunctions, localAction);
                 }
@@ -265,17 +267,16 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         	this.noRefreshOnUpdateDirty = true;
         	if(replace){
             	utils.forEach(storeItem, lang.hitch(this, function(value, col){
-            		if (value !== item[col] && !utils.in_array(col, ['connectedIds', 'idg', 'rowId', 'id'])){
+            		if (!utils.in_array(col, ['connectedIds', 'idg', 'rowId', 'id'])){
             			this.updateDirty(idPropertyValue, col, item[col] || '');
             		}
             	}));        		
-        	}else{
-            	utils.forEach(item, lang.hitch(this, function(value, col){
-            		if (value !== storeItem[col] && col !== 'connectedIds'){
-            			this.updateDirty(idPropertyValue, col, value);
-            		}
-            	}));       		
         	}
+        	utils.forEach(item, lang.hitch(this, function(value, col){
+        		if (value !== storeItem[col] && col !== 'connectedIds'){
+        			this.updateDirty(idPropertyValue, col, value);
+        		}
+        	}));       		
         	if (this.onChangeNotify){
         		if (storeItem.connectedIds){
         			item.connectedIds = storeItem.connectedIds;
@@ -483,7 +484,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             				var rValue = value[r];
             				if (row.id === rValue.id){
             		            rValue[idp] = row[idp];
-            					this.updateRow(rValue, true);
+            					this.updateRow(rValue);
             					delete value[r];
             					return;
             				}

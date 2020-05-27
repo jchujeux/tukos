@@ -13,21 +13,24 @@ define (["dojo/_base/declare", "dojo/on", "dojo/aspect", "dijit/registry", "dojo
                         this.onCompleteFunction = this.onCompleteFunction || eutils.eval(this.onCompleteAction, 'data');
                         this.onCompleteFunction(response.data);
                     }else{
-                        form.serverDialog({action: 'Reset'}, [], [], Pmg.messages('actionDone')).then(function(response){
+                        form.serverDialog({action: 'Reset'}, [], [], Pmg.message('actionDone')).then(function(response){
                         	if (self.grid){
                         		grid = form.getWidget(self.grid)
                             	grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
                         	}
-                            Pmg.addFeedback(Pmg.messages('actionDone'));
+                            Pmg.addFeedback(Pmg.message('actionDone'));
                         });
                     }
             	}else{
-            		Pmg.alert({title: Pmg.messages('failedimport'), content: response.feedback[0]});
+            		Pmg.alert({title: Pmg.message('failedimport'), content: response.feedback[0]});
             	}
+            	this.set('label', this.keepLabel);
             });            		
             aspect.after(this, 'onChange', function(){
                 var valuesToSend = {};
-                this.url = Pmg.requestUrl({object: form.object, view: form.viewMode, mode: form.paneMode, action: self.serverAction, query: {id: registry.byId(form.id + 'id').get('value'), params: self.queryParams}});
+                this.keepLabel = this.label;
+                this.set('label', Pmg.loading(this.label));
+                this.url = Pmg.requestUrl({object: form.object, view: form.viewMode, mode: form.paneMode, action: self.serverAction, query: {/*id: registry.byId(form.id + 'id').get('value'), */params: self.queryParams}});
             	if (self.includeWidgets){
                 	self.includeWidgets.forEach(function(widget){
                 		valuesToSend[widget] = form.valueOf(widget);
