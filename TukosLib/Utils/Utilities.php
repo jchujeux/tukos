@@ -5,8 +5,27 @@ class Utilities{
     public static function nullToBlank($value){
         return  ($value === null ? '' : $value);
     }
-    public static function blankToNull($value){
-    	return  ($value === '' ? null : $value);
+    public static function blankToNull($value, $keys = []){
+        return  ($value === '' ? null : $value);
+    }
+    public static function arrayCallbackByKeys($values, $callback, $keys = []){
+        if (empty($keys)){
+            foreach($values as &$value){
+                $value = $callback($value);
+            }
+        }else{
+            $presentKeys = array_intersect(array_keys($values), $keys);
+            foreach($presentKeys as $key){
+                $values[$key] = $callback($values[$key]);
+            }
+        }
+        return $values;
+    }
+    public static function nullToBlankArray($values, $keys = []){
+        return self::arrayCallbackByKeys($values, ['TukosLib\Utils\Utilities', 'nullToBlank'], $keys);
+    }
+    public static function blankToNullArray($values, $keys = []){
+        return self::arrayCallbackByKeys($values, ['TukosLib\Utils\Utilities', 'blankToNull'], $keys);
     }
     public static function jsonDecode($json, $assoc=true){
         return is_array($json) ? $json : json_decode($json, $assoc);

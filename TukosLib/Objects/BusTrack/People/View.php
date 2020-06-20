@@ -2,24 +2,13 @@
 namespace TukosLib\Objects\BusTrack\People;
 
 use TukosLib\Objects\AbstractView;
-use TukosLib\Objects\ViewUtils;
+use TukosLib\Objects\Collab\People\View as PeopleView;;
 
-class View extends AbstractView {
+class View extends PeopleView {
 
 	function __construct($objectName, $translator=null){
-		parent::__construct($objectName, $translator, 'Organization', 'Lastname');
-        $customDataWidgets = [
-            'firstname'  => ViewUtils::textBox($this, 'Firstname'),
-            'title'      => ViewUtils::textBox($this, 'Civility'),
-        	//'clientid'	 => ViewUtils::textBox($this, 'Clientid'),
-            'email'      => ViewUtils::textBox($this, 'email', ['atts' => ['edit' =>  ['placeHolder' => 'xxx@yyy']]]),
-            'telmobile'  => ViewUtils::textBox($this, 'Telmobile'),
-            'street'     => ViewUtils::textBox($this, 'Streetaddress'),
-            'postalcode' => ViewUtils::textBox($this, 'Postalcode'),
-            'city'       => ViewUtils::textBox($this, 'City'),
-            'country'    => ViewUtils::storeSelect('country', $this, 'Country'),
-            'invoicingaddress'     => ViewUtils::textArea($this, 'Invoicingaddress'),
-        ];
+		AbstractView::__construct($objectName, $translator, 'Organization', 'Lastname');
+        $customDataWidgets = $this->customDataWidgets();
 
         $subObjects['bustrackquotes'] = [
             'atts'  => ['title' => $this->tr('bustrackquotes'),],

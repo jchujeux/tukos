@@ -30,7 +30,7 @@ class Model extends AbstractModel {
             'lefttopay' => "DECIMAL (10, 2)",
             'status' =>  'VARCHAR(50)  DEFAULT NULL',
         ];
-        parent::__construct($objectName, $translator, 'bustrackinvoices', ['parentid' => ['bustrackpeople', 'bustrackorganizations'], 'organization' => ['bustrackorganizations'],
+        parent::__construct($objectName, $translator, 'bustrackinvoices', ['parentid' => ['bustrackpeople', 'bustrackorganizations'], 'organization' => ['bustrackorganizations'], 'contact' => ['bustrackpeople'],
             'relatedquote' => ['bustrackquotes']], ['items'], $colsDefinition, [], ['status'], ['custom', 'history'], ['name', 'parentid', 'reference']);
         $this->gridsIdCols =  array_merge($this->gridsIdCols, ['items' => ['catalogid']]);
         $this->setDeleteChildren(['bustrackinvoicesitems']);
@@ -111,7 +111,7 @@ class Model extends AbstractModel {
 	    ];
        	$rows[] = ['tag' => 'tr', 'content' => [
        		['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => $this->tr('tax')], 
-        	['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format($invoice['pricewt'] - $invoice['pricewot'], 'currency')]]
+        	['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format((float)$invoice['pricewt'] - (float)$invoice['pricewot'], 'currency')]]
         ];
         $rows[] = ['tag' => 'tr', 'content' => [
         	['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => '<b>' . $this->tr('Totalwt') . '</b>'],

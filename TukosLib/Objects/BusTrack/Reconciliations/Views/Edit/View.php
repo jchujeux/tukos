@@ -10,7 +10,7 @@ class View extends EditView{
     function __construct($actionController){
         parent::__construct($actionController); 
         $this->dataLayout['contents']['row1'] = [
-            'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'widgetWidths' => ['40%', '60%']],
+            'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'widgetWidths' => ['50%', '50%']],
             'contents' => [
                 'col1' => [
                     'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true],

@@ -71,7 +71,7 @@ trait ContentExporter {
 			if ($atts['sendas'] === 'appendtobody' || $atts['sendas'] === 'bodyandattachment'){
 				$mailArgs['body'] .= $atts['content'];
 			}
-			if ($atts['sendas'] !== 'apppendtobdy'){
+			if ($atts['sendas'] !== 'appendtobody'){
 			    if($tmpFileName = $this->buildTargetFile($atts)){
 			        $mailArgs['attachments'] = [$tmpFileName];
 			    }else{

@@ -107,8 +107,9 @@ class Store {
                         }
                     }
                 }
+                unset($item);
                 foreach($mergeRhsKey as $id => $rhsKey){
-                    if ($lhsKey = Utl::getItem($id, $mergeLhsKey)){
+                    if (($lhsKey = Utl::getItem($id, $mergeLhsKey,false)) !== false){
                         $result[$lhsKey] = array_merge($result[$lhsKey], array_filter($result[$rhsKey]));
                         unset($result[$rhsKey]);
                     }

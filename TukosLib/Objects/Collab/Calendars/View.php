@@ -15,7 +15,7 @@ class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
 
-    	parent::__construct($objectName, $translator, 'Parent', 'Description', []);
+    	parent::__construct($objectName, $translator, 'Parent', 'Description');
 		array_push($this->mustGetCols, 'sources', 'periodstart', 'periodend', 'displayeddate', 'calendarsentries');
     	$this->doNotEmpty = ['displayeddate'];
     	$this->setGridWidget('calendarsentries');

@@ -30,7 +30,7 @@ class View extends AbstractView {
                 ]],
             ]]]),
             'pendinginvoiceslog' => ViewUtils::basicGrid($this, 'Pendinginvoices', [
-                'id' => ['label' => $tr('Invoice'), 'renderCell' => 'renderNamedId'], 'customer' => ['label' => $tr('Customer'), 'renderCell' => 'renderNamedId'], 'name' => ['label' => $tr('Description')],
+                'id' => ['label' => $tr('Invoice'), 'renderCell' => 'renderNamedId'], 'customer' => ['label' => $tr('Customer'), 'renderCell' => 'renderNamedId'], 'comments' => ['label' => $tr('Comments'), 'renderCell' => 'renderContent'],
                 'contact' => ['label' => $tr('Contact'), 'renderCell' => 'renderNamedId'], 'invoicedate' => ['label' => $tr('Invoicedate'), 'formatType' => 'date', 'width' => '100'], 
                 'pricewt' => ['label' => $tr('Pricewt'), 'formatType' => 'currency', 'renderCell' => 'renderContent', 'width' => '80'], 
                 'lefttopay' => ['label' => $tr('Lefttopay'), 'formatType' => 'currency', 'renderCell' => 'renderContent', 'width' => '80']
@@ -38,7 +38,7 @@ class View extends AbstractView {
                 'lefttopay' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#lefttopay#);"]]]
             ]]]]]),
             'paymentsdetailslog' => ViewUtils::basicGrid($this, 'Paymentsdetails', [
-                'invoiceid' => ['label' => $tr('Invoice'), 'renderCell' => 'renderNamedId', 'width' => ''], 'customer' => ['label' => $tr('Customer'), 'renderCell' => 'renderNamedId', 'width' => '220'],
+                'invoiceid' => ['label' => $tr('Invoice'), 'renderCell' => 'renderNamedIdExtra', 'width' => ''], 'customer' => ['label' => $tr('Customer'), 'renderCell' => 'renderNamedId', 'width' => '220'],
                 'invoicedate' => ['label' => $tr('InvoiceDate'), 'formatType' => 'date', 'width' => '100'], 'invoiceamount' => ['label' => $tr('Invoiceamount'), 'formatType' => 'currency', 'width' => '100'],
                 'paymentitemname' => ['label' => $tr('Paymentitem'), 'width' => '200'], 'category' => ['label' => $tr('Category'), 'renderCell' => 'renderNamedId', 'width' => '200'], 
                 'paymentitemamount' => ['label' => $tr('Paidamount'), 'formatType' => 'currency','renderCell' => 'renderContent', 'width' => '100'], 'vatfree' => ['label' => $tr('Vatfree'), 'formatType' => 'translate', 'width' => '100'], 
@@ -58,7 +58,7 @@ class View extends AbstractView {
             $customDataWidgets[$widgetName] = ViewUtils::htmlContent($this, $rowsLabels[$label] = ucfirst($widgetName), ['atts' => ['edit' => ['value' => $this->tr($widgetName), 'style' => ['width' => '130px']]]]);
             foreach (['details', 'exp', 'unexp', 'total'] as $prefix){
                 $widgetName = "{$prefix}{$label}";
-                $customDataWidgets[$widgetName] = ViewUtils::tukosCurrencyBox($this, $widgetName, ['atts' => ['edit' => ['label' => "{$this->tr($colsLabels[$prefix])} {$this->tr($rowsLabels[$label])}"]]]);
+                $customDataWidgets[$widgetName] = ViewUtils::tukosCurrencyBox($this, $widgetName, ['atts' => ['edit' => ['label' => "{$this->tr($colsLabels[$prefix])} {$this->tr($rowsLabels[$label])}", 'disabled' =>  true]]]);
             }
         }
         $this->doNotEmpty = $noGrid;

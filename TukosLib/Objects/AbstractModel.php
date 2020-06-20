@@ -124,7 +124,6 @@ abstract class AbstractModel extends ObjectTranslator {
 		$missingCols = ($this->useItemsCache ? ItemsCache::missingCols($atts) : $atts['cols']);
 		if (empty($missingCols)){
             $result = ItemsCache::getOne($atts);
-            //Feedback::add('Avoided store->getOne; ' . json_encode($atts));
         }else{
             $requiredCols = $atts['cols'];
             $atts['cols'] = $missingCols;
@@ -143,7 +142,6 @@ abstract class AbstractModel extends ObjectTranslator {
                     $result = ItemsCache::mergeOne($result, $atts);
                 }
             }else{
-            	//Feedback::add($this->tr('itemnotfound'));
             	return [];
             }
         }
@@ -275,12 +273,6 @@ abstract class AbstractModel extends ObjectTranslator {
                 return false;
             }
         }else{
-/*
-            if (!empty($newValues['updated']) && $newValues['updated'] < $oldValues['updated']){
-                Feedback::add([[$this->tr('theuser') => $oldValues['updator']], [$this->tr('updatedat') => $oldValues['updated']], [$this->tr('afteryouredit') => null]]);
-                return false;
-            }
-*/
             if ($this->user->hasUpdateRights($oldValues)){
                 return $this->_update($oldValues, $newValues, $jsonFilter);
             }else{
@@ -359,8 +351,9 @@ abstract class AbstractModel extends ObjectTranslator {
         $oldHistory = Utl::extractItem('history', $oldValues);
 
         $this->jsonNewValues($oldValues, $newValues);
+        $newValues = Utl::blankToNullArray($newValues, $this->idCols);
         
-        $differences = array_udiff_assoc($newValues, $oldValues, function($left, $right){return ($left === $right ? 0 : 1);});
+        $differences = array_udiff_assoc($newValues, $oldValues, function($left, $right){return (($left === $right) || ($left === Utl::blankToNull($right))) ? 0 : 1;});
         if (!empty($differences)){
             $updated = $differences['updated'] = date('Y-m-d H:i:s');
             $updator = $this->user->id();
@@ -383,7 +376,7 @@ abstract class AbstractModel extends ObjectTranslator {
             $this->jsonEncode($differences, $jsonFilter);
             
             $updatedCount = $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $oldValues['id']]]);
-            if (!$updatedCount){// means no old item was found, insert the differences instead (is an update of a tukosconfig item in the user database), but still consider as an update
+            if (!$updatedCount && $oldValues['id'] < 10000){// means no old item was found, insert the differences instead (is an update of a tukosconfig item in the user database), but still consider as an update (*** could stillbe conflct ***
                 $differences['id']      = $oldValues['id'];
                 $differences['created'] = date('Y-m-d H:i:s');
                 $differences['creator'] = $this->user->id();

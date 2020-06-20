@@ -12,6 +12,7 @@ class StoreUtilities {
     public static $store = null;
     public static $hasObjectCols = false;
     public static $hasTukosCols = false;
+    public static $hasSubSelect = false;
     private static $idColsCache = [];
     
     public static function instantiate(){
@@ -63,7 +64,8 @@ class StoreUtilities {
     
     function objectTranslatedExtendedNames($model, $storeAtts){
     	$objectName = $model->objectName;
-    	$storeAtts['cols'] = array_merge(Utl::getItem('cols', $storeAtts, ['id']), $model->extendedNameCols);
+    	$requestedCols = $storeAtts['cols'];
+    	$storeAtts['cols'] = array_unique(array_merge(Utl::getItem('cols', $storeAtts, ['id']), $model->extendedNameCols));
     	$values = Utl::toAssociative($model->translateAll($model->getAll($storeAtts)), 'id');
     	if (empty($values)){
     		return [];
@@ -90,21 +92,26 @@ class StoreUtilities {
 	    		}
 	    	}
 			$result = [];
+			$keepName = in_array('name', $requestedCols);
+			$colsToRemove = array_diff($model->extendedNameCols, $requestedCols);
 			foreach ($values as $id => $value){
-				$extendedNameValues = Utl::extractItems($model->extendedNameCols, $value);
+			    if ($keepName){
+			        $value['sname'] = $value['name'];
+			    }
+			    $extendedNameValues = Utl::getItems($model->extendedNameCols, $value);
 			    $presentExtendedNameIdCols = array_intersect($extendedNameIdCols, array_keys($extendedNameValues));
 		        foreach ($presentExtendedNameIdCols as $col){
 					$idColValue = $extendedNameValues[$col];
 		        	$extendedNameValues[$col] = implode(' ', self::extendedNameColsForId($idColValue, $extraValues, $extendedNameColsCache));
 		        }	
-		        $result[$id] = array_merge(['name' => implode(' ', $extendedNameValues)], $value);
+		        Utl::extractItems($colsToRemove, $value);
+		        $result[$id] = array_merge($value, ['name' => implode(' ', $extendedNameValues)]);
 			}
 			return $result;
     	}
     }
 
     function translatedExtendedName($model, $id){
-    	$objectName = $model->objectName;
     	$extendedNameValues = $model->getOne(['where' => ['id' => $id], 'cols' => $model->extendedNameCols]);
     	$model->translateOne($extendedNameValues);
     	if (empty($extendedNameValues)){
@@ -185,17 +192,24 @@ class StoreUtilities {
         self::$hasTukosCols = false;
     }
     
-    public static function transformGet($queryAtts, $objectName, $maxSizeCols = [], $fieldMaxSize = 0){
+    public static function transformGet($queryAtts, $objectName, $maxSizeCols = [], $fieldMaxSize = 0, $asCol = true){
+        if ($union = Utl::getItem('union', $queryAtts)){
+            self::$hasSubSelect = false;
+            $cols = $queryAtts['cols'];
+        }
+        $queryAtts['where'] = self::transformWhere(self::deletedFilter($queryAtts['where']), $objectName);
+        if (self::$hasSubSelect && $union){
+            $queryAtts['union'] = $union = false;
+        }
+        $queryAtts['cols'] = self::transformCols($queryAtts['cols'], $objectName, $maxSizeCols, $fieldMaxSize, $asCol);
         if (!empty($queryAtts['orderBy'])){
-            if (isset($queryAtts['union'])){
-                if (array_intersect($orderByKeys = array_keys($queryAtts['orderBy']), $queryAtts['cols']) !== $orderByKeys){
-                    $queryAtts['union'] = false;
+            if ($union){
+                if (array_intersect($orderByKeys = array_keys($queryAtts['orderBy']), $cols) !== $orderByKeys){
+                    $queryAtts['union'] = $union = false;
                 }
             }
-            $queryAtts['orderBy'] = self::transformOrderBy($queryAtts['orderBy'], $objectName, Utl::getItem('union', $queryAtts));
+            $queryAtts['orderBy'] = self::transformOrderBy($queryAtts['orderBy'], $objectName, $union);
         }
-        $queryAtts['cols'] = self::transformCols($queryAtts['cols'], $objectName, $maxSizeCols, $fieldMaxSize);
-        $queryAtts['where'] = self::transformWhere(self::deletedFilter($queryAtts['where']), $objectName);
         if (!empty($queryAtts['groupBy'])){
             $queryAtts['groupBy'] = self::transformCols($queryAtts['groupBy'], $objectName);
         }
@@ -264,16 +278,17 @@ class StoreUtilities {
         }
     }
 
-    public static function transformCols($cols, $objectName, $maxSizeCols = [], $fieldMaxSize = null){
+    public static function transformCols($cols, $objectName, $maxSizeCols = [], $fieldMaxSize = null, $asCol = false){
         $transformedCols = [];
         foreach ($cols as $col){
             if (is_array($col)){
                 $transformedCols[] = Utl::substitute(reset($col), [self::colsPrefix($colString = key($col), $objectName) . $colString]);
             }else{
                 $extCol = self::colsPrefix($col, $objectName) . $col;
+                $asColString = $asCol ? " as $col" : '';
                 $transformedCols[] = in_array($col, $maxSizeCols)
-                    ? "if(length($extCol) > $fieldMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$objectName,col:$col}\"), $extCol) as $col"
-                    : "$extCol as $col";
+                    ? "if(length($extCol) > $fieldMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$objectName,col:$col}\"), $extCol) $asColString"
+                    : "$extCol$asColString";
             }
         }
         return $transformedCols;
@@ -300,10 +315,11 @@ class StoreUtilities {
                 		$condition['col'] = $colWhere($condition['col']);
                 	}
                 	if (in_array($condition['opr'], ['IN SELECT', 'NOT IN SELECT', 'EXISTS', 'NOT EXISTS']) && is_array($condition['values'])){
+                	    self::$hasSubSelect = true;
                 	    $hasObjectCols = self::$hasObjectCols;
                 	    $hasTukosCols = self::$hasTukosCols;
                 	    self::resetCols();
-                	    $condition['values'] = self::transformGet($condition['values'], $condition['values']['table']);
+                	    $condition['values'] = self::transformGet($condition['values'], $condition['values']['table'], [], 0, false);
                 	     self::$hasObjectCols = $hasObjectCols;
                 	     self::$hasTukosCols = $hasTukosCols;
                 	}

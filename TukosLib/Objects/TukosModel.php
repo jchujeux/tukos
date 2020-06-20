@@ -12,7 +12,7 @@ class TukosModel {
     protected $tableName = 'tukos';
     protected $_colsDefinition = [
         'id'           =>  'INT(11) PRIMARY KEY',
-        'parentid'     =>  "INT(11) NOT NULL DEFAULT '0'",
+        'parentid'     =>  "INT(11) NOT NULL DEFAULT NULL",
         'object'       =>  "VARCHAR(80)",
         'name'         =>  "VARCHAR(255) DEFAULT ''",
         'contextid'    =>  'INT(11) NOT NULL',

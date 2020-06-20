@@ -2,19 +2,13 @@
 namespace TukosLib\Objects\BusTrack\Organizations;
 
 use TukosLib\Objects\AbstractView;
-use TukosLib\Objects\ViewUtils;
+use TukosLib\Objects\Collab\Organizations\View as OrganizationView;
 
-
-class View extends AbstractView {
+class View extends OrganizationView {
 
 	function __construct($objectName, $translator=null){
-		parent::__construct($objectName, $translator, 'Organization', 'Lastname');
-		$customDataWidgets = [
-		    'segment' => ViewUtils::storeSelect('segment', $this, 'Segment'),
-		    'headofficeaddress' => ViewUtils::textArea($this, 'HeadOfficeAddress'),
-		    'invoicingaddress' => ViewUtils::textArea($this, 'InvoicingAddress'),
-		    'vatid' => ViewUtils::textBox($this, 'Vatid'),
-		];
+	    AbstractView::__construct($objectName, $translator, 'Parent organization', 'Organization name');
+		$customDataWidgets = $this->customDataWidgets();
         $subObjects['bustrackquotes'] = [
             'atts'  => ['title' => $this->tr('bustrackquotes'),],
             'filters' => ['parentid' => '@id'],
