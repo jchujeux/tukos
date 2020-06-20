@@ -80,6 +80,7 @@ class View extends EditView{
             'widgets' => ['paymentslog', 'pendinginvoiceslog', 'paymentsdetailslog'],
         ];
         $this->actionWidgets['process']['atts'] = array_merge($this->actionWidgets['process']['atts'], [
+            'label' => $this->view->tr('generateoractualize'),
             'allowSave' => true,
             'urlArgs' => ['query' => ['params' => json_encode(['process' => 'processOne', 'save' => true])]], 
             'includeWidgets' => ['parentid', 'startdate', 'enddate']

@@ -44,7 +44,7 @@ class View extends AbstractView {
             'imc' => ViewUtils::tukosNumberBox($this, 'IMC', ['atts' => ['edit' => ['disabled' => true, 'constraints' => ['pattern' => '00.']]]]),
         ];
         $subObjects = [
-	        'sptprograms' => [
+         'sptprograms' => [
 	            'atts'  => ['title' => $this->tr('Sptprograms'),],
 	            'filters' => ['parentid' => '@id'],
 	            'allDescendants' => true,
@@ -54,17 +54,17 @@ class View extends AbstractView {
 	            'filters' => ['parentid' => '@id'],
 	            'allDescendants' => true,
 	        ],
-	        'physiocdcs' => [
+             'physiocdcs' => [
 	            'atts'  => ['title' => $this->tr('Physiocdcs'),],
 	            'filters' => ['parentid' => '@id'],
 	            'allDescendants' => true,
 	        ],
-        	'physioassesments' => [
+             'physioassesments' => [
 	            'atts'  => ['title' => $this->tr('Physioassesments'),],
 	            'filters' => [[['col' => 'parentid', 'opr' => '=', 'values' => '@id'], ['col' => 'parentid', 'opr' => 'IN SELECT', 'values' => ['where' => ['parentid' => '@id'], 'table' => 'tukos', 'cols' => ['id']], 'or' => true]]],
 	            'allDescendants' => true,
 	        ],
-    		'calendarsentries' => [
+             'calendarsentries' => [
     			'atts' => ['title' => $this->tr('Appointments'), 'maxHeight' => '300px', 'storeType' => 'LazyMemoryTreeObjects',],
     			'initialRowValue' => ['duration' => '[1, "hour"]'],
     			'filters' => [
@@ -96,7 +96,8 @@ class View extends AbstractView {
 
     			],
     		],
-        	'physioprescriptions' => [
+
+            'physioprescriptions' => [
 	            'atts'  => ['title' => $this->tr('Prescriptions'),],
 	            'filters' => ['parentid' => '@id'],
 	            'allDescendants' => true,

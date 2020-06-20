@@ -18,7 +18,7 @@ class View extends AbstractView {
             'reference' =>  ViewUtils::textBox($this, 'Paymentreference'),
             'slip' =>  ViewUtils::textBox($this, 'CheckSlipNumber'),
             'amount'  => ViewUtils::tukosCurrencyBox($this, 'Amount', ['atts' => [
-                'edit' => ['onChangeLocalAction' => ['unassignedamount' => ['value' => "return newValue -  (sWidget.form.getWidget('items').get('summary') || 0);"]]],
+                'edit' => ['onChangeLocalAction' => ['unassignedamount' => ['value' => "return newValue -  ((sWidget.form.getWidget('items').get('summary') || {}).amount || 0);"]]],
                 'storeedit' => ['formatType' => 'currency', 'width' => 80],
                 'overview' => ['formatType' => 'currency', 'width' => 80],
             ]]),

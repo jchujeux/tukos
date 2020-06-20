@@ -88,7 +88,7 @@ EOT
     }
     public function pendingInvoicesKPIs($organization, $startDate, $endDate){
         $results = SUtl::$tukosModel->store->query(<<<EOT
-            SELECT `bustrackinvoices`.`id`, `t0`.`parentid` as `customer`, `t0`.`name`, `bustrackinvoices`.`reference`, `bustrackinvoices`.`invoicedate`,
+            SELECT `bustrackinvoices`.`id`, `t0`.`parentid` as `customer`, `t0`.`name`, `bustrackinvoices`.`reference`, `bustrackinvoices`.`invoicedate`, `bustrackinvoices`.`contact`, `t0`.`comments`, 
                    `bustrackinvoices`.`pricewt` as `pricewt`, IFNULL(`pricewt` - sum(`bustrackpaymentsitems`.`amount`), `pricewt`) as `lefttopay`
             FROM `bustrackinvoices`
                 INNER JOIN (`tukos` as `t0`) ON `t0`.`id` = `bustrackinvoices`.`id`
@@ -159,8 +159,6 @@ EOT
                 }
                 $this->updateOne($newValues, ['where' => $where])['id'];
                 Feedback::add($this->tr('Dashboard updated'));
-            }else{
-                Feedback::add($this->tr('Nothingselectednochange'));
             }
         }else{
             Feedback::add($this->tr('Needorgastartend'));

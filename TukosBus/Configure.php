@@ -55,7 +55,7 @@ class Configure{
             '#bustrackreconciliations' => [],
             '#bustrackdashboards' => [], 
         	'@help' => [
-        	    ['overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],
+        	    [/*'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],*/
         	     'guidedtour' => ['type' => 'MenuItem', 'atts' => [
         	        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('GuidedtourTukosBus')]]])]]]],
         	     'tutotukos' => ['type' => 'MenuItem', 'atts' => [

@@ -54,8 +54,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
              
             var summaryCol = this.summaryRow.cols[column.field];
             if (summaryCol){
-                var value = item[column.field] || '', atts = summaryCol.atts, node = dct.create('div', {style: utils.in_array(atts.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {}});
-                node.appendChild(document.createTextNode(atts && atts.formatType ? utils.transform(value, atts.formatType, atts.formatOptions, Pmg) : value));
+                var value = item[column.field] || '', atts = summaryCol.atts, formatType = (atts || {}).formatType, node = dct.create('div', {style: utils.in_array(formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {}});
+                node.appendChild(document.createTextNode(formatType ? utils.transform(value, formatType, atts.formatOptions, Pmg) : value));
                 cell.appendChild(node);
             }
         },

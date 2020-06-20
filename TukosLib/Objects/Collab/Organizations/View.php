@@ -13,10 +13,19 @@ class View extends AbstractView {
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Parent organization', 'Organization name');
 
-        $customDataWidgets = [
+        $customDataWidgets = $this->customDataWidgets();
+        $subObjects['people']        = ['atts' => ['title' => $this->tr('People')]           , 'filters' => ['parentid' => '@id'], 'allDescendants' => true];
+        $subObjects['organizations'] = ['atts' => ['title' => $this->tr('sub-organizations')], 'filters' => ['parentid' => '@id'], 'allDescendants' => true];
+        $this->customize($customDataWidgets, $subObjects);
+    }
+    function customDataWidgets(){
+        return [
+            'comments' => ['atts' => ['edit' => ['height' => '150px']]],
             'segment' => ViewUtils::storeSelect('segment', $this, 'Segment'),
-            'logo'    => ViewUtils::textBox($this, 'Logo'),
+            'weburl' => ViewUtils::textBox($this, 'Weburl'),
             'trigram' => ViewUtils::textBox($this, 'Trigram', ['atts' => ['edit' => ['style' => ['width' => '3em']]]]),
+            'logo'    => ViewUtils::lazyEditor($this, 'Logo', ['atts' => ['edit' => ['height' => '60px']]]),
+            'defaultfooter' => ViewUtils::lazyEditor($this, 'Defaultfooter', ['atts' => ['edit' => ['height' => '60px']]]),
             'headofficeaddress' => ViewUtils::textArea($this, 'HeadOfficeAddress'),
             'invoicingaddress' => ViewUtils::textArea($this, 'InvoicingAddress'),
             'vatid' => ViewUtils::textBox($this, 'Vatid'),
@@ -24,9 +33,6 @@ class View extends AbstractView {
             'judicialform' => ViewUtils::textBox($this, 'JudicialForm'),
             'sharecapital' => ViewUtils::textBox($this, 'ShareCapital')
         ];
-        $subObjects['people']        = ['atts' => ['title' => $this->tr('People')]           , 'filters' => ['parentid' => '@id'], 'allDescendants' => true];
-        $subObjects['organizations'] = ['atts' => ['title' => $this->tr('sub-organizations')], 'filters' => ['parentid' => '@id'], 'allDescendants' => true];
-        $this->customize($customDataWidgets, $subObjects);
-    }    
+    }
 }
 ?>

@@ -1,8 +1,8 @@
 /*
  * Read-only store to suppport the ObjectSelect widget
  */
- define(["dojo/_base/lang", 'dojo/_base/array', "dojo/json", "dojo/_base/declare", "dojo/store/util/QueryResults", "tukos/PageManager", "tukos/utils"
-], function(lang, arrayUtil, JSON, declare, QueryResults, Pmg, utils /*=====, Store =====*/){
+ define(["dojo/_base/lang", 'dojo/_base/array', "dojo/json", "dojo/_base/declare", "dojo/store/util/QueryResults", "tukos/PageManager", "tukos/utils", "tukos/widgetUtils", "tukos/evalutils"
+], function(lang, arrayUtil, JSON, declare, QueryResults, Pmg, utils, wutils, eutils /*=====, Store =====*/){
 
     var base = null;
     return declare(base, {
@@ -47,7 +47,8 @@
             if (!query || query == {}){
                 return QueryResults([]);
             }else{
-                var queryOptions = this.queryOptions(query, options);
+                if (this.widget){this.processFilters(query)};
+            	var queryOptions = this.queryOptions(query, options);
                 if (this.storeDgrid){
                 	var grid = this.getGrid(), items = [];
                 	grid.store.forEach(function(item){
@@ -72,6 +73,47 @@
                     return QueryResults(results);                	
                 }
             }    
+        },
+        processFilters: function(query){
+        	var widget = this.widget, dropdownFilters = widget.dropdownFilters;
+            if (typeof dropdownFilters === 'string'){
+            	this.dropdownFilterFunction = this.dropdownFilterFunction || eutils.eval(dropdownFilters, 'widget');
+            	query = lang.mixin(query, this.dropdownFilterFunction(widget));
+            }else{
+            	for (var i in dropdownFilters){
+                    var theCol = dropdownFilters[i];
+                    if (typeof(theCol) == "string" && wutils.specialCharacters.indexOf(theCol[0]) > -1){
+                        query[i] = widget.valueOf(theCol);
+                    }else{
+                        query[i] = theCol;
+                    }
+                }
+            	for (var i in query){
+                    var theCol = query[i];
+                    switch(typeof(theCol)){
+                    	case 'string':
+                    		query[i] = (wutils.specialCharacters.indexOf(theCol[0]) > -1) ? widget.valueOf(theCol) : theCol;
+                    		break;
+                    	case 'object':
+                    		if (!(theCol instanceof RegExp)){
+                    			query[i] = this.filterSpecial(theCol);
+                    		}
+                    }
+                }
+            }
+            this.inherited(arguments);
+        },
+        filterSpecial: function(filter){
+        	var self = this, widget = this.widget, result = {};
+        	utils.forEach(filter, function(item, key){
+        		if (typeof(item) === 'object'){
+        			return self.filterSpecial(item);
+        			
+        		}else{
+        			result[key] = (wutils.specialCharacters.indexOf(item[0]) > -1) ? widget.valueOf(item) || '%%' : item;
+        		}
+        	});
+        	return result;
         },
         queryOptions: function(query, options){
             options = options || {};

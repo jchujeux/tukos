@@ -9,8 +9,10 @@ class Model extends AbstractModel {
     
         $colsDefinition = [
             'segment' =>  'VARCHAR(50)  DEFAULT NULL',
-            'logo' =>  'VARCHAR(150)  DEFAULT NULL',
+            'weburl' => 'VARCHAR(255) DEFAULT NULL',
             'trigram' =>  'CHAR(3)  DEFAULT NULL',
+            'logo' =>  'longtext  DEFAULT NULL',
+            'defaultfooter' =>  'longtext  DEFAULT NULL',
             'headofficeaddress' => 'VARCHAR(255) DEFAULT NULL',
             'invoicingaddress' => 'VARCHAR(255) DEFAULT NULL',
             'vatid' => 'VARCHAR(31) DEFAULT NULL',
