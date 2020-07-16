@@ -23,8 +23,6 @@ class Main{
             if ($user->setUser(['name' => $username])){/* so as $user has the proper rights and other initialization information*/
                 if ($request['controller'] === 'Page'){
                     list($request, $query) = $user->getCustomTukosUrl($request, $query);
-                    //$request = $user->customizeRequest($request);
-                    //$query = $user->customizeQuery($query);
                 }
                 try{
 	                $controllerClass = 'TukosLib\\Controllers\\' . $request['controller'];

@@ -46,7 +46,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
                     function(response){
                         currentPane.refresh(response.formContent);
                         ready(function(){
-                            (currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);
+                            setTimeout(function(){(currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);}, 0);// due to similar setTimeout in ObjectPane affecting markIfChanged
                             Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
                             currentPane.resize();
                         });

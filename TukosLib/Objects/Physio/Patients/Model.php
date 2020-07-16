@@ -12,10 +12,10 @@ class Model extends PeopleModel {
     protected $corpulenceOptions = ['thin', 'normal', 'fat', 'obese'];
     protected $morphotypeOptions = ['endomorph', 'mesomorph', 'ectomorph'];
 
-    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
+    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null, $absentColsFlag = 'forbid'){
         $computedCols = ['age' => ['birthdate'], 'imc' => ['height', 'weight']];
         Utl::adjustSourceCols($atts['cols'], $toAddComputedCols, $addedSourceCols, $computedCols);
-        $item = parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue);
+        $item = parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue, $absentColsFlag);
         if (empty($toAddComputedCols)){
             return $item;
         }else{

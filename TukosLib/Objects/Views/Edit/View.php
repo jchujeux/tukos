@@ -32,7 +32,7 @@ class View {
             'new'  => ['type' => 'ObjectNew', 'atts' => ['serverAction' => 'Edit', 'label' => $this->view->tr('New'), 'isNew' => true, 'confirmAtts' => ['title' => $tr('fieldsHaveBeenModified'), 'content' => $tr('sureWantToForget')]]],
             'duplicate'  => ['type' => 'ObjectDuplicate', 'atts' => ['label' => $this->view->tr('Duplicate')]],
             'reset'  => ['type' => 'ObjectReset', 'atts' => ['serverAction' => 'Reset', 'label' => $this->view->tr('Reset'), 'confirmAtts' => ['title' => $tr('fieldsHaveBeenModified'), 'content' => $tr('sureWantToForget')]]],
-            'calendartab'  => ['type' => 'ObjectCalendar', 'atts' => ['label' => $this->view->tr('Calendar')]],
+            'calendartab'  => ['type' => 'ObjectCalendar', 'atts' => ['label' => $this->view->tr('Calendar'), 'hidden' => true]],
         	'export'  => ['type' => 'ObjectExport', 'atts' => ['label' => $this->view->tr('export')]],
             'process'  => ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Process')]],
             'clearFeedback'  => ['type' => 'ObjectFieldClear', 'atts' => ['label' => $this->view->tr('Clear Feedback'), 'fieldToClear' => 'feedback']],

@@ -18,9 +18,9 @@ class Save extends SaveModel {
             $this->modelSaveOneExisting  = (empty($query['params']['saveOneExisting'])  ? $this->modelSaveOneExisting : $query['params']['saveOneExisting']);
         }
         $valuesToSave = $this->dialogue->getValues();
-
+        //$valuesToSave = Utl::getItem('values', $valuesToSave, $valuesToSave);
+        
         $subObjectsToSave = SubObjectsSave::extractValues($this->view->subObjects, $valuesToSave);
-
         if (empty($valuesToSave['id']) && !empty($query['id'])){
             $valuesToSave['id'] = $query['id'];
         }

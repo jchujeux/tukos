@@ -7,19 +7,24 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             this.inherited(arguments);
             lang.mixin(this.pane, {attachedWidget: this.attachedWidget, previewContent: lang.hitch(this, this.previewContent), tabContextId: lang.hitch(form, form.tabContextId)});
         	this.onOpen = lang.hitch(this, function(){
-        		var pane = this.pane, _arguments = arguments;
-        		setTimeout(lang.hitch(this, function(){
-            		when(this.onOpenAction(), lang.hitch(this, function(){
-    	        		this.setVisibility();
-    	        		when(this.previewContent(), lang.hitch(this, function(){
-    	            		pane.watchOnChange = true;
-    	            		dijit.TooltipDialog.prototype.onOpen.apply(this, _arguments);
-    	            		ready(function(){
-    	            			pane.resize();
-    	            		});
-    	            	}));
-            		}), 100);        			
-        		}));
+        		var pane = this.pane, _arguments = arguments, attachedWidget = this.attachedWidget, needToSaveBefore = attachedWidget.needToSaveBefore, form = attachedWidget.form, changedValues = form.changedValues();;
+        		if (needToSaveBefore && (form.valueOf == '' || !utils.empty(changedValues))){
+                    Pmg.alert({title: Pmg.message('newOrFieldsModified'), content: Pmg.message('saveOrReloadFirst')});
+                    this.close();
+        		}else{
+            		setTimeout(lang.hitch(this, function(){
+                		when(this.onOpenAction(), lang.hitch(this, function(){
+        	        		this.setVisibility();
+        	        		when(this.previewContent(), lang.hitch(this, function(){
+        	            		pane.watchOnChange = true;
+        	            		dijit.TooltipDialog.prototype.onOpen.apply(this, _arguments);
+        	            		ready(function(){
+        	            			pane.resize();
+        	            		});
+        	            	}));
+                		}), 100);        			
+            		}));
+        		}
         	});
         	this.blurCallback = on.pausable(this, 'blur', this.close);
         },

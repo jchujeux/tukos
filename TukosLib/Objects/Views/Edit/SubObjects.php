@@ -23,6 +23,9 @@ class SubObjects {
             if (empty($subObject['widgetCols'])){
                 $view->subObjects[$widgetName]['widgetCols'] = $subObject['widgetCols']= $subObject['view']->gridCols();
             }
+            if (!empty($subObject['removeCols'])){
+                $view->subObjects[$widgetName]['widgetCols'] = $subObject['widgetCols'] = array_diff($view->subObjects[$widgetName]['widgetCols'], $subObject['removeCols']);
+            }
             if (empty($subObject['getCols'])){
                 $view->subObjects[$widgetName]['getCols'] = $subObject['getCols']   = array_intersect($subObject['widgetCols'], $subObject['view']->allowedGetCols());
             }

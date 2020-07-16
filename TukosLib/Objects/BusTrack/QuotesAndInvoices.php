@@ -101,7 +101,8 @@ trait QuotesAndInvoices {
 						'catalog' => ['fields' => [
 						    'catalogid' => 'id', 'name' => 'name', 'comments' => 'comments', 'category' => 'category', 'vatfree' => 'vatfree', 'unitpricewot' => 'unitpricewot', 'vatrate' => 'vatrate', 'unitpricewt' => 'unitpricewt']],
 				],
-				'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' =>
+		        'allowedNestedRowWatchActions' => 2,
+		        'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' =>
 						"var discountWt = sWidget.form.valueOf('discountwt'), priceWt = sWidget.summary.pricewt - discountWt, discountPc = discountWt / sWidget.summary.pricewt;\n" .
 						"sWidget.form.setValueOf('pricewt', priceWt);\n" .
 						"sWidget.form.setValueOf('pricewot', sWidget.summary.pricewot * (1 - discountPc));\n" .

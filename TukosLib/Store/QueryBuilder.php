@@ -55,7 +55,9 @@ class QueryBuilder{
         if (isset($value)){
             $this->bindQuery->bindValue($bindKey, $value);
             $j += 1;
-        }
+        }/*else{
+            echo 'value is not set';
+        }*/
         return $bindKey;
     }
     

@@ -14,7 +14,7 @@ class View extends EditView{
             'contents' => [
                 'col1' => [
                     'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true],
-                    'widgets' => ['id', 'parentid', 'name', 'startdate', 'enddate']
+                    'widgets' => ['id', 'parentid', 'name', 'startdate', 'enddate', 'nocreatepayments']
                 ],
                 'col2' => [
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],

@@ -42,6 +42,7 @@ class View extends EditView{
             ]
         ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
+        $this->actionWidgets['export']['atts']['needToSaveBefore'] = true;
         $this->actionWidgets['export']['atts']['dialogDescription'] = [
             'paneDescription' => [
                 'widgetsDescription' => [
@@ -117,6 +118,7 @@ class View extends EditView{
                         "sWidget.setValueOf('#pricewt', quantity *  newUnitPriceWt);\n" .
                         "return true;\n"
                     ]]])),
+                    'comments' => Widgets::htmlContent(Widgets::complete(['title' => $tr('comments'), 'hidden' => true])),
                     'unitpricewt'  => Widgets::tukosCurrencyBox(Widgets::complete(['title' => $tr('Unitpricewt'), 'style' => ['width' => '4em'], 'onChangeLocalAction' => ['unitpricewot' => ['localActionStatus' =>
                         "var quantity = sWidget.valueOf('#quantity'), vatFactor = 1+Number(sWidget.valueOf('#vatrate')), newUnitPriceWot = newValue / vatFactor;\n" .
                         "sWidget.setValueOf('#unitpricewot', newUnitPriceWot);\n" .
@@ -160,7 +162,7 @@ class View extends EditView{
                         ],
                         'row2' => [
                             'tableAtts' =>['cols' => 8,  'customClass' => 'labelsAndValues', 'showLabels' => true],
-                            'widgets' => ['category', 'vatfree', 'vatrate', 'unitpricewot', 'unitpricewt', 'quantity', 'pricewot', 'pricewt'],
+                            'widgets' => ['category', 'vatfree', 'vatrate', 'unitpricewot', 'comments', 'unitpricewt', 'quantity', 'pricewot', 'pricewt'],
                         ],
                         'row3' => [
                             'tableAtts' =>['cols' => 8,  'customClass' => 'labelsAndValues', 'showLabels' => false],
