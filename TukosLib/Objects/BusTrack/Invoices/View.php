@@ -16,7 +16,7 @@ class View extends AbstractView {
         $tr = $this->tr;
         $labels = $this->model->itemsLabels;
         //$this->sendOnSave = array_merge($this->sendOnSave, ['organization']);
-		$this->allowedNestedWatchActions = 10;
+		$this->allowedNestedWatchActions = 2;
 		$customDataWidgets = [
 		    'comments' => ['atts' => ['edit' => ['height' => '150px']]],
 		    'organization' => ViewUtils::objectSelect($this, 'Invoicingorganization', 'organizations'),
@@ -42,11 +42,11 @@ class View extends AbstractView {
 		    ]]),
             'status'   => ViewUtils::storeSelect('status', $this, 'Status'),
         ];
-
         $subObjects = [
             'catalog' => [
                 'object' => 'bustrackcatalog', 'filters' => [],
                 'atts' => ['title' => $tr('Bustrackcatalog'), 'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false]],
+                'sendOnHidden' => ['category', 'vatfree', 'vatrate', 'unitpricewot', 'unitpricewt'],
                 'allDescendants' => true],
             'items' => [
                 'object' => 'bustrackinvoicesitems', 'filters' => ['parentid' => '@id'],
@@ -61,7 +61,7 @@ class View extends AbstractView {
                         'catalog' => ['fields' => [
                             'catalogid' => 'id', 'name' => 'name', 'comments' => 'comments', 'unitpricewot' => 'unitpricewot', 'vatrate' => 'vatrate', 'unitpricewt' => 'unitpricewt', 'category' => 'category', 'vatfree' => 'vatfree']]
                     ],
-                    'allowedNestedRowWatchActions' => 0,
+                    'allowedNestedRowWatchActions' => 2,
                     'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => <<<EOT
 var discountWt = sWidget.form.valueOf('discountwt'), priceWt = sWidget.summary.pricewt - discountWt, discountPc = discountWt / sWidget.summary.pricewt, paymentsItems = sWidget.form.getWidget('paymentsitems');
 sWidget.form.setValueOf('pricewt', priceWt);
@@ -77,7 +77,8 @@ EOT
             ],
             'payments' => [
                 'object' => 'bustrackpayments',
-                'atts'  => ['title' => $tr('bustrackpayments'), 'newRowPrefix' => 'new'],
+                'removeCols' => ['unassignedamount'],
+                'atts'  => ['title' => $tr('bustrackpayments'), 'newRowPrefix' => 'new'/*, 'colsDescription' => ['amount' => ['atts' => ['edit' => ['onChangeLocalAction' => '~delete']]]]*/],
                 'filters' => [
                     ['tukosJoin' => ['inner', '(`tukos`  as `t0`, `bustrackpaymentsitems`)', '`t0`.`parentid` = `bustrackpayments`.`id` AND `bustrackpaymentsitems`.`invoiceid` = @id AND `t0`.`id` = `bustrackpaymentsitems`.`id`']],
                     ['groupBy' => ['tukos.id']],
@@ -93,6 +94,7 @@ EOT
                         'name' => ['content' =>  ['Total']],
                         'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]]
                     ]],
+                    'allowedNestedRowWatchActions' => 2,
                     'onWatchLocalAction' => ['summary' => ['paymentsitems' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' =>
                         "sWidget.form.setValueOf('todeduce', sWidget.summary.amount);\n" .
                         "sWidget.form.setValueOf('lefttopay', sWidget.form.valueOf('pricewt') - sWidget.summary.amount);\n" .

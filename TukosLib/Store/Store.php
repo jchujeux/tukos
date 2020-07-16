@@ -61,18 +61,22 @@ class Store {
     }
     public function addCols($colsDescription, $tableName){
         if (!empty($colsDescription)){
-            $sqlStmt = 'ALTER TABLE `' . $tableName . '`';
+            $alterOptions = '';
             $separator = '';
             foreach ($colsDescription as $col => $description){
-                $sqlStmt .= $separator . ' ADD COLUMN `' . $col . '` ' . $description;
+                $alterOptions .= $separator . ' ADD COLUMN `' . $col . '` ' . $description;
                 $separator = ',';
             }
+            $sqlStmt = "ALTER TABLE `$tableName` $alterOptions";
             Feedback::add(Tfk::tr('addingcolumn(s)') . ': ' . $sqlStmt);
             $this->hook->query($sqlStmt);
         }
     }
     public function addMissingColsIfNeeded($colsDescription, $tableName){
         $this->addCols(array_diff_key($colsDescription, Utl::toAssociative($this->tableColsStructure($tableName), 'Field')), $tableName);
+        if (($configStore = Tfk::$registry->get('configStore'))->dbName !== $this->dbName && $configStore->tableExists($tableName)){
+            $configStore->addMissingColsIfNeeded($colsDescription, $tableName);
+        }
     }
     function setFoundRows($atts, $countResults){
         if (!empty($atts['range']) && $countResults = $atts['range']['limit']){

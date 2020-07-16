@@ -29,8 +29,8 @@ class Model extends AbstractModel{
         parent::__construct($objectName, $translator, 'mailsmtps', ['parentid' => ['organizations', 'itsystems', 'people']], [], $colsDefinition, [], ['security', 'auth']);
         $this->mailer = false;
     }
-    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
-        $result = parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue);
+    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null, $absentColsFlag = 'forbid'){
+        $result = parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue, $absentColsFlag);
         if (!empty($result['smtppwd'])){
             $result['smtppwd'] = $this->user->decrypt($result['smtppwd'], 'shared');
         }

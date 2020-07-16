@@ -105,9 +105,9 @@ class Model extends AbstractModel {
     	}
     }
     
-    public function getOne($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
-    	if (empty($googleCalId = Utl::getItem('googlecalid', $atts['where']))){
-    		return parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue);
+    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null, $absentColsFlag = 'forbid'){
+        if (empty($googleCalId = Utl::getItem('googlecalid', $atts['where']))){
+    		return parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue, $absentColsFlag);
     	}else{
     		return $this->getGoogleEvent($googleCalId, $atts['where']['id']);
     	}

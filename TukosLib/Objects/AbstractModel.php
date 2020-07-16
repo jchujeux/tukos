@@ -119,7 +119,14 @@ abstract class AbstractModel extends ObjectTranslator {
     public function errorModelAction(){
         Feedback::add($this->tr('errormodelaction'));
     }
-    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
+    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null, $absentColsFlag = 'forbid'){
+        $absentCols = [];
+        if ($absentColsFlag !== 'forbid'){
+            $absentCols = array_diff($atts['cols'], $this->allCols);
+            if (!empty($absentCols)){                
+                $atts['cols'] = array_diff($atts['cols'], $absentCols);
+            }
+        }
     	$atts = ['table' => $this->tableName, 'union' => 'merge'] + $atts;
 		$missingCols = ($this->useItemsCache ? ItemsCache::missingCols($atts) : $atts['cols']);
 		if (empty($missingCols)){
@@ -147,6 +154,11 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         if ($jsonColsPaths){
             $this->drilldown($result, $jsonColsPaths, $jsonNotFoundValue);
+        }
+        if (!empty($absentCols) && $absentColsFlag !== 'ignore'){
+            foreach ($absentCols as $col){
+                $result[$col] = $absentColsFlag;
+            }
         }
         return $result;
     }
@@ -377,9 +389,13 @@ abstract class AbstractModel extends ObjectTranslator {
             
             $updatedCount = $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $oldValues['id']]]);
             if (!$updatedCount && $oldValues['id'] < 10000){// means no old item was found, insert the differences instead (is an update of a tukosconfig item in the user database), but still consider as an update (*** could stillbe conflct ***
+                $differences = array_merge($this->initialize(), $differences);
                 $differences['id']      = $oldValues['id'];
                 $differences['created'] = date('Y-m-d H:i:s');
                 $differences['creator'] = $this->user->id();
+                SUtl::$tukosModel->store->query("delete from {$this->tableName} where id={$differences['id']}");
+                SUtl::$tukosModel->store->query("delete from `tukos` where id=-{$differences['id']}");
+                
                 $this->insertItem($differences);
             }
 

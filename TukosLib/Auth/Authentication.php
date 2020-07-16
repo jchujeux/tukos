@@ -8,6 +8,7 @@ namespace TukosLib\Auth;
 
 use TukosLib\Auth\LoginPage;
 use TukosLib\Utils\Cipher;
+use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
 
 class Authentication{
@@ -43,7 +44,12 @@ class Authentication{
             default:// receiving a tukos application request check if authorized
                 $segment = $this->session->getSegment(Tfk::$registry->appName);
                 if ($segment->status !== 'VALID'){
-                    new LoginPage(Tfk::$registry->pageUrl);
+                    if ($request['controller'] === 'Page'){
+                        new LoginPage(Tfk::$registry->pageUrl);
+                    }else{
+                        Feedback::add(Tfk::tr('invalidsessionreloadpage'));
+                        $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(['feedback' => Feedback::get()])));
+                    }
                     return false;
                 }else{
                     $this->session->commit();

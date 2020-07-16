@@ -14,6 +14,7 @@ class Model extends AbstractModel {
         $colsDefinition =  [
             'startdate' => 'date NULL DEFAULT NULL',
             'enddate' => 'date NULL DEFAULT NULL',
+            'nocreatepayments' => 'VARCHAR(7) DEFAULT NULL',
             'paymentslog' => 'longtext',
         ];
         parent::__construct($objectName, $translator, 'bustrackreconciliations', ['parentid' => ['bustrackorganizations']], ['paymentslog'], $colsDefinition, [], [], ['custom']);
@@ -122,7 +123,7 @@ class Model extends AbstractModel {
                                     if (($existingCount = count($existingPayments)) > 1){
                                         $found = 0;
                                         foreach($existingPayments as $payment){
-                                            if ($payment['name'] === $description){
+                                            if (preg_replace("/\n|\r/", "", trim($payment['name'])) === $description){
                                                 $found += 1;
                                                 $paymentId = $payment['id'];
                                             }
@@ -150,7 +151,6 @@ class Model extends AbstractModel {
             $row += 1;
         }
         $workbook->close();
-        //$this->updateOne(['id' => $values['id'], 'paymentslog' => '']);
         return ['outcome' => 'success', 'data' => ['payments' => $paymentsToReturn]];
     }
     public function syncPayments($query, $values){
@@ -162,6 +162,7 @@ class Model extends AbstractModel {
         $paymentsItemsModel = $objectsStore->objectModel('bustrackpaymentsitems');
         $categoriesModel = $objectsStore->objectModel('bustrackcategories');
         $organization = $values['organization'];
+        $noCreatePayments = $values['nocreatepayments'];
         $payments = $values['payments'];
         $existingPaymentsIds = []; $updatedPaymentsIds = []; $noDateAmountRows = []; $rowNeedsMorePaymentInfo = []; $createdPaymentsIds = []; $createdPaymentsItemsIds = []; $createdInvoicesIds = []; $createdInvoicesItemsIds = [];
         $paymentsColsMapping = ['id' => 'paymentid', 'parentid' => 'customer', 'name' => 'description', 'date' => 'date', 'isexplained' => 'isexplained', 'paymenttype' => 'paymenttype', 'reference' => 'reference', 'slip' => 'slip', 
@@ -173,11 +174,9 @@ class Model extends AbstractModel {
         $invoicesReconciliationCols = array_keys($reconciliationToInvoicesMapping);
         foreach($payments as &$payment){
             $id = $payment['id'];
-/*
             if (isset($payment['amount'])){
-                $payment['amount'] = is_string($payment['amount']) ? $payment['amount'] : number_format($payment['amount'], 2);
+                $payment['amount'] = number_format((float)$payment['amount'], 2, ".", "");
             }
-*/
             $payment['organization'] = $organization;
             foreach ($paymentsReconciliationCols as $col){
                 $$col = Utl::getItem($col, $payment);
@@ -201,34 +200,48 @@ class Model extends AbstractModel {
                     }
                     if (Utl::extractItem('updated', $existingModelPayment) > Utl::getItem('updated', $payment, '')){//payment was updated since last synchronisation => update reconciliation with payment info
                         $payment = array_merge($payment, $this->arrayColsMap($existingModelPayment, $paymentsColsMapping));
-                        $updateModelPayment = true;
-                    }else{
-                        $existingModelPayment = array_merge($existingModelPayment, array_filter(Utl::getItems(['date', 'name', 'amount', 'isexplained', 'parentid', 'category', 'paymenttype', 'reference', 'slip'], $presentPaymentModelValues)));
-                        $payment = array_merge($payment, $this->arrayColsMap($existingModelPayment, $paymentsColsMapping));
                         $updateModelPayment = false;
+                    }else{
+                        $existingModelPayment = array_merge($existingModelPayment, Utl::getItems(['date', 'name', 'amount', 'isexplained', 'parentid', 'category', 'paymenttype', 'reference', 'slip'], $presentPaymentModelValues));
+                        $payment = array_merge($payment, $this->arrayColsMap($existingModelPayment, $paymentsColsMapping));
+                        $updateModelPayment = true;
                     }
                 }else{
                     $existingModelPayment = [];
                     $updateModelPayment = false;
                     if ($paymentid){
-                        Feedback::add("{$this->tr('paymentidnotfoundforrow')}: $id - {$this->tr('payment')}: $paymentid. {$this->tr('newpaymenttocreate')}");
+                        //Feedback::add("{$this->tr('paymentidnotfoundforrow')}: $id - {$this->tr('payment')}: $paymentid. {$this->tr('newpaymenttocreate')}");
+                        Feedback::add("{$this->tr('paymentidnotfoundforrow')}: $id - {$this->tr('payment')}: $paymentid. {$this->tr('eliminated')}");
+                        $payment['paymentid'] = $paymentid = 0;
                     }
                 }
                 $createInvoice = Utl::getItem('createinvoice', $payment, false, false);
                 $invoiceMatch = false;
-                if (!Utl::getItem('invoiceid', $payment) && !Utl::getItem('invoiceitemid', $payment) && !empty($existingModelPayment)){
+                if (!Utl::getItem('invoiceid', $payment) && !Utl::getItem('invoiceitemid', $payment)/* && !empty($existingModelPayment)*/){
                     $where = []; $presentInvoicesCols = array_intersect(array_keys($payment), $invoicesReconciliationCols);
                     foreach ($presentInvoicesCols as $col){
                         $where[$reconciliationToInvoicesMapping[$col]] = $payment[$col];
                     }
+                    $where[] = ['col' => 'invoicedate', 'opr' => '<=', 'values' => $date ? $date : $values['enddate']];
                     $invoiceId = $invoiceItemId = '';
-                    if (Utl::getItem('pricewt', $where)){
+                    if (Utl::getItem('pricewt', $where) && Utl::getItem('customer', $where)){
                         $this->searchInvoices($where, $id, $invoicesModel, $invoicesItemsModel, $invoiceId, $invoiceItemId);
                         $payment['invoiceid'] = $invoiceMatch = $invoiceId; $payment['invoiceitemid'] = $invoiceItemId;
                     }
-                }else if (!$createInvoice){
-                    $invoiceItemId = Utl::getItem('invoiceitemid', $payment);
-                    $invoiceId = Utl::getItem('invoiceid', $payment);
+                }else{
+                    if ($invoiceItemId = Utl::getItem('invoiceitemid', $payment)){
+                        if (empty($invoicesItemsModel->getOne(['where' => ['id' => $invoiceItemId], 'cols' => ['id']]))){
+                            $notFoundInvoicesItemsIds[] = $invoiceItemId;
+                            Feedback::add("{$this->tr('invoiceitemididnotfoundforrow')}: $id - {$this->tr('invoiceitem')}: $invoiceitemid. {$this->tr('ignored')}");
+                            $invoiceItemId = '';
+                        }
+                    }
+                    if ($invoiceId = Utl::getItem('invoiceid', $payment)){
+                        if (empty($invoicesModel->getOne(['where' => ['id' => $invoiceId], 'cols' => ['id']]))){
+                            Feedback::add("{$this->tr('invoicedidnotfoundforrow')}: $id - {$this->tr('invoice')}: $invoiceid. {$this->tr('ignored')}");
+                            $invoiceId = '';
+                        }
+                    }
                 }
                 if($createInvoice){
                     if ($invoiceMatch){
@@ -237,6 +250,11 @@ class Model extends AbstractModel {
                         }else{
                             Feedback::add("{$this->tr('invoicesetorfoundforrow')}: $id - {$this->tr('invoice')}: $invoiceId. {$this->tr('invoicenotcreated')}");
                             $invoiceItemId = Utl::getItem('invoiceItemId', $payment);
+                            $createInvoice = false;
+                        }
+                    }else{
+                        if ($invoiceId || $invoiceItemId){
+                            Feedback::add("{$this->tr('invoicesetorfoundforrow')}: $id - {$this->tr('invoice')}: $invoiceId. {$this->tr('invoicenotcreated')}");
                             $createInvoice = false;
                         }
                     }
@@ -253,8 +271,8 @@ class Model extends AbstractModel {
                             Feedback::add($this->tr('RowNeedsCategoryCustomerAmountDateInvoiceNotCreated') . ": {$id}");
                         }
                     }
-                    $payment['createinvoice'] = '';
                 }
+                $payment['createinvoice'] = '';
                 if ($updateModelPayment){
                     if ($paymentsModel->updateOne($existingModelPayment)){
                         $updatedPaymentsIds[] = $paymentid = $existingModelPayment['id'];
@@ -262,24 +280,26 @@ class Model extends AbstractModel {
                     if ($invoiceItemId){
                         $paymentItems = $paymentsItemsModel->getAll(['where' => ['parentid' => $paymentid, 'invoiceid' => $invoiceId, 'invoiceitemid' => $invoiceItemId], 'cols' => ['id']]);
                         if (!($paymentsItemsCount = count($paymentItems))){
-                            $createdPaymentsItems[] = $paymentsItemsModel->insert(['parentid' => $paymentid, 'name' => $description, 'amount' => $amount, 'invoiceid' => $invoiceId, 'invoiceitemid' => $invoiceItemId], true)['id'];
+                            $createdPaymentsItemsIds[] = $paymentsItemsModel->insert(['parentid' => $paymentid, 'name' => $description, 'amount' => $amount, 'invoiceid' => $invoiceId, 'invoiceitemid' => $invoiceItemId], true)['id'];
                         }else if ($paymentsItemsCount === 1){
-                            if ($paymentsItemsModel->updateOne(array_merge($paymentItem, ['name' => $description, 'amount' => $amount]))){
+                            if ($paymentsItemsModel->updateOne(array_merge($paymentItem = $paymentItems[0], ['name' => $description, 'amount' => $amount]))){
                                 $updatedPaymentsItemsIds[] = $paymentItem['id'];
                             }
                         }else{
                             Feedback::add($this->tr('Severalpaymentsitemsforrownotupdated') . ": {$id}");
                         }
                     }
-                }else{
+                }else if (!$noCreatePayments){
+                    $doNotCreateThisPayment = false;
                     if (!$paymentid){
-                        if (count(array_filter(Utl::getItems(['date', 'amount', 'category'], $presentPaymentModelValues))) >= 3){
+                        if (count(array_filter(Utl::getItems(['date', 'amount'/*, 'category'*/], $presentPaymentModelValues))) >= 2){
                             $createdPaymentsIds[] = $paymentid = $payment['paymentid'] = $paymentsModel->insert(array_merge($presentPaymentModelValues, ['unassignedamount' => $invoiceItemId ? 0.0 : $amount]), true)['id'];
                         }else{
                             $noDateAmountRows[] = $id;
+                            $doNotCreateThisPayment = true;
                         }
                     }
-                    if ($invoiceItemId){
+                    if ($invoiceItemId && !$doNotCreateThisPayment){
                         $paymentItems = $paymentsItemsModel->getAll(['where' => ['parentid' => $paymentid, 'invoiceid' => $invoiceId, 'invoiceitemid' => $invoiceItemId], 'cols' => ['id']]);
                         if (!($paymentsItemsCount = count($paymentItems))){
                             $createdPaymentsItemsIds[] = $paymentsItemsModel->insert(['parentid' => $paymentid, 'name' => $description, 'amount' => $amount, 'invoiceid' => $invoiceId, 'invoiceitemid' => $invoiceItemId], true)['id'];

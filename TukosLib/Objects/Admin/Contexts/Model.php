@@ -32,12 +32,12 @@ class Model extends AbstractModel {
         }
     }
 
-    public function getOne ($atts, $jsonColsKeys = [], $jsonNotFoundValue=null){
-        $unallowed = $this->user->unallowedModules();
+    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null, $absentColsFlag = 'forbid'){
+            $unallowed = $this->user->unallowedModules();
         if (!empty($unallowed)){
             $atts['where'][] = ['col' => 'name', 'opr' => 'NOT IN', 'values' => $unallowed];
         }
-        return parent::getOne($atts, $jsonColsKeys, $jsonNotFoundValue);
+        return parent::getOne($atts, $jsonColsKeys, $jsonNotFoundValue, $absentColsFlag);
     }
 
     public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){

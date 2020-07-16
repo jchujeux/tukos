@@ -28,7 +28,7 @@ EOT;
 	if (paymentsToSync.length > 0){
         this.set('label', Pmg.loading(label));
         Pmg.serverDialog({action: 'Process', object: 'bustrackreconciliations', view: 'edit', query: {id: form.valueOf('id'), startdate: form.valueOf('startdate'), enddate: form.valueOf('enddate'),
-            params: {process: 'syncPayments', noget: true}}}, {data: {payments: paymentsToSync, organization: form.valueOf('parentid')}}).then( 
+            params: {process: 'syncPayments', noget: true}}}, {data: {payments: paymentsToSync, organization: form.valueOf('parentid'), nocreatepayments: form.valueOf('nocreatepayments'), enddate: form.valueOf('enddate')}}).then( 
             function(response){
                 //paymentsLog.set('value', response.data.paymentslog);            
                 var updatedPayments = response.data.paymentslog;		  

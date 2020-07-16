@@ -17,7 +17,7 @@ class GetItems extends AbstractViewModel{
         foreach ($itemsProperties as $id => $properties){
             try{
                 $objectName = $objectNames[$id]['object'];
-                $values = Tfk::$registry->get('objectsStore')->objectModel($objectName)->getOne(['where' => ['id' => $id], 'cols' => $properties]);
+                $values = Tfk::$registry->get('objectsStore')->objectModel($objectName)->getOne(['where' => ['id' => $id], 'cols' => $properties], [], null, '');
                 $view = Tfk::$registry->get('objectsStore')->objectView($objectName);
                 $result[$id] = $this->convert($values, $view->dataWidgets, 'objToEdit', false, false, true);
             }catch(\Exception $e){

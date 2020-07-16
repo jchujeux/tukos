@@ -25,8 +25,8 @@ class Model extends AbstractModel{
         ];
         parent::__construct($objectName, $translator, 'mailservers', ['parentid' => ['organizations', 'itsystems', 'people']], [], $colsDefinition, [], ['security', 'auth', 'software']);
     }
-    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
-        $result = parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue);
+    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null, $absentColsFlag = 'forbid'){
+        $result = parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue, $absentColsFlag);
         if (!empty($result['adminpwd'])){
             $result['adminpwd'] = $this->user->decrypt($result['adminpwd'], 'shared');
         }

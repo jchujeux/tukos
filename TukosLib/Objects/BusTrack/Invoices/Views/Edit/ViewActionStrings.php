@@ -33,7 +33,7 @@ if (rows.length > 2){
 }
 this.getWidget('paymenttable').set('value', html);
 return this.serverAction(
-    {action: 'Process', query: {id: true, params: {process: 'invoiceTable', noget: true}}},
+    {action: 'Process', query: {id: true, params: {process: 'invoiceTable', save: true, noget: true}}},
     {includeWidgets: ['catalogid', 'comments'], 
     includeFormWidgets: ['id', 'name', 'parentid', 'reference', 'invoicedate', 'items', 'discountwt', 'pricewot', 'pricewt', 'todeduce']}).then(lang.hitch(this, function(){
        return true;

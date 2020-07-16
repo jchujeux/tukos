@@ -59,7 +59,7 @@ class Model extends AbstractModel {
         if (!empty($item['parentid'])){
             $peopleModel = Tfk::$registry->get('objectsStore')->objectModel('sptathletes');
             $person = $peopleModel->getOneExtended(['where' => ['id' => $item['parentid']], 'cols' => ['email']]);
-            $item['sportsmanemail'] = $person['email'];
+            $item['sportsmanemail'] = Utl::getItem('email', $person);
         }
         return $item;
     }

@@ -60,14 +60,21 @@ class Model extends AbstractModel {
         $invoiceItemsModel = Tfk::$registry->get('objectsStore')->objectModel('bustrackinvoicesitems');
         $items = $invoiceItemsModel->getAll(['where' => ['parentid' => $invoice['id']], 'cols' => $colsToRetrieve]);
         $hasDiscountCol = false;
+        $hasCommentsCol = false;
         foreach($items as $item){
         	if (isset($item['discount']) && $item['discount'] > 0){
         		$hasDiscountCol = true;
         		break;
         	}
+        	if (($comments = Utl::getItem('comments', $item)) && $comments !== '<br />'){
+        	    $hasCommentsCol = true;
+        	}
         }
         if (!$hasDiscountCol){
         	unset($selectedColsFormatType['discount']);
+        }
+        if (!$hasCommentsCol){
+            unset($selectedColsFormatType['comments']);
         }
         $numberOfCols = count($selectedColsFormatType);
 
