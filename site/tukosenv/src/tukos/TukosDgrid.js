@@ -55,6 +55,7 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
                 domStyle.set(this.domNode, 'width', this.style.width);
             }
             aspect.after(grid, 'expand', function(){
+                eutils.actionFunction(grid, 'afterExpand', this.afterExpandAction, 'args', arguments);
                 setTimeout(function(){grid.layoutHandle.resize();}, 500);
             });
 /*

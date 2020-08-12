@@ -52,6 +52,7 @@ utils.forEach(invoicesItemsFields, function(invoicesItemsField, field){
 });
 invoicesItemsGrid.addRow(undefined, invoicesItemsRow);
 invoicesItemsGrid.setSummary();
+invoicesItemsGrid.refresh({keepScrollPosition: true});
 if (fieldsValues.paymenttype){
     utils.forEach(paymentsFields, function(paymentsField, field){
         paymentsRow[paymentsField] =  fieldsValues[field];
@@ -62,6 +63,7 @@ if (fieldsValues.paymenttype){
         });
     }
     paymentsGrid.addRow(undefined, paymentsRow);
+    paymentsGrid.refresh({keepScrollPosition: true});
     utils.forEach(paymentsItemsFields, function(paymentsItemsField, field){
         paymentsItemsRow[paymentsItemsField] =  fieldsValues[field];
     });
@@ -69,6 +71,7 @@ if (fieldsValues.paymenttype){
     paymentsItemsRow.parentid = paymentsGrid.newRowPrefix + paymentsGrid.getLastNewRowPrefixId();
     paymentsItemsGrid.addRow(undefined, paymentsItemsRow);
     paymentsItemsGrid.setSummary();
+    paymentsItemsGrid.refresh({keepScrollPosition: true});
 }
 pane.close();
 EOT;

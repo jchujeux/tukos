@@ -30,7 +30,9 @@ class View extends AbstractView {
                 'date' => Widgets::description(ViewUtils::tukosDateBox($this, 'date'), false),
                 'description' =>  Widgets::description(ViewUtils::textArea($this, 'description', ['atts' => [
                         'edit' => ['style' => ['width' => '500px']], 'storeedit' => ['width' => 500], 'overview' => ['width' => 500]]]), false),
-                'amount' => Widgets::description(ViewUtils::tukosCurrencyBox($this, 'Amount', ['atts' => ['storeedit' => ['formatType' => 'currency', 'width' => 80]]]), false),
+                'amount' => Widgets::description(ViewUtils::tukosCurrencyBox($this, 'Amount', ['atts' => [
+                    'edit' => ['onChangeLocalAction' => ['amount' => ['localActionStatus' => $this->amountLocalAction()]]],
+                    'storeedit' => ['formatType' => 'currency', 'width' => 80, 'renderContentAction' => $this->amountRenderContentAction()]]]), false),
                 'isexplained' => Widgets::description(ViewUtils::checkBox($this, 'Isexplained', ['atts' => ['storeedit' => ['width' => 80]]]), false),
                 'customer' => Widgets::description(ViewUtils::objectSelectMulti(['bustrackpeople', 'bustrackorganizations'], $this, 'Customer', ['atts' => ['edit' => ['allowManualInput' => true, 'style' => ['width' => '100px']]]]), false),
                 'category' => Widgets::description(ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => ['dropdownFilters' => ['parentid' => '@parentid']]]]), false),
@@ -47,8 +49,16 @@ class View extends AbstractView {
                         'edit' => ['dropdownFilters' => ['parentid' => '#invoiceid']],
                         'storeedit' => ['width' => 100]]]), false),
                 ],
-                ['type' => 'StoreDgrid', 'atts' => ['edit' => ['object' => 'bustrackpayments', 'objectIdCols' => ['paymentid', 'customer', 'category', 'invoiceid', 'invoiceitemid'], 'allowSelectAll' => true, 'maxHeight' => '500px',
-                    'minRowsPerPage' => 500, 'maxRowsPerPAge' => 500,]]]
+                ['type' => 'StoreDgrid', 'atts' => [
+                    'edit' => [
+                        'object' => 'bustrackpayments', 'objectIdCols' => ['paymentid', 'customer', 'category', 'invoiceid', 'invoiceitemid'], 'allowSelectAll' => true, 'maxHeight' => '500px', 'minRowsPerPage' => 500, 'maxRowsPerPAge' => 500,
+                        'summaryRow' => ['cols' => [
+                            'name' => ['content' =>  ['Total']],
+                            'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]],
+                        ]],
+                        'deleteRowAction' => $this->deleteRowAction(),
+                        'afterExpandAction' => $this->afterExpandAction()
+                    ]]]
             ),
         ];
         $this->customize($customDataWidgets, [], ['grid' => ['paymentslog']], ['paymentslog' => []]);
@@ -76,6 +86,45 @@ if (customer){
     filters.parentid = customer;
 }
 return filters;
+EOT;
+    }
+    public function amountLocalAction(){
+        return <<<EOT
+
+console.log('in amountLocalAction');
+var  parentid = tWidget.row.data.parentid;
+if (parentid){
+    var grid = tWidget.column.grid, collection = grid.collection, idProperty = collection.idProperty, delta = newValue - (oldValue || 0);
+    var parentRow = collection.getSync(parentid);
+    grid.updateDirty(parentid, 'amount', Number(parentRow.amount)-delta);
+}
+EOT;
+    }
+    public function deleteRowAction(){
+        return <<<EOT
+var parentid = row.parentid, amount = row.amount;
+if (parentid && amount){
+    var collection = this.collection, idProperty = collection.idProperty, parentRow = collection.getSync(parentid);
+    this.updateDirty(parentid, 'amount', Number(parentRow.amount) + amount);
+}
+EOT;
+    }
+    public function amountRenderContentAction(){
+        return <<<EOT
+var column = this, grid = column.grid, store = column.grid.store;
+if (!grid._expanded[args.object[store.idProperty]]){
+    args.value = Number(args.value);
+    store.getChildren(args.object).forEach(function(subRow){
+    	args.value += Number(subRow.amount) || 0;
+    });
+    args.value = args.value.toString();
+}
+EOT;
+    }
+    public function afterExpandAction(){
+        return <<<EOT
+var amountCell = this.cell(args[1][0].element, 'amount'), value = this.cellValueOf('amount'); // column, element and row
+lang.hitch(amountCell.column, this.renderContent)(amountCell.row.data, value, amountCell.element, null, true);
 EOT;
     }
 }

@@ -2,9 +2,9 @@
  *  tukos grids  mixin for dynamic widget information handling and cell rendering (widgets values and attributes that may be modified by the user or the server)
  *   - usage: 
  */
-define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/dom-construct", "dojo/dom-style", "dijit/registry", "dijit/Dialog", "tukos/utils", "tukos/widgetUtils", "tukos/menuUtils",
+define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/dom-construct", "dojo/dom-style", "dijit/registry", "dijit/Dialog", "tukos/utils", "tukos/evalutils", "tukos/widgetUtils", "tukos/menuUtils",
          "tukos/widgets/widgetCustomUtils", "tukos/sheetUtils", "tukos/widgets/ColorPicker", "tukos/PageManager", "dojo/number",  "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, on, dct, dst, registry, Dialog, utils, wutils, mutils, wcutils, sutils, ColorPicker, Pmg, number, messages){
+    function(arrayUtil, declare, lang, on, dct, dst, registry, Dialog, utils, eutils, wutils, mutils, wcutils, sutils, ColorPicker, Pmg, number, messages){
     return declare(null, {
 
         constructor: function(){
@@ -34,31 +34,31 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
         },
         renderNamedId: function(object, value, node){
             var grid = this.grid, newRowPrefixGridName = utils.drillDown(this, ['editorArgs', 'storeArgs', 'storeDgrid']);
-        	return this.grid._renderContent(this, object, newRowPrefixGridName ? grid.form.getWidget(newRowPrefixGridName).newRowPrefixNamedId(value) : Pmg.namedId(value));
+        	return this.grid._renderContent(this, object, node, newRowPrefixGridName ? grid.form.getWidget(newRowPrefixGridName).newRowPrefixNamedId(value) : Pmg.namedId(value));
         },
         renderNamedIdExtra: function(object, value, node){
-            return this.grid._renderContent(this, object, Pmg.namedIdExtra(value));
+            return this.grid._renderContent(this, object, node, Pmg.namedIdExtra(value));
         },
         renderNameExtra: function(object, value, node){
-            return this.grid._renderContent(this, object, Pmg.namedExtra(value));
+            return this.grid._renderContent(this, object, node, Pmg.namedExtra(value));
         },
         renderStoreValue: function(object, value, node){
-            return this.grid._renderContent(this, object, value ? utils.findReplace(this.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value);
+            return this.grid._renderContent(this, object, node, value ? utils.findReplace(this.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value);
         },
         renderCheckBox: function(object, value, node){
-        	return this.grid._renderContent(this, object, value ? '☑' : '☐', {textAlign: 'center'});
+        	return this.grid._renderContent(this, object, node, value ? '☑' : '☐', {textAlign: 'center'});
         },
         renderColorPicker: function(object, value, node){
-        	return this.grid._renderContent(this, object, '', {backgroundColor: value});
+        	return this.grid._renderContent(this, object, node, '', {backgroundColor: value});
         },
-        renderContent: function(object, value, node){
-            var grid = this.grid, row = grid.row(object);
-            var result = ((value === undefined || value === null) ? "" : sutils.evalFormula(grid, value, this.field, row.data.idg));
-            result = utils.transform(result, this.formatType, this.formatOptions, Pmg);
-            return grid._renderContent(this, object, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {});
+        renderContent: function(object, value, node, options, noCreate){
+            var grid = this.grid, row = grid.row(object), args = {object: object, value: ((value === undefined || value === null) ? "" : sutils.evalFormula(grid, value, this.field, row.data.idg))}, result;
+            eutils.actionFunction(this, 'renderContent', this.renderContentAction, 'args', args);
+            result = utils.transform(args.value, this.formatType, this.formatOptions, Pmg);
+            return grid._renderContent(this, object, node, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {}, noCreate);
         },
         
-        _renderContent: function(column, storeRow, innerHTML, styleAtts){
+        _renderContent: function(column, storeRow, node, innerHTML, styleAtts, noCreate){
             var row =this.row(storeRow), rowHeight = (this.rowHeights[row.id] ? this.rowHeights[row.id] : column.minHeightFormatter), atts = {style: lang.mixin({maxHeight: rowHeight, overflow: 'auto'}, styleAtts)},
             	rowId =  storeRow[this.collection.idProperty], node;
             if (this.dirty[rowId] && typeof this.dirty[rowId][column.field] !== 'undefined' && !atts.style.backgroundColor){
@@ -67,12 +67,20 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             if(! innerHTML || ! /\S/.test(innerHTML) || innerHTML === '~delete'){
                 innerHTML = '<p> ';
             }
-            atts.innerHTML= innerHTML;
-            node = dct.create('div', atts);
+            if (noCreate){
+            	node.innerHTML = innerHTML;
+            	dst.set(node, atts.style);
+            }else{
+                atts.innerHTML= innerHTML;
+                node = dct.create('div', atts);
+            }
             if(typeof innerHTML === "string" && innerHTML.substring(0, 7) === '#tukos{'){
             	dst.set(node, {textDecoration: "underline", color: "blue", cursor: "pointer"});
             	node.innerHTML = Pmg.message('loadOnClick');
             	node.onClickHandler = on(node, 'click', lang.hitch(this, this.loadContentOnClick));
+            }else{
+            	node.innerHTML = innerHTML;
+            	dst.set(node, atts.style);
             }
             if (this.renderCallbackFunction){
             	this.renderCallbackFunction(node, row.data);

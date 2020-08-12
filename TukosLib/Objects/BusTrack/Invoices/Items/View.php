@@ -10,6 +10,7 @@ class View extends AbstractView {
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Invoice', 'Description');
         $this->sendOnSave = array_merge($this->sendOnSave, ['parentid']);
+        $this->allowedNestedWatchActions = 0;
         $labels = Bustrack::$labels;
         $customDataWidgets = [
             'catalogid'    => ViewUtils::objectSelect($this, 'CatalogId', 'bustrackcatalog', ['atts' => ['edit' => [
@@ -47,7 +48,7 @@ class View extends AbstractView {
                 'storeedit' => ['formatType' => 'currency', 'width' => 80]
             ]]),
             'unitpricewt'  => ViewUtils::tukosCurrencyBox($this, $labels['unitpricewt'], ['atts' => [
-                'edit' =>  ['style' => ['width' => '4em'], 'onChangeLocalAction' => ['unitpricewot' => ['localActionStatus' =>
+                'edit' =>  ['style' => ['width' => '4em'], 'onChangeLocalAction' => ['unitpricewt' => ['localActionStatus' =>
                     "var reduction = 1 -  sWidget.valueOf('#discount'), quantity = sWidget.valueOf('#quantity'), vatFactor = 1+Number(sWidget.valueOf('#vatrate')), newUnitPriceWot = newValue / vatFactor;\n" .
                     "sWidget.setValueOf('#unitpricewot', newUnitPriceWot);\n" .
                     "sWidget.setValueOf('#pricewot', quantity *  newUnitPriceWot * reduction);\n" .
