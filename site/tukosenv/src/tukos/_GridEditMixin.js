@@ -109,9 +109,9 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         getLastNewRowPrefixId: function(){
         	return this.newRowPrefix ? this.newRowPrefixId : '';
         },
-        updateDirty: function(idPropertyValue, field, value){
+        updateDirty: function(idPropertyValue, field, value, isNewRow){
             var collection = this.collection, grid = this, collectionRow = this.collection.getSync(idPropertyValue), oldValue;
-            if ((oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)/* || collectionRow[field]*/) !== value){
+            if (isNewRow || ((oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field]) !== value)){
                 this.inherited(arguments);
                 collectionRow[field] = value;
                 if (!grid.noRefreshOnUpdateDirty){
@@ -145,7 +145,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             this.setSummary();
         },
 
-        onCellChangeLocalAction: function(idPropertyValue, column, newValue){
+        onCellChangeLocalAction: function(idPropertyValue, column, newValue, oldValue){
             var editorArgs = column.editorArgs;
         	if (typeof column.localDataChangeActionFunctions == "undefined"){
                 column.localDataChangeActionFunctions = {};
@@ -174,7 +174,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
 	                        			source = lang.mixin(source, {parent: this, form: this.form, valueOf: wutils.valueOf, setValueOf: wutils.setValueOf, setValuesOf: wutils.setValuesOf});
 	                        		}
 	                        	//}
-	                        	var result = widgetActionFunctions[att].action(source, targetCell, newValue);
+	                        	var result = widgetActionFunctions[att].action(source, targetCell, newValue, oldValue);
 	                        	if (att === 'value'){
 	                            	this.updateDirty(idPropertyValue, colName, result);
 	                        	}
@@ -245,7 +245,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             //this.isNotUserEdit += 1;
            for (var j in item){
                 if (j != 'idg' && 'j' !== 'connectedIds'){
-                    this.updateDirty(item.idg, j, item[j]);
+                    this.updateDirty(item.idg, j, item[j], true);
                 }
             }
             //this.isNotUserEdit += -1;
@@ -352,15 +352,18 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             dialog.open({x: evt.clientX, y: evt.clientY});
         },
         
-        deleteRow: function(rowItem){
-            this.deleteRowItem(rowItem || this.clickedRow.data);
+        deleteRow: function(rowItem, skipDeleteAction){
+            this.deleteRowItem(rowItem || this.clickedRow.data, skipDeleteAction);
             var grid = this;
             this.refresh({keepScrollPosition: true});
         },
 
-        deleteRowItem: function(item){
+        deleteRowItem: function(item, skipDeleteAction){
             var noRefresh = this.noRefreshOnUpdateDirty;
             this.noRefreshOnUpdateDirty = true;
+			if (!skipDeleteAction){
+				eutils.actionFunction(this, 'deleteRow', this.deleteRowAction, 'row', item);
+			}
         	if (item.id != undefined && (this.newRowPrefix ? item.id.substring(0,3) !== this.newRowPrefix : true) && (this.initialId ? item.id <= this.maxServerId : true)){
                 var toSendOnDelete = {id: item.id, '~delete': true};
             	if (this.sendOnDelete){
@@ -382,10 +385,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             this.deleteDirty(idgToDelete);
             this.noRefreshOnUpdateDirty = noRefresh;
         },
-        deleteRows: function(rows){
+        deleteRows: function(rows, skipDeleteAction){
         	var self = this;
         	rows.forEach(lang.hitch(this, function(row){
-        		this.deleteRowItem(row);
+        		this.deleteRowItem(row, skipDeleteAction);
         	}));
         },
         moveRow: function(itemToMove, currentRowData, where){
@@ -443,8 +446,8 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 }
                 j++;
             }
-            result = result.concat(this.deleted);
-            return result;            
+            //result = result.concat(this.deleted);
+            return this.deleted.concat(result);            
         },
         
         keepChanges: function(){
@@ -491,7 +494,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             			}
             			rowsToDelete.push(row);
             		}));
-            		this.deleteRows(rowsToDelete);
+            		this.deleteRows(rowsToDelete, true);
             		for (var r in value){
             			this.addRow(null, value[r]);
             		}

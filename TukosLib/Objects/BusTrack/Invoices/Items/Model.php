@@ -43,7 +43,7 @@ class Model extends AbstractModel {
         if (!$this->bulkIsSuspended){
             $amountChanged = Utl::getItem('pricewt', $values, false, false);
             $invoiceId = Utl::getItem('parentid', $values);
-            if ($this->bulkParentObject !== 'bustrackinvoices' && ($amountChanged || !empty($invoiceId))){
+            if ($this->bulkParentObject !== 'bustrackinvoices' && $amountChanged && !empty($invoiceId)){
                 $this->invoicesIdsToProcess = array_unique(array_merge($this->invoicesIdsToProcess, [$invoiceId]));
             }
             if (!$this->isBulkProcessing){

@@ -28,6 +28,17 @@ define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferre
                 						: ''
                 	)))))) + p1 + p2 +  p3;
             });
+        },
+        actionFunction: function(widget, action, body, evalArgs, args){
+            if (body){
+                var functionName = action + 'ActionFunction';
+            	if (!widget[functionName]){
+                    var myEval = widget.myEval || (widget.myEval = lang.hitch(widget, this.eval));
+                    widget[functionName] = myEval(body, evalArgs || '');
+                }
+                return widget[functionName](args);
+            }
+            return true;
         }
     }
 });

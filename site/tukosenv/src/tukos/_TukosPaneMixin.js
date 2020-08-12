@@ -275,14 +275,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
             return urlArgs;
         },
         openAction: function(description){
-            if (description){
-                if (!this.openActionFunction){
-                    var myEval = this.myEval = lang.hitch(this, eutils.eval);
-                    this.openActionFunction = myEval(description, '');
-                }
-                return this.openActionFunction();
-            }
-            return true;
+            return eutils.actionFunction(this, 'open', description);
         }
     });
 });

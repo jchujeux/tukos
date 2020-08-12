@@ -58,15 +58,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dijit/form/Button", "dijit/re
         },
 
         processCondition: function(){
-            if (this.conditionDescription){
-                if (!this.conditionFunction){
-                    var myEval = lang.hitch(this, eutils.eval);
-                    this.conditionFunction = myEval(this.conditionDescription, '');
-                }
-                return this.conditionFunction();
-            }else{
-                return true;
-            }
+            return eutils.actionFunction(this, 'condition', this.conditionDescription);
         }
     });
 });

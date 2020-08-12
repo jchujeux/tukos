@@ -91,24 +91,24 @@ trait QuotesAndInvoices {
 		['atts' => ['edit' => [
 		    'initialRowValue' => ['vatrate' => 0.085],
 		    'sort' => [['property' => 'rowId', 'descending' => false]],
-				'summaryRow' => ['cols' => [
-						'name' => ['content' =>  ['Total']],
-						'pricewot' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#pricewot#);"]]],
-						'pricewt' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#pricewt#);"]]]
-				]],
-				'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
-				'onDropMap' => [
-						'catalog' => ['fields' => [
-						    'catalogid' => 'id', 'name' => 'name', 'comments' => 'comments', 'category' => 'category', 'vatfree' => 'vatfree', 'unitpricewot' => 'unitpricewot', 'vatrate' => 'vatrate', 'unitpricewt' => 'unitpricewt']],
-				],
-		        'allowedNestedRowWatchActions' => 2,
-		        'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' =>
-						"var discountWt = sWidget.form.valueOf('discountwt'), priceWt = sWidget.summary.pricewt - discountWt, discountPc = discountWt / sWidget.summary.pricewt;\n" .
-						"sWidget.form.setValueOf('pricewt', priceWt);\n" .
-						"sWidget.form.setValueOf('pricewot', sWidget.summary.pricewot * (1 - discountPc));\n" .
-						"sWidget.form.setValueOf('discountpc', discountWt === '' ? '' : discountPc);\n" .
-						"return true;"
-				]]]],
+			'summaryRow' => ['cols' => [
+					'name' => ['content' =>  ['Total']],
+					'pricewot' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#pricewot#);"]]],
+					'pricewt' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#pricewt#);"]]]
+			]],
+			'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
+			'onDropMap' => [
+					'catalog' => ['fields' => [
+					    'catalogid' => 'id', 'name' => 'name', 'comments' => 'comments', 'category' => 'category', 'vatfree' => 'vatfree', 'unitpricewot' => 'unitpricewot', 'vatrate' => 'vatrate', 'unitpricewt' => 'unitpricewt']],
+			],
+	        'allowedNestedRowWatchActions' => 2,
+	        'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' =>
+					"var discountWt = sWidget.form.valueOf('discountwt'), priceWt = sWidget.summary.pricewt - discountWt, discountPc = discountWt / sWidget.summary.pricewt;\n" .
+					"sWidget.form.setValueOf('pricewt', priceWt);\n" .
+					"sWidget.form.setValueOf('pricewot', sWidget.summary.pricewot * (1 - discountPc));\n" .
+					"sWidget.form.setValueOf('discountpc', discountWt === '' ? '' : discountPc);\n" .
+					"return true;"
+			]]]],
 		]]]);
 	}
 
