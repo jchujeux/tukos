@@ -98,9 +98,11 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
                         var theFunction = eutils.eval(rhs, 'self, row');
                         store.filter(expression.filter).forEach(function(row){
                         	res += theFunction(self, row);
-                        	store.getChildren(row).forEach(function(subRow){
-                        		res += theFunction(self, subRow);
-                        	});
+                        	if (typeof store.getChildren === "function"){
+                        		store.getChildren(row).forEach(function(subRow){
+                        			res += theFunction(self, subRow);
+                        		});
+                        	}
                         });
                         result[col] += res;
                     }

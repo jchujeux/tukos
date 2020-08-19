@@ -9,7 +9,7 @@ class View extends AbstractView {
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'User', 'View Name');
         $customDataWidgets = [
-            'vobject'     => ViewUtils::storeSelect('vobject', $this, 'Object'),
+            'vobject'     => ViewUtils::storeSelect('vobject', $this, 'Object', null, ['objToEdit' => ['strtolower' => []]]),
             'view'       => ViewUtils::storeSelect('view', $this, 'View'),
             'panemode'       => ViewUtils::storeSelect('panemode', $this, 'Pane mode'),
         	'customization' => ['type' => 'textArea',     'atts' => ['edit' =>  ['title' => $this->tr('Customization'), 'colspan' => '6' ]]],

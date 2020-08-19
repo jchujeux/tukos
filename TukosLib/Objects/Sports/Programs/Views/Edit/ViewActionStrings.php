@@ -212,10 +212,12 @@ EOT;
       return <<<EOT
 	var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');
 	this.set('label', Pmg.loading(label));
-	pane.serverAction( {action: 'Process', query: {id: true, params: {process: 'updateAcl', noget: true}}}, {includeWidgets: ['googlecalid', 'acl']}).then(lang.hitch(this, function(){
+	pane.serverAction( {action: 'Process', query: {id: true, params: {process: 'updateAcl', noget: true}}}, {includeWidgets: ['googlecalid', 'acl']}).then(lang.hitch(this, function(response){
 		console.log('server action completed');
+		pane.getWidget('acl').set('value', response.acl);
 		this.set('label', label);
 		pane.resize();
+		setTimeout(function(){pane.getWidget('acl').resize();}, 0);
 	}));
 EOT;
   }

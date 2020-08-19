@@ -14,13 +14,23 @@ class View extends OrganizationView {
             'filters' => ['parentid' => '@id'],
             'allDescendants' => true,
         ];
-        $subObjects['bustrackinvoices'] = [
-            'atts' => ['title' => $this->tr('bustrackinvoices'), 'storeType' => 'LazyMemoryTreeObjects'],
+        $subObjects['bustrackinvoicescustomers'] = [
+            'atts' => ['title' => $this->tr('bustrackinvoicescustomers'), 'storeType' => 'LazyMemoryTreeObjects'],
             'filters' => ['parentid' => '@id'],
             'allDescendants' => 'hasChildrenOnly'
         ];
-        $subObjects['bustrackpayments'] = [
-            'atts' => ['title' => $this->tr('bustrackpayments'), 'storeType' => 'LazyMemoryTreeObjects'],
+        $subObjects['bustrackpaymentscustomers'] = [
+            'atts' => ['title' => $this->tr('bustrackpaymentscustomers'), 'storeType' => 'LazyMemoryTreeObjects'],
+            'filters' => ['parentid' => '@id'],
+            'allDescendants' => 'hasChildrenOnly'
+        ];
+        $subObjects['bustrackinvoicessuppliers'] = [
+            'atts' => ['title' => $this->tr('bustrackinvoicessuppliers'), 'storeType' => 'LazyMemoryTreeObjects'],
+            'filters' => ['parentid' => '@id'],
+            'allDescendants' => 'hasChildrenOnly'
+        ];
+        $subObjects['bustrackpaymentssuppliers'] = [
+            'atts' => ['title' => $this->tr('bustrackpaymentssuppliers'), 'storeType' => 'LazyMemoryTreeObjects'],
             'filters' => ['parentid' => '@id'],
             'allDescendants' => 'hasChildrenOnly'
         ];
