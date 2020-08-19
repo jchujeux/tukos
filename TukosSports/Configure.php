@@ -56,8 +56,14 @@ class Configure{
                 '#scripts' => [['#scriptsoutputs' => []]], '#health' => [['#healthtables' => []]],
             ]],
             'collab' => [['#people' => [], '#organizations' => []/*, '#teams' => []*/, '#notes' => []/*, '#documents' => []*/, '#calendars' => [['#calendarsentries' => []]], '#tasks' => []]],
-            'bustrack' => [['#bustrackcatalog' => [], 'bustrackcustomers' => [['#bustrackpeople' => [], '#bustrackorganizations' => []]], '#bustrackquotes' => [], '#bustrackinvoices' => [['#bustrackinvoicesitems' => []]], '#bustrackpayments' => [['#bustrackpaymentsitems' => []]],
-                '#bustrackcategories' => [], '#bustrackdashboards' => [], '#bustrackreconciliations' => []]],
+            'bustrack' => [
+                ['#bustrackcategories' => [],
+                    '#bustrackcatalog' => [], 'bustrackcustomers' => [['#bustrackpeople' => [], '#bustrackorganizations' => []]], '#bustrackquotes' => [],
+                    'bustrackinvoices' => [['#bustrackinvoicescustomers' => [['#bustrackinvoicescustomersitems' => []]], '#bustrackinvoicessuppliers' => [['#bustrackinvoicessuppliersitems' => []]]]],
+                    'bustrackpayments' => [['#bustrackpaymentscustomers' => [['#bustrackpaymentscustomersitems' => []]], '#bustrackpaymentssuppliers' => [['#bustrackpaymentssuppliersitems' => []]]]],
+                    'bustrackreconciliations' => [['#bustrackreconciliationscustomers' => [], '#bustrackreconciliationssuppliers' => []]],
+                'bustrackdashboards' => [['#bustrackdashboardscustomers' => [], '#bustrackdashboardssuppliers' => []]]]
+            ],
             'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [], '#sptsessionsstages' => [], '#sptexercises' => [['#sptexerciseslevels' => []]]]],
             'physio' => [['#physiopatients' => [], '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
             '#help' => [[

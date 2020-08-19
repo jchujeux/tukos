@@ -61,8 +61,14 @@ class Configure{
                 '#scripts' => [['#scriptsoutputs' => []]], '#health' => [],
             ]],
             'collab' => [['#people' => [], '#organizations' => [], '#teams' => [], '#notes' => [], '#documents' => [], '#calendars' => [['#calendarsentries' => []]], '#tasks' => []]],
-            'bustrack' => [['#bustrackcatalog' => [], 'bustrackcustomers' => [['#bustrackpeople' => [], '#bustrackorganizations' => []]], '#bustrackquotes' => [], '#bustrackinvoices' => [['#bustrackinvoicesitems' => []]], '#bustrackpayments' => [['#bustrackpaymentsitems' => []]], 
-                '#bustrackcategories' => [], '#bustrackdashboards' => [], '#bustrackreconciliations' => []]],
+            'bustrack' => [
+                ['#bustrackcategories' => [],
+                '#bustrackcatalog' => [], 'bustrackcustomers' => [['#bustrackpeople' => [], '#bustrackorganizations' => []]], '#bustrackquotes' => [], 
+                'bustrackinvoices' => [['#bustrackinvoicescustomers' => [['#bustrackinvoicescustomersitems' => []]], '#bustrackinvoicessuppliers' => [['#bustrackinvoicessuppliersitems' => []]]]], 
+                'bustrackpayments' => [['#bustrackpaymentscustomers' => [['#bustrackpaymentscustomersitems' => []]], '#bustrackpaymentssuppliers' => [['#bustrackpaymentssuppliersitems' => []]]]], 
+                'bustrackreconciliations' => [['#bustrackreconciliationscustomers' => [], '#bustrackreconciliationssuppliers' => []]],
+                'bustrackdashboards' => [['#bustrackdashboardscustomers' => [], '#bustrackdashboardssuppliers' => []]]]
+            ],
             'wine' => [['#wines' => [['#wineappellations' => [], '#wineregions' => []]], '#winegrowers' => [], '#winecellars' => [['#wineinputs' => [], '#wineoutputs' => [], '#winestock' => [], '#winedashboards' => []]]]],
             'itm' => [['itsm' => [['#itsvcdescs' => [['#itslatargets' => []]], '#itincidents' => []]], '#itsystems' => [], '#networks' => [], 
                        '#hosts' => [['#macaddresses' => [], '#hostsdetails' => [], '#servicesdetails' => []]], '#connexions' => [],

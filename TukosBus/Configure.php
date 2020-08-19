@@ -50,10 +50,10 @@ class Configure{
             '#bustrackcatalog' => [],
             'bustrackcustomers' => [['#bustrackpeople' => [], '#bustrackorganizations' => []]],
         	'#bustrackquotes' => [],
-            '#bustrackinvoices' => [['#bustrackinvoicesitems' => []]],
-            '#bustrackpayments' => [['#bustrackpaymentsitems' => []]],
-            '#bustrackreconciliations' => [],
-            '#bustrackdashboards' => [], 
+            'bustrackinvoices' => [['#bustrackinvoicescustomers' => [['#bustrackinvoicescustomersitems' => []]], '#bustrackinvoicessuppliers' => [['#bustrackinvoicessuppliersitems' => []]]]],
+            'bustrackpayments' => [['#bustrackpaymentscustomers' => [['#bustrackpaymentscustomersitems' => []]], '#bustrackpaymentssuppliers' => [['#bustrackpaymentssuppliersitems' => []]]]],
+            'bustrackreconciliations' => [['#bustrackreconciliationscustomers' => [], '#bustrackreconciliationssuppliers' => []]],
+            'bustrackdashboards' => [['#bustrackdashboardscustomers' => [], '#bustrackdashboardssuppliers' => []]],
         	'@help' => [
         	    [/*'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],*/
         	     'guidedtour' => ['type' => 'MenuItem', 'atts' => [

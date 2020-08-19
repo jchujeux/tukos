@@ -61,31 +61,33 @@ class Calendar{
     
     public static function updateRules($args){
     	$calId = $args['googlecalid']; 
-    	$service = self::getService(); $newRules = [];
+    	$service = self::getService(); $newRules = []; $rulesToDelete = [];
     	$existingRules = Utl::toAssociative((array) self::getRules([$calId]), 'id');
     	$modifiedRules = Utl::toAssociative(
-    		array_filter($args['acl'], function($rule) use (&$newRules){
+    		array_filter($args['acl'], function($rule) use (&$newRules, &$rulesToDelete){
 	    		if (empty($rule['id'])){
 	    			$newRules[] = $rule;
 	    			return false;
+	    		}else if (Utl::getItem('~delete', $rule)){
+	    		    $rulesToDelete[] = $rule;
+	    		    return false;
 	    		}else{
 	    			return true;
 	    		}
 	    	}),
 	    	'id'
     	);
-    	$rulesToDelete = array_diff_key($existingRules, $modifiedRules);
-    	foreach ($rulesToDelete as $ruleId => $rule){
-    		$service->acl->delete($calId, $ruleId);
+    	foreach ($rulesToDelete as $rule){
+    		$service->acl->delete($calId, $rule['id']);
     	}
     	$scope = new \Google_Service_Calendar_AclRuleScope();
     	foreach ($modifiedRules as $ruleId => $item){
     		if (!empty(array_diff_assoc($item, ($existingRule = $existingRules[$ruleId])))){
 				$rule = $service->acl->get($calId, $ruleId);
-				if ($item['role'] !== $existingRule['role']){
+				if (isset($item['role']) && $item['role'] !== $existingRule['role']){
 					$rule->setRole($item['role']);
 				}
-				if ($item['email'] !== $existingRule['email']){
+				if (isset($item['email']) && $item['email'] !== $existingRule['email']){
     				$scope->setType('user');
     				$scope->setValue($item['email']);
     				$rule->setScope($scope);
@@ -101,6 +103,7 @@ class Calendar{
     		$rule->setRole($item['role']);
     		$service->acl->insert($calId, $rule);
     	}
+    	return self::getRules([$args['googlecalid']]);
     }
     
     public static function createCalendar($description, $rules = []){

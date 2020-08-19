@@ -350,6 +350,10 @@ class Utilities{
         }
         return false;
     }
+    public static function removeAccents($string){
+        $transliterator = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC');
+        return $transliterator->transliterate($string);
+    }
     public static function replace($comparisonOperator, $arrayToSearch, $searchProperty, $searchValue, $returnProperty, &$cache, $ignoreCase, $ignoreAccent){
         if (empty($cache[$searchValue])){
             foreach($arrayToSearch as $row){
