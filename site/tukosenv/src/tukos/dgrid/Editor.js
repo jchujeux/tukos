@@ -70,17 +70,6 @@ define([
 			}else{
 				return false;
 			}
-/*
-			return this._editorInstances[colId] || (col 
-				? (this._editorInstances[colId] = typeof col.column.editor === 'string'
-					? when(WidgetsLoader.loadWidget(col.column.editor), lang.hitch(this, function(editor){
-						col.column.editor = editor;
-						return this._createSharedEditor(col.column, col.originalRenderCell);
-					  }))
-					: this._createSharedEditor(col.column, col.originalRenderCell)
-				  )
-				: col);
-*/
 		},
 		insertRow: function () {
 			this._editorRowListeners = {};
@@ -335,8 +324,6 @@ define([
 			field = column.field;
 			cellElement = cell.element.contents || cell.element;
 
-			//if ((cmp = when(this.getEditorInstance(column.id), function(cmp))) {
-			//if ((cmp = this.getEditorInstance(column.id))) {
 			if (this.hasEditorInstance(column.id)){
 				// Shared editor (editOn used)
 				if (this._activeCell !== cellElement) {
