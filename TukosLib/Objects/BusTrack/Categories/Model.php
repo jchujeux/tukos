@@ -14,6 +14,9 @@ class Model extends AbstractModel {
         $colsDefinition =  [
             'vatfree'      => "VARCHAR(31) DEFAULT NULL",
             'vatrate' 		=> "DECIMAL (5, 4)",
+            'applytocustomers' => "VARCHAR(7) DEFAULT NULL",
+            'applytosuppliers' => "VARCHAR(7) DEFAULT NULL",
+            'filterpriority' => "MEDIUMINT DEFAULT NULL",
             'criteria' => "longtext DEFAULT NULL"
         ];
         parent::__construct($objectName, $translator, 'bustrackcategories', ['parentid' => ['organizations']], ['criteria'], $colsDefinition, [], [], ['custom']);
@@ -31,30 +34,41 @@ class Model extends AbstractModel {
         }
         return $this->defaultVatRates[$organization];
     }
-    public function getCategories($organization){
+    public function _getCategories($organization){
         if (!isset($this->categories[$organization])){
-            $items = $this->getAll(['where' => ['parentid' => $organization], 'cols' => ['id', 'name', 'vatfree', 'vatrate', 'criteria']]);
+            $items = $this->getAll(['where' => ['parentid' => $organization], 'cols' => ['id', 'name', 'vatfree', 'vatrate', 'applytocustomers', 'applytosuppliers', 'filterpriority', 'criteria'], 'orderBy' => ['filterpriority' =>  'ASC']]);
             $result = [];
             foreach ($items as $item){
                 $id = Utl::getItem('id', $item);
                 $result[$id] = $item;
             }
-            $result[0] = ['name' => 'noncategorized', 'vatfree' => '', 'vatrate' => !empty($otherRate = Utl::getItem($this->tr('other'), $result)) ? $otherRate : $this->defaultVatRate()];
+            $result[0] = ['name' => 'noncategorized', 'vatfree' => '', 'vatrate' => !empty($otherRate = Utl::getItem($this->tr('other'), $result)) ? $otherRate : $this->defaultVatRate(),
+                'applytosuppliers' => false, 'applytocustomers' => false, 'filterpriority' => 0];
             $this->categories[$organization] = $result;
         }
         return $this->categories[$organization];
     }
+    public function getCategories($organization, $customersOrSuppliers = ""){
+        $categories = $this->_getCategories($organization);
+        if ($customersOrSuppliers){
+            return array_filter($categories, function($category) use ($customersOrSuppliers){
+                return $category["applyto$customersOrSuppliers"];
+            });
+        }else{
+            return $categories;
+        }
+    }
     public function vatFree($organization, $categoryId){
-        return $this->getCategories($organization)[$categoryId]['vatfree'];
+        return $this->_getCategories($organization)[$categoryId]['vatfree'];
     }
     public function vatRate($organization, $categoryId){
-        return $this->getCategories($organization)[$categoryId]['vatrate'];
+        return $this->_getCategories($organization)[$categoryId]['vatrate'];
     }
     public function name($organization, $categoryId){
-        return $this->getCategories($organization)[$categoryId]['name'];
+        return $this->_getCategories($organization)[$categoryId]['name'];
     }
     public function tName($organization, $categoryId){
-        return $this->tr($this->getCategories($organization)[$categoryId]['name']);
+        return $this->tr($this->_getCategories($organization)[$categoryId]['name']);
     }
     public function criterias($organization, $categoryId){
         return json_decode(Utl::getItem('criteria', $this->getCategories($organization)[$categoryId], '[]'), true);

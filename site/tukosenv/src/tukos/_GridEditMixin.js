@@ -234,7 +234,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 }
             }
             if (this.initialId || this.newRowPrefix){
-                item.id = this.getNewId();
+                item.id = item.id || this.getNewId();
             }else{
                 //delete item.id;
             }

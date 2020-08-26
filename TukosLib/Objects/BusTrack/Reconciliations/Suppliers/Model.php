@@ -1,7 +1,7 @@
 <?php
 namespace TukosLib\Objects\BusTrack\Reconciliations\Suppliers;
 
-use TukosLib\Objects\Bustrack\Reconciliations\Customers\Model as ReconciliationsModel;
+use TukosLib\Objects\BusTrack\Reconciliations\Customers\Model as ReconciliationsModel;
 
 class Model extends ReconciliationsModel {
     

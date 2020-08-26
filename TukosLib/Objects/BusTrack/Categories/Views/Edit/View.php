@@ -16,7 +16,7 @@ class View extends EditView{
                     'contents' => [
                         'col1' => [
                             'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 100],
-                            'widgets' => ['id', 'parentid', 'name', 'vatfree', 'vatrate']
+                            'widgets' => ['id', 'parentid', 'name', 'vatfree', 'vatrate', 'applytocustomers', 'applytosuppliers', 'filterpriority']
                         ],
                         'col2' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],

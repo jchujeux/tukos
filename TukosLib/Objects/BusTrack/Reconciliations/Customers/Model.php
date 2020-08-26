@@ -21,6 +21,7 @@ class Model extends AbstractModel {
             'startdate' => 'date NULL DEFAULT NULL',
             'enddate' => 'date NULL DEFAULT NULL',
             'nocreatepayments' => 'VARCHAR(7) DEFAULT NULL',
+            'verificationcorrections' => 'VARCHAR(7) DEFAULT NULL',
             'paymentslog' => 'longtext',
         ];
         parent::__construct($objectName, $translator, "bustrackreconciliations{$this->customersOrSuppliers}", ['parentid' => ['bustrackorganizations']], ['paymentslog'], $colsDefinition, [], [], ['custom']);
@@ -54,7 +55,7 @@ class Model extends AbstractModel {
         $invoicesModel = $objectsStore->objectModel("bustrackinvoices{$this->customersOrSuppliers}");
         $invoicesItemsModel = $objectsStore->objectModel("bustrackinvoices{$this->customersOrSuppliers}items");
         $paymentsModel = $objectsStore->objectModel("bustrackpayments{$this->customersOrSuppliers}");
-        $categories = $categoriesModel->getCategories($organization);
+        $categories = $categoriesModel->getCategories($organization, $this->customersOrSuppliers);
         $categoriesFilters = [];
         $getPattern = function($items, $boundary = '\b'){
             return "/(.*)($boundary" . implode("$boundary|$boundary", $items) . "$boundary)(.*)/is";
@@ -109,17 +110,19 @@ class Model extends AbstractModel {
                     case $paymentIdentifiers[1]:
                         $slip = preg_match('/([0-9]*)[ ]*$/', $description, $matches) ? $matches[1] : '';
                         break;
-                    case $paymentIdentifiers[2]: //REMISE CARTE   CARTE 195270101 5689491 12/03
-                        $slip = preg_match('/([0-9]*) [^ ]* $/', $description, $matches) ? $matches[1] : '';
-                        break;
                     case $paymentIdentifiers[4]:
                     case $paymentIdentifiers[5]:
                         break;
-                    default: 
+                    case $paymentIdentifiers[2]: //REMISE CARTE   CARTE 195270101 5689491 12/03
+                        if ($this->customersOrSuppliers === 'customers'){
+                            $slip = preg_match('/([0-9]*) [^ ]* $/', $description, $matches) ? $matches[1] : '';
+                            break;
+                        }
+                    default:
                         foreach ($categoriesFilters as $categoryId => $filter){
                             $hasValueMatch = 0;
                             $customerId = (isset($filter['customerPattern']) && preg_match($filter['customerPattern'], str_replace('.', '', $description), $customerMatches)) ? $filter['items'][strtoupper($customerMatches[2])]['id'] : '';
-                            if ($customerId && (!isset($filter['valuePattern']) || $hasValueMatch = preg_match($filter['valuePattern'], str_replace('.', '', $description), $valueMatches))){
+                            if (($customerId || !isset($filter['customerPattern'])) && (!isset($filter['valuePattern']) || $hasValueMatch = preg_match($filter['valuePattern'], str_replace('.', '', $description), $valueMatches))){
                                 $description = preg_replace("/\n|\r/", "", trim(($customerId && isset($filter['removematch'])) ? ($customerMatches[1] . $customerMatches[3]) : $description));
                                 $category = (string)$categoryId;
                                 $isExplained = 'YES';
@@ -142,7 +145,7 @@ class Model extends AbstractModel {
                 if (!$foundPayment){
                     $paymentId = $this->searchPayment($paymentsModel, [], $date, $amount, $description, $id);
                 }
-                $paymentsToReturn[] = $paymentsRow = ['id' => $id, 'date' => $date, 'description' => $description, 'amount' => $amount, 'customer' => $customerId, 'paymenttype' => 'paymenttype' . $paymentTypeId[$paymentTypeMatch], 
+                $paymentsToReturn[] = $paymentsRow = ['id' => $id, 'date' => $date, 'description' => $description, 'amount' => $amount, 'customer' => $customerId, 'paymenttype' => 'paymenttype' . $paymentTypeId[$paymentTypeMatch],
                     'category' => $category, 'slip' => $slip, 'isexplained' => $isExplained, 'paymentid' => $paymentId, 'invoiceid' => $invoiceId, 'invoiceitemid' => $invoiceItemId];
                 SUtl::addItemIdCols($paymentsRow, ['paymentid', 'customer', 'category', 'invoiceid', 'invoiceitemid']);
             }
@@ -346,6 +349,72 @@ class Model extends AbstractModel {
         Feedback::add($this->tr('synchrocompleted'));
         return ['data' => ['paymentslog' => $payments]];
     }
+    function verifyReconciliation($query, $values){
+        $fileName = $_FILES['uploadedfile']['tmp_name'];
+        $workbook = new XlsxInterface();
+        $workbook->open($fileName);
+        $sheet = $workbook->getSheet('1');
+        $numberOfRows = $workbook->numberOfRows($sheet);
+        $dateCol = 1; $paymentCol = $this->paymentsCol; $descriptionCol = 2; $row = 11;
+        $startDate = Utl::getItem('startdate', $values, '1900-01-01');
+        $endDate = Utl::getItem('enddate', $values, '9999-12-31', '9999-12-31');
+        $corrections = $values['verificationcorrections'] === "YES";
+        $getDate = function($row) use ($workbook, $sheet, $dateCol){
+            return date('Y-m-d', strtotime(str_replace('/', '-', $workbook->getCellValue($sheet, $row, $dateCol))));
+        };
+        $id = 0; $needsUpdate = false;
+        $paymentsLog = Utl::toAssociative(json_decode($values['paymentslog'], true), 'id');
+        $rootPayments = $paymentsLog;
+        foreach ($paymentsLog as $key => $payment){
+            if ($parentId = Utl::getItem('parentid', $payment)){
+                $rootPayments[$parentId]['amount'] = floatval($rootPayments[$parentId]['amount']) + floatval(Utl::getItem('amount', $payment, 0));
+                unset($rootPayments[$key]);
+            }
+        }
+        $deletedRows = []; $amountChangedRows = []; $extraRows = [];
+        while ($row <= $numberOfRows && $getDate($row) > $endDate){$row +=1;};
+        while ($row <= $numberOfRows && $startDate <= ($date = $getDate($row))){
+            if ($amount = $workbook->getCellValue($sheet, $row, $paymentCol)){
+                $id +=1;
+                if (isset($rootPayments[$id])){
+                    if (($delta = floatval($amount) - floatval($rootPayments[$id]['amount'])) != 0){
+                        $amountChangedRows[] = $id;
+                        if ($corrections){$paymentsLog[$id]['amount'] += $delta;}
+                        $needsUpdate = true;
+                    }
+                }else{
+                    $deletedRows[] = $id;
+                    if ($corrections){$paymentsLog[$id] = ['amount' => $amount, 'date' => $getDate($row), 'idg' => $id, 'description' => $workbook->getCellValue($sheet, $row, $descriptionCol)];}
+                    $needsUpdate = true;
+                }
+            }
+            $row += 1;
+        }
+        //if ((count($rootPayments) + count($deletedRows)) > $id){
+            $payment = end($rootPayments);
+            while (($logId = key($rootPayments)) > $id){
+                $extraRows[] = $logId;
+                if ($corrections){unset($paymentsLog[$logId]);}
+                $payment = prev($rootPayments);
+                $needsUpdate = true;
+            }
+        //}
+        $workbook->close();
+        $this->addFeedbackArray($deletedRows, $corrections ? 'recoveredrows' : 'deletedRows');
+        $this->addFeedbackArray($amountChangedRows, $corrections ? 'amountrecoveredrows' : 'amountChangedRows');
+        $this->addFeedbackArray($extraRows, $corrections ? 'removedextrarows' : 'extraRows');
+        if ($needsUpdate){
+            ksort($paymentsLog);
+            return ['outcome' => 'success', 'data' => ['payments' => Utl::toNumeric($paymentsLog, 'id')]];
+        }else{
+            return ['outcome' => 'success'];
+        }
+    }
+    public function addFeedbackArray($array, $message){
+        if (!empty($array)){
+            Feedback::add("{$this->tr($message)}: " . implode(', ', $array));
+        }
+    }
     public function searchInvoices($where, $id, $invoicesModel, $invoicesItemsModel, &$invoiceId, &$invoiceItemId){
         $existingInvoices = $invoicesModel->getAll(['where' => $where, 'cols' => ['id'], 'orderBy' => ['invoicedate' =>  'DESC']]);
         $invoiceId = Utl::drillDown($existingInvoices, [0, 'id']);
@@ -384,6 +453,8 @@ class Model extends AbstractModel {
             }
             if ($found > 1){
                 Feedback::add("{$this->tr('Severalpaymentsfound')}: $id - {$this->tr('Selectedid')}: $paymentId");
+                $paymentId = Utl::drillDown($existingPayments, [0, 'id']);
+            }else if($found === 0){
                 $paymentId = Utl::drillDown($existingPayments, [0, 'id']);
             }
         }else{

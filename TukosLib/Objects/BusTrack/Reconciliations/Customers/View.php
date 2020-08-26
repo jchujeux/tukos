@@ -16,6 +16,7 @@ class View extends AbstractView {
             'startdate' => ViewUtils::tukosDateBox($this, 'Periodstart'),
             'enddate' => ViewUtils::tukosDateBox($this, 'Periodend'),
             'nocreatepayments' => ViewUtils::checkBox($this, 'Nocreatepaymentsonsync'),
+            'verificationcorrections' => ViewUtils::checkBox($this, 'Verificationcorrections'),
             'paymentslog' => ViewUtils::jsonGrid($this, 'Reconciliationstate', [
                 'selector' => ['selector' => 'checkbox', 'width' => 30],
                 'id' => ['field' => 'id', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'renderExpando' => true],
@@ -35,7 +36,8 @@ class View extends AbstractView {
                     'storeedit' => ['formatType' => 'currency', 'width' => 80, 'renderContentAction' => $this->amountRenderContentAction()]]]), false),
                 'isexplained' => Widgets::description(ViewUtils::checkBox($this, 'Isexplained', ['atts' => ['storeedit' => ['width' => 80]]]), false),
                 'customer' => Widgets::description(ViewUtils::objectSelectMulti(['bustrackpeople', 'bustrackorganizations'], $this, $paidByOrTo, ['atts' => ['edit' => ['allowManualInput' => true, 'style' => ['width' => '100px']]]]), false),
-                'category' => Widgets::description(ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => ['dropdownFilters' => ['parentid' => '@parentid']]]]), false),
+                'category' => Widgets::description(ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
+                    'dropdownFilters' => ['parentid' => '@parentid', ["col" => "applyto{$customersOrSuppliers}", 'opr' => 'IN' , 'values' => ["YES", 1]]]]]]), false),
                 'paymenttype' => Widgets::description(ViewUtils::storeSelect('paymentType', $this, 'paymenttype'), false),
                 'reference' =>  Widgets::description(ViewUtils::textBox($this, 'Paymentreference'), false),
                 'slip' =>  Widgets::description(ViewUtils::textBox($this, 'CheckSlipNumber'), false),
@@ -52,6 +54,7 @@ class View extends AbstractView {
                 ['type' => 'StoreDgrid', 'atts' => [
                     'edit' => [
                         'object' => 'bustrackpayments', 'objectIdCols' => ['paymentid', 'customer', 'category', 'invoiceid', 'invoiceitemid'], 'allowSelectAll' => true, 'maxHeight' => '500px', 'minRowsPerPage' => 500, 'maxRowsPerPAge' => 500,
+                        'sort'            => [['property' => 'id', 'descending' => false]],
                         'summaryRow' => ['cols' => [
                             'name' => ['content' =>  ['Total']],
                             'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]],
@@ -67,7 +70,9 @@ class View extends AbstractView {
         return <<<EOT
 var payment = sWidget.getItem(), mapping = {date: 'date', sname: 'description', amount: 'amount', isexplained: 'isexplained', parentid: 'customer', category: 'category', paymenttype: 'paymenttype', reference: 'reference', slip: 'slip'};
 utils.forEach(mapping, function(target, source){
-    sWidget.setValueOf(target, payment[source] || '');
+    if (payment[source]){    
+        sWidget.setValueOf(target, payment[source]);
+    }
 });
 ['createinvoice', 'invoiceid', 'invoiceitemid'].forEach(function(col){
     sWidget.setValueOf(col, '');

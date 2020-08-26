@@ -16,6 +16,8 @@ $params = getopt('', ['app:', 'class:', 'parentid:', 'db:']);
 $appName = $params['app'];
 $dbName = $params['db'];
 
+echo "database: $dbName";
+
 Tfk::initialize('commandLine', $appName, $phpDir);
 
 $configure =  '\\' . $appName . '\\Configure';

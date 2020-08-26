@@ -6,8 +6,16 @@ class ViewActionStrings{
     public static function onImportCompleteAction(){
         return <<<EOT
         var form = this.form;
-        form.setValueOf('paymentslog', data['payments']);
+        form.setValueOf('paymentslog', data.payments);
         form.resize();
+EOT;
+    }
+    public static function onVerificationCompleteAction(){
+        return <<<EOT
+    if (data && data.payments){
+        var form = this.form;
+        form.setValueOf('paymentslog', data.payments);
+    }
 EOT;
     }
     public function syncOnClickAction($customersOrSuppliers){

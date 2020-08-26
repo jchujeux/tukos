@@ -1,5 +1,5 @@
 <?php
-namespace TukosLib\Objects\Bustrack\Dashboards\Suppliers;
+namespace TukosLib\Objects\BusTrack\Dashboards\Suppliers;
 
 use TukosLib\Objects\BusTrack\Dashboards\Customers\View as DashboardsView;
 

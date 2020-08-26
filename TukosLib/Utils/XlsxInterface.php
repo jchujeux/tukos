@@ -51,11 +51,12 @@ class XlsxInterface{
         return $this->zip->addFromString('xl/worksheets/sheet' . $sheetNumber . '.xml', $sheetXmlObject->asXml());
     }
     public function numberOfRows($sheet){
-        return count($sheet->sheetData->row);
+        $lastXmlRow = count($sheet->sheetData->row) -1;
+        return intval($sheet->sheetData->row[$lastXmlRow]['r'][0]);
     }
     public function getCell($sheet, $row, $col){
         $xmlRow = $row - 1;
-        while($sheet->sheetData->row[$xmlRow]['r'][0] != $row){
+        while(!isset($sheet->sheetData->row[$xmlRow]) || $sheet->sheetData->row[$xmlRow]['r'][0] != $row){
             $xmlRow += -1;
         }
         return $sheet->sheetData->row[$xmlRow]->c[$col-1];

@@ -1,7 +1,7 @@
 <?php
 namespace TukosLib\Objects\BusTrack\Invoices\Suppliers\Items;
 
-use TukosLib\Objects\Bustrack\Invoices\Customers\Items\Model as ItemsModel;
+use TukosLib\Objects\BusTrack\Invoices\Customers\Items\Model as ItemsModel;
 
 class Model extends ItemsModel {
     
