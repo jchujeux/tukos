@@ -107,7 +107,7 @@
         	var self = this, widget = this.widget, result = {};
         	utils.forEach(filter, function(item, key){
         		if (typeof(item) === 'object'){
-        			return self.filterSpecial(item);
+        			result[key] = self.filterSpecial(item);
         			
         		}else{
         			result[key] = (wutils.specialCharacters.indexOf(item[0]) > -1) ? widget.valueOf(item) || '%%' : item;

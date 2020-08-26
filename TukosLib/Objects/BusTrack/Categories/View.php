@@ -18,6 +18,9 @@ class View extends AbstractView {
                 'storeedit' => ['formatType' => 'percent', 'width' => 80],
                 'overview' => ['formatType' => 'percent', 'width' => 80]
             ]]),
+            'applytocustomers' => ViewUtils::checkBox($this, 'Applytocustomers'),
+            'applytosuppliers' => ViewUtils::checkBox($this, 'Applytosuppliers'),
+            'filterpriority' => ViewUtils::numberTextBox($this, 'Filterpriority'),
             'criteria' => ViewUtils::JsonGrid($this, 'Filtercriteria', [
                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                 'customertype'    => ViewUtils::storeSelect('customerType', $this, 'Customertype'),                'attribute'  => ViewUtils::storeSelect('attributeType', $this, 'Filterattribute'),

@@ -17,6 +17,7 @@ class View extends EditView{
 	
 	function __construct($actionController){
        parent::__construct($actionController);
+       $customersOrSuppliers = $this->view->model->customersOrSuppliers;
        $tr = $this->view->tr;
        $customContents = [
             'row1' => [
@@ -105,6 +106,7 @@ class View extends EditView{
                     'catalogid'    => Widgets::description(ViewUtils::objectSelect($this->view, 'CatalogId', 'bustrackcatalog', ['atts' => ['edit' => ['storeArgs' => ['storeDgrid' => 'catalog'], 'onChangeLocalAction' => [
                         'catalogid' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => VAS::catalogIdLocalAction()]]]]]])),
                     'category' => Widgets::ObjectSelect(Widgets::complete(['title' => $tr('Category'), 'object' => 'bustrackcategories', 'style' => ['width' => '15em'], 'storeArgs' => ['cols' => ['vatfree']],
+                        'dropdownFilters' => [["col" => "applyto{$customersOrSuppliers}", 'opr' => 'IN' , 'values' => ["YES", 1]]],
                         'onWatchLocalAction' => ['value' => ['vatfree' => ['checked' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? true : false;"]]]]])),
                     'vatfree' => Widgets::checkBox(Widgets::complete(['title' => $tr('vatfree'), 'onWatchLocalAction' => [
                         'checked' => ['vatfree' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => VAS::vatfreeLocalAction()]]]]])),
@@ -195,6 +197,7 @@ EOT
                     'pricewt'  => Widgets::tukosCurrencyBox(Widgets::complete(['title' => $tr('pricewt'), 'style' => ['width' => '4em']])),
                     'invoiceitemid' => Widgets::objectSelect(Widgets::complete(['title' => $tr('Invoiceitem'),'object' => 'bustrackinvoicesitems', 'storeArgs' => ['storeDgrid' => 'items']])),
                     'category' => Widgets::ObjectSelect(Widgets::complete(['title' => $tr('Category'), 'object' => 'bustrackcategories', 'style' => ['width' => '15em'], 'storeArgs' => ['cols' => ['vatfree']],
+                        'dropdownFilters' => [["col" => "applyto{$customersOrSuppliers}", 'opr' => 'IN' , 'values' => ["YES", 1]]],
                         'onWatchLocalAction' => ['value' => ['vatfree' => ['checked' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? true : false;"]]]]])),
                     'paymenttype' => Widgets::description(ViewUtils::StoreSelect('paymentType', $this->view, 'PaymentType', null, ['atts' => ['edit' => ['onChangeLocalAction' => [
                         'reference' => ['hidden' => "return newValue !== 'paymenttype1';"],

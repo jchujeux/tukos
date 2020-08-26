@@ -29,11 +29,11 @@ class CheckOrphanIds {
                     $modelIds = $model->getAll(['where' => [['col' => 'id', 'opr' => '>', 'values' => 0]], 'cols' => $cols]);
                     $ids = array_merge($ids, array_column($modelIds, 'id'));
                     foreach($modelIdCols as $col){
-                        $idCols = array_unique(array_merge($idCols, array_column($modelIds, $col)));
+                        $idCols = array_unique(array_merge($idCols, array_filter(array_column($modelIds, $col))));
                     }
                 }
             }
-            $orphanIds = array_filter(array_diff($idCols, $ids));
+            $orphanIds = array_diff($idCols, $ids);
             if ($orphanIds){
                 $objValue  = ['name'            => 'CheckOrphanIds', 
                               'parentid'        => $options->parentid    ? $options->parentid    : $user->id(), 

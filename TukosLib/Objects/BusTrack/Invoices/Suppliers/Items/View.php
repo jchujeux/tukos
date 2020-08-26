@@ -1,5 +1,5 @@
 <?php
-namespace TukosLib\Objects\Bustrack\Invoices\Suppliers\Items;
+namespace TukosLib\Objects\BusTrack\Invoices\Suppliers\Items;
 
 use TukosLib\Objects\BusTrack\Invoices\Customers\Items\View as ItemsView;
 

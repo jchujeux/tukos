@@ -10,15 +10,17 @@ class View extends AbstractView {
     public $invoiceName = 'Invoice';
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, $this->invoiceName, 'Description');
+        $customersOrSuppliers = $this->model->customersOrSuppliers;
         $this->sendOnSave = array_merge($this->sendOnSave, ['parentid']);
         $this->allowedNestedWatchActions = 0;
-        $labels = Bustrack::$labels;
+        $labels = BusTrack::$labels;
         $customDataWidgets = [
             'catalogid'    => ViewUtils::objectSelect($this, 'CatalogId', 'bustrackcatalog', ['atts' => ['edit' => [
                 'storeArgs' => ['cols' => ['name', 'category', 'vatfree', 'vatrate', 'unitpricewot', 'unitpricewt']], 
                 'onChangeLocalAction' => ['catalogid' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => VAS::catalogIdLocalAction()]]]]]]),
             //'catalogid'    => ViewUtils::objectSelect($this, $labels['catalogid'], 'bustrackcatalog', ['atts' => ['storeedit' => ['width' => 100]]]),
             'category' => ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
+                'dropdownFilters' => [["col" => "applyto{$customersOrSuppliers}", 'opr' => 'IN' , 'values' => ["YES", 1]]],
                 'storeArgs' => ['cols' => ['vatfree']],
                 'onWatchLocalAction' => ['value' => ['vatfree' => ['value' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? 'YES' : '';"]]]]
             ]]]),

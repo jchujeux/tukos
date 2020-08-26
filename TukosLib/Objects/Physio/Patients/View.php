@@ -49,7 +49,7 @@ class View extends AbstractView {
 	            'filters' => ['parentid' => '@id'],
 	            'allDescendants' => true,
 	        ],
-	        'bustrackinvoices' => [
+	        'bustrackinvoicescustomers' => [
 	            'atts'  => ['title' => $this->tr('bustrackinvoices'),],
 	            'filters' => ['parentid' => '@id'],
 	            'allDescendants' => true,

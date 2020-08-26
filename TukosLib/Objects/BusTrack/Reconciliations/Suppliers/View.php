@@ -1,5 +1,5 @@
 <?php
-namespace TukosLib\Objects\Bustrack\Reconciliations\Suppliers;
+namespace TukosLib\Objects\BusTrack\Reconciliations\Suppliers;
 
 use TukosLib\Objects\BusTrack\Reconciliations\Customers\View as ReconciliationsView;
 

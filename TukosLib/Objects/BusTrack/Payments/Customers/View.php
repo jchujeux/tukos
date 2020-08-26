@@ -30,6 +30,7 @@ class View extends AbstractView {
             ]]),
             'isexplained' => ViewUtils::checkBox($this, 'Isexplained'),
             'category' => ViewUtils::ObjectSelect($this, 'unassignedCategory', 'bustrackcategories', ['atts' => ['edit' => [
+                'dropdownFilters' => [["col" => "applyto{$customersOrSuppliers}", 'opr' => 'IN' , 'values' => ["YES", 1]]],
                 'storeArgs' => ['cols' => ['vatfree']],
                 'onWatchLocalAction' => ['value' => ['vatfree' => ['checked' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? true : false;"]]]]
             ]]]),

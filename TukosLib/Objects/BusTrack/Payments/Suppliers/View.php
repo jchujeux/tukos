@@ -1,5 +1,5 @@
 <?php
-namespace TukosLib\Objects\Bustrack\Payments\Suppliers;
+namespace TukosLib\Objects\BusTrack\Payments\Suppliers;
 
 use TukosLib\Objects\BusTrack\Payments\Customers\View as PaymentsView;
 

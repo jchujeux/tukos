@@ -21,6 +21,7 @@ define (["dojo/_base/declare", "dojo/on", "dojo/aspect", "dijit/registry", "dojo
                             Pmg.addFeedback(Pmg.message('actionDone'));
                         });
                     }
+					Pmg.addFeedback(Pmg.message('actionDone'));
             	}else{
             		Pmg.alert({title: Pmg.message('failedimport'), content: response.feedback[0]});
             	}
@@ -36,7 +37,13 @@ define (["dojo/_base/declare", "dojo/on", "dojo/aspect", "dijit/registry", "dojo
                 		valuesToSend[widget] = form.valueOf(widget);
                 	});
                 }
-            	self.upload(valuesToSend);
+				if (self.includeGridWidgets){
+					self.includeGridWidgets.forEach(function(widget){
+						valuesToSend[widget] = JSON.stringify(form.getWidget(widget).store.fetchSync());
+					});
+				}
+				Pmg.setFeedback(Pmg.message('actionDoing'))            	
+				self.upload(valuesToSend);
             });
         }
     }); 
