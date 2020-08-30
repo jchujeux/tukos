@@ -35,10 +35,10 @@ EOT;
     }
     public static function synchronizeOnClickAction(){
         return <<<EOT
-var fields = ['customer', 'name', 'date', 'category', 'vatfree', 'vatrate', 'unitpricewot', 'unitpricewt', 'comments', 'quantity', 'pricewot', 'pricewt', 'paymenttype', 'reference', 'slip'],
-    invoicesFields = {customer: 'parentid', date: 'invoicedate', name: 'name'},
+var fields = ['organization', 'customer', 'name', 'date', 'category', 'vatfree', 'vatrate', 'unitpricewot', 'unitpricewt', 'comments', 'quantity', 'pricewot', 'pricewt', 'paymenttype', 'reference', 'slip'],
+    invoicesFields = {organization: 'organization', customer: 'parentid', date: 'invoicedate', name: 'name'},
     invoicesItemsFields = {name: 'name', category: 'category', vatfree: 'vatfree', vatrate: 'vatrate', unitpricewot: 'unitpricewot', comments: 'comments', unitpricewt: 'unitpricewt', quantity: 'quantity', pricewot: 'pricewot', pricewt: 'pricewt'},
-    paymentsFields = {customer: 'parentid', name: 'name', date: 'date', paymenttype: 'paymenttype', pricewt: 'amount'},
+    paymentsFields = {customer: 'parentid', name: 'name', date: 'date', paymenttype: 'paymenttype', pricewt: 'amount', organization: 'organization'},
     paymentsItemsFields = {name: 'name', pricewt: 'amount'}, pane = this.pane, form = pane.form,
     invoicesItemsGrid = form.getWidget('items'), paymentsItemsGrid = form.getWidget('paymentsitems'), paymentsGrid = form.getWidget('payments'), fieldsValues = {}, invoicesItemsRow={}, paymentsItemsRow = {}, paymentsRow = {};
 fields.forEach(function(field){

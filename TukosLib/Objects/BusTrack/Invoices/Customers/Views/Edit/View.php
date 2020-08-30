@@ -100,6 +100,7 @@ class View extends EditView{
             //'closeOnBlur' => true,
             'paneDescription' => [
                 'widgetsDescription' => [
+                    'organization' => Widgets::ObjectSelect(Widgets::complete(['title' => $tr('Organization'), 'object' => 'bustrackorganizations', 'hidden' => true])),
                     'customer' => Widgets::description(ViewUtils::objectSelectMulti(['bustrackpeople', 'bustrackorganizations'], $this->view, 'Customer')),
                     'date' => Widgets::tukosDateBox(Widgets::complete(['title' => $tr('Date'), 'value' => date('Y-m-d')])),
                     'name' => Widgets::textBox(Widgets::complete(['title' => $tr('Description'), 'style' => ['width' => '15em']])),
@@ -168,7 +169,7 @@ class View extends EditView{
                         ],
                         'row3' => [
                             'tableAtts' =>['cols' => 8,  'customClass' => 'labelsAndValues', 'showLabels' => false],
-                            'widgets' => ['paymenttype', 'reference', 'slip'],
+                            'widgets' => ['paymenttype', 'reference', 'slip', 'organization'],
                         ],
                         'row4' => [
                             'tableAtts' =>['cols' => 2,  'customClass' => 'labelsAndValues', 'showLabels' => false],
@@ -177,9 +178,12 @@ class View extends EditView{
                     ],
                 ],
                  'onOpenAction' => <<<EOT
-var invoiceParentId = this.form.valueOf('parentid');
+var invoiceParentId = this.form.valueOf('parentid'), organizationId = this.form.valueOf('organization');
 if (invoiceParentId){
-    this.setValueOf('customer', this.form.valueOf('parentid'));
+    this.setValueOf('customer', invoiceParentId);
+}
+if (organizationId){
+    this.setValueOf('organization', organizationId);
 }
 return true;
 EOT

@@ -66,7 +66,7 @@ class StoreUtilities {
     	$objectName = $model->objectName;
     	$requestedCols = $storeAtts['cols'];
     	$storeAtts['cols'] = array_unique(array_merge(Utl::getItem('cols', $storeAtts, ['id']), $model->extendedNameCols));
-    	$values = Utl::toAssociative($model->translateAll($model->getAll($storeAtts)), 'id');
+    	$values = Utl::toAssociative($model->translateAll($model->getAllExtended($storeAtts)), 'id');
     	if (empty($values)){
     		return [];
     	}else{

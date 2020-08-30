@@ -19,7 +19,7 @@ class ObjectSelect extends AbstractViewModel{
 		$storeAtts = $query['storeatts'];
 		$storeAtts['where'] = $this->user->filter($storeAtts['where'], $this->model->objectName);
 		if (Utl::getItem('one', $query)){// A single row is expected (example: JsonRest get function)
-			return $this->modelToViewSingle($this->model->getOne($storeAtts));
+			return $this->modelToViewSingle($this->model->getOneExtended($storeAtts));
 		}else{// An array of rows is expected (example: JsonREST query)
 			$storeAtts['allDescendants'] = $allDescendants;
 			$whereName = substr(Utl::extractItem('name', $storeAtts['where'])[1], 1, -1);
