@@ -192,6 +192,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             for (var col in this.initialRowValue){
                 init[col] = this.initialRowValue[col];
             }
+			eutils.actionFunction(this, 'initRow', this.initRowAction, 'row', init);
             return init;
         },
 

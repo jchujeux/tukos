@@ -13,11 +13,11 @@ class FullClean {
             	'app-s'		=> 'tukos application name (mandatory if run from the command line, not needed in interactive mode)',
                 'db-s'		    => 'tukos application database name (not needed in interactive mode)',
                 'class=s'          => 'this class name',
-                'deleteDelay-s'    => 'recent deleted ids to keep in php interval_spec format (optional: 0 if omitted)',
+                'removeDelay-s'    => 'recent deleted ids to keep in php interval_spec format (optional: 0 if omitted)',
                 'parentid-s'       => 'parent id (optional, default is user->id())',
             ]);
-            if ($options->deleteDelay){
-                $deleteBefore = (new \DateTime)->sub(new \DateInterval($options->deleteDelay))->format('Y-m-d H:i:s');
+            if ($options->removeDelay){
+                $deleteBefore = (new \DateTime)->sub(new \DateInterval($options->removeDelay))->format('Y-m-d H:i:s');
             }
             $objectsToConsider = Directory::getNativeObjs();
             $totalDeleted = 0;
@@ -36,7 +36,7 @@ class FullClean {
             	if ($store->tableExists($objectName)){
             		$idsToDelete = $store->query("SELECT id FROM $objectName WHERE NOT EXISTS (SELECT NULL from tukos WHERE tukos.id = $objectName.id OR tukos.id = -$objectName.id)")->fetchAll(\PDO::FETCH_COLUMN, 0);
             		if (!empty($idsToDelete)){
-            		    $countDeleted = $store->query("DELETE FROM $objectName WHERE NOT EXISTS (SELECT NULL from tukos WHERE tukos.id = $objectName.id)")->rowCount();
+            		    $countDeleted = $store->query("DELETE FROM $objectName WHERE NOT EXISTS (SELECT NULL from tukos WHERE tukos.id = $objectName.id OR tukos.id = -$objectName.id)")->rowCount();
             		    $totalDeleted += $countDeleted;
             		    echo "\r\nFullClean - $countDeleted removed ids in table $objectName : they were not found in tukos: ". implode(', ', $idsToDelete);
             		    

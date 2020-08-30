@@ -8,7 +8,7 @@ use TukosLib\Utils\Utilities as Utl;
 class Model extends AbstractModel {
     
     protected $segmentOptions = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'MULTI'];
-    protected $attributeTypeOptions = ['name', 'comments', 'segment'];
+    protected $attributeTypeOptions = ['name', 'firstname', 'comments', 'segment'];
     
     function __construct($objectName, $translator=null){
         $colsDefinition =  [

@@ -81,17 +81,15 @@ class Model extends AbstractModel {
                 $okToStart = Tfk::isInteractive() || $this->okToStart($scriptInfo);
                 if ($okToStart){ 
                     $scriptName = $scriptInfo['path'] . $scriptInfo['scriptname'];
-                    if (!strpos($scriptInfo['parameters'], '--parentid')){
-                        $scriptInfo['parameters'] .= ' --parentid ' . $scriptInfo['id'];
-                    }
-                    if (!strpos($scriptInfo['parameters'], '--db')){
-                        $scriptInfo['parameters'] .= ' --db ' . Tfk::$registry->get('appConfig')->dataSource['dbname'];
-                    }
-                    $replace = [
-                    	'/^ *([^ ]*)(.*)/' => function($matches){return $matches[1] . ' --app ' . Tfk::$registry->appName. ' ' . $matches[2];},
-                    	'/([^\\b])@(\w*)([^\\b]|$)/' => function($matches) use ($scriptInfo){return ' ' . $scriptInfo[$matches[2]];}
-                    ];
-                    $script = new $scriptName($scriptInfo['id'], preg_replace_callback_array($replace, $scriptInfo['parameters']), $scriptInfo['runmode']);
+                        if ($position = strpos($scriptInfo['parameters'], 'tukosScheduler.php')){
+                            $position = $position + 18;
+                            foreach ([' --db ' => Tfk::$registry->get('appConfig')->dataSource['dbname'], ' --parentid ' => $scriptInfo['id'], ' --app ' => Tfk::$registry->appName] as $parameter => $value){
+                                if (!strpos($scriptInfo['parameters'], $parameter)){
+                                    $scriptInfo['parameters'] = substr_replace($scriptInfo['parameters'],  $parameter . $value, $position, 0);
+                                }
+                            }
+                        }
+                    $script = new $scriptName($scriptInfo['id'], $scriptInfo['parameters'], $scriptInfo['runmode']);
                     return 'SCRIPTISRUNNING';
                 }else{
                     return $okToStart;

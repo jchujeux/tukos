@@ -16,7 +16,6 @@ class CheckOrphanIds {
                  'db-s'		    => 'tukos application database name (not needed in interactive mode)',
                  'class=s'      => 'this class name',
                  'parentid-s'   => 'parent id (optional)',
-                 'db-s'         => 'database name(optional)'
                 ]);
             $ids     = [];
             $idCols  = [];

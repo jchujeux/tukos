@@ -75,8 +75,9 @@ class Model extends AbstractModel {
                 foreach($criterias as $criteria){
                     if ($model = Utl::getItem('customertype', $criteria)){
                         $whereModel = $model;
-                        if ($value = Utl::getItem('value', $criteria)){
-                            $where[$criteria['attribute']] = $criteria['value'];
+                        if ($value = Utl::getItem('value', $criteria) && $attribute = Utl::getItem('attribute', $criteria)){
+                            //$where[$criteria['attribute']] = $value;
+                            $where[] = ['col' => $attribute, 'opr' => 'IN', 'values' => array_map('trim', explode(',', $criteria['value']))];
                         }
                     }else{
                         $valueItems = array_map('trim', explode(',', $criteria['value']));
@@ -101,6 +102,7 @@ class Model extends AbstractModel {
         while ($row <= $numberOfRows && $getDate($row) > $endDate){$row +=1;};
         while ($row <= $numberOfRows && $startDate <= ($date = $getDate($row))){
             if ($amount = $workbook->getCellValue($sheet, $row, $paymentCol)){
+                $amount = number_format(floatval($amount), 2, ".", "");
                 $id +=1;
                 $matches = []; $customerMatches = []; $customerId = ''; $valueMatches = []; $category = ''; $slip = ''; $isExplained = ''; $paymentId = ''; $invoiceId = ''; $invoiceItemId = ''; $foundPayment = false;
                 $description = $workbook->getCellValue($sheet, $row, $descriptionCol);
@@ -176,7 +178,7 @@ class Model extends AbstractModel {
         foreach($payments as &$payment){
             $id = $payment['id'];
             if (isset($payment['amount'])){
-                $payment['amount'] = number_format((float)$payment['amount'], 2, ".", "");
+                $payment['amount'] = number_format(floatval($payment['amount']), 2, ".", "");
             }
             $payment['organization'] = $organization;
             foreach ($paymentsReconciliationCols as $col){
@@ -261,6 +263,7 @@ class Model extends AbstractModel {
                     }
                     if ($createInvoice){
                         if (($category = Utl::getItem('category', $payment)) && ($customer = Utl::getItem('customer', $payment)) && ($amount = Utl::getItem('amount', $payment)) && ($date = Utl::getItem('date', $payment))){
+                            $amount = number_format(floatval($amount), 2, ".", "");
                             $vatRate = $categoriesModel->vatRate($organization, $category);
                             $createdInvoicesIds[] = $payment['invoiceid'] = $invoiceId = $invoicesModel->insert(['parentid' => $customer, 'organization' => $organization, 'name' => $description = Utl::getItem('description', $payment),
                                 'invoicedate' => $date, 'pricewt' => $amount, 'organization' => $organization], true)['id'];
@@ -364,27 +367,37 @@ class Model extends AbstractModel {
         };
         $id = 0; $needsUpdate = false;
         $paymentsLog = Utl::toAssociative(json_decode($values['paymentslog'], true), 'id');
-        $rootPayments = $paymentsLog;
+        $rootPayments = $paymentsLog; $maxChildId = 0;
         foreach ($paymentsLog as $key => $payment){
             if ($parentId = Utl::getItem('parentid', $payment)){
                 $rootPayments[$parentId]['amount'] = floatval($rootPayments[$parentId]['amount']) + floatval(Utl::getItem('amount', $payment, 0));
                 unset($rootPayments[$key]);
+                if ($key > $maxChildId){
+                    $maxChildId = $key;
+                }
             }
         }
-        $deletedRows = []; $amountChangedRows = []; $extraRows = [];
+        $deletedRows = []; $amountChangedRows = []; $extraRows = []; $childRowsNeedingNewId = [];
         while ($row <= $numberOfRows && $getDate($row) > $endDate){$row +=1;};
         while ($row <= $numberOfRows && $startDate <= ($date = $getDate($row))){
             if ($amount = $workbook->getCellValue($sheet, $row, $paymentCol)){
+                $amount = number_format(floatval($amount), 2, ".", "");
                 $id +=1;
                 if (isset($rootPayments[$id])){
-                    if (($delta = floatval($amount) - floatval($rootPayments[$id]['amount'])) != 0){
-                        $amountChangedRows[] = $id;
+                    if (($delta = floatval($amount) - floatval(number_format(floatval($rootPayments[$id]['amount']), 2, ".", ""))) != 0){
+                        $amountChangedRows[] = "$id($row)";
                         if ($corrections){$paymentsLog[$id]['amount'] += $delta;}
                         $needsUpdate = true;
                     }
                 }else{
-                    $deletedRows[] = $id;
-                    if ($corrections){$paymentsLog[$id] = ['amount' => $amount, 'date' => $getDate($row), 'idg' => $id, 'description' => $workbook->getCellValue($sheet, $row, $descriptionCol)];}
+                    $deletedRows[] = "$id($row)";
+                    if ($corrections){
+                        if (isset($paymentsLog[$id])){
+                            $childRowsNeedingNewId[] = $paymentsLog[$id];
+                        }
+                        $paymentsLog[$id] = ['amount' => $amount, 'date' => $getDate($row)/*, 'idg' => $id*/, 'description' => $workbook->getCellValue($sheet, $row, $descriptionCol), 'parentid' => '', 'paymentid' => '', 'isexplained' => '',
+                            'customer' => '', 'category' => '', 'paymenttype' => '', 'reference' => '', 'slip' => '', 'createinvoice' => '', 'invoiceid' => '', 'invoiceitemid' => ''
+                        ];}
                     $needsUpdate = true;
                 }
             }
@@ -404,6 +417,11 @@ class Model extends AbstractModel {
         $this->addFeedbackArray($amountChangedRows, $corrections ? 'amountrecoveredrows' : 'amountChangedRows');
         $this->addFeedbackArray($extraRows, $corrections ? 'removedextrarows' : 'extraRows');
         if ($needsUpdate){
+            foreach ($childRowsNeedingNewId as $payment){
+                $maxChildId += 1;
+                //$payment['idg'] = $maxChildId;
+                $paymentsLog[$maxChildId] = $payment;
+            }
             ksort($paymentsLog);
             return ['outcome' => 'success', 'data' => ['payments' => Utl::toNumeric($paymentsLog, 'id')]];
         }else{

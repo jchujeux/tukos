@@ -82,13 +82,17 @@ EOT;
     }
     public function paymentIdDropdownFilters(){
         return <<<EOT
-var filters = {0: {col: 'date', opr: '>=', values: dutils.dateString(widget.valueOf('@startdate'), [-30, 'day'])}, 1: {col: 'date', opr: '<=', values: widget.valueOf('@enddate')}, 
-               2:{0: {col: 'isexplained', opr: 'IS NULL', values : ''}, 1: {col: 'isexplained', opr: '=', values: '', or: true}}}, amount = widget.valueOf('amount'), customer = widget.valueOf('customer');
+var filters = {0: {col: 'date', opr: '>=', values: dutils.dateString(widget.valueOf('@startdate'), [-30, 'day'])}, 1: {col: 'date', opr: '<=', values: widget.valueOf('@enddate')}}, 
+    amount = Number.parseFloat(widget.valueOf('amount')).toFixed(2), customer = widget.valueOf('customer'), isExplained = widget.valueOf('isexplained');
 if (amount){
     filters.amount = amount;
 }
 if (customer){
     filters.parentid = customer;
+}
+console.log('isExplained: ' + isExplained);
+if (!isExplained){
+    filters[2] = {0: {col: 'isexplained', opr: 'IS NULL', values : ''}, 1: {col: 'isexplained', opr: '=', values: '', or: true}};
 }
 return filters;
 EOT;
