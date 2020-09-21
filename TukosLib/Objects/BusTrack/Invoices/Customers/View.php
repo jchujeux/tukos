@@ -78,7 +78,7 @@ EOT
                 'object' => "bustrackpayments{$customersOrSuppliers}",
                 'removeCols' => ['unassignedamount'],
                 'atts'  => ['title' => $tr("bustrackpayments{$customersOrSuppliers}"), 'newRowPrefix' => 'new'/*, 'colsDescription' => ['amount' => ['atts' => ['edit' => ['onChangeLocalAction' => '~delete']]]]*/,
-                    'initRowAction' => "row.organization = this.form.valueOf('organization'); row.parentid = this.form.valueOf('parentid');"],
+                    'createRowAction' => "row.organization = this.form.valueOf('organization'); row.parentid = this.form.valueOf('parentid');"],
                 'filters' => [
                     ['tukosJoin' => ['inner', "(`tukos`  as `t0`, `bustrackpayments{$customersOrSuppliers}items`)", "`t0`.`parentid` = `bustrackpayments{$customersOrSuppliers}`.`id` AND `bustrackpayments{$customersOrSuppliers}items`.`invoiceid` = @id AND `t0`.`id` = `bustrackpayments{$customersOrSuppliers}items`.`id`"]],
                     ['groupBy' => ['tukos.id']],

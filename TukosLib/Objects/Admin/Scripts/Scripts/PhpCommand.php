@@ -8,11 +8,10 @@ class PhpCommand extends CommandLine{
     function __construct($id, $parameters, $runMode){
         if (is_array($parameters)){
             $phpScript = Tfk::$tukosPhpDir . array_shift($parameters);
-            $parameters = array_unshift($parameters, Tfk::$phpCommand, $phpScript);
+            $parameters = array_unshift($parameters, 'php', $phpScript);
         }else{
-             $parameters = Tfk::$phpCommand . ' ' . Tfk::$tukosPhpDir . $parameters;
+             $parameters = 'php' . ' ' . Tfk::$tukosPhpDir . $parameters;
         }
-        //Feedback::add("phpCommand - parameters: $parameters");
         parent::__construct($id, $parameters, $runMode);
     }
 } 

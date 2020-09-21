@@ -15,8 +15,10 @@ class Modify extends AbstractAction{
     function response($query){
         $received = $this->dialogue->getValues();
         if ($received['ids'] === true){
-            $where = array_merge($this->user->getCustomView($this->objectName, 'overview', $this->paneMode, ['data', 'filters', 'overview']), $query['storeatts']['where']);
+            //$where = array_merge($this->user->getCustomView($this->objectName, 'overview', $this->paneMode, ['data', 'filters', 'overview']), $query['storeatts']['where']);
+            $where = $query['storeatts']['where'];
             $where['contextpathid'] = $query['contextpathid'];
+            $where = $this->user->filter($where);
         }else{
             $where = [['col' => 'id', 'opr' => 'IN', 'values' => $received['ids']]];
         }

@@ -6,7 +6,6 @@
 namespace TukosLib\Objects\Admin\Health\Scripts;
 
 use TukosLib\Utils\Utilities as Utl;
-use Zend\Console\Getopt;
 use Ifsnop\Mysqldump;
 use TukosLib\TukosFramework as Tfk;
 
@@ -18,14 +17,19 @@ class FullBackup {
         $store        = Tfk::$registry->get('store');
         $objectsStore = Tfk::$registry->get('objectsStore');
         try{
-            $options = new Getopt([
-                'class=s'      => 'this class name',
-                'parentid-s'   => 'parent id (optional, default is user->id())',
-                'parentTable-s'=> 'parent script table (optional, required if parentid is not a users)',
-            ]);
-            $this->tableObj = $objectsStore->objectModel('healthtables');
-            $stmt = $store->tableStatus();
+            $options = new \Zend_Console_Getopt(
+                ['app-s'		=> 'tukos application name (not needed in interactive mode)',
+                 'db-s'		    => 'tukos application database name (not needed in interactive mode)',
+                 'class=s'      => 'this class name',
+                 'parentid-s'   => 'parent id (optional)'
+                ]);
             $source = $appConfig->dataSource;
+            $dateBackup = date('Y-m-d H:i:s');
+            $backupFileName = $source['dbname'] . str_replace(':', '-', str_replace(' ', '_', $dateBackup)) . '.sql.bz2';
+            $dump = new Mysqldump("mysql:host={$source['host']};dbname={$source['dbname']}", $source['admin'], $source['pass'], ['compress' => 'Bzip2']);
+            $dump->start(Tfk::$tukosTmpDir . $backupFileName);
+            echo "Backed-up database: {$source['dbname']} into file $backupFileName";
+/*
             while ($tableStatus = $stmt->fetch()){
                 $tableName      = $tableStatus['Name'];
                 if (in_array('updated', $store->tableCols($tableName))){
@@ -60,7 +64,8 @@ class FullBackup {
                     }
                 }
             }
-        }catch(Getopt_exception $e){
+*/
+        }catch(\Zend_Console_Getopt_Exception $e){
             Tfk::debug_mode('log', 'an exception occured while parsing command arguments in FullBackup: ', $e->getUsageMessage());
         }
     }

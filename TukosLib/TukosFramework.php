@@ -8,9 +8,7 @@ class TukosFramework{
      * Concentrate here all depencies relative to the physical server set-up
      *
      */
-    const phpDetachedCommand = 'start /Dx: /xampp/php/php '; // so that runs in a separate ms-dos windows (detached)
     const mailServerFolder = '/Xampp/MercuryMail/';
-    const backupBinDir = '/xampp/mysql/bin/';
 
     const dojoModules = ['dojo', 'dijit', 'dojox'];
 
@@ -18,10 +16,9 @@ class TukosFramework{
     
     public static $tukosPhpDir, $phpVendorDir, $vendorDir = [], $tukosTmpDir, $tukosPhpImages,
                   $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment, $tukosBaseLocation, $dojoBaseLocation, $tukosFormsDojoBaseLocation, $dojoCdnBaseLocation, $tukosFormsTukosBaseLocation, 
-                  $tukosDomainName, $tukosFormsDomainName, $htmlToPdfCommand, $phpCommand; 
+                  $tukosDomainName, $tukosFormsDomainName, $htmlToPdfCommand; 
   
     public static function initialize ($mode, $appName = null, $phpDir = null){
-        //self::$startMicroTime = microtime(true);
         self::$tukosPhpDir = $phpDir;
         self::$tukosTmpDir = $phpDir . '/tmp/';
         self::$tukosPhpImages = $phpDir . 'site/images/';
@@ -38,7 +35,6 @@ class TukosFramework{
         self::$osName = php_uname('s');
         self::$mode = $mode;
         self::$htmlToPdfCommand = getenv('wkHtmlToPdfCommand');
-        self::$phpCommand = getenv('tukosPhpCommand');
     }
     
     public static function setEnvironment($environment){

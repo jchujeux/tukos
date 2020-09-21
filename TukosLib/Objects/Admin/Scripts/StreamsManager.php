@@ -26,7 +26,6 @@ class StreamsManager{
     * Launches a new command
     */ 
     public function startStream($id, $cmd, $scriptObj = true){
-        //$desc = [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => ["file", Tfk::$tukosTmpDir . $id . "streamerror.txt", 'a']];
         $desc = [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => $scriptObj ? ["pipe", "w"] : ["file", Tfk::$tukosTmpDir . $id . "streamerror.txt", 'a']];
         if (empty($this->process[$id])){
             try{
@@ -116,8 +115,8 @@ class StreamsManager{
     
     public function waitOnStreams($seconds = 1){    
         if ($this->process){
-            sleep($seconds);
             while (count($this->process)) { 
+                sleep($seconds);
                 foreach ($this->process as $id => $theProcess){
                     $status = proc_get_status($theProcess['resource']);
                     $theProcessTerminated =  ! $status['running'];

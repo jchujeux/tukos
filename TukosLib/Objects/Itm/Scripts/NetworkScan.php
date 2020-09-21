@@ -14,15 +14,13 @@ use TukosLib\TukosFramework as Tfk;
 class NetworkScan {
 
     function __construct($parameters){ 
-        global $argv;
         $objectsStore = Tfk::$registry->get('objectsStore');
 
         $networks   = $objectsStore->objectModel('networks');
-
-        $args = $argv;
         try{
             $options = new \Zend_Console_Getopt(
                 ['app-s'		=> 'tukos application name (not needed in interactive mode)',
+                 'db-s'		    => 'tukos application database name (not needed in interactive mode)',
                  'class=s'      => 'this class name',
                  'scriptid=i'   => 'the script id for the network to scan',
                  'networkid=i'  => 'the tukos id for the network to scan',
@@ -64,8 +62,8 @@ class NetworkScan {
             }
                 
             Tfk::debug_mode('log', 'investigation completed - status: ', $status);
-        }catch(Getopt_exception $e){
-            Tfk::debug_mode('log', 'an exception occured while parsing command aguments in networkscan: ', $e->getUsageMessage());
+        }catch(\Zend_Console_Getopt_Exception $e){
+            Tfk::debug_mode('log', 'an exception occured while parsing command arguments in networkscan: ', $e->getUsageMessage());
         }            
     }
 }

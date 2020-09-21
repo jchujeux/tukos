@@ -6,10 +6,11 @@
 namespace TukosLib\Objects\Admin\Scripts;
 
 use TukosLib\Objects\AbstractModel;
+use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk; 
 
 class Model extends AbstractModel {
-    protected $runModeOptions       = ['ATTACHED', 'DETACHED'];
+    protected $runModeOptions       = ['ATTACHED'/*, 'DETACHED'*/];
     protected $statusOptions        = ['DISABLED', 'READY', 'RUNNING'];
     public $colsToGet			= ['id', 'parentid', 'status', 'startdate', 'enddate', 'laststart', 'timeinterval', 'path', 'scriptname', 'parameters', 'runmode'];
     function __construct($objectName, $translator=null){
@@ -19,10 +20,10 @@ class Model extends AbstractModel {
                             'runmode'       =>  "ENUM ('ATTACHED', 'DETACHED') ",
                             'status'        =>  "ENUM ('DISABLED', 'READY', 'RUNNING') ",
                             'startdate'     =>  "timestamp",
-                            'enddate'       =>  "timestamp",
+                            'enddate'       =>  "timestamp DEFAULT NULL",
                             'timeinterval'  =>  'VARCHAR(80)',
-                            'laststart'     =>  "timestamp",
-                            'lastend'       =>  "timestamp",];
+                            'laststart'     =>  "timestamp DEFAULT NULL",
+                            'lastend'       =>  "timestamp DEFAULT NULL",];
         parent::__construct($objectName, $translator, 'scripts', ['parentid' => ['users', 'networks']], [], $colsDefinition, [], ['runmode', 'status']);
 
         $this->initVals = ['parentid' => $this->user->id(), 'status' => 'DISABLED', 'path' => 'TukosLib\Objects\Admin\Scripts\Scripts\\', 'runmode' => 'ATTACHED', 'timeinterval' => json_encode([1, 'hour'])];
@@ -58,7 +59,7 @@ class Model extends AbstractModel {
                 $initialStartTime       = strtotime($dates['startdate']);
                 $lastExpectedStartTime  = $initialStartTime + floor(($currentTime - $initialStartTime) / $timeInterval) * $timeInterval;
                 $lastStartTime          = strtotime($lastStart);
-                return ($lastStartTime < $lastExpectedStartTime ? true : 'NOTYETTIME');
+                return ($lastStartTime < $lastExpectedStartTime ? 'YES' : 'NOTYETTIME');
             }else{
                 return 'YES';
             }
@@ -72,14 +73,15 @@ class Model extends AbstractModel {
     function processScript($scriptInfo){
         switch ($scriptInfo['status']){
             case 'DISABLED' :
+                Feedback::add($this->tr('ScriptIsDisabled'));
                 return 'ScriptIsDisabled';
                 break;
             case 'RUNNING' :
+                Feedback::add($this->tr('ScriptAlreadyRunning'));
                 return 'ScriptAlreadyRunning';
                 break;
             case 'READY' :
-                $okToStart = Tfk::isInteractive() || $this->okToStart($scriptInfo);
-                if ($okToStart){ 
+                if (Tfk::isInteractive() || ($okToStart = $this->okToStart($scriptInfo)) === 'YES'){
                     $scriptName = $scriptInfo['path'] . $scriptInfo['scriptname'];
                         if ($position = strpos($scriptInfo['parameters'], 'tukosScheduler.php')){
                             $position = $position + 18;
@@ -90,6 +92,7 @@ class Model extends AbstractModel {
                             }
                         }
                     $script = new $scriptName($scriptInfo['id'], $scriptInfo['parameters'], $scriptInfo['runmode']);
+                    Feedback::add($this->tr('Scriptisrunning'));
                     return 'SCRIPTISRUNNING';
                 }else{
                     return $okToStart;

@@ -192,7 +192,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             for (var col in this.initialRowValue){
                 init[col] = this.initialRowValue[col];
             }
-			eutils.actionFunction(this, 'initRow', this.initRowAction, 'row', init);
             return init;
         },
 
@@ -226,6 +225,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         createNewRow: function(item, currentRowData, where){
             var noRefresh = this.noRefreshOnUpdateDirty;
         	this.noRefreshOnUpdateDirty = true;
+			eutils.actionFunction(this, 'createRow', this.createRowAction, 'row', item);
             if ('rowId' in this.columns && where !== undefined){
                 if (where === 'before'){
                     //item.rowId = currentRowData.rowId;
@@ -266,13 +266,14 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         	var idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {}, noRefresh = this.noRefreshOnUpdateDirty;
         	//this.isNotUserEdit += 1;
         	this.noRefreshOnUpdateDirty = true;
-        	if(replace){
+        	/*if(replace){
             	utils.forEach(storeItem, lang.hitch(this, function(value, col){
             		if (!utils.in_array(col, ['connectedIds', 'idg', 'rowId', 'id'])){
             			this.updateDirty(idPropertyValue, col, item[col] || '');
             		}
             	}));        		
-        	}
+        	}*/
+			eutils.actionFunction(this, 'updateRow', this.updateRowAction, 'row', item);
         	utils.forEach(item, lang.hitch(this, function(value, col){
         		if (value !== storeItem[col] && col !== 'connectedIds'){
         			this.updateDirty(idPropertyValue, col, value);
