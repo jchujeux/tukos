@@ -22,6 +22,8 @@ class Model extends AbstractModel {
             'enddate' => 'date NULL DEFAULT NULL',
             'nocreatepayments' => 'VARCHAR(7) DEFAULT NULL',
             'verificationcorrections' => 'VARCHAR(7) DEFAULT NULL',
+            'pendinginvoicesonly' => 'VARCHAR(7) DEFAULT NULL',
+            'showinvoicessince' => 'date NULL DEFAULT NULL',
             'paymentslog' => 'longtext',
         ];
         parent::__construct($objectName, $translator, "bustrackreconciliations{$this->customersOrSuppliers}", ['parentid' => ['bustrackorganizations']], ['paymentslog'], $colsDefinition, [], [], ['custom']);
@@ -168,7 +170,7 @@ class Model extends AbstractModel {
         $noCreatePayments = $values['nocreatepayments'];
         $payments = $values['payments'];
         $existingPaymentsIds = []; $updatedPaymentsIds = []; $noDateAmountRows = []; $rowNeedsMorePaymentInfo = []; $createdPaymentsIds = []; $createdPaymentsItemsIds = []; $createdInvoicesIds = []; $createdInvoicesItemsIds = [];
-        $paymentsColsMapping = ['id' => 'paymentid', 'parentid' => 'customer', 'name' => 'description', 'date' => 'date', 'isexplained' => 'isexplained', 'paymenttype' => 'paymenttype', 'reference' => 'reference', 'slip' => 'slip', 
+        $paymentsColsMapping = ['id' => 'paymentid', 'parentid' => 'customer', 'name' => 'description', 'date' => 'date', 'isexplained' => 'isexplained', 'paymenttype' => 'paymenttype', 'reference' => 'reference'/*, 'slip' => 'slip'*/, 
             'amount' => 'amount', 'category' => 'category', 'organization' => 'organization'];
         $reconciliationColsMapping = array_flip($paymentsColsMapping);
         $paymentsModelCols = array_merge(array_keys($paymentsColsMapping), ['updated']);
@@ -227,7 +229,7 @@ class Model extends AbstractModel {
                     }
                     $where[] = ['col' => 'invoicedate', 'opr' => '<=', 'values' => $date ? $date : $values['enddate']];
                     $invoiceId = $invoiceItemId = '';
-                    if (Utl::getItem('pricewt', $where) && Utl::getItem('customer', $where)){
+                    if (Utl::getItem('pricewt', $where) && Utl::getItem('parentid', $where)){
                         $this->searchInvoices($where, $id, $invoicesModel, $invoicesItemsModel, $invoiceId, $invoiceItemId);
                         $payment['invoiceid'] = $invoiceMatch = $invoiceId; $payment['invoiceitemid'] = $invoiceItemId;
                     }

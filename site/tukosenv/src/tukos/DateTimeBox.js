@@ -53,8 +53,8 @@ function(declare, lang, domstyle, Widget, _FocusMixin, wutils, dutils, DateTextB
                 if (this.TZField){
                     this.TZField.set('value', (value.slice(-1) == 'Z' ? 'l' : 'i'), arguments[1]);
                 }   
-                this._set("value", value);
             }
+                this._set("value", value);
         },
         _getValueAttr: function(){
             if (this.dateField && this.dateField.get('value') === ''){

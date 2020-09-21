@@ -13,11 +13,19 @@ class Delete extends AbstractAction{
         $this->actionModel  = new OverviewGetModel($this);
     }
     function response($query){
-        $selectedIds = $this->dialogue->getValues()['ids'];
+        $received = $this->dialogue->getValues();
+        if ($received['ids'] === true){
+            //$where = array_merge($this->user->getCustomView($this->objectName, 'overview', $this->paneMode, ['data', 'filters', 'overview']), $query['storeatts']['where']);
+            $where = $query['storeatts']['where'];
+            $where['contextpathid'] = $query['contextpathid'];
+            $where = $this->user->filter($where);
+        }else{
+            $where = [['col' => 'id', 'opr' => 'IN', 'values' => $received['ids']]];
+        }
         if (method_exists($this->model, 'bulkPreProcess')){
             $this->model->bulkPreProcess();
         }
-        $result = $this->model->delete([['col' => 'id', 'opr' => 'IN', 'values' => $selectedIds]]);
+        $result = $this->model->delete($where);
         if (method_exists($this->model, 'bulkPostProcess')){
             $this->model->bulkPostProcess();
         }

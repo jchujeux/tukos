@@ -18,7 +18,7 @@ class Main{
         $authentication = Tfk::$registry->get('Authentication');
         $username = $authentication->isAuthenticated($dialogue, $request, $query);
         if ($username !== false){/* Proceed only if user is authorized */
-        	SUtl::instantiate();
+            SUtl::instantiate();
             $user = Tfk::$registry->get('user');
             if ($user->setUser(['name' => $username])){/* so as $user has the proper rights and other initialization information*/
                 if ($request['controller'] === 'Page'){

@@ -8,16 +8,24 @@ use TukosLib\TukosFramework as Tfk;
 trait ItemsExporter{
 
 	public function exportItems($query, $atts){		
-		return HttpUtilities::downloadFile($this->buildItemsFile($atts), 'plain/txt', $query['downloadtoken']);
+		return HttpUtilities::downloadFile($this->buildItemsFile($query, $atts), 'plain/txt', $query['downloadtoken']);
 	}
 
-	public function buildItemsFile($atts){
+	public function buildItemsFile($query, $atts){
 	    $idsToExport = json_decode($atts['ids'], true);
 		$visibleCols = json_decode($atts['visibleCols'], true);
 		$modifyValues = json_decode($atts['modifyValues'], true);
 		$fileName = Tfk::$tukosTmpDir . uniqId() . '.txt';
 		$colsToDownload = array_diff(isset($visibleCols['id']) ? $visibleCols : array_merge($visibleCols, ['id']), ['0', 'created', 'creator', 'updated', 'updator', 'configstatus']);
-		$items = $this->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $idsToExport]], 'cols' => $colsToDownload]);
+		if ($idsToExport === true){
+		    //$where = array_merge($this->user->getCustomView($this->objectName, 'overview', $this->paneMode, ['data', 'filters', 'overview']), $query['storeatts']['where']);
+		    $where = $query['storeatts']['where'];
+		    $where['contextpathid'] = $query['contextpathid'];
+		    $where = $this->user->filter($where);
+		}else{
+		    $where = [['col' => 'id', 'opr' => 'IN', 'values' => $idsToExport]];
+		}
+		$items = $this->getAll(['where' => $where, 'cols' => $colsToDownload]);
 		if (!empty($items)){
 			$ids = array_flip(array_column($items, 'id'));
 			$i = 1;

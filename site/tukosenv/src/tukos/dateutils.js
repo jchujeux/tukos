@@ -49,7 +49,7 @@ define(["dojo", "dojox/date/posix", "tukos/utils"], function(dojo, ISODates, uti
                 var newToDateObject = (correction ? new Date(dojo.date.add(fromDateObject, durationArray[1], durationArray[0]).getTime() - 1) : dojo.date.add(fromDateObject, durationArray[1], durationArray[0]));
                 return this.formatDate(newToDateObject);
             }else{
-                return toDate;
+                return toDate || fromDate;
             }
         },
         addDurationString: function(durationString, toDate, format){
