@@ -19,7 +19,7 @@ class Model extends AbstractModel {
                             'parameters'    =>  'longtext ',
                             'runmode'       =>  "ENUM ('ATTACHED', 'DETACHED') ",
                             'status'        =>  "ENUM ('DISABLED', 'READY', 'RUNNING') ",
-                            'startdate'     =>  "timestamp",
+                            'startdate'     =>  "timestamp DEFAULT NULL",
                             'enddate'       =>  "timestamp DEFAULT NULL",
                             'timeinterval'  =>  'VARCHAR(80)',
                             'laststart'     =>  "timestamp DEFAULT NULL",
@@ -52,8 +52,8 @@ class Model extends AbstractModel {
             return 'NOTBETWEENSTARTANDENDDATE'; 
         }else{
             $lastStart = ($dates['laststart'] === null ? '0000-00-00 00:00:00' : $dates['laststart']);
-            $interval  = (empty($dates['timeinterval']) ? [1, 'hour'] :  json_decode($dates['timeinterval']));
-            $timeInterval  = strtotime('+' . $interval[0] . ' ' . $interval[1]) - time();
+            $interval  = (empty($dates['timeinterval']) ? [0, 'hour'] :  json_decode($dates['timeinterval']));
+            $timeInterval  = strtotime('+' . $interval[0] . ' ' . $interval[1]) - time() - 1;
             if ($timeInterval > 0){
                 $currentTime            = strtotime($currentDate);
                 $initialStartTime       = strtotime($dates['startdate']);

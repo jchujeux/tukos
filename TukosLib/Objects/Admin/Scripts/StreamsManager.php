@@ -98,7 +98,6 @@ class StreamsManager{
     }
 
     public function waitOnStream($id, $scriptObj = true, $outputFlag = 'store'){
-        $output = '';
         $continue = true;
         $result = null;
         while($continue){

@@ -37,7 +37,7 @@ class Model extends AbstractModel {
         if (!empty($unallowed)){
             $atts['where'][] = ['col' => 'name', 'opr' => 'NOT IN', 'values' => $unallowed];
         }
-        return parent::getOne($atts, $jsonColsKeys, $jsonNotFoundValue, $absentColsFlag);
+        return parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue, $absentColsFlag);
     }
 
     public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){

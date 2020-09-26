@@ -9,6 +9,7 @@ use TukosLib\Objects\Admin\Users\Model as UserModel;
 class TukosModel {
 
     protected $_nextIdTable = 'id';
+    protected $optionsTable = 'options';
     protected $tableName = 'tukos';
     protected $_colsDefinition = [
         'id'           =>  'INT(11) PRIMARY KEY',
@@ -52,12 +53,15 @@ class TukosModel {
             forEach (Directory::configStatusRange() as $status => $range){
             	$this->store->insert(['configrange' => $status, 'nextid' => $range, 'updated' => date('Y-m-d H:i:s')], ['table' => $this->_nextIdTable]);
             }
+            $this->store->createTable($this->optionsTable, ['name' => 'VARCHAR (80)', 'value' => 'longtext']);
+            $this->store->insert((['name' => 'parameters', 'value' => '{"union": false}']));
         }
         $this->textColumns = array_keys(array_filter($this->_colsDefinition, function($def){return in_array(strtolower(substr($def, 0, 4)), $this->_textColumns);}));
         $this->maxSizeCols = ['comments'];
         $this->allCols = array_keys($this->_colsDefinition);
         $this->sharedObjectCols = array_diff($this->allCols, ['object']);
         $this->idColsObjects = ['parentid' => [$this->tableName], 'contextid' => ['contexts'], 'creator' =>['users'], 'updator' => ['users']];
+        $this->parameters = json_decode($this->store->getOne(['table' => $this->optionsTable, 'where' => ['name' => 'parameters'], 'cols' => ['value']])['value'], true);
     }
     
     public function nextId($configStatus, $increment = true){
