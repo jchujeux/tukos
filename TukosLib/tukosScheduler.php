@@ -50,6 +50,7 @@ if (!empty($params['class'])){
     $feedback = [];
     foreach ($scriptsToConsider as $scriptInfo){
         $scriptInfo['runmode'] = 'ATTACHED';
+        echo var_dump($scriptInfo);
         $feedback[$scriptInfo['id']] = $scripts->processScript($scriptInfo);
     }
     $runningIds = '';
@@ -64,7 +65,21 @@ if (!empty($params['class'])){
     }
     $output  = ($runningIds === '' ? 'No script execution was started' : 'started execution of scripts: ' . $runningIds);
     
-    $values = $scriptsOutputs->insert(['name' => 'tukos scheduler', 'output' => $output, 'parentid' => $user->id()], true);
+    if ($runningIds === ''){
+        $values = $scriptsOutputs->getOne(['where' => ['name' => 'tukos scheduler'], 'cols' => ['id', 'output', 'comments'], 'orderBy' => ['updated' => 'DESC']]);
+        if (empty($values) || strpos($values['output'], 'No script') === false){
+            $isInsert = true;
+        }else{
+            $isInsert = false;
+            $values['output'] = $output;
+            $values['parentid'] = $user->id();
+            $values['comments'] = empty($values['comments']) ? "repeat 1" : "repeat " . explode( ' ', $values['comments'])[1] + 1;
+            $scriptsOutputs->updateOne($values);
+        }
+    }
+    if ($isInsert){
+        $values = $scriptsOutputs->insert(['name' => 'tukos scheduler', 'output' => $output, 'parentid' => $user->id()], true);
+    }
     $streamsStore->waitOnStreams();
     
     $values['output'] = '<br>tukos scheduler execution completed and all streams are closed';

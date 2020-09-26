@@ -29,7 +29,7 @@ class UserInformation{
                 'where' => SUtl::transformWhere($where, $tu),
                 'cols' => ['tukos.id', 'password', 'rights', 'modules', 'language', 'environment', 'tukosorganization', 'customviewids', 'customcontexts', 'pagecustom', 'dropboxaccesstoken', 'dropboxbackofficeaccess', 'parentid', 'name', 
                            'contextid', 'custom'],
-                'union' => 'merge'
+                'union' => Tfk::$registry->get('tukosModel')->parameters['union']
             ]);
             if ($userName === 'tukos'){
                 $this->userInfo = $this->tukosInfo = $usersInfo;

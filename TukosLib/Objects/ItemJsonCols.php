@@ -12,7 +12,9 @@ trait ItemJsonCols {
     protected function jsonDecode(&$values, $jsonCols){
         $colsToProcess = array_intersect(array_keys($values), $jsonCols);
         foreach ($colsToProcess as $col){
-            $values[$col] = json_decode($values[$col], true);
+            if (is_string($values[$col])){
+                $values[$col] = json_decode($values[$col], true);
+            }
         }
     }
 
@@ -38,7 +40,7 @@ trait ItemJsonCols {
     protected function jsonNewValues(&$oldValues, &$newValues){
         $colsToProcess = array_intersect(array_keys($newValues), $this->jsonCols);
         foreach ($colsToProcess as $col){
-            if (!is_string($newValues[$col])){
+            if (!empty($newValues[$col]) && !is_string($newValues[$col])){
                 if (Utl::array_contains($oldValues[$col], $newValues[$col])){
                     unset($oldValues[$col]);
                     unset($newValues[$col]);

@@ -140,7 +140,7 @@ class StoreUtilities {
     }
     
     function extendedNameCols($ids){
-    	$objectNamesAndIds = Utl::toAssociativeGrouped(Tfk::$registry->get('tukosModel')->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $ids]], 'cols' => ['id', 'object'], 'union' => 'merge']), 'object', 'true');
+    	$objectNamesAndIds = Utl::toAssociativeGrouped(self::$tukosModel->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $ids]], 'cols' => ['id', 'object'], 'union' => self::$tukosModel->parameters['union']]), 'object', 'true');
     	$objectStore = Tfk::$registry->get('objectsStore');
     	$extraIds = $values = [];
     	foreach ($objectNamesAndIds as $objectName => $objectIds){

@@ -30,11 +30,10 @@ abstract class AbstractModel extends ObjectTranslator {
 
     use ItemHistory, ItemJsonCols, ItemsChildren, Store, ItemCustomization, ContentExporter, ItemsExporter, ItemsImporter;
     
-  //these are the minimal cols required in the $store  table for any Tukos object, with associated keys definition, to be completed with object specific cols definitions
     protected $permissionOptions = ['NOTDEFINED', 'PR', 'RO', 'PU', 'ACL'];
     protected $aclOptions = ['0' => 'none', '1' => 'read', '2' => 'update', '3' => 'delete'];
     protected $gradeOptions = ['TEMPLATE', 'NORMAL', 'GOOD', 'BEST'];
-    protected $timeIntervalOptions =  ['', 'year', 'quarter', 'month', 'week', 'weekday', 'day', 'hour', 'minute', 'second'];// corresponds to intersection of php strToTime & dojo.date supported intervals
+    protected $timeIntervalOptions =  ['year', 'quarter', 'month', 'week', 'weekday', 'day', 'hour', 'minute', 'second'];// corresponds to intersection of php strToTime & dojo.date supported intervals
     protected $useItemsCache = true;
     const optionalCols = ['worksheet', 'custom', 'history'];
 
@@ -127,7 +126,7 @@ abstract class AbstractModel extends ObjectTranslator {
                 $atts['cols'] = array_diff($atts['cols'], $absentCols);
             }
         }
-    	$atts = ['table' => $this->tableName, 'union' => 'merge'] + $atts;
+        $atts = ['table' => $this->tableName, 'union' => Utl::extractItem('union', $atts, $this->tukosModel->parameters['union'])] + $atts;
 		$missingCols = ($this->useItemsCache ? ItemsCache::missingCols($atts) : $atts['cols']);
 		if (empty($missingCols)){
             $result = ItemsCache::getOne($atts);
@@ -173,7 +172,7 @@ abstract class AbstractModel extends ObjectTranslator {
         return $this->foundRows;
     }
     public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
-         $atts = ['table' => $this->tableName, 'union' => Utl::extractItem('union', $atts, 'merge')] + $atts;
+        $atts = ['table' => $this->tableName, 'union' => Utl::extractItem('union', $atts, $this->tukosModel->parameters['union'])] + $atts;
     	if ($allDescendants = Utl::extractItem('allDescendants', $atts, false)){
     		if (isset($atts['range'])){
             	Tfk::error_message('info', 'combining range and allDescendants is not supported. Continuing at your own risks - atts: ', $atts);
@@ -205,19 +204,6 @@ abstract class AbstractModel extends ObjectTranslator {
     }
     
     public function getAllExtended($atts){
-/*
-        if ($atts['cols'] !== '*'){
-            if (!empty($fieldsMaxSize = $this->user->fieldsMaxSize())){
-                $presentMaxSizeCols = array_intersect($atts['cols'], $this->maxSizeCols);
-                foreach ($presentMaxSizeCols as $key => $col){
-                    //$atts['cols'][$key] = 'if(length(' . $col . ') > ' . $fieldsMaxSize . ', concat("#tukos{id:", tukos.id, ",object:' . $this->objectName . ',col:' . $col . '}"),' . $col . ') ' . $col;
-                    //$extCol = "tukos.$col";
-                    $extCol = SUtl::colsPrefix($col, $this->tableName) . "$col";
-                    $atts['cols'][$key] = "if(length($extCol) > $fieldsMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$this->objectName,col:$col}\"),$extCol)";
-                }
-            }
-        }
-*/
         $items = $this->getAll($atts, [], null, true, true);
         $this->addItemsIdCols($items);
         return $items;
@@ -277,7 +263,7 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         $atts = $this->completeUpdateAtts($newValues, $atts);
         $oldValues = $this->getOne($atts, $this->activeJsonColsDefaultPath($atts['cols'], $newValues));
-        if (empty($oldValues)){
+        if (empty($oldValues) && empty($id = Utl::getItem('id', $newValues)) && id > 10000){
             if ( $insertIfNoOld){
                 return $this->insert($newValues, $init);
             }else{
@@ -373,33 +359,34 @@ abstract class AbstractModel extends ObjectTranslator {
                 $differences['updator'] = $updator;
                 $oldValues['updator'] = $oldUpdator;
             }
-
+            $id = Utl::getItem('id', $oldValues, $newValues['id']);
             if (in_array('history', $this->allCols)){
                 $differences['history'] = $this->addHistory($oldHistory, Utl::getItems(array_keys($differences), $oldValues));
-                //$differences['history'] = $this->compressHistory($differences, $oldValues['id']);
             }
             if ($this->useItemsCache){
-                ItemsCache::updateOne($differences, $oldValues['id']);
+                ItemsCache::updateOne($differences, $id);
             }
             if (!empty($differences['history'])){
-                $differences['history'] = $this->compressHistory($differences, $oldValues['id']);
+                $differences['history'] = $this->compressHistory($differences, $id);
             }
             
             $this->jsonEncode($differences, $jsonFilter);
             
-            $updatedCount = $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $oldValues['id']]]);
-            if (!$updatedCount && $oldValues['id'] < 10000){// means no old item was found, insert the differences instead (is an update of a tukosconfig item in the user database), but still consider as an update (*** could stillbe conflct ***
+            $updatedCount = $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $id]]);
+            if (!$updatedCount && $id < 10000){// means no old item was found, insert the differences instead (is an update of a tukosconfig item in the user database), but still consider as an update (*** could stillbe conflct ***
                 $differences = array_merge($this->initialize(), $differences);
-                $differences['id']      = $oldValues['id'];
+                $differences['id']      = $id;
                 $differences['created'] = date('Y-m-d H:i:s');
                 $differences['creator'] = $this->user->id();
-                SUtl::$tukosModel->store->query("delete from {$this->tableName} where id={$differences['id']}");
-                SUtl::$tukosModel->store->query("delete from `tukos` where id=-{$differences['id']}");
+                if ($this->store->tableExists($this->tableName)){    
+                    $this->store->query("delete from {$this->tableName} where id={$differences['id']}");
+                }
+                $this->store->query("delete from `tukos` where id=-{$differences['id']}");
                 
                 $this->insertItem($differences);
             }
 
-            $updatedRow = ['id' => $oldValues['id'], 'updated' => $updated, 'updator' => $updator];
+            $updatedRow = ['id' => $id, 'updated' => $updated, 'updator' => $updator];
             if (property_exists($this, 'processUpdateForBulk') && method_exists($this, $processUpdateForBulk = $this->processUpdateForBulk)){
                 $this->$processUpdateForBulk($oldValues, $newValues);
             }
