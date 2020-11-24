@@ -51,6 +51,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
         openDialog: function(item, openArgs){
             var editDialog = this.editDialog, pane = editDialog.pane;
             pane.itemId = item[this.collection.idProperty];
+			pane.emptyWidgets(pane.postElts);
+			pane.resetChangedWidgets();
             pane.watchOnChange = pane.markIfChanged = false;
             when(editDialog.open(openArgs), lang.hitch(this, function(){
                 when (pane.setWidgets({value: item}), function(){

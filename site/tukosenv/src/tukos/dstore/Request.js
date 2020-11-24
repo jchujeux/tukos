@@ -43,6 +43,9 @@ define(['dojo/request',	'dojo/_base/lang', 'dojo/_base/array', 'dojo/json', 'doj
 			if (this.userFilters){
 	            queryOptions.where = lang.mixin(queryOptions.where || {}, this.userFilters());
 			}
+			if (this.eliminatedItems){
+				queryOptions.eliminateditems = this.eliminatedItems;
+			}
             return queryOptions;
 		},
 		filterOptions: function (queryOptions, filter) {

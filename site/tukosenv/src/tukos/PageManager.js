@@ -1,6 +1,6 @@
-define(["dojo/ready", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", "dojo/json",
-		"dgrid/List", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/utils"],
-function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, List, _WidgetsExtend, _WidgetsFormExtend, utils){
+define(["dojo/ready", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", 
+		"dojo/json", "dojo/date/locale", "dgrid/List", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/utils"],
+function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, dojoDateLocale, List, _WidgetsExtend, _WidgetsFormExtend, utils){
     var stores, tabs, openedBrowserTabs = {},
         objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
@@ -19,7 +19,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
 		   this.cache.messages = this.cache.messages || {};
            var self = this;
            Date.prototype.toJSON = function(){
-               return dojo.date.locale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
+               return dojoDateLocale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
            };
            require([obj.isMobile ? "tukos/mobile/buildForm" : "tukos/desktop/buildForm", "tukos/StoresManager"], function(buildForm, StoresManager){
 	           stores = new StoresManager();
@@ -36,7 +36,7 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             this.cache.messages = this.cache.messages || {};
             var self = this;
             Date.prototype.toJSON = function(){
-                return dojo.date.locale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
+                return dojoDateLocale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
             };
             require([obj.isMobile ? "tukos/mobile/buildPage" : "tukos/desktop/buildPage", "tukos/StoresManager"], function(buildPage, StoresManager){
             	stores = new StoresManager();
@@ -209,13 +209,23 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             if (beep){
                 this.beep();
             }
-            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || '' /*|| this.message('Ok')*/),
-                  currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;;
-            if (((currentTab || {}).form || {}).getWidget){
-                var widget = (lang.hitch(currentTab.form, currentTab.form.getWidget))('feedback');
-                if (widget){
-                    widget.set('value', separator ? widget.get('value') + separator + newFeedback : newFeedback);
-                }
+            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || '' /*|| this.message('Ok')*/), widget, form,
+                  currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;
+			if (this.focusedPanel === "leftPanel"){
+				console.log('focus is on left panel');
+				var currentPane = this.accordion ? this.accordion.currentPane() : false, form = currentPane.form || {};
+				if (form.getWidget){
+					widget = form.getWidget('feedback');
+				}
+			}         
+			if (!widget){
+				form = (currentTab || {}).form || {};
+				if (form.getWidget){
+					widget = form.getWidget('feedback');
+				}
+			}
+            if (widget){
+                widget.set('value', separator ? widget.get('value') + separator + newFeedback : newFeedback);
             }
             if (this.logWidget){
             	this.logWidget.set('value', this.logWidget.get('value') + (separator ? separator : '\n') + newFeedback);
@@ -357,7 +367,13 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         	if (args && typeof args === 'object'){
         		var pageTukosOrUserOrChangesCustomization = 'page' + utils.capitalize(args.tukosOrUserOrChanges) + 'Customization';
         		this.cache[pageTukosOrUserOrChangesCustomization] = value;
-        	}
+        	}else{
+				if (args){
+					this.cache.newCustomization[args] = value;
+				}else{
+					this.cache.newPageCustomization = value;
+				}
+			}
         }
     }
 });

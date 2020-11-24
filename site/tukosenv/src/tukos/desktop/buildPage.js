@@ -1,13 +1,13 @@
 define(["dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/ready", "dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/layout/AccordionContainer",
-	"tukos/desktop/NavigationMenu", "tukos/TabsManager", "tukos/AccordionManager", "tukos/TabOnClick", "tukos/PageManager"], 
-function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, ContentPane, AccordionContainer, NavigationMenu, TabsManager, AccordionManager, TabOnClick, Pmg) {
+	"dijit/focus", "tukos/desktop/NavigationMenu", "tukos/TabsManager", "tukos/AccordionManager", "tukos/TabOnClick", "tukos/utils", "tukos/PageManager"], 
+function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, ContentPane, AccordionContainer, focusUtil, NavigationMenu, TabsManager, AccordionManager, TabOnClick, utils, Pmg) {
 	return {
 		initialize: function(){
 			var self = this, obj = Pmg.cache, appLayout = new BorderContainer({design: 'sidebar'}, "appLayout"), pageCustomization = obj.pageCustomization || {}, hideLeftPane = pageCustomization.hideLeftPane === 'YES', 
 				leftPaneWidth = pageCustomization.leftPaneWidth || "12%", panesConfig = pageCustomization.panesConfig || [], newPageCustomization = obj.newPageCustomization = lang.clone(pageCustomization),
 				leftAccordion = new AccordionContainer({id: 'leftPanel', region: "left", 'class': "left", splitter: true, style: {width: leftPaneWidth, padding: "0px", display: (hideLeftPane ? "none" : "block")}});
 			appLayout.addChild(leftAccordion);
-			this.accordion   = new AccordionManager({container: leftAccordion});
+			Pmg.accordion   = new AccordionManager({container: leftAccordion});
 			var contentHeader = new ContentPane({id: 'tukosHeader', region: "top", 'class': "edgePanel", style: "padding: 0px;", content: obj.headerContent});
 			if (Pmg.get('userRights') === 'SUPERADMIN' || Pmg.getCustom('pageCustomForAll') === 'YES' || (!Pmg.get('noPageCustomForAll') && Pmg.getCustom('pageCustomForAll') !== 'NO')){
 				contentHeader.on('contextmenu', lang.hitch(this, this.contextMenuCallback));
@@ -22,25 +22,14 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
 			var userTabLink = new TabOnClick({url: obj.userEditUrl}, "pageusername");
 			      
 			var newPanesConfig = [], rowId = 1;
-			obj.accordionDescription.forEach(function(description, key){
-				var paneId = description['id'], paneConfigKey, newPaneConfig;
-				panesConfig.some(function(paneConfig, key){
-					if(paneConfig.name === paneId){
-						paneConfigKey = key;
-						return true;
-					};
-				});
-				newPaneConfig = paneConfigKey ? panesConfig[paneConfigKey] : {name: paneId, present: 'YES'};
-				if (description.config){
-					newPaneConfig = lang.mixin(newPaneConfig, description.config);
+			focusUtil.on('widget-focus', function(widget){
+				var panel = focusUtil.get('activeStack')[1];
+				switch (panel){
+					case 'leftPanel': 
+					case 'centerPanel':
+						Pmg.focusedPanel = panel;
 				}
-				newPaneConfig.rowId = rowId;
-				newPanesConfig.push(newPaneConfig);
-				rowId += 1;
 			});
-			if (newPanesConfig.length > 0){
-				Pmg.addCustom('panesConfig', newPanesConfig);
-			}
 			obj.pageChangesCustomization = {};
 			ready(function(){
 			   if (!hideLeftPane){
@@ -56,16 +45,18 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
 			           if (displayStatus === 'none'){
 			           	   self.lazyCreateAccordion();
 			               ready(function(){
-			               	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || pageCustomization.leftPaneWidth);
-			               	domStyle.set('leftPanel', 'display', 'block');
-			               	newPageCustomization.hideLeftPane = 'NO';
-			               	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
-			               	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-			               	self.resizeLayoutPanes(true);
+				               	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || pageCustomization.leftPaneWidth);
+				               	domStyle.set('leftPanel', 'display', 'block');
+				               	//newPageCustomization.hideLeftPane = 'NO';
+								Pmg.addCustom('hideLeftPane', 'NO');
+				               	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
+				               	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
+				               	self.resizeLayoutPanes(true);
 			               });
 			           }else{
 			           	domStyle.set('leftPanel', 'display', 'none');
-			           	newPageCustomization.hideLeftPane = 'YES';
+			           	//newPageCustomization.hideLeftPane = 'YES';
+						Pmg.addCustom('hideLeftPane', 'YES');
 			           	leftPaneButton.set("iconClass", "ui-icon tukos-right-arrow");
 			           	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
 			           	self.resizeLayoutPanes(false);
@@ -80,7 +71,8 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
 			               	domStyle.set('leftPanel', 'width', '80%');
 			               	isMaximized = true;
 			               	domStyle.set('leftPanel', 'display', 'block');
-			               	newPageCustomization.hideLeftPane = 'NO';
+			               	//newPageCustomization.hideLeftPane = 'NO';
+							Pmg.addCustom('hideLeftPane', 'NO');
 			               	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
 			               	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
 			               	self.resizeLayoutPanes(true)
@@ -108,7 +100,8 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
 				       	if (leftPaneWidthWidget){
 				       		leftPaneWidthWidget.set('value', newWidth);
 				       	}
-				       	obj.newPageCustomization.width = newWidth;
+				       	//obj.newPageCustomization.width = newWidth;
+						Pmg.addCustom('width', newWidth);
 				       	//console.log('splitter was called')
 				       });
 				   	Pmg.setFeedback(obj.feedback);
@@ -145,18 +138,29 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
         },
         lazyCreateAccordion: function(ignoreSelected){
             if (!this.createdAccordion){
-            	var panesConfig = Pmg.cache.newPageCustomization.panesConfig || [], self = this, selectedAccordionPane;
-            	Pmg.cache.accordionDescription.forEach(function(description, key){
-                	var paneConfig = panesConfig[key] || {}, selected = paneConfig.selected;
-                	if (!(paneConfig.present === 'NO')){
-                		var pane = self.accordion.create(description);
-                    	if (selected){
-                    		selectedAccordionPane = pane;
-                    	}
-                	}
-                });  
+            	var panesConfig = Pmg.cache.newPageCustomization.panesConfig || [], self = this, selectedAccordionPane, panesDescription = Pmg.cache.accordionDescription;
+				utils.forEach(panesConfig, function(paneConfig){
+					var theDescription = false;
+					if (paneConfig.present === 'YES'){
+						panesDescription.some(function(description){
+							if (description.id === paneConfig.name){
+								theDescription = description;
+								return true;
+							}
+						});
+					}
+					if (theDescription){
+						var pane = Pmg.accordion.create(theDescription);
+						if (paneConfig.selected){
+							selectedAccordionPane = pane;
+						}
+						if (paneConfig.associatedTukosId){
+							pane.set('associatedtukosid', paneConfig.associatedtukosid);
+						}
+					}
+				});
             	if (!ignoreSelected && selectedAccordionPane){
-            		ready(function(){self.accordion.gotoPane(selectedAccordionPane);});
+            		ready(function(){Pmg.accordion.gotoPane(selectedAccordionPane);});
             	}
             	this.createdAccordion = true;
             }
@@ -168,7 +172,8 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
                 	var newPageCustomization = Pmg.cache.newPageCustomization, leftPaneButton = registry.byId('showHideLeftPane'), leftPaneMaxButton = registry.byId('showMaxLeftPane');
                 	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || Pmg.cache.pageCustomization.leftPaneWidth);
                 	domStyle.set('leftPanel', 'display', 'block');
-                	newPageCustomization.hideLeftPane = 'NO';
+                	//newPageCustomization.hideLeftPane = 'NO';
+					Pmg.addCustom('hideLeftPane', 'NO');
                 	leftPaneButton.set("iconClass", "ui-icon tukos-left-superarrow");
                 	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
                 	this.setNavigationPane(id);
@@ -184,11 +189,11 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
             		navigatorPane.createPane();
             		ready(lang.hitch(this, function(){
                     	navigatorPane.form.getWidget('tree').showItem({id: id, object: Pmg.objectName(id)});
-                    	this.accordion.gotoPane(navigatorPane);
+                    	Pmg.accordion.gotoPane(navigatorPane);
             		}));
             	}else{
                 	navigatorPane.form.getWidget('tree').showItem({id: id, object: Pmg.objectName(id)});
-                	this.accordion.gotoPane(navigatorPane);                		
+                	Pmg.accordion.gotoPane(navigatorPane);                		
             	}
             }else{
             	console.log('case of navigator pane not present to be done');

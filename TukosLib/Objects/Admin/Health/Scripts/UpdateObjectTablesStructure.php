@@ -20,7 +20,7 @@ class UpdateObjectTablesStructure {
         try{
             $options = new \Zend_Console_Getopt([
                 'app-s'		=> 'tukos application name (mandatory if run from the command line, not needed in interactive mode)',
-                'class=s'      => 'this class name',
+                'db-s'		    => 'tukos application database name (not needed in interactive mode)','class=s'      => 'this class name',
                 'parentid-s'   => 'parent id (optional, default is user->id())',
                 'modifycols-s' => 'if "true" the cols definition will be modified as needed',
                 'removecols-s' => 'if "true" the cols will be removed as needed',
@@ -62,7 +62,7 @@ class UpdateObjectTablesStructure {
                         $dbColStructure = $columnsStructure[$col];
                         $dbColDescription = str_replace(' ', '', $dbColStructure['Type'] . (is_null($default = $dbColStructure['Default']) ? '' : ("default '" . $default) . "'") . ($dbColStructure['Key'] === 'PRI' ? 'primarykey' : ''));
                         if (strcasecmp(substr($dbColDescription, 0, strlen($appColDescription)), $appColDescription) !== 0){
-                            echo "table: $objectName, col: $col, database definition: $dbColDescription, application definition: $appColDescription";
+                            echo "<b>table: $objectName, col: $col, database definition: $dbColDescription, application definition: $appColDescription";
                             if ($options->modifycols === 'true'){
                                 try{
                                     $alterStmt = $store->hook->query("ALTER TABLE `$objectName` MODIFY COLUMN `$col` $appColDescription");
@@ -79,7 +79,7 @@ class UpdateObjectTablesStructure {
                     Tfk::error_message('on', ' Exception in UpdateObjectTablesStructure: ', $e->getMessage());
                 }
             }
-            echo $changesWereMade ? "Changes were made!!!" : "No change made";
+            echo $changesWereMade ? "<b>Changes were made!!!" : "<b>No change made";
         }catch(\Zend_Console_Getopt_Exception $e){
             Tfk::error_message('on', 'an exception occured while parsing command arguments : ', $e->getUsageMessage());
         }

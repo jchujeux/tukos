@@ -10,7 +10,7 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
                 evt.stopPropagation();
                 evt.preventDefault();
 
-                var action = self.serverAction, isItemsChange = utils.in_array(action, ['Modify', 'Delete']), needsRevert = this.needsRevert || isItemsChange || action === 'Duplicate', queryParams = self.queryParams;
+                var action = self.serverAction, isItemsChange = utils.in_array(action, ['Modify', 'Delete', 'Restore']), queryParams = self.queryParams;
                 toProcess = action === 'Reset' ? {} : (isItemsChange ? this.editableIdsToProcess(grid) : this.idsToProcess(grid)) ;
                 Pmg.setFeedback(self.actionStartMessage);
                 
@@ -43,7 +43,7 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
                     			paneDescription: {
                     				widgetsDescription: {
                     					message: {type: 'HtmlContent', atts: {label: '', style: {marginLeft: '3em'}}},
-                        				cols: {type: 'BasicGrid', atts: {
+                        					cols: {type: 'BasicGrid', atts: {
                         					label: Pmg.message('columns to modify'), allowSelectAll: true, collection: new Memory({data: []}),
                         					columns: {selector: {selector: 'checkbox', width: 50}, col: {label: Pmg.message('column'), width: 200}, value: {label: Pmg.message('newValue')}}}},
                     					allpages: {type: 'CheckBox', atts: {label: Pmg.message('allpages'), onClick: function(evt){
@@ -51,7 +51,7 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
                     							if (this.checked){
                     								this.previousMessage = messageWidget.get('value');
                     								messageWidget.set('value', string.substitute(Pmg.message('allpages ${actioned} ${number}' + (action === 'Process' ? '' : ' permanently')),
-														{actioned: Pmg.message({Modify: 'modified', Delete: 'eliminated', Process: 'exported'}[action]), number: grid.form.valueOf('filteredrecords')}));
+														{actioned: Pmg.message({Modify: 'modified', Delete: 'eliminated', Restore: 'restored', Process: 'exported'}[action]), number: grid.form.valueOf('filteredrecords')}));
                     								toProcess.all = true;
                     							}else{
                     								messageWidget.set('value', this.previousMessage);
@@ -76,10 +76,17 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
                 								urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: grid.form.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
 												download.download(urlArgs, {data: {ids: JSON.stringify(toProcess.all || toProcess.ids), visibleCols: JSON.stringify(visibleCols), modifyValues: JSON.stringify(grid.modify.values)}});
 											}else{
-	                    						self.form.serverDialog(urlArgs, {ids: toProcess.all || toProcess.ids, values: grid.modify.values}, [], Pmg.message('actionDone')).then(function(response){
+									        	Pmg.setFeedback(Pmg.message('actionDoing'));
+												var label = this.get('label'), _self = this;	                    						
+												this.set('label', Pmg.loading(label));
+												self.form.serverDialog(urlArgs, {ids: toProcess.all || toProcess.ids, values: grid.modify.values}, [], Pmg.message('actionDone')).then(function(response){
 	        	                                    tooltipDialog.close();
 	                    							grid.revert();
 	                                        	});	                        						
+									            grid.on('dgrid-refresh-complete', function(){
+													Pmg.setFeedback(Pmg.message('actionDone'));
+													_self.set('label', label);
+												});
 											}
                     					}}},
                     					cancel: {type: 'TukosButton', atts: {label: Pmg.message('Cancel'), onClick: function(evt){tooltipDialog.close();}}}
@@ -102,8 +109,9 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
                     				allPages.set('checked', false);
                     				toProcess.all = false;
                     				allPages.set('hidden', !grid.allSelected);
-                        			messageWidget.set('value', string.substitute(Pmg.message('will be ${actioned} ${number} items: ${ids}' + (action === 'Process' ? '' : ' permanently')), 
-										{actioned: Pmg.message({Modify: 'modified', Delete: 'eliminated', Process: 'exported'}[action]), number: toProcess.ids.length, ids: toProcess.ids.join(', ') + '<p>' + toProcess.warning}));
+                        			messageWidget.set('value', string.substitute(Pmg.message('will be ${actioned} ${number} items: ${ids}' + (action === 'Process' || action === 'Restore' ? '' : ' permanently')), 
+										{actioned: Pmg.message({Duplicate: 'duplicated', Modify: 'modified', Delete: 'eliminated', Restore: 'restored', Process: 'exported'}[action]), number: toProcess.ids.length, 
+										ids: toProcess.ids.join(', ') + '<p>' + toProcess.warning}));
 									if (action === 'Modify'){
 										cols.set('hidden', false);	                        				
 										utils.forEach(grid.modify.displayedValues, function(value, col){
@@ -129,33 +137,46 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
         },
 
         searchAction: function(data){
-            var form = this.form, grid = form.getWidget(this.grid), filter = {pattern: form.valueOf('pattern')}, contextpathid = form.valueOf('contextid'), id = form.valueOf('id');
+            var form = this.form, grid = form.getWidget(this.grid), filter = {pattern: form.valueOf('pattern')}, contextpathid = form.valueOf('contextid'), id = form.valueOf('id'), searchType = form.valueOf('itemstypestosearch');
             if (id){
             	filter.id = id;
             }
             if (contextpathid){
             	filter.contextpathid = contextpathid
             }
-            
+            if (searchType === 'eliminateditems'){
+				grid.store.eliminatedItems = true;
+			}else{
+				delete grid.store.eliminatedItems;
+			}
         	Pmg.setFeedback(Pmg.message('actionDoing'));
+			var label = this.get('label'), self = this;	                    						
+			this.set('label', Pmg.loading(label));
             grid.set('collection', grid.store.filter(filter));
-            Pmg.setFeedback(Pmg.message('actionDone'));
+            grid.on('dgrid-refresh-complete', function(){
+				Pmg.setFeedback(Pmg.message('actionDone'));
+				self.set('label', label);
+			});
         },
 
         resetAction: function(options){
             var form = this.form, parent = form.parent, title = parent.get('title'), url = require.toUrl('tukos/resources/images/loadingAnimation.gif'), grid = form.getWidget(this.grid), queryParams = this.queryParams;
+			var label = this.get('label'), self = this;	                    						
+			this.set('label', Pmg.loading(label));
         	if (queryParams){
                 form.serverDialog({action: 'Reset', query: {params: queryParams}}, options || {}, [], Pmg.message('actionDone')).then(function(response){
             		response.feedback.pop();
                     Pmg.alert({title: Pmg.message(queryParams.process), content: response.feedback.join('<br>')});
                 	grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
-                    Pmg.setFeedback(Pmg.message('actionDone'));
                 });
         	}else{
             	grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
-                Pmg.setFeedback(Pmg.message('actionDone'));        		
         	}
-        },
+             grid.on('dgrid-refresh-complete', function(){
+				Pmg.setFeedback(Pmg.message('actionDone'));
+				self.set('label', label);
+			});
+       },
         
         idsToProcess: function(grid){
 			var idsToProcess = new Array;

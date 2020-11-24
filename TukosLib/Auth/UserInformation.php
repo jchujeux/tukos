@@ -109,7 +109,6 @@ class UserInformation{
         return array_intersect($this->allowedModules, directory::getNativeObjs());
     }
     public function isAllowed($module, $query){
-        $module = strtolower($module);
         if ($module === 'users' && isset($query['id']) && $query['id'] === $this->id()){
             return true;
         }else{
@@ -120,7 +119,7 @@ class UserInformation{
         return $this->unallowedModules;
     }
     public function isUnallowed($module){
-        return in_array(strtolower($module), $this->unallowedModules);
+        return in_array($module, $this->unallowedModules);
     }
 
     public function contextTreeAtts($tr){
@@ -332,14 +331,6 @@ class UserInformation{
         $paneMode = strtolower($paneMode); $view = strtolower($view);
         $customViewId = $this->customViewId($objectName, $view, $paneMode, $tukosOrUser);
         if (empty($customViewId)){
-/*
-            $result = $this->objectsStore->objectModel('customviews')->insert(
-                ['name' => 'new', 'vobject' => $objectName, 'view' => $view, 'panemode' => $paneMode, 'customization' => $newValues], 
-                true, true
-            );
-            $this->setCustomViewId($objectName, $view, $paneMode, $result['id'], $tukosOrUser);
-            return ['customviewid' => $result['id']];
-*/
             Feedback::add('updateCustomView: inserting a new view not supposed to happen');
         }else{
             $this->objectsStore->objectModel('customviews')->updateOne(
@@ -367,13 +358,17 @@ class UserInformation{
         }
     }
     public function updatePageCustom($pageCustom, $tukosOrUser){
-        if ($tukosOrUser === 'user'){
+        $usersModel = $this->objectsStore->objectModel('users');
+        $where = ($tukosOrUser === 'user') ? ['id' => $this->id()] : ['name' => 'tukos'];
+        $usersModel->updateOne(['pagecustom' => $pageCustom], ['where' => $where], false, true);
+        return $usersModel->getOne(['where' => $where, 'cols' => ['pagecustom']], ['pagecustom' => []]);
+/*        if ($tukosOrUser === 'user'){
             $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => $pageCustom], ['where' => ['id' => $this->id()]], false, true);
         }else{
             $this->objectsStore->objectModel('users')->updateOne(['pagecustom' => $pageCustom], ['where' => ['name' => 'tukos']], false, true);
         }
         Feedback::add(Tfk::tr('serveractiondone'));
-        return [];
+        return [];*/
     }
     public function fieldsMaxSize(){
         return intval(Utl::getItem('fieldsMaxSize', $this->pageCustomization()));

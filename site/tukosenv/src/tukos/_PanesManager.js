@@ -24,13 +24,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
                 var query = {};
                 if (!theForm){
                 	var paneId = currentPane.id, panesConfig = Pmg.getCustom('panesConfig'), paneConfig;
-                	panesConfig.some(function(config){
-                		if (config.name === paneId){
-                			paneConfig = config;
-                			return true;
-                		}
-                	});
-                	query = {id: paneConfig.id};
+                	if (currentPane.associatedtukosid){
+						query.id = currentPane.associatedtukosid;
+					}
                 }else{
 	            	if (theFormContent.viewMode === 'Edit'){
 	                    var id = lang.hitch(theForm, theForm.valueOf)('id');

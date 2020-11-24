@@ -20,10 +20,10 @@ class View extends EditView{
             return $tr($string, 'escapeSQuote');
         };
         $customContents = [
-
             	'row1' => [
-                    'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true],
-                    'widgets' => ['id', 'parentid', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter', 'synchnextmonday', 'questionnairetime']
+                    'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => '130'],
+                    'widgets' => ['id', 'parentid', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter',
+                        'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'stsratio', 'initialsts', 'initiallts']
                 ],
             	'row2' => [
             	    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['66%', '33%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
@@ -57,10 +57,10 @@ class View extends EditView{
                 ]
         ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
-        $this->onOpenAction = $this->onViewOpenAction() .  $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies');
+        $this->onOpenAction = $this->onViewOpenAction() .  $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies') . $this->view->OpenEditAction();
         $plannedOptionalCols = ['name', 'duration', 'intensity', 'sport', 'sportimage', 'stress', 'distance', 'elevationgain', 'content']; $plannedColOptions = [];
         $performedOptionalCols = ['name', 'duration', 'sport', 'sportimage', 'distance', 'elevationgain', 'perceivedeffort', 'sensations', 'mood', 'athletecomments', 'coachcomments']; $plannedColOptions = [];
-        $optionalWeeks = ['performedthisweek', 'plannedthisweek', 'performedlastweek', 'plannedlastweek']; $weekOptions;
+        $optionalWeeks = ['performedthisweek', 'plannedthisweek', 'performedlastweek', 'plannedlastweek'];
         foreach($plannedOptionalCols as $col){
             $plannedColOptions[$col] = $this->view->tr($col);
         }
@@ -70,6 +70,12 @@ class View extends EditView{
         foreach($optionalWeeks as $week){
            $weekOptions[$week] = $tr($week);
        }
+        $this->actionWidgets['reset']['atts']['afterActions'] = [
+            'postReset' => <<<EOT
+var grid = this.form.getWidget('sptsessions');
+grid.loadChartUtils.updateCharts(grid, 'changed');
+EOT
+        ];
        $this->actionWidgets['export']['atts']['dialogDescription'] = [
             'paneDescription' => [
                 'widgetsDescription' => [
@@ -257,7 +263,7 @@ class View extends EditView{
 		            'gcsynchroend' => Widgets::tukosDateBox(['title' => $tr('synchroend'), 'onWatchLocalAction' => $this->urlChangeLocalAction('gcsynchrostart', $tr, false)]),
 		            'gcmetricstoinclude' => Widgets::multiSelect(Widgets::complete(['title' => $tr('gcmetricstoinclude'), 'options' => GC::metricsOptions($tr), 'style' => ['height' => '150px'], 
 		                'onWatchLocalAction' =>  $this->urlChangeLocalAction('gcmetricstoinclude', $tr)])),
-		            'gcactivitiesmetrics' => Widgets::basicGrid(Widgets::complete(['label' => $tr('gcactivitiesmetrics'), 'allowSelectAll' => true, 'dynamicColumns' => true, 'adjustLastColumn' => false, 
+		            'gcactivitiesmetrics' => Widgets::basicGrid(Widgets::complete(['label' => $tr('gcactivitiesmetrics'), 'allowSelectAll' => true, 'dynamicColumns' => true, 'adjustLastColumn' => false, 'minRowsPerPage' => 500,
 		                'colsDescription' => GC::metricsColsDescription($tr), 'nonGcCols' => GC::nonGcCols(), 'permanentGcOptions' => GC::permanentGcOptions()])),
 		            'gclink' => Widgets::htmlContent(['title' => $tr('gclink'), 'readonly' => true]),
 		            'gcinput' => Widgets::textArea(Widgets::complete(['title' => $tr('gcinput')])),

@@ -37,7 +37,7 @@ class ViewUtils{
         return Utl::array_merge_recursive_replace([
         		'type' => 'numberTextBox', 
         		'atts' => ['edit' => ['label' => $view->tr($label)]],
-        		//'objToEdit' => ['floatval' => []],  'objToStoreEdit' => ['floatval' => []],
+            //'objToEdit' => ['floatval' => []],  'objToStoreEdit' => ['floatval' => []],  'objToOverview' => ['floatval' => []],
         	],
         	$custom);
     }

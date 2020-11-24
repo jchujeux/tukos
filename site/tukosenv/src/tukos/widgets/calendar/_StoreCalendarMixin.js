@@ -63,12 +63,8 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
 		},
 
 		duplicateSelectedItem: function(){
-			var duplicate = lang.clone(this.selectedItem);
-			duplicate.id = this.nextItemId;
-			delete duplicate.connectedIds;
-			delete duplicate.objectId;
-			this.store.add(duplicate);
-			this.nextItemId += 1;
+			var grid = this.getGrid(), item = grid.collection.getSync(this.selectedItem.connectedIds[grid.widgetName]);
+			grid.addRow(undefined, grid.copyItem(item));
 		},
 
 		deleteSelectedItems: function(){

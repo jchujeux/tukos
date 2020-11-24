@@ -59,10 +59,10 @@ class View {
         ];
         
         $this->actionLayout = [
-            'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0'],
+            'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '1', 'labelWidth' => '130'],
             'contents' => [
                 'actions' => [
-                    'tableAtts' => ['cols' => 2, 'customClass' => 'actionTable', 'showLabels' => false, 'label' => '<b>' . $this->view->tr('For all items') . '<b>', 'spacing' => '0'],
+                    'tableAtts' => ['cols' => 2, 'customClass' => 'actionTable', 'showLabels' => false, 'label' => '<b>' . $this->view->tr('For all items') . '<b>', 'spacing' => '0', 'widgetCellStyle' => ['text-align' => 'center']],
                     'widgets' => ['reset'],
                 ],
                 'selection' => [

@@ -60,7 +60,7 @@ class View extends AbstractView {
                         'catalog' => ['fields' => [
                             'catalogid' => 'id', 'name' => 'name', 'comments' => 'comments', 'unitpricewot' => 'unitpricewot', 'vatrate' => 'vatrate', 'unitpricewt' => 'unitpricewt', 'category' => 'category', 'vatfree' => 'vatfree']]
                     ],
-                    'allowedNestedRowWatchActions' => 2,
+                    'allowedNestedRowWatchActions' => 1,
                     'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => <<<EOT
 var discountWt = sWidget.form.valueOf('discountwt'), priceWt = sWidget.summary.pricewt - discountWt, discountPc = discountWt / sWidget.summary.pricewt, paymentsItems = sWidget.form.getWidget('paymentsitems');
 sWidget.form.setValueOf('pricewt', priceWt);

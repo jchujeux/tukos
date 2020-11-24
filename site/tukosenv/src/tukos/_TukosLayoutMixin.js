@@ -32,7 +32,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/Deferred", "dojo/promise
 	                }else{
 	                    widgets[i] = instantiatingWidget;
 	                }
-	                //dojo.when(instantiatingWidget, lang.hitch(this, function(widget){
 		            dojo.when(instantiatingWidget, function(widget){
 	                    widget.layoutHandle = self;
 	                    widget.parentContentPane = fromParent;

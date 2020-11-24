@@ -359,7 +359,11 @@ abstract class AbstractModel extends ObjectTranslator {
                 $differences['updator'] = $updator;
                 $oldValues['updator'] = $oldUpdator;
             }
-            $id = Utl::getItem('id', $oldValues, $newValues['id']);
+            $id = Utl::getItem('id', $oldValues, Utl::getItem('id', $newValues));
+            if (empty($id)){
+                Feedback::addErrorCode($NoIdInUpdate);
+                return false;
+            }
             if (in_array('history', $this->allCols)){
                 $differences['history'] = $this->addHistory($oldHistory, Utl::getItems(array_keys($differences), $oldValues));
             }
@@ -373,7 +377,7 @@ abstract class AbstractModel extends ObjectTranslator {
             $this->jsonEncode($differences, $jsonFilter);
             
             $updatedCount = $this->updateItems($differences, ['table' =>  $this->tableName, 'where' => ['id' => $id]]);
-            if (!$updatedCount && $id < 10000){// means no old item was found, insert the differences instead (is an update of a tukosconfig item in the user database), but still consider as an update (*** could stillbe conflct ***
+            if (!$updatedCount && $id < 10000){// means no old item was found, insert the differences instead (is an update of a tukosconfig item in the user database in union merge mode), but still consider as an update
                 $differences = array_merge($this->initialize(), $differences);
                 $differences['id']      = $id;
                 $differences['created'] = date('Y-m-d H:i:s');
@@ -529,6 +533,16 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         return $result;
     }
+    public function restore($ids){
+        $where = [['col' => 'id', 'opr' => 'in', 'values' => $ids]];
+        $result = $this->updateItems([], ['where' => $where, 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]]);
+        if (property_exists($this, 'processInsertForBulk') && method_exists($this, $processInsertForBulk = $this->processInsertForBulk)){
+            $restoredItems = $this->getAll(['where' => $where, 'cols' => property_exists($this, 'additionalColsForBulkDelete') ? array_merge(['id'], $this->additionalColsForBulkDelete) : ['id']]);
+            foreach ($restoredItems as $item){
+                $this->$processInsertForBulk($item);
+            }
+        }
+    }
     public function setDeleteChildren($childrenObjectsToSuspendBulk = []){
         $this->processDeleteForBulk = 'processDeleteChildrenForBulk';
         $this->_postProcess = '_postProcessDeleteChildren';
@@ -555,10 +569,11 @@ abstract class AbstractModel extends ObjectTranslator {
             $this->parentIdsToPostProcessDelete = [];
         }
     }
-    public function summary($activeUserFilters = null){
+    public function summary($storeAtts){
         return [
-        		'filteredrecords' => is_null($activeUserFilters) ? $this->foundRows() : $this->getAll(['where' => $this->user->filter($activeUserFilters, $this->objectName), 'cols' => ['count(*)']])[0]['count(*)'],
-        		'totalrecords' => $this->getAll(['where' => $this->user->filter([], $this->objectName), 'cols' => ['count(*)']])[0]['count(*)']
+        		'filteredrecords' => empty(Utl::getItem('where', $storeAtts)) ? $this->foundRows() : $this->getAll(['where' => $this->user->filter($storeAtts['where'], $this->objectName), 'eliminateditems' => $storeAtts['eliminateditems'], 
+        		    'cols' => ['count(*)']])[0]['count(*)'],
+        		'totalrecords' => $this->getAll(['where' => $this->user->filter([], $this->objectName), 'eliminateditems' => $storeAtts['eliminateditems'], 'cols' => ['count(*)']])[0]['count(*)']
         ];
     }
     public function bulkPreProcess($parentObjectName = ''){

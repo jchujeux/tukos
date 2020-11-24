@@ -19,7 +19,7 @@ class SubObjectsSave extends SubObjects{
             $deleteValues = []; $idsDeleted = []; $widgetsMapping = [];
             $saveSubObject = $editModelSave->objectsStore->objectViewModel($editModelSave->controller, 'Edit', 'Save', ['view' => $subObject['view'], 'model' => $subObject['model']]);
             foreach ($dataWidgets as $colName => $widget){
-                if ($widget['type'] === 'ObjectSelect' && $gridName = Utl::drillDown($widget['atts'], ['storeedit', 'editorArgs', 'storeArgs', 'storeDgrid'], null)){
+                if (Utl::getItem('type', $widget) === 'ObjectSelect' && $gridName = Utl::drillDown($widget['atts'], ['storeedit', 'editorArgs', 'storeArgs', 'storeDgrid'], null)){
                     $widgetsMapping[$colName] = $gridName;
                 }                
             }

@@ -45,13 +45,14 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
             			TextBox: {type: 'TextBox', atts: {widgetName: 'attValue', style: {width: '20em'}, hidden: true}},
             			StoreSelect: {type: 'StoreSelect', atts: {placeHolder: messages.selectvalue, style: {width: 'auto'}, hidden: true, storeArgs: {data: []}}},
             			RestSelect: {type: 'RestSelect', atts: {placeHolder: messages.selectvalue, style: {width: 'auto'}, hidden: true}},
+						MultiSelect: {type: 'MultiSelect', atts: {widgetName: 'attValue', hidden: true, style: {width: '15em', height: '200px'}}},
                         cancel: {type: 'TukosButton', atts: {label: messages.close, onClickAction:  'this.pane.close();'}},
                         apply: {type: 'TukosButton', atts: {label: messages.apply}}
                     },
                     layout:{
                         tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},
                         contents: {
-                           row1: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['att', 'NumberUnitBox', 'TextBox', 'StoreSelect', 'RestSelect']},
+                           row1: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['att', 'NumberUnitBox', 'TextBox', 'StoreSelect', 'RestSelect', 'MultiSelect']},
                            row2: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['cancel', 'apply']}
                         }
                     }
@@ -103,7 +104,8 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
 
         attWatchCallback: function(attr, oldValue, newValue){
             var self = this, pane = widgetCustomDialog.pane, getWidget = lang.hitch(pane, pane.getWidget), customAtts = this.customAtts,
-            	attValueWidgets = {NumberUnitBox: getWidget('NumberUnitBox'), TextBox: getWidget('TextBox'), StoreSelect: getWidget('StoreSelect'), RestSelect: getWidget('RestSelect')};
+            	attValueWidgets = {NumberUnitBox: getWidget('NumberUnitBox'), TextBox: getWidget('TextBox'), StoreSelect: getWidget('StoreSelect'), RestSelect: getWidget('RestSelect'),
+					MultiSelect: getWidget('MultiSelect')};
             if (newValue === ''){
             	var attValueType = 'NumberUnitBox', attValueWidget = this.attValueWidget = attValueWidgets.NumberUnitBox;
             }else{
@@ -124,12 +126,12 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
             	            widget.set('dropdownFilters', atts.dropDownFilters);
             	            widget.storeArgs = lang.mixin(widget.storeArgs, atts.atts.storeArgs);
             				widget.set('store', Pmg.store(widget.storeArgs));
+							break;
+						case 'MultiSelect':
+							widget.set('options', atts.options);
 
             		}
             		widget.set('value', self.currentAttValue());
-            		widget.set('hidden', false);
-            	}else{
-            		widget.set('hidden', true);
             	}
             });
             pane.resize();
@@ -157,7 +159,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
             //if (oldAttValue !== newAttValue){
                 newAtt = attRoot === att ? newAttValue : utils.newObj([[att, newAttValue]]);//{[att]: newAttValue});
                 widget.set(attRoot, newAtt);
-                lang.setObject((widget.itemCustomization || 'customization.') + (attRoot === 'value' ? ('data.value.' + widget.widgetName) : ('widgetsDescription.' + widget.widgetName + '.atts.' + attRoot)), newAtt, widgetPane);
+                lang.setObject((widget.itemCustomization || 'customization') + (attRoot === 'value' ? ('.data.value.' + widget.widgetName) : ('.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot)), newAtt, widgetPane);
                 //lang.setObject((widget.itemCustomization || 'customization') + '.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot, newAtt, widgetPane);
             //}
         },
@@ -198,38 +200,53 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
         },
                     
         customDialogCallback: function(widget, evt, column){
-            evt.preventDefault();
+            var self = this;
+			evt.preventDefault();
             evt.stopPropagation();
             if (widgetCustomDialog){
-                widgetCustomDialog.destroyRecursive();
-            }
-            var self = this;
+                this.customDialogOpen(widget, evt, column);
+            }else{
             require(["tukos/TukosTooltipDialog"], function(TukosTooltipDialog){
                 widgetCustomDialog = new TukosTooltipDialog({paneDescription: widgetCustomDialogDescription});
                 ready(function(){
-                    self.widget = widget;
-                    self.column = column;
-                    var pane = widgetCustomDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
-                    paneGetWidget('att').watch('value',  lang.hitch(self, self.attWatchCallback));
-                    paneGetWidget('NumberUnitBox').unitField.watch('value', lang.hitch(self, self.attValueUnitWatchCallback));
-                    paneGetWidget('apply').onClickFunction = (column ? lang.hitch(self, self.applyGridEditorCustom) : lang.hitch(self, self.applyCustom));
-                    lang.hitch(self, self.setWidgetTypeAtts)(widget);
-                    widgetCustomDialog.open({parent: widget, x: evt.clientX, y: evt.clientY});
-                });
+					var pane = widgetCustomDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
+	                paneGetWidget('att').watch('value',  lang.hitch(self, self.attWatchCallback));
+	                paneGetWidget('NumberUnitBox').unitField.watch('value', lang.hitch(self, self.attValueUnitWatchCallback));
+					self.customDialogOpen(widget, evt, column);
+				});
             });
+			}
         },   
-        
-        newAttValue : function(){
+        customDialogOpen: function(widget, evt, column){
+            var self = this;
+			ready(function(){
+                var pane = widgetCustomDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
+                self.widget = widget;
+                self.column = column;
+				//paneGetWidget('att').set('value', '');
+				//paneGetWidget('NumberUnitBox').set('value', '');
+                paneGetWidget('apply').onClickFunction = (column ? lang.hitch(self, self.applyGridEditorCustom) : lang.hitch(self, self.applyCustom));
+                lang.hitch(self, self.setWidgetTypeAtts)(widget);
+                widgetCustomDialog.open({parent: widget, x: evt.clientX, y: evt.clientY});
+				paneGetWidget('att').set('value', '');
+				paneGetWidget('NumberUnitBox').set('value', undefined);
+            });
+	
+		},
+        newAttValue: function(){
             var attValueWidget = this.attValueWidget;
-            if (attValueWidget.widgetType === 'NumberUnitBox'){
-	            var newValue  = (attValueWidget.numberField.get('disabled')) ? '' : attValueWidget.numberField.get('value');
-	            if (! attValueWidget.unitField.get('disabled')){
-	                newValue += attValueWidget.unitField.get('value');
-	            }
-	            return newValue;
-            }else{
-            	return attValueWidget.get('value');
-            }
+            switch(attValueWidget.widgetType){
+				case 'NumberUnitBox': 
+		            var newValue  = (attValueWidget.numberField.get('disabled')) ? '' : attValueWidget.numberField.get('value');
+		            if (! attValueWidget.unitField.get('disabled')){
+		                newValue += attValueWidget.unitField.get('value');
+		            }
+		            return newValue;
+				case 'MultiSelect': 
+					return attValueWidget.get('serverValue');
+				default:
+					return attValueWidget.get('value');
+			}
         }
     }
 });

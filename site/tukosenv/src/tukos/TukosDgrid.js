@@ -54,10 +54,12 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
             if (this.style && this.style.width){
                 domStyle.set(this.domNode, 'width', this.style.width);
             }
+/*
             aspect.after(grid, 'expand', function(){
                 eutils.actionFunction(grid, 'afterExpand', this.afterExpandAction, 'args', arguments);
-                setTimeout(function(){grid.layoutHandle.resize();}, 500);
+                //setTimeout(function(){grid.layoutHandle.resize();}, 500);
             });
+*/
 /*
             this.on("dgrid-refresh-complete", function(evt){
                 var scrollPos = grid.getScrollPosition();
@@ -104,7 +106,7 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
 */
             this.on(on.selector(".dgrid-row, .dgrid-header", "contextmenu"), lang.hitch(this, this.contextMenuCallback));
         },
-        _setAllowApplicationFilter: function(newValue){
+		_setAllowApplicationFilter: function(newValue){
         	wutils.watchCallback(this, 'allowApplicationFilter', this.allowApplicationFilter, newValue);
         	this.allowApplicationFilter = newValue;
         },

@@ -33,9 +33,14 @@ class Model extends AbstractModel {
         	'synchroweeksafter'   => 'INT(11) DEFAULT NULL',
         	'synchnextmonday' => "ENUM ('" . implode("','", $this->synchnextmondayOptions) . "') DEFAULT NULL",
 			'questionnairetime'  =>  'VARCHAR(20)  DEFAULT NULL',
-            'weeklies' => 'longtext'
+            'weeklies' => 'longtext',
+            'stsdays' => 'INT DEFAULT NULL',
+            'ltsdays' => 'INT DEFAULT NULL',
+            'stsratio' => 'FLOAT DEFAULT NULL',
+            'initialsts' => 'FLOAT DEFAULT NULL',
+            'initiallts' => 'FLOAT DEFAULT NULL'
         ];
-        parent::__construct($objectName, $translator, 'sptprograms', ['parentid' => ['sptathletes']], ['weeklies'], $colsDefinition, [], [], ['worksheet', 'custom']);
+        parent::__construct($objectName, $translator, 'sptprograms', ['parentid' => ['sptathletes']], ['weeklies'], $colsDefinition, [], []);
         $this->afterGoogleSync = false;
     }
 
@@ -54,8 +59,8 @@ class Model extends AbstractModel {
         }
         $item = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
         $item['calendar'] = '';
-        $item['loadchart'] = $this->loadChartData($item);
-        $item['performedloadchart'] = $this->performedLoadChartData($item);
+        //$item['loadchart'] = $this->loadChartData($item);
+        //$item['performedloadchart'] = $this->performedLoadChartData($item);
         if (!empty($item['parentid'])){
             $peopleModel = Tfk::$registry->get('objectsStore')->objectModel('sptathletes');
             $person = $peopleModel->getOneExtended(['where' => ['id' => $item['parentid']], 'cols' => ['email']]);

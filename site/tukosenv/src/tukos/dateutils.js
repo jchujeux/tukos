@@ -1,6 +1,6 @@
-define(["dojo", "dojox/date/posix", "tukos/utils"], function(dojo, ISODates, utils){
+define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
     var durations = {second: 1, minute: 60, hour: 3600, day: 24*3600, week: 7*24*3600, month: 24*3600*30, quarter: 24*3600*30*3, year: 24*3600*365},
-    	daysName = ['sunday', 'monday', 'tuesday', 'wednesday','thursday', 'friday', 'saturday'];
+    	daysName = ['sunday', 'monday', 'tuesday', 'wednesday','thursday', 'friday', 'saturday', 'sunday'];
 	return {
         toISO: function(date, options){
             return dojo.date.stamp.toISOString(date, options || {zulu: true});
@@ -69,7 +69,10 @@ define(["dojo", "dojox/date/posix", "tukos/utils"], function(dojo, ISODates, uti
             }
             return new Date(toDate);
         },
-        getDayOfWeek: function (number, date) {// returns a date
+        dayName: function(dayNumber){
+			return Pmg.message(daysName[dayNumber]);
+		},
+		getDayOfWeek: function (number, date) {// returns a date
           var day = date.getDay(),
               diff = date.getDate() - day + number + (day == 0 ? -7:0); // adjust when day is sunday
           return new Date(date.setDate(diff));
@@ -78,14 +81,40 @@ define(["dojo", "dojox/date/posix", "tukos/utils"], function(dojo, ISODates, uti
         	return daysName[date.getDay()];
         },
         getISOWeekOfYear: function(date){
-            return ISODates.getIsoWeekOfYear(typeof date === "string" ? this.parseDate(date) : date);
-        },
+			return this.getWeekOfYear(date, 1);
+		},
+		getWeekOfYear: function(date, dowOffset){
+			/*getWeek() was developed by Nick Baicoianu at MeanFreePath: http://www.epoch-calendar.com */
+			dowOffset = typeof(dowOffset) == 'int' ? dowOffset : 0; //default dowOffset to zero
+			var newYear = new Date(date.getFullYear(),0,1);
+			var day = newYear.getDay() - dowOffset; //the day of week the year begins on
+			day = (day >= 0 ? day : day + 7);
+			var daynum = Math.floor((date.getTime() - newYear.getTime() - 
+			(date.getTimezoneOffset()-newYear.getTimezoneOffset())*60000)/86400000) + 1;
+			var weeknum;
+			//if the year starts before the middle of a week
+			if(day < 4) {
+				weeknum = Math.floor((daynum+day-1)/7) + 1;
+				if(weeknum > 52) {
+					nYear = new Date(date.getFullYear() + 1,0,1);
+					nday = nYear.getDay() - dowOffset;
+					nday = nday >= 0 ? nday : nday + 7;
+					/*if the next year starts before the middle of
+		 			  the week, it is week #1 of that year*/
+					weeknum = nday < 4 ? 1 : 53;
+				}
+			}
+			else {
+				weeknum = Math.floor((daynum+day-1)/7);
+			}
+			return weeknum;
+		},
         parseDate: function(dateString){
            return (typeof dateString === 'string' ? (dateString.length > 10 && dateString[10] === 'T' ?  this.fromISO(dateString) : dojo.date.locale.parse(dateString, {selector: 'date', datePattern: (dateString.length === 10 ? 'y-M-d' : 'y-M-d H:m:s')})): undefined);
         },
-        formatDate: function(date){
+        formatDate: function(date, datePattern){
             //console.log('dateutils.formatDate - date: ' + date);
-            return dojo.date.locale.format(date, {selector: 'date', datePattern: 'yyyy-MM-dd'});
+            return dojo.date.locale.format(date, {selector: 'date', datePattern: datePattern || 'yyyy-MM-dd'});
         },
         dateAdd: function(date, interval, units) {
           var ret = new Date(date); //don't change original date

@@ -35,9 +35,9 @@ class View extends AbstractView {
             'dropboxbackofficeaccess' => ViewUtils::storeSelect('dropboxbackofficeaccess', $this, 'dropboxbackofficeaccess'),
             'customviewids' => [
                 'type' => 'objectEditor', 
-                'atts' => ['edit' => ['title' => $this->tr('Custom views'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true, 'isEditTabWidget' => true*/, 
+                'atts' => ['edit' => ['title' => $this->tr('Custom views'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 
                     'style' => ['maxHeight' =>  '500px', 'maxWidth' => '400px',  'overflow' => 'auto']]],
-                'objToEdit' => ['jsonDecode' => ['class' => $utl],  'map_array_recursive' => ['class' => $utl, $this->tr]],
+//                'objToEdit' => ['jsonDecode' => ['class' => $utl],  'map_array_recursive' => ['class' => $utl, $this->tr]],
             ],
             'customcontexts' => ['type' => 'objectEditor',
                 'atts' => ['edit' =>  ['title' => $this->tr('Custom contexts'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true, 'isEditTabWidget' => true*/,

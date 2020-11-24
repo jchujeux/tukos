@@ -5,6 +5,9 @@ class Utilities{
     public static function nullToBlank($value){
         return  ($value === null ? '' : $value);
     }
+    public static function nullToBlankFloatVal($value){
+        return  ($value === null ? '' : floatval($value));
+    }
     public static function blankToNull($value, $keys = []){
         return  ($value === '' ? null : $value);
     }

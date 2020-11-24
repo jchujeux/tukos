@@ -36,7 +36,8 @@ class View extends AbstractView {
                 'amount' => Widgets::description(ViewUtils::tukosCurrencyBox($this, 'Amount', ['atts' => [
                     'edit' => ['onChangeLocalAction' => ['amount' => ['localActionStatus' => $this->amountLocalAction()]]],
                     'storeedit' => ['formatType' => 'currency', 'width' => 80, 'renderContentAction' => $this->amountRenderContentAction()]]]), false),
-                'isexplained' => Widgets::description(ViewUtils::checkBox($this, 'Isexplained', ['atts' => ['storeedit' => ['width' => 80]]]), false),
+                'isexplained' => Widgets::description(ViewUtils::checkBox($this, 'Isexplained', ['atts' => ['storeedit' => ['width' => 80, 'editorArgs' => [
+                        'onChangeLocalAction' => ['isexplained' => ['localActionStatus' => $this->updatedRow()]]]]]]), false),
                 'customer' => Widgets::description(ViewUtils::objectSelectMulti(['bustrackpeople', 'bustrackorganizations'], $this, $paidByOrTo, ['atts' => ['edit' => ['allowManualInput' => true, 'style' => ['width' => '100px']]]]), false),
                 'category' => Widgets::description(ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
                     'dropdownFilters' => ['parentid' => '@parentid', ["col" => "applyto{$customersOrSuppliers}", 'opr' => 'IN' , 'values' => ["YES", 1]]]]]]), false),
@@ -47,17 +48,24 @@ class View extends AbstractView {
                 'invoiceid'     => Widgets::description(ViewUtils::objectSelect($this, 'Invoice', "bustrackinvoices{$customersOrSuppliers}", ['atts' => [
                         'edit' => [
                             'dropdownFilters' => $this->invoiceIdDropdownFilters(),
-                            'onChangeLocalAction' => ['invoiceitemid' => ['value' => "return '';"], 'customer' => ['value' => "return sWidget.getItemProperty('parentid');"]]],
+                            'storeArgs' => ['cols' => ['parentid']],
+                            'onChangeLocalAction' => ['invoiceitemid' => ['value' => "return '';"], 'customer' => ['localActionStatus' => $this->invoiceIdCustomerLocalAction()]],
+                        ],
                         'storeedit' => ['width' => 100]
                     ]]), false),
                 'invoiceitemid' => Widgets::description(ViewUtils::objectSelect($this, 'Invoiceitem', "bustrackinvoices{$customersOrSuppliers}items", ['atts' => [
-                        'edit' => ['dropdownFilters' => ['parentid' => '#invoiceid']],
+                        'edit' => [
+                            'dropdownFilters' => ['parentid' => '#invoiceid'],
+                            'storeArgs' => ['cols' => ['name', 'category', 'pricewt']],
+                            'onChangeLocalAction' => ['invoiceitemid' => ['localActionStatus' => $this->invoiceItemIdLocalAction()]]
+                        ],
                         'storeedit' => ['width' => 100]]]), false),
                 ],
                 ['type' => 'StoreDgrid', 'atts' => [
                     'edit' => [
-                        'object' => 'bustrackpayments', 'objectIdCols' => ['paymentid', 'customer', 'category', 'invoiceid', 'invoiceitemid'], 'allowSelectAll' => true, 'maxHeight' => '500px', 'minRowsPerPage' => 500, 'maxRowsPerPAge' => 500,
-                        'sort'            => [['property' => 'id', 'descending' => false]],
+                        'object' => 'bustrackpayments', 'objectIdCols' => ['paymentid', 'customer', 'category', 'invoiceid', 'invoiceitemid'], 'allowSelectAll' => true, 'maxHeight' => '500px', 'minRowsPerPage' => 500, 'maxRowsPerPage' => 500,
+                        //'allowedNestedRowWatchActions' => 0,
+                        'sort'            => [['property' => 'id', 'descending' => false]], 'deselectOnRefresh' => false,
                         'summaryRow' => ['cols' => [
                             'name' => ['content' =>  ['Total']],
                             'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]],
@@ -65,11 +73,22 @@ class View extends AbstractView {
                         'createRowAction' => $this->createRowAction(),
                         'updateRowAction' => $this->updateRowAction(),
                         'deleteRowAction' => $this->deleteRowAction(),
-                        'afterExpandAction' => $this->afterExpandAction()
-                    ]]]
+                        //'afterExpandAction' => $this->afterExpandAction(),
+                        'afterActions' => [
+                            'expand' => $this->AfterExpand(),
+                        ]
+                ]]]
             ),
         ];
         $this->customize($customDataWidgets, [], ['grid' => ['paymentslog']], ['paymentslog' => []]);
+    }
+    public function updatedRow(){
+        return <<<EOT
+var grid = tWidget.column.grid, idp =grid.collection.idProperty, id = tWidget.row.data[idp];
+    grid.updateDirty(id, 'updated', dutils.formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss'));
+return true;
+EOT
+        ;
     }
     public function paymentIdLocalAction(){
         return <<<EOT
@@ -79,25 +98,27 @@ utils.forEach(mapping, function(target, source){
         sWidget.setValueOf(target, payment[source]);
     }
 });
-['createinvoice', 'invoiceid', 'invoiceitemid'].forEach(function(col){
-    sWidget.setValueOf(col, '');
-});
 return true;
 EOT;
     }
     public function paymentIdDropdownFilters(){
         return <<<EOT
 var filters = {0: {col: 'date', opr: '>=', values: dutils.dateString(widget.valueOf('@startdate'), [-30, 'day'])}, 1: {col: 'date', opr: '<=', values: widget.valueOf('@enddate')}}, 
-    amount = Number.parseFloat(widget.valueOf('amount')).toFixed(2), customer = widget.valueOf('customer'), isExplained = widget.valueOf('isexplained');
+    amount = Number.parseFloat(widget.valueOf('amount')).toFixed(2), i = 0, isExplained = widget.valueOf('isexplained');
 if (amount && !isNaN(amount)){
     filters.amount = amount;
 }
-if (customer){
-    filters.parentid = customer;
-}
+['customer', 'category', 'paymenttype', 'reference'].forEach(function(col){
+    var value = widget.valueOf(col), targetCol = col === 'customer' ? 'parentid' : col;
+    if (value){
+        i += 1;
+        filters[i] = {0: {col: targetCol, opr: 'IS NULL', values : ''}, 1: {col: targetCol, opr: '=', values: value, or: true}};
+    }
+});
 console.log('isExplained: ' + isExplained);
 if (!isExplained){
-    filters[2] = {0: {col: 'isexplained', opr: 'IS NULL', values : ''}, 1: {col: 'isexplained', opr: '=', values: '', or: true}};
+    i += 1;
+    filters[i] = {0: {col: 'isexplained', opr: 'IS NULL', values : ''}, 1: {col: 'isexplained', opr: '=', values: '', or: true}};
 }
 return filters;
 EOT;
@@ -118,6 +139,26 @@ if (customer){
 return filters;
 EOT;
     }
+    public function invoiceIdCustomerLocalAction(){
+        return <<<EOT
+if (newValue){
+    var grid = tWidget.column.grid, idp = grid.collection.idProperty, id = tWidget.row.date[idp];
+    grid.updateDirty(id, 'customer', sWidget.getItemProperty('parentid'));
+}
+EOT
+        ;
+    }
+    public function invoiceItemIdLocalAction(){
+        return <<<EOT
+if (newValue){
+    var grid = tWidget.column.grid, idp =grid.collection.idProperty, id = tWidget.row.data[idp];
+    grid.updateDirty(id, 'category', sWidget.getItemProperty('category'));
+    grid.updateDirty(id, 'description', sWidget.valueOf('description') || sWidget.getItemProperty('name'));
+    grid.updateDirty(id, 'amount', sWidget.valueOf('amount') || sWidget.getItemProperty('pricewt'), false, true);
+}
+EOT
+        ;
+    }
     public function amountLocalAction(){
         return <<<EOT
 
@@ -126,7 +167,7 @@ var  parentid = tWidget.row.data.parentid;
 if (parentid){
     var grid = tWidget.column.grid, collection = grid.collection, idProperty = collection.idProperty, delta = newValue - (oldValue || 0);
     var parentRow = collection.getSync(parentid);
-    grid.updateDirty(parentid, 'amount', Number(parentRow.amount)-delta);
+    grid.updateDirty(parentid, 'amount', Number(parentRow.amount)-delta, false, true);
 }
 EOT;
     }
@@ -144,7 +185,7 @@ EOT;
 var parentid = row.parentid, amount = row.amount;
 if (parentid && amount){
     var collection = this.collection, parentRow = collection.getSync(parentid);
-    this.updateDirty(parentid, 'amount', Number(parentRow.amount) + amount);
+    this.updateDirty(parentid, 'amount', Number(parentRow.amount) + Number(amount));
 }
 EOT;
     }
@@ -172,10 +213,24 @@ if (!grid._expanded[args.object[store.idProperty]]){
 }
 EOT;
     }
+/*
     public function afterExpandAction(){
         return <<<EOT
-var amountCell = this.cell(args[1][0].element, 'amount'), value = this.cellValueOf('amount'); // column, element and row
-lang.hitch(amountCell.column, this.renderContent)(amountCell.row.data, value, amountCell.element, null, true);
+    var amountCell = this.cell(args[1][0].element || args[1][0], 'amount'), value = this.cellValueOf('amount'); // column, element and row
+    lang.hitch(amountCell.column, this.renderContent)(amountCell.row.data, value, amountCell.element, null, true);
+EOT;
+    }
+*/
+    public function afterExpand(){
+        return <<<EOT
+var self = this, row = arguments[1][0], element = row.element;
+return arguments[0].then(function(){
+    if (element){
+        var amountCell = self.cell(element, 'amount'), value = self.cellValueOf('amount'); // column, element and row
+        lang.hitch(amountCell.column, self.renderContent)(amountCell.row.data, value, amountCell.element, null, true);
+    }
+    return true;
+});
 EOT;
     }
 }

@@ -285,7 +285,9 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                         if (!isNaN(value)){
                             if (value % 1 !== 0){
                                 value = number.format(value, {places: 2});
-                            }
+                            }else{
+								value = value.toString();
+							}
                         }
                 }
             }

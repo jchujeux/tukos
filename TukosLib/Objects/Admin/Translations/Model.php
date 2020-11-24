@@ -114,15 +114,9 @@ class Model extends ObjectTranslator {
     public function delete ($where){
         return $this->store->delete(['table' => $this->objectName, 'where' => $where]);
     }
-/*    
-    public function summary($activeUserFilters = null){
-        $totalRecords = $this->getAll(['where' => [], 'cols' => ['count(*)']])[0]['count(*)'];
-    	return ['filteredrecords' => $totalRecords,	'totalrecords' => $totalRecords];
-    }
-*/
-    public function summary($activeUserFilters = null){
+    public function summary($storeAtts){
         return [
-            'filteredrecords' => is_null($activeUserFilters) ? $this->foundRows() : $this->getAll(['where' => $activeUserFilters, 'cols' => ['count(*)']])[0]['count(*)'],
+            'filteredrecords' => empty(Utl::getItem('where', $storeAtts)) ? $this->foundRows() : $this->getAll(['where' => $this->user->filter($storeAtts['where'], $this->objectName), 'cols' => ['count(*)']])[0]['count(*)'],
             'totalrecords' => $this->getAll(['where' => $this->user->filter([], $this->objectName), 'cols' => ['count(*)']])[0]['count(*)']
         ];
     }

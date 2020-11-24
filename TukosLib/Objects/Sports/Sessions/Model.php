@@ -34,13 +34,14 @@ class Model extends AbstractModel {
                 'athletecomments' => 'VARCHAR(512) DEFAULT NULL',
                 'athleteweeklyfeeling' => 'VARCHAR(512) DEFAULT NULL',
                 'coachcomments' => 'VARCHAR(512) DEFAULT NULL',
-                'coachweeklycomments' => 'VARCHAR(512) DEFAULT NULL'],
+                'coachweeklycomments' => 'VARCHAR(512) DEFAULT NULL',
+                'sts' => 'FLOAT DEFAULT NULL',
+                'lts' => 'FLOAT DEFAULT NULL',
+                'tsb' => 'FLOAT DEFAULT NULL',
+        ],
             GC::sessionsColsDefinition());
         parent::__construct(
-            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition, [], 
-            [/*'startdate', 'duration', 'intensity', 'stress', 'sport', 'sensations','perceivedeffort','mood','mode'*/], 
-            ['custom']
-        );
+            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition);
     }   
     function initialize($init=[]){
         return parent::initialize(array_merge(['duration' => '60', 'warmup' => '', 'mainactivity' => '', 'warmdown' => ''], $init));

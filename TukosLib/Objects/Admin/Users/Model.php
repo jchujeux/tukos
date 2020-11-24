@@ -55,6 +55,20 @@ class Model extends AbstractModel{
     public function getOneExtended ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
     	$result = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
     	$result['targetdb'] = Tfk::$registry->get('configStore')->getOne(['where' => ['username' => $result['name']], 'table' => 'usersauth', 'cols' => ['targetdb']])['targetdb'];
+    	$result['customviewids'] = json_decode($result['customviewids'], true);
+    	if (!empty($result['customviewids'])){
+    	    ksort($result['customviewids']);
+    	    $ids = [];
+    	    $callback = function($id)use (&$ids){
+    	        $ids[] = $id;
+    	    };
+    	    array_walk_recursive($result['customviewids'], $callback);
+    	    $customviewsname = array_column(Tfk::$registry->get('objectsStore')->objectModel('customviews')->getAll(['where' => [['col' => 'id', 'opr' => 'in', 'values' => $ids]], 'cols' => ['id', 'name']]), 'name',  'id');
+    	    array_walk_recursive($result['customviewids'], function (&$id) use ($customviewsname){
+    	        $id = [$id => Utl::getItem($id, $customviewsname, 'customviewnotfound')];
+    	    });
+    	    $result['customviewids'] = Utl::map_array_recursive($result['customviewids'], $this->tr);
+    	}
     	return $result;
     }
 

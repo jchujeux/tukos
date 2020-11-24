@@ -32,8 +32,8 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
             	                ];
             	this.contextMenuItems.canEdit = [
             	            	    {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editInPopup)}},
-            	                    {atts: {label: messages.deleterow,   onClick: function(evt){self.deleteRow(false)}}},
-            	                    {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [{atts: {label: messages.deleteselection,   onClick: lang.hitch(this, this.deleteSelection)}}]}}
+            	                    {atts: {label: messages.deleterow,   onClick: function(evt){self.deleteRow(false, false, true)}}},
+            	                    {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [{atts: {label: messages.deleteselection,   onClick: function(evt){self.deleteSelection(false, true)}}}]}}
             	                ];
                 this.contextMenuItems.row = this.contextMenuItems.row.concat(addedItems);
                 this.contextMenuItems.idCol = this.contextMenuItems.idCol.concat(addedItems);
@@ -46,6 +46,15 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
             	}));
             }
             this.revert();//Necessary for the children rows expansion / collapse to work (!)
+        },
+        resize: function(){
+			var self = this, previousScrollPosition = this.getScrollPosition();
+			this.inherited(arguments);
+			setTimeout(function(){
+				self.scrollTo(previousScrollPosition);
+			}, 100);
+        	var style = this.bodyNode.style;
+			style.maxHeight = (parseInt(this.parentContentPane.domNode.style.height) - parseInt(style.marginTop) - parseInt(style.marginBottom)- 2) + 'px';
         },
         setUserCollectionFilters: function(){
         	var userCollectionFilter = new this.store.Filter(), map = {'=': 'eq', '<>': 'ne', '>': 'gt', '<': 'lt', '>=': 'gte', '<=': 'lte', 'RLIKE': 'rlike', 'NOT RLIKE': 'notrlike', 'BETWEEN': 'between'}, columns = this.columns;
@@ -75,18 +84,21 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
         	this.inherited(arguments);
         	wutils.watchCallback(this, 'collection', null, newValue);
         },
-        deleteSelection: function(){
-        	var deselect = 0, grid = this;
+        deleteSelection: function(skipDeleteAction, isUserRowEdit){
+        	var deselect = 0, grid = this, toDelete = [];
         	utils.forEach(this.selection, function(status, id){
         		if (status){
     				var row = grid.row(id), item = row.data; 
 					if ((typeof item.canEdit === "undefined") || item.canEdit){
-						grid.deleteRowItem(item);
+						toDelete.push(item);
 					}else{
 						grid.deselect(id);
 						deselect += 1;
 					}
         		}
+				if (toDelete.length > 0){
+					grid.deleteRows(toDelete, skipDeleteAction, isUserRowEdit);
+				}
         	});
 			this.contextMenu.menu.onExecute();
         },
@@ -171,14 +183,14 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
                 this.prepareInitSubRow(init);
                 item = utils.merge(init, item || {});
                 this.createNewRow(item, null, 'append');
-                this.expand(this.clickedRow.data.idg, true);
-                setTimeout(function(){grid.layoutHandle.resize();}, 0);
+                this.expand(this.row(this.clickedRow.data.idg), true);
+                //setTimeout(function(){grid.layoutHandle.resize();}, 0);
             }
         },
 
-        deleteRow: function(rowItem){
+        deleteRow: function(rowItem, skipDeleteAction, isUserRowEdit){
             if ((rowItem ? rowItem.canEdit : this.clickedRow.data.canEdit) || ! rowItem.id){
-                this.inherited(arguments);
+				this.inherited(arguments);
             }
         }
     }); 
