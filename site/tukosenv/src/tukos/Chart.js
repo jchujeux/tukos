@@ -1,9 +1,10 @@
 define(["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom-construct",  "dojo/dom-style", "dojo/Deferred",  "dijit/_WidgetBase", "dojox/charting/Chart",
-        "dojox/charting/themes/ThreeD", "dojox/charting/StoreSeries", "dojo/json", "dojo/store/Observable", "dojo/store/Memory"/*, "dstore/Memory"*/, "dojo/ready", "tukos/utils", "tukos/widgets/widgetCustomUtils"], 
-function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, JSON, Observable, Memory/*, DMemory*/, ready, utils, wcutils){
+        "dojox/charting/themes/ThreeD", "dojox/charting/StoreSeries", "dojo/store/Observable", "dojo/store/Memory"/*, "dstore/Memory"*/, "dojo/ready", "tukos/utils", "tukos/widgets/widgetCustomUtils"], 
+function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, Observable, Memory/*, DMemory*/, ready, utils, wcutils){
     var classesPath = {
         Default:  "dojox/charting/plot2d/", Columns: "dojox/charting/plot2d/", ClusteredColumns: "dojox/charting/plot2d/", Lines: "dojox/charting/plot2d/", Areas: "dojox/charting/plot2d/", Pie: "dojox/charting/plot2d/",
-        Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "tukos/widgets/", Axis2d:  "*dojox/charting/axis2d/Default", Tooltip: "dojox/charting/action2d/", BasicGrid: "tukos/"
+        Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "tukos/widgets/", Axis2d:  "*dojox/charting/axis2d/Default", Tooltip: "dojox/charting/action2d/", BasicGrid: "tukos/",
+		MouseIndicator: "dojox/charting/action2d/", MouseZoomAndPan: "dojox/charting/action2d/"
     };
 	return declare(Widget, {
         
@@ -23,13 +24,15 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, J
             	var requiredType = axis.type || 'Axis2d';
             	requiredClasses[requiredType] = this.classLocation(requiredType);
             }));
-            utils.forEach(this.series, lang.hitch(this, function(series){
-            	var requiredType = series.value.tooltip;
-            	if (requiredType){
-                	requiredClasses['Tooltip'] = this.classLocation('Tooltip');
-            		
-            	}
-            }));
+            if (this.tooltip){
+				requiredClasses['Tooltip'] = this.classLocation('Tooltip');
+			}
+            if (this.mouseZoomAndPan){
+				requiredClasses['MouseZoomAndPan'] = this.classLocation('MouseZoomAndPan');
+			}
+			if (this.mouseIndicator){
+				requiredClasses['MouseIndicator'] = this.classLocation('MouseIndicator');
+			}
             if (this.legend){
                 requiredClasses[this.legend.type] = this.classLocation(this.legend.type);
             }
@@ -71,11 +74,16 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, J
                         }
                         this.chart.addAxis(axisName, axisOptions);
                     }
-                
                     for (var plotName in this.plots){
                         var plotOptions = this.plots[plotName];
                         plotOptions.type = this.chartClasses[plotOptions.plotType];
                         this.chart.addPlot(plotName, plotOptions);
+	                    if (this.chartClasses['Tooltip']){
+	                    	plotOptions.tooltip = new this.chartClasses['Tooltip'](this.chart, plotName);
+	                    }
+	                    if (this.chartClasses['MouseZoomAndPan']){
+	                    	plotOptions.mouseZoomAndPan = new this.chartClasses['MouseZoomAndPan'](this.chart, plotName);
+	                    }
                     }
             		lang.hitch(this, this.createTableWidget)();
                     this.onLoadDeferred.resolve();
@@ -105,7 +113,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, J
             }));
         },
         _setValueAttr: function(value){
-            var value = value || '', store = this.store, idProperty = this.store.idProperty, kwArgs = this.kwArgs || {}, tooltips={};
+            var value = value || '', store = this.store, idProperty = this.store.idProperty, kwArgs = this.kwArgs || {}, colsToExclude = this.colsToExclude ? JSON.parse(this.colsToExclude) : [];
             this._set("value", value);
             if (value != ''){
                 store.setData(value.store);
@@ -118,7 +126,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, J
                 		dst.set(tableNode, {display: "block"});
                 		dst.set(tableNode.parentNode, {width: this.tableWidth || '20%'});
                 		this.tableWidget.set('maxHeight', tableHeight);
-                		this.tableWidget.set('value', value.store);
+                		this.tableWidget.set('value', value.tableStore || value.store);
                 	}else{
                 		if (tableNode){
                     		dst.set(tableNode, {display: "none"});   
@@ -126,28 +134,37 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, J
                 		}
                 	}
                 	dst.set(chartNode, {height: height});
-                	for (var axisName in value.axes){
+					for (var axisName in value.axes){
                             chart.addAxis(axisName, utils.mergeRecursive(this.axes[axisName], value.axes[axisName]));
                     }
-                    for (var plotName in value.plots){
+					for (var plotName in value.plots){
                         chart.addPlot(plotName, utils.mergeRecursive(this.plots[plotName], value.plots[plotName]));
                     }
-                    for (var seriesName in this.series){
-                        var series = this.series[seriesName];
-                        chart.addSeries(seriesName, new StoreSeries(store, kwArgs, series.value), series.options);
-                        if (series.value.tooltip){
-                        	tooltips[seriesName] = new this.chartClasses['Tooltip'](chart, series.options.plot);
-                        }
+					for (var seriesName in this.series){
+                        if(utils.in_array(seriesName, colsToExclude)){
+							chart.removeSeries(seriesName);
+						}else{
+							var series = this.series[seriesName];
+	                        chart.addSeries(seriesName, new StoreSeries(store, kwArgs, series.value), series.options);
+						}
                     }
+					if (this.chartClasses['MouseIndicator']){
+						this.chart.mouseIndicator = new this.chartClasses['MouseIndicator'](this.chart, this.mouseIndicator.plot, this.mouseIndicator.kwArgs);
+					}
                     try {
                         chart.render();
                         chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
                     }catch(err){
                         console.log('error while rendering or resizing chart for widget: ' + this.widgetName);
                     }
-                    if (this.legend && !this.legendWidget){
-                        var legendWidget = this.legendWidget = new this.chartClasses[this.legend.type](lang.mixin({chart: chart, chartWidgetName: this.widgetName, form: this.form}, this.legend.options || {}), this.legendNode); 
-                    }
+                    if (this.legend){
+						if (!this.legendWidget){
+							this.legendWidget = new this.chartClasses[this.legend.type](lang.mixin({chart: chart, 
+								chartWidgetName: this.widgetName, form: this.form, tukosChartWidget: this}, this.legend.options || {}), this.legendNode);
+						}else{
+							this.legendWidget.refresh();
+						}
+					}
                 }));
             }
         },

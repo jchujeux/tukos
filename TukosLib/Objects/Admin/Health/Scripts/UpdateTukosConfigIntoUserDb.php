@@ -20,7 +20,7 @@ class UpdateTukosConfigIntoUserDb {
             $updatedIds = [];
             foreach ($changedConfigs as $object => $ids){
                 $objectModel = $objectsStore->objectModel($object);
-                $cols = array_merge($objectModel->allCols, ['object']);
+                $cols = array_merge(array_diff($objectModel->allCols, ['history', 'updator']), ['object']);
                 $optionalJoin = $configStore->tableExists($object) ? "NATURAL JOIN $object " : '';
                 $configItems = $configStore->query("SELECT * from tukos $optionalJoin WHERE id IN (" . implode(',', $ids) . ")")->fetchAll(\PDO::FETCH_ASSOC);
                 $configItemsOld = Utl::toAssociative($configStoreOld->query("SELECT * from tukos $optionalJoin WHERE id IN (" . implode(',', $ids) . ")")->fetchAll(\PDO::FETCH_ASSOC), 'id');
@@ -38,9 +38,9 @@ class UpdateTukosConfigIntoUserDb {
                      * dans $configItem, remplacer les colonnes qui ont été modifiées par l'utilisateur, C.A.D celles dont la valeur est différente de celle de $itemConfigOld
                      * 
                      */
+                    unset($configItem['history']);
+                    unset($configItem['updator']);
                     $itemToCopy = array_merge($configItem, array_diff($userItem, Utl::getItem($id, $configItemsOld, [])));
-                    unset($itemToCopy['updator']);
-                    unset($itemToCopy['history']);
                     $objectModel->updateOne($itemToCopy, ['union' => false]);
                     $updatedIds[] = $id;
                 }

@@ -23,7 +23,7 @@ class Authentication{
     }
     public function isAuthenticated($dialogue, $request, $query){
         switch ($request['object']){
-            case 'Auth':
+            case 'auth':
                 switch ($request['view']){
                     case 'LoginValidation':
                         $this->checkUserCredentials($dialogue);
@@ -36,7 +36,7 @@ class Authentication{
                         break;
                 }
                 return false;
-            case 'Backoffice':
+            case 'backoffice':
                 if (isset($query['targetdb'])){
                     Tfk::$registry->get('appConfig')->dataSource['dbname'] = Cipher::decrypt(rawurldecode($query['targetdb']), Tfk::$registry->get('appConfig')->ckey);
                 }

@@ -148,7 +148,7 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
 
     checkAvailable: function(){
         // For table plugs Checking if a table or part of a table has focus so that Plugs can change their status
-        console.log('calling checkAvailable');
+        //console.log('calling checkAvailable');
     	if(this.availableCurrentlySet){// availableCurrentlySet is set for a short amount of time, so that all  plugins get the same return without doing the method over
             return this.currentlyAvailable;
         }else{
@@ -160,8 +160,8 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
             }else{
                 this.currentlyAvailable = this.editor.focused && (this._savedTableInfo ? this._savedTableInfo.tbl :
                     this.editor.hasAncestorElement("table"));
-                console.log('has table ancestor: ' + this.editor.hasAncestorElement("table"));
-                console.log('currentlyavailable: ' + this.currentlyAvailable);
+                //console.log('has table ancestor: ' + this.editor.hasAncestorElement("table"));
+                //console.log('currentlyavailable: ' + this.currentlyAvailable);
                 if(this.currentlyAvailable){
                     this.connectTableKeys();
                 }else{

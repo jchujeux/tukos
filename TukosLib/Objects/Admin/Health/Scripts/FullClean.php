@@ -28,7 +28,7 @@ class FullClean {
             $countDeleted = $stmt->rowCount();
             if ($countDeleted){
                 $totalDeleted = $countDeleted;
-                echo "\r\nFullClean - $countDeleted removed ids in table tukos: " . implode(', ', array_column($idsToDelete, 'id'));
+                echo "<br>FullClean - $countDeleted removed ids in table tukos: " . implode(', ', array_column($idsToDelete, 'id'));
             }
             foreach ($objectsToConsider as $objectName){
             	$idsToDelete = [];
@@ -38,7 +38,7 @@ class FullClean {
             		if (!empty($idsToDelete)){
             		    $countDeleted = $store->query("DELETE FROM $objectName WHERE NOT EXISTS (SELECT NULL from tukos WHERE tukos.id = $objectName.id OR tukos.id = -$objectName.id)")->rowCount();
             		    $totalDeleted += $countDeleted;
-            		    echo "\r\nFullClean - $countDeleted removed ids in table $objectName : they were not found in tukos: ". implode(', ', $idsToDelete);
+            		    echo "<br>FullClean - $countDeleted removed ids in table $objectName : they were not found in tukos: ". implode(', ', $idsToDelete);
             		    
             		}
             	}

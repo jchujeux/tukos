@@ -75,6 +75,7 @@ class Registry{
             foreach($this->request as &$value){
                 $value = ucfirst($value);
             }
+            $this->request['object'] = strtolower($this->request['object']);
             $this->appName = $this->setAppName($this->request['application']);
             $this->controller = $this->request['controller'];
             if ($this->isMobile = (new MobileDetect)->isMobile());

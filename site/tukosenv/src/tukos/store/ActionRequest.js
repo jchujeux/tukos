@@ -70,7 +70,7 @@
             if(options.start >= 0 || options.count != Infinity){
                 queryOptions = this.rangeOptions(queryOptions, options);
             }
-            if(options && options.sort){
+            if(options.sort){
                 queryOptions = this.sortOptions(queryOptions, options.sort);
             }
             return queryOptions;    

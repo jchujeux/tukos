@@ -2,11 +2,62 @@
  *  tukos grids  mixin for dynamic widget information handling and cell rendering (widgets values and attributes that may be modified by the user or the server)
  *   - usage: 
  */
-define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all", "dojo/on", "dojo/when", "dijit/registry", "dijit/focus", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/sheetUtils", 
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all", "dojo/on", "dojo/when", "dijit/registry", "dijit/focus", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/sheetUtils", 
          "tukos/widgetUtils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/widgets/WidgetsLoader", "tukos/PageManager", "tukos/TukosTooltipDialog", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(arrayUtil, declare, lang, all, on, when, registry, focusUtil, utils, dutils, eutils, sutils, wutils, mutils, wcutils, WidgetsLoader, Pmg, TukosTooltipDialog, messages){
-    var mixin = declare(null, {
-
+function(declare, lang, all, on, when, registry, focusUtil, utils, dutils, eutils, sutils, wutils, mutils, wcutils, WidgetsLoader, Pmg, TukosTooltipDialog, messages){
+	var copyDialogTooltip, 
+		applyCallback = function(){
+	        var grid = copyDialogTooltip.grid, numberOfCopies = parseInt(copyDialogTooltip.pane.valueOf('copies') || '1'), incrementFrom = copyDialogTooltip.pane.valueOf('incrementfrom') , noRefresh = grid.noRefreshOnUpdateDirty;
+	        grid.noRefreshOnUpdateDirty = true;
+	        copyDialogTooltip.pane.close();
+	        var data = grid.clickedRowValues(), name = data.name || '', re = /(^.*)([0-9]+$)/g, match = re.exec(name), item = grid.copyItem(data);
+			if (match){
+				name = match[1];
+				incrementFrom = parseInt(match[2]);
+			}else{
+				incrementFrom = false;
+			}
+	        if ('rowId' in grid.columns){
+	                grid.offsetRowsId(data.rowId + 1, numberOfCopies);
+	        }
+	        for (var i = 1; i <= numberOfCopies; i++){
+	            if ('rowId' in grid.columns){
+	            	item.rowId = data.rowId + i;
+	            }
+	        	item.name = name + (incrementFrom === false ? '' : (i + incrementFrom));
+	            utils.forEach(item, function(value, col){
+	            	if (typeof value === 'string' && value[0] === '='){
+	            		item[col] = sutils.offsetFormula(grid, value, i, 0);
+	            	}
+	            });
+	        	grid.addRow(undefined, item);
+	        }
+	        grid.noRefreshOnUpdateDirty = noRefresh;
+	        if (!noRefresh){
+	            grid.refresh({keepScrollPosition: true});
+	        }
+    	},
+		copyDialog = function(grid){
+			copyDialogTooltip = copyDialogTooltip || new TukosTooltipDialog({paneDescription: {
+	            widgetsDescription: {
+	                copies: {type: 'TextBox', atts: {title: Pmg.message('numberofcopies'), placeHolder: Pmg.message('numberofcopies') + '  ...', style: {width: '5em'}}},
+	                //incrementfrom: {type: 'TextBox', atts: {title: Pmg.message('incrementfrom'), placeHolder: Pmg.message('incrementfrom') + '  ...', style: {width: '5em'}}},
+	                cancel: {type: 'TukosButton', atts: {label: Pmg.message('close'), onClickAction:  'this.pane.close();'}},
+	                apply: {type: 'TukosButton', atts: {label: Pmg.message('apply'), onClick:applyCallback}}
+	            },
+	            layout:{
+	                tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},
+	                contents: {
+	                   row1: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['copies'/*, 'incrementfrom'*/]},
+	                   row2: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['cancel', 'apply']}
+	                }
+	            }
+	        }});
+			copyDialogTooltip.grid = grid;
+			copyDialogTooltip.pane.setValuesOf({copies: 1, incrementfrom: ''});
+			return copyDialogTooltip;
+		};
+    return declare(null, {
         constructor: function(args){
             if (args.newColumnArgs){
                 args.newColumnArgs.input = lang.clone(args.newColumnArgs)
@@ -109,7 +160,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         getLastNewRowPrefixId: function(){
         	return this.newRowPrefix ? this.newRowPrefixId : '';
         },
-        updateDirty: function(idPropertyValue, field, value, isNewRow){
+        updateDirty: function(idPropertyValue, field, value, isNewRow, isUserEdit){
             var collection = this.collection, grid = this, collectionRow = this.collection.getSync(idPropertyValue), oldValue;
             if (isNewRow || ((oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field]) !== value)){
                 this.inherited(arguments);
@@ -117,7 +168,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 if (!grid.noRefreshOnUpdateDirty){
                 	sutils.refreshFormulaCells(grid);
                 }
-                if (this.isUserEdit){
+                if (isUserEdit || this.isUserEdit){
                 	if (this.onChangeNotify){
                 		var item = lang.mixin(lang.clone(this.dirty[idPropertyValue]), {idg: idPropertyValue, connectedIds: this.collection.getSync(idPropertyValue).connectedIds});
                     	this.notifyWidgets({action: 'update',  item: item, sourceWidget: this});            		
@@ -132,12 +183,12 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             }
         },
                 
-        deleteDirty: function(idPropertyValue){
+        deleteDirty: function(idPropertyValue, isUserRowEdit){
             var wName = this.widgetName;
-        	delete this.dirty[idPropertyValue];
-            if (this.onChangeNotify && this.isUserEdit){
+            if (this.onChangeNotify && isUserRowEdit){
                 this.notifyWidgets({action: 'delete', item: lang.mixin(this.collection.getSync(idPropertyValue), this.dirty[idPropertyValue])});
             }
+        	delete this.dirty[idPropertyValue];
             if (utils.empty(this.dirty) && this.deleted.length === 0 && this.form.changedWidgets[wName]){
                 delete this.form.changedWidgets[wName];
                 delete this.form.userChangedWidgets[wName]
@@ -157,35 +208,38 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             var localActionFunctions = column.localDataChangeActionFunctions;
             if (!utils.empty(localActionFunctions)){
             	var sourceCell = this.cell(idPropertyValue, column.field), idPropertyValue, sourceWidget = this.getEditorInstance(column.field) || sourceCell.element.widget || sourceCell.element.input,
-            		allowedNestedRowWatchActions = this.allowedNestedRowWatchActions;
+            		allowedNestedRowWatchActions = this.allowedNestedRowWatchActions, needsRefresh = false;;
             	this.noRefreshOnUpdateDirty = true;
                 this.nestedRowWatchActions = this.nestedRowWatchActions || 0;
                 column.nestedWatchActions = column.nestedWatchActions || 0;
-            	for (var colName in localActionFunctions){
-                    var targetCell = this.cell(idPropertyValue, colName), widgetActionFunctions =  localActionFunctions[colName], result, source = sourceWidget;
-                    for (var att in widgetActionFunctions){
-                    	if (att === 'value' || att === 'localActionStatus'){
-                            if ((allowedNestedRowWatchActions === undefined || (this.nestedRowWatchActions <= allowedNestedRowWatchActions)) && column.nestedWatchActions < 1){
-	                        	this.nestedRowWatchActions += 1;
-	                        	column.nestedWatchActions += 1;
-	                        	//if (this.nestedRowWatchActions > 1 || !sourceWidget){
-	                        		source = sourceWidget || sourceCell;
-	                        		if (!source.parent){
-	                        			source = lang.mixin(source, {parent: this, form: this.form, valueOf: wutils.valueOf, setValueOf: wutils.setValueOf, setValuesOf: wutils.setValuesOf});
-	                        		}
-	                        	//}
-	                        	var result = widgetActionFunctions[att].action(source, targetCell, newValue, oldValue);
-	                        	if (att === 'value'){
-	                            	this.updateDirty(idPropertyValue, colName, result);
-	                        	}
-	                        	this.nestedRowWatchActions += -1;
-	                        	column.nestedWatchActions += -1;
-                            }
-                        }
-                    }
-                }
-            	this.noRefreshOnUpdateDirty = false;
-                setTimeout(lang.hitch(this, this.refresh), 0);
+				when(sourceWidget, lang.hitch(this, function(sourceWidget){
+	            	for (var colName in localActionFunctions){
+	                    var targetCell = this.cell(idPropertyValue, colName), widgetActionFunctions =  localActionFunctions[colName], result, source = sourceWidget;
+	                    for (var att in widgetActionFunctions){
+	                    	if (att === 'value' || att === 'localActionStatus'){
+	                            if ((allowedNestedRowWatchActions === undefined || (this.nestedRowWatchActions <= allowedNestedRowWatchActions)) && column.nestedWatchActions < 1){
+		                        	this.nestedRowWatchActions += 1;
+		                        	column.nestedWatchActions += 1;
+		                        	//if (this.nestedRowWatchActions > 1 || !sourceWidget){
+		                        		source = sourceWidget || sourceCell;
+		                        		if (!source.parent){
+		                        			source = lang.mixin(source, {parent: this, form: this.form, valueOf: wutils.valueOf, setValueOf: wutils.setValueOf, setValuesOf: wutils.setValuesOf});
+		                        		}
+		                        	//}
+		                        	var result = widgetActionFunctions[att].action(source, targetCell, newValue, oldValue);
+		                        	if (att === 'value'){
+		                            	this.updateDirty(idPropertyValue, colName, result);
+										needsRefresh = true;
+		                        	}
+		                        	this.nestedRowWatchActions += -1;
+		                        	column.nestedWatchActions += -1;
+	                            }
+	                        }
+	                    }
+	                }
+	            	this.noRefreshOnUpdateDirty = false;
+	                setTimeout(lang.hitch(this, this.refresh, {keepScrollPosition: true}), 0);
+				}));
             }
         },
         prepareInitRow: function(init){
@@ -300,67 +354,15 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
         },
         
         copyRow: function(evt){
-            var numberOfCopies = 1, self = this;
-            var applyCallback = function(){
-                var numberOfCopies = parseInt(this.pane.valueOf('copies') || '1'), incrementFrom = this.pane.valueOf('incrementfrom') , noRefresh = self.noRefreshOnUpdateDirty;
-                self.noRefreshOnUpdateDirty = true;
-                this.pane.close();
-                var data = self.clickedRowValues(), name = data.name || '';;
-                if (incrementFrom && 'name' in self.columns){
-                	var hasIncrement = true;
-                	data.name = name + ' ' + incrementFrom;
-                	self.updateDirty(data[self.collection.idProperty], 'name', data.name);
-                	incrementFrom = parseInt(incrementFrom);
-                }else{
-                	var hasIncrement = false;
-                	incrementFrom = 0;
-                }
-                var item = self.copyItem(data);
-                if ('rowId' in self.columns){
-                        self.offsetRowsId(data.rowId + 1, numberOfCopies);
-                }
-                for (var i = 1; i <= numberOfCopies; i++){
-                    if ('rowId' in self.columns){
-                    	item.rowId = data.rowId + i;
-                    }
-                	item.name = name + (hasIncrement ? ' ' + i + incrementFrom : '');
-                    utils.forEach(item, function(value, col){
-                    	if (typeof value === 'string' && value[0] === '='){
-                    		item[col] = sutils.offsetFormula(self, value, i, 0);
-                    	}
-                    });
-                	self.addRow(undefined, item);
-                }
-                this.noRefreshOnUpdateDirty = noRefresh;
-                if (!noRefresh){
-                    this.refresh({keepScrollPosition: true});
-                }
-            };
-            var dialog = new TukosTooltipDialog({paneDescription: {
-                    widgetsDescription: {
-                        copies: {type: 'TextBox', atts: {title: messages.numberofcopies, placeHolder: messages.numberofcopies + '  ...', style: {width: '5em'}}},
-                        incrementfrom: {type: 'TextBox', atts: {title: messages.incrementfrom, placeHolder: messages.incrementfrom + '  ...', style: {width: '5em'}}},
-                        cancel: {type: 'TukosButton', atts: {label: messages.close, onClickAction:  'this.pane.close();'}},
-                        apply: {type: 'TukosButton', atts: {label: messages.apply, onClick:applyCallback}}
-                    },
-                    layout:{
-                        tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},
-                        contents: {
-                           row1: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['copies', 'incrementfrom']},
-                           row2: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['cancel', 'apply']}
-                        }
-                    }
-                }});
-            dialog.open({x: evt.clientX, y: evt.clientY});
+			copyDialog(this).open({x: evt.clientX, y: evt.clientY});
         },
         
-        deleteRow: function(rowItem, skipDeleteAction){
-            this.deleteRowItem(rowItem || this.clickedRow.data, skipDeleteAction);
-            var grid = this;
+        deleteRow: function(rowItem, skipDeleteAction, isUserRowEdit){
+            this.deleteRowItem(rowItem || this.clickedRow.data, skipDeleteAction, isUserRowEdit);
             this.refresh({keepScrollPosition: true});
         },
 
-        deleteRowItem: function(item, skipDeleteAction){
+        deleteRowItem: function(item, skipDeleteAction, isUserRowEdit){
             var noRefresh = this.noRefreshOnUpdateDirty;
             this.noRefreshOnUpdateDirty = true;
 			if (!skipDeleteAction){
@@ -384,13 +386,13 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 this.offsetRowsId(item.rowId, -1);
             }
             this.collection.removeSync(idgToDelete);
-            this.deleteDirty(idgToDelete);
+            this.deleteDirty(idgToDelete, isUserRowEdit);
             this.noRefreshOnUpdateDirty = noRefresh;
         },
-        deleteRows: function(rows, skipDeleteAction){
+        deleteRows: function(rows, skipDeleteAction, isUserRowEdit){
         	var self = this;
         	rows.forEach(lang.hitch(this, function(row){
-        		this.deleteRowItem(row, skipDeleteAction);
+        		this.deleteRowItem(row, skipDeleteAction, isUserRowEdit);
         	}));
         },
         moveRow: function(itemToMove, currentRowData, where){
@@ -756,6 +758,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                             case 'date' : gridItem[targetCol] = dutils.formatDate(value); break;
                             case 'datetime':
                             case 'datetimestamp':  gridItem[targetCol] = dojo.date.stamp.toISOString(value, {zulu: true}); break;
+							default: gridItem[targetCol] = value;
                         }
                     }else{
                     	gridItem[targetCol] = value;
@@ -771,8 +774,6 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
                 return undefined;
             }
         },
-
-
         _setNotify: function(args){
         	var notifyCallers = this.notifyCallers = this.notifyCallers || {}, widgetName = this.widgetName;
             this.inSetNotify = (this.inSetNotify || 0);
@@ -809,33 +810,4 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/prom
             }
         }
     });
-/*
-    mixin.loadDependingWidgets = function(Widget, atts){
-        var loadingDependingWidgets = {};
-        if (atts.newColumnArgs){
-        	atts.newColumnArgs.input = lang.clone(atts.newColumnArgs)
-        }
-        for (var i in atts.columns){
-            var dependingWidget = atts.columns[i].editor;
-            if (dependingWidget){
-                loadingDependingWidgets[i] = WidgetsLoader.loadWidget(dependingWidget);
-            }
-        }
-        var newColumnEditor = (atts.newColumnArgs || {}).editor;
-        if (newColumnEditor){
-            loadingDependingWidgets.newColumnEditor = WidgetsLoader.loadWidget(newColumnEditor);
-        }
-        return all(loadingDependingWidgets).then(function(Widgets){
-            for (var i in loadingDependingWidgets){
-                if (i === 'newColumnEditor'){
-                    atts.newColumnArgs.editor = Widgets[i];                            	
-                }else{
-                	atts.columns[i].editor = Widgets[i];                    	
-                }
-            }
-            return Widget;
-        });
-    };
-*/
-    return mixin;
 });

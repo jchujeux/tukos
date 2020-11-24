@@ -10,7 +10,7 @@ trait ViewActionStrings{
         return <<<EOT
 ['loadchart', 'performedloadchart'].forEach(lang.hitch(this, function(widgetName){    
     var widget = this.getWidget(widgetName);
-        widget.plots.week.values = dutils.difference(this.valueOf('fromdate'), this.valueOf('displayeddate'), 'week')+1;
+        widget.plots.week.values = dutils.difference(dutils.getDayOfWeek(1, new Date(this.valueOf('fromdate'))), this.valueOf('displayeddate'), 'week')+1;
     widget.chart.addPlot('week', widget.plots.week);
 	try{
     widget.chart.render();
@@ -349,10 +349,11 @@ EOT;
   protected function gcsyncOnClickAction(){
       return <<<EOT
   var self = this, pane = this.pane, gcActivitiesMetrics = pane.getWidget('gcactivitiesmetrics'), selection = gcActivitiesMetrics.get('selection'), gcCollection = gcActivitiesMetrics.get('collection'), gcColumns = gcActivitiesMetrics.columns, 
-      form = pane.form, sessions = form.getWidget('sptsessions'), sessionsStore = sessions.store;
-  utils.forEach(selection, function(isSelected, idProp){
+      form = pane.form, sessions = form.getWidget('sptsessions'), sessionsStore = sessions.store, oldestChangedItem;
+sessions.isBulkRowAction = true;  
+utils.forEach(selection, function(isSelected, idProp){
       if (isSelected){
-        var gcActivity = gcCollection.getSync(idProp), itemToSync = {}, associatedSessionRow = gcActivity.tukosIdProp ? sessions.row(gcActivity.tukosIdProp).data : {};
+        var gcActivity = gcCollection.getSync(idProp), itemToSync = {}, associatedSessionRow = gcActivity.tukosIdProp ? sessionsStore.getSync(gcActivity.tukosIdProp) : {};
         utils.forEach(gcColumns, function(column, gcName){
             var sessionColName = column.sessionsColName;
             if (sessionColName && (!utils.in_array(sessionColName, ['name', 'sport']) || !associatedSessionRow[sessionColName])){
@@ -369,13 +370,22 @@ EOT;
         }else{
             itemToSync.mode = 'performed';
             itemToSync.startdate = gcActivity.date;
-            sessions.addRow(undefined, itemToSync);
+            var addedItem = sessions.addRow(undefined, itemToSync);
             gcActivity.tukosIdProp = itemToSync[sessionsStore.idProperty];
             gcActivity.tukosid = Pmg.message('newsession', 'sptprograms') + ' (' + Pmg.message('synced', 'sptprograms') + ')';
         }
+        if (!oldestChangedItem || ((addedItem || itemToSync).startdate < oldestChangedItem.startdate)){
+            oldestChangedItem = addedItem || itemToSync;
+        }
       }
-  });
-  gcActivitiesMetrics.set('collection', gcCollection);
+});
+gcActivitiesMetrics.set('collection', gcCollection);
+if (oldestChangedItem){
+    sessions.tsbCalculator.updateRowAction(sessions, oldestChangedItem, true);
+    sessions.refresh({keepScrollPosition: true});
+    sessions.loadChartUtils.updateCharts(sessions, true);
+    sessions.isBulkRowAction = false;
+}
 EOT;
   }
 }

@@ -1,10 +1,20 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all", "dojo/on", "dijit/registry", "tukos/utils",
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all", "dojo/on", "dojo/aspect", "dijit/registry", "tukos/utils",
          "tukos/widgetUtils", "tukos/evalutils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, when, all, on, registry, utils,  wutils, eutils, Pmg, messages){
+    function(declare, lang, when, all, on, aspect, registry, utils,  wutils, eutils, Pmg, messages){
     return declare(null, {
         decorate: function(widget){
-            var self = this, form = this.form;
-            require(["tukos/menuUtils", "tukos/widgets/widgetCustomUtils"], function(mutils, wcutils){
+            var self = this;
+            if (widget.afterActions){
+				utils.forEach(widget.afterActions, function(action, methodName){
+					aspect.after(widget, methodName, lang.hitch(widget, eutils.eval(action, 'args'))/*, true*/);
+				});
+			}
+            if (widget.beforeActions){
+				utils.forEach(widget.beforeActions, function(action, methodName){
+					aspect.before(widget, methodName, lang.hitch(widget, eutils.eval(action, 'args')));
+				});
+			}
+			require(["tukos/menuUtils", "tukos/widgets/widgetCustomUtils"], function(mutils, wcutils){
                 var menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
                 menuItemsArgs = (utils.in_array(widgetName, self.objectIdCols))
                     ? menuItemsArgs.concat(lang.hitch(self, wcutils.idColsContextMenuItems)(widget))
@@ -45,7 +55,12 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
                 widget.set('value', value, '');
             }
         },
-        emptyWidgets: function(widgetsName){
+        setValuesOf: function(values){
+			for (var widgetName in values){
+				this.setValueOf(widgetName, values[widgetName]);
+			}
+		},
+		emptyWidgets: function(widgetsName){
             var self = this,
                 onLoadDeferredWidgets = [];
             widgetsName.forEach(function(widgetName, index){

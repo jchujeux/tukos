@@ -34,6 +34,9 @@ class Feedback {
         }
     }
     
+    public static function addErrorCode($code){
+        self::add(Tfk::tr('ErrorCode') . ': ' . $code . '. ' . Tfk::tr('contactsupport'));
+    }
     public static function get(){
         return self::$feedback;
     }

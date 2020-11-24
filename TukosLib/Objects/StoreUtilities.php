@@ -193,11 +193,12 @@ class StoreUtilities {
     }
     
     public static function transformGet($queryAtts, $objectName, $maxSizeCols = [], $fieldMaxSize = 0, $asCol = true){
+        $eliminated = Utl::extractItem('eliminateditems', $queryAtts);
         if ($union = Utl::getItem('union', $queryAtts)){
             self::$hasSubSelect = false;
             $cols = $queryAtts['cols'];
         }
-        $queryAtts['where'] = self::transformWhere(self::deletedFilter($queryAtts['where']), $objectName);
+        $queryAtts['where'] = self::transformWhere(self::deletedFilter($queryAtts['where'], $eliminated), $objectName);
         if (self::$hasSubSelect && $union){
             $queryAtts['union'] = $union = false;
         }
@@ -218,7 +219,7 @@ class StoreUtilities {
             return $queryAtts;
         }
         if (self::$hasObjectCols){
-            $queryAtts['join'][] = ['inner', self::$tukosTableName, self::$tukosTableName . '.id = ' . $objectName . '.id'];
+            $queryAtts['join'][] = ['inner', self::$tukosTableName, self::$tukosTableName . '.id = ' . ($eliminated ? '-' : '') . $objectName . '.id'];
         }else{
             $queryAtts['table'] = self::$tukosTableName;
         }
@@ -249,8 +250,8 @@ class StoreUtilities {
         return $queryAtts;
     }
   
-    public static function deletedFilter($where){
-    	$where[] = ['col' => 'id', 'opr' => '>', 'values' => 0];
+    public static function deletedFilter($where, $eliminated = false){
+    	$where[] = ['col' => 'id', 'opr' => $eliminated ? '<' : '>', 'values' => 0];
     	return $where;
     }
 

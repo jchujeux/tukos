@@ -170,7 +170,7 @@ class Model extends AbstractModel {
         $noCreatePayments = $values['nocreatepayments'];
         $payments = $values['payments'];
         $existingPaymentsIds = []; $updatedPaymentsIds = []; $noDateAmountRows = []; $rowNeedsMorePaymentInfo = []; $createdPaymentsIds = []; $createdPaymentsItemsIds = []; $createdInvoicesIds = []; $createdInvoicesItemsIds = [];
-        $paymentsColsMapping = ['id' => 'paymentid', 'parentid' => 'customer', 'name' => 'description', 'date' => 'date', 'isexplained' => 'isexplained', 'paymenttype' => 'paymenttype', 'reference' => 'reference'/*, 'slip' => 'slip'*/, 
+        $paymentsColsMapping = ['id' => 'paymentid', 'parentid' => 'customer', 'name' => 'description', 'date' => 'date', 'isexplained' => 'isexplained', 'paymenttype' => 'paymenttype', 'reference' => 'reference', 'slip' => 'slip', 
             'amount' => 'amount', 'category' => 'category', 'organization' => 'organization'];
         $reconciliationColsMapping = array_flip($paymentsColsMapping);
         $paymentsModelCols = array_merge(array_keys($paymentsColsMapping), ['updated']);
@@ -196,7 +196,8 @@ class Model extends AbstractModel {
                     : array_merge($whereCols, $this->dateFilter($query['startdate'], $query['enddate'], $date));
                 $existingModelPayments = $paymentsModel->getAll(['where' => $where, 'cols' => $paymentsModelCols, 'orderBy' => ['date' => 'DESC']]);
                 if (($paymentsCount = count($existingModelPayments))){
-                    $existingModelPayment = array_filter($existingModelPayments[0]);
+                    //$existingModelPayment = array_filter($existingModelPayments[0]);
+                    $existingModelPayment = $existingModelPayments[0];
                     if ($paymentsCount > 1){
                         Feedback::add("{$this->tr('Severalpaymentsfound')}: $id - {$this->tr('Mostrecentselected')}: {$existingModelPayment['id']}");
                     }

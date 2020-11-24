@@ -36,13 +36,18 @@ trait PageCustomization{
                     ])),
                     'hideLeftPane' => Widgets::storeSelect(Widgets::complete(['storeArgs' =>['data' => Utl::idsNamesStore(['YES', 'NO'], $tr)], 'title' => $tr('hideleftpane'),'onWatchLocalAction' => $this->hideLeftPaneAction()])),
                     'leftPaneWidth' => Widgets::textBox(Widgets::complete(['label' => $tr('Leftpanewidth'), 'onWatchLocalAction' => $this->leftPaneWidthAction()])),
-                    'panesConfig' => Widgets::simpleDgrid(Widgets::complete(['label' => $tr('panes'), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => true, 'style' => ['width' => '500px'],
-                            'colsDescription' => [
-                                'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-                                'name'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => $this->accordionStoreData], 'label' => $tr('panename')]]), false),
-                                'selected' => Widgets::description(Widgets::checkBox(['edit' => ['label' => $tr('selected'), 'onChangeLocalAction' => $this->selectedAction(),]]), false),
-                                'present' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $tr)], 'label' => $tr('presentpane')]]), false),
-                                'id' => Widgets::description(Widgets::objectSelect(['edit' => ['label' => $tr('id'), 'object' => 'calendars'],
+                    'panesConfig' => Widgets::simpleDgrid(Widgets::complete(['label' => $tr('panes'), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => false, 'style' => ['width' => '500px'],
+                        'deleteRowAction' => $this->deleteRowAction('panesConfig'),    
+                        'colsDescription' => [
+                                //'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                                'name'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => $this->accordionStoreData], 'label' => $tr('panename'),
+                                    'onWatchLocalAction' => $this->gridWatchLocalAction('panesConfig')]]), false),
+                                'selectonopen' => Widgets::description(Widgets::checkBox(['edit' => ['label' => $tr('selectonopen'), 'onChangeLocalAction' => $this->selectedAction(),
+                                    'onWatchLocalAction' => $this->gridWatchLocalAction('panesConfig')]]), false),
+                                'present' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $tr)], 'label' => $tr('presentpane'),
+                                    'onWatchLocalAction' => $this->gridWatchLocalAction('panesConfig')]]), false),
+                                'associatedtukosid' => Widgets::description(Widgets::objectSelect([
+                                    'edit' => ['label' => $tr('associatedtukosid'), 'object' => 'calendars', 'onWatchLocalAction' => $this->gridWatchLocalAction('panesConfig')],
                                     'storeedit' => ['canEdit' => '(function(item, cellValue){if(item.hasId){return true;}else{return false;}})']]), false),
                             ]])),
                     'fieldsMaxSize' => Widgets::textBox(Widgets::complete(['label' => $tr('Fieldsmaxsize'), 'onWatchLocalAction' => $this->watchLocalAction('fieldsMaxSize')])),
@@ -99,18 +104,27 @@ EOT
             ]]]
         ];
     }
+    private function deleteRowAction($widgetName){
+        return <<<EOT
+var form = this.form;
+Pmg.addCustom('$widgetName', utils.newObj([[row.idg, '~delete']]));
+form.setValueOf('newPageCustom',Pmg.getCustom({tukosOrUserOrChanges: 'changes'}));
+EOT
+        ;
+    }
     private function fillDialogActionString($mode){
         return <<<EOT
 var form = ('$mode' === 'open' ? this : sWidget.form), setValueOf = lang.hitch(form, form.setValueOf), 
     widgets = ['pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose'];
 form.watchOnChange = false;
+form.markIfChanged = false;
 form.emptyWidgets(widgets);
-utils.forEach(Pmg.getCustom('$mode' === 'open' || !newValue ? undefined : {tukosOrUserOrChanges: newValue === 'allusers' ? 'tukos' : 'user'}), function(value, widgetName){
-    setValueOf(widgetName, value);
-});
 var disabled = ('$mode' === 'open' ? false : (newValue ? true : false));
 widgets.forEach(function(widgetName){
     form.getWidget(widgetName).set('disabled', disabled);
+});
+utils.forEach(Pmg.getCustom('$mode' === 'open' || !newValue ? undefined : {tukosOrUserOrChanges: newValue === 'allusers' ? 'tukos' : 'user'}), function(value, widgetName){
+    setValueOf(widgetName, value);
 });
 if ('$mode' === 'open'){
     if (Pmg.get('userRights')!== 'SUPERADMIN'){
@@ -123,6 +137,7 @@ if ('$mode' === 'open'){
     setValueOf('newPageCustom', Pmg.getCustom({tukosOrUserOrChanges: 'changes'}));
 }
 form.watchOnChange = true;
+form.markIfChanged = true;
 EOT;
     }
     private function newPageCustomAction(){
@@ -160,13 +175,13 @@ EOT
         ]]]];
     }
     private function selectedAction(){
-        return ['selected' => ['localActionStatus' => [<<<EOT
+        return ['selectonopen' => ['localActionStatus' => [<<<EOT
 if (newValue){
     var grid = sWidget.grid, collection = grid.collection, idp = collection.idProperty, dirty = grid.dirty;
     collection.fetchSync().forEach(function(item){
         var idv = item[idp], dirtyItem = dirty[idv];
-        if ((dirtyItem && dirtyItem.hasOwnProperty('selected') && dirtyItem.selected) || item.selected){
-            grid.updateDirty(idv, 'selected', false);
+        if ((dirtyItem && dirtyItem.hasOwnProperty('selectonopen') && dirtyItem.selectonopen) || item.selectonopen){
+            grid.updateDirty(idv, 'selectonopen', false);
         }
     })
 }
@@ -177,11 +192,12 @@ EOT
     private function saveOnClickAction($tukosOrUser){
         $saving = Tfk::tr('saving') . '...';
         return <<<EOT
-var pane = this.pane, setValueOf = lang.hitch(pane, pane.setValueOf);
+var pane = this.pane, setValueOf = lang.hitch(pane, pane.setValueOf), panesConfigGrid = pane.getWidget('panesConfig'), data = Pmg.getCustom({tukosOrUserOrChanges: 'changes'});
 Pmg.setFeedback('$saving');
-Pmg.serverDialog({object: 'users', view: 'NoView', action: 'PageCustomSave', query: {tukosOrUser: '$tukosOrUser'}}, {data: Pmg.getCustom({tukosOrUserOrChanges: 'changes'})}).then(function(response){
-    //Pmg.setCustom({'tukosOrUserOrChanges': '$tukosOrUser'}, utils.mergeRecursive(Pmg.getCustom({tukosOrUserOrChanges: '$tukosOrUser'}), Pmg.getCustom({tukosOrUserOrChanges: 'changes'})));    
-    Pmg.setCustom({'tukosOrUserOrChanges': '$tukosOrUser'}, lang.mixin(Pmg.getCustom({tukosOrUserOrChanges: '$tukosOrUser'}), Pmg.getCustom({tukosOrUserOrChanges: 'changes'})));    
+Pmg.serverDialog({object: 'users', view: 'NoView', action: 'PageCustomSave', query: {tukosOrUser: '$tukosOrUser'}}, {data: data}).then(function(response){
+    //Pmg.setCustom({'tukosOrUserOrChanges': '$tukosOrUser'}, lang.mixin(Pmg.getCustom({tukosOrUserOrChanges: '$tukosOrUser'}), Pmg.getCustom({tukosOrUserOrChanges: 'changes'})));    
+    Pmg.setCustom({tukosOrUserOrChanges: '$tukosOrUser'}, response.pagecustom);    
+    Pmg.setCustom({tukosOrUserOrChanges: '$tukosOrUser'}, lang.clone(response.pagecustom));    
     Pmg.setCustom({tukosOrUserOrChanges: 'changes'}, {});    
     setValueOf('newPageCustom', {});
     if (pane.valueOf('tukosOrUser') === '$tukosOrUser'){

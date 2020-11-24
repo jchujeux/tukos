@@ -18,8 +18,9 @@ class Get extends ViewsGetModel {
         return $unHiddenCols;
     }
     function getOverviewGrid($query){
+        $summaryStoreAtts = [/*'where' => $query['storeatts']['where'], */'eliminateditems' => Utl::getItem('eliminateditems', $query['storeatts'])];
         $result = $this->getGrid($query['storeatts'], $this->unHiddenOverviewGridCols($this->view->gridCols()), false, 'objToOverview');
-        $result['summary'] = ['value' => $this->model->summary()];
+        $result['summary'] = ['value' => $this->model->summary($summaryStoreAtts)];
         return $result;
     }
     

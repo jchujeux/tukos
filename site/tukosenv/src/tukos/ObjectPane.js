@@ -12,7 +12,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/Co
             var dataTable = this.tableLayout(this.dataLayout, dataPane, lang.hitch(wutils, wutils.setWatchers));
             this.addChild(dataPane);
             var actionPane = new ContentPane({region: "top", 'class': "edgePanel", style: "padding: 0px; overflow: auto;"},  dojo.doc.createElement("div"));
-            var actionTable = this.tableLayout(this.actionLayout, actionPane);
+            var actionTable = this.tableLayout(this.actionLayout, actionPane, lang.hitch(wutils, wutils.setWatchers));
             this.addChild(actionPane);
             if (this.summaryLayout != undefined){
                 var summaryPane = new ContentPane({region: "bottom", 'class': "edgePanel", style: "padding: 0px; overflow: auto;"},  dojo.doc.createElement("div"));

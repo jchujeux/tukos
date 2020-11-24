@@ -94,10 +94,10 @@ class Directory{
     	return self::$configStatusRange;
     }
     public static function getObjDir($object){
-        return self::$directory[strtolower($object)];
+        return self::$directory[$object];
     }
     public static function getObjDomain($object){
-        return strtolower(explode('\\', self::$directory[strtolower($object)], 2)[0]);
+        return strtolower(explode('\\', self::$directory[$object], 2)[0]);
     }
     public static function getObjs(){
         return array_keys(self::$directory);

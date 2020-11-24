@@ -21,10 +21,12 @@ EOT;
     function watchLocalAction($widgetName){
         return $this->watchLocalActionTemplate($widgetName, $this->watchLocalActionString());
     }
-    function watchCheckboxLocalAction($att){
+    function watchCheckboxLocalAction($widgetName){
         return ['checked' => [
-                $att  => ['localActionStatus' => [
-                        'action' => "lang.setObject('customization.widgetsDescription.' + sWidget.pane.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription." . $att . ".atts.checked', newValue, sWidget.pane.form);return true;",
+                $widgetName  => ['localActionStatus' => ['action' => <<<EOT
+lang.setObject('customization.widgetsDescription.' + sWidget.pane.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription." . $widgetName . ".atts.checked', newValue, sWidget.pane.form);
+return true
+EOT
                 ]],
                 'update' => ['hidden' => ['action' => "return false;"]],
         ]];

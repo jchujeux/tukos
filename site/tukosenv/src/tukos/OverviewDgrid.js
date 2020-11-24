@@ -19,7 +19,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
             args.collection = args.store.filter({contextpathid: args.form.tabContextId()});
         },
         postCreate: function(){
-            this.inherited(arguments);
+			this.inherited(arguments);
             if (this.hasFilters && this.hideServerFilters !== 'yes'){
             	this.showFilters();
             }
@@ -30,7 +30,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
             this.contextMenuItems.header.push({atts: {label: messages.showhidetargetvalues  , onClick: lang.hitch(this, function(evt){this.showColValues();})}});
         },
         resize: function(){
+			var self = this, previousScrollPosition = this.getScrollPosition();
 			this.inherited(arguments);
+			setTimeout(function(){
+				self.scrollTo(previousScrollPosition);
+			}, 100);
         	var style = this.bodyNode.style;
 			style.maxHeight = (parseInt(this.parentContentPane.domNode.style.height) - parseInt(style.marginTop) - parseInt(style.marginBottom)- 2) + 'px';
         },
