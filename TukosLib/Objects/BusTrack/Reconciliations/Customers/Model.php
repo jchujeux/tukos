@@ -21,6 +21,7 @@ class Model extends AbstractModel {
             'startdate' => 'date NULL DEFAULT NULL',
             'enddate' => 'date NULL DEFAULT NULL',
             'nocreatepayments' => 'VARCHAR(7) DEFAULT NULL',
+            'unexplainedpaymentsonly' => 'VARCHAR(7) DEFAULT NULL',
             'verificationcorrections' => 'VARCHAR(7) DEFAULT NULL',
             'pendinginvoicesonly' => 'VARCHAR(7) DEFAULT NULL',
             'showinvoicessince' => 'date NULL DEFAULT NULL',

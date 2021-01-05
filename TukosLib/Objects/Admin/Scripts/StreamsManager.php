@@ -7,12 +7,10 @@ use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
 
 class StreamsManager{
-
    /*
     * On my Windows system (in french), mb_detect_encoding wrongly detects ISO-8859-1 as the pipe output encoding, when the proper encoding is CP850,
     * hence the parameter outputEncoding below that must be checked for each specific server set-up.
     */
-    
     function __construct($timeout = 2, $outputEncoding='CP850'){
         $this->objectsStore = Tfk::$registry->get('objectsStore');
         $this->timeout = $timeout;
@@ -44,18 +42,16 @@ class StreamsManager{
             return false;
         }
     }
-
     public function closeStream($id, $scriptObj = true){
         foreach ($this->process[$id]['pipes'] as $pipe){
             fclose($pipe);
         }
-        $return_value=proc_close($this->process[$id]['resource']);
+       proc_close($this->process[$id]['resource']);
         if ($scriptObj){
             $this->scriptObj->updateOne(['id' => $id, 'status' => 'READY', 'lastend' => date('Y-m-d H:i:s')]);
         }
         unset($this->process[$id]); 
     }
-    
     function getPipesContent($theProcess, $outputFlag, $id, $result){
         $read       = [$theProcess['pipes'][1]];
         $write      = [];
@@ -96,7 +92,6 @@ class StreamsManager{
         }
         return (isset($result) ? $result : true);
     }
-
     public function waitOnStream($id, $scriptObj = true, $outputFlag = 'store'){
         $continue = true;
         $result = null;
@@ -111,7 +106,6 @@ class StreamsManager{
         $this->closeStream($id, $scriptObj);
         return (isset($result) ? $result : true);
     }
-    
     public function waitOnStreams($seconds = 1){    
         if ($this->process){
             while (count($this->process)) { 
@@ -130,5 +124,4 @@ class StreamsManager{
         }
     }
 }
-
 ?>

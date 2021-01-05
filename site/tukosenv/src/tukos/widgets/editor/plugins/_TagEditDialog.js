@@ -1,6 +1,6 @@
 define (
-	["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-style", "dojo/dom-construct", "dojo/ready", "dojo/on","tukos/utils","tukos/TukosTooltipDialog","tukos/widgets/ColorPalette","tukos/PageManager"], 
-    function(declare, lang, domAttr, domStyle, dct, ready, on, utils, TukosTooltipDialog, colorPalette, Pmg){
+	["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/dom-attr", "dojo/dom-style", "dojo/ready", "dojo/on","tukos/utils","tukos/TukosTooltipDialog","tukos/widgets/ColorPalette","tukos/PageManager"], 
+    function(declare, lang, when, domAttr, domStyle, ready, on, utils, TukosTooltipDialog, colorPalette, Pmg){
 
     var colorIconClass = "dijitEditorIcon dijitEditorIconHiliteColor",
         sizeUnits = utils.storeData(['auto', 'cm', '%', 'em', 'px']), thicknessUnits = utils.storeData(['cm', 'em', 'px']), hAlignStoreData = Pmg.messageStoreData(['default', 'left', 'center', 'right']),
@@ -35,7 +35,8 @@ define (
             lang.mixin(this, this.dialogAtts());
             this.inherited(arguments);
             this.onOpen = lang.hitch(this, function(){
-                this.editor.begEdit();
+				var self = this, _arguments = arguments;
+				this.editor.begEdit();
                 if (this.prepareTable){
                     this.prepareTable();
                     this.target = this.table;
@@ -43,36 +44,40 @@ define (
                 	var selection = this.editor.selection;
                 	this.target = selection.getSelectedElement() || selection.getParentElement();
                 }
-                if (this.openDialog()){
-                    dijit.TooltipDialog.prototype.onOpen.apply(this, arguments);
-                    ready(lang.hitch(this, function(){//JCH: solves issues of empty TooltipDialog when browser window size changes after tooltipdialog has been laoded, among others ...
-                        this.pane.resize();
-                    }));                	
-                }else{
-                	dijit.popup.close(this);
-                }
+                when(this.openDialog(), function(response){
+					if (response){
+	                    dijit.TooltipDialog.prototype.onOpen.apply(self, _arguments);
+	                    /*ready(lang.hitch(self, function(){//JCH: solves issues of empty TooltipDialog when browser window size changes after tooltipdialog has been laoded, among others ...
+	                        this.pane.resize();
+	                    }));*/           	
+	                }else{
+	                	dijit.popup.close(this);
+	                }
+				});
             });
             this.blurCallback = on.pausable(this, 'blur', this.close);
         },
         openDialog: function(){
             var target = this.target, includedAtts = this.includedAtts, pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
-            if (this.isInsert){
-                utils.forEach(this.defaultAttsValue, function(attValue, att){
-                    var widget = paneGetWidget(att);
-                    widget.set('value', attValue);
-                });
-                return true;
-            }else if(target.id === 'dijitEditorBody'){
-            	Pmg.setFeedback(Pmg.message('NoTagToEdit'), '', '', true);
-            	this.close();
-            	return false;
-            }else{
-                includedAtts.forEach(function(att){
-                    var attWidget = paneGetWidget(att), attValue = attWidget.attValueModule.get(target, att);
-                    attWidget.set('value', attValue);
-                });
-            	return true;
-            }
+            return this.pane.onInstantiated(lang.hitch(this, function(){
+				if (this.isInsert){
+	                utils.forEach(this.defaultAttsValue, function(attValue, att){
+	                    var widget = paneGetWidget(att);
+	                    widget.set('value', attValue);
+	                });
+	                return true;
+	            }else if(target.id === 'dijitEditorBody'){
+	            	Pmg.setFeedback(Pmg.message('NoTagToEdit'), '', '', true);
+	            	this.close();
+	            	return false;
+	            }else{
+	                includedAtts.forEach(function(att){
+	                    var attWidget = paneGetWidget(att), attValue = attWidget.attValueModule.get(target, att);
+	                    attWidget.set('value', attValue);
+	                });
+	            	return true;
+	            }
+			}));
         },
         apply: function(){
             var target = this.target, includedAtts = this.includedAtts, pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);

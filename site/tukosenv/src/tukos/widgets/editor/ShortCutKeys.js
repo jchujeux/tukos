@@ -101,10 +101,10 @@ function(declare, lang, keys, has, domStyle, expressions, utils){
 						handled = true;
 					}
 					break;
-				case keys.BACKSPACE:
+				/*case keys.BACKSPACE:
 					this.execCommand("delete");
 					handled = true;
-					break;
+					break;*/
 				case keys.PAGE_UP:
 				case keys.PAGE_DOWN:
 					if (has("ff")){

@@ -16,6 +16,7 @@ class View extends AbstractView {
             'startdate' => ViewUtils::tukosDateBox($this, 'Periodstart'),
             'enddate' => ViewUtils::tukosDateBox($this, 'Periodend'),
             'nocreatepayments' => ViewUtils::checkBox($this, 'Nocreatepaymentsonsync'),
+            'unexplainedpaymentsonly' => ViewUtils::checkBox($this, 'Unexplainedpaymentsonly'),
             'verificationcorrections' => ViewUtils::checkBox($this, 'Verificationcorrections'),
             'pendinginvoicesonly' => ViewUtils::checkBox($this, 'Showpendinginvoicesonly'),
             'showinvoicessince' => ViewUtils::tukosDateBox($this, 'Showinvoicessince'),
@@ -104,7 +105,7 @@ EOT;
     public function paymentIdDropdownFilters(){
         return <<<EOT
 var filters = {0: {col: 'date', opr: '>=', values: dutils.dateString(widget.valueOf('@startdate'), [-30, 'day'])}, 1: {col: 'date', opr: '<=', values: widget.valueOf('@enddate')}}, 
-    amount = Number.parseFloat(widget.valueOf('amount')).toFixed(2), i = 0, isExplained = widget.valueOf('isexplained');
+    amount = Number.parseFloat(widget.valueOf('amount')).toFixed(2), i = 0, unexplainedOnly = widget.valueOf('@unexplainedpaymentsonly');
 if (amount && !isNaN(amount)){
     filters.amount = amount;
 }
@@ -115,8 +116,8 @@ if (amount && !isNaN(amount)){
         filters[i] = {0: {col: targetCol, opr: 'IS NULL', values : ''}, 1: {col: targetCol, opr: '=', values: value, or: true}};
     }
 });
-console.log('isExplained: ' + isExplained);
-if (!isExplained){
+//console.log('isExplained: ' + isExplained);
+if (unexplainedOnly){
     i += 1;
     filters[i] = {0: {col: 'isexplained', opr: 'IS NULL', values : ''}, 1: {col: 'isexplained', opr: '=', values: '', or: true}};
 }

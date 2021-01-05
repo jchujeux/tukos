@@ -123,7 +123,7 @@ class QueryBuilder{
             if (is_string($firstKey = key($conditions))){
                 return $this->complexWhereElement($query, $conditions);
             }else{
-                $andOr = Utl::extractItem('.or', $conditions) ? ' OR ' : ' AND ';
+                $andOr = Utl::extractItem('or', $conditions) ? ' OR ' : ' AND ';
                 $whereString = '(';
                 $prefix = '';
                 foreach ($conditions as $key => $condition){

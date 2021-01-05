@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/dom-class", "dojo/string", "tukos/widgets/editor/plugins/_TagEditDialog", "tukos/utils", "tukos/hiutils", 
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/dom-class", "dojo/string", "tukos/widgets/editor/plugins/_TagEditDialog", "tukos/utils", "tukos/hiutils", 
 		"tukos/tukosWidgets", "tukos/PageManager"], 
-function(declare, lang, dct, domStyle, dcl, string, _TagEditDialog, utils, hiutils, tukosWidgets, Pmg) {
+function(declare, lang, when, dcl, string, _TagEditDialog, utils, hiutils, tukosWidgets, Pmg) {
 	var attWidgets = ['backgroundColor', 'color', 'width', 'height', 'paddingLeft', 'placeHolder'],
 		extraWidgets = ['type', 'name', 'uniquechoice', 'numCols', 'increment', 'min', 'max', 'digits', 'value', 'topics', 'values', 'labels', 'orientation', 'to', 'subject', 'subjectPrepend', 'body', 'filename'],
 		paramWidgets = extraWidgets.concat(attWidgets);
@@ -42,26 +42,29 @@ function(declare, lang, dct, domStyle, dcl, string, _TagEditDialog, utils, hiuti
         		},
         		openDialog: function(){
                     var pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), selection = this.editor.selection, widgetContainer = selection.getSelectedElement() || selection.getParentElement(), 
-                    	paramsValues, defaultParams, nameWidget = paneGetWidget('name');
-                    while((!dcl.contains(widgetContainer, 'tukosContainer')) && (widgetContainer = widgetContainer.parentNode)){};
-                    if (widgetContainer){
-                    	paramsValues = tukosWidgets.getParams(widgetContainer);
-                    	defaultParams = this.presentParams = tukosWidgets.defaultParams(paramsValues['type']);
-                        selection.selectElement(widgetContainer);
-                        paneGetWidget('insert').set('label', Pmg.message('replace'));
-                    }else{
-                    	paramsValues = defaultParams = this.presentParams = tukosWidgets.defaultParams();
-                        paneGetWidget('insert').set('label', Pmg.message('insert'));
-                    }
-                	paramWidgets.forEach(function(param){
-                		var paramWidget = paneGetWidget(param), absentParam = defaultParams[param] === undefined;
-                		paramWidget.set('value', absentParam ? '' : paramsValues[param] || '', false);
-                		paramWidget.set('hidden', absentParam);
-                	});
-                	hiutils.setUniqueAtt(this.editor.document, 'tukosContainer', 'data-widgetid');
-                	nameWidget.store.setData(this.classNodesToStoreData('tukosContainer', 'data-widgetid'));
-                	nameWidget.set('initialValue', nameWidget.get('value'));
-                	return true;
+                    	paramsValues, defaultParams;
+					return this.pane.onInstantiated(lang.hitch(this, function(){
+						var nameWidget = paneGetWidget('name');
+						while((!dcl.contains(widgetContainer, 'tukosContainer')) && (widgetContainer = widgetContainer.parentNode)){};
+	                    if (widgetContainer){
+	                    	paramsValues = tukosWidgets.getParams(widgetContainer);
+	                    	defaultParams = this.presentParams = tukosWidgets.defaultParams(paramsValues['type']);
+	                        selection.selectElement(widgetContainer);
+	                        paneGetWidget('insert').set('label', Pmg.message('replace'));
+	                    }else{
+	                    	paramsValues = defaultParams = this.presentParams = tukosWidgets.defaultParams();
+	                        paneGetWidget('insert').set('label', Pmg.message('insert'));
+	                    }
+	                	paramWidgets.forEach(function(param){
+	                		var paramWidget = paneGetWidget(param), absentParam = defaultParams[param] === undefined;
+	                		paramWidget.set('value', absentParam ? '' : paramsValues[param] || '', false);
+	                		paramWidget.set('hidden', absentParam);
+	                	});
+	                	hiutils.setUniqueAtt(this.editor.document, 'tukosContainer', 'data-widgetid');
+	                	nameWidget.store.setData(this.classNodesToStoreData('tukosContainer', 'data-widgetid'));
+	                	nameWidget.set('initialValue', nameWidget.get('value'));
+	                	return true;
+					}));
         		},
                 onTypeChange: function(newValue){
                 	var pane = this.pane, defaultParams = this.presentParams = tukosWidgets.defaultParams(newValue), paneGetWidget = lang.hitch(pane, pane.getWidget);

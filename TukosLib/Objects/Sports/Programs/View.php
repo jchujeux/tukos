@@ -33,11 +33,10 @@ class View extends AbstractView {
 		    $chartsCols[$col]['tooltipUnit'] = $tooltipUnit;
 		}
 		$chartsCols['elevationgain']['tooltipUnit'] = ' (m)';
-		foreach(['elevationgain' => 10] as $col => $scalingFactor){
+		foreach(['elevationgain' => ['day' => 10, 'week' => 10], 'gctrimp100' => ['day' => 25, 'week' => 100], 'sts' => ['day' => 1, 'week' => 0.1], 'lts' => ['day' => 1, 'week' => 0.1], 'tsb' => ['day' => 1, 'week' => 0.1]] as $col => $scalingFactor){
 		    $chartsCols[$col]['scalingFactor'] = $scalingFactor;
 		}
-		foreach(['gctrimp100' => ['day' => 40, 'week' => 100], 'load' => ['day' => 120, 'week' => 600], 'perceivedload' => ['day' => 120, 'week' => 600], 'sts' => ['day' => 1, 'week' => 0.1],
-		         'lts' => ['day' => 1, 'week' => 0.1], 'tsb' => ['day' => 1, 'week' => 0.1]] as $col => $normalizationFactor){
+		foreach(['load' => ['day' => 120, 'week' => 600], 'perceivedload' => ['day' => 120, 'week' => 600]] as $col => $normalizationFactor){
 		    $chartsCols[$col]['normalizationFactor'] = $normalizationFactor;
 		}
 		foreach(['intensity', 'stress', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
@@ -99,9 +98,9 @@ class View extends AbstractView {
 		        $tableAttsColumns[$col] = ['label' => $colLabel . ' ' . Utl::getItem('tooltipUnit', $atts, '') , 'field' => $col, 'width' => 60];
 		        $series[$col] = ['value' => ['y' => $col, 'text' => $idProperty, 'tooltip' => $col . 'Tooltip'], 'options' => ['plot' => $plot, 'label' => $colLabel, 'legend' => $colLabel]];
 		        if ($plot === 'lines'){
-		            $linesAxisLabel .= $colLabel . $legendLabel . ' ';
+		            $linesAxisLabel .= $colLabel /*. $legendLabel*/ . ' ';
 		        }else{
-		            $clusterAxisLabel .= $colLabel . $legendLabel . ' ';
+		            $clusterAxisLabel .= $colLabel /*. $legendLabel*/ . ' ';
 		        }
 		        $colsToExcludeOptions[$col] = ['option' => $tr($col), 'tooltip' => $tr($col . 'Tooltip')];
 		    }

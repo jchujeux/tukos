@@ -19,7 +19,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
                 menuItemsArgs = (utils.in_array(widgetName, self.objectIdCols))
                     ? menuItemsArgs.concat(lang.hitch(self, wcutils.idColsContextMenuItems)(widget))
                     : menuItemsArgs;
-                mutils.buildContextMenu(widget,{type: 'DynamicMenu', atts: {targetNodeIds: [widget.domNode]}, items: menuItemsArgs});
+				if (widget.customContextMenuItems){
+					menuItemsArgs = menuItemsArgs.concat(widget.customContextMenuItems());
+				}                
+				mutils.buildContextMenu(widget,{type: 'DynamicMenu', atts: {targetNodeIds: [widget.domNode]}, items: menuItemsArgs});
             });
         },
         getWidget: function(widgetName){

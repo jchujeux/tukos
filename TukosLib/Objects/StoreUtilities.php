@@ -306,6 +306,8 @@ class StoreUtilities {
                     if (!empty($condition[0])){
                 		$transformedWhere[] = self::longFilter($colWhere($key), $condition);
                     }
+                }else if ($key === 'or'){
+                    $transformedWhere[$key] = $condition;
                 }else if ($where[$key] !== '%'){// is a simple where
                     $transformedWhere[$colWhere($key)] = $condition;
                 }
