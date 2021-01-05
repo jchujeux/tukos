@@ -23,7 +23,7 @@ abstract class AbstractView extends ObjectTranslator{
         $this->model = $objectsStore->objectModel($this->objectName, $this->tr);
         $this->user  = Tfk::$registry->get('user');
         $this->sendOnSave = $this->sendOnDelete = ['updated'];
-        $this->mustGetCols = ['id', 'name', 'parentid', 'updated', 'permission', 'updator'];
+        $this->mustGetCols = ['id', 'name', 'parentid', 'updated', 'permission', 'updator', 'creator'];
 
         $this->dataWidgets = [
             'id' => ViewUtils::textBox($this, 'Id', [

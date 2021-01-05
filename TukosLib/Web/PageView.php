@@ -135,13 +135,14 @@ class PageView extends Translator{
             	$this->buildDescription($itemKey, $itemLayout, $theDescriptionItems['items']);
             }
             if (empty($theDescriptionItems['items'])){
-                unset($theDescriptionItems);
+                //unset($theDescriptionItems);
+                unset($theDescription[$module]);
             }
         }
     }
     public function menuBarDescription($modulesMenuLayout){
         $theDescription = [];
-        foreach ($modulesMenuLayout as $key => $layout){
+    foreach ($modulesMenuLayout as $key => $layout){
             if (empty($layout['type'])){
                 $layout['type'] = 'PopupMenuBarItem';
             }

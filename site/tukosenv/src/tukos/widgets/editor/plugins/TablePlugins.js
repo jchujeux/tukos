@@ -52,14 +52,8 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
                 this.editorDomNode = this.editor.editNode || this.editor.iframe.document.body.firstChild;
                 // RichText should have a mouseup connection to recognize drag-selections. Example would be selecting multiple table cells
                 this._myListeners = [
-                    //dojo.connect(this.editorDomNode , "mouseup", this.editor, "onClick"),
-                    //dojo.connect(this.editor, "onDisplayChanged", this, "checkAvailable"),
                 	aspect.after(this.editor, 'onDisplayChanged', lang.hitch(this, this.checkAvailable)),
                     dojo.connect(this.editor, "onBlur", this, "checkAvailable"),
-                    //dojo.connect(this.editor, "_saveSelection", this, function(){
-                        // because on IE, the selection is lost when the iframe goes out of focus
-                        //this._savedTableInfo = this.getTableInfo();
-                    //}),
                     dojo.connect(this.editor, "_restoreSelection", this, function(){
                         delete this._savedTableInfo;
                     })
@@ -69,7 +63,6 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
             }));
         }
     },
-	
     getTableInfo: function(forceNewData){
         // Gets the table in focus. Collects info on the table - see return params
         if(this._savedTableInfo){
@@ -80,20 +73,30 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
                 // tableData is set for a short amount of time, so that all plugins get the same return without doing the method over
                 return this.tableData;
             }else{
-                var tr, trs, td, tds=[], tbl, cols, tdIndex, trIndex, o;
+                var tr, trs, td, tds=[], tbl, cols = 0, rCols = [], colIndex, tdIndex, trIndex, o;
                 td = this.editor.getAncestorElement("td");
                 if(td){ tr = td.parentNode; }
                 tbl = this.editor.getAncestorElement("table");
                 if(tbl){
                     trs = Array.apply(null, tbl.children[0].children);
                     trs.forEach(function(r, i){
-                        tds = tds.concat(Array.apply(null, r.children));
-                    	if(tr==r){trIndex = i;}
+                        var tdrs = [];
+						tds = tds.concat(Array.apply(null, r.children));
+						rCols[i] = r.children.length;
+                    	if(tr==r){
+							trIndex = i;
+							tdrs = Array.apply(null, r.children);
+							tdrs.forEach(function(c, j){
+								cols += c.colSpan;
+								if (td == c){
+									colIndex = j;
+								}
+							})
+						}
                     });
                     tds.forEach(function(d, i){
                         if(td==d){tdIndex = i;}
                     });
-                    cols = tds.length/trs.length;           
                     o = {
                         tbl:tbl,		// focused table
                         td:td,			// focused TD
@@ -102,9 +105,10 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
                         tds:tds,		// cells
                         rows:trs.length,// row amount
                         cols:cols,		// column amount
+						rCols: rCols,	// cols per row (account for colspan)
                         tdIndex:tdIndex,// index of focused cell
                         trIndex:trIndex,	// index of focused row
-                        colIndex:tdIndex%cols
+                        colIndex:colIndex
                     };
                 }else{
                     o = {};                    // there's no table in focus.   Use {} not null so that this._savedTableInfo is non-null
@@ -173,25 +177,27 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
             }
         }
     },
-	
     _prepareTable: function(tbl, forceIds){
-        // For IE's sake, we are adding IDs to the TDs if none is there We go ahead and use it for other code for convenience
-        var trs = Array.apply(null, tbl.children[0].children), i = 0, timeStamp = this.getTimeStamp();
-        if (forceIds || !trs[0].children[0].id){
-            trs.forEach(function(r){
+        var trs = Array.apply(null, tbl.children[0].children), timeStamp = this.getTimeStamp(), self = this;
+        if (forceIds || !trs[0].children[0].id || trs[0].children[0].id.split('_').length !== 4){
+            trs.forEach(function(r, rIndex){
                 var tds = Array.apply(null, r.children);
-                tds.forEach(function(td){
-                	td.id = "tdid"+i+'_'+timeStamp;
-                	i++;
+                tds.forEach(function(td, cIndex){
+					td.id = self.getTdId(rIndex, cIndex, timeStamp);
                 });
             });
         }
     },
-	
     getTimeStamp: function(){
         return new Date().getTime(); 
     },
-	
+	getRowColStamp: function(td){
+		var splittedId = td.id.split('_');
+		return [Number(splittedId[1]), Number(splittedId[2]), splittedId[3]];
+	},
+	getTdId: function(r, c, timeStamp){
+		return ['tdid', r, c, timeStamp].join('_');
+	},
     _tempStoreTableData: function(type){
         // caching or clearing table data, depending on the arg
         if(type===true){//store indefinitely
@@ -242,17 +248,7 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
         this.tablesConnected = false;
     },
     previousOrNextCell: function(evt){
-		var o = this.getTableInfo(), editor = this.editor;
-		o.tdIndex = editor.shiftKeyDown(evt) ? o.tdIndex-1 : tabTo = o.tdIndex+1;
-        console.log('tdIndex: ' + o.tdIndex);
-        if(o.tdIndex>=0 && o.tdIndex<o.tds.length){
-            editor.selectElement(o.tds[o.tdIndex]);
-            this.currentlyAvailable = true;
-            this._tempAvailability(true);
-            this._tempStoreTableData(true);
-        }else{
-            this.onDisplayChanged();
-        }
+		this.rightOrLeft(evt, editor.shiftKeyDown(evt) ? false : true); 
     },
     rightOrLeftCell: function(evt, right){
 		  var editor = this.editor, selectedElement = editor.selection.getSelectedElement();
@@ -275,19 +271,18 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
   upOrDownCell: function(evt, down){
 	  var editor = this.editor, selectedElement = editor.selection.getSelectedElement();
 	  if (selectedElement && selectedElement.tagName === 'TD'){
-		  var temp = selectedElement.id.slice(4).split('_'), sTdIndex = temp[0], tableTimeStamp = temp[1],
-		      tableInfo = this.getTableInfo(), cols = tableInfo.cols, rows = tableInfo.rows, sRow = Math.trunc(sTdIndex/cols), sCol = sTdIndex % cols;
+		var rcs = this.getRowColStamp(selectedElement), sRow = rcs[0], sCol = rcs[1], stamp = rcs[2], tableInfo = this.getTableInfo(), cols = tableInfo.cols, rCols = tableInfo.rCols, rows = tableInfo.rows;
 		  if (down){
 			  if (sRow+1 === rows){
 				  if (sCol+1 === cols){
 					  Pmg.addFeedback(Pmg.message('end of table'), '', true);
 				  }else{
 					  tRow = 0;
-					  tCol = sCol + 1;
+					  tCol = Math.min(sCol + 1, rCols[tRow]);
 				  }
 			  }else{
 				  tRow = sRow + 1;
-				  tCol = sCol;
+				  tCol = Math.min(sCol, rCols[tRow]-1);
 			  }
 		  }else{
 			  if (sRow === 0){
@@ -295,14 +290,14 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
 					  Pmg.addFeedback(Pmg.message('beginning of table'), '', true);
 				  }else{
 					  tRow = rows-1;
-					  tCol = sCol - 1;
+					  tCol = Math.min(sCol - 1, rCols[tRow]);
 				  }
 			  }else{
 				  tRow = sRow -1;
-				  tCol = sCol;
+				  tCol = Math.min(sCol, rCols[tRow]-1);
 			  }
 		  }
-		  editor.selectElement(editor.byId('tdid' + (tCol + tRow * cols) + '_' + tableTimeStamp));
+		  editor.selectElement(editor.byId(this.getTdId(tRow, tCol, stamp)));
 		  return true;
 	  }
 	  return false;
@@ -415,6 +410,12 @@ var TablePlugins = declare("dojox.editor.plugins.TablePlugins", _Plugin, {
         getTableInfo: function(forceNewData){
             return this.editor._tablePluginHandler.getTableInfo(forceNewData);
         },
+		getRowColStamp: function(td){
+			return this.editor._tablePluginHandler.getRowColStamp(td);
+		},
+		getTdId: function(r, c, timeStamp){
+			return this.editor._tablePluginHandler.getTdId(r, c, timeStamp);
+		},
         prepareTable: function(){
             this.tableInfo = this.getTableInfo(true);
             this.table = this.tableInfo.tbl;
@@ -481,22 +482,18 @@ var TablePlugins = declare("dojox.editor.plugins.TablePlugins", _Plugin, {
 	    	});
 	    },
 	    pasteAtSelected: function(){
-	    	var table = this.table, isWorksheet = dcl.contains(table, 'tukosWorksheet'), lastSelectedTds = this.lastSelectedTds, tableInfo = this.tableInfo, cols = tableInfo.cols, rows = tableInfo.rows;
+	    	var table = this.table, isWorksheet = dcl.contains(table, 'tukosWorksheet'), lastSelectedTds = this.lastSelectedTds, tableInfo = this.tableInfo, rCols = tableInfo.rCols, rows = tableInfo.rows;
 	    	if (lastSelectedTds){
-	        	var	temp = lastSelectedTds[0].id.slice(4).split('_'), sourceTdIndex = temp[0], tableTimeStamp = temp[1], sourceRow = Math.trunc(sourceTdIndex/cols), sourceCol = sourceTdIndex % cols, selectedTds = this.selectedTds,
-	        		targetTdIndex = selectedTds[0].id.slice(4).split('_')[0], targetRow = Math.trunc(targetTdIndex/cols), targetCol = targetTdIndex % cols, rowOffset = targetRow - sourceRow, colOffset = targetCol - sourceCol,
-	        		tdIdOffset = targetTdIndex - sourceTdIndex, tTdId, e = this.editor, targetLastPastedTd, tRow, tCol,
-	        		targetLastTdIndex = selectedTds[selectedTds.length-1].id.slice(4).split('_')[0], lastTargetRow = Math.trunc(targetLastTdIndex/cols), targetRows = lastTargetRow - targetRow + 1, lastTargetCol = targetLastTdIndex % cols, 
-	        		targetCols = lastTargetCol - targetCol + 1, continuePaste = true;
+				var sRcs = this.getRowColStamp(lastSelectedTds[0]), sourceRow = sRcs[0], sourceCol = sRcs[1], stamp = sRcs[2],	selectedTds = this.selectedTds, tRcs = this.getRowColStamp(selectedTds[0]), targetRow = tRcs[0],
+					targetCol = tRcs[1], rowOffset = targetRow - sourceRow, colOffset = targetCol - sourceCol, ltRcs = this.getRowColStamp(selectedTds[selectedTds.length-1]), lastTargetRow = ltRcs[0], lastTargetCol = ltRcs[1],
+					self = this, e = this.editor, continuePaste = true, tRow, tCol;
 	    		while(continuePaste){
-	            	lastSelectedTds.forEach(function(sTd, sTdIndex){
-	        			var sTdIndex = sTd.id.slice(4).split('_')[0], tTd;
-	        			tRow = Math.trunc(sTdIndex/cols) + rowOffset;
-	        			tCol = sTdIndex % cols + colOffset;
-	        			if (tRow < rows && tCol < cols){
-	        				targetLastPastedTd = parseInt(sTdIndex) + tdIdOffset;
-	        				tTdId = 'tdid' + targetLastPastedTd + '_' + tableTimeStamp;
-	        				tTd = e.byId(tTdId);
+	            	lastSelectedTds.forEach(function(sTd){
+						var sRcs = 	self.getRowColStamp(sTd), tTd;
+						tRow = sRcs[0] + rowOffset;
+						tCol = sRcs[1] + colOffset;		
+	        			if (tRow < rows && tCol < rCols[tRow]){
+	        				tTd = e.byId(self.getTdId(tRow, tCol, stamp));
 	        				if (isWorksheet){
 	        					var sExpression = sTd.children[0], tExpression = tTd.children[0];
 	        					expressions.copyExpression(sExpression, tExpression, rowOffset, colOffset);
@@ -508,11 +505,9 @@ var TablePlugins = declare("dojox.editor.plugins.TablePlugins", _Plugin, {
 	        		});
 	            	if (tCol < lastTargetCol){
 	            		colOffset = tCol - sourceCol + 1;
-	            		tdIdOffset = colOffset + rowOffset * cols;
 	            	}else if (tRow < lastTargetRow){
 	            		colOffset = targetCol - sourceCol;
 	            		rowOffset = tRow + 1 - sourceRow;
-	            		tdIdOffset = colOffset + rowOffset * cols;
 	            	}else{
 	            		continuePaste = false;
 	            	}

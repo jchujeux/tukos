@@ -93,7 +93,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
     	    aspect.after(this, 'onDisplayChanged', lang.hitch(this, function(){
     			var document = this.document, wSelection;
     	    	if (document && (wSelection = document.getSelection())){
-    				var eSelection = this.selection, anchorNode = wSelection.anchorNode, parentNode = anchorNode.parentNode, path = parentNode.nodeName + ' > ';
+    				var anchorNode = wSelection.anchorNode, parentNode = anchorNode.parentNode, path = parentNode.nodeName + ' > ';
         			while(parentNode && (parentNode.nodeName !== 'BODY')){
         				parentNode = parentNode.parentNode;
         				path = parentNode.nodeName + ' > ' + path;
@@ -223,7 +223,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
             	this.editNode.className = 'claro';
             }));
         },
-
+/*
         destroy: function(){
 			array.forEach(this._plugins, function(p){
 				if(p && p.destroy){
@@ -238,6 +238,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
             }
             RichText.prototype.destroy.apply(this, arguments);
         },
+*/
 		pasteHtmlAtCaret: function(html, selectPastedContent) {// found here: http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div/6691294#6691294
             var sel = dijit.range.getSelection(this.window), range = sel.getRangeAt(0);
             this.endEdit();
@@ -279,7 +280,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
     				eSelection.selectElement(placeHolders[0]);
     			}else{
     				eSelection.selectElement(node);
-    				eSelection.collapse();
+    				//eSelection.collapse();
     			}
             	dcl.remove(node, selectedClass);
             	if (!node.getAttribute('class')){

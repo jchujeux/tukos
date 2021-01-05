@@ -43,13 +43,15 @@ function(declare, lang, ready, _Plugin, Button, _TagEditDialog, messages) {
         	return dropDown;
         },
         openDialog: function(){
-        	if (this.inherited(arguments)){
-                var target = this.target, pane = this.pane;
-                pane.getWidget('tagname').set('value', target.tagName);
-                return true;       		
-        	}else{
-        		return false;
-        	};
+	        var target = this.target, pane = this.pane;
+			when(this.inherited(arguments), function(response){
+	        	if (response){
+	                pane.getWidget('tagname').set('value', target.tagName);
+	                return true;       		
+	        	}else{
+	        		return false;
+	        	};
+			});
         }
     });
 	_Plugin.registry['SelectionEditor'] = function(){return new SelectionEditor({})};

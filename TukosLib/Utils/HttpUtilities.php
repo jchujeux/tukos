@@ -11,7 +11,7 @@ class HttpUtilities{
             readfile($fileName);
             return false;// this is required so as not to send anything (e.g. Feedback) in the response (in the downloaded file) after successful download
         }else{
-            Feedback::add($this->tr('errorgeneratingfile'));
+            Feedback::add(Tfk::tr('errorgeneratingfile'));
             return [];
         }
     }

@@ -227,7 +227,7 @@ abstract class AbstractModel extends ObjectTranslator {
         if ((empty($atts) || empty($atts['where'])) && !empty($values['id'])){
             $atts['where'] = ['id' => $values['id']];
         }
-        $defCols = ['id', 'permission', 'acl', 'updator', 'updated'];
+        $defCols = ['id', 'permission', 'acl', 'updator', 'updated', 'creator'];
         if (in_array('history', $this->allCols)){
             $defCols[] = 'history';
         }

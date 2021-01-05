@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-style", "dojo/dom-class", "dojo/dom-construct", "tukos/utils", "tukos/expressions", "tukos/widgets/editor/plugins/_TagEditDialog", "tukos/PageManager"], 
-    function(declare, lang, domAttr, domStyle, dcl, dct, utils, expressions, _TagEditDialog, Pmg){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/dom-attr", "dojo/dom-style", "dojo/dom-class", "tukos/utils", "tukos/expressions", "tukos/widgets/editor/plugins/_TagEditDialog", "tukos/PageManager"], 
+    function(declare, lang, when, domAttr, domStyle, dcl, utils, expressions, _TagEditDialog, Pmg){
 
     var actions = ['copySelected', 'emptySelected', 'pasteAtSelected', 'merge', 'split', 'apply', 'close'];
 
@@ -28,16 +28,17 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
             return this._dialogAtts(extraWidgetsDescription, headerRowLayout, actions, actionsRow, this.editableAtts);
         },
         openDialog: function(){
-            var pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), paneSetWidgets = lang.hitch(pane, pane.setWidgets), table = this.table;
+            var pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), paneSetWidgets = lang.hitch(pane, pane.setWidgets), table = this.table, tableInfo = this.tableInfo;
             this.target = this.selectedTds[0];
-            this.inherited(arguments);
-            if (dcl.contains(table, 'tukosWorksheet')){
-            	var tableInfo = this.tableInfo, disabledRowValue = tableInfo.trIndex === 0 ? true : false, disabledColValue = tableInfo.colIndex === 0 ? true : false;
-            	paneSetWidgets({checked: {isWorksheet: true}, value: {sheetName: table.id}, hidden: {sheetName: false}});
-            }else{
-            	paneSetWidgets({checked: {isWorksheet: false}, hidden: {sheetName: true}});
-            }
-            return true;
+            return when(this.inherited(arguments), function(){
+	            if (dcl.contains(table, 'tukosWorksheet')){
+	            	var disabledRowValue = tableInfo.trIndex === 0 ? true : false, disabledColValue = tableInfo.colIndex === 0 ? true : false;
+	            	paneSetWidgets({checked: {isWorksheet: true}, value: {sheetName: table.id}, hidden: {sheetName: false}});
+	            }else{
+	            	paneSetWidgets({checked: {isWorksheet: false}, hidden: {sheetName: true}});
+	            }
+	            return true;
+			});
         },
         apply: function(){
             var tds = this.selectedTds, includedAtts = this.includedAtts, pane = this.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);

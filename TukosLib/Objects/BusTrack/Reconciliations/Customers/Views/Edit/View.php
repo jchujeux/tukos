@@ -14,7 +14,7 @@ class View extends EditView{
             'contents' => [
                 'col1' => [
                     'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true],
-                    'widgets' => ['id', 'parentid', 'name', 'startdate', 'enddate', 'nocreatepayments', 'verificationcorrections', 'pendinginvoicesonly', 'showinvoicessince']
+                    'widgets' => ['id', 'parentid', 'name', 'startdate', 'enddate', 'nocreatepayments', 'unexplainedpaymentsonly', 'verificationcorrections', 'pendinginvoicesonly', 'showinvoicessince']
                 ],
                 'col2' => [
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],

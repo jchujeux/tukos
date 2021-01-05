@@ -27,7 +27,7 @@ class UserInformation{
             $usersInfo = SUtl::$store->$getFunc([/*can't use Users\Model here as AbstractModel relies on $this->userInfo */
                 'table' => $tu, 'join' => [['inner', $tk,  $tk . '.id = ' . $tu . '.id']],
                 'where' => SUtl::transformWhere($where, $tu),
-                'cols' => ['tukos.id', 'password', 'rights', 'modules', 'language', 'environment', 'tukosorganization', 'customviewids', 'customcontexts', 'pagecustom', 'dropboxaccesstoken', 'dropboxbackofficeaccess', 'parentid', 'name', 
+                'cols' => ['tukos.id', 'password', 'rights', 'modules', 'restrictedmodules',  'language', 'environment', 'tukosorganization', 'customviewids', 'customcontexts', 'pagecustom', 'dropboxaccesstoken', 'dropboxbackofficeaccess', 'parentid', 'name', 
                            'contextid', 'custom'],
                 'union' => Tfk::$registry->get('tukosModel')->parameters['union']
             ]);
@@ -43,6 +43,7 @@ class UserInformation{
                 }
             }
             $this->unallowedModules  = ($this->isSuperAdmin() || $this->userInfo['modules'] === null) ? [] : json_decode($this->userInfo['modules'], true);
+            $this->restrictedModules = ($this->isSuperAdmin() || $this->userInfo['restrictedmodules'] === null) ? [] : json_decode($this->userInfo['restrictedmodules'], true);
             if ($userName === 'tukosBackOffice'){
                 $this->allowedModules = ['contexts', 'backoffice'];
             }else{
@@ -115,6 +116,9 @@ class UserInformation{
             return in_array($module, $this->allowedModules);
         }
     }
+    public function isRestricted($module){
+        return in_array($module, $this->restrictedModules);
+    }
     public function unallowedModules(){
         return $this->unallowedModules;
     }
@@ -144,10 +148,7 @@ class UserInformation{
         return $this->modulesMenuLayout;
     }
       
-   /*
-    * Flag to determine whether a record can be modified by current user. 
-    */
-    public function canEdit($permission, $updator){
+/*    public function canEdit($item){
 
         switch ($this->rights()){
             case 'SUPERADMIN':
@@ -155,32 +156,42 @@ class UserInformation{
                 break;
             case 'ADMIN':
             case 'ENDUSER' :
-                if (($permission === 'RO' || $permission === 'PR') && $this->id() !== $updator){
+                if (($permission = $item['permission'] === 'RO' || $permission === 'PR') && $this->id() !== $item['updator']){
                     return false;
                 }else{
                     return true;
                 }
                 break;
+            case 'RESTRICTEDUSER':
+                return $this->id() === $updator ? true : false;
+                break;
         }
     }
+*/
     function fullColName($colName, $tableName = ''){
         return ($tableName === '' ? '' : $tableName . '.') . $colName;
     }
-    function filterPrivate($where, $tableName=''){
+    function filterPrivate($where, $objectName='',  $tableName=''){
         switch ($this->rights()){
             case 'SUPERADMIN':
                 break;
             case 'ADMIN':
             case 'ENDUSER' :
-/*
-                $where[] = [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RO,PU']],
-                ['col' => $this->fullColName('updator'), 'opr' => 'LIKE', 'values' => $this->id(), 'or' => true],
-                ['col' => $this->fullColName('acl'), 'opr' => 'RLIKE', 'values' => $this->id() . '","permission":"[123]"', 'or' => true]
-                ];
-*/
                 $where[] = [
-                    [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RO','PU']], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
-                    ['col' => $this->fullColName('updator'), 'opr' => 'LIKE', 'values' => $this->id(), 'or' => true],
+                    [
+                        [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RO','PU']], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
+                        [['col' => $this->fullColName('updator'), 'opr' => 'LIKE', 'values' => $this->id()],[['col' => $this->fullColName('creator'), 'opr' => 'LIKE', 'values' => $this->id()],['col' => $aclName, 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']], 'or' => true], 'or' => true
+                    ],
+                    ['col' => $aclName, 'opr' => 'RLIKE', 'values' => $this->id() . '","permission":"[123]"', 'or' => true]
+                ];
+                break;
+            case 'RESTRICTEDUSER':
+                $permissions = empty($objectName) || !$this->isRestricted($objectName) ?  ['RO', 'PU'] : ['PU'];
+                $where[] = [
+                     [
+                         [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => $permissions], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
+                         [['col' => $this->fullColName('updator'), 'opr' => 'LIKE', 'values' => $this->id()],[['col' => $this->fullColName('creator'), 'opr' => 'LIKE', 'values' => $this->id()],['col' => $aclName, 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']], 'or' => true], 'or' => true
+                    ],
                     ['col' => $aclName, 'opr' => 'RLIKE', 'values' => $this->id() . '","permission":"[123]"', 'or' => true]
                 ];
                 break;
@@ -188,12 +199,24 @@ class UserInformation{
         return $where;  
     }
     function filterReadOnly($where, $tableName = ''){
-        if ($this->rights()!== "SUPERADMIN"){
-            $where[] = [
-                [['col' => $this->fullColName('permission'), 'opr' => '=', 'values' => 'PU'], ['col' => ($this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"[01]"']], 
-                ['col' => $this->fullColName('updator'), 'opr' => '=', 'values' => $this->id(), 'or' => true],
-                ['col' => $this->fullColName('acl'), 'opr' => 'RLIKE', 'values' => $this->id(). '","permission":"[23]"', 'or' => true]
-            ];
+        switch($rights = $this->rights()){
+            case "SUPERADMIN":
+                break;
+            case 'RESTRICTEDUSER':
+                if (!empty($objectName) && !$this->isRestricted($objectName)){
+                    $where[] = [
+                        ['col' => $this->fullColName('updator'), 'opr' => '=', 'values' => $this->id(), 'or' => true],
+                        ['col' => $this->fullColName('acl'), 'opr' => 'RLIKE', 'values' => $this->id(). '","permission":"[23]"', 'or' => true]
+                    ];
+                    break;
+                }
+            case 'ADMIN':case 'ENDUSER':
+                $where[] = [
+                    [['col' => $this->fullColName('permission'), 'opr' => '=', 'values' => 'PU'], ['col' => ($this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"[01]"']], 
+                    ['col' => $this->fullColName('updator'), 'opr' => '=', 'values' => $this->id(), 'or' => true],
+                    ['col' => $this->fullColName('acl'), 'opr' => 'RLIKE', 'values' => $this->id(). '","permission":"[23]"', 'or' => true]
+                ];
+                break;
         }
         return $where;
     }
@@ -215,7 +238,7 @@ class UserInformation{
         if (isset($where['id']) && $where['id'] === $this->id()){
         	return $where;//so that a user can always access his own item
         }else{
-    		return $this->filterContext($this->filterPrivate($where, $tableName), $objectName, $tableName);
+    		return $this->filterContext($this->filterPrivate($where, $objectName, $tableName), $objectName, $tableName);
         }
     }
     public function aclRights ($userId, $acl){
@@ -234,11 +257,11 @@ class UserInformation{
     }
     public function hasUpdateRights($item){
         $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
-        return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 1)) || $aclRights > 1 || $item['id'] === $this->id();
+        return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 1)) || $aclRights > 1 || $item['id'] === $userId || ($item['creator'] === $userId && !$aclRights) ;
     }
     public function hasDeleteRights($item){
         $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
-        return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 2)) || $aclRights > 2;
+        return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 2)) || $aclRights > 2 || ($item['creator'] === $userId && !$aclRights);
     }
     public function getDropboxUserAccessToken($userId){
         if (is_string($this->userInfo['custom'])){
@@ -379,7 +402,7 @@ class UserInformation{
     public function getCustomTukosUrl($request, $query){
         if (!isset(Tfk::$registry->route->values['object']) && ($customTukosUrl = Utl::getItem(Tfk::$registry->appName, Utl::toAssociative(Utl::getItem('defaultTukosUrls', $this->pageCustomization(), []), 'app')))){
             if ($customUrlObject = Utl::getItem('object', $customTukosUrl)){
-                $request = array_merge($request, ['object' => ucfirst($customUrlObject), 'view' => ucfirst(Utl::getItem('view', $customTukosUrl, 'overview'))]);
+                $request = array_merge($request, ['object' => $customUrlObject, 'view' => ucfirst(Utl::getItem('view', $customTukosUrl, 'overview'))]);
             }
             if ($customUrlQuery = Utl::getItem('query', $customTukosUrl)){
                 $conditions = explode(',', $customUrlQuery); $customQuery = [];

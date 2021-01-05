@@ -67,7 +67,7 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
 			angleBrackets: mfenced('&langle;', '&rangle;', {chr: '<', ctrl: true}), ket: mfenced('&verbar;', '&rangle;',{chr: '<', shift: true}), bra: mfenced('&langle;', '&verbar;', '<'), braket: braket(),
 			frac: tagN('mfrac', 2, 'f'), msup: tagN('msup', 2, {chr: 's', shift: true}), msub: tagN('msub', 2, 's'), mover: tagN('mover', 2, {chr: 'o', shift: true}), sqrt: tagN('msqrt', 1, {chr: 'r', shift: true}),
 			msubsup: tagN('msubsup', 3, {chr: 's', ctrl: true, shift: true}), 'int': modownup('msubsup', '&int;', {chr: 'i', shift: true}),
-			sum: modownup('munderover', '&sum;', 'z'),
+			sum: modownup('msubsup', '&sum;', 'z'),
 			mrow: tag('mrow', 'r'), mi: tag('mi', 'i'), mo: tag('mo', 'o'), mn: tag('mn', 'n'), mtext: tag('mtext', 't'),
 			table21: table(2, 1, {chr: 't', shift: true}, "rowalign='center'"),
 			hamilt: tag("mi", {chr: 'h'}, null, "&hamilt;"), lagran: tag("mi", {chr: 'l'}, null, "&lagran;"), planckh: tag("mi", {chr: 'h'}, null, "&planckh;"), hbar: tag("mi", {chr: 'h', shift: true}, null, "&hbar;"),
@@ -83,13 +83,13 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
             	items: [
             		{type: 'PopupMenuItem', atts: {label: Pmg.message('MathMLConstructs')}, popup: {type: 'DropDownMenu', items: this.buildDropDownItems(constructs)}},
             		{type: 'PopupMenuItem', atts: {label: Pmg.message('Symbols')}, popup: this.buildTablePopup(symbols)},
-            		{type: 'PopupMenuItem', atts: {label: Pmg.message('entities')}, popup: this.entityPalette}
+            		{type: 'PopupMenuItem', atts: {label: Pmg.message('entities')  + '  ' + this.shortCutLabel(['e', false, false, true])}, popup: this.entityPalette}
             	]
             };
         },
         setKeyHandlers: function(){
         	var editor = this.editor, self = this;
-    		editor.addKeyHandler("s", true, true, lang.hitch(this, function(){
+    		editor.addKeyHandler("c", true, true, lang.hitch(this, function(){
     			this.button.openDropDown();
     			this.button.dropDown.focus();
     		}));
@@ -207,7 +207,8 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
         			insert = function(key, tagName){
         				if (isTextTag(tagName) && enclosingTagName !== tagName){
         					_insert(htmlTag(tagName, null, key));
-        					eSelection.collapse();
+        					eSelection.selectElementChildren(eSelection.getSelectedElement());
+							eSelection.collapse();
         					handled = true;
         				}
         			},

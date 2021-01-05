@@ -20,7 +20,7 @@ class View extends AbstractView {
 		$customDataWidgets = [
 		    'comments' => ['atts' => ['edit' => ['height' => '150px']]],
 		    'organization' => ViewUtils::objectSelect($this, 'Invoicingorganization', 'organizations'),
-		    'contact' => ViewUtils::objectSelect($this, 'Invoicingcontact', 'people'),
+		    'contact' => ViewUtils::objectSelect($this, 'Invoicingcontact', 'bustrackpeople'),
 		    'reference' =>  ViewUtils::textBox($this, 'Reference', ['atts' => ['edit' => ['disabled' => true]]]),
             'relatedquote' => ViewUtils::objectSelect($this, 'Relatedquote', 'bustrackquotes', [
             	'atts' => ['edit' => [

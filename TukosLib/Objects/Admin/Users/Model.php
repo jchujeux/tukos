@@ -11,15 +11,16 @@ use TukosLib\Utils\Cipher;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel{
-    protected $rightsOptions = ['SUPERADMIN', 'ADMIN', 'ENDUSER'];
+    protected $rightsOptions = ['SUPERADMIN', 'ADMIN', 'ENDUSER','RESTRICTEDUSER'];
     protected $environmentOptions = ['production', 'development'];
     protected $dropboxbackofficeaccessOptions = ['yes', 'no'];
     
     public static $_colsDefinition = [
             'password'      =>  'VARCHAR(255)  DEFAULT NULL',
             'rights'        =>  'VARCHAR(80) DEFAULT NULL',
-            'modules'       =>  'VARCHAR(2048) DEFAULT NULL',
-            'language'      =>  "VARCHAR(80) DEFAULT NULL",
+        'modules'       =>  'VARCHAR(2048) DEFAULT NULL',
+        'restrictedmodules'       =>  'VARCHAR(2048) DEFAULT NULL',
+        'language'      =>  "VARCHAR(80) DEFAULT NULL",
             'environment'   =>  "VARCHAR(80) DEFAULT NULL",
             'tukosorganization' =>  "VARCHAR(80) DEFAULT NULL",
             'dropboxaccesstoken'      =>  'VARCHAR(255)  DEFAULT NULL',
@@ -36,14 +37,14 @@ class Model extends AbstractModel{
         parent::__construct($objectName, $translator, 'users', ['parentid' => ['people']], ['modules', 'customviewids', 'customcontexts', 'pagecustom'], self::$_colsDefinition, self::$_colsIndexes, ['rights', 'modules', 'language'], ['custom', 'history']);
 
         switch ($this->user->rights()){
-            case 'SUPERADMIN': 
-                $this->rightsOptions = ['ADMIN', 'ENDUSER', 'SUPERADMIN'];
-                break;
             case 'ADMIN':
-                $this->rightsOptions = ['ADMIN', 'ENDUSER'];
+                $this->rightsOptions = ['ADMIN', 'ENDUSER', 'RESTRICTEDUSER'];
                 break;
             case 'ENDUSER':
                 $this->rightsOptions = ['ENDUSER'];
+                break;
+            case 'RESTRICTEDUSER':
+                $this->rightsOptions = ['RESTRICTEDUSER'];
                 break;
         }
     }

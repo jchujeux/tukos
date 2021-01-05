@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "dojoFixes/dojox/html/format", "tukos/TukosTooltipDialog", "tukos/utils",
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojoFixes/dojox/html/format", "tukos/TukosTooltipDialog",
         "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-function(declare, lang, dct, domStyle, string, JSON, htmlFormat, TooltipDialog, utils, Pmg, messages) {
+function(declare, lang, dct, htmlFormat, TooltipDialog, Pmg, messages) {
 
 	return declare(null, {
 
@@ -53,6 +53,7 @@ function(declare, lang, dct, domStyle, string, JSON, htmlFormat, TooltipDialog, 
 		    		//editor.execCommand('inserthtml', content);
 		    		editor.pasteHtmlAtCaret(content, true);
 		    	}
+		    		editor.set('value', editor.get('value'));
 	    	}
 	    },
 

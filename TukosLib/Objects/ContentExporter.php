@@ -20,10 +20,23 @@ trait ContentExporter {
 				"for (var i in x) {" .
 					"var y = document.getElementsByClassName(x[i]);" .
 					"for (var j=0; j<y.length; ++j) y[j].textContent = vars[x[i]];" .
-		"}}</script>" /*.
-		'<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' .
-		'<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/mml-chtml.js"></script>'*/;
-	protected $tukosFormsHeader = '<title>${title}</title><link rel="stylesheet" href="${dojoBaseLocation}dijit/themes/claro/claro.css" media="screen">';
+		"}}</script>";
+		//'<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>' .
+	protected $mathMLHeaderScript = <<<EOT
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+	messageStyle: "none",
+    }
+);
+</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=MML_CHTML" defer crossorigin="anonymous"></script>
+EOT
+	;
+	protected $mathMLWkhtmlToPdfOptions = <<<EOT
+  --run-script "MathJax.Hub.Config({NativeMML:{scale:200},CommonHTML:{scale:200}});MathJax.Hub.Queue(['Rerender',MathJax.Hub],function(){window.status='finished'})" --window-status finished --no-stop-slow-scripts 
+EOT
+	;
+	protected $tukosHeader = '<title>${title}</title><link rel="stylesheet" href="${dojoBaseLocation}dijit/themes/claro/claro.css" media="screen">';
 	protected $tukosFormsBodyScripts = '
 <script>var dojoConfig ={
             baseUrl: "", isDebug: false, async: true, locale: "en-en",
@@ -104,7 +117,7 @@ trait ContentExporter {
 		        return $this->buildHtml2TextFile($dirFileName .'.txt', implode('', Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)));
 		    case 'tukosform':
 		        return $this->buildHtmlFile($dirFileName . '.htm', $atts['content'],
-		          Utl::substitute($this->tukosFormsHeader, ['title' => $fileName, 'dojoBaseLocation' => Tfk::$tukosFormsDojoBaseLocation]), '', null,
+		          Utl::substitute($this->tukosHeader, ['title' => $fileName, 'dojoBaseLocation' => Tfk::$tukosFormsDojoBaseLocation]), '', null,
 		          Utl::substitute($this->tukosFormsBodyScripts, [
 		              'dojoBaseLocation' => Tfk::$tukosFormsDojoBaseLocation,
 		              'tukosBaseLocation' => Tfk::$tukosFormsTukosBaseLocation,
@@ -113,7 +126,7 @@ trait ContentExporter {
 		    case 'json':
 		        return $this->buildFile($dirFileName .'.json', json_encode(Utl::getItems(['filecover', 'fileheader', 'content', 'filefooter'], $atts)));
 		    case 'pdf':
-		        return $this->buildPdfFile($dirFileName, $atts);
+		        return $this->buildPdfFile($dirFileName, $atts, Utl::substitute($this->tukosHeader, ['title' => $fileName, 'dojoBaseLocation' => Tfk::$dojoBaseLocation]));
 		    default:
 		        Feedback::add($this->tr('unsupportedformatas'));
 		        return false;
@@ -126,16 +139,17 @@ trait ContentExporter {
 	    return $fileName;
 	}
 	function buildHtmlFile($fileName, $content, $htmlHeader = '', $bodyAtts = '', $bodyDivAtts = null, $bodyScripts = ''){
+	    $htmlHeader .= $this->hasMath($content) ? $this->mathMLHeaderScript : '';
 	    return $this->buildFile($fileName, '<!DOCTYPE HTML><html ><head><meta charset="utf-8">' . $htmlHeader . '</head><body class="claro" ' . $bodyAtts . '>' .
 	        (isset($bodyDivAtts) ? '<div ' . $bodyDivAtts . '>' : '') . $content . (isset($bodyDivAtts) ? '</div>' : '') . $bodyScripts . '</body></html>');
 	}
 	function buildHtml2TextFile($fileName, $content){
 	    return $this->buildFile($fileName, Html2Text::convert($content));
 	}
-	function buildPdfFile($dirFileName, $atts){
+	function buildPdfFile($dirFileName, $atts, $htmlHeader){
 	    $contentFileName =  $dirFileName . 'body.htm';
-	    $this->buildHtmlFile($contentFileName, $atts['content'], $this->tukosFormsHeader);
-	    $htmlToPdfOptions = ' ';
+	    $this->buildHtmlFile($contentFileName, $atts['content'], $htmlHeader);
+	    $htmlToPdfOptions =  ' ';
 	    $bodyAtts = 'style="margin:0; padding: 0;" onload="subst()"';
 	    $headerDivAtts = null;
 	    if (!empty($atts['contentmargin'])){
@@ -145,7 +159,7 @@ trait ContentExporter {
 	        $headerDivOptions = 'style="height:' . intval($offset + $coef * ($atts['contentmargin'] - $offset)) . 'mm;overflow:hidden;"';
 	    }
 	    if ($atts['orientation'] === 'landscape'){
-	        $htmlToPdfOptions .= '-O landscape ';
+	        $htmlToPdfOptions .= ' -O landscape ';
 	    }
 	    if ($atts['smartshrinking'] === 'off'){
 	        $htmlToPdfOptions .= ' --disable-smart-shrinking ';
@@ -171,7 +185,7 @@ trait ContentExporter {
 	    }
 	    $tmpPdfFileName = $dirFileName . '.pdf';
 	    $streamsStore = Tfk::$registry->get('streamsStore');
-	    if ($streamsStore->startStream('htmltopdf', Tfk::$htmlToPdfCommand /*. ' --javascript-delay 25000 ' */. $htmlToPdfOptions . $contentFileName . ' ' . $tmpPdfFileName, false)){
+	    if ($streamsStore->startStream('htmltopdf', Tfk::$htmlToPdfCommand.' '. $htmlToPdfOptions. ' ' . $contentFileName . ($this->hasMath($atts['content']) ? $this->mathMLWkhtmlToPdfOptions : '') . ' ' . $tmpPdfFileName, false)){
 	        $streamsStore->waitOnStream('htmltopdf', false, 'forget');
 	    }
 	    unlink($contentFileName);
@@ -179,6 +193,9 @@ trait ContentExporter {
 	    if (!empty($atts['filefooter'])){unlink($footerFileName);}
 	    if (!empty($atts['filecover'])){unlink($coverFileName);}
 	    return $tmpPdfFileName;
+	}
+	function hasMath($content){
+	    return stripos($content, '<math') > -1;
 	}
 }
 ?>

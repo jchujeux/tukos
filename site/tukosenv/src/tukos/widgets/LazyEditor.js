@@ -1,7 +1,7 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dojo/Deferred", "dojo/dom-style", "dijit/layout/ContentPane", "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
         "tukos/widgets/HtmlContent", "tukos/widgets/DnDWidget", "tukos/widgets/widgetCustomUtils"], 
   function(declare, lang, ready, when, Deferred, domStyle, ContentPane, Pmg, WidgetsLoader, HtmlContent, DnD, wcutils){
-	var editor, isPlaced = false;
+	var EditorClass, editor, isPlaced = false;
 	return declare([ContentPane, DnD], {
 		postCreate: function(){
 			this.inherited(arguments);
@@ -17,6 +17,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			if (!this.disabled && !this.readOnly){
 				if (!editor){
 					when(WidgetsLoader.loadWidget('Editor'), lang.hitch(this, function(Editor){
+						EditorClass = Editor;
 						editor = new Editor({style: {width: '100%'}}, dojo.doc.createElement("div"));
 						editor.startup();//JCH: needed for OverviewDgrid editor instantiation in colValues
 						this.placeEditor();
@@ -27,6 +28,13 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 					}
 				}
 			}
+		},
+		resetEditor: function(){
+			editor = null;
+		},
+		customContextMenuItems: function(){
+			var self = this;    		
+			return [{atts: {label: Pmg.message('resetEditor')  , onClick: function(){self.resetEditor()}}}];
 		},
 		editorToContentHeight: function(editorHeight){
 			return editorHeight ? (parseInt(editorHeight) + 78) + 'px' : undefined;

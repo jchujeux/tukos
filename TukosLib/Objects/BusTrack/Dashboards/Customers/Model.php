@@ -164,7 +164,7 @@ EOT
             }
         }else{
             Feedback::add($this->tr('Needorgastartend'));
-            return false;
+            return [];
         }
         return [];
     }

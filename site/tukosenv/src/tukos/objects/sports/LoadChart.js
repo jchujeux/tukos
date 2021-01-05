@@ -151,16 +151,16 @@ return declare(null, {
 						chartItem.durationTooltip = tooltipPrefix + tableItem.duration  + (tooltipComplement || '');
 						break;
 					default:
-						tableItem[col] = chartItem[col].toFixed(colAtts.decimals || 0);
-						chartItem[col + 'Tooltip'] = tooltipPrefix + tableItem[col] + (colAtts.tooltipUnit || '') + (tooltipComplement || '');
 						if (colAtts.isDurationAverage){
 							chartItem[col] = chartItem[col] / chartItem.duration;
 						}
-						if (colAtts.scalingFactor){
-							chartItem[col] = chartItem[col] / colAtts.scalingFactor;
-						}
 						if (colAtts.normalizationFactor){
 							chartItem[col] = chartItem[col] / colAtts.normalizationFactor[dayOrWeek];
+						}
+						tableItem[col] = chartItem[col].toFixed(colAtts.decimals || 1);
+						chartItem[col + 'Tooltip'] = tooltipPrefix + tableItem[col] + (colAtts.tooltipUnit || '') + (tooltipComplement || '');
+						if (colAtts.scalingFactor){
+							chartItem[col] = chartItem[col] / colAtts.scalingFactor[dayOrWeek];
 						}
 				}
 			});
