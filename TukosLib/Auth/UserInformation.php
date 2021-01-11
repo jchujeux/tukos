@@ -147,27 +147,6 @@ class UserInformation{
     public function modulesMenuLayout(){
         return $this->modulesMenuLayout;
     }
-      
-/*    public function canEdit($item){
-
-        switch ($this->rights()){
-            case 'SUPERADMIN':
-                return true;
-                break;
-            case 'ADMIN':
-            case 'ENDUSER' :
-                if (($permission = $item['permission'] === 'RO' || $permission === 'PR') && $this->id() !== $item['updator']){
-                    return false;
-                }else{
-                    return true;
-                }
-                break;
-            case 'RESTRICTEDUSER':
-                return $this->id() === $updator ? true : false;
-                break;
-        }
-    }
-*/
     function fullColName($colName, $tableName = ''){
         return ($tableName === '' ? '' : $tableName . '.') . $colName;
     }
@@ -179,14 +158,14 @@ class UserInformation{
             case 'ENDUSER' :
                 $where[] = [
                     [
-                        [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RO','PU']], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
+                        [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RL','RO','PU']], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
                         [['col' => $this->fullColName('updator'), 'opr' => 'LIKE', 'values' => $this->id()],[['col' => $this->fullColName('creator'), 'opr' => 'LIKE', 'values' => $this->id()],['col' => $aclName, 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']], 'or' => true], 'or' => true
                     ],
                     ['col' => $aclName, 'opr' => 'RLIKE', 'values' => $this->id() . '","permission":"[123]"', 'or' => true]
                 ];
                 break;
             case 'RESTRICTEDUSER':
-                $permissions = empty($objectName) || !$this->isRestricted($objectName) ?  ['RO', 'PU'] : ['PU'];
+                $permissions = empty($objectName) || !$this->isRestricted($objectName) ?  ['RL', 'RO', 'PU'] : ['PU'];
                 $where[] = [
                      [
                          [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => $permissions], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
@@ -255,11 +234,17 @@ class UserInformation{
             return false;
         }
     }
-    public function hasUpdateRights($item){
+    public function hasUpdateRights($item, $newItem=[]){
+        if (in_array($item['permission'] , ['PL', 'RL']) && !empty($newItem) && Utl::getItem('permission', $newItem,$item['permission']) === $item['permission']){
+            return false;
+        }
         $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
         return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 1)) || $aclRights > 1 || $item['id'] === $userId || ($item['creator'] === $userId && !$aclRights) ;
     }
     public function hasDeleteRights($item){
+        if (in_array($item['permission'] , ['PL', 'RL'])){
+            return false;
+        }
         $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
         return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 2)) || $aclRights > 2 || ($item['creator'] === $userId && !$aclRights);
     }

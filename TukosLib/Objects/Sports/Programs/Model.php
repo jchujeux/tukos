@@ -18,7 +18,7 @@ class Model extends AbstractModel {
     
 	protected $presentationOptions = ['perdate', 'persession'];
     protected $synchnextmondayOptions = ['YES', 'NO'];
-    public $defaultSessionsTrackingVersion = 'V1';
+    public $defaultSessionsTrackingVersion = 'V2';
     
     function __construct($objectName, $translator=null){
         $colsDefinition = [
@@ -353,15 +353,24 @@ class Model extends AbstractModel {
         $id = $query['id'];
         $trackingConfiguration = $this->getCombinedCustomization(['id' => $id], 'edit', null, ['widgetsDescription', 'sessionstracking', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription']);
         $includeTrackingFormUrl = ($eventFormUrl = Utl::getItem('eventformurl', $trackingConfiguration)) ? $eventFormUrl['atts']['checked'] : false;
+        $targetDbString = $sessionFeedback = null;
+        $completeTrackingFormUrl = function ($eventDescription) use ($includeTrackingFormUrl, &$targetDbString, $sessionFeedback){
+            if ($includeTrackingFormUrl){
+                if (is_null($targetDbString)){
+                    $targetDbString = "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared'));
+                    $sessionFeedback = Tfk::$registry->get('translatorsStore')->substituteTranslations($this->tr('SessionFeedback'));
+                }
+                $eventDescription['description'] .= $targetDbString . '}">'  .  $sessionFeedback . '</a><br>';
+            }
+            return $eventDescription;
+        };
         if ($includeTrackingFormUrl){
             $logoFile = ($logo = Utl::getItem('formlogo', $trackingConfiguration)) ? $logo['atts']['value'] : '';
             $formPresentation = ($presentation = Utl::getItem('formpresentation', $trackingConfiguration)) ? $presentation['atts']['value'] : '';
             $formVersion = ($version = Utl::getItem('version', $trackingConfiguration)) ? $version['atts']['value'] : $this->defaultSessionsTrackingVersion;
         }else{
-            $logoFile = $formPresentation = $formVersion = '';
+            $logoFile = $formPresentation = $formVersion = $targetDbString = '';
         }
-        //$logofile = $includeTrackingFormUrl ? (($logo = Utl::getItem('formlogo', $trackingConfiguration)) ? $logo['atts']['value'] : '') : '';
-        //$formPresentation = $includeTrackingFormUrl ? (($presentation = Utl::getItem('formpresentation', $trackingConfiguration)) ? $presentation['atts']['value'] : '') : '';
         $where = ['parentid' => $id, [['col' => 'duration', 'opr' => '<>', 'values' => '0'], ['col' => 'mode', 'opr' => '<>', 'values' => 'performed']]];
         if ($minTimeToSync = Utl::getItem('synchrostart', $atts, '', '')){
         	$where[] = ['col' => 'startdate', 'opr' => '>=', 'values' => $minTimeToSync];
@@ -395,23 +404,27 @@ class Model extends AbstractModel {
 	            }
 	            $descriptions = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode($descriptions)), true);
 	            foreach($sessionsToSync as $key => $session){
-	                $eventDescription = ['start' => ['date' => $session['startdate']], 'end' => ['date' => $session['startdate']], 'summary' => $session['name'], 'description' => $descriptions[$key]];
+	                $eventDescription = ['start' => ['date' => $session['startdate']], 'end' => ['date' => date('Y-m-d', strtotime($session['startdate'] . ' +1 day'))], 'summary' => $session['name'], 'description' => $descriptions[$key]];
 	                if (!empty($intensity = $session['intensity'])){
 	                    $eventDescription['colorId'] = Calendar::getEventColorId(Sports::$colorNameToHex[Sports::$intensityColorsMap[$intensity]]);
 	                }
 	                if ((!$googleEventId = Utl::getItem('googleid', $session)) || empty($existingGoogleEvents[$googleEventId])){
-	                    $event = Calendar::createEvent($calId, $eventDescription);
+	                    $event = Calendar::createEvent($calId, $completeTrackingFormUrl($eventDescription));
 	                    $created += 1;
 	                    $sessionsModel->updateOne(['id' => $session['id'], 'googleid' => $event->getId()]);
 	                }else{
 	                    try {
-	                        if ($eventDescription != $existingGoogleEvents[$googleEventId]){
-	                            Calendar::updateEvent($calId, $googleEventId, $eventDescription);
+	                        $existingGoogleEvent = $existingGoogleEvents[$googleEventId];
+	                        if ($includeTrackingFormUrl && ($position = strpos($existingGoogleEvent['description'], '&targetdb')) !== false){
+	                            $existingGoogleEvent['description'] = substr($existingGoogleEvent['description'], 0, $position);
+	                        }
+	                        if ($eventDescription != $existingGoogleEvent){
+	                            Calendar::updateEvent($calId, $googleEventId, $completeTrackingFormUrl($eventDescription));
 	                            $updated += 1;
 	                        }
 	                        $updatedEvents[] = $googleEventId;
 	                    } catch (\Exception $e) {
-	                        $event = Calendar::createEvent($calId, $eventDescription);
+	                        $event = Calendar::createEvent($calId, $completeTrackingFormUrl($eventDescription));
 	                        $created +=1;
 	                        $sessionsModel->updateOne(['id' => $session['id'], 'googleid' => $event->getId()]);
 	                    }
@@ -452,8 +465,7 @@ class Model extends AbstractModel {
             $sport = rawurlencode($session['sport']);
             $description .= '<a href="' .  Tfk::$registry->rootUrl . Tfk::$registry->appUrl .
             "Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&version=$version&parentid=$programId&date={$session['startdate']}&name=$sessionName&sport=$sport&sessionid={$session['sessionid']}" .
-            ($logoFile ? "&logo=$logoFile" : '') . ($presentation ? "&presentation=$presentation" : '') . "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared')) . '">' .
-            $this->tr('SessionFeedback') . '</a><br>';
+            ($logoFile ? "&logo=$logoFile" : '') . ($presentation ? "&presentation=$presentation" : '');
         }
         return $description;
     }

@@ -22,7 +22,7 @@ class TukosModel {
         'updated'      =>  "timestamp",
         'creator'      =>  'INT(11) NOT NULL',
         'updator'      =>  'INT(11) NOT NULL',
-        'permission'   =>  "ENUM ('NOTDEFINED', 'PR', 'RO', 'PU', 'ACL')",
+        'permission'   =>  "ENUM ('NOTDEFINED', 'PL',  'PR', 'RL',  'RO', 'PU', 'ACL')",
         'acl'           => 'longtext',
         'grade'          =>  "ENUM ('TEMPLATE', 'NORMAL', 'GOOD', 'BEST')",
         'worksheet'    =>  'longtext',

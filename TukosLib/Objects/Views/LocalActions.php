@@ -24,7 +24,7 @@ EOT;
     function watchCheckboxLocalAction($widgetName){
         return ['checked' => [
                 $widgetName  => ['localActionStatus' => ['action' => <<<EOT
-lang.setObject('customization.widgetsDescription.' + sWidget.pane.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription." . $widgetName . ".atts.checked', newValue, sWidget.pane.form);
+lang.setObject('customization.widgetsDescription.' + sWidget.pane.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription.$widgetName.atts.checked', newValue, sWidget.pane.form);
 return true
 EOT
                 ]],

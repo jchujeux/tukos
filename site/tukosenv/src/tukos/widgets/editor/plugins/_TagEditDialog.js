@@ -47,9 +47,9 @@ define (
                 when(this.openDialog(), function(response){
 					if (response){
 	                    dijit.TooltipDialog.prototype.onOpen.apply(self, _arguments);
-	                    /*ready(lang.hitch(self, function(){//JCH: solves issues of empty TooltipDialog when browser window size changes after tooltipdialog has been laoded, among others ...
+	                    ready(lang.hitch(self, function(){//JCH: solves issues of empty TooltipDialog when browser window size changes after tooltipdialog has been laoded, among others ...
 	                        this.pane.resize();
-	                    }));*/           	
+	                    }));
 	                }else{
 	                	dijit.popup.close(this);
 	                }

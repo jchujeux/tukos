@@ -27,7 +27,7 @@ class Get extends AbstractViewModel {
 
         $getOne = $this->modelGetOne;
         $value = $this->modelToView(
-            $this->model->$getOne(['where' => $this->user->filter($query, $this->model->objectName), 'cols' => $this->adjustedCols($cols)], $this->view->jsonColsPathsView),
+            $this->model->$getOne(['where' => $this->user->filterPrivate($query, $this->model->objectName), 'cols' => $this->adjustedCols($cols)], $this->view->jsonColsPathsView),
             $modelToView,
             false
         );

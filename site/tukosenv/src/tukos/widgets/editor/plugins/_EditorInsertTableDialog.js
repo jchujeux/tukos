@@ -24,8 +24,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-attr", "dojo/dom-sty
                 attWidget.attValueModule.set(table, att, attWidget.get('value'));
             });
             if (isWorksheet){
-            	var sheetName = paneGetWidget('sheetName').get('value'), root = this.editor.document;
-            	if (this.editor.document.getElementById(sheetName)){
+            	var sheetName = paneGetWidget('sheetName').get('value').replace(/ /g, '_'), root = this.editor.document;
+            	if (!sheetName){
+            		Pmg.alert({title: Pmg.message('errorEmptyName'), content: Pmg.message('You need to enter a new sheet name')});
+            	}else if (this.editor.document.getElementById(sheetName)){
             		Pmg.alert({title: Pmg.message('errorDuplicateName'), content: Pmg.message('the chosen sheetName is already in use')});
             		return;
             	}

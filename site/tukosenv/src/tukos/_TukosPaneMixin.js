@@ -124,7 +124,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
     	   if (!utils.empty(this.userChangedWidgets)){
     		   hasChanged = {widgets: true};
     	   }
-    	   if ((Pmg.getCustom('ignoreCustomOnClose') !== 'YES') && !utils.empty(this.customization)){
+    	   if (!utils.empty(this.customization) && (Pmg.getCustom('ignoreCustomOnClose') !== 'YES')){
     		   hasChanged.customization = true;
     	   }
     	   return utils.empty(hasChanged) ? false : hasChanged;

@@ -1,6 +1,6 @@
-define(["dojo/ready", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/dom", "dojo/dom-style", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", 
+define(["dojo/ready", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", 
 		"dojo/json", "dojo/date/locale", "dgrid/List", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/utils"],
-function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, dojoDateLocale, List, _WidgetsExtend, _WidgetsFormExtend, utils){
+function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, dojoDateLocale, List, _WidgetsExtend, _WidgetsFormExtend, utils){
     var stores, tabs, openedBrowserTabs = {},
         objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
@@ -41,18 +41,6 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             require([obj.isMobile ? "tukos/mobile/buildPage" : "tukos/desktop/buildPage", "tukos/StoresManager"], function(buildPage, StoresManager){
             	stores = new StoresManager();
             	buildPage.initialize();
-                self.requestUrl = function(urlArgs){//functions depending on utils locateed here so that utils can be located in the require above and then can depend on PageManager
-                    return string.substitute(urlTemplate, {dialogueUrl: self.get('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
-                };
-                self.addExtendedIdsToCache = function(newExtendedIds){
-                    self.cache.extendedIds = utils.merge(self.cache.extendedIds, newExtendedIds || []);
-                };
-                self.addMessagesToCache = function(messages, object){
-                	if (!utils.empty(messages)){
-                    	var objectsMessagesCache = this.cache.objectsMessages || (this.cache.objectsMessages = {}), objectMessagesCache = objectsMessagesCache[object] || (objectsMessagesCache[object] = {});
-                    	objectMessagesCache = lang.mixin(objectMessagesCache, messages);
-                	}
-                };
                 self.serverTranslations = function(expressions, actionModel){
                     var results = {}, actionModel = actionModel || 'GetTranslations';
                     return self.serverDialog({object: 'users', view: 'NoView', action: 'Get', query:{params: {actionModel: actionModel}}}, {data: expressions}, self.message('actionDone')).then(function (response){
@@ -137,11 +125,9 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         store: function(args){
             return stores.get(args);
         },
-/*
         requestUrl: function(urlArgs){
             return string.substitute(urlTemplate, {dialogueUrl: this.get('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
         },
-*/
         openExternalUrl: function(url){//deprecated - to eliminate from existing editor content if present
             window.open(url);
             return false;
@@ -263,6 +249,15 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
             	return objectName;
             }
         },
+        addExtendedIdsToCache: function(newExtendedIds){
+            this.cache.extendedIds = utils.merge(this.cache.extendedIds, newExtendedIds || []);
+        },
+        addMessagesToCache: function(messages, object){
+        	if (!utils.empty(messages)){
+            	var objectsMessagesCache = this.cache.objectsMessages || (this.cache.objectsMessages = {}), objectMessagesCache = objectsMessagesCache[object] || (objectsMessagesCache[object] = {});
+            	objectMessagesCache = lang.mixin(objectMessagesCache, messages);
+        	}
+        },
         addExtrasToCache: function(newExtras){
         	this.cache.extras = lang.mixin(this.cache.extras, newExtras || []);
         },
@@ -355,12 +350,12 @@ function(ready, lang, Deferred, dom, domStyle, string, request, _WidgetBase, _Fo
         	lang.setObject(path, value, this.cache.newPageCustomization);
         	lang.setObject(path, value, this.cache.pageChangesCustomization);
         },
-        getCustom: function(args){
+        getCustom: function(args, absentValue){
         	if (args && typeof args === 'object'){
         		var pageTukosOrUserOrChangesCustomization = 'page' + utils.capitalize(args.tukosOrUserOrChanges) + 'Customization';
         		return args.property ? this.cache[pageTukosOrUserOrChangesCustomization][args.property] : this.cache[pageTukosOrUserOrChangesCustomization];
         	}else{
-            	return args ? this.cache.newPageCustomization[args] : this.cache.newPageCustomization;
+            	return args ? utils.drillDown(this.cache.newPageCustomization, 'args', absentValue) : this.cache.newPageCustomization;
         	}
         },
         setCustom: function(args, value){

@@ -1,10 +1,10 @@
-define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "dijit/registry", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, dom, on, Button, registry, Pmg, messages){
+define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "dijit/registry", "tukos/utils", "tukos/PageManager"], 
+    function(declare, dom, on, Button, registry, utils, Pmg){
     return declare("tukos.ObjectDelete", [Button], {
         postCreate: function(){
             this.inherited(arguments);
             this.on("click", function(evt){
-                var self = this;
+                var self = this, form = self.form;
                 evt.stopPropagation();
                 evt.preventDefault();
                 
@@ -13,6 +13,8 @@ define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "diji
                 var idValue = self.form.valueOf('id');
                 if (idValue == ''){/* is new entry, nothing to delete on the server side*/
                 	Pmg.alert({title: Pmg.message('nothingToDelete'), content: Pmg.message('newItemResetInstead')});
+                }else if(!form.changedValues().permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL'])){
+                    	Pmg.setFeedback(Pmg.message('itemislocked')); Pmg.beep();
                 }else{
                     Pmg.confirm({title: Pmg.message('deleteExistingItem'), content: Pmg.message('sureWantToDeleteItem')}).then(
                         function(){
@@ -21,7 +23,7 @@ define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "diji
                             if (updatedWidget){
                                 postValues['updated'] = updatedWidget.get('value');
                             }
-                            self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Delete')}, postValues, self.form.get('dataElts'), messages.actionDone); 
+                            self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Delete')}, postValues, self.form.get('dataElts'), Pmg.message('actionDone')); 
                         },
                         function(){Pmg.setFeedback(Pmg.message('actionCancelled'));});
                 }

@@ -11,7 +11,7 @@ class AbstractModel extends ObjectTranslator {
 
     protected $gradeOptions = ['TEMPLATE', 'NORMAL', 'GOOD', 'BEST'];
     protected $configStatusOptions = ['tukos', 'bustrack', 'wine', 'itm', 'sports', 'physio', 'users'];
-    protected $permissionOptions = ['NOTDEFINED', 'PR', 'RO', 'PU', 'ACL'];
+    protected $permissionOptions = ['NOTDEFINED', 'PL', 'PR', 'RL', 'RO', 'PU', 'ACL'];
 
     public static function translationSets(){
         return [];

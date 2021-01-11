@@ -9,13 +9,14 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dijit/
                 evt.preventDefault();
                 setTimeout(function(){
                     var changedValues = form.changedValues();
-                    console.log('object save just got changedValues');
                     if (form.itemCustomization){
                         lang.setObject('custom.' + form.viewMode + '.' + form.paneMode, form.itemCustomization, changedValues);
                         delete form.itemCustomization;
                 	}
                     if (utils.empty(changedValues)){
                         Pmg.setFeedback(messages.noChangeToSubmit);
+                    }else if(!changedValues.permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL'])){
+                    	Pmg.setFeedback(Pmg.message('itemislocked')); Pmg.beep();
                     }else{
                         Pmg.setFeedback(messages.actionDoing);
                         self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Save'), query: self.urlArgs ? lang.mixin({id: form.valueOf('id')}, self.urlArgs.query) : {id: form.valueOf('id')}}, changedValues, form.get('dataElts'), messages.actionDone); 

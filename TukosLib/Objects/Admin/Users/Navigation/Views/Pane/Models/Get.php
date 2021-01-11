@@ -22,7 +22,7 @@ class Get extends ViewsGetModel {
     	$result = [];
     	foreach ($childrenNames as $id => $name){
     		$atts = $childrenAtts[$id];
-    		$result[] = array_merge($name, ['id' => $id, 'object' => $objectName, 'children' => $atts['children'], 'canEdit' => $this->user->hasUpdateRights($atts)]);
+    		$result[] = array_merge($name, ['id' => $id, 'object' => $objectName, 'children' => $atts['children'], 'canEdit' => $this->user->hasUpdateRights($atts, $atts)]);
     	}
     	return $result;
     }
@@ -31,7 +31,7 @@ class Get extends ViewsGetModel {
         //$atts = ['where' => SUtl::deletedFilter($this->user->filter(['parentid' => $parentId], 'tukos', 'tukos')), 'cols' => ['object', 'parentid', 'count(*) as children'], 'groupBy' => ['object']];
         $atts = ['where' => $where, 'cols' => ['object', 'parentid', 'count(*) as children'], 'groupBy' => ['object']];
         if (!$this->user->isSuperAdmin()){
-        	$atts['cols'][] = Utl::substitute('count(CASE WHEN permission = "RO" AND ${userid} <> updator THEN 1 END) AS readonly', ['userid' => $this->user->id()]);
+        	$atts['cols'][] = Utl::substitute('count(CASE WHEN permission in ("RL", "RO") AND ${userid} <> updator THEN 1 END) AS readonly', ['userid' => $this->user->id()]);
         }
         if (!empty($excludeObjects)){
             $atts['where'][] = ['col' => 'object', 'opr' => 'NOT IN', 'values' => $excludeObjects];

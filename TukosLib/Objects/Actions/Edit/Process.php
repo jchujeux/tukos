@@ -4,6 +4,7 @@ namespace TukosLib\Objects\Actions\Edit;
 
 use TukosLib\Objects\Actions\AbstractAction;
 use TukosLib\Utils\Feedback;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class Process extends AbstractAction{
@@ -32,7 +33,7 @@ class Process extends AbstractAction{
             if (empty($query['params']['noget'])){
                 $this->getViewModel     = $this->objectsStore->objectViewModel($this->controller, 'Edit', 'Get');
                 $response = [];
-                $this->getViewModel->respond($response, ['id' => $query['id']]);
+                $this->getViewModel->respond($response, ['id' => $query['id'], 'contextpathid' => Utl::getItem('contextpathid', $query, $this->user->getContextId($this->model->objectName))]);
                 $response['title'] = $this->view->tabEditTitle($response['data']['value']);
                 return $response;
             }else{
