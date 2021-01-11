@@ -30,7 +30,7 @@ abstract class AbstractModel extends ObjectTranslator {
 
     use ItemHistory, ItemJsonCols, ItemsChildren, Store, ItemCustomization, ContentExporter, ItemsExporter, ItemsImporter;
     
-    protected $permissionOptions = ['NOTDEFINED', 'PR', 'RO', 'PU', 'ACL'];
+    protected $permissionOptions = ['NOTDEFINED', 'PL', 'PR', 'RL', 'RO', 'PU', 'ACL'];
     protected $aclOptions = ['0' => 'none', '1' => 'read', '2' => 'update', '3' => 'delete'];
     protected $gradeOptions = ['TEMPLATE', 'NORMAL', 'GOOD', 'BEST'];
     protected $timeIntervalOptions =  ['year', 'quarter', 'month', 'week', 'weekday', 'day', 'hour', 'minute', 'second'];// corresponds to intersection of php strToTime & dojo.date supported intervals
@@ -263,7 +263,7 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         $atts = $this->completeUpdateAtts($newValues, $atts);
         $oldValues = $this->getOne($atts, $this->activeJsonColsDefaultPath($atts['cols'], $newValues));
-        if (empty($oldValues) && empty($id = Utl::getItem('id', $newValues)) && id > 10000){
+        if (empty($oldValues) && empty($id = Utl::getItem('id', $newValues))){
             if ( $insertIfNoOld){
                 return $this->insert($newValues, $init);
             }else{
@@ -271,7 +271,7 @@ abstract class AbstractModel extends ObjectTranslator {
                 return false;
             }
         }else{
-            if ($this->user->hasUpdateRights($oldValues)){
+            if ($this->user->hasUpdateRights($oldValues, $newValues)){
                 return $this->_update($oldValues, $newValues, $jsonFilter);
             }else{
                 Feedback::add($this->tr('Noupdaterightsfor') . ' ' . $oldValues['id']);
@@ -333,12 +333,16 @@ abstract class AbstractModel extends ObjectTranslator {
 
         $updatedRows = [];
         foreach ($oldValuesArray as $key => $oldValues){
-            if (!empty($oldValues['history'])){
-                $oldValues['history'] = $this->expandHistory($oldValues, ['where' => $oldValues['id'], 'table' => $this->tableName]);
-            }
-            $result = $this->_update($oldValues, $newValues);
-            if ($result){
-                $updatedRows[] = $result;
+            if ($this->user->hasUpdateRights($oldValues, $newValues)){
+                if (!empty($oldValues['history'])){
+                    $oldValues['history'] = $this->expandHistory($oldValues, ['where' => $oldValues['id'], 'table' => $this->tableName]);
+                }
+                $result = $this->_update($oldValues, $newValues);
+                if ($result){
+                    $updatedRows[] = $result;
+                }
+            }else{
+                Feedback::add($this->tr('Noupdaterightsfor') . ' ' . $oldValues['id']);
             }
         }
         return $updatedRows;
@@ -533,6 +537,7 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         return $result;
     }
+/*
     public function restore($ids){
         $where = [['col' => 'id', 'opr' => 'in', 'values' => $ids]];
         $result = $this->updateItems([], ['where' => $where, 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]]);
@@ -543,6 +548,7 @@ abstract class AbstractModel extends ObjectTranslator {
             }
         }
     }
+ */
     public function setDeleteChildren($childrenObjectsToSuspendBulk = []){
         $this->processDeleteForBulk = 'processDeleteChildrenForBulk';
         $this->_postProcess = '_postProcessDeleteChildren';

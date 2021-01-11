@@ -6,6 +6,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/Co
         postCreate: function(){
             this.inherited(arguments);
             this.widgetType = "ObjectPane";
+			this.Pmg = Pmg;
             this.widgetsName = [];
             this.customization = {};
             var dataPane = new ContentPane({region: "center", 'class': "centerPanel", style: "padding: 0px;  overflow: auto; width: 100%; height: 100%; "}, dojo.doc.createElement("div"));

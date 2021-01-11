@@ -111,6 +111,7 @@ class Model extends AbstractModel {
                 $description = $workbook->getCellValue($sheet, $row, $descriptionCol);
                 $paymentTypeMatch = preg_match($paymentIdentifierPattern, $description, $matches) ? $matches[1] : 'other';
                 $description = $matches ? $matches[2] : $description;
+                $paymentDate = $date;
                 switch($paymentTypeMatch){
                     case $paymentIdentifiers[1]:
                         $slip = preg_match('/([0-9]*)[ ]*$/', $description, $matches) ? $matches[1] : '';
@@ -121,6 +122,7 @@ class Model extends AbstractModel {
                     case $paymentIdentifiers[2]: //REMISE CARTE   CARTE 195270101 5689491 12/03
                         if ($this->customersOrSuppliers === 'customers'){
                             $slip = preg_match('/([0-9]*) [^ ]* $/', $description, $matches) ? $matches[1] : '';
+                            $paymentDate = preg_match('/([0-9]*)\\/([0-9]*)[ ]*$/', $description, $matches) ? date('Y-m-d', strtotime(substr($date, 0, 5) . $matches[2] . '-' . $matches[1])) : '';
                             break;
                         }
                     default:
@@ -148,7 +150,7 @@ class Model extends AbstractModel {
                         break;
                 };
                 if (!$foundPayment){
-                    $paymentId = $this->searchPayment($paymentsModel, [], $date, $amount, $description, $id);
+                    $paymentId = $this->searchPayment($paymentsModel, [], $paymentDate, $amount, $description, $id);
                 }
                 $paymentsToReturn[] = $paymentsRow = ['id' => $id, 'date' => $date, 'description' => $description, 'amount' => $amount, 'customer' => $customerId, 'paymenttype' => 'paymenttype' . $paymentTypeId[$paymentTypeMatch],
                     'category' => $category, 'slip' => $slip, 'isexplained' => $isExplained, 'paymentid' => $paymentId, 'invoiceid' => $invoiceId, 'invoiceitemid' => $invoiceItemId];
@@ -474,8 +476,8 @@ class Model extends AbstractModel {
                 }
             }
             if ($found > 1){
-                Feedback::add("{$this->tr('Severalpaymentsfound')}: $id - {$this->tr('Selectedid')}: $paymentId");
                 $paymentId = Utl::drillDown($existingPayments, [0, 'id']);
+                Feedback::add("{$this->tr('Severalpaymentsfound')}: $id - {$this->tr('Selectedid')}: $paymentId");
             }else if($found === 0){
                 $paymentId = Utl::drillDown($existingPayments, [0, 'id']);
             }
