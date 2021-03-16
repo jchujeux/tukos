@@ -44,7 +44,7 @@ class ViewUtils{
     static public function tukosNumberBox($view, $label, $custom=[]){
         return Utl::array_merge_recursive_replace([
         		'type' => 'tukosNumberBox',
-        		'atts' => ['edit' => ['label' => $view->tr($label)]],
+        		'atts' => ['edit' => ['label' => $view->tr($label), 'constraints' => ['pattern' => '##.']]],
         		//'objToEdit' => ['floatval' => []],  'objToStoreEdit' => ['floatval' => []],
         		'editToObj' => ['blankToNull' => ['class' => self::utl]], 'storeEditToObj' => ['blankToNull' => ['class' => self::utl]], 'overviewToObj' => ['blankToNull' => ['class' => self::utl]], 
         	],
@@ -230,7 +230,13 @@ class ViewUtils{
         return  Utl::array_merge_recursive_replace(
             ['type' => 'BasicGrid', 'atts' => ['edit' => ['label' => $view->tr($label), 'storeType' => 'MemoryTreeObjects', 'columns' => $columns]]],
             $custom
-        );
+            );
+    }
+    public static function onDemandGrid($view, $label, $columns, $custom=[]){
+        return  Utl::array_merge_recursive_replace(
+            ['type' => 'OnDemandGrid', 'atts' => ['edit' => ['label' => $view->tr($label), 'columns' => $columns]]],
+            $custom
+            );
     }
 }
 ?>

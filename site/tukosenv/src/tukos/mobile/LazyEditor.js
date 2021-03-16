@@ -16,7 +16,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 		},
 		
 		onClickCallback: function(){
-			if (!this.disabled && !this.readOnly){
+			if (!this.disabled && !this.readonly){
 				console.log('entering onCLickCallback - this.id:' + this.id);
 				if (this.onClickHandle){
 					this.onClickHandle.remove();

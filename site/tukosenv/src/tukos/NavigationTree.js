@@ -1,6 +1,6 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/window", "dojo/Deferred", "tukos/store/ActionRequest", "dijit/Tree",
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/window", "tukos/store/ActionRequest", "dijit/Tree",
          "dijit/tree/ObjectStoreModel", "dijit/tree/dndSource", "tukos/PageManager", "tukos/utils", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, aspect, window, Deferred, ActionRequest, Tree, ObjectStoreModel, dndSource, Pmg, utils, messages){
+    function(declare, lang, window, ActionRequest, Tree, ObjectStoreModel, dndSource, Pmg, utils, messages){
     return declare([Tree], {
 
         constructor: function(args){

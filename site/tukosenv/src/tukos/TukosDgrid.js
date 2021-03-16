@@ -1,10 +1,10 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/keys", "dojo/on", "dojo/when", "dojo/query", "dojo/aspect", "dojo/dom-style",
-         "dgrid/OnDemandGrid", "tukos/_GridMixin", "tukos/_GridSummaryMixin", "dgrid/Selection", "dgrid/Keyboard", "dgrid/Selector", "dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer", 
-         "dgrid/extensions/DijitRegistry", "tukos/dgrid/Editor", "tukos/utils", "tukos/widgetUtils", "tukos/evalutils"/*, "tukos/dgrid/lazytree"*/, "dgrid/Tree"/*, "tukos/ganttColumn"*/,"tukos/colFilter", 
-         "tukos/PageManager", "tukos/sheetUtils", "dojo/json", "dojo/i18n!tukos/nls/messages"/*, "dojo/domReady!"*/], 
-function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
-         Grid, _GridMixin, _GridSummaryMixin, Selection, Keyboard, selector, Hider, Resizer, DijitRegistry, editor, utils, wutils, eutils, tree/*, ganttColumn*/,colFilter, 
-         Pmg, sutils, JSON, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/dom-construct", "dojo/on", "dojo/when", "dojo/query", "dojo/dom-style",
+         "dgrid/OnDemandGrid", "tukos/_GridMixin", "tukos/_GridSummaryMixin", "dgrid/Selection", "dgrid/Keyboard", "dgrid/Selector", "tukos/dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer", 
+         "dgrid/extensions/DijitRegistry", "tukos/dgrid/Editor", "tukos/utils", "tukos/widgetUtils", "tukos/evalutils", "dgrid/Tree","tukos/colFilter", 
+         "tukos/PageManager", "tukos/sheetUtils", "dojo/i18n!tukos/nls/messages"], 
+function(declare, lang, ready, dct, on, when, query, domStyle,
+         Grid, _GridMixin, _GridSummaryMixin, Selection, Keyboard, selector, Hider, Resizer, DijitRegistry, editor, utils, wutils, eutils, tree,colFilter, 
+         Pmg, sutils, messages){
     
 	return declare([Grid, editor, tree, selector, Selection, Keyboard, Hider, Resizer, DijitRegistry, _GridMixin, _GridSummaryMixin], {
 
@@ -43,7 +43,7 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
             };
             this.addKeyHandler(67, copyCellCallback);
             if (this.renderCallback){
-            	this.renderCallbackFunction = eutils.eval(this.renderCallback, "node, rowData")
+            	this.renderCallbackFunction = eutils.eval(this.renderCallback, "node, rowData, column, tdCell")
             }
             this.keepScrollPosition = true;
             this.noDataMessage =  Pmg.message('noDataMessage');
@@ -109,6 +109,13 @@ function(declare, lang, dct, keys, on, when, query, aspect, domStyle,
 		_setAllowApplicationFilter: function(newValue){
         	wutils.watchCallback(this, 'allowApplicationFilter', this.allowApplicationFilter, newValue);
         	this.allowApplicationFilter = newValue;
+        },
+        _setCollection: function(newValue){
+			var self = this;        	
+			this.inherited(arguments);
+			ready(function(){
+				wutils.watchCallback(self, 'collection', null, newValue);
+			});	
         },
         onFilterChange: function(filterWidget){
             lang.setObject('widgetsDescription.' + this.widgetName + '.atts.columns.' + filterWidget.col + '.filter', filterWidget.get('value'), this.pane.customization);        	

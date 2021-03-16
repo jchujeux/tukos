@@ -78,6 +78,7 @@ class Configure{
             Tfk::$registry->set('dialogue', function(){
                 return new WebDialogue(Tfk::$registry->get('translatorsStore'));
             });
+            Tfk::$registry->loader->add('Aura\Session\\'  , Tfk::$vendorDir['aura'] . 'package/Aura.Session/src/');
             Tfk::$registry->set('session', function(){
                 return new SessionManager(new SegmentFactory, new CsrfTokenFactory);
             });

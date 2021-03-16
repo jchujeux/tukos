@@ -1,9 +1,5 @@
-/*
- *  Provides a Select field which data store is args.storeData, callable from ObjectPane.js
- *   
- */
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dijit/form/FilteringSelect", "dojo/store/Memory", "tukos/widgetUtils"], 
-    function(declare, arrayUtil, lang, FilteringSelect, Memory, widgetUtils){
+define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dijit/form/FilteringSelect", "dojo/store/Memory", "tukos/widgetUtils", "tukos/PageManager"], 
+    function(declare, arrayUtil, lang, FilteringSelect, Memory, widgetUtils, Pmg){
     return declare([FilteringSelect], {
         constructor: function(args){
             if (args.dropdownFilters){
@@ -11,6 +7,12 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dijit/for
             }
             args.store= new Memory(args.storeArgs);
         },
+		postCreate: function(){
+			this.inherited(arguments);
+        	if (Pmg.isMobile()){
+				this.set('readonly', true);
+        	}
+		},
         storeFilter: function(object){
             var match = previousMatch = newMatch = true;
             for (var i in this.dropdownFilters){
@@ -42,12 +44,14 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dijit/for
             }
             return match;
         },
-
         toggleDropDown: function(){
             if (this.dropdownFilters){
                 this.store.setData(arrayUtil.filter(this.storeData, lang.hitch(this, "storeFilter")));
             }
             this.inherited(arguments);
-        }
+        },
+		_getDisplayedValueAttr: function(){
+			return this.inherited(arguments);
+		}
     }); 
 });

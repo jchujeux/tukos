@@ -29,6 +29,7 @@ class ObjectSelect extends AbstractViewModel{
 				$storeAtts['where'][] = ['col' => 'id', 'opr' => 'in', 'values' => $this->idList($sourceId, $sourceInfo)];
 			}
 			$result = SUtl::objectTranslatedExtendedNames($this->model, $storeAtts);
+			SUtl::resetIdColsCache();
 			if (!empty($whereName)){
 				$result = array_filter($result, function($item) use ($whereName){
 					return stristr($item['name'], $whereName);

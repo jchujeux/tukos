@@ -4,8 +4,6 @@ namespace TukosLib\Objects\Views\Pane;
 
 use TukosLib\Objects\Views\Edit\SubObjects;
 use TukosLib\Utils\Utilities as Utl;
-use TukosLib\Utils\Widgets;
-use TukosLib\TukosFramework as Tfk;
 
 class View {
 

@@ -7,8 +7,6 @@
 namespace TukosLib\Objects\Admin\Users\Navigation;
 
 use TukosLib\Objects\AbstractModel;
-use TukosLib\Utils\Utilities as Utl;
-use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {
     function __construct($objectName, $translator=null){

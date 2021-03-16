@@ -1,8 +1,4 @@
 <?php
-/**
- *
- * class for viewing methods and properties for the $users model object
- */
 namespace TukosLib\Objects\Help;
 
 use TukosLib\Objects\AbstractView;

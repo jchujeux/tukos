@@ -21,7 +21,7 @@ class View extends AbstractView {
         $subObjects['wineinputs']  = [
             'atts' => [
                 'title'     => $this->tr('Pending Wine Input'),
-                'summaryRow' => ['cols' => ['quantity' => ['content' => ['Total: ', ['filter' => ['status' => 'PENDING'], 'init' => 0, 'rhs' => "return Number(#quantity#);"],' items']]]],
+                'summaryRow' => ['cols' => ['quantity' => ['content' => ['Total: ', ['filter' => ['status' => 'PENDING'], 'init' => 0, 'rhs' => "return res + Number(#quantity#);"],' items']]]],
             ],
             'filters'   => ['parentid' => '@id', ['col' => 'status', 'opr' => 'IN', 'values' => ['IGNORE', 'PENDING']]],
             'allDescendants' => false
@@ -29,7 +29,7 @@ class View extends AbstractView {
         $subObjects['wineoutputs'] = [
             'atts' => [
                 'title'     => $this->tr('Pending Wine Output'), 
-                'summaryRow' => ['cols' => ['quantity' => ['content' => ['Total: ', ['filter' => ['status' => 'PENDING'], 'init' => 0, 'rhs' => "return Number(#quantity#);"],' items']]]],
+                'summaryRow' => ['cols' => ['quantity' => ['content' => ['Total: ', ['filter' => ['status' => 'PENDING'], 'init' => 0, 'rhs' => "return res + Number(#quantity#);"],' items']]]],
             ],
             'filters'   => ['parentid' => '@id', ['col' => 'status', 'opr' => 'IN', 'values' => ['IGNORE', 'PENDING']]],
             'allDescendants' => false,

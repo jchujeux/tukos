@@ -53,8 +53,8 @@ class View extends AbstractView {
                     'colsDescription' => ['parentid' => ['atts' => ['editorArgs' => ['storeArgs' => ['storeDgrid' => 'payments']]]], 'catalogid' => ['atts' => ['editorArgs' => ['storeArgs' => ['storeDgrid' => 'catalog']]]]],
                     'summaryRow' => ['cols' => [
                         'name' => ['content' =>  ['Total']],
-                        'pricewot' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#pricewot#);"]]],
-                        'pricewt' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#pricewt#);"]]]
+                        'pricewot' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#pricewot#);"]]],
+                        'pricewt' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#pricewt#);"]]]
                     ]],
                     'onDropMap' => [
                         'catalog' => ['fields' => [
@@ -92,7 +92,7 @@ EOT
                         'parentid' => ['atts' => ['storeedit' => ['editorArgs' => ['storeArgs' => ['storeDgrid' => 'payments']]]]], 'invoiceitemid' => ['atts' => ['storeedit' => ['editorArgs' => ['storeArgs' => ['storeDgrid' => 'items']]]]]],
                     'summaryRow' => ['cols' => [
                         'name' => ['content' =>  ['Total']],
-                        'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]]
+                        'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#amount#);"]]]
                     ]],
                     'allowedNestedRowWatchActions' => 2,
                     'onWatchLocalAction' => ['summary' => ['paymentsitems' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' =>

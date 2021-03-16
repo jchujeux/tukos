@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dijit/_editor/_Plugin", "dijit/form/DropDownButton", "tukos/widgets/editor/plugins/_TagEditDialog", "dojo/i18n!tukos/nls/messages"], 
-function(declare, lang, ready, _Plugin, Button, _TagEditDialog, messages) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dijit/_editor/_Plugin", "dijit/form/DropDownButton", "tukos/widgets/editor/plugins/_TagEditDialog", "dojo/i18n!tukos/nls/messages"], 
+function(declare, lang, ready, when, _Plugin, Button, _TagEditDialog, messages) {
 
     var SelectionEditor = dojo.declare([_Plugin], {
     

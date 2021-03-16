@@ -28,7 +28,6 @@ class Get extends ViewsGetModel {
     }
 
     function childrenObjects($where, $excludeObjects = []){
-        //$atts = ['where' => SUtl::deletedFilter($this->user->filter(['parentid' => $parentId], 'tukos', 'tukos')), 'cols' => ['object', 'parentid', 'count(*) as children'], 'groupBy' => ['object']];
         $atts = ['where' => $where, 'cols' => ['object', 'parentid', 'count(*) as children'], 'groupBy' => ['object']];
         if (!$this->user->isSuperAdmin()){
         	$atts['cols'][] = Utl::substitute('count(CASE WHEN permission in ("RL", "RO") AND ${userid} <> updator THEN 1 END) AS readonly', ['userid' => $this->user->id()]);

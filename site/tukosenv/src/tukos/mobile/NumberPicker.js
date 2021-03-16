@@ -4,7 +4,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
     	constructor: function(args){
     		delete args.style.width;
     		args.style = lang.mixin({height: '90px'}, args.style);
-    		this.digits = args.style.constraints.pattern.split('.');
+    		this.digits = args.constraints.pattern.split('.');
     		this.slotClasses = [];
     		this.slotProps = [];
     		for (var i = 1; i <= this.digits[0].length; i++){

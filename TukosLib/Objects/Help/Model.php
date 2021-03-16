@@ -1,8 +1,4 @@
 <?php
-/**
- *
- * class for the notes tukos object, allowing to attach a textual note to tukos objects
- */
 namespace TukosLib\Objects\Help;
 
 use TukosLib\Objects\AbstractModel;

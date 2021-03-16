@@ -11,7 +11,7 @@ class Tab extends AbstractAction{
         parent::__construct($controller);
     }
     function response($query){
-        $formContent         = $this->actionView->formContent((isset($this->view->customContentAtts['overview']) ? $this->view->customContentAtts['overview'] : []));
+        $formContent         = $this->actionView->formContent((isset($this->view->customContentAtts['overview']) ? $this->view->customContentAtts['overview'] : ($this->request['object'] === 'backoffice' ? $query : [])));
         return [
             'title'       => empty($query['title']) ? ucfirst($this->view->tr($this->view->objectName)) . ' - ' . ucfirst($this->view->tr('overview')) : $query['title'],
             'closable'    => true,

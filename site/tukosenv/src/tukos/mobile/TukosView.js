@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "tukos/mobile/ObjectPane", "tukos/PageManager"], 
-    function(declare, lang, View, Heading, ToolBarButton, ObjectPane, Pmg){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "tukos/TabOnCLick", "tukos/PageManager"], 
+    function(declare, lang, View, Heading, ToolBarButton, TabOnClick, Pmg){
     var paneModules = {objectPane: "tukos/mobile/ObjectPane", tukosPane: "tukos/TukosPane", navigationPane: "tukos/mobile/NavigationPane"};
 	return declare(View, {
     	postCreate: function (){    
@@ -32,6 +32,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mo
             		}
             		this.resize();
             	})})).placeAt(this.heading, 'first');
+        	}else if(this.paneModuleType === 'navigationPane'){
+            	(this.logout = new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){
+            		location.replace(Pmg.get('pageUrl') + 'auth/logout',"_self");
+            	}})).placeAt(this.heading, 'first');
         	}
         	previousView = previousView || this.mobileViews.lastPane() || this;
         	nextView = nextView || this.mobileViews.firstPane() || this;
@@ -55,6 +59,19 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mo
             	self.form.noLoadingIcon = true;
             	self.addChild(self.form);        		
         	});
+        },
+        destroy: function(){
+        	var self = this, _arguments = arguments, previousView = this.heading.previousViewButton.get('targetView'), nextView = this.heading.nextViewButton.get('targetView');
+        	if (previousView === this){
+        		this.mobileViews.navigationView();
+        		previousView = this.heading.nextViewButton.get('targetView');
+        		nextView = this.heading.nextViewButton.get('targetView');
+        	}else{
+        		this.mobileViews.selectPane(nextView);
+        	}
+        	nextView.heading.previousViewButton.set('targetView', previousView);
+        	previousView.heading.nextViewButton.set('targetView', nextView);
+        	setTimeout(function(){self.inherited(_arguments);}, 100);
         },
         createPane: function(){
             if (!this.form){

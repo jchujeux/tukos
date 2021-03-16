@@ -3,7 +3,6 @@
 namespace TukosLib\Objects\Actions\Edit;
 
 use TukosLib\Objects\Actions\AbstractAction;
-use TukosLib\TukosFramework as Tfk;
 
 class Edit extends AbstractAction{
     function __construct($controller){
@@ -13,7 +12,9 @@ class Edit extends AbstractAction{
     function response($query){
         $response = [];
         $this->getViewModel->respond($response, $query);
-        $response['title'] = $this->view->tabEditTitle($response['data']['value']);
+        if ($this->request['object'] !== 'backoffice'){
+            $response['title'] = $this->view->tabEditTitle($response['data']['value']);
+        }
         return $response;
     }
 }

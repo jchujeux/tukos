@@ -4,8 +4,6 @@ namespace TukosLib\Objects\Actions\Edit;
 
 use TukosLib\Objects\Actions\AbstractAction;
 
-use TukosLib\TukosFramework as Tfk;
-
 class Save extends AbstractAction{
     function __construct($controller){
         parent::__construct($controller);
@@ -16,8 +14,10 @@ class Save extends AbstractAction{
         $savedId = $this->saveViewModel->save($query);
         if ($savedId){
             $response = [];
-            $this->getViewModel->respond($response, ['id' => $savedId]);
-            $response['title'] = $this->view->tabEditTitle($response['data']['value']);
+            $this->getViewModel->respond($response, ($isBackOffice = $this->request['object'] === 'backoffice') ? $query : ['id' => $savedId]);
+            if (!$isBackOffice){
+                $response['title'] = $this->view->tabEditTitle($response['data']['value']);
+            }
             return $response;
         }else{
             return ['data' => false];

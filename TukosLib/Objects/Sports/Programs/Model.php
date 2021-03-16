@@ -68,154 +68,6 @@ class Model extends AbstractModel {
         }
         return $item;
     }
-    public function loadChartData($item){
-        if (isset($item['id'])){
-            $customAtts = $this->getCombinedCustomization(['id' => $item['id']], 'edit', null, ['widgetsDescription', 'loadchart', 'atts']);
-            $weekType = empty($customAtts['weektype']) ? 'weekoftheyear' : $customAtts['weektype'];
-            $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
-            $sessions = $sessionsModel->getAll([
-                'where' => $this->user->filter(['parentid' => $item['id'], [['col' => 'mode', 'opr' => '=', 'values' => 'planned'], ['col' => 'mode', 'opr' => 'IS NULL', 'values' => null, 'or' => true],
-                    ['col' => 'startdate', 'opr' => '>=', 'values' => $item['fromdate']],['col' => 'startdate', 'opr' => '<=', 'values' => $item['todate']]]], 'sptsessions'),
-                'orderBy' => ['startdate' => ' ASC'],  'cols' => ['startdate', 'duration', 'distance', 'elevationgain', 'intensity', 'sport', 'stress']]);
-                    $chartData = [];
-                    if (!empty($sessions)){
-                        $fromDateStamp = empty($item['fromdate']) ? strtotime(reset($sessions)['startdate']) : strtotime($item['fromdate']);
-                        $mondayStamp = strtotime(date('w', $fromDateStamp) == 1 ? 'this monday' : 'previous monday', $fromDateStamp);
-                        $mondayDate = date('Y-m-d', $mondayStamp);
-                        $nextMondayStamp = strtotime('next monday', $mondayStamp);
-                        $nextMondayDate = date('Y-m-d', $nextMondayStamp);
-                        
-                        $toDateStamp = empty($item['todate']) ? strtotime(end($sessions)['startdate']) : strtotime($item['todate']);
-                        $lastMondayStamp = strtotime(date('w', $toDateStamp) == 1 ? 'this monday' : 'previous monday', $toDateStamp);
-                        $lastMondayDate = date('Y-m-d', $lastMondayStamp);
-                        
-                        reset($sessions);
-                        $session = current($sessions);
-                        while(!empty($session) && $session['startdate'] < $mondayDate){
-                            $session = next($sessions);
-                        }
-                        $weekNumber = 0;
-                        $normalizationDuration = 600;
-                        while($mondayDate <= $lastMondayDate){
-                            $weekNumber += 1;
-                            //$numberOfSessions = 0;
-                            $chartItem = ['id' => $weekNumber, 'week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'load' => 0, 'intensity' => 0,
-                                'duration' => 0, 'stress' => 0, 'distance' => 0, 'elevationgain' => 0
-                            ];
-                            while(!empty($session) && $session['startdate'] < $nextMondayDate){
-                                if ($session['sport'] != 'rest'){
-                                    //$numberOfSessions += 1;
-                                    $chartItem['distance'] += floatval($session['distance']);
-                                    $chartItem['elevationgain'] += floatval($session['elevationgain']);
-                                    $intensity = intval($session['intensity']);//array_search($session['intensity'], Sports::$intensityOptions);
-                                    $duration = $session['duration'];
-                                    $stress = array_search($session['stress'], Sports::$stressOptions);
-                                    $chartItem['intensity'] += $intensity * $duration;
-                                    $chartItem['duration'] += $duration;
-                                    $chartItem['stress'] += $stress * $duration;
-                                }
-                                $session = next($sessions);
-                            }
-                            if ($chartItem['duration'] > 0){
-                                $chartItem['load'] = round($chartItem['intensity'] / $normalizationDuration, 2);
-                                $chartItem['intensity'] = round($chartItem['intensity'] / $chartItem['duration'], 2);
-                                $chartItem['stress'] = round($chartItem['stress'] / $chartItem['duration'], 2);
-                                $charItem['duration'] = round($chartItem['duration'], 2);
-                            }else{
-                                $chartItem['load'] = 0;
-                                $chartItem['intensity'] = 0;
-                                $chartItem['stress'] = 0;
-                            }
-                            $chartItem['elevationgain'] = round($chartItem['elevationgain'] / 10, 1);
-                            $chartItem['durationTooltip']= $this->tr('duration') . ': ' .Utl::format($chartItem['duration'], 'minutesToHHMM');
-                            $chartItem['loadTooltip']= $this->tr('load') . ': ' . $chartItem['load'];
-                            $chartItem['intensityTooltip']= $this->tr('intensity') . ': ' . $chartItem['intensity'];
-                            $chartItem['stressTooltip']= $this->tr('stress') . ': ' . $chartItem['stress'];
-                            $chartItem['distanceTooltip']= $this->tr('distance') . ': ' . $chartItem['distance'] . ' km';
-                            $chartItem['elevationgainTooltip']= $this->tr('elevationgain') . ': ' . $chartItem['elevationgain']*10 . ' m';
-                            $chartData[] = $chartItem;
-                            $mondayDate = $nextMondayDate;
-                            $nextMondayStamp = strtotime('next monday', $nextMondayStamp);
-                            $nextMondayDate = date('Y-m-d', $nextMondayStamp);
-                        }
-                        return ['store' => $chartData, 'axes' => ['x' => ['title' => $this->tr($weekType)]]];
-                    }
-        }
-        return $this->defaultLoadChart();
-    }
-    public function performedLoadChartData($item){
-        if (isset($item['id'])){
-            $customAtts = $this->getCombinedCustomization(['id' => $item['id']], 'edit', null, ['widgetsDescription', 'performedloadchart', 'atts']);
-            $weekType = empty($customAtts['weektype']) ? 'weekoftheyear' : $customAtts['weektype'];
-            $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
-            $sessions = $sessionsModel->getAll(
-                ['where' => 
-                    $this->user->filter(['parentid' => $item['id'], 'mode' => 'performed', ['col' => 'startdate', 'opr' => '>=', 'values' => $item['fromdate']],['col' => 'startdate', 'opr' => '<=', 'values' => $item['todate']]],'sptsessions'), 
-                'orderBy' => ['startdate' => ' ASC'],  'cols' => ['startdate', 'duration', 'distance', 'elevationgain', 'perceivedeffort', 'sensations', 'mood']]);
-            $chartData = [];
-            if (!empty($sessions)){
-                $fromDateStamp = empty($item['fromdate']) ? strtotime(reset($sessions)['startdate']) : strtotime($item['fromdate']);
-                $mondayStamp = strtotime(date('w', $fromDateStamp) == 1 ? 'this monday' : 'previous monday', $fromDateStamp);
-                $mondayDate = date('Y-m-d', $mondayStamp);
-                $nextMondayStamp = strtotime('next monday', $mondayStamp);
-                $nextMondayDate = date('Y-m-d', $nextMondayStamp);
-                
-                $toDateStamp = empty($item['todate']) ? strtotime(end($sessions)['startdate']) : strtotime($item['todate']);
-                $lastMondayStamp = strtotime(date('w', $toDateStamp) == 1 ? 'this monday' : 'previous monday', $toDateStamp);
-                $lastMondayDate = date('Y-m-d', $lastMondayStamp);
-                
-                reset($sessions);
-                $session = current($sessions);
-                while(!empty($session) && $session['startdate'] < $mondayDate){
-                    $session = next($sessions);
-                }
-                $weekNumber = 0;
-                $normalizationDuration = 600;
-                while($mondayDate <= $lastMondayDate){
-                    $weekNumber += 1;
-                    //$numberOfSessions = 0;
-                    $chartItem = ['id' => $weekNumber, 'week' => $this->tr('W') . ($weekType == 'weekofprogram' ? $weekNumber : date('W', strtotime($mondayDate))), 'weekof' => $mondayDate, 'distance' => 0, 'elevationgain' => 0,
-                        'duration' => 0, 'perceivedeffort' => 0, 'perceivedload' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0];
-                    while(!empty($session) && $session['startdate'] < $nextMondayDate){
-                        //$numberOfSessions += 1;
-                        $duration = empty($duration = $session['duration']) ? 0 : $duration;
-                        $chartItem['distance'] += floatval($session['distance']);
-                        $chartItem['elevationgain'] += floatval($session['elevationgain']);
-                        $chartItem['duration'] += $duration;
-                        $chartItem['perceivedeffort'] += (empty($v = floatval($session['perceivedeffort'])) ? 5 : $v) * $duration;
-                        $chartItem['sensations'] += (empty($v = floatval($session['sensations'])) ? 5 : $v) * $duration;
-                        $chartItem['mood'] += (empty($v = floatval($session['mood'])) ? 5 : $v) * $duration;
-                        $chartItem['fatigue'] += ((empty($v = floatval($session['sensations'])) ? 5 : $v) + (empty($v = floatval($session['mood'])) ? 5 : $v)) / 2 * $duration;
-                        $session = next($sessions);
-                    }
-                    $chartItem['distance'] = round($chartItem['distance'], 1);
-                    if ($chartItem['duration'] > 0){
-                        $chartItem['perceivedeffort'] = round($chartItem['perceivedeffort'] / $chartItem['duration'], 1);
-                        $chartItem['perceivedload'] = round($chartItem['perceivedeffort'] * $chartItem['duration'] / $normalizationDuration, 2);
-                        $chartItem['sensations'] = round($chartItem['sensations'] / $chartItem['duration'], 1);
-                        $chartItem['mood'] = round($chartItem['mood'] / $chartItem['duration'], 1);
-                        $chartItem['fatigue'] = 11 - round($chartItem['fatigue'] / $chartItem['duration'], 1);
-                    }
-                    $chartItem['elevationgain'] = round($chartItem['elevationgain'] / 10, 1);
-                    $chartItem['duration'] = round($chartItem['duration'], 0);
-                    $chartItem['durationTooltip']= Utl::format($chartItem['duration'], 'minutesToHHMM');
-                    $chartItem['distanceTooltip']= $this->tr('distance') . ': ' . $chartItem['distance'] . ' ' . 'kms';
-                    $chartItem['elevationgainTooltip']= $this->tr('elevationgain') . ': ' . $chartItem['elevationgain']*10 . ' ' . 'm';
-                    $chartItem['perceivedeffortTooltip'] =$this->tr('perceivedeffort') . ': ' . $chartItem['perceivedeffort'];
-                    $chartItem['perceivedloadTooltip'] =$this->tr('perceivedload') . ': ' . $chartItem['perceivedload'];
-                    $chartItem['sensationsTooltip'] = $this->tr('sensations') . ': ' . $chartItem['sensations'];
-                    $chartItem['moodTooltip'] = $this->tr('mood') . ': ' . $chartItem['mood'];
-                    $chartItem['fatigueTooltip'] = $this->tr('fatigue') . ': ' . $chartItem['fatigue'];
-                    $chartData[] = $chartItem;
-                    $mondayDate = $nextMondayDate;
-                    $nextMondayStamp = strtotime('next monday', $nextMondayStamp);
-                    $nextMondayDate = date('Y-m-d', $nextMondayStamp);
-                }
-                return ['store' => $chartData, 'axes' => ['x' => ['title' => $this->tr($weekType)]]];
-            }
-        }
-        return $this->defaultPerformedLoadChart();
-    }
     public function defaultLoadChart(){
         $paneMode = isset($this->paneMode) ? $this->paneMode : 'Tab';
         $weekType = $this->user->getCustomView($this->objectName, 'edit', $paneMode, ['widgetsDescription', 'loadchart', 'atts', 'weektype']);
@@ -353,8 +205,13 @@ class Model extends AbstractModel {
         $id = $query['id'];
         $trackingConfiguration = $this->getCombinedCustomization(['id' => $id], 'edit', null, ['widgetsDescription', 'sessionstracking', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription']);
         $includeTrackingFormUrl = ($eventFormUrl = Utl::getItem('eventformurl', $trackingConfiguration)) ? $eventFormUrl['atts']['checked'] : false;
+        if ($includeTrackingFormUrl){
+            
+        }else{
+            
+        }
         $targetDbString = $sessionFeedback = null;
-        $completeTrackingFormUrl = function ($eventDescription) use ($includeTrackingFormUrl, &$targetDbString, $sessionFeedback){
+        $completeTrackingFormUrl = function ($eventDescription) use ($includeTrackingFormUrl, &$targetDbString, &$sessionFeedback){
             if ($includeTrackingFormUrl){
                 if (is_null($targetDbString)){
                     $targetDbString = "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared'));

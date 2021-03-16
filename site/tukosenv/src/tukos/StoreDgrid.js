@@ -53,8 +53,10 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
 			setTimeout(function(){
 				self.scrollTo(previousScrollPosition);
 			}, 100);
-        	var style = this.bodyNode.style;
-			style.maxHeight = (parseInt(this.parentContentPane.domNode.style.height) - parseInt(style.marginTop) - parseInt(style.marginBottom)- 2) + 'px';
+        	if (this.parentContentPane){
+	        	var style = this.bodyNode.style;
+				style.maxHeight = (parseInt(this.parentContentPane.domNode.style.height) - parseInt(style.marginTop) - parseInt(style.marginBottom)- 2) + 'px';
+			}
         },
         setUserCollectionFilters: function(){
         	var userCollectionFilter = new this.store.Filter(), map = {'=': 'eq', '<>': 'ne', '>': 'gt', '<': 'lt', '>=': 'gte', '<=': 'lte', 'RLIKE': 'rlike', 'NOT RLIKE': 'notrlike', 'BETWEEN': 'between'}, columns = this.columns;
@@ -79,10 +81,6 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on",
 				var grid = this.grid;
 				this.onFilterChange(this);
 			}        	
-        },
-        _setCollection: function(newValue){
-        	this.inherited(arguments);
-        	wutils.watchCallback(this, 'collection', null, newValue);
         },
         deleteSelection: function(skipDeleteAction, isUserRowEdit){
         	var deselect = 0, grid = this, toDelete = [];

@@ -10,7 +10,8 @@ define(['dojo/request',	'dojo/_base/lang', 'dojo/_base/array', 'dojo/json', 'doj
 			return new QueryResults(results.data, {totalLength: results.total,response: results.response});
 		},
         requestDialog: function(queryOptions){
-            var response = Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query:  queryOptions ? {storeatts: queryOptions} : {}}, {}, '', true);
+            var query = {storeatts: queryOptions} || {};
+            var response = Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query:  this.params ? lang.mixin(query, {params: this.params}) : query}, {}, '', true);
 			var collection = this;
 			return {
 				data: response.then(function (response) {

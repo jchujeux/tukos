@@ -3,7 +3,7 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
     return {
 
         specialCharacters: '$@#',
-        changeColor: 'LightYellow',
+        changeColor: 'lightyellow',
 
         changeStyle: function(widget, property, value){
             if (typeof widget.changeStyle === 'function'){
@@ -23,7 +23,7 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
         setStyleToUnchanged: function(widget){
             if (typeof widget.setStyleToUnchanged === 'function'){
                 widget.setStyleToUnchanged();
-            }else{
+            }else if (widget.domNode.style.backgroundColor === this.changeColor){
                 this.changeStyle(widget, 'backgroundColor', 'White');
             }
         },
@@ -119,8 +119,7 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                 }
             }
         },
-        
-        valueOf: function(name){
+        valueOf: function(name, displayed){
             var specialCharacters = '$@#',
                 firstChar = name[0],
                 realName,
@@ -137,17 +136,19 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                             case 'function' : return form[realName]();
                             default: return form[realName];
                         }
-                        //return (typeof form[realName] === 'undefined') ? form[realName] :  form[realName]();
                     case '@':
                         return form.valueOf(realName);
                 }
             }
             if (parent && typeof parent.cellValueOf === "function"){
-                return parent.cellValueOf(realName);
+                return displayed ? parent.cellDisplayedValueOf(realName) : parent.cellValueOf(realName);
             }else{
-                return form.valueOf(realName);
+                return displayed ? form.displayedValueOf(realName) : form.valueOf(realName);
             }
         },
+		displayedValueOf: function(name){
+			return this.valueOf(name, true);
+		},
         setValueOf: function(name, value){
             var specialCharacters = '$@#',
                 firstChar = name[0],

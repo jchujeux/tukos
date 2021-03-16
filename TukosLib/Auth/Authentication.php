@@ -44,7 +44,7 @@ class Authentication{
             default:// receiving a tukos application request check if authorized
                 $segment = $this->session->getSegment(Tfk::$registry->appName);
                 if ($segment->status !== 'VALID'){
-                    if ($request['controller'] === 'Page'){
+                    if (in_array($request['controller'], ['Page', 'MobilePage'])){
                         new LoginPage(Tfk::$registry->pageUrl);
                     }else{
                         Feedback::add(Tfk::tr('invalidsessionreloadpage'));

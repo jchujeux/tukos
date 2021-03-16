@@ -12,7 +12,7 @@ require $phpDir . '/TukosLib/TukosFramework.php';
 
 Tfk::initialize('interactive', null, $phpDir);
 
-if (Tfk::$registry->route) {
+if (!empty(Tfk::$registry->route)) {
     if ($appName = Tfk::$registry->appName){
         $configure = $appName . '\\Configure';
         $mainController = '\\TukosLib\\Controllers\\Main';

@@ -50,7 +50,7 @@ trait ItemCustomization {
     }
 
     public function getCombinedCustomization($where, $view, $paneMode, $keys){ 
-        $paneMode = empty($this->paneMode) ? 'tab' : strtolower($this->paneMode);
+        $paneMode = empty($paneMode) ? 'tab' : strtolower($paneMode);
         return Utl::array_merge_recursive_replace($this->user->getCustomView($this->objectName, $view, $paneMode, $keys),   $this->getItemCustomization($where, array_merge([strtolower($view), $paneMode], $keys)));
     }
 }

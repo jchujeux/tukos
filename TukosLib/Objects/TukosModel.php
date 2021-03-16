@@ -13,7 +13,7 @@ class TukosModel {
     protected $tableName = 'tukos';
     protected $_colsDefinition = [
         'id'           =>  'INT(11) PRIMARY KEY',
-        'parentid'     =>  "INT(11) NOT NULL DEFAULT NULL",
+        'parentid'     =>  "INT(11) NOT NULL",
         'object'       =>  "VARCHAR(80)",
         'name'         =>  "VARCHAR(255) DEFAULT ''",
         'contextid'    =>  'INT(11) NOT NULL',
@@ -44,17 +44,21 @@ class TukosModel {
         if (!$this->store->tableExists($this->tableName)){
             $now = date('Y-m-d H:i:s');
             $this->store->createTable($this->tableName, $this->_colsDefinition, $this->_colsIndexes);
-            $this->store->insert(['id' => 2, 'name' => 'tukos', 'object' => 'users', 'contextid' => 1, 'created' => $now, 'updated' => $now, 'creator' => 2, 'updator' => 2], ['table' => $this->tableName]);
+            $this->store->insert(['id' => 12, 'name' => 'tukosscheduler', 'object' => 'users', 'contextid' => 1, 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => 13, 'updator' => 13], ['table' => $this->tableName]);
+            $this->store->insert(['id' => 13, 'name' => 'tukos', 'object' => 'users', 'contextid' => 1, 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => 13, 'updator' => 13], ['table' => $this->tableName]);
+            $this->store->insert(['id' => 15, 'name' => 'tukosBackOffice', 'object' => 'users', 'contextid' => 1, 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => 13, 'updator' => 13], ['table' => $this->tableName]);
             require __DIR__.'/Admin/Users/Model.php';
             $this->store->createTable('users', array_merge([ 'id'  =>  'INT(11) PRIMARY KEY'], UserModel::$_colsDefinition), UserModel::$_colsIndexes);
-            $this->store->insert(['id' => 2, 'rights' => 'SUPERADMIN'], ['table' => 'users']);
-            $this->store->insert(['id' => 1, 'name' => 'tukos', 'object' => 'contexts', 'created' => $now, 'updated' => $now, 'creator' => 2, 'updator' => 2], ['table' => $this->tableName]);
+            $this->store->insert(['id' => 12, 'rights' => 'SUPERADMIN'], ['table' => 'users']);
+            $this->store->insert(['id' => 13, 'rights' => 'SUPERADMIN'], ['table' => 'users']);
+            $this->store->insert(['id' => 15, 'rights' => 'RESTRICTEDUSER'], ['table' => 'users']);
+            $this->store->insert(['id' => 1, 'name' => 'tukos', 'object' => 'contexts', 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => 2, 'updator' => 2], ['table' => $this->tableName]);
             $this->store->createTable($this->_nextIdTable, [/*'id' => 'INT(11)', */'configrange' => 'VARCHAR(20) PRIMARY KEY', 'nextid' => 'INT(11)', 'updated' => 'datetime']);
             forEach (Directory::configStatusRange() as $status => $range){
             	$this->store->insert(['configrange' => $status, 'nextid' => $range, 'updated' => date('Y-m-d H:i:s')], ['table' => $this->_nextIdTable]);
             }
             $this->store->createTable($this->optionsTable, ['name' => 'VARCHAR (80)', 'value' => 'longtext']);
-            $this->store->insert((['name' => 'parameters', 'value' => '{"union": false}']));
+            $this->store->insert(['name' => 'parameters', 'value' => '{"union": false}'], ['table' => $this->optionsTable]);
         }
         $this->textColumns = array_keys(array_filter($this->_colsDefinition, function($def){return in_array(strtolower(substr($def, 0, 4)), $this->_textColumns);}));
         $this->maxSizeCols = ['comments'];

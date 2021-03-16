@@ -24,7 +24,7 @@ class Get extends ViewsGetModel {
         	}
 
             foreach ($this->view->dataWidgets as $col => $description){
-        		$data['readOnly'][$col] = (isset($description['atts']['edit']['readOnly']) &&  $description['atts']['edit']['readOnly']) ? true : false;
+        		$data['readonly'][$col] = (isset($description['atts']['edit']['readonly']) &&  $description['atts']['edit']['readonly']) ? true : false;
             }
 
         	foreach ($this->view->subObjects as $col => $description){
@@ -36,7 +36,7 @@ class Get extends ViewsGetModel {
         	return false;
         }else{
         	foreach ($this->view->dataWidgets as $col => $description){
-        		$data['readOnly'][$col] = true;
+        		$data['readonly'][$col] = true;
         	}
         	foreach ($this->view->subObjects as $col => $description){
         		$data['disabled'][$col] = true;
@@ -102,7 +102,7 @@ class Get extends ViewsGetModel {
             SubObjectsGet::getData($response, $this, $contextPathId);
         }
 
-        $response['readOnly'] = $this->setProtection($response['data']);
+        $response['readonly'] = $this->setProtection($response['data']);
         if ($dupId){
         	if (!empty($itemCustomization = $this->view->model->getItemCustomization(['id' => $dupId], ['edit', $this->paneMode]))){
         		$response['itemCustomization'] = $itemCustomization;

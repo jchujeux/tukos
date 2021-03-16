@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dijit/focus", "dijit/popup", "dijit/TooltipDialog"], 
-function(declare, lang, dct, dst, focus, popup, TooltipDialog){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dijit/popup", "dijit/TooltipDialog"], 
+function(declare, lang, dct, dst, popup, TooltipDialog){
     return declare(TooltipDialog, {
         postCreate: function(){
         	this.inherited(arguments);
@@ -9,12 +9,12 @@ function(declare, lang, dct, dst, focus, popup, TooltipDialog){
                 var widgetName = widgetsName[i];
                 var widget = form.getWidget(widgetName);
                 if (widget != undefined){
-                    var tr       = dct.create('tr', {}, hiderTable);
-                    var td       = dct.create('td', {}, tr);
-                    var checkBox = dct.create('input', {id: form.id + 'hiderRow' + widgetName, type: 'checkbox', style: {width: '30px'}, checked: !widget.hidden, onchange: this.toggleWidgetHideMode}, td);
+                    var tr       = dct.create('tr', {}, hiderTable),  td       = dct.create('td', {}, tr), id = form.id + 'hiderRow' + widgetName;
+                    var checkBox = dct.create('input', {id: id, type: 'checkbox', style: {width: '30px'}, checked: !widget.hidden, onchange: this.toggleWidgetHideMode}, td);
                     checkBox.widget = widget;
                     var td       = dct.create('td', {style: 'text-align: left;'}, tr);
-                    td.appendChild(document.createTextNode(widget.title || widget.label));
+                    var label = dct.create('label', {"for": id}, td);
+                    label.appendChild(document.createTextNode(widget.title || widget.label)); 
                 }
             };
             this.set('content', hiderTable);
@@ -30,13 +30,6 @@ function(declare, lang, dct, dst, focus, popup, TooltipDialog){
 			}
 		},
 		toggleHiderMenu: function(){
-			var self = this;
-/*
-			if (this.isOpened){
-        		popup.close(this);
-				this.isOpened = false;
-			}else {
-*/
 			if (!this.close()){
 				popup.open({popup: this, around: this.parent.domNode});
 				this.isOpened = true;

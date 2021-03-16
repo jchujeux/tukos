@@ -45,14 +45,14 @@ class UserInformation{
             $this->unallowedModules  = ($this->isSuperAdmin() || $this->userInfo['modules'] === null) ? [] : json_decode($this->userInfo['modules'], true);
             $this->restrictedModules = ($this->isSuperAdmin() || $this->userInfo['restrictedmodules'] === null) ? [] : json_decode($this->userInfo['restrictedmodules'], true);
             if ($userName === 'tukosBackOffice'){
-                $this->allowedModules = ['contexts', 'backoffice'];
+                $this->allowedModules = ['contexts', 'backoffice', 'blog'];
             }else{
                 $this->allowedModules =  array_diff($this->objectModules, $this->unallowedModules);
                 if ($this->isSuperAdmin()){
                     SUtl::$store->addMissingColsIfNeeded (SUtl::$tukosModel->colsDescription, $tk);
                 }
             }            
-            $this->ckey = $this->userInfo['password'];
+            $this->ckey = Utl::getItem('password', $this->userInfo, $this->tukosCkey, $this->tukosCkey);
             $translatorsStore = Tfk::$registry->get('translatorsStore');
             if ($language = Utl::getItem('language', $this->userInfo)){
                 $translatorsStore->setLanguage($language);
@@ -77,6 +77,19 @@ class UserInformation{
     }
     public function username(){
         return $this->userInfo['name'];
+    }
+    public function getModel($object){
+        $objectModel = $object . "Model";
+        return isset($this->$objectModel) ? $this->$objectModel : $this->$objectModel = $this->objectsStore->objectModel($object);
+    }
+    public function peoplefirstAndLastNameOrUserName($userId){
+        $peopleId = $this->getModel('users')->getOne(['where' => ['id' => $userId], 'cols' => ['parentid']])['parentid'];
+        if(empty($peopleId)){
+            return $this->user->userName();
+        }else{
+            $people = $this->getModel('people')->getOne(['where' => ['id' => $peopleId], 'cols' => ['name', 'firstname']]);
+            return "{$people['firstname']} {$people['name']}";
+        }
     }
     public function contextid(){
         return $this->userInfo['contextid'];
@@ -126,15 +139,21 @@ class UserInformation{
         return in_array($module, $this->unallowedModules);
     }
 
-    public function contextTreeAtts($tr){
+    public function contextTreeAtts($tr, $hasChildren=false){
         $result = ['storeArgs' => ['data'  => $this->contextModel->storeData], 
-                   'root'  => call_user_func($tr, $this->contextModel->rootId),
+                   'root'  => $this->contextModel->getRootId(),
                    //'paths' => [$this->contextModel->ancestors]
         ];
-        foreach ($result['storeArgs']['data'] as $key => $data){
-            $result['storeArgs']['data'][$key]['name'] = call_user_func($tr, $data['name']);
+        foreach ($result['storeArgs']['data'] as &$data){
+            $data['name'] = $tr($data['name']);// call_user_func($tr, $data['name']);
+            if ($hasChildren){
+                $data['hasChildren'] = true;
+            }
         }
         return $result;
+    }
+    public function getRootId(){
+        return $this->contextModel->getRootId();
     }
 
     public function encrypt($string, $mode){
@@ -177,7 +196,7 @@ class UserInformation{
         }
         return $where;  
     }
-    function filterReadOnly($where, $tableName = ''){
+    function filterReadonly($where, $tableName = ''){
         switch($rights = $this->rights()){
             case "SUPERADMIN":
                 break;
@@ -235,7 +254,7 @@ class UserInformation{
         }
     }
     public function hasUpdateRights($item, $newItem=[]){
-        if (in_array($item['permission'] , ['PL', 'RL']) && !empty($newItem) && Utl::getItem('permission', $newItem,$item['permission']) === $item['permission']){
+        if (in_array(Utl::getItem('permission', $item) , ['PL', 'RL']) && !empty($newItem) && Utl::getItem('permission', $newItem, $item['permission']) === $item['permission']){
             return false;
         }
         $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
@@ -253,7 +272,7 @@ class UserInformation{
             $this->userInfo['custom'] = json_decode($this->userInfo['custom'], true);
         }
         if (in_array($userId, $this->userInfo['custom']['dropbox'])){
-            $usersModel = $this->objectsStore->objectModel('users');
+            $usersModel = $this->getModel('users');//$this->objectsStore->objectModel('users');
             $values = $usersModel->getOne(['where' => ['id' => $userId], 'cols' => ['password', 'dropboxaccesstoken']]);
             if (empty($values['dropboxaccesstoken'])){
                 Feedback::add('nodropboxaccesstokenforuser' . ': ' . $userId);
@@ -366,7 +385,7 @@ class UserInformation{
         }
     }
     public function updatePageCustom($pageCustom, $tukosOrUser){
-        $usersModel = $this->objectsStore->objectModel('users');
+        $usersModel = $this->getModel('users');//$this->objectsStore->objectModel('users');
         $where = ($tukosOrUser === 'user') ? ['id' => $this->id()] : ['name' => 'tukos'];
         $usersModel->updateOne(['pagecustom' => $pageCustom], ['where' => $where], false, true);
         return $usersModel->getOne(['where' => $where, 'cols' => ['pagecustom']], ['pagecustom' => []]);
@@ -385,7 +404,7 @@ class UserInformation{
         return IntVal(Utl::getItem('historyMaxItems', $this->pageCustomization()));
     }
     public function getCustomTukosUrl($request, $query){
-        if (!isset(Tfk::$registry->route->values['object']) && ($customTukosUrl = Utl::getItem(Tfk::$registry->appName, Utl::toAssociative(Utl::getItem('defaultTukosUrls', $this->pageCustomization(), []), 'app')))){
+        if (!isset(Tfk::$registry->route['object']) && ($customTukosUrl = Utl::getItem(Tfk::$registry->appName, Utl::toAssociative(Utl::getItem('defaultTukosUrls', $this->pageCustomization(), []), 'app')))){
             if ($customUrlObject = Utl::getItem('object', $customTukosUrl)){
                 $request = array_merge($request, ['object' => $customUrlObject, 'view' => ucfirst(Utl::getItem('view', $customTukosUrl, 'overview'))]);
             }

@@ -30,6 +30,7 @@ class PageView extends Translator{
             'contextTreeAtts' => array_merge($this->user->contextTreeAtts($this->tr), ['style' => ['width' => '15em', 'backgroundColor' => '#F8F8F8']]),
             'sortParam' => 'sort',
             'dialogueUrl' => Tfk::$registry->dialogueUrl,
+    	    'pageUrl' => Tfk::$registry->pageUrl,
             'accordionDescription' => [],
             'tabsDescription' => [],
     		'navigationTree' => 'navigationTree'

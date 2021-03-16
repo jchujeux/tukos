@@ -43,8 +43,24 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             return this.grid._renderContent(this, object, node, Pmg.namedExtra(value));
         },
         renderStoreValue: function(object, value, node){
-            return this.grid._renderContent(this, object, node, value ? utils.findReplace(this.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value);
+			var grid = this.grid;            
+			return grid._renderContent(this, object, node, grid._storeDisplayedValue(value, this));
         },
+		_storeDisplayedValue: function(value, column){
+			return value ? utils.findReplace(column.editorArgs.storeArgs.data, 'id', value, 'name', column.storeCache || (column.storeCache = {})) : value;
+		},
+        renderNumberUnitValue: function(object, value, node){
+            var grid = this.grid;
+			return grid._renderContent(this, object, node, grid._numberUnitDisplayedValue(value, this));
+        },
+		_numberUnitDisplayedValue: function(value, column){
+            if (value){
+				var values = JSON.parse(value), count = values[0],
+            		unitValue = values[1] ? utils.findReplace(column.editorArgs.unit.storeArgs.data, 'id', values[1], 'name', column.storeCache || (column.storeCache = {})) : values[1],
+                	transformedValue = count + ' ' + unitValue + (count > 1 && column.formatType === 'numberunit' ? 's' : '');
+			}
+			return transformedValue || value;
+		},
         renderCheckBox: function(object, value, node){
         	return this.grid._renderContent(this, object, node, value ? '☑' : '☐', {textAlign: 'center'});
         },
@@ -58,7 +74,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             return grid._renderContent(this, object, node, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {}, noCreate);
         },
         
-        _renderContent: function(column, storeRow, node, innerHTML, styleAtts, noCreate){
+        _renderContent: function(column, storeRow, tdCell, innerHTML, styleAtts, noCreate){
             var row =this.row(storeRow), rowHeight = (this.rowHeights[row.id] ? this.rowHeights[row.id] : column.minHeightFormatter), atts = {style: lang.mixin({maxHeight: rowHeight, overflow: 'auto'}, styleAtts)},
             	rowId =  storeRow[this.collection.idProperty], node;
             if (this.dirty[rowId] && typeof this.dirty[rowId][column.field] !== 'undefined' && !atts.style.backgroundColor){
@@ -68,9 +84,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                 innerHTML = '<p> ';
             }
             if (noCreate){
+            	node = tdCell;
             	node.innerHTML = innerHTML;
             	dst.set(node, atts.style);
-            }else{
+           }else{
                 atts.innerHTML= innerHTML;
                 node = dct.create('div', atts);
             }
@@ -83,7 +100,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             	dst.set(node, atts.style);
             }
             if (this.renderCallbackFunction){
-            	this.renderCallbackFunction(node, row.data);
+            	this.renderCallbackFunction(node, row.data, column, tdCell);
             }
             return node;
         },
@@ -91,8 +108,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
         	var column = this.columns[colName];
         	switch (column.widgetType){
         		case 'StoreSelect': 
-        			return value ? utils.findReplace(column.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value;
-        		case 'ObjectSelect':
+        			return this._storeDisplayedValue(value, column);
+				case 'NumberUnitBox':    
+					return this._numberUnitDisplayedValue(value, column);    		
+				case 'ObjectSelect':
         		case 'ObjectSelectMulti':
         		case 'ObjectSelectDropDown':
         			return Pmg.namedId(value);
@@ -227,7 +246,9 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                 return (typeof result === "undefined" || result === null) ? '' : result;
             }
         },
-
+		cellDisplayedValueOf: function(field, idPropertyValue){
+			return this.colDisplayedValue(this.cellValueOf(field, idPropertyValue), field);
+		},
         selectRow: function(rowIdProperty){
             var row = this.row(rowIdProperty);
            if (row){

@@ -4,7 +4,6 @@ namespace TukosLib\Objects\Views\Overview\Models;
 
 use TukosLib\Objects\Views\Models\Get as ViewsGetModel;
 use TukosLib\Utils\Utilities as Utl;
-use TukosLib\TukosFramework as Tfk;
 
 class Get extends ViewsGetModel {
     protected function unHiddenOverviewGridCols($cols){

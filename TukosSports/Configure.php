@@ -65,7 +65,8 @@ class Configure{
                 'bustrackdashboards' => [['#bustrackdashboardscustomers' => [], '#bustrackdashboardssuppliers' => []]]]
             ],
             'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [], '#sptsessionsstages' => [], '#sptexercises' => [['#sptexerciseslevels' => []]]]],
-            'physio' => [['#physiopatients' => [], '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
+            'physio' => [['#physiopatients' => [], 'physiopersotrack' => [['#physiopersoquotes' => [], '#physiopersoplans' => [], '#physiopersotreatments' => [], '#physiopersodailies' => [['#physiopersosessions' => []]], '#physiopersoexercises' => []]], '#physioprescriptions' => [],
+                '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
             '#help' => [[
                 'guidedtour' => ['type' => 'MenuItem', 'atts' => [
                     'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtour')]]])]]]],
@@ -91,6 +92,7 @@ class Configure{
             Tfk::$registry->set('dialogue', function(){
                 return new WebDialogue(Tfk::$registry->get('translatorsStore'));
             });
+            Tfk::$registry->loader->add('Aura\Session\\'  , Tfk::$vendorDir['aura'] . 'package/Aura.Session/src/');
             Tfk::$registry->set('session', function(){
                 return new SessionManager(new SegmentFactory, new CsrfTokenFactory);
             });

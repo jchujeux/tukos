@@ -56,10 +56,10 @@ class View extends AbstractView {
 		];
 		$summaryRow = ['cols' => [
 		    'day' => ['content' =>  ['Total']],
-		    'duration' => ['atts' => ['formatType' => 'minutesToHHMM'], 'content' => [['rhs' => "var duration = #duration#.split(':'); return duration[0]*60 + Number(duration[1]);"]]],
-		    'distance' => ['content' => [['rhs' => "return Number(#distance#);"]]],
-		    'elevationgain' => ['content' => [['rhs' => "return Number(#elevationgain#);"]]],
-		    'gctrimp100' => ['content' => [['rhs' => "return Number(#gctrimp100#);"]]]
+		    'duration' => ['atts' => ['formatType' => 'minutesToHHMM'], 'content' => [['rhs' => "var duration = #duration#.split(':'); return res + duration[0]*60 + Number(duration[1]);"]]],
+		    'distance' => ['content' => [['rhs' => "return res + Number(#distance#);"]]],
+		    'elevationgain' => ['content' => [['rhs' => "return res + Number(#elevationgain#);"]]],
+		    'gctrimp100' => ['content' => [['rhs' => "return res + Number(#gctrimp100#);"]]]
 		]];
 		$chartsAtts = [
 		    'loadchart' => ['name' => 'loadchart', 'type' => $chartTypes['program'], 'filter' => $chartFilter['planned'], 'cols' => $chartCols['planned']],

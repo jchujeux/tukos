@@ -53,7 +53,7 @@ trait QuotesAndInvoices {
 				'storeedit' => ['formatType' => 'currency', 'width' => 80]
 		]]),
 		'discount' => ViewUtils::tukosNumberBox($this, $labels['discount'], ['atts' => [
-				'edit' => ['title' => $this->tr($labels['discount']) . ' %', 'constraints' => ['type' => 'percent', 'pattern' => '#.####%'], 'editOptions' => ['pattern' => '#.####%'],
+				'edit' => ['title' => $this->tr($labels['discount']) . ' %', 'constraints' => ['type' => 'percent', 'pattern' => '##.####%'], 'editOptions' => ['pattern' => '#.####%'],
 						'onChangeLocalAction' => ['discount' => ['localActionStatus' =>
 								"var reduction = 1 -  newValue, quantity = sWidget.valueOf('#quantity'), unitPriceWot = sWidget.valueOf('#unitpricewot'), unitPriceWt = sWidget.valueOf('#unitpricewt');\n" .
 								"sWidget.setValueOf('#pricewot', quantity *  unitPriceWot * reduction);\n" .
@@ -93,8 +93,8 @@ trait QuotesAndInvoices {
 		    'sort' => [['property' => 'rowId', 'descending' => false]],
 			'summaryRow' => ['cols' => [
 					'name' => ['content' =>  ['Total']],
-					'pricewot' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#pricewot#);"]]],
-					'pricewt' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#pricewt#);"]]]
+					'pricewot' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#pricewot#);"]]],
+					'pricewt' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#pricewt#);"]]]
 			]],
 			'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
 			'onDropMap' => [
@@ -114,7 +114,7 @@ trait QuotesAndInvoices {
 
 	protected function discountPc($labels){
 		return ViewUtils::tukosNumberBox($this, 'Globaldiscountpc', ['atts' => [
-				'edit' => ['title' => $this->tr($labels['discount']) . ' %', 'constraints' => ['type' => 'percent', 'pattern' => '#.####%'], 'editOptions' => ['pattern' => '#.####%'], 'onChangeLocalAction' => [
+				'edit' => ['title' => $this->tr($labels['discount']) . ' %', 'constraints' => ['type' => 'percent', 'pattern' => '##.####%'], 'editOptions' => ['pattern' => '#.####%'], 'onChangeLocalAction' => [
 						'discountpc'  => ['localActionStatus' =>
 								"var form = sWidget.form, itemsW = form.getWidget('items'), newVal = isNaN(newValue) ? '' : newValue;\n" .
 								"if (itemsW && itemsW.summary){\n" .
@@ -159,6 +159,7 @@ trait QuotesAndInvoices {
 		]]);
 	}
 	protected function priceWt($isInvoice = false){
+	    $isInvoice = $isInvoice ? 'true' : 'false';
 	    return ViewUtils::tukosCurrencyBox($this, 'Totalwt', ['atts' => [
 				'edit' => ['onChangeLocalAction' => [
 						'pricewt'  => ['localActionStatus' => <<<EOT

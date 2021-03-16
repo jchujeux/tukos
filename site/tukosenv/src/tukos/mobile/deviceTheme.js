@@ -6,7 +6,7 @@
 ], function(config, lang, win, require){
 
 	// module:
-	//		dojox/mobile/deviceTheme
+	//		tukos/mobile/deviceTheme
 
 	var dm = lang && lang.getObject("dojox.mobile", true) || {};
 
@@ -16,7 +16,7 @@
 		// description:
 		//		This module detects the user agent of the browser and loads the
 		//		appropriate theme files. It can be enabled by simply including 
-		//		the dojox/mobile/deviceTheme script in your application as follows:
+		//		the tukos/mobile/deviceTheme script in your application as follows:
 		//
 		//	|	<script src="dojox/mobile/deviceTheme.js"></script>
 		//	|	<script src="dojo/dojo.js" data-dojo-config="parseOnLoad: true"></script>
@@ -47,12 +47,12 @@
 		//		To simulate a particular device from the application code, the user agent
 		//		can be forced by setting dojoConfig.mblUserAgent as follows:
 		//
-		//	|	<script src="dojox/mobile/deviceTheme.js" data-dojo-config="mblUserAgent: 'Holodark'"></script>
+		//	|	<script src="tukos/mobile/deviceTheme.js" data-dojo-config="mblUserAgent: 'Holodark'"></script>
 		//	|	<script src="dojo/dojo.js" data-dojo-config="parseOnLoad: true"></script>
 		//
 		//		By default, an all-in-one theme file (e.g. themes/ios7/ios7.css) is
 		//		loaded. The all-in-one theme files contain style sheets for all the
-		//		dojox/mobile widgets regardless of whether they are used in your
+		//		mobile widgets regardless of whether they are used in your
 		//		application or not.
 		//
 		//		If you want to choose what theme files to load, you can specify them
@@ -99,7 +99,7 @@
 			var n = scripts[i];
 			var src = n.getAttribute("src") || "";
 			if(src.match(/\/deviceTheme\.js/i)){
-				//config.baseUrl = src.replace("deviceTheme\.js", "../../dojo/");
+				config.baseUrl = src.replace("deviceTheme\.js", "../../dojo/");
 				var conf = (n.getAttribute("data-dojo-config") || n.getAttribute("djConfig"));
 				if(conf){
 					var obj = eval("({ " + conf + " })");
@@ -129,8 +129,7 @@
 		this.toUrl = function(/*String*/path){
 			// summary:
 			//		A wrapper for require.toUrl to support non-dojo usage.
-			//return require ? require.toUrl(path) : config.baseUrl + "../" + path;
-			return dojoBasePath + path;
+			return require ? require.toUrl(path) : config.baseUrl + "../" + path;
 		};
 
 		this.setDm = function(/*Object*/_dm){

@@ -15,13 +15,9 @@ class Registry{
         $this->loader->register();
         
         $this->loader->add('TukosLib\\', Tfk::$tukosPhpDir);
-        $this->loader->add('TukosApp\\', Tfk::$tukosPhpDir);
-        $this->loader->add('TukosSports\\', Tfk::$tukosPhpDir);
-        $this->loader->add('TukosBus\\', Tfk::$tukosPhpDir);
         
         $this->loader->add('Aura\Di\\'    , $auraDir . 'package/Aura.Di/src/');
 
-        //$this->container = new \Aura\Di\Container(new \Aura\Di\Forge(new \Aura\Di\Config));
         $this->container = new DiContainer(new \Aura\Di\Forge(new \Aura\Di\Config));
         
         if ($this->mode === 'interactive'){
@@ -32,12 +28,14 @@ class Registry{
             Tfk::$tukosFormsTukosBaseLocation = 'https://' . Tfk::$tukosDomainName . '/tukos/tukosenv/release/';
             $this->loader->add('Aura\View\\'     , $auraDir . 'package/Aura.View/src/');
             $this->loader->add('Aura\Web\\'      , $auraDir . 'package/Aura.Web/src/');
-            $this->loader->add('Aura\Session\\'  , $auraDir . 'package/Aura.Session/src/');
+            //$this->loader->add('Aura\Session\\'  , $auraDir . 'package/Aura.Session/src/');
             $this->loader->add('Aura\Http\\'     , $auraDir . 'package/Aura.Http/src/');
-            $this->loader->add('Aura\Router\\', $auraDir . 'package/Aura.Router/src/');
+            //$this->loader->add('Aura\Router\\', $auraDir . 'package/Aura.Router/src/');
             $this->loader->add('Detection\\', Tfk::$vendorDir['MobileDetect']);
             $this->setHttpServices();
+            $this->loader->add($this->appName . '\\', Tfk::$tukosPhpDir);
         }else{
+            $this->loader->add('Ifsnop\\'     , Tfk::$phpVendorDir);
             $this->appName = $this->setAppName($appName);
         }
         $this->loader->add('Aura\Sql\\'         , $auraDir . 'package/Aura.Sql/src/');
@@ -46,47 +44,44 @@ class Registry{
         $this->loader->add('Zend\\'       , Tfk::$vendorDir['zend']);
         $this->loader->add('Pear\\'       , Tfk::$vendorDir['pear']);
         $this->loader->add('ManuelLemos\\', Tfk::$phpVendorDir);
-        $this->loader->add('Ifsnop\\'     , Tfk::$phpVendorDir);
         $this->loader->add('PHPMailer\\'  , Tfk::$phpVendorDir);
         $this->loader->add('Html2Text\\'  , Tfk::$phpVendorDir);        
         $this->loader->add('Dropbox\\', Tfk::$vendorDir['Dropbox']);
     }
 
     protected function setHttpServices(){
-
-        $this->container->set('routeMap', new \Aura\Router\Map(new \Aura\Router\DefinitionFactory, new \Aura\Router\RouteFactory)); 
-        $map = $this->get('routeMap');
-        
         $this->rootUrl = (!empty($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
-        $this->inComingUriPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        
-        $map->add('tukosPane'       , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}/{:view}/{:mode}/{:action}/{:pane}');
-        $map->add('tukosAction'       , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}/{:view}/{:mode}/{:action}');
-        $map->add('tukosMode'     , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}/{:view}/{:mode}');
-        $map->add('tukosView  '     , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}/{:view}');
-        $map->add('tukosObject'     , Tfk::publicDir . 'index20.php/{:application}/{:controller}/{:object}');
-        $map->add('tukosController' , Tfk::publicDir . 'index20.php/{:application}/{:controller}/');
-        $map->add('tukosBase'       , Tfk::publicDir . 'index20.php/{:application}/');
-        $map->add('tukosDefault'       , Tfk::publicDir . 'index20.php/{:application}');
-        
-        $this->route = $map->match($this->inComingUriPath, $_SERVER);
-        if ($this->route && $this->route->values['application']){
-            $this->request = array_merge(['controller' => 'Page', 'object' => 'Help', 'view' => 'Overview'], $this->route->values);
+        if (empty($_SERVER['PATH_INFO'])){
+            $this->route = false;
+        }else if (!empty($route = explode('/', substr($_SERVER['PATH_INFO'], 1)))){
+            $routeSteps = ['application', 'controller', 'object', 'view', 'mode', 'action', 'pane'];
+            foreach($route as $key => $value){
+                $this->route[$routeSteps[$key]] = $value;
+            }
+            $this->isMobile = (new MobileDetect)->isMobile();
+            $this->request = array_merge(['controller' => 'Page', 'object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab'], $this->route);
+            if ($this->isMobile){
+                if ($this->request['controller'] === 'Page'){
+                    $this->request['controller'] = 'MobilePage';
+                }
+                if ($this->request['mode'] === 'Tab'){
+                    $this->request['mode'] = 'Mobile';
+                }
+            }
             foreach($this->request as &$value){
                 $value = ucfirst($value);
             }
             $this->request['object'] = strtolower($this->request['object']);
             $this->appName = $this->setAppName($this->request['application']);
             $this->controller = $this->request['controller'];
-            if ($this->isMobile = (new MobileDetect)->isMobile());
-            $this->pageUrl          = $map->generate('tukosController', ['application' => $this->appName, 'controller' => ($this->isMobile ? 'Mobile' : '') . 'Page']);
-            $this->dialogueUrl      = $map->generate('tukosController', ['application' => $this->appName, 'controller' => 'Dialogue']);
-            $this->appUrl          = $map->generate('tukosBase', ['application' => $this->appName]);
+            $this->appUrl          = Tfk::publicDir . "index20.php/{$this->appName}/";
+            $this->pageUrl         = "{$this->appUrl}Page/";
+            $this->dialogueUrl   = "{$this->appUrl}Dialogue/";
         }
         $this->urlQuery = $_GET;
     }        
     public function setAppName($appName){
-        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus'][strtolower($appName)];
+        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus', 'tukosblog' => 'TukosBlog', 'tukosmsqr' => 'TukosMSQR'][strtolower($appName)];
     }
     public function set($service, $serviceObject){
         return $this->container->set($service, $serviceObject);

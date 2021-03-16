@@ -12,7 +12,7 @@ class Model extends AbstractModel {
                 'startdate'  => 'VARCHAR(30)  DEFAULT NULL',
                 'duration'   => 'VARCHAR(30)  DEFAULT NULL',
                 'intensity'  =>  'TINYINT DEFAULT NULL',
-                'stress'     =>  "ENUM ('" . implode("','", Sports::$stressOptions) . "')",
+                'stress'     =>  'TINYINT DEFAULT NULL',
                 'sport'      =>  "ENUM ('" . implode("','", Sports::$sportOptions) . "')",
                 'warmup'     =>  'longtext',
                 'mainactivity' =>  'longtext',

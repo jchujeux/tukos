@@ -29,7 +29,7 @@ class AbstractModel extends ObjectTranslator {
         $this->nonImapCols = [];
         $this->idProps    = [];
         
-        $this->extendedNameCols = ['name'];
+        $this->aliasExtendedNameCols = $this->extendedNameCols = ['name'];
         $this->colsToTranslate = ['permission', 'grade', 'configstatus'];
         
     }

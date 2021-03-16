@@ -35,7 +35,7 @@ class Controller extends ObjectTranslator{
         if ($this->user->isAllowed($request['object'], $query)){
             try{
                 $action = $this->objectsStore->objectAction($this, $request);
-                if (isset($query['storeatts']) && !empty($query['storeatts']['where'])){
+                if (isset($query['storeatts']) && isset($this->view->dataWidgets) && !empty($query['storeatts']['where'])){
                     $where = &$query['storeatts']['where']; $storesData = [];
                     $where = array_merge($this->user->getCustomView($this->objectName, 'overview', $this->paneMode, ['data', 'filters', 'overview']), $where);
                     foreach($where as $widgetName => $condition){
