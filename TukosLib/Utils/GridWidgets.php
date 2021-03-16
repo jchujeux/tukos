@@ -25,6 +25,9 @@ trait  GridWidgets{
         }
         return $attsTarget;
     }
+    public static function onDemandGrid($atts, $editOnly = true){
+        return ['type' => 'OnDemandGrid', 'atts' => $atts];
+    }
     public static function basicGrid($atts, $editOnly = true){
         if (isset($atts['columns'])){
             foreach ($atts['columns'] as $key => &$description){
@@ -133,9 +136,14 @@ trait  GridWidgets{
         }
         $atts = self::complete($atts, (isset($element['atts']['edit']) ? $element['atts']['edit'] : $atts));
         if ($mode === 'overview'){
-            if ($element['type'] === 'StoreSelect'){
-                $editorArgs = ['storeArgs' => ['data' => $element['atts']['edit']['storeArgs']['data']]];
-                $atts['editorArgs'] = empty($atts['editorArgs']) ? $editorArgs : Utl::array_merge_recursive_replace($editorArgs, $atts['editorArgs']);
+            switch ($element['type']){
+                case 'StoreSelect':
+                    $editorArgs = ['storeArgs' => ['data' => $element['atts']['edit']['storeArgs']['data']]];
+                    $atts['editorArgs'] = empty($atts['editorArgs']) ? $editorArgs : Utl::array_merge_recursive_replace($editorArgs, $atts['editorArgs']);
+                    break;
+                case 'NumberUnitBox':
+                    $editorArgs = ['unit' => ['storeArgs' => ['data' => $element['atts']['edit']['unit']['storeArgs']['data']]]];
+                    $atts['editorArgs'] = empty($atts['editorArgs']) ? $editorArgs : Utl::array_merge_recursive_replace($editorArgs, $atts['editorArgs']);
             }
         }else{
             $atts['disabled'] = (isset($atts['disabled']) ? $atts['disabled'] : (isset($element['atts']['edit']['disabled']) ? $element['atts']['edit']['disabled'] : false));

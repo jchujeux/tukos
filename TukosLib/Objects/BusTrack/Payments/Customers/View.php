@@ -39,7 +39,7 @@ class View extends AbstractView {
         $subObjects['items'] = ['object' => "bustrackpayments{$customersOrSuppliers}items", 'filters' => ['parentid' => '@id'], 'allDescendants' => true, 'atts' => ['title' => $this->tr("bustrackpayments{$customersOrSuppliers}items"),
             'summaryRow' => ['cols' => [
                 'name' => ['content' =>  ['Total']],
-                'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]]
+                'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#amount#);"]]]
             ]],
             'onWatchLocalAction' => ['summary' => ['items' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' =>
                 "sWidget.form.setValueOf('unassignedamount', sWidget.form.valueOf('amount') - sWidget.summary.amount);\n" .

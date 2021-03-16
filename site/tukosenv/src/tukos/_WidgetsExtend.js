@@ -7,9 +7,12 @@ define (["dojo/_base/lang", "tukos/widgetUtils"],
         getAttr: function(attrName){
             return this[attrName] || this.getParent()[attrName];// widgets on a grid miss some attributes (form & formId in paticular) => if not found we look for it into its parent (e.g. a grid)
         },
-        valueOf: function(name){
-            return lang.hitch(this, wutils.valueOf)(name);
+        valueOf: function(name, displayed){
+            return lang.hitch(this, wutils.valueOf)(name, displayed);
         },
+		displayedValueOf: function(name){
+			return lang.hitch(this, wutils.displayedValueOf)(name);
+		},
         setValueOf:  function(name, value){
             return lang.hitch(this, wutils.setValueOf)(name, value);
         },
@@ -17,7 +20,7 @@ define (["dojo/_base/lang", "tukos/widgetUtils"],
             return lang.hitch(this, wutils.setValuesOf)(data);
         },
         _setReadOnlyAttr: function(newValue){
-        	this._set('readOnly', newValue);
+        	this._set('readonly', newValue);
         	if (newValue){
         		this.defaultBackgroundColor = this.defaultBackgroundColor || this.get('style').backgroundColor;
         		this.set('style', {backgroundColor: 'WhiteSmoke'});

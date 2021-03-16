@@ -41,7 +41,8 @@ class ItemsCache {
         return self::$itemsCache[$whereId] = $values;
     }
     public static function getOne($atts){
-        return array_intersect_key(self::valuesInCache(self::whereId($atts['where'], $atts['table'])), array_flip($atts['cols']));
+        $fCols = array_flip($atts['cols']);
+        return array_intersect_key(array_replace($fCols, self::valuesInCache(self::whereId($atts['where'], $atts['table']))), $fCols);
     }
     public static function updateOne($values, $idOrWhereId){
         if (empty(self::$idCache[$idOrWhereId])){
@@ -58,7 +59,7 @@ class ItemsCache {
     public static function mergeOne($values, $atts){
         $whereId = self::whereId($atts['where'], $atts['table']);
         self::updateOne($values, $whereId);
-        return array_intersect_key(self::$itemsCache[$whereId], array_flip($atts['cols']));
+        return array_merge(array_intersect_key(self::$itemsCache[$whereId], array_flip($atts['cols'])), $values);
     }
     public static function cacheExtra($value, $name, $atts){
         $whereId = self::whereId($atts['where'], $atts['table']);

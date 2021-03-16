@@ -207,6 +207,8 @@ class TranslatorsManager {
                 return Utl::escapeSQuote($translation);
             case 'ucfirst':
                 return ucfirst(mb_strtolower($translation));
+            case 'lowercase':
+                return mb_strtolower($translation);
             case 'ucwords':
                 return ucwords(mb_strtolower($translation));
             case 'none':

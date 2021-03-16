@@ -22,16 +22,23 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/on", "tuko
             this.contextMenuItems.idCol = lang.hitch(this, wcutils.idColsContextMenuItems)(this).concat([{atts: {label: Pmg.message('togglerowheight'), onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}]);
         },
         resize: function(){
-	        this.inherited(arguments);
-	    	var style = this.bodyNode.style, bodyHeight = parseInt(window.getComputedStyle(document.body).getPropertyValue('height')), viewHeight = parseInt(window.getComputedStyle(this.form.domNode.parentNode).getPropertyValue('height')),
-	    		maxHeight, newMaxHeight;
-			if (viewHeight !== this.previousViewHeight){
-		    	maxHeight = style.maxHeight === '' ? 0 : parseInt(style.maxHeight);
-		    	style.maxHeight = (maxHeight + bodyHeight - viewHeight) + 'px';
-		    	newMaxHeight = parseInt(style.maxHeight);
-		    	this.previousViewHeight = viewHeight;
-			}
-	    	console.log('maxHeight: ' + maxHeight + ' bodyHeight: ' + bodyHeight + ' viewHeight: ' + viewHeight + ' newMaxHeight: ' + newMaxHeight);
+			var self = this, previousScrollPosition = this.getScrollPosition(), viewNode;
+			this.inherited(arguments);
+			setTimeout(function(){
+				self.scrollTo(previousScrollPosition);
+			}, 100);
+	    	if (viewNode = this.form.domNode.parentNode){
+		    	var style = this.bodyNode.style, bodyHeight = parseInt(window.getComputedStyle(document.body).getPropertyValue('height')), viewHeight = parseInt(window.getComputedStyle(viewNode).getPropertyValue('height')),
+		    		maxHeight, newMaxHeight;
+				style.maxWidth = parseInt(window.getComputedStyle(viewNode).getPropertyValue('width'));
+				if (viewHeight !== this.previousViewHeight){
+			    	maxHeight = style.maxHeight === '' ? 0 : parseInt(style.maxHeight);
+			    	style.maxHeight = (maxHeight + bodyHeight - viewHeight) + 'px';
+			    	newMaxHeight = parseInt(style.maxHeight);
+			    	this.previousViewHeight = viewHeight;
+				}
+		    	console.log('maxHeight: ' + maxHeight + ' bodyHeight: ' + bodyHeight + ' viewHeight: ' + viewHeight + ' newMaxHeight: ' + newMaxHeight);
+	    	}
         },
         contextMenuCallback: function(evt){
             evt.preventDefault();

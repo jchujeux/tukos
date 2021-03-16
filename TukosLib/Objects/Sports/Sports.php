@@ -8,7 +8,12 @@ class Sports {
     //public static $intensityOptions = ['verylow', 'low', 'medium', 'high', 'veryhigh'];
     public static $intensityOptions = ['1' => 'extremelylow', '2' => 'verylow',  '3' => 'low', '4' => 'ratherlow', '5' => 'medium', '6' => 'slightlyhigh', '7' => 'ratherhigh',
         '8' => 'high', '9' => 'veryhigh', '10' => 'extremelyhigh'];
-    public static $stressOptions   = ['verylow', 'low', 'medium', 'high', 'veryhigh'];
+    public static $stressOptions   = ['2' => 'verylow', '3' => 'low', '5' => 'medium', '8' => 'high', '9' => 'veryhigh'];
+    public static $repeatsOptions = ['repetition', 'second', 'minute'];
+    public static $extraOptions = ['atbodyweight', 'km/h', 'extraload', 'ononeleg', 'barefoot'];
+    public static $extra1Options = ['slowspeed', 'highspeed', 'walkingrecup', 'barefoot'];
+    public static $noNumberUnitExtra = ['atbodyweight' => true, 'ononeleg' => true, 'barefoot' => true];
+    public static $noNumberUnitExtra1 = ['slowspeed' => true, 'highspeed' => true, 'barefoot' => true];
     public static $sportOptions = ['bicycle', 'running', 'swimming', 'climbing', 'elliptic', 'bodybuilding', 'rest', 'other'];
     public static $stagetypeOptions = ['warmup', 'mainactivity', 'warmdown', 'various'];
     public static $level1Options = ['muscular', 'aerobic', 'proprioception', 'stretching', 'specific'],

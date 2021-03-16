@@ -1,17 +1,14 @@
-/*
- *  Provides a Tree widget field which data store is args.storeData, callable from ObjectPane.js
- *   
- */
-define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dijit/tree/dndSource", "tukos/PageManager", "tukos/utils", "dojo/domReady!"], 
-    function(declare, aspect, ObjectStoreModel, Tree, dndSource, Pmg, utils){
+define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "dijit/Tree", "dojo/store/Memory", "dijit/tree/dndSource", "tukos/PageManager", "tukos/utils", "tukos/evalutils", "dojo/domReady!"], 
+    function(declare, aspect, ObjectStoreModel, Tree, Memory, dndSource, Pmg, utils, eutils){
     return declare(Tree, {
         constructor: function(args){
-            if (args.storeArgs && (args.storeArgs.action || args.storeArgs.target)){
-                args.storeArgs.object = args.storeArgs.object || args.object;
+            var storeArgs = args.storeArgs;
+            if (storeArgs && (storeArgs.action || storeArgs.target)){
+                storeArgs.object = storeArgs.object || args.object;
             }
-            var myStore = Pmg.store(args.storeArgs);
-            myStore.getChildren = function(object, options){
-                return this.query({parentid: object.id});
+            var myStore = Pmg.store(storeArgs), parentProperty = args.parentProperty || 'parentid';
+            myStore.getChildren = function(object){
+                return this.query(utils.newObj([[parentProperty, object.id]]));
             }
             aspect.around(myStore, "put", function(originalPut){
                 // To support DnD, the store must support put(child, {parent: parent}).
@@ -24,15 +21,49 @@ define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "di
                     return originalPut.call(myStore, obj, options);
                 }
             });
-            args.model = new ObjectStoreModel({store: myStore, query: utils.newObj([[myStore.idProperty, args.root]]),
+            args.model = new ObjectStoreModel({store: myStore, query: utils.newObj([[myStore.idProperty, args.root]]), labelType: 'html', 
                                                mayHaveChildren: function(object){
                                                     return (object.hasChildren != undefined ? object.hasChildren : myStore.getChildren(object).length > 0);
 					                           }
             });
+            if (storeArgs.object && storeArgs.data){
+            	var dataStore = this.dataStore = new Memory({data: storeArgs.data}), root = args.root, parentDataProperty = args.parentDataProperty ||parentProperty; 
+            	args.model.getRoot = function(onItem){
+            		onItem(dataStore.get(root));
+            	}
+            	//args.model.childrenCache[root] = dataStore.query(utils.newObj([[parentDataProperty, root]]));
+            	this.initializeChildrenCache(root, dataStore, parentDataProperty, args.model);
+            }
             args.dndController = dndSource;
         },
+   		postCreate: function(){
+            this.inherited(arguments);
+            if (this.dataStore){
+            	//this.initializeChildrenCache(this.root, this.dataStore);
+            }
+            if (this.onClickAction){
+	            this.onClickFunction = eutils.eval(this.onClickAction, 'item');
+	            this.on('click', function(item){
+	                this.onClickFunction(item);
+	            });
+            }
+        },
+        initializeChildrenCache : function(rootId, dataStore, parentDataProperty, model){
+        	var self = this, children =  dataStore.query(utils.newObj([[parentDataProperty, rootId]]));
+        	if (children.length > 0){
+        			model.childrenCache[rootId] = children;
+        			children.forEach(function(item){
+            			var id = item[dataStore.idProperty], children = dataStore.query(utils.newObj([[parentDataProperty, id]]));
+            			if (children.length > 0){
+            				model.childrenCache[id] = children;
+            				self.initializeChildrenCache(id, dataStore, parentDataProperty, model);
+            			}
+         			});
+        	}
+        },
         getLabel: function(item){
-            return item.name + '(' + item.id + ')';
+            //return  '<span style="display:inline-block;white-space:normal;margin-right:40px;">' + item.name + (this.noIdInLabel ? '' :  '(' + item.id + ')') + '</span>';
+            return  '<span style="display:inline-block;white-space:normal;margin-right:40px;">' + item.name + (this.colInLabel === false  ? '' :  '(' + item[this.colInLabel || 'id'] + ')') + '</span>';
         }
     }); 
 });

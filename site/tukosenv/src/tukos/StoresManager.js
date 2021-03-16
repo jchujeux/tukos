@@ -3,8 +3,8 @@
  *  Limitation: does not take into account the query part, which may specify different columns to return => limit usage to ObjectSelect which
  *  returns the same columns, or plan to generalize this component (or from the server side return all columns systematically ?)
  */
-define (["dojo/_base/declare", "dojo/string", "dojo/store/Memory", "dojo/store/Cache", "dojo/store/Observable", "tukos/PageManager", "tukos/store/ActionRequest", "tukos/store/ObjectSelect"], 
-    function(declare, string, Memory, Cache, Observable, Pmg, ActionRequestStore, ObjectSelectStore){
+define (["dojo/_base/declare", "dojo/store/Memory", "dojo/store/Observable", "tukos/PageManager", "tukos/store/ActionRequest", "tukos/store/ObjectSelect"], 
+    function(declare, Memory, Observable, Pmg, ActionRequestStore, ObjectSelectStore){
     return declare(null, {
         constructor: function(args){
             this.stores = new Object();
@@ -16,16 +16,6 @@ define (["dojo/_base/declare", "dojo/string", "dojo/store/Memory", "dojo/store/C
         	if (action || args.target){
                 var theStore = args.target = (args.target || Pmg.requestUrl(args)) + this.i;
                 this.i += 1;
-/*
-                if (action === 'ObjectSelect'){
-                	if (theStore in this.stores){
-                        return this.stores[theStore].myStore;
-                    }
-                }else{
-                    theStore = theStore + this.i;
-                    this.i += 1;               	
-                }
-*/
                 args.sortParam = args.sortParam || Pmg.get('sortParam');
                 this.stores[theStore] = {myStore: new Observable(new (action === 'ObjectSelect' ? ObjectSelectStore : ActionRequestStore)(args))};
                 return this.stores[theStore].myStore;

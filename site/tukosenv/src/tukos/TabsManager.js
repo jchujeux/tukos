@@ -93,12 +93,14 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
                 target.object = target.table;
             }
             if (target.id){
-            	target.query = lang.mixin({id: target.id}, target.query ||{});// legacy - changed to target on 2017-06-16 & need to support previous syntax in tukos/editor/plugins/TuksoLinkDialog
+            	target.query = lang.mixin({id: target.id}, target.query ||{});// legacy - changed to target on 2017-06-16 & need to support previous syntax in tukos/editor/plugins/TukosLinkDialog
             }
-            var openedTabs = this.container.getChildren();
+            var openedTabs = this.container.getChildren(), id = target.query.id, name = target.query.name;
             for (var i in openedTabs){
-                if ((openedTabs[i].get('title').match(/(\d+)\)$/) || {} )[1] === target.query.id){
-                    this.container.selectChild(openedTabs[i]);
+                var tab = openedTabs[i];
+                if ((id && tab.contentId == id) || (name && tab.contentName === name) || (id && (tab.get('title').match(/(\d+)\)$/) || {} )[1] === id)){
+                //if ((openedTabs[i].get('title').match(/(\d+)\)$/) || {} )[1] === target.query.id){
+                    this.container.selectChild(tab);
                     return;
                 }
             }

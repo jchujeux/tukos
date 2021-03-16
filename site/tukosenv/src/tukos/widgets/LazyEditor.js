@@ -1,7 +1,7 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dojo/Deferred", "dojo/dom-style", "dijit/layout/ContentPane", "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
         "tukos/widgets/HtmlContent", "tukos/widgets/DnDWidget", "tukos/widgets/widgetCustomUtils"], 
   function(declare, lang, ready, when, Deferred, domStyle, ContentPane, Pmg, WidgetsLoader, HtmlContent, DnD, wcutils){
-	var EditorClass, editor, isPlaced = false;
+	var editors = {}, isPlaced = false, editorTypes = {normal: 'Editor', simple: 'MobileEditor'};
 	return declare([ContentPane, DnD], {
 		postCreate: function(){
 			this.inherited(arguments);
@@ -11,15 +11,16 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			this.addChild(this.htmlContent);
 			this.onClickHandle = this.on('click', this.onClickCallback);
 			this.viewSource = false;
+			this.editorType = this.editorType || 'normal';
 		},
 		onClickCallback: function(){
 			this.onClickHandle.remove();
-			if (!this.disabled && !this.readOnly){
-				if (!editor){
-					when(WidgetsLoader.loadWidget('Editor'), lang.hitch(this, function(Editor){
-						EditorClass = Editor;
-						editor = new Editor({style: {width: '100%'}}, dojo.doc.createElement("div"));
-						editor.startup();//JCH: needed for OverviewDgrid editor instantiation in colValues
+			if (!this.disabled && !this.readonly){
+				var editorType = this.editorType;
+				if (!editors[editorType]){
+					when(WidgetsLoader.loadWidget(editorTypes[editorType]), lang.hitch(this, function(Editor){
+						editors[editorType] = new Editor({style: {width: '100%'/*, minHeight: '150px'*/}, toolbarMode: 'alwaysOn'}, dojo.doc.createElement("div"));
+						editors[editorType].startup();//JCH: needed for OverviewDgrid editor instantiation in colValues
 						this.placeEditor();
 					}));
 				}else{
@@ -30,7 +31,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			}
 		},
 		resetEditor: function(){
-			editor = null;
+			editors[this.editorType] = null;
 		},
 		customContextMenuItems: function(){
 			var self = this;    		
@@ -40,10 +41,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			return editorHeight ? (parseInt(editorHeight) + 78) + 'px' : undefined;
 		},
 		contentToEditorHeight: function(contentHeight){
-			return contentHeight ? (parseInt(contentHeight) - 78) + 'px' : undefined;
+			return contentHeight ? (Math.max(parseInt(contentHeight), 150) - 78) + 'px' : undefined;
 		},
 		placeEditor: function(){
-			var htmlContent = this.htmlContent, height = this.contentToEditorHeight(htmlContent.get('style').height);
+			var htmlContent = this.htmlContent, height = this.contentToEditorHeight(htmlContent.get('style').height), editor = editors[this.editorType];
 			editor.widgetName = this.widgetName;
 			editor.pane = this.pane;
 			editor.lazyEditor = this;
@@ -56,7 +57,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			editor.set('value', htmlContent.get('value'));
 			this.removeChild(htmlContent);
 			this.addChild(editor);
-			if (this.viewSource !== editor.isInViewSource()){
+			if (editor.isInViewSource && (this.viewSource !== editor.isInViewSource())){
 				editor.toggle();
 			}
 			editor.focus();
@@ -65,12 +66,14 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 		},
 		
 		onBlurCallback: function(){
-			var htmlContent = this.htmlContent, self = this, newValue;
+			var htmlContent = this.htmlContent, self = this, newValue, editor = editors[this.editorType];
 			console.log('calling onBlurCallback - isPlaced: ' + isPlaced);
 			this.onBlurHandle.remove();
 			if (editor && this.getIndexOfChild(editor) > -1/* && editor.isFullscreen !== true*/){//case where focus not via onClick, e.g. onDrop
 				//htmlContent.set('style', {height: this.editorToContentHeight(editor.get('height'))});
-				this.viewSource = editor.isInViewSource();
+				if (editor.isInViewSOurce){
+					this.viewSource = editor.isInViewSource();
+				}
 				editor.set('value', (newValue = editor.get('value')));// to make sure the Editor onWatch is triggered, that untranslates if needed into serverValue
 				this.set('value', newValue);
 				when(editor.get('serverValue'), function(serverValue){

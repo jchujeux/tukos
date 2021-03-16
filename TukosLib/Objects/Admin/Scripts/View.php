@@ -7,8 +7,6 @@ namespace TukosLib\Objects\Admin\Scripts;
 
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
-use TukosLib\Utils\Utilities as Utl;
-use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
 

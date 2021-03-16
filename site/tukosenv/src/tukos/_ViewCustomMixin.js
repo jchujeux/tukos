@@ -76,7 +76,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/dom-
         },
 
         setVisibility: function(args){
-            var  targetPane = this.currentPane(), form = targetPane.form || targetPane, pane = targetPane.customDialog.pane, viewMode = form.viewMode, isOverview = (viewMode === 'Overview'), isReadOnly = form.readOnly,
+            var  targetPane = this.currentPane(), form = targetPane.form || targetPane, pane = targetPane.customDialog.pane, viewMode = form.viewMode, isOverview = (viewMode === 'Overview'), isReadOnly = form.readonly,
                  paneGetWidget = lang.hitch(pane, pane.getWidget);
             paneGetWidget('tukosCustomView').set('value',  form.tukosviewid ? form.tukosviewid : '', false);
             paneGetWidget('defaultCustomView').set('value',  form.customviewid ? form.customviewid : '', false);

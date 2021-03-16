@@ -12,28 +12,31 @@ class View extends AbstractView {
     
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Customer', 'Description');
-		$labels = $this->model->itemsLabels;
 		$this->allowedNestedWatchActions = 1;
-		$customDataWidgets = [
+        $this->customize($this->customDataWidgets(), $this->subObjects(), ['grid' => ['items']], ['items' => []]);
+    }
+    function customDataWidgets(){
+        $labels = $this->model->itemsLabels;
+        return [
             'reference' =>  ViewUtils::textBox($this, 'Reference', ['atts' => ['edit' => ['disabled' => true]]]),
             'quotedate' => ViewUtils::tukosDateBox($this, 'Quotedate'),
             'items'  => $this->items($labels),
-			'discountpc' => $this->discountPc($labels),
-        	'discountwt' => $this->discountWt(),
-			'pricewot' => $this->priceWot(),
-			'pricewt' => $this->priceWt(),
-			'downpay' => ViewUtils::tukosCurrencyBox($this, 'Downpay'),
-        	'status'   => ViewUtils::storeSelect('status', $this, 'Status'),
+            'discountpc' => $this->discountPc($labels),
+            'discountwt' => $this->discountWt(),
+            'pricewot' => $this->priceWot(),
+            'pricewt' => $this->priceWt(),
+            'downpay' => ViewUtils::tukosCurrencyBox($this, 'Downpay'),
+            'status'   => ViewUtils::storeSelect('status', $this, 'Status'),
         ];
-
-        $subObjects = [
+    }
+    function subObjects(){
+        return [
             'catalog' => [
-                'object' => 'bustrackcatalog', 'filters' => [], 
+                'object' => 'bustrackcatalog', 'filters' => [],
                 'atts' => ['title' => $this->tr('Bustrackcatalog'), 'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false]],
-                 'allDescendants' => true,
+                'allDescendants' => true,
             ]
         ];
-        $this->customize($customDataWidgets, $subObjects, ['grid' => ['items']], ['items' => []]);
-    }    
+    }
 }
 ?>

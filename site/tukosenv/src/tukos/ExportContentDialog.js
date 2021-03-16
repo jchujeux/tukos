@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all", "dojo/ready", "dojo/when", "tukos/utils", "tukos/hiutils", "tukos/TukosTooltipDialog", "tukos/Download",  "tukos/PageManager", "dojo/json", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, on, all, ready, when, utils, hiutils, TukosTooltipDialog, download, Pmg, JSON, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all", "dojo/ready", "dojo/when", "tukos/utils", "tukos/hiutils", "tukos/TukosTooltipDialog", "tukos/Download",  "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+    function(declare, lang, on, all, ready, when, utils, hiutils, TukosTooltipDialog, download, Pmg, messages){
     return declare(TukosTooltipDialog, {
         postCreate: function(){
             var form = this.form;
@@ -26,7 +26,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             		}));
         		}
         	});
-        	this.blurCallback = on.pausable(this, 'blur', this.close);
+        	this.blurCallback = on.pausable(this, 'blur', this.pane.close);
         },
         _dialogAtts: function(form){
             var onWatch = lang.hitch(this, this.onWatchLocalAction), onWatchCheckBox =  lang.hitch(this, this.onWatchCheckBoxLocalAction);

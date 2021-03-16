@@ -4,9 +4,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <title>Tukos mobile</title>
-    <script type="text/javascript">
-    	dojoBasePath = "<?= $this->dojoBaseLocation ?>";<!-- used in deviceTheme.js -->
-    </script>
     <script type="text/javascript" src="<?= $this->tukosLocation ?>/mobile/deviceTheme.js"></script>
     <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dijit/themes/claro/claro.css" media="screen">
     <link rel="stylesheet" href="<?= $this->dgridLocation ?>/css/dgrid.css" media="screen">

@@ -2,10 +2,10 @@
     Provides a popup menu to allow parent selection in case of multi-table parent  
     - usage: 
 */
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuItem", "dijit/DropDownMenu", "dijit/form/MappedTextBox",
-         "dijit/_HasDropDown", "tukos/utils", "tukos/PageManager", "dijit/Tooltip", "dijit/form/TextBox",  "tukos/widgets/WidgetsLoader",
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuItem", "dijit/MenuItem", "dijit/DropDownMenu", "dijit/form/MappedTextBox",
+         "dijit/_HasDropDown", "tukos/utils", "tukos/PageManager", "dijit/Tooltip",  "tukos/widgets/WidgetsLoader",
          "dojo/text!dijit/form/templates/DropDownBox.html", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, on, PopupMenuItem, DropDownMenu, MappedTextBox, _HasDropDown, utils, Pmg, Tooltip, TextBox, widgetsLoader, template, messages){
+    function(declare, lang, on, PopupMenuItem, MenuItem, DropDownMenu, MappedTextBox, _HasDropDown, utils, Pmg, Tooltip, widgetsLoader, template, messages){
     return declare([MappedTextBox, _HasDropDown], {
         templateString: template,
 		baseClass: "dijitTextBox dijitComboBox",
@@ -23,6 +23,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuIte
         postCreate: function(){
         	this.inherited(arguments);
         	this.object = this.defaultObject;
+			if (Pmg.isMobile()){
+				this.set('readonly', true);
+			}
         },
         openDropDown: function(){
             var self = this;
@@ -39,7 +42,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuIte
                             dojo.when(widgetsLoader.instantiate('ObjectSelect', self1.objectSelectAtts), function(theObjectSelect){
                             	self1.set('popup', theObjectSelect);                            	
                             });
-                        	//self1.set('popup', new ObjectSelect(self1.objectSelectAtts));
                         }
                     },
                     200
@@ -51,6 +53,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuIte
             if (!this.dropDown){
                 this.dropDown = new DropDownMenu({});
                 this.emptyDropDown = new DropDownMenu({});
+				this.dropDown.addChild(new MenuItem({onClick: function(){self.set('value', '');}}));
                 if (self.items){
                     for (var i in self.items){
                         self.items[i].onChange = onChangeCallBack;

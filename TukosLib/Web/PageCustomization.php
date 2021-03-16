@@ -22,7 +22,7 @@ trait PageCustomization{
                     'defaultTukosUrls' => Widgets::simpleDgrid(Widgets::complete(['label' => $tr('defaultTukosUrls'), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => false, 'noDeleteRow' => true,
                         'style' => ['width' => '500px'], 'colsDescription' => [
                             //'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-                            'app'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['TukosApp', 'TukosBus', 'TukosSports'], $tr)], 'label' => $tr('tukosAppName'),
+                            'app'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['TukosApp', 'TukosBus', 'TukosSports', 'TukosMSQR'], $tr)], 'label' => $tr('tukosAppName'),
                                 'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
                             'object'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore($this->user->allowedModules(), $tr)], 'label' => $tr('module'),
                                 'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),

@@ -39,7 +39,7 @@ class View extends AbstractView {
                     'storeedit' => ['formatType' => 'currency', 'width' => 80, 'renderContentAction' => $this->amountRenderContentAction()]]]), false),
                 'isexplained' => Widgets::description(ViewUtils::checkBox($this, 'Isexplained', ['atts' => ['storeedit' => ['width' => 80, 'editorArgs' => [
                         'onChangeLocalAction' => ['isexplained' => ['localActionStatus' => $this->updatedRow()]]]]]]), false),
-                'customer' => Widgets::description(ViewUtils::objectSelectMulti(['bustrackpeople', 'bustrackorganizations'], $this, $paidByOrTo, ['atts' => ['edit' => ['allowManualInput' => true, 'style' => ['width' => '100px']]]]), false),
+                'customer' => Widgets::description(ViewUtils::objectSelectMulti(['bustrackpeople', 'bustrackorganizations'], $this, $paidByOrTo, ['atts' => ['edit' => [/*'allowManualInput' => true, */'style' => ['width' => '100px']]]]), false),
                 'category' => Widgets::description(ViewUtils::ObjectSelect($this, 'Category', 'bustrackcategories', ['atts' => ['edit' => [
                     'dropdownFilters' => ['parentid' => '@parentid', ["col" => "applyto{$customersOrSuppliers}", 'opr' => 'IN' , 'values' => ["YES", 1]]]]]]), false),
                 'paymenttype' => Widgets::description(ViewUtils::storeSelect('paymentType', $this, 'paymenttype'), false),
@@ -69,7 +69,7 @@ class View extends AbstractView {
                         'sort'            => [['property' => 'id', 'descending' => false]], 'deselectOnRefresh' => false,
                         'summaryRow' => ['cols' => [
                             'name' => ['content' =>  ['Total']],
-                            'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]],
+                            'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#amount#);"]]],
                         ]],
                         'createRowAction' => $this->createRowAction(),
                         'updateRowAction' => $this->updateRowAction(),

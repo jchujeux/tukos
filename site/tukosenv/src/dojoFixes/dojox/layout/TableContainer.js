@@ -105,7 +105,9 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
 				child.resize();
 			}
 		});
-                this.layout();
+                if (!this.resizeOnly){
+                	this.layout();
+                }
                 if (this.table){
                     if (arguments[0] != undefined && this.table.clientWidth > arguments[0].w){
                         this.set('style', {width: this.table.clientWidth+'px'}); //JCH - to allow horizontal scrolling of the parent pane (that needs to be aware of width > its own width)
@@ -226,7 +228,7 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
                                     ? this.labelWidth + "px" : this.labelWidth);
                         }
                         if (labelCellStyle){
-                            dojo.forEach(labelCellStyle, function(value, att){
+                            utils.forEach(labelCellStyle, function(value, att){
                                 domStyle.set(labelCell, att, value);
                             });
                         }

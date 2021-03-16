@@ -44,19 +44,13 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
             }
         },
         _renderSummaryCell: function (item, cell, column) {
-            // summary:
-            //      Simple method which outputs data for each
-            //      requested column into a text node in the
-            //      passed cell element.  Honors columns'
-            //      get, formatter, and renderCell functions.
-            //      renderCell is called with an extra flag,
-            //      so custom implementations can react to it.
-             
             var summaryCol = this.summaryRow.cols[column.field];
             if (summaryCol){
-                var value = item[column.field] || '', atts = summaryCol.atts, formatType = (atts || {}).formatType, node = dct.create('div', {style: utils.in_array(formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {}});
-                node.appendChild(document.createTextNode(formatType ? utils.transform(value, formatType, atts.formatOptions, Pmg) : value));
+                var value = item[column.field] || '', atts = summaryCol.atts, formatType = (atts || {}).formatType, 
+					node = dct.create('div', {innerHTML: formatType ? utils.transform(value, formatType, atts.formatOptions, Pmg) : this.colDisplayedValue(value, column.field), style: utils.in_array(formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {}});
+                //node.appendChild(document.createTextNode(formatType ? utils.transform(value, formatType, atts.formatOptions, Pmg) : value));
                 cell.appendChild(node);
+				//column.renderCell(item, value, cell);
             }
         },
         _setSummary: function (data) {
@@ -95,12 +89,12 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
                     }else{
                         var res = (expression.init || 0);
                         var rhs = expression.rhs.replace(/#(.+)#/, "self.cellValue(row,'$1')");
-                        var theFunction = eutils.eval(rhs, 'self, row');
+                        var theFunction = eutils.eval(rhs, 'self, row, res');
                         store.filter(expression.filter).forEach(function(row){
-                        	res += theFunction(self, row);
+                        	res = theFunction(self, row, res);
                         	if (typeof store.getChildren === "function"){
                         		store.getChildren(row).forEach(function(subRow){
-                        			res += theFunction(self, subRow);
+                        			res = theFunction(self, subRow, res);
                         		});
                         	}
                         });

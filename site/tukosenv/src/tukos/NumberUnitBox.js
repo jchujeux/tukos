@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/_WidgetBase", "dijit/_FocusMixin", "dijit/form/TextBox", "tukos/StoreSelect", "tukos/widgetUtils", "dijit/registry", "dojo/json"], 
-function(declare, lang, domstyle, Widget, _FocusMixin, TextBox, StoreSelect, wutils, registry, JSON){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/_WidgetBase", "dijit/_FocusMixin", "dijit/form/TextBox", "tukos/StoreSelect", "tukos/widgetUtils", "tukos/utils", "dojo/json"], 
+function(declare, lang, dst, Widget, _FocusMixin, TextBox, StoreSelect, wutils, utils, JSON){
     return declare([Widget, _FocusMixin], {
         postCreate: function(){
             this.inherited(arguments);
@@ -13,24 +13,28 @@ function(declare, lang, domstyle, Widget, _FocusMixin, TextBox, StoreSelect, wut
             	if (self.onChange){
             		self.onChange(newValue);
             	}
+            	if ((self.noNumberUnit || {})[newValue]){
+            		self.numberField.set('value', '');
+            		self.numberField.set('disabled', true);
+            		dst.set(self.numberField.domNode, 'display', 'none');
+            	}else{
+            		self.numberField.set('disabled', false);
+            		dst.set(self.numberField.domNode, 'display', 'block');
+            	}
             });
             this.domNode.appendChild(this.unitField.domNode);   
         },
-
         focus: function(){
             this.numberField.focus();
         },
-
-        setStyleToChanged: function(widget){
+        setStyleToChanged: function(){
             this.numberField.set('style', {backgroundColor: wutils.changeColor});
             this.unitField.set('style', {backgroundColor: wutils.changeColor});
         },
-
         setStyleToUnchanged: function(){
             this.numberField.set('style', {backgroundColor: ''});
             this.unitField.set('style', {backgroundColor: ''});
         }, 
-
         _setValueAttr: function(value){
             this._set("value", value);
             if (typeof this.value == 'string' && this.value != ''){
@@ -49,6 +53,11 @@ function(declare, lang, domstyle, Widget, _FocusMixin, TextBox, StoreSelect, wut
         _getValueAttr: function(){
             return this.concat ? this.numberField.get('value') + this.unitField.get('value') : JSON.stringify([this.numberField.get('value'), this.unitField.get('value')]);
         },
+		_getDisplayedValueAttr: function(){
+			var unitValue = this.unitField.get('value');
+			
+			return this.numberField.get('value') + ' ' + (unitValue ? utils.findReplace(this.unitField.store.data, 'id', unitValue, 'name', this.storeCache || (this.storeCache = {})) : unitValue);
+		},
         _setDisabledAttr: function(value){
             this.inherited(arguments);
             this.numberField.set('disabled', value);

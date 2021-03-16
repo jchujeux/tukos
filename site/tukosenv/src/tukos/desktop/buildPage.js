@@ -21,7 +21,6 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
 			Pmg.tabs = new TabsManager({container: contentTabs, tabsDescription: obj.tabsDescription});
 			var userTabLink = new TabOnClick({url: obj.userEditUrl}, "pageusername");
 			      
-			var newPanesConfig = [], rowId = 1;
 			focusUtil.on('widget-focus', function(widget){
 				var panel = focusUtil.get('activeStack')[1];
 				switch (panel){

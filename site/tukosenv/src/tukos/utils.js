@@ -30,15 +30,25 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         	lang.setObject(typeof path === 'string'? path : path.join('.'), value, result);
         	return result;
         },
-        empty: function(obj) {
-            if (!obj){
+        empty: function(mixed) {
+            if (!mixed){
             	return true;
+            }else{
+            	switch(typeof(mixed)){
+            		case "object":
+			        	if (Array.isArray(mixed)){
+			        		return mixed.length === 0;
+			        	}else{
+				        	for(var key in mixed) {
+				                if(mixed.hasOwnProperty(key))
+				                    return false;
+				            }
+				            return true;
+			            }
+			        default:
+			          	return false;
+				}
             }
-        	for(var key in obj) {
-                if(obj.hasOwnProperty(key))
-                    return false;
-            }
-            return true;
         },
         forEach: function(object, callback){
             for (var key in object){
@@ -264,7 +274,7 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                     	return value.substring(1,9);
                     case 'numberunit':
                      	var values = JSON.parse(value), count = values[0], unit=values[1], localUnit = messages[unit] || unit;
-                        value = count + ' ' + localUnit + (count > 1 ? 's' : '');
+                        value = count + ' ' + localUnit + (count > 1 ? ((formatOptions || {}).noPlural ? '' : 's') : '');
                         break;
                     case 'percent' : 
                         value =  (value == 0 ? '' : number.format(value*100,{places: 2}) + '%');

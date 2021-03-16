@@ -1,4 +1,4 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/on", "dgrid/OnDemandGrid", "dgrid/Selector", "dgrid/extensions/DijitRegistry", "dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer",
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/on", "dgrid/OnDemandGrid", "dgrid/Selector", "dgrid/extensions/DijitRegistry", "tukos/dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer",
 	"tukos/_GridSummaryMixin", "tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager"], 
 function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resizer, _GridSummaryMixin, utils, eutils, mutils, wcutils, Pmg){
     return declare([Grid, DijitRegistry, Hider, Resizer, Selector, _GridSummaryMixin], {
@@ -40,7 +40,7 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
             	self.set(att, self[att]);
             });
             if (this.renderCallback){
-            	this.renderCallBackFunction = eutils.eval(this.renderCallback, "node, rowData")
+            	this.renderCallbackFunction = eutils.eval(this.renderCallback, "node, rowData, column, tdCell")
             }
             this.keepScrollPosition = true;
         	if (!this.itemCustomization){
@@ -95,6 +95,15 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         renderStoreValue: function(object, value, node){
             return this.grid._renderContent(this, object, value ? utils.findReplace(this.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value);
         },
+        renderNumberUnitValue: function(object, value, node){
+            if (value){
+				var values = JSON.parse(value), count = values[0],
+            		unitValue = values[1] ? utils.findReplace(this.editorArgs.unit.storeArgs.data, 'id', values[1], 'name', this.storeCache || (this.storeCache = {})) : values[1],
+                	transformedValue = count + ' ' + unitValue + (count > 1 && this.formatType === 'numberunit' ? 's' : '');
+	
+			}
+            return this.grid._renderContent(this, object, node, transformedValue || value);
+        },
         renderCheckBox: function(object, value, node){
         	return this.grid._renderContent(this, object, value ? '☑' : '☐', {textAlign: 'center'});
         },        
@@ -123,7 +132,7 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
             	node.onClickHandler = on(node, 'click', lang.hitch(this, this.loadContentOnClick));
             }
             if (this.renderCallbackFunction){
-            	this.renderCallbackFunction(node, row.data);
+            	this.renderCallbackFunction(node, row.data, column);
             }
             return node;
         },

@@ -19,16 +19,18 @@ abstract class AbstractView extends ObjectTranslator{
     function __construct($objectName, $translator, $parentWidgetTitle='Parent', $nameWidgetTitle='Name', $parentObjects = 'parentid'){
         parent::__construct($objectName, $translator);
         $this->objectName = $objectName;
-        $objectsStore  = Tfk::$registry->get('objectsStore');
+        $objectsStore = $this->objectsStore = Tfk::$registry->get('objectsStore');
         $this->model = $objectsStore->objectModel($this->objectName, $this->tr);
         $this->user  = Tfk::$registry->get('user');
         $this->sendOnSave = $this->sendOnDelete = ['updated'];
         $this->mustGetCols = ['id', 'name', 'parentid', 'updated', 'permission', 'updator', 'creator'];
+        $missingUser = $this->tr('missinguser', 'escapeSQuote');
+        $needsUser = $this->tr('aclneedsuser', 'escapeSQuote');
 
         $this->dataWidgets = [
             'id' => ViewUtils::textBox($this, 'Id', [
                     'atts' => [
-                        'edit' =>  ['readOnly' => true, 'style' => ['width' => '6em', 'backgroundColor' => 'WhiteSmoke']],
+                        'edit' =>  ['readonly' => true, 'style' => ['width' => '6em', 'backgroundColor' => 'WhiteSmoke']],
                         'storeedit' => ['width' => 60, 'renderExpando' => true, 'formatter' => 'formatId', 'renderCell' => '', 'editOn' => 'dblClick'],
                         'overview'  => ['width' => 60],
                     ]
@@ -37,14 +39,14 @@ abstract class AbstractView extends ObjectTranslator{
             'parentid'  => ViewUtils::objectSelectMulti($parentObjects, $this, $parentWidgetTitle),
             'name'      => ViewUtils::textBox($this, $nameWidgetTitle, ['atts' => ['storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
             'comments'  => ViewUtils::lazyEditor($this, 'CommentsDetails', ['atts' => ['edit' => ['height' => '400px']]]),
-            'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [false, 'ucfirst', false], ['atts' => 
-                [/*'edit' => ['onWatchLocalAction' => ['value' => ['acl' => ['hidden' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return newValue === 'ACL' ? false : true"]]]]],*/
+            'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [true, 'ucfirst', false], ['atts' => 
+                ['edit' => ['readonly' => true, /*'onWatchLocalAction' => ['value' => ['acl' => ['hidden' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return newValue === 'ACL' ? false : true"]]]]*/],
                  'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]
             ]),
             'acl' => ViewUtils::JsonGrid($this, 'Acl', [
                     'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                     'userid' => ViewUtils::objectSelect($this, 'User', 'users'),
-                'permission'  => ViewUtils::storeSelect('acl', $this, 'Permission', [true, 'ucfirst', true])
+                'permission'  => ViewUtils::storeSelect('acl', $this, 'Permission', [true, 'ucfirst', true], ['atts' => ['edit' => ['onChangeLocalAction' => ['acl' => ['localActionStatus' => "if (!sWidget.valueOf('userid')){Pmg.alert({title: '$missingUser', content: '$needsUser'})}; return true;"]]]]])
                 ],
                 ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]
             ),
@@ -62,10 +64,10 @@ abstract class AbstractView extends ObjectTranslator{
                 'objToStoreEdit' => ['translate' => ['tr' => ['class' => $this]]],                        
                 'objToOverview' => ['translate' => ['tr' => ['class' => $this]]],                        
             ],
-            'updator'   => ViewUtils::objectSelect($this, 'Last edited by', 'users', ['atts' => ['edit' => ['placeHolder' => '', 'style' => ['width' => '10em', 'backgroundColor' => 'WhiteSmoke'], 'readOnly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
-            'updated'   => ViewUtils::timeStampDataWidget($this, 'Last edit date', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'WhiteSmoke'], 'readOnly' => true]]]),
-            'creator'   => ViewUtils::objectSelect($this, 'Created by', 'users', ['atts' => ['edit' => ['placeHolder' => '', 'style' => ['width' => '10em', 'backgroundColor' => 'WhiteSmoke'], 'readOnly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
-            'created'   => ViewUtils::timeStampDataWidget($this, 'Creation date', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'WhiteSmoke'], 'readOnly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
+            'updator'   => ViewUtils::objectSelect($this, 'Last edited by', 'users', ['atts' => ['edit' => ['placeHolder' => '', 'style' => ['width' => '10em', 'backgroundColor' => 'WhiteSmoke'], 'readonly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
+            'updated'   => ViewUtils::timeStampDataWidget($this, 'Last edit date', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'WhiteSmoke'], 'readonly' => true]]]),
+            'creator'   => ViewUtils::objectSelect($this, 'Created by', 'users', ['atts' => ['edit' => ['placeHolder' => '', 'style' => ['width' => '10em', 'backgroundColor' => 'WhiteSmoke'], 'readonly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
+            'created'   => ViewUtils::timeStampDataWidget($this, 'Creation date', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'WhiteSmoke'], 'readonly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             
         ];
         if ($this->user->rights() === 'SUPERADMIN'){
@@ -154,6 +156,9 @@ abstract class AbstractView extends ObjectTranslator{
                 isset($this->dataWidgets['configstatus']) ? ['configstatus'] : []), 
             $this->_exceptionCols['grid']
         ));
+    }
+    function dataWidgets(){
+        return $this->dataWidgets;
     }
     function widgetsDescription($elements, $editOnly = true){
         $result = [];

@@ -4,24 +4,6 @@ define (["dojo/_base/declare", "dijit/form/MultiSelect", "dijit/Tooltip", "tukos
         postCreate: function(){
             var valueToRestore = this.value;
         	this.inherited(arguments);
-/*
-			if (this.options){
-				this.set('options', this.options);
-			}
-*/
-/*
-            for (var  i in this.options){
-                var opt = dojo.doc.createElement('option'), option = this.options[i];
-                if (typeof option === 'string'){
-                	opt.innerHTML = option;
-                }else{
-                	opt.innerHTML = option.option;
-                	var tooltip = new Tooltip({connectId: [opt], label: option.tooltip});
-                }
-                opt.value = i;
-                this.domNode.appendChild(opt);
-            }
-*/
             this.set('value', valueToRestore);
         },
         _getServerValueAttr: function(){

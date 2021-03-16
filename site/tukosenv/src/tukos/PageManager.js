@@ -14,7 +14,21 @@ function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _
 			this.cache = obj;
 			this.cache.messages = this.cache.messages || {};				
 	   },
+	   initializeBlog: function(obj){
+		   tukos = {Pmg: this};
+		   this.cache = obj;
+		   this.cache.messages = this.cache.messages || {};
+           var self = this;
+           Date.prototype.toJSON = function(){
+               return dojoDateLocale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
+           };
+           require([obj.isMobile ? "tukos/mobile/buildBlog" : "tukos/desktop/buildBlog", "tukos/StoresManager"], function(buildBlog, StoresManager){
+	           stores = new StoresManager();
+	           buildBlog.initialize();
+           });
+	   },
 	   initializeForm: function(obj){
+		   tukos = {Pmg: this};
 		   this.cache = obj;
 		   this.cache.messages = this.cache.messages || {};
            var self = this;
@@ -24,9 +38,6 @@ function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _
            require([obj.isMobile ? "tukos/mobile/buildForm" : "tukos/desktop/buildForm", "tukos/StoresManager"], function(buildForm, StoresManager){
 	           stores = new StoresManager();
 	           buildForm.initialize();
-	           self.requestUrl = function(urlArgs){//functions depending on utils located here so that utils can be located in the require above and then can depend on PageManager
-	               return string.substitute(urlTemplate, {dialogueUrl: self.get('dialogueUrl'), object: urlArgs.object, view: urlArgs.view, mode: urlArgs.mode || 'Tab', action: urlArgs.action}) + '?' + utils.join(urlArgs.query);
-	           };
            });
 	   },
 	   initialize: function(obj) {
@@ -114,14 +125,15 @@ function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _
         get: function(item){
             return this.cache[item];
         },
+        set: function(item, value){
+        	this.cache[item] = value;
+        },
         setCopiedCell: function(copiedCell){
             this.copiedCell = copiedCell;
         },
-
         getCopiedCell: function(){
             return this.copiedCell;
         },
-
         store: function(args){
             return stores.get(args);
         },
@@ -355,7 +367,7 @@ function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _
         		var pageTukosOrUserOrChangesCustomization = 'page' + utils.capitalize(args.tukosOrUserOrChanges) + 'Customization';
         		return args.property ? this.cache[pageTukosOrUserOrChangesCustomization][args.property] : this.cache[pageTukosOrUserOrChangesCustomization];
         	}else{
-            	return args ? utils.drillDown(this.cache.newPageCustomization, 'args', absentValue) : this.cache.newPageCustomization;
+            	return args ? utils.drillDown(this.cache.newPageCustomization, args.split('.'), absentValue) : this.cache.newPageCustomization;
         	}
         },
         setCustom: function(args, value){

@@ -92,7 +92,7 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_
     	    });
     	    aspect.after(this, 'onDisplayChanged', lang.hitch(this, function(){
     			var document = this.document, wSelection;
-    	    	if (document && (wSelection = document.getSelection())){
+    	    	if (document && (wSelection = document.getSelection()) && wSelection.anchorNode){
     				var anchorNode = wSelection.anchorNode, parentNode = anchorNode.parentNode, path = parentNode.nodeName + ' > ';
         			while(parentNode && (parentNode.nodeName !== 'BODY')){
         				parentNode = parentNode.parentNode;

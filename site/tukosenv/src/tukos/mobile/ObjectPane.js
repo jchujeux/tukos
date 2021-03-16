@@ -1,13 +1,14 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/when", "dojo/promise/all", "dojo/aspect", "dijit/registry", "dojox/mobile/ScrollablePane", "dojox/mobile/Container", "dojox/mobile/FormLayout", 
-		"dojox/mobile/ToolBarButton", "tukos/widgets/WidgetsLoader", "tukos/_ObjectPaneMixin", "tukos/utils", "tukos/widgetUtils"], 
-    function(declare, lang, dct, dst, when, all, aspect, registry, ScrollablePane, Container, FormLayout, ToolBarButton, widgetsLoader, _ObjectPaneMixin, utils, wutils){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/when", "dojo/promise/all", "dojo/aspect", "dijit/registry"/*, "tukos/mobile/ScrollableContainer"*/, "dojox/mobile/Container", "dojox/mobile/FormLayout", 
+		"dojox/mobile/ToolBarButton", "tukos/widgets/WidgetsLoader", "tukos/_ObjectPaneMixin", "tukos/utils", "tukos/widgetUtils", "tukos/PageManager"], 
+    function(declare, lang, dct, dst, when, all, aspect, registry/*, ScrollableContainer*/, Container, FormLayout, ToolBarButton, widgetsLoader, _ObjectPaneMixin, utils, wutils, Pmg){
     
 	var mobileWidgetTypes = {TextBox: 'MobileTextBox', FormattedTextBox: 'MobileFormattedTextBox', LazyEditor: 'MobileEditor', ObjectReset: 'MobileObjectReset', ObjectSave: 'MobileObjectAction', ObjectNew: 'MobileObjectAction',
-							 OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction', Textarea: 'MobileTextBox', StoreSelect: "MobileStoreSelect", TimeTextBox: "MobileTimePicker", TukosNumberBox: "MobileNumberBox"};
+							 OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction', Textarea: 'MobileTextBox'/*, StoreSelect: "MobileStoreSelect"*/, TimeTextBox: "MobileTimePicker", TukosNumberBox: "MobileNumberBox"};
 	return declare([Container, _ObjectPaneMixin], {
         postCreate: function(){
             var self = this;
         	this.inherited(arguments);
+        	this.Pmg = Pmg;
             this.widgetType = "MobileObjectPane";
             this.widgetsName = [];
             this.customization = {};
@@ -40,9 +41,14 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                     		});
                 		}else{
                 			hider.toggleHiderMenu();
+                			widgetsHiderButton.set('icon', widgetsHiderButton.get('icon') === "mblDomButtonBlueCircleMinus" ? "mblDomButtonBlueCirclePlus" :  "mblDomButtonBlueCircleMinus");
                 		}
                 	});
             	}
+             	this.closeViewButton = new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){
+             		console.log('here is where I need to act');
+             		self.viewPane.destroy();
+             	}}).placeAt(this.viewPane.actionsHeading, 1);
                 if (this.data && this.data.value && !this.data.value.id){
                     this.markIfChanged = true;
                 }
@@ -63,10 +69,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
             if (tableAtts && layout.widgets){
                 this.addChild(theFormLayout = new FormLayout({columns: (tableAtts.showLabels && tableAtts.orientation!== 'vert') ? 'two' : 'single'}));
             	layout.widgets.forEach(lang.hitch(this, function(widgetName){
-                    var widgetDescription = this.widgetsDescription[widgetName], widgetAtts = widgetDescription.atts, instantiatingWidget, widgetType, widgetLayout, widgetLabel, widgetFieldSet;
+                    var widgetDescription = this.widgetsDescription[widgetName], widgetAtts = widgetDescription.atts, instantiatingWidget, widgetType, widgetLayout, widgetLabel, widgetFieldSet, widgetScrollPane;
                 	if (widgetDescription && (widgetType = (widgetDescription.atts.mobileWidgetType || mobileWidgetTypes[widgetDescription['type']] || widgetDescription['type']))){
     	                self.widgetsName.push(widgetName);
-                    	widgetLayout = dct.create('div', null, theFormLayout.domNode);
+                    		widgetLayout = dct.create('div', null, theFormLayout.domNode);
                     	if (tableAtts.showLabels){
                     		widgetLabel = dct.create('label', {innerHTML: widgetDescription.atts.label}, widgetLayout);
                     	}
@@ -80,9 +86,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                     		}
                 			widgetFieldSet.appendChild(theWidget.domNode);
                     		self.decorate(theWidget);
-                    		//if (self._started){
-                    			theWidget.startup();
-                    		//}
+                    		theWidget.startup();
                     	});
                         if (typeof instantiatingWidget.then === "function"){
                         	this.instantiatingWidgets[widgetName] = instantiatingWidget;

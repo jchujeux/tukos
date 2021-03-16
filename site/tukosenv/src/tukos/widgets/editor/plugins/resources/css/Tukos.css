@@ -29,6 +29,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitAdditionalEditorIconInsertPageBreak {
 	background-image: url(../icons/insertPageBreak.gif);
 	background-repeat: no-repeat;
@@ -44,6 +45,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitAdditionalEditorIconInsertPage {
 	background-image: url(../icons/insertPage.gif);
 	background-repeat: no-repeat;
@@ -59,6 +61,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitAdditionalEditorIconInsertToPage {
 	background-image: url(../icons/insertToPage.gif);
 	background-repeat: no-repeat;
@@ -74,6 +77,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitAdditionalEditorIconChoiceList {
 	background-image: url(../icons/choiceList.gif);
 	background-repeat: no-repeat;
@@ -81,6 +85,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitAdditionalEditorIconTemplateProcess {
 	background-image: url(../icons/templateprocess.png);
 	background-repeat: no-repeat;
@@ -88,6 +93,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitAdditionalEditorIconFitWindow {
 	background-image: url(../icons/fitWindow.gif);
 	background-repeat: no-repeat;
@@ -95,6 +101,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitDisabled .dijitAdditionalEditorIconFitWindow {
 	background-image: url(../icons/fitWindow.gif);
 	background-repeat: no-repeat;
@@ -102,6 +109,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitAdditionalEditorIconTagEdit {
 	background-image: url(../icons/tagEdit.gif);
 	background-repeat: no-repeat;
@@ -109,6 +117,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitDisabled .dijitAdditionalEditorIconTagEdit {
 	background-image: url(../icons/tagEdit.gif);
 	background-repeat: no-repeat;
@@ -116,6 +125,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitAdditionalEditorIconMathMLEdit {
 	background-image: url(../icons/mathMLEdit.gif);
 	background-repeat: no-repeat;
@@ -123,6 +133,7 @@
 	width: 18px;
 	height: 18px;
 }
+
 .dijitDisabled .dijitAdditionalEditorIconMathMLEdit {
 	background-image: url(../icons/mathMLEdit.gif);
 	background-repeat: no-repeat;
@@ -131,10 +142,12 @@
 	height: 18px;
 }
 /* Editor Table selection buttons */
-.editorIconModifyTableSelection{ 	
-	background-image:url(../images/tableSelectionIcons.png);
-	background-position:0px 0px;	}
-.dijitDisabled .editorIconModifyTableSelection{ 	
-	background-image:url(../images/tableSelectionIcons.png);
-	background-position:-18px 0px;	}
+.editorIconModifyTableSelection {
+	background-image: url(../images/tableSelectionIcons.png);
+	background-position: 0px 0px;
+}
 
+.dijitDisabled .editorIconModifyTableSelection {
+	background-image: url(../images/tableSelectionIcons.png);
+	background-position: -18px 0px;
+}

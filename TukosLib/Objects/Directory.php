@@ -5,6 +5,7 @@ class Directory{
     private static $directory =  [
         'tukos'             => 'Tukos',
         'backoffice'        => 'BackOffice',
+        'blog'              => 'Collab\Blog',
     	'users'             => 'Admin\Users',
         'customviews'       => 'Admin\Users\CustomViews',
         'navigation'        => 'Admin\Users\Navigation',
@@ -61,6 +62,12 @@ class Directory{
     	'sptexercises'		=> 'Sports\Exercises',
         'sptexerciseslevels' => 'Sports\Exercises\Levels',
         'physiopatients'    => 'Physio\Patients',
+        'physiopersoquotes' => 'Physio\PersoTrack\Quotes',
+        'physiopersoexercises' => 'Physio\PersoTrack\Exercises',
+        'physiopersoplans' => 'Physio\PersoTrack\Plans',
+        'physiopersotreatments' => 'Physio\PersoTrack\Treatments',
+        'physiopersodailies' => 'Physio\PersoTrack\DailyAssesments',
+        'physiopersosessions' => 'Physio\PersoTrack\Sessions',
         'physioprescriptions' => 'Physio\Prescriptions',
         'physioassesments' => 'Physio\Assesments',
         'physiocdcs' => 'Physio\Cdcs',
@@ -84,20 +91,20 @@ class Directory{
         'bustrackreconciliationssuppliers' => 'BusTrack\Reconciliations\Suppliers',
         'help'              => 'Help',
         ];
-    private static $objectsDomainALiases = ['people' => ['bustrack' => 'bustrackpeople', 'sports' => 'sptathletes', 'physio' => 'physiopatients'], 'organizations' => ['bustrack' => 'bustrackorganizations', 'wine' => 'winegrowers']];
-    private static $configStatusRange = ['tukos' => 3, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'users' => 10001];
+    private static $objectsDomainAliases = ['people' => ['bustrack' => 'bustrackpeople', 'sports' => 'sptathletes', 'physio' => 'physiopatients'], 'organizations' => ['bustrack' => 'bustrackorganizations', 'wine' => 'winegrowers'], 'bustrackquotes' => ['physio' => 'physiopersoquotes']];
+    private static $configStatusRange = ['tukos' => 16, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'users' => 10001];
     
     public static function objectsDomainAliases(){
-        return self::$objectsDomainALiases;
+        return self::$objectsDomainAliases;
     }
     public static function configStatusRange(){
     	return self::$configStatusRange;
     }
     public static function getObjDir($object){
-        return self::$directory[$object];
+        return self::$directory[strtolower($object)];
     }
     public static function getObjDomain($object){
-        return strtolower(explode('\\', self::$directory[$object], 2)[0]);
+        return strtolower(explode('\\', self::$directory[strtolower($object)], 2)[0]);
     }
     public static function getObjs(){
         return array_keys(self::$directory);

@@ -20,9 +20,8 @@ $dbName = $params['db'];
 echo "database: $dbName<br>";
 
 Tfk::initialize('commandLine', $appName, $phpDir);
-
-$configure =  '\\' . $appName . '\\Configure';
-
+$configure = "\\$appName\\Configure";
+Tfk::$registry->loader->setClass($configure, Tfk::$tukosPhpDir . $configure . ".php");
 Tfk::$registry->set('appConfig', new $configure());
 $appConfig = Tfk::$registry->get('appConfig');
 $appConfig->dataSource['dbname'] = $dbName;

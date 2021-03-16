@@ -16,13 +16,5 @@ class SessionsFeedbackV2 extends SessionsFeedbackVersion{
         $this->ratingWidgets = ['perceivedeffort', 'sensations', 'mood'];
         $this->row2LayoutWidgets = ['name', 'sport', 'duration', 'distance', 'elevationgain', 'perceivedeffort',  'sensations', 'mood'];
     }
-/*
-    public function getFormDataWidgets(){
-        parent::getFormDataWidgets();
-        $this->dataWidgets['sport']['atts']['edit']['storeArgs']['data'] = Utl::idsNamesStore(['running', 'bicycle', 'swimming', 'bodybuilding'], $this->view->tr);
-        //$this->dataWidgets['sport']['atts']['edit']['mobileWidgetType'] = 'MobileStoreSelect';
-        return $this->dataWidgets;
-    }
-*/
 }
 ?>

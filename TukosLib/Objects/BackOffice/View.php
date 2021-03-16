@@ -4,19 +4,29 @@ namespace TukosLib\Objects\BackOffice;
 use TukosLib\Objects\ObjectTranslator;
 use TukosLib\Objects\Directory;
 use TukosLib\Utils\Widgets;
-use TukosLib\Objects\ViewUtils;
-use TukosLib\TukosFramework as Tfk;
+use TukosLib\Utils\Utilities as Utl;
 
 class View extends ObjectTranslator{
 
+     private $backOfficeProperties = ['dataWidgets', 'actionWidgets',  'dataLayout', 'actionLayout', 'summaryLayout'];
     function __construct($objectName, $translator=null){
         $this->objectName = $objectName;
         parent::__construct($objectName, $translator);
         $this->subObjects = [];
     }
+    function __call($func, $arguments){
+        if (in_array($func, $this->backOfficeProperties)){
+            return $this->backOfficeProperty($func, $arguments[0], isset($arguments[1]) ? $arguments[1] : []);
+        }
+    }
+    function backOfficeProperty($property, $query, $default = []){
+        $this->instantiateBackOffice($query);
+        return isset($this->backOffice->$property) ? $this->backOffice->$property : $default;
+    }
     function instantiateBackOffice($query){
         if (empty($this->backOffice)){
-            $backOfficeClass = 'TukosLib\\Objects\\' . Directory::getObjDir($query['object']) . '\\BackOffice\\' . $query['form'];
+            list($object, $form) = array_values(Utl::getItems(['object', 'form'], Utl::getItem('params', $query, $query)));
+            $backOfficeClass = 'TukosLib\\Objects\\' . Directory::getObjDir($object) . '\\BackOffice\\' . $form;
             $this->backOffice = new $backOfficeClass($query);
             $this->dataWidgets = $this->backOffice->dataWidgets;
         }
@@ -61,14 +71,16 @@ class View extends ObjectTranslator{
         $this->instantiateBackOffice($query);
         return $this->backOffice->getActionWidgets($query);
     }
+    function getOverviewDataLayout($query){
+        
+    }
     function getTitle($query){
         $this->instantiateBackOffice($query);
         return $this->backOffice->getTitle();
-        
     }
     function tabEditTitle ($values){
-        return '';
+        $title =  Utl::getItem('name', $values, '');
+        return  strlen($title) > 20 ? substr($title, 0, 17) . ' ...' : $title;
     }
-    
 }
 ?>

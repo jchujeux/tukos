@@ -62,15 +62,15 @@ class StoreUtilities {
    		}
     }
     
-    function objectTranslatedExtendedNames($model, $storeAtts){
+    function objectTranslatedExtendedNames($model, $storeAtts = []){
     	$objectName = $model->objectName;
-    	$requestedCols = $storeAtts['cols'];
+    	$requestedCols = Utl::getItem('cols', $storeAtts, []);
     	$storeAtts['cols'] = array_unique(array_merge(Utl::getItem('cols', $storeAtts, ['id']), $model->extendedNameCols));
     	$values = Utl::toAssociative($model->translateAll($model->getAllExtended($storeAtts)), 'id');
     	if (empty($values)){
     		return [];
     	}else{
-	    	$extendedNameIdCols = array_intersect($model->extendedNameCols, $model->idCols);
+	    	$extendedNameIdCols = array_intersect($model->aliasExtendedNameCols, $model->idCols);
 	    	if (!empty($extendedNameIdCols)){
 	    		$extraIds = [];
 	    		$extendedNameColsCache = [];
@@ -93,12 +93,12 @@ class StoreUtilities {
 	    	}
 			$result = [];
 			$keepName = in_array('name', $requestedCols);
-			$colsToRemove = array_diff($model->extendedNameCols, $requestedCols);
+			$colsToRemove = array_diff($model->aliasExtendedNameCols, $requestedCols);
 			foreach ($values as $id => $value){
 			    if ($keepName){
 			        $value['sname'] = $value['name'];
 			    }
-			    $extendedNameValues = Utl::getItems($model->extendedNameCols, $value);
+			    $extendedNameValues = Utl::getItems($model->aliasExtendedNameCols, $value);
 			    $presentExtendedNameIdCols = array_intersect($extendedNameIdCols, array_keys($extendedNameValues));
 		        foreach ($presentExtendedNameIdCols as $col){
 					$idColValue = $extendedNameValues[$col];
@@ -117,7 +117,7 @@ class StoreUtilities {
     	if (empty($extendedNameValues)){
     		return [];
     	}else{
-    		$extendedNameIdCols = array_intersect($model->extendedNameCols, $model->idCols);
+    		$extendedNameIdCols = array_intersect($model->aliasExtendedNameCols, $model->idCols);
     		if (!empty($extendedNameIdCols)){
     			$extraIds = [];
     			$extendedNameColsCache = [];
@@ -146,7 +146,7 @@ class StoreUtilities {
     	foreach ($objectNamesAndIds as $objectName => $objectIds){
     		$model = $objectStore->objectModel($objectName);
     		$values[$objectName] = Utl::toAssociative($model->translateAll($model->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $objectIds]], 'cols' => array_merge(['id'], $model->extendedNameCols)])), 'id');
-    		$extendedNameIdCols = array_intersect($model->extendedNameCols, $model->idCols);
+    		$extendedNameIdCols = array_intersect($model->aliasExtendedNameCols, $model->idCols);
     		if (!empty($extendedNameIdCols)){
     			foreach($extendedNameIdCols as $col){
     				$extraIds = array_filter(array_unique(array_merge($extraIds, array_unique(array_column($values[$objectName], $col)))));
@@ -178,6 +178,9 @@ class StoreUtilities {
         if (!in_array($id, self::$idColsCache)){
             self::$idColsCache[] = $id;
         }
+    }
+    public static function resetIdColsCache(){
+        self::$idColsCache = [];
     }
     public static function translatedExtendedIdCols($emptyIdColsCache = true){
     	$extendedIdCols =  self::translatedExtendedIds(self::$idColsCache);
@@ -219,7 +222,10 @@ class StoreUtilities {
             return $queryAtts;
         }
         if (self::$hasObjectCols){
-            $queryAtts['join'][] = ['inner', self::$tukosTableName, self::$tukosTableName . '.id = ' . ($eliminated ? '-' : '') . $objectName . '.id'];
+            if (!isset($queryAtts['join'])){
+                $queryAtts['join'] = [];
+            }
+            array_unshift($queryAtts['join'],  ['inner', self::$tukosTableName, self::$tukosTableName . '.id = ' . ($eliminated ? '-' : '') . $objectName . '.id']);
         }else{
             $queryAtts['table'] = self::$tukosTableName;
         }
@@ -285,8 +291,8 @@ class StoreUtilities {
             if (is_array($col)){
                 $transformedCols[] = Utl::substitute(reset($col), [self::colsPrefix($colString = key($col), $objectName) . $colString]);
             }else{
-                $extCol = self::colsPrefix($col, $objectName) . $col;
-                $asColString = $asCol ? " as $col" : '';
+                $extCol = ($colPrefix = self::colsPrefix($col, $objectName)) . $col;
+                $asColString = $asCol && !empty($colPrefix) ? " as $col" : '';
                 $transformedCols[] = in_array($col, $maxSizeCols)
                     ? "if(length($extCol) > $fieldMaxSize , concat(\"#tukos{id:\", tukos.id, \",object:$objectName,col:$col}\"), $extCol) $asColString"
                     : "$extCol$asColString";

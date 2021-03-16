@@ -195,8 +195,9 @@ class Widgets{
                                            'required'   => true, 'style' => ['width' => "auto"],
                                            'fetchProperties' =>['sort' => [['attribute' => 'name', 'descending' => false]]],
                                            'storeArgs' => ['data' => null]]],
-                    'storeedit' => ['editOn' => 'click', 'width' => 100],
-                                           
+            'storeedit' => ['width' => 100, 'editOn' => 'click', 'renderCell' => 'renderNumberUnitValue'],
+            'overview'  => ['renderCell' => 'renderNumberUnitValue'],
+            
         ];
         return ['type' => 'NumberUnitBox', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }

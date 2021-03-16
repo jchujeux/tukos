@@ -31,7 +31,7 @@ abstract class AbstractModel extends ObjectTranslator {
     use ItemHistory, ItemJsonCols, ItemsChildren, Store, ItemCustomization, ContentExporter, ItemsExporter, ItemsImporter;
     
     protected $permissionOptions = ['NOTDEFINED', 'PL', 'PR', 'RL', 'RO', 'PU', 'ACL'];
-    protected $aclOptions = ['0' => 'none', '1' => 'read', '2' => 'update', '3' => 'delete'];
+    protected $aclOptions = ['0' => 'none', '1' => 'RO', '2' => 'RW', '3' => 'RWD'];
     protected $gradeOptions = ['TEMPLATE', 'NORMAL', 'GOOD', 'BEST'];
     protected $timeIntervalOptions =  ['year', 'quarter', 'month', 'week', 'weekday', 'day', 'hour', 'minute', 'second'];// corresponds to intersection of php strToTime & dojo.date supported intervals
     protected $useItemsCache = true;
@@ -60,6 +60,10 @@ abstract class AbstractModel extends ObjectTranslator {
             }
         }
         $this->extendedNameCols = $extendedNameCols;
+        $this->aliasExtendedNameCols = [];
+        foreach ($extendedNameCols as $name){
+            $this->aliasExtendedNameCols[] = ($dotIndex = strpos($name, '.')) === false ? $name : (($asIndex = strpos($name, ' as ')) !== false ? substr($name, $asIndex + 4) : substr($name, $dotIndex + 1));
+        }
         $this->tukosExtendedNameCols  = array_intersect($this->extendedNameCols, $this->tukosModel->allCols);
         $this->objectExtendedNameCols = array_diff($this->extendedNameCols, $this->tukosExtendedNameCols);
         

@@ -27,8 +27,8 @@ class View extends AbstractView {
                 'category' => ['label' => $tr('Unassignedcategory'), 'renderCell' => 'renderNamedId', 'width' => '150'],
                 'isexplained' => ['label' => $tr('Isexplained'), 'renderCell' => 'renderCheckBox', 'width' => 60],
             ], ['atts' => ['edit' => ['objectIdCols' => ['id', 'parentid'], 'maxHeight' => '550px', 'summaryRow' => ['cols' => [
-                    'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]],
-                    'unassignedamount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#unassignedamount#);"]]]
+                    'amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#amount#);"]]],
+                    'unassignedamount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#unassignedamount#);"]]]
                 ]],
             ]]]),
             'pendinginvoiceslog' => ViewUtils::basicGrid($this, 'Pendinginvoices', [
@@ -37,7 +37,7 @@ class View extends AbstractView {
                 'pricewt' => ['label' => $tr('Pricewt'), 'formatType' => 'currency', 'renderCell' => 'renderContent', 'width' => '80'], 
                 'lefttopay' => ['label' => $tr('Lefttopay'), 'formatType' => 'currency', 'renderCell' => 'renderContent', 'width' => '80']
             ], ['atts' => ['edit' => ['objectIdCols' => ['id', 'parentid', 'contact'], 'maxHeight' => '550px', 'summaryRow' => ['cols' => [
-                'lefttopay' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#lefttopay#);"]]]
+                'lefttopay' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#lefttopay#);"]]]
             ]]]]]),
             'paymentsdetailslog' => ViewUtils::basicGrid($this, 'Paymentsdetails', [
                 'invoiceid' => ['label' => $tr('Invoice'), 'renderCell' => 'renderNamedIdExtra', 'width' => ''], 'customer' => ['label' => $tr($paidByOrTo), 'renderCell' => 'renderNamedId', 'width' => '220'],
@@ -47,7 +47,7 @@ class View extends AbstractView {
                 'vatrate' => ['label' => $tr('Vatrate'), 'formatType' => 'percent', 'renderCell' => 'renderContent', 'width' => '100'],
                 'paymentid' => ['label' => $tr('Payment'), 'width' => '100'], 'paymentdate' => ['label' => $tr('Date'), 'formatType' => 'date', 'width' => '100'],
             ], ['atts' => ['edit' => ['idProperty' => 'paymentitemid', 'objectIdCols' => ['invoiceid', 'customer', 'paymentid'], 'maxHeight' => '550px', 'summaryRow' => ['cols' => [
-                'paymentitemamount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#paymentitemamount#);"]]]
+                'paymentitemamount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#paymentitemamount#);"]]]
             ]]]]]),
         ];
         $noGrid = []; $colsLabels = []; $rowsLabels = [];
@@ -72,7 +72,7 @@ class View extends AbstractView {
         	    $description => ['label' => $this->tr($description), 'field' => $description, 'width' => 130], 
         	    'amount' => ['label' => $this->tr('amount'), 'field' => 'amount', 'renderCell' => 'renderContent', 'formatType' => 'currency', 'width' => 70]
         	],
-    	    'summaryRow' => ['cols' => ['amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return Number(#amount#);"]]]]]
+    	    'summaryRow' => ['cols' => ['amount' => ['atts' => ['formatType' => 'currency'], 'content' => [['rhs' => "return res + Number(#amount#);"]]]]]
     	];
     }
 

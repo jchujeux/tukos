@@ -21,7 +21,7 @@ class Dialogue extends Translator{
         if (isset($query['storeatts'])){
             $query['storeatts'] = json_decode($query['storeatts'], true);
         }
-        if (!empty($query['params'])){
+        if (!empty($query['params']) && is_string($query['params'])){
             $query['params'] = json_decode($query['params'], true);
         }
         Tfk::$registry->timezoneOffset = Utl::extractItem('timezoneOffset', $query, 0);

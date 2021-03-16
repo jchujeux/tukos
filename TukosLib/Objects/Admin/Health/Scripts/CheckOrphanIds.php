@@ -87,7 +87,7 @@ class CheckOrphanIds {
                     $output .= "<br>No orphan ids were eliminated (clean !== 'yes')";
                 }
             }else{
-                $output .= '<br>No orphan ids found';
+                $output = '<br>No orphan ids found';
             }
             echo $output;
         }catch(\Zend_Console_Getopt_Exception $e){
