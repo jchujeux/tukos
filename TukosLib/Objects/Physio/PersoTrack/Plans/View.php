@@ -10,6 +10,8 @@ class View extends AbstractView {
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Patient', 'Description');
         $customDataWidgets = [
+            'parentid' => ['atts' => ['edit' => ['onChangeLocalAction' => ['acl' => ['value' => 'return {1:{rowId:1,userid:newValue,permission:1}};']]]]],
+            'name' => ['atts' => ['edit' => ['style' => ['width' => '100%', 'height' => 'auto']]]],
             'diagnostic' => ViewUtils::lazyEditor($this, 'RecapDiagnostic', ['atts' => ['edit' => ['height' => '100px', 'editorType' => 'simple']]]),
             'symptomatology' => ViewUtils::lazyEditor($this, 'CurrentSymptomatology', ['atts' => ['edit' => ['height' => '100px', 'editorType' => 'simple']]]),//ViewUtils::textArea($this, 'CurrentSymptomatology'),
             'recentactivity' => ViewUtils::lazyEditor($this, 'Recentactivity', ['atts' => ['edit' => ['height' => '100px', 'editorType' => 'simple']]]),//ViewUtils::textArea($this, 'Recentactivity'),

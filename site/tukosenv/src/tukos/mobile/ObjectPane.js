@@ -77,8 +77,8 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                     		widgetLabel = dct.create('label', {innerHTML: widgetDescription.atts.label}, widgetLayout);
                     	}
                 		widgetFieldSet = dct.create('fieldset', null, widgetLayout);
-                		dojo.when(instantiatingWidget = widgetsLoader.instantiate(widgetType, utils.mergeRecursive(widgetAtts, {id: this.id + widgetName, pane: this, form: this, widgetType: widgetType, widgetName: widgetName,
-                											style: {backgroundColor: widgetAtts.disabled ? 'lightgrey': 'white', color: 'black'}}), optionalWidgetInstantiationCallback), function(theWidget){
+                		dojo.when(instantiatingWidget = widgetsLoader.instantiate(widgetType, utils.mergeRecursive(widgetAtts, {id: this.id + widgetName, pane: this, form: this, widgetType: widgetType, widgetName: widgetName/*,
+                											style: {backgroundColor: widgetAtts.disabled ? 'lightgrey': 'white', color: 'black'}*/}), optionalWidgetInstantiationCallback), function(theWidget){
                     		theWidget.layoutHandle = self;
                     		theWidget.layoutContainer = widgetLayout;
                     		if (theWidget.get('hidden')){

@@ -57,7 +57,7 @@ class Page extends Translator{
             $pageView->addToPageManagerArgs('noContextCustomForAll', $appConfig->noContextCustomForAll);
         }
         $request['mode'] = $request['action'] = 'Tab';
-        $isOkTab = $pageView->addTab(array_merge($dialogueController->response($request, $query), ['selected' => true]));
+        $isOkTab = (Utl::extractItem('notab', $query) === 'yes') || $pageView->addTab(array_merge($dialogueController->response($request, $query), ['selected' => true]));
 
         if ($isOkAccordion && $isOkTab){
             //Feedback::add($this->tr('svrexectime') . (microtime(true) - Tfk::$startMicroTime));

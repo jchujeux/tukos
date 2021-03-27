@@ -44,18 +44,28 @@ class Configure{
             return new TranslatorsManager($this->languages);
         });
         Tfk::setTranslator();
+        
+        $request =Tfk::$registry->request;
+        $query = Tfk::$registry->urlQuery;
+        if (!isset($query['id']) && !isset($query['notab'])){
+            $query['notab'] = 'yes';
+            Tfk::$registry->urlQuery = $query;
+        }
             
-        $this->modulesMenuLayout = [
-            '#physiopersoplans' => [],
-            '#physiopersotreatments' => [],
-            '#physiopersodailies' => [],
-        	'@help' => [
-        	    [/*'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],*/
-        	     'guidedtour' => ['type' => 'MenuItem', 'atts' => [
-        	        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('GuidedtourTukosMSQR')]]])]]]],
-        	     'tutotukos' => ['type' => 'MenuItem', 'atts' => [
-        	        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('TutotukosMSQR')]]])]]]]
-        ]]];
+        $this->modulesMenuLayout = array_merge(($request['object'] === 'physiopersotreatments' && $request['view'] === 'Edit' && isset($query['id'])) 
+            ? ['@physiopersoplans' => ['type' => 'MenuBarItem', 'atts' => ['onClickArgs' => ['object' => 'physiopersoplans', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['id' => ['object' => 'physiopersotreatments', 'id' => $query['id'], 'col' => 'parentid']]]]],
+               '@physiopersotreatments' => ['type' => 'MenuBarItem', 'atts' => ['onClickArgs' => ['object' => 'physiopersotreatments', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['id' => $query['id']]]]]
+              ]
+            : ['$physiopersoplans' => [], '$physiopersotreatments' => []],
+            ['#physiopersodailies' => [],
+                '@help' => [
+                    [/*'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],*/
+                    'guidedtour' => ['type' => 'MenuItem', 'atts' => [
+                        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('GuidedtourTukosMSQR')]]])]]]],
+                    'tutotukos' => ['type' => 'MenuItem', 'atts' => [
+                        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('TutotukosMSQR')]]])]]]]
+                    ]]
+            ]);
         $this->transverseModules = ['help'];
         $this->objectModulesDefaultContextName = ['tukos' => 'tukos', 'customviews' => 'tukos'];
         $this->setobjectModulesDefaultContextName($this->modulesMenuLayout);
@@ -95,7 +105,7 @@ class Configure{
         $depth += 1;
         if (is_array($modulesLayout)){
             foreach($modulesLayout as $key => $layout){
-                $module = (($key[0] === '#' || $key[0] === '@') ? substr($key, 1): $key);
+                $module = in_array($key[0], ['#', '$', '@']) ? substr($key, 1): $key;
                 if ($depth === 1){
                     $contextName = (in_array($module, $this->transverseModules) ? 'tukos' : $module);
                 }

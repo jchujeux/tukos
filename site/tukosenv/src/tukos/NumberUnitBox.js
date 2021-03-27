@@ -4,10 +4,10 @@ function(declare, lang, dst, Widget, _FocusMixin, TextBox, StoreSelect, wutils, 
         postCreate: function(){
             this.inherited(arguments);
             var self = this;
-            this.numberField = new TextBox(this.number, dojo.doc.createElement('div'));
+            this.numberField = new TextBox(this.number, dojo.doc.createElement('span'));
             this.numberField.watch('value', lang.hitch(wutils, wutils.subWidgetWatchCallback, this, this.numberField));
             this.domNode.appendChild(this.numberField.domNode); 
-            this.unitField = new StoreSelect(this.unit, dojo.doc.createElement('div')); 
+            this.unitField = new StoreSelect(this.unit, dojo.doc.createElement('span')); 
             this.unitField.watch('value', lang.hitch(wutils, wutils.subWidgetWatchCallback, this, this.unitField));
             this.unitField.on('change', function(newValue){
             	if (self.onChange){
@@ -19,7 +19,7 @@ function(declare, lang, dst, Widget, _FocusMixin, TextBox, StoreSelect, wutils, 
             		dst.set(self.numberField.domNode, 'display', 'none');
             	}else{
             		self.numberField.set('disabled', false);
-            		dst.set(self.numberField.domNode, 'display', 'block');
+            		dst.set(self.numberField.domNode, 'display', 'in-line');
             	}
             });
             this.domNode.appendChild(this.unitField.domNode);   

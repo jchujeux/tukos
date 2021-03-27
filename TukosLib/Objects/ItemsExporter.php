@@ -21,7 +21,7 @@ trait ItemsExporter{
 		    //$where = array_merge($this->user->getCustomView($this->objectName, 'overview', $this->paneMode, ['data', 'filters', 'overview']), $query['storeatts']['where']);
 		    $where = $query['storeatts']['where'];
 		    $where['contextpathid'] = $query['contextpathid'];
-		    $where = $this->user->filter($where);
+		    $where = $this->user->filter($where, $this->objectName);
 		}else{
 		    $where = [['col' => 'id', 'opr' => 'IN', 'values' => $idsToExport]];
 		}

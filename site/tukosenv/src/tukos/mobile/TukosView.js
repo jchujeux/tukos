@@ -1,4 +1,4 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "tukos/TabOnCLick", "tukos/PageManager"], 
+define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "tukos/TabOnClick", "tukos/PageManager"], 
     function(declare, lang, View, Heading, ToolBarButton, TabOnClick, Pmg){
     var paneModules = {objectPane: "tukos/mobile/ObjectPane", tukosPane: "tukos/TukosPane", navigationPane: "tukos/mobile/NavigationPane"};
 	return declare(View, {

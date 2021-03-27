@@ -19,10 +19,9 @@
     <script type="text/javascript">
 
     require([
-         "dojo/dom", "dojo/dom-construct", "dojo/request", "dijit/registry", "dojox/mobile", "dojox/mobile/View", "dojox/mobile/Heading", "tukos/mobile/FormLayout",
-         //"dojox/mobile/compat",
+         "dojo/dom", "dojo/dom-construct", "dojo/request", "dijit/registry", "dojox/mobile", "dojox/mobile/View", "dojox/mobile/Heading", "tukos/mobile/FormLayout", "dojox/mobile/Pane",
          "dojo/domReady!"
-     ], function (dom, dct, request, registry, Mobile, View, Heading, FormLayout) {
+     ], function (dom, dct, request, registry, Mobile, View, Heading, FormLayout, Pane) {
          // now parse the page for widgets
         var loginForm = {columns: 'two', rows: [
 			{label: {innerHTML: "<?= $this->username?>" }, widget: {type: "TextBox", atts: {id: "username", title: "<?= $this->username?>", onInput: function(){dom.byId('svrFeedback').hidden = true}}}}, 
@@ -43,8 +42,9 @@
           		);
 			}}}}
 		]};
-        var loginView = new View(null, "loginView"), loginHeading = new Heading({label: "Tukos - <?= $this->authentication?>"}), formLayout = new FormLayout(loginForm);
-
+        var loginView = new View(null, "loginView"), loginHeading = new Heading({label: "<?= $this->authentication?>"}), formLayout = new FormLayout(loginForm), 
+        	logoWidget = new Pane({innerHTML: '<img alt="logo" src=<?= $this->logo?> style="max-height: 40px; width: auto; float: right;">'});
+        loginHeading.addChild(logoWidget);
         loginView.addChild(loginHeading);
         loginView.addChild(formLayout); 
 		loginView.startup();
@@ -53,6 +53,6 @@
 </script>
 </head>
 <body >
-    <div id="loginView"></div>
+<div id="loginView"></div>
 </body>
 </html>

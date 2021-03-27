@@ -15,7 +15,7 @@ class Model extends AbstractModel {
     function __construct($objectName, $translator=null){
         $colsDefinition = [];
         parent::__construct($objectName, $translator, 'contexts', ['parentid' => ['contexts']], [], $colsDefinition, [], ['name']);
-        $this->storeData = $this->getAll(['where' => $this->user->filterPrivate([]), 'cols' => ['id', 'name', 'parentid']]);
+        $this->storeData = $this->getAll(['where' => $this->user->filterPrivate([], $this->objectName), 'cols' => ['id', 'name', 'parentid']]);
         $this->ancestors   = [];
         $this->descendants = [];
         $this->rootName = 'tukos';

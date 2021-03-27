@@ -16,12 +16,12 @@ $params = getopt('', ['app:', 'class:', 'parentid:', 'db:', 'scriptids:']);
 
 $appName = $params['app'];
 $dbName = $params['db'];
+require $phpDir . "$appName/Configure.php";
 
 echo "database: $dbName<br>";
 
 Tfk::initialize('commandLine', $appName, $phpDir);
 $configure = "\\$appName\\Configure";
-Tfk::$registry->loader->setClass($configure, Tfk::$tukosPhpDir . $configure . ".php");
 Tfk::$registry->set('appConfig', new $configure());
 $appConfig = Tfk::$registry->get('appConfig');
 $appConfig->dataSource['dbname'] = $dbName;

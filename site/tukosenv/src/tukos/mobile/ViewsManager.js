@@ -5,20 +5,26 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_PanesManager", "tukos/
         	var self = this, created, selected, descriptions = this.viewsDescription;
         	this.container.on(".mblView:contextmenu", lang.hitch(this, this.contextMenuCallback));
         	this.container.selectChild = function(target, transitionDir, transition){
-        		if (this.selectedChildWidget !== target){
+        		if (!this.selectedChildWidget){
+            		this.selectedChildWidget = target;        			
+				}else if (this.selectedChildWidget !== target){
             		this.selectedChildWidget.performTransition(target.id, transitionDir || 1, transition || "slide");
             		this.selectedChildWidget = target;        			
         		}else{
         			Pmg.beep();
         		}
         	}
-        	for (var i in descriptions){
-        		created = this.create(descriptions[i]);
-        		if (descriptions[i].selected){
-        			selected = created;
-        		}
-        		this.container.selectedChildWidget = selected ? selected : this.container.getChildren()[0];
-        	}
+			if (descriptions.length === 0){
+				this.navigationView();
+			}else{
+				for (var i in descriptions){
+	        		created = this.create(descriptions[i]);
+	        		if (descriptions[i].selected){
+	        			selected = created;
+	        		}
+	        		this.container.selectedChildWidget = selected ? selected : this.container.getChildren()[0];
+	        	}
+			}
         },
         create: function(args){
             var theNewTab = new TukosView(lang.mixin(args, {mobileViews: this}));
@@ -38,13 +44,15 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_PanesManager", "tukos/
             );
         },
         gotoTab: function(target){
-            var openedViews = this.container.getChildren();
-            for (var i in openedViews){
-                if ((openedViews[i].get('title').match(/(\d+)\)$/) || {} )[1] === target.query.id){
-                    this.container.selectChild(openedViews[i]);
-                    return;
-                }
-            }
+			if ((target.query || {}).id){
+				var openedViews = this.container.getChildren();
+	            for (var i in openedViews){
+	                if ((openedViews[i].get('title').match(/(\d+)\)$/) || {} )[1] === target.query.id){
+	                    this.container.selectChild(openedViews[i]);
+	                    return;
+	                }
+	            }
+			}
             target.action = target.action || 'Tab';
             this.request(target);
         }, 
@@ -52,7 +60,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_PanesManager", "tukos/
         	return this.currentPane().heading.domNode;
         },
         navigationView: function(){
-        	this.selectPane(this._navigationView || (this._navigationView = this.create({title: Pmg.message('NavigationView'), navigationContent: Pmg.get('menuBarDescription')})), -1, 'slidev');
+        	this.selectPane(this._navigationView || (this._navigationView = this.create({title: Pmg.get('headerContent'), navigationContent: Pmg.get('menuBarDescription')})), -1, 'slidev');
         }
     }); 
 });

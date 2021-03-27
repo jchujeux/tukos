@@ -18,7 +18,7 @@ class Model extends AbstractModel {
             'otherexceptional' => 'VARCHAR(512) DEFAULT NULL',
         ];
         parent::__construct(
-            $objectName, $translator, 'physiopersodailies',  ['parentid' => ['physiopersotreatments'], 'patient' => ['physiopatients']], [], $colsDefinition, [], [], ['custom'], ['physiopersotreatments.patient',  'startdate']);
+            $objectName, $translator, 'physiopersodailies',  ['parentid' => ['physiopersotreatments']/*, 'patient' => ['physiopatients']*/], [], $colsDefinition, [], [], ['custom'], ['physiopersotreatments.patient',  'startdate']);
     }   
     public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null, $absentColsFlag = 'forbid'){
         if (array_search('physiopersotreatments.patient', $atts['cols'])!== false){

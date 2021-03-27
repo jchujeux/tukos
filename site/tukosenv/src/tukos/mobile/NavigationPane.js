@@ -7,12 +7,19 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/when",  "dojo
         	args = lang.mixin(args, {iconBase: iconBase, "class":"mblAccordionRoundRect"});
         },
 		postCreate: function(){
-            var items = this.items, item, pane;
+            var items = this.items, item, pane, itemPane;
         	this.inherited(arguments);
             for (var domain in items){
             	item = items[domain];
-            	this.addChild(pane = new ContentPane(lang.mixin({iconPos1: domainIcon}, item.atts)));
-            	this.fillPane(pane, item.popup);
+				if (item.popup){
+	            	this.addChild(pane = new ContentPane(lang.mixin({iconPos1: domainIcon}, item.atts)));
+					this.fillPane(pane, item.popup);
+				}else{
+        			this.startup();
+            		this.addChild(pane = new Pane(lang.mixin({iconPos1: menuItemIcon}, item.atts)));
+        			pane._at.onClickArgs = item.atts.onClickArgs;
+        			this.addTriggers(pane._at);
+				}            	
             }
         	aspect.after(this, "expand", lang.hitch(this, this.setAutoHeight));
         },

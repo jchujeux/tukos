@@ -19,7 +19,7 @@ class View extends EditView{
                 'widgets' => ['id', 'parentid', 'name']
             ],
             'row2' => [
-                'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 80],
+                'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'labelWidth' => 80],
                 'widgets' => ['diagnostic', 'symptomatology', 'recentactivity', 'objective']
             ],
             'row3' => [
