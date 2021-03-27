@@ -131,8 +131,7 @@ class SessionFeedback extends ObjectTranslator{
             $sessionId = Utl::getItem('sessionid', $query, '');
             $performedSession = ['id' => '', 'sportsman' => $programInformation['parentid'], 'startdate' => $query['date'], 'sessionid' => $sessionId, 'name' => rawurldecode($query['name']), 'sport' => rawurldecode($query['sport'])];
             $performedSession = array_merge($performedSession,
-                $this->sessionsModel->getOne(['where' => $this->user->filter(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'sessionid' => $sessionId, 'mode' => 'performed']),
-                    'sptsessions'), 'cols' => $this->version->formObjectWidgets()]));
+                $this->sessionsModel->getOne(['where' => $this->user->filter(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'sessionid' => $sessionId, 'mode' => 'performed']), 'sptsessions'), 'cols' => $this->version->formObjectWidgets()]));
         }
         $performedSession['sportsman'] = SUtl::translatedExtendedName(Tfk::$registry->get('objectsStore')->objectModel('people'), $performedSession['sportsman']);
         if (!$duration = Utl::getItem('duration', $performedSession)){
@@ -161,10 +160,10 @@ class SessionFeedback extends ObjectTranslator{
         if ($savedCount){
             if (empty($id)){
                 $where = Utl::getItems(['parentid', 'startdate', 'sessionid', 'mode'], array_merge($query, $values, ['mode' => 'performed']));
-                $id = $this->sessionsModel->updateOne($values, ['where' => $this->user->filter($where)], true, false, 
+                $id = $this->sessionsModel->updateOne($values, ['where' => $this->user->filter($where), 'sptsessions'], true, false, 
                     ['name' => $query['name'], 'sport' => $query['sport'], 'permission' => 'PU', 'startdate' => $query['date'], 'mode' => 'performed', 'parentid' => $query['parentid'], 'sportsman' => $programInformation['parentid']])['id'];
             }else{
-                if (!$this->sessionsModel->updateOne($values, ['where' => $this->user->filter(['id' => $id])])){
+                if (!$this->sessionsModel->updateOne($values, ['where' => $this->user->filter(['id' => $id], 'sptsessions')])){
                     $saveCount = 0;
                 }
             }

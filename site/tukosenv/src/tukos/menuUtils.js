@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/Menu", "tukos/widgets/WidgetsLoader", "tukos/PageManager"], 
-function(declare, lang, when, Menu, widgetsLoader, Pmg){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/Menu", "tukos/widgets/WidgetsLoader", "tukos/utils", "tukos/PageManager"], 
+function(declare, lang, when, Menu, widgetsLoader, utils, Pmg){
 	var buildMenu = function(description, mode, theMenu, addTriggers, addContext){
 	    	var type = description.type || 'Menu', atts = description.atts, items = description.items,
 				setTriggers = function(widget){
@@ -27,14 +27,16 @@ function(declare, lang, when, Menu, widgetsLoader, Pmg){
 					}
 				case 'itemsOnly':
 		        	when(theMenu, function(theMenu){
-						for (var i in items){
-			        		var item = items[i], type = item.type, atts = item.atts;
+						var childrenItems = {};
+						utils.forEach(items, function(item, i){
+			        		var type = item.type, atts = item.atts;
 			        		switch (type){
 			        			case 'MenuItem':
+								case 'MenuBarItem':
 			        			case undefined: 
-			        				when(widgetsLoader.instantiate('MenuItem', atts), function(menuItem){
-			        					theMenu.addChild(setTriggers(menuItem));
-			        				})
+									when(widgetsLoader.instantiate(type || 'MenuItem', atts), function(menuItem){
+			        					childrenItems[i] = setTriggers(menuItem);
+			        				});
 			        				break;
 			        			case 'PopupMenuItem':
 			        			case 'PopupMenuBarItem':
@@ -51,14 +53,19 @@ function(declare, lang, when, Menu, widgetsLoader, Pmg){
 					                				});
 					                			}
 				        					});
-					                		theMenu.addChild(popupItem);
+			        						childrenItems[i] = setTriggers(popupItem);
 				        				});
 			    					});
 			        				break;
 			        			default:
 			        				console.log('this is not supposed to happen - menuUtils.buildMenu()');
 			        		}
-						}
+						});
+						dojo.ready(function(){
+							for(var i in items){
+								theMenu.addChild(childrenItems[i]);
+							};
+						});
 		        	});
 			}
 			return theMenu;

@@ -2,6 +2,7 @@
 namespace TukosLib;
 
 use TukosLib\TukosFramework as Tfk;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\DiContainer;
 use Detection\MobileDetect;
 
@@ -61,10 +62,10 @@ class Registry{
             $this->isMobile = (new MobileDetect)->isMobile();
             $this->request = array_merge(['controller' => 'Page', 'object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab'], $this->route);
             if ($this->isMobile){
-                if ($this->request['controller'] === 'Page'){
+                if (strtolower($this->request['controller']) === 'page'){
                     $this->request['controller'] = 'MobilePage';
                 }
-                if ($this->request['mode'] === 'Tab'){
+                if (strtolower($this->request['mode']) === 'tab'){
                     $this->request['mode'] = 'Mobile';
                 }
             }
@@ -79,6 +80,9 @@ class Registry{
             $this->dialogueUrl   = "{$this->appUrl}Dialogue/";
         }
         $this->urlQuery = $_GET;
+        $this->organization = Utl::extractItem('org', $this->urlQuery, 'tukos');
+        $this->logo = ['tukos' => Tfk::publicDir . 'images/tukosswissknife.jpg', 'tds' => Tfk::publicDir . 'images/tdspetit.jpg'][$this->organization];
+        $this->headerBanner = ['tukos' => 'headerBanner', 'tds' => 'tdsHeaderBanner'][$this->organization];
     }        
     public function setAppName($appName){
         return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus', 'tukosblog' => 'TukosBlog', 'tukosmsqr' => 'TukosMSQR'][strtolower($appName)];

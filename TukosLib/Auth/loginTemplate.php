@@ -14,7 +14,7 @@
 		</script>
 		<table style="margin-left: auto; margin-right: auto;">
 			<tr>
-				<td><img alt="tukos swiss knife" src="/tukos/images/tukosswissknife.jpg"><br><?= $this->headerBanner ?></td>
+				<td><img alt="logo" src="<?= $this->logo?>"><br><?= $this->headerBanner ?></td>
 				<td>
             		<form id="formNode">
                 		<h1><?= $this->authentication?></h1>

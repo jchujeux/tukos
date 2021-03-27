@@ -52,7 +52,10 @@ class Get extends ViewsGetModel {
         if ($cols === ['*']){
             $cols = $this->view->allowedGetCols();
         }
+        return $cols;
+/*
         $unHiddenCols = [];
+
         $customElements = $this->getElementsCustomization($query);
         foreach ($cols as $col){
             if ((!isset($customElements[$col]['atts']['hidden']) && empty($this->view->dataWidgets[$col]['atts']['edit']['hidden'])) ||
@@ -61,6 +64,7 @@ class Get extends ViewsGetModel {
             }
         }
         return $unHiddenCols;
+*/
     }
 
     protected function getData(&$response, $query, $cols=['*']){

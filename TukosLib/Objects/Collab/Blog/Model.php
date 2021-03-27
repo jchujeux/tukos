@@ -22,7 +22,7 @@ class Model extends AbstractModel {
         return " onclick=\"{$this->gotoTabString($view, $queryString)}\"";
     }
     function getRecentPosts(){
-        $posts = $this->getAll(['where' => $this->user->filterPrivate([]), 'cols' => ['id', 'name', 'comments', 'updated', 'updator'], 'orderBy' => ['updated' => 'DESC'], 'limit' => 5]);
+        $posts = $this->getAll(['where' => $this->user->filterPrivate([], $this->objectName), 'cols' => ['id', 'name', 'comments', 'updated', 'updator'], 'orderBy' => ['updated' => 'DESC'], 'limit' => 5]);
 /*
         $rows = [];
         foreach($posts as $post){

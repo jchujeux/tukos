@@ -331,7 +331,7 @@ abstract class AbstractModel extends ObjectTranslator {
     
 
     public function updateAll ($newValues, $atts=[]){
-        $atts['where'] = $this->user->filterContext($this->user->filterReadOnly($atts['where']));
+        $atts['where'] = $this->user->filterContext($this->user->filterReadOnly($atts['where'], $this->objectName), $this->objectName);
         $atts = $this->completeUpdateAtts($newValues, $atts);
         $oldValuesArray = $this->getAll($atts);
 

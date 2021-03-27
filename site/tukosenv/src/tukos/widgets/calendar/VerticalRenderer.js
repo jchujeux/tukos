@@ -147,7 +147,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                 		case 'ruler':
                             var atts = customAtts.atts || {};
                             if (fieldValue){
-                                this.ruler = new HorizontalSlider(utils.mergeRecursive({value: map.indexOf(fieldValue), minimum: 0, maximum:  4, style: {width: '100%'}}, atts), dojo.doc.createElement('div'));
+                                this.ruler = new HorizontalSlider(utils.mergeRecursive({value: map[fieldValue], minimum: 0, maximum:  4, style: {width: '100%'}}, atts), dojo.doc.createElement('div'));
                             }
                             break;
                 	}

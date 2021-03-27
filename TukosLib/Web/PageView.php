@@ -65,8 +65,16 @@ class PageView extends Translator{
         return ['object' => $object, 'view' => $view, 'mode' => 'Tab', 'action' => 'Tab'];
     }
 
-    private function defaultModuleActions($object){
-        return  [
+    private function defaultModuleActions($object, $mode){
+        $editOverview = [
+            'edit' => [
+                'type' => 'PopupMenuItem',
+                'atts' => ['label' => $this->tr('edit')],
+                'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectanitem'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'Edit'), 'object' => $object, 'mode' => 'Tab'], true),
+            ],
+            'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'Overview'), 'label' => $this->tr('overview')]],
+        ];
+        return $mode === '$' ? $editOverview : array_merge([
             'new' => [
                 'type' => 'PopupMenuItem',    
                  'atts' => ['label' => $this->tr('new')],
@@ -79,19 +87,14 @@ class PageView extends Translator{
                         ]
                     ],
                 ],
-            ],
+            ]],
+            $editOverview
+        );
 
-            'edit' => [
-                'type' => 'PopupMenuItem', 
-                'atts' => ['label' => $this->tr('edit')],
-                'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectanitem'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'Edit'), 'object' => $object, 'mode' => 'Tab'], true),
-            ],
-            'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'Overview'), 'label' => $this->tr('overview')]],
-        ];
     }
 
     protected function buildDescription($key, $layout, &$theDescription){
-        if (in_array($key[0], ['#', '@'])){
+        if (in_array($key[0], ['#', '$', '@'])){
             $module = substr($key, 1);
             if (!in_array($module, $this->user->allowedModules())){
                 return;
@@ -116,14 +119,19 @@ class PageView extends Translator{
         	$type = $layout['popup']['type'];
         	$theDescription[$module]['popup'] = Widgets::$type($layout['popup']['atts'], true);
         }
-        if ($key[0] === '#'){
-            $theDescription[$module]['popup'] = ['type' => 'DropDownMenu', 'items' => $this->defaultModuleActions($module)];
+        if (in_array($key[0], ['#', '$'])){
+            $theDescription[$module]['popup'] = ['type' => 'DropDownMenu', 'items' => $this->defaultModuleActions($module, $key[0])];
         	$theDescriptionItems = &$theDescription[$module]['popup'];
         }else if(isset($layout['type']) && in_array($layout['type'], ['PopupMenuBarItem', 'PopupMenuItem'])){
         	$theDescription[$module]['popup'] = ['type' => 'DropDownMenu'];
         	$theDescriptionItems = &$theDescription[$module]['popup'];
         }else{
-        	$theDescriptionItems = &$theDescription[$module];
+        	if (isset($layout['type']) && in_array($layout['type'], ['MenuItem', 'MenuBarItem'])){
+        	        if (is_array($queryId = Utl::drillDown($layout, ['atts', 'onClickArgs', 'query', 'id']))){
+        	        $theDescription[$module]['atts']['onClickArgs']['query']['id'] = Tfk::$registry->get('objectsStore')->objectModel($queryId['object'])->getOne(['where' => ['id' => $queryId['id']], 'cols' => [$queryId['col']]])[$queryId['col']];
+        	    }
+        	}
+            $theDescriptionItems = &$theDescription[$module];
         }
         if (!empty($layout[0])){
             if (empty($theDescriptionItems['items'])){
@@ -175,7 +183,7 @@ class PageView extends Translator{
         $this->pageManagerArgs['userRights'] = $this->user->rights();
         
         if ($this->pageManagerArgs['isMobile'] = $this->isMobile){
-            $this->pageManagerArgs['headerContent'] = 'This is mobile tukos!';
+            $this->pageManagerArgs['headerContent'] = $this->tr(Tfk::$registry->appName . 'HeaderBanner');
             $pageTemplate = "MobilePageTemplate.php";
         }else{
             $this->pageManagerArgs['headerContent'] = Utl::substitute(

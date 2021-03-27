@@ -4,7 +4,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dijit/popup", "
 	return declare(null, {
         onClickMenuItem: function(evt){
             focusUtil.curNode && focusUtil.curNode.blur();
-        	Pmg.tabs.request(this.onClickArgs);
+        	Pmg.tabs.gotoTab(this.onClickArgs);
         },
         onChangeObjectSelect: function(newValue){
             if (!(newValue === '')){
@@ -61,7 +61,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dijit/popup", "
             				activeContext: {type: 'ObjectSelectDropDown', atts: {label: Pmg.message('ActiveContext'), style: {width: '12em'}, table: 'contexts', dropDownWidget: {type: 'StoreTree', atts: Pmg.cache.contextTreeAtts},
             					disabled: true}},
             				save: {type: "TukosButton", atts: {label: Pmg.message('Save'), onClick: function(evt){lang.hitch(self, self.saveCustomContext())}}},
-            				cancel:{type: "TukosButton", atts: {label: Pmg.message('Cancel'), onClick: function(evt){lang.hitch(self, self.cancelCustomContext())}}}
+            				cancel:{type: "TukosButton", atts: {label: Pmg.message('Close'), onClick: function(evt){lang.hitch(self, self.cancelCustomContext())}}}
             			},
             			layout: {
             				tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false},

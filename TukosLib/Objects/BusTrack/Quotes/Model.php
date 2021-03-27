@@ -13,6 +13,7 @@ class Model extends AbstractModel {
 
     function __construct($objectName, $translator=null){
         $colsDefinition =  [
+            'organization' => 'MEDIUMINT NULL DEFAULT NULL',
             'reference' => 'VARCHAR(50)  DEFAULT NULL',
             'quotedate' => 'date NULL DEFAULT NULL',
             'items'  => 'longtext',
@@ -43,17 +44,19 @@ class Model extends AbstractModel {
         $dateFormat = $this->user->dateFormat();
         $atts = $valuesAndAtts['atts'];
         $quote = $valuesAndAtts['values'];
-
-        $oldQuote = $this->getOne(['where' => $this->user->filter(['id' => $query['id']], $this->objectName),'cols' => ['items']], ['items' => []]);
-		
-        if (isset($oldQuote['items'])){
-        	if (!empty($quote['items'])){
-        		$quote['items'] = Utl::toAssociative($quote['items'], 'id');
-        		$quote['items'] = Utl::array_merge_recursive_replace($oldQuote['items'], $quote['items']);
-        	}else{
-        		$quote['items'] = $oldQuote['items'];
-        	}
+        $id = Utl::getItem('id', $query);
+        if (!empty($id)){
+            $oldQuote = $this->getOne(['where' => $this->user->filter(['id' => $query['id']], $this->objectName),'cols' => ['items']], ['items' => []]);            
+            if (isset($oldQuote['items'])){
+                if (!empty($quote['items'])){
+                    $quote['items'] = Utl::toAssociative($quote['items'], 'id');
+                    $quote['items'] = Utl::array_merge_recursive_replace($oldQuote['items'], $quote['items']);
+                }else{
+                    $quote['items'] = $oldQuote['items'];
+                }
+            }
         }
+
         //$optionalCols = ['rowId' => 'string',  'catalogid' => 'string', 'comments' => 'string'];
         $colsFormatType = ['rowId' => 'string',  'catalogid' => 'string', 'name' => 'string', 'comments' => 'string', 'quantity' => 'string', 'unitpricewot' => 'currency', 'unitpricewt' => 'currency',
         	'discount' => 'currency', 'pricewot' => 'currency', 'vatrate' => 'percent', 'pricewt' => 'currency'];
@@ -113,7 +116,7 @@ class Model extends AbstractModel {
        	$rows[] = ['tag' => 'tr', 'content' => [
             ['tag' => 'td', 'atts' => 'colspan="' . ($numberOfCols - 3) . '" ', 'content' => ""],
        		['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => '<b>' . $this->tr('Tax') . '</b>'], 
-        	['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format($quote['pricewt'] - $quote['pricewot'], 'currency')]]
+        	['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format(Utl::getItem('pricewt', $quote, 0, 0) - Utl::getItem('pricewot', $quote, 0, 0), 'currency')]]
         ];
         $rows[] = ['tag' => 'tr', 'content' => [
             ['tag' => 'td', 'atts' => 'colspan="' . ($numberOfCols - 3) . '" ', 'content' => $downPayContent],

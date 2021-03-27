@@ -24,9 +24,8 @@ class Model extends AbstractModel {
 
     function summary($activeUserFilters = null){// argument is ignored here
         $totals = $this->getAll(['where' => $this->user->filter([], $this->objectName), 'cols' => ['count(*)']]);
-        $filteredTotals = $this->getAll(['where' => $this->user->filter($this->user->getCustomView($this->objectName, 'overview', isset($this->paneMode) ? $this->paneMode : 'Tab', ['data', 'filters', 'overview']),
-            $this->objectName), 'cols' => ['format', 'count(*)', "sum(quantity)"], 'groupBy' => ['format']]);
-
+        $filteredTotals = $this->getAll(['where' => $this->user->filter($this->user->getCustomView($this->objectName, 'overview', isset($this->paneMode) ? $this->paneMode : 'Tab', ['data', 'filters', 'overview']), $this->objectName), 
+            'cols' => ['format', 'count(*)', "sum(quantity)"], 'groupBy' => ['format']]);
         $return['totalrecords'] = $totals[0]['count(*)'];
         $return['filteredrecords'] = 0;
         $return['sumquantity'] = 0;

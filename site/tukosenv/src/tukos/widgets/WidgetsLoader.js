@@ -3,7 +3,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/p
 	return {
             widgetsPath: {
                 TextBox: "dijit/form/", NumberTextBox: "dijit/form/", CurrencyTextBox: "dijit/form/", CheckBox: "tukos/widgets/", TimeTextBox: "tukos/widgets/", Textarea: "dijit/form/", Select: "dijit/form/", Button: "dijit/form/",
-                DropDownButton: "dijit/form/", RadioButton: "dijit/form/", Menu: "dijit/", MenuItem: "dijit/", PopupMenuItem: "dijit/", PopupMenuBarItem: "dijit/", DropDownMenu: "dijit/", ContentPane: "dijit/layout/",
+                DropDownButton: "dijit/form/", RadioButton: "dijit/form/", Menu: "dijit/", MenuItem: "dijit/", MenuBarItem: "dijit/", PopupMenuItem: "dijit/", PopupMenuBarItem: "dijit/", DropDownMenu: "dijit/", ContentPane: "dijit/layout/",
                 TukosDateBox: "tukos/", Editor: "tukos/widgets/", LazyEditor: "tukos/widgets/",
                 FormattedTextBox: "tukos/widgets/", MultiSelect: "tukos/", StoreSelect: "tukos/", ObjectSelect: "tukos/", ObjectSelectMulti: "tukos/", ObjectSelectDropDown: "tukos/",
                 TukosNumberBox: "tukos/", TukosCurrencyBox: "tukos/", NumberUnitBox: "tukos/", DateTimeBox: "tukos/", TukosButton: "tukos/widgets/", DropDownTextBox: "tukos/widgets/", 

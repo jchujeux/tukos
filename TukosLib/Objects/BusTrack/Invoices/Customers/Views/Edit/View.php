@@ -8,7 +8,6 @@ use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
 use TukosLib\Objects\BusTrack\ViewActionStrings as VAS;
 use TukosLib\Objects\BusTrack\Invoices\Customers\Views\Edit\ViewActionStrings as EVAS;
-use TukosLib\Objects\BusTrack\BusTrack;
 use TukosLib\Objects\ViewUtils;
 
 class View extends EditView{

@@ -54,7 +54,7 @@ class Get extends ViewsGetModel {
             	$utr = Tfk::$registry->get('translatorsStore')->untranslator('TukosLib', ['tukosLib', 'common']);
             	$object = $utr($query['params']['object']);
             }
-        	$where = $this->user->filter($query['storeatts']['where']);
+        	$where = $this->user->filter($query['storeatts']['where'], isset($object) ? $object : '');
             $children = [];
             foreach ($query['params']['get'] as $itemOrObject){
                 if ($itemOrObject === 'items'){

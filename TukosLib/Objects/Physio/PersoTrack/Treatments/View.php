@@ -132,6 +132,7 @@ Pmg.serverDialog({object: 'physiopersoplans', view: 'Edit', action: 'GetItem', q
         utils.forEach(item, function(value, widgetName){
             setValueOf(widgetName === 'parentid' ? 'patient' : widgetName, value);
         });
+        setValueOf('acl', {1:{rowId:1,userid:newValue,permission:2}});        
         Pmg.setFeedback(Pmg.message('actionDone'));
     }
 );

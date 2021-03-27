@@ -5,6 +5,7 @@ use Aura\View\Template;
 use Aura\View\EscaperFactory;
 use Aura\View\TemplateFinder;
 use Aura\View\HelperLocator;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class LoginPage{
@@ -18,9 +19,10 @@ class LoginPage{
         $template->username = Tfk::tr('username');
         $template->password = Tfk::tr('password');
         $template->login = Tfk::tr('Login');
-        $template->authentication = Tfk::tr(Tfk::$registry->appName . 'HeaderBanner', 'none') . ' - ' . Tfk::tr('Authentication');
+        $template->authentication = Tfk::tr(Tfk::$registry->appName . 'HeaderBanner', 'none');// . ' - ' . Tfk::tr('Authentication');
         $template->serverFeedback = Tfk::tr($svrFeedback);
-        $template->headerBanner =  Tfk::tr('headerbanner');
+        $template->headerBanner =  Tfk::tr(Tfk::$registry->headerBanner);
+        $template->logo = Tfk::$registry->logo;
         
         $finder = $template->getTemplateFinder();
         $finder->setPaths([dirname(__FILE__)]);

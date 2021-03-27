@@ -18,6 +18,7 @@ class View extends AbstractView {
     function customDataWidgets(){
         $labels = $this->model->itemsLabels;
         return [
+            'organization' => ViewUtils::objectSelect($this, 'Emittingorganization', 'organizations'),
             'reference' =>  ViewUtils::textBox($this, 'Reference', ['atts' => ['edit' => ['disabled' => true]]]),
             'quotedate' => ViewUtils::tukosDateBox($this, 'Quotedate'),
             'items'  => $this->items($labels),

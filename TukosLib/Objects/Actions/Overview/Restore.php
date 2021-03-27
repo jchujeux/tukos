@@ -13,7 +13,7 @@ class Restore extends AbstractAction{
         }else{
             $where = [['col' => 'id', 'opr' => 'IN', 'values' => $received['ids']]];
         }
-        $where = $this->user->filterContext($this->user->filterReadonly($where));
+        $where = $this->user->filterContext($this->user->filterReadonly($where, $this->objectName), $this->objectName);
         $this->model->restore($where);
         return [];
     }

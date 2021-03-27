@@ -7,6 +7,8 @@ use TukosLib\Utils\Utilities as Utl;
 
 class Get extends ViewsGetModel {
     protected function unHiddenOverviewGridCols($cols){
+        return $cols;
+/*
         $customElements = $this->getElementsCustomization();
         $unHiddenCols = [];
         foreach ($cols as $col){
@@ -15,6 +17,7 @@ class Get extends ViewsGetModel {
             }
         }
         return $unHiddenCols;
+*/
     }
     function getOverviewGrid($query){
         $summaryStoreAtts = [/*'where' => $query['storeatts']['where'], */'eliminateditems' => Utl::getItem('eliminateditems', $query['storeatts'])];

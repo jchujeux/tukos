@@ -17,6 +17,7 @@ class UserInformation{
         $this->modulesMenuLayout = $modulesMenuLayout;
         $this->tukosCkey = $tukosCkey;
         $this->objectsStore = Tfk::$registry->get('objectsStore');
+        $this->lockedMode = true;
     }
     
     public function setUser($where){
@@ -169,7 +170,7 @@ class UserInformation{
     function fullColName($colName, $tableName = ''){
         return ($tableName === '' ? '' : $tableName . '.') . $colName;
     }
-    function filterPrivate($where, $objectName='',  $tableName=''){
+    function filterPrivate($where, $objectName=''){
         switch ($this->rights()){
             case 'SUPERADMIN':
                 break;
@@ -196,7 +197,7 @@ class UserInformation{
         }
         return $where;  
     }
-    function filterReadonly($where, $tableName = ''){
+    function filterReadonly($where, $objectName = ''){
         switch($rights = $this->rights()){
             case "SUPERADMIN":
                 break;
@@ -218,7 +219,7 @@ class UserInformation{
         }
         return $where;
     }
-    function filterContext($where, $objectName='', $tableName=''){// $tableName is needed in queries involving joins as contextid may then appear in different tables
+    function filterContext($where, $objectName=''){
         $col = $this->fullColName('contextid');
         if (isset($where['contextpathid'])){
             $contextPathId = Utl::extractItem('contextpathid', $where);
@@ -232,11 +233,11 @@ class UserInformation{
         }
         return $where;  
     }
-    function filter($where, $objectName='', $tableName=''){
+    function filter($where, $objectName=''){
         if (isset($where['id']) && $where['id'] === $this->id()){
         	return $where;//so that a user can always access his own item
         }else{
-    		return $this->filterContext($this->filterPrivate($where, $objectName, $tableName), $objectName, $tableName);
+    		return $this->filterContext($this->filterPrivate($where, $objectName), $objectName);
         }
     }
     public function aclRights ($userId, $acl){
@@ -253,15 +254,18 @@ class UserInformation{
             return false;
         }
     }
+    public function setLockedMode($on){
+        $this->lockedMode = $on;
+    }
     public function hasUpdateRights($item, $newItem=[]){
-        if (in_array(Utl::getItem('permission', $item) , ['PL', 'RL']) && !empty($newItem) && Utl::getItem('permission', $newItem, $item['permission']) === $item['permission']){
+        if ($this->lockedMode && in_array(Utl::getItem('permission', $item) , ['PL', 'RL']) && !empty($newItem) && Utl::getItem('permission', $newItem, $item['permission']) === $item['permission']){
             return false;
         }
         $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
         return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 1)) || $aclRights > 1 || $item['id'] === $userId || ($item['creator'] === $userId && !$aclRights) ;
     }
     public function hasDeleteRights($item){
-        if (in_array($item['permission'] , ['PL', 'RL'])){
+        if ($this->lockedMode && in_array($item['permission'] , ['PL', 'RL'])){
             return false;
         }
         $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
