@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dijit/form/FilteringSelect", "dojo/store/Memory", "tukos/widgetUtils", "tukos/PageManager"], 
-    function(declare, arrayUtil, lang, FilteringSelect, Memory, widgetUtils, Pmg){
+define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/dom-attr", "dijit/form/FilteringSelect", "dojo/store/Memory", "tukos/widgetUtils", "tukos/PageManager"], 
+    function(declare, arrayUtil, lang, domAttr, FilteringSelect, Memory, widgetUtils, Pmg){
     return declare([FilteringSelect], {
         constructor: function(args){
             if (args.dropdownFilters){
@@ -9,9 +9,11 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dijit/for
         },
 		postCreate: function(){
 			this.inherited(arguments);
-        	if (Pmg.isMobile()){
-				this.set('readonly', true);
-        	}
+		},
+		_onFocus: function(){
+			if (Pmg.isMobile()){
+				domAttr.set(this.textbox, 'readonly', 'readonly');
+			}
 		},
         storeFilter: function(object){
             var match = previousMatch = newMatch = true;
@@ -45,13 +47,23 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dijit/for
             return match;
         },
         toggleDropDown: function(){
-            if (this.dropdownFilters){
-                this.store.setData(arrayUtil.filter(this.storeData, lang.hitch(this, "storeFilter")));
-            }
-            this.inherited(arguments);
+		if (!this.isDisabled){
+			if (this.dropdownFilters){
+	                this.store.setData(arrayUtil.filter(this.storeData, lang.hitch(this, "storeFilter")));
+	            }
+	            this.inherited(arguments);
+			}            
         },
 		_getDisplayedValueAttr: function(){
 			return this.inherited(arguments);
+		},
+		_setDisabledAttr: function(value){
+			if (this.hasColor){
+				this.isDisabled = value;
+				this.set('readonly', value);
+			}else{
+				this.inherited(arguments);
+			}
 		}
     }); 
 });

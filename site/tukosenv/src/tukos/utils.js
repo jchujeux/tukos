@@ -57,6 +57,22 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
                 }
             }
         },
+        some: function(object, callback){
+			result = false;            
+			for (var key in object){
+                if (object.hasOwnProperty(key)){
+                    if (result = callback(object[key], key, object)){
+						return result;
+					}
+                }
+            }
+			return result;
+        },
+		count: function(object){
+			var count = 0;
+			this.forEach(object, function(){count +=1;});
+			return count;
+		},
 /*
         assign: function(object, property, value){
             object[property] = value;
@@ -116,7 +132,9 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         		}
         		return comparisonOperator === 'find' ? targetValue === sourceValue : targetValue.includes(sourceValue);
         	};
-        	return cache[searchValue] || (cache[searchValue] = ((arrayToSearch.find(search)|| [])[returnProperty] || searchValue));       		
+        	//return cache[searchValue] || (cache[searchValue] = ((arrayToSearch.find(search)|| [])[returnProperty] || searchValue));       		
+        	//return cache[searchValue] || ((cache[searchValue] = (arrayToSearch.find(search) || [])[returnProperty]) === false ? (cache[searchValue] = searchValue) : cache[searchValue]);       		
+        	return cache[searchValue] || ((cache[searchValue] = arrayToSearch.find(search)) === undefined ?  (cache[searchValue] = searchValue) : (cache[searchValue] = cache[searchValue][returnProperty]));       		
         },
         findReplace: function (arrayToSearch, searchProperty, searchValue, returnProperty, cache, ignoreCase, ignoreAccent){
             return this.replace('find', arrayToSearch, searchProperty, searchValue, returnProperty, cache, ignoreCase, ignoreAccent);
@@ -167,6 +185,11 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
             });
             return array1;
         },
+		array_unique: function(array){
+			return array.filter(function(value, index, self){
+				return self.indexOf(value) === index;
+			});
+		},
         merge: function (target, source){//Use the returned value to be sure to get the modified value in all cases
             this.wasModified = false;
             if (this.isObject(target) && this.isObject(source)){

@@ -90,12 +90,12 @@ class Get extends ViewsGetModel {
             $storeAtts = Utl::extractItem('storeatts', $query, []);
             $where = Utl::getItem('where', $storeAtts, $query);
             $cols = Utl::getItem('cols', $storeAtts, $cols);
-            $value = $this->getOne($where, $this->unHiddenEditCols($where, $cols), 'objToEdit');
+            $value = $this->getOne($where, $this->unHiddenEditCols($where, $cols), 'objToEdit', true);
             if (isset($value['id'])){
             	$customMode = 'item';
             	$allowCustomValue = false;
             }else{
-            	$value = $this->initialize('objToEdit', isset($query['storeatts']['init']) ? $query['storeatts']['init'] : []);
+            	$value = $this->initialize('objToEdit', isset($storeAtts['init']) ? $storeAtts['init'] : []);
             	$customMode = 'object';
             	$allowCustomValue = true;
             }

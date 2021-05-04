@@ -65,7 +65,7 @@ class PageView extends Translator{
         return ['object' => $object, 'view' => $view, 'mode' => 'Tab', 'action' => 'Tab'];
     }
 
-    private function defaultModuleActions($object, $mode){
+    private function defaultModuleActions($object, $mode, $customAtts){
         $editOverview = [
             'edit' => [
                 'type' => 'PopupMenuItem',
@@ -74,7 +74,7 @@ class PageView extends Translator{
             ],
             'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'Overview'), 'label' => $this->tr('overview')]],
         ];
-        return $mode === '$' ? $editOverview : array_merge([
+        return Utl::array_merge_recursive_replace($mode === '$' ? $editOverview : array_merge([
             'new' => [
                 'type' => 'PopupMenuItem',    
                  'atts' => ['label' => $this->tr('new')],
@@ -89,7 +89,7 @@ class PageView extends Translator{
                 ],
             ]],
             $editOverview
-        );
+        ), $customAtts);
 
     }
 
@@ -102,6 +102,7 @@ class PageView extends Translator{
         }else{
             $module = $key;
         }
+        $customAtts = Utl::extractItem('customAtts', $layout, []);
         if (empty($layout['atts']) || !isset($layout['atts']['label'])){
             $layout['atts']['label'] = $this->tr($module);
             $layout['atts']['moduleName'] = $module;
@@ -117,18 +118,19 @@ class PageView extends Translator{
         $theDescription[$module]['type'] = $layout['type'];
         if (isset($layout['popup'])){
         	$type = $layout['popup']['type'];
-        	$theDescription[$module]['popup'] = Widgets::$type($layout['popup']['atts'], true);
+        	$theDescription[$module]['popup'] = strtoupper($type[0]) !== $type[0] ? Widgets::$type($layout['popup']['atts'], true) : $layout['popup'];
         }
         if (in_array($key[0], ['#', '$'])){
-            $theDescription[$module]['popup'] = ['type' => 'DropDownMenu', 'items' => $this->defaultModuleActions($module, $key[0])];
+            $theDescription[$module]['popup'] = ['type' => 'DropDownMenu', 'items' => $this->defaultModuleActions($module, $key[0], $customAtts)];
         	$theDescriptionItems = &$theDescription[$module]['popup'];
-        }else if(isset($layout['type']) && in_array($layout['type'], ['PopupMenuBarItem', 'PopupMenuItem'])){
+        }else if(isset($layout['type']) && in_array($layout['type'], ['PopupMenuBarItem', 'PopupMenuItem']) && !isset($theDescription[$module]['popup'])){
         	$theDescription[$module]['popup'] = ['type' => 'DropDownMenu'];
         	$theDescriptionItems = &$theDescription[$module]['popup'];
         }else{
         	if (isset($layout['type']) && in_array($layout['type'], ['MenuItem', 'MenuBarItem'])){
-        	        if (is_array($queryId = Utl::drillDown($layout, ['atts', 'onClickArgs', 'query', 'id']))){
-        	        $theDescription[$module]['atts']['onClickArgs']['query']['id'] = Tfk::$registry->get('objectsStore')->objectModel($queryId['object'])->getOne(['where' => ['id' => $queryId['id']], 'cols' => [$queryId['col']]])[$queryId['col']];
+        	    if (is_array($queryId = Utl::drillDown($layout, ['atts', 'onClickArgs', 'query', 'id']))){
+        	        $theItem = Tfk::$registry->get('objectsStore')->objectModel($queryId['object'])->getOne(['where' => ['id' => $queryId['id']], 'cols' => [$queryId['col']]]);
+        	        $theDescription[$module]['atts']['onClickArgs']['query']['id'] = empty($theItem) ? '' : $theItem[$queryId['col']];
         	    }
         	}
             $theDescriptionItems = &$theDescription[$module];

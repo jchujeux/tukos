@@ -1,7 +1,8 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/on", "dgrid/OnDemandGrid", "dgrid/Selector", "dgrid/extensions/DijitRegistry", "tukos/dgrid/extensions/ColumnHider", "dgrid/extensions/ColumnResizer",
-	"tukos/_GridSummaryMixin", "tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager"], 
-function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resizer, _GridSummaryMixin, utils, eutils, mutils, wcutils, Pmg){
-    return declare([Grid, DijitRegistry, Hider, Resizer, Selector, _GridSummaryMixin], {
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/on", "dojo/ready", "dgrid/OnDemandGrid", "dgrid/Keyboard", "dgrid/Selector", "dgrid/extensions/DijitRegistry", "tukos/dgrid/extensions/ColumnHider", "tukos/dgrid/extensions/ColumnResizer",
+		"tukos/_WidgetsExtend", "tukos/_GridSummaryMixin", "tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/sheetUtils", "tukos/widgetUtils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager"], 
+function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegistry, Hider, Resizer, _WidgetsExtend, _GridSummaryMixin, utils, eutils, mutils, sutils, wutils,  wcutils, Pmg){
+	lang.extend (Grid, _WidgetsExtend);    
+	return declare([Grid, DijitRegistry, Keyboard, Hider, Resizer, Selector, _GridSummaryMixin], {
         constructor: function(args){
             var self = this;
         	for (var i in args.columns){
@@ -13,7 +14,7 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
                         {atts: {label: Pmg.message('viewcellindialog'), onClick: lang.hitch(this, function(evt){this.viewCellInPopUpDialog(this);})}},
                         {atts: {label: Pmg.message('viewcellinwindow'), onClick: lang.hitch(this, function(evt){this.viewInSeparateBrowserWindow(this);})}}
                      ],
-                     idCol: [{atts: {label: Pmg.message('editinnewtab'), onClick: function(evt){self.editInNewTab()}}}].concat(
+                     idCol: [{atts: {label: Pmg.message('editinnewtab'), onClick: function(evt){self.editInNewTab(self)}}}].concat(
                     		 [{atts: {label: Pmg.message('togglerowheight'), onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}]),
                      header: []
             };
@@ -37,11 +38,21 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         		});
         	}
             ['maxHeight', 'maxWidth', 'minWidth', 'width'].forEach(function(att){
-            	self.set(att, self[att]);
+			if (self[att]){
+				self.set(att, self[att]);
+			}	
             });
+            this.formulaCache = {};
+            var copyCellCallback = function(evt){
+                if (evt.ctrlKey){
+                    Pmg.setCopiedCell(sutils.copyCell(this.clickedCell));
+                }
+            };
+            this.addKeyHandler(67, copyCellCallback);
             if (this.renderCallback){
             	this.renderCallbackFunction = eutils.eval(this.renderCallback, "node, rowData, column, tdCell")
             }
+            this.noDataMessage =  Pmg.isMobile() ? Pmg.message('noDataMessageMobile') : Pmg.message('noDataMessage');
             this.keepScrollPosition = true;
         	if (!this.itemCustomization){
         		this.customizationPath = 'customization.widgetsDescription.' + (form.attachedWidget ? form.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription.' : '') + this.widgetName + '.atts.';
@@ -74,17 +85,44 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
             }
             this.on(on.selector(".dgrid-row, .dgrid-header", "contextmenu"), lang.hitch(this, this.contextMenuCallback));
         },
+		resize: function(){
+			this.adjustMinWidthAutoColumns('min');
+			this.inherited(arguments);
+			/*if (this.adjustMinWidthAutoColumns('min')){
+				this.inherited(arguments);
+			}*/
+		},
+		_setAllowApplicationFilter: function(newValue){
+        	wutils.watchCallback(this, 'allowApplicationFilter', this.allowApplicationFilter, newValue);
+        	this.allowApplicationFilter = newValue;
+        },
+        _setCollection: function(newValue){
+			var self = this;        	
+			this.inherited(arguments);
+			ready(function(){
+				wutils.watchCallback(self, 'collection', null, newValue);
+			});	
+        },
     	_setMaxHeight: function(value){
             this.bodyNode.style.maxHeight = value;
         },
         canEditRow: function(object){
-            return !this.grid.disabled && object.canEdit;
+            return !this.grid.disabled && ((typeof object.canEdit === "undefined") || object.canEdit);
         }, 
+        formatId: function(id){
+        	var newRowPrefix = this.grid.newRowPrefix;
+        	if (newRowPrefix && id.indexOf(newRowPrefix) === 0){
+        		return Pmg.message(newRowPrefix) + ' ' + id.substring(newRowPrefix.length);
+        	}else{
+        		return id || '';
+        	}
+        },
         formatContent: function(value, object){
         	return this.formatType ? utils.transform(value, this.formatType, this.formatOptions, Pmg) : value;
         },
         renderNamedId: function(object, value, node){
-            return this.grid._renderContent(this, object, Pmg.namedId(value));
+            var grid = this.grid, newRowPrefixGridName = utils.drillDown(this, ['editorArgs', 'storeArgs', 'storeDgrid']);
+        	return this.grid._renderContent(this, object, node, newRowPrefixGridName ? grid.form.getWidget(newRowPrefixGridName).newRowPrefixNamedId(value) : Pmg.namedId(value));
         },
         renderNamedIdExtra: function(object, value, node){
             return this.grid._renderContent(this, object, Pmg.namedIdExtra(value));
@@ -92,47 +130,64 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         renderNameExtra: function(object, value, node){
             return this.grid._renderContent(this, object, Pmg.namedExtra(value));
         },
+		_storeDisplayedValue: function(value, column){
+			return value ? utils.findReplace(column.editorArgs.storeArgs.data, 'id', value === '0' ? '' : value, 'name', column.storeCache || (column.storeCache = {})) : value;
+		},
         renderStoreValue: function(object, value, node){
-            return this.grid._renderContent(this, object, value ? utils.findReplace(this.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value);
+			var self = this, grid = this.grid;            
+			return grid._renderContent(this, object, node, grid._storeDisplayedValue(value, this));
         },
-        renderNumberUnitValue: function(object, value, node){
+		_numberUnitDisplayedValue: function(value, column){
             if (value){
 				var values = JSON.parse(value), count = values[0],
-            		unitValue = values[1] ? utils.findReplace(this.editorArgs.unit.storeArgs.data, 'id', values[1], 'name', this.storeCache || (this.storeCache = {})) : values[1],
-                	transformedValue = count + ' ' + unitValue + (count > 1 && this.formatType === 'numberunit' ? 's' : '');
-	
+            		unitValue = values[1] ? utils.findReplace(column.editorArgs.unit.storeArgs.data, 'id', values[1], 'name', column.storeCache || (column.storeCache = {})) : values[1],
+                	transformedValue = count + ' ' + unitValue + (count > 1 && column.formatType === 'numberunit' ? 's' : '');
 			}
-            return this.grid._renderContent(this, object, node, transformedValue || value);
+			return transformedValue || value;
+		},
+        renderNumberUnitValue: function(object, value, node){
+            var grid = this.grid;
+			return grid._renderContent(this, object, node, grid._numberUnitDisplayedValue(value, this));
         },
         renderCheckBox: function(object, value, node){
-        	return this.grid._renderContent(this, object, value ? '☑' : '☐', {textAlign: 'center'});
+        	return this.grid._renderContent(this, object, node, value ? '☑' : '☐', {textAlign: 'center'});
         },        
         renderColorPicker: function(object, value, node){
-        	return this.grid._renderContent(this, object, '', {backgroundColor: value});
+        	return this.grid._renderContent(this, object, node, '', {backgroundColor: value});
         },
-        renderContent: function(object, value, node){
-            var grid = this.grid, row = grid.row(object), 
-            	result = utils.transform((value === undefined || value === null) ? '' : grid.evalFormula ? grid.evalFormula(grid, value, this.field, row.data[grid.collection.idProperty]) : value, this.formatType, this.formatOptions, Pmg);
-            return grid._renderContent(this, object, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {});
+        renderContent: function(object, value, node, options, noCreate){
+            var grid = this.grid, row = grid.row(object), args = {object: object, value: sutils.evalFormula(grid, value, this.field, row.data.idg)}, result;
+            eutils.actionFunction(this, 'renderContent', this.renderContentAction, 'args', args);
+            result = utils.transform(args.value, this.formatType, this.formatOptions, Pmg);
+            return grid._renderContent(this, object, node, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {}, noCreate);
         },
-        _renderContent: function(column, object, innerHTML, styleAtts){
-            var grid = column.grid, row =this.row(object), rowHeight = ((this.rowHeights || {})[row.id] ? this.rowHeights[row.id] : column.minHeightFormatter), atts = {style: lang.mixin({maxHeight: rowHeight, overflow: 'auto'}, styleAtts)},
-            	rowId =  object[this.collection.idProperty], node;
-            if (this.dirty[rowId] && this.dirty[rowId][column.field] !== undefined && !atts.style.backgroundColor && grid.changeColor){
-                atts.style.backgroundColor =  grid.changeColor;
+        _renderContent: function(column, storeRow, tdCell, innerHTML, styleAtts, noCreate){
+            var row =this.row(storeRow), rowHeight = (this.rowHeights[row.id] ? this.rowHeights[row.id] : column.minHeightFormatter), atts = {style: lang.mixin({maxHeight: rowHeight, overflow: 'auto'}, styleAtts)},
+            	rowId =  storeRow[this.collection.idProperty], node;
+            if (this.dirty[rowId] && typeof this.dirty[rowId][column.field] !== 'undefined' && !atts.style.backgroundColor){
+                atts.style.backgroundColor =  wutils.changeColor;
             }
             if(! innerHTML || ! /\S/.test(innerHTML) || innerHTML === '~delete'){
                 innerHTML = '<p> ';
             }
-            atts.innerHTML= innerHTML;
-            node = dct.create('div', atts);
+            if (noCreate){
+            	node = tdCell;
+            	node.innerHTML = innerHTML;
+            	dst.set(node, atts.style);
+           }else{
+                atts.innerHTML= innerHTML;
+                node = dct.create('div', atts);
+            }
             if(typeof innerHTML === "string" && innerHTML.substring(0, 7) === '#tukos{'){
             	dst.set(node, {textDecoration: "underline", color: "blue", cursor: "pointer"});
             	node.innerHTML = Pmg.message('loadOnClick');
             	node.onClickHandler = on(node, 'click', lang.hitch(this, this.loadContentOnClick));
+            }else{
+            	node.innerHTML = innerHTML;
+            	dst.set(node, atts.style);
             }
             if (this.renderCallbackFunction){
-            	this.renderCallbackFunction(node, row.data, column);
+            	this.renderCallbackFunction(node, row.data, column, tdCell);
             }
             return node;
         },
@@ -140,8 +195,10 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         	var column = this.columns[colName];
         	switch (column.widgetType){
         		case 'StoreSelect': 
-        			return value ? utils.findReplace(column.editorArgs.storeArgs.data, 'id', value, 'name', this.storeCache || (this.storeCache = {})) : value;
-        		case 'ObjectSelect':
+        			return this._storeDisplayedValue(value, column);
+				case 'NumberUnitBox':    
+					return this._numberUnitDisplayedValue(value, column);    		
+				case 'ObjectSelect':
         		case 'ObjectSelectMulti':
         		case 'ObjectSelectDropDown':
         			return Pmg.namedId(value);
@@ -173,7 +230,7 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         viewCellInPopUpDialog: function(grid){
             if (!grid.viewCellDialog){
             	require (['dijit/Dialog'], function(Dialog){
-            		grid.viewCellDialog = new Dialog({style: {color: 'black'}});
+            		grid.viewCellDialog = new Dialog({title: Pmg.message('Extendedview'), style: {color: 'black'}});
             		grid.viewCellDialog.set('content', grid.clickedRowValues()[grid.clickedCell.column.field]);
             		grid.viewCellDialog.show();
             	});
@@ -187,10 +244,39 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
             newWindow.document.write(grid.clickedRowValues()[grid.clickedCell.column.field]);
             newWindow.document.close();
         },
+        editInNewTab: function(grid){
+            var field  = grid.clickedCell.column.field,
+                query = {};
+            if (grid.clickedCell.column.onClickFilter){
+                var object  = grid.object === 'tukos' ? grid.cellValueOf('object') : grid.object,
+                    fields = grid.clickedCell.column.onClickFilter;
+                for (var i in fields){
+                    var field = fields[i];
+                    var value = grid.cellValueOf(field);
+                    if (value){
+                        query[field] = value;
+                    }
+                }
+            }else{
+                var id = grid.cellValueOf(field);
+                if (id){
+                    object = Pmg.objectName(id, grid.form.objectDomain);
+                    query.id = id;
+                }
+            }
+            if (!utils.empty(query)){
+                Pmg.tabs.gotoTab({object: object, view: 'Edit', mode: 'Tab', action: 'Tab', query: query});
+            }
+        },
+        showInNavigator: function(grid){
+        	var targetId = grid.cellValueOf(grid.clickedCell.column.field);
+        	if (targetId){
+        		Pmg.showInNavigator(targetId);
+        	}
+        },
         clickedRowIdPropertyValue: function(){
         	return this.clickedRow.data[this.collection.idProperty]        	
         }, 
-        
         rowValues: function(idPropertyValue){
             var result = this.collection.getSync(idPropertyValue) || this.emptyRowItem(idPropertyValue);
             return this.dirty ? lang.mixin(lang.clone(result), this.dirty[idPropertyValue]) : result;
@@ -203,8 +289,55 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         		return this.clickedRow.data;
         	}
         },
-        cellValue: function(row, field){
-            return row[field] || '';    
+        contextMenuCallback: function(evt){
+        	evt.preventDefault();
+			evt.stopPropagation();
+			var row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column,
+                menuItems = lang.clone(this.contextMenuItems),
+                colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';
+			this.clickedColumn = this.column(evt);
+			if (colItems !== 'header' && menuItems.canEdit && row.data.canEdit !== false){
+            	menuItems[colItems] = menuItems[colItems].concat(menuItems.canEdit);
+            }
+            mutils.setContextMenuItems(this, menuItems[colItems].concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this)));
+        },
+        cellValueOf: function(field, idPropertyValue){
+			var result;            
+			if (idPropertyValue){
+                if (this.collection.getSync){
+                    return this.collection.getSync(idPropertyValue)[field];
+                }else{
+					console.log("BasicGrid.cellValueOf - unsupported Rest store");
+                }
+            }else{
+                var result = this.clickedRowValues()[field];
+                return (typeof result === "undefined" || result === null) ? '' : result;
+            }
+        },
+		cellDisplayedValueOf: function(field, idPropertyValue){
+			return this.colDisplayedValue(this.cellValueOf(field, idPropertyValue), field);
+		},
+        selectRow: function(rowIdProperty){
+            var row = this.row(rowIdProperty);
+           if (row){
+                //var reorderedIndex = arrayUtil.indexOf(this.store.sort(this.get('sort')).fetchSync(), this.store.getSync(rowIdProperty));
+                var reorderedIndex = this.store.sort(this.get('sort')).fetchSync().indexOf(this.store.getSync(rowIdProperty));
+        
+                this.bodyNode.scrollTop = this.rowHeight*reorderedIndex;
+                this.refresh();
+            }
+        },
+        colId: function(field){
+            var orderedCols = this.subRows[0];
+            for (var  i in orderedCols){
+                if (orderedCols[i].field === field){
+                    return i;
+                }
+            }
+            return -1;
+        },
+        colField: function(colId){
+            return this.subRows[0][colId].field;
         },
         _setValue: function(value){
         	this.collection.setData(value ? value : [])
@@ -222,23 +355,6 @@ function(declare, lang, dct, dst, on, Grid, Selector, DijitRegistry, Hider, Resi
         		}
         	}
     		this.inherited(arguments);
-        },
-        contextMenuCallback: function(evt){
-        	var row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column, clickedColumn = this.clickedColumn = this.column(evt);
-                var menuItems = lang.clone(this.contextMenuItems);
-                var colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';
-                if (colItems !== 'header' && menuItems.canEdit && row.data.canEdit !== false){
-                	menuItems[colItems] = menuItems[colItems].concat(menuItems.canEdit);
-                }
-                mutils.setContextMenuItems(this, menuItems[colItems].concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this)));
-        },
-        editInNewTab: function(){
-            var grid = this, field  = grid.clickedCell.column.field, id = grid.clickedRowValues()[grid.clickedCell.column.field];
-            if (id){
-                Pmg.tabs.gotoTab({object: Pmg.objectName(id, grid.form.objectDomain), view: 'Edit', mode: 'Tab', action: 'Tab', query: {id: id}});
-            }
-            if (!utils.empty(query)){
-            }
         }
     });
 });

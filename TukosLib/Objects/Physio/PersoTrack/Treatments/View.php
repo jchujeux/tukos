@@ -50,7 +50,7 @@ class View extends AbstractView {
                 'type' => 'StoreSimpleCalendar',
                 'atts' => ['edit' => [
                     'columnViewProps' => ['minHours' => 0, 'maxHours' => 4],
-                    'style' => ['height' => '150px', 'width' => '800px'],
+                    'style' => ['height' => '130px', 'width' => '800px'],
                     'timeMode' => 'duration', 'durationFormat' => 'time', 'moveEnabled' => true,
 /*
                     'customization' => ['items' => [
@@ -61,7 +61,7 @@ class View extends AbstractView {
                         'ruler' => ['field' => 'stress', 'map' => Sports::$stressOptions, 'atts' => ['minimum' => 0, 'maximum' => 4, 'showButtons' => false, 'discreteValues' => 5]],
                     ]],
 */
-                    'onChangeNotify' => [$this->gridWidgetName => ['startTime' => 'startdate', 'duration' => 'duration', 'summary' => 'name', 'comments' => 'comments', 'stress' => 'stress', 'series' => 'series', 'repeats' => 'repeats', 'extra' => 'extra']],
+                    'onChangeNotify' => [$this->gridWidgetName => ['startTime' => 'startdate', 'duration' => 'duration', 'summary' => 'name', 'exerciseid' => 'exerciseid', 'comments' => 'comments', 'stress' => 'stress', 'series' => 'series', 'repeats' => 'repeats', 'extra' => 'extra']],
                     'onWatchLocalAction' => ['date' => $dateChangeLocalAction(false)]]]],
                 'fromdate', 'todate'),
             'weeklies' => ViewUtils::JsonGrid($this, 'Weeklies', [
@@ -87,15 +87,32 @@ class View extends AbstractView {
                     'title' => $this->tr('Sessions'), 'allDescendants' => true, 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'startdate',
                     'endDateTimeCol' => 'startdate',
                     'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
-                    'onChangeNotify' => ['calendar' => ['startdate' => 'startTime',  'duration' => 'duration',  'name' => 'summary', 'comments' => 'comments', 'stress' => 'stress', 'series' => 'series', 'repeats' => 'repeats', 'extra' => 'extra']],
-                    'onDropMap' => ['exercises' => ['fields' => ['name' => 'name', 'startdate' => 'startdate', 'comments' => 'comments', 'stress' => 'stress', 'series' => 'series', 'repeats' => 'repeats', 'extra' => 'extra']]],
-                    'sort' => [['property' => 'startdate', 'descending' => false]],
+                    'onChangeNotify' => ['calendar' => ['startdate' => 'startTime',  'duration' => 'duration',  'name' => 'summary', 'exerciseid' => 'exerciseid', 'comments' => 'comments', 'stress' => 'stress', 'series' => 'series', 'repeats' => 'repeats', 'extra' => 'extra']],
+                    'onDropMap' => ['exercises' => ['fields' => ['name' => 'name', 'startdate' => 'startdate', 'comments' => 'comments', 'rowId' => 'exerciseid', 'stress' => 'stress', 'series' => 'series', 'repeats' => 'repeats', 'extra' => 'extra']]],
+                    'sort' => [['property' => 'startdate', 'descending' => true]],
                     'onWatchLocalAction' => [
                         'allowApplicationFilter' => ['physiopersosessions' => $this->dateChangeGridLocalAction("tWidget.form.valueOf('displayeddate')", 'tWidget', 'newValue')],
                         'collection' => [
                             'calendar' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => 'tWidget.currentView.invalidateLayout();return true;']],
                         ]],
                     'renderCallback' => "if (column.field in  {painduring: true, painafter: true, painnextday: true}){var newColor = {1: 'LIGHTGREEN', 2: 'ORANGE', 3: 'RED', 4: 'RED'}[rowData[column.field]];domstyle.set(tdCell, 'backgroundColor', newColor);domstyle.set(node, 'backgroundColor', newColor);}",
+                    'colsDescription' => [
+                        'startdate' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['startdate' => ['localActionStatus' => $this->sessionChangeLocalAction('startdate')]]]]]],
+                        'painduring' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['startdate' => ['localActionStatus' => $this->sessionChangeLocalAction('painduring')]]]]]],
+                        'painafter' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['startdate' => ['localActionStatus' => $this->sessionChangeLocalAction('painafter')]]]]]],
+                        'parentid' => ['atts' => ['storeedit' => ['hidden' => true]]]
+                    ],
+                    'afterActions' => [
+                        'createNewRow' => "this.form.localActions.afterCreateSessionRow(arguments[1][0]);",
+                        'updateRow' => "this.form.localActions.afterUpdateSessionRow(arguments[1][0]);",
+                        'deleteRow' => "this.form.localActions.afterCreateSessionRow(arguments[1][0]);",
+                        'deleteRows' => "this.form.localActions.afterDeleteSessionsRows(arguments[1][0]);",
+                    ],
+                    'beforeActions' => [
+                        //'deleteRows' => "this.form.localActions.beforeSessionDeleteRows(args);",
+                        'updateRow' => "this.form.localActions.beforeSessionRowChange(args);",
+                        //'deleteRow' => "this.form.localActions.beforeSessionRowChange(args);",
+                    ]
                 ],
                 'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'],
                     [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
@@ -146,13 +163,27 @@ exercises.forEach(function(exercise){
     data.push({id: exercise.idg, name: exercise.name});
 });
 tWidget.columns.exerciseid.editorArgs.storeArgs.data = data;
-if (tWidget.getEditorInstance('exerciseid')){
+if (tWidget.getEditorInstance && tWidget.getEditorInstance('exerciseid')){
     when (tWidget.getEditorInstance('exerciseid'), function(editorInstance){
         editorInstance.store.setData(data);
     });
 }
 console.log('I am in exercisesLocalAction');
 return true;
+EOT;
+     }
+     function OpenEditAction(){
+         return <<<EOT
+var form = this;
+require (["tukos/objects/physio/persoTrack/dailyAssesments/LocalActions"], function(LocalActions){
+    form.localActions = new LocalActions({form: form});
+});
+EOT
+         ;
+     }
+     function sessionChangeLocalAction($colName){
+         return <<<EOT
+return sWidget.form.localActions ? sWidget.form.localActions.{$colName}ChangeLocalAction(sWidget, tWidget, newValue, oldValue) : true;
 EOT;
      }
 }

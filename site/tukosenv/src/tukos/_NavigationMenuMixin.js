@@ -3,6 +3,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dijit/popup", "
     var customContextDialog;
 	return declare(null, {
         onClickMenuItem: function(evt){
+			evt.preventDefault();
+			evt.stopPropagation();
             focusUtil.curNode && focusUtil.curNode.blur();
         	Pmg.tabs.gotoTab(this.onClickArgs);
         },

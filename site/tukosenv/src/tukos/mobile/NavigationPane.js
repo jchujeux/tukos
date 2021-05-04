@@ -41,11 +41,28 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/when",  "dojo
         			parent.startup();
         			accordion.addChild(pane = new Pane(lang.mixin({iconPos1: newIcon}, item.atts)));
                     when(mutils.buildMenu(item.popup, 'full', null, lang.hitch(self, self.addTriggers)), function(dropDown){
-                        dropDown.on('blur', function(){popup.close(dropDown);});
+                        dropDown.on('blur', function(){
+							popup.close(dropDown);
+						});
                     	pane._at.on('click', function(evt){
-                        	popup.open({popup: dropDown, around: pane._at.domNode});
-                			focusUtil.focus(dropDown.domNode);            				
+                        	//evt.preventDefault();
+							//evt.stopPropagation();
+							if (this.selected){
+								popup.close(dropDown);
+							}else{
+								popup.open({parent: pane._at, popup: dropDown, around: pane._at.domNode/*, 
+									onExecute: function(){
+										popup.close(dropDown);
+										}, 
+								onCancel: function(){
+									popup.close(dropDown);
+								}*/});
+	                			focusUtil.focus(dropDown.focusNode || dropDown.domNode);            				
+							}
             			});
+						/*pane.on('blur', function(){
+							popup.close(dropDown);
+						});*/
                     });
         		}
         		

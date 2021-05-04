@@ -43,19 +43,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_PanesManager", "tukos/
                 }
             );
         },
-        gotoTab: function(target){
-			if ((target.query || {}).id){
-				var openedViews = this.container.getChildren();
-	            for (var i in openedViews){
-	                if ((openedViews[i].get('title').match(/(\d+)\)$/) || {} )[1] === target.query.id){
-	                    this.container.selectChild(openedViews[i]);
-	                    return;
-	                }
-	            }
-			}
-            target.action = target.action || 'Tab';
-            this.request(target);
-        }, 
         currentPaneNode: function(){
         	return this.currentPane().heading.domNode;
         },

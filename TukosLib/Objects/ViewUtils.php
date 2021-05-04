@@ -125,10 +125,10 @@ class ViewUtils{
         );
     }
 
-    static public function numberUnitBox($optionsName, $view, $label, $custom=[]){
+    static public function numberUnitBox($optionsName, $view, $label, $custom=[], $trOptions = null){
         return Utl::array_merge_recursive_replace([
                 'type' => 'numberUnitBox', 
-                'atts' => ['edit' => ['label' => $view->tr($label), 'unit'  => ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr)]]]]
+                'atts' => ['edit' => ['label' => $view->tr($label), 'unit'  => ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr, $trOptions)]]]]
             ],
             $custom
         );

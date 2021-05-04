@@ -34,10 +34,10 @@ class View extends EditView{
                                 'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                                 'widgets' => ['painduring', 'painafter', 'painnextday']
                             ],
-                            'row3' => [
+                            /*'row3' => [
                                 'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                                 'widgets' => ['mood', 'fatigue']
-                            ],
+                            ],*/
                             'row4' => [
                                 'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                                 'widgets' => ['otherexceptional', 'comments']
@@ -48,6 +48,7 @@ class View extends EditView{
             ],
         ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
+        $this->onOpenAction = $this->view->openEditAction();
     }
 }
 ?>

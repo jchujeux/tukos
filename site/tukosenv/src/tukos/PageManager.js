@@ -1,11 +1,10 @@
 define(["dojo/ready", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", 
-		"dojo/json", "dojo/date/locale", "dgrid/List", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/utils"],
-function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, dojoDateLocale, List, _WidgetsExtend, _WidgetsFormExtend, utils){
+		"dojo/json", "dojo/date/locale", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/utils"],
+function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, dojoDateLocale, _WidgetsExtend, _WidgetsFormExtend, utils){
     var stores, tabs, openedBrowserTabs = {},
         objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
 		lang.extend(_WidgetBase, _WidgetsExtend);//for this to work in all cases, no require for a widget should be made before this statement executes, above in PageManager, and in modules required in evalUtils (which _WidgetsExtend depends on)
-		lang.extend(List, _WidgetsExtend);
 		lang.extend(_FormValueMixin, _WidgetsFormExtend);
 		lang.extend(_CheckboxMixin, _WidgetsFormExtend);
 	return {
@@ -40,6 +39,9 @@ function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _
 	           buildForm.initialize();
            });
 	   },
+	   initializeNoPage: function(obj){
+	   		this.cache= obj;
+	   },
 	   initialize: function(obj) {
             tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
             this.cache = obj;
@@ -52,6 +54,10 @@ function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _
             require([obj.isMobile ? "tukos/mobile/buildPage" : "tukos/desktop/buildPage", "tukos/StoresManager"], function(buildPage, StoresManager){
             	stores = new StoresManager();
             	buildPage.initialize();
+		        self.editorGotoTab = function(target, event){
+		            event.stopPropagation();
+		        	self.tabs.gotoTab(target);
+		        };
                 self.serverTranslations = function(expressions, actionModel){
                     var results = {}, actionModel = actionModel || 'GetTranslations';
                     return self.serverDialog({object: 'users', view: 'NoView', action: 'Get', query:{params: {actionModel: actionModel}}}, {data: expressions}, self.message('actionDone')).then(function (response){

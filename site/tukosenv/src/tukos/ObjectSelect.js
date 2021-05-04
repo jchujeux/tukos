@@ -1,12 +1,16 @@
-define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom-attr", "dojo/on", "dojo/when", "dijit/form/FilteringSelect", "tukos/utils", "tukos/widgetUtils", "tukos/PageManager", "dojo/json"], 
-    function(declare, lang, domAttr, on, when, FilteringSelect, utils, wutils, Pmg, JSON){
+define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom", "dojo/dom-attr", "dojo/aspect", "dojo/ready", "dijit/form/FilteringSelect", "dijit/focus", "tukos/PageManager"], 
+    function(declare, lang, dom, domAttr, aspect, ready, FilteringSelect, focusUtil, Pmg){
+	var clickedNode = null;
+	aspect.before(focusUtil, '_onTouchNode', function(node, by) {
+	    clickedNode = node;
+	    return [node, by];
+	});
+	/*focusUtil.on("widget-focus", function(widget){
+		console.log("focused widget: ", widget);
+	});*/
     return declare([FilteringSelect], {
-        constructor: function(args){
-/*
-        	if (args.storeArgs){
-        		args.storeArgs.widget = this;
-        	}
-*/
+		_firstClick: true,
+		constructor: function(args){
         	args.store = Pmg.store(lang.mixin({object: args.object, view: 'NoView', mode: args.mode || 'Tab', action: 'ObjectSelect', widget: this}, args.storeArgs));
         },
     	postCreate: function(){
@@ -22,46 +26,35 @@ define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom-attr", "dojo/on", "
                 }
             });
         },
-/*
-        toggleDropDown: function(){
-            this.query = {};
-            for (var i in this.dropdownFilters){
-                var theCol = this.dropdownFilters[i];
-                switch(typeof(theCol)){
-                	case 'string':
-                		this.query[i] = (wutils.specialCharacters.indexOf(theCol[0]) > -1) ? this.valueOf(theCol) : theCol;
-                		break;
-                	case 'object':
-                		this.query[i] = this.filterSpecial(theCol);
-                }
-            }
-            this.inherited(arguments);
-        },
-        filterSpecial: function(filter){
-        	var self = this, result = {};
-        	utils.forEach(filter, function(item, key){
-        		if (typeof(item) === 'object'){
-        			return self.filterSpecial(item);
-        			
-        		}else{
-        			result[key] = (wutils.specialCharacters.indexOf(item[0]) > -1) ? self.valueOf(item) || '%%' : item;
-        		}
-        	});
-        	return result;
-        },
-        onFocus: function(){
-            for (var i in this.dropdownFilters){
-                var theCol = this.dropdownFilters[i];
-                if (typeof(theCol) == "string" && wutils.specialCharacters.indexOf(theCol[0]) > -1){
-                    this.query[i] = this.valueOf(theCol);
-                }else{
-                    this.query[i] = theCol;
-                }
-            }
-            this.inherited(arguments);
-        },
-*/
-        _setValueAttr: function(/*String*/ value, /*Boolean?*/ priorityChange, /*String?*/ displayedValue, /*item?*/ item){
+		onFocus: function(){
+			if (Pmg.isMobile()){
+            	var isButtonClicked = dom.isDescendant(clickedNode, this._buttonNode), textbox = this.textbox;
+	            if (!this.textbox.disabled && (this._firstClick || isButtonClicked)) {
+	                // disable focusing the input box on touch devices
+	                // in order to avoid the keyboard from showing
+	                //textbox.disabled = true;
+					domAttr.set(textbox, 'readonly', 'readonly');
+	                if (this._firstClick && !isButtonClicked) {
+	                    //this.toggleDropDown();
+	                }
+	                this._firstClick = false;
+	                setTimeout(function() {
+	                    //textbox.disabled = false;
+						domAttr.remove(textbox, 'readonly');
+	                    clickedNode = null;
+	                }, 1000);
+	            }
+			}
+			this.inherited(arguments);
+		},
+		onBlur: function(){
+			if (Pmg.isMobile()){
+				this._firstClick = true;
+				this.closeDropDown();
+			}
+			this.inherited(arguments);
+		},
+		_setValueAttr: function(/*String*/ value, /*Boolean?*/ priorityChange, /*String?*/ displayedValue, /*item?*/ item){
             if (item === undefined && displayedValue === undefined && (value === null || value === '')){
                 this.inherited(arguments, [value, priorityChange, '', item]);
             }else{

@@ -1,6 +1,6 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dojo/Deferred", "dojo/dom-style", "dojox/mobile/ContentPane", "tukos/mobile/ScrollableContainer",  "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
-        "tukos/widgets/HtmlContent", "tukos/widgets/DnDWidget"], 
-  function(declare, lang, ready, when, Deferred, domStyle, ContentPane, ScrollableContainer, Pmg, WidgetsLoader, HtmlContent, DnD){
+        "tukos/widgets/HtmlContent"], 
+  function(declare, lang, ready, when, Deferred, domStyle, ContentPane, ScrollableContainer, Pmg, WidgetsLoader, HtmlContent){
 	var editor;
 	return declare([ScrollableContainer], {
 		constructor: function(args){

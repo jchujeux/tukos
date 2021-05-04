@@ -9,7 +9,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/Editor
 			this.inherited(arguments);
 			var self = this;
 			if (!(this.toolbarMode === 'alwaysOn')){
-				this.on('click', function(){
+				this.on('focus', function(){
 	        		this.toolbar.set('style', {display: "block"});
 					//this.statusBar.set('style', {display: "block"});
 					this.statusBar.statusBar.domNode.style.display = "block";

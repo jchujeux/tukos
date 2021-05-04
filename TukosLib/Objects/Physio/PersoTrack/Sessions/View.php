@@ -15,7 +15,7 @@ class View extends AbstractView {
         $customDataWidgets = Utl::array_merge_recursive_replace(array_merge([
                 'parentid' => ['atts' => ['edit' => ['onChangeLocalAction' => ['parentid' => ['localActionStatus' =>$this->relatedTreatmentAction()]]]]],
                 'exercises' => $this->exercises(),
-                'name'      => ['atts' => ['edit' =>  ['style' => ['width' => '30em']]],],
+                'name'      => ['atts' => ['edit' =>  ['style' => ['width' => '30em']], 'storeedit' => ['width' => 100]],],
                 'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
                 'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'lowercase', true]),
                 'exerciseid' => ['type' => 'storeSelect', 'atts' => ['edit' =>  ['storeArgs' => ['data' => []], 'label' => $this->tr('ExerciseId'),
@@ -69,13 +69,13 @@ EOT;
     }
     public static function relatedTreatmentAction(){
         return <<<EOT
-var cols = ['name', 'parentid', 'objective', 'exercises', 'protocol', 'torespect'];
-Pmg.serverDialog({object: 'physiopersotreatments', view: 'Edit', action: 'GetItem', query: {id: newValue, storeatts: JSON.stringify({cols: ['exercises']})}}).then(
+var cols = ['exercises'];
+Pmg.serverDialog({object: 'physiopersotreatments', view: 'Edit', action: 'GetItem', query: {id: newValue, storeatts: JSON.stringify({cols: cols})}}).then(
     function(response){
         var form = sWidget.form, setValueOf = lang.hitch(form, form.setValueOf), item = response.data.value, items;
         delete item.id;
-        utils.forEach(item, function(value, widgetName){
-            setValueOf(widgetName === 'parentid' ? 'patient' : widgetName, value);
+        cols.forEach(function(widgetName){
+            setValueOf(widgetName, item[widgetName]);
         });
         Pmg.setFeedback(Pmg.message('actionDone'));
     }

@@ -19,7 +19,7 @@ class SubObjectsGet extends SubObjects{
                 $subObject['filters'] = array_merge($subObject['filters'], $editModelGet->user->getCustomView($editModelGet->model->objectName, 'edit', $editModelGet->paneMode, ['widgetsDescription', $widgetName, 'atts', 'columns', 'filter']));
                 $subObjectValue = $getClass->getGrid(
                     self::setQuery($subObject['filters'], $response['data']['value'], $contextPathId), 
-                    self::colsToSend($editModelGet, $subObject, $widgetName),
+                    $subObject['getCols'],//self::colsToSend($editModelGet, $subObject, $widgetName),
                     (isset($subObject['allDescendants']) ? $subObject['allDescendants'] : false), 
                     'objToStoreEdit'
                 )['items'];

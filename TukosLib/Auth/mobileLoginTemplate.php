@@ -19,13 +19,14 @@
     <script type="text/javascript">
 
     require([
-         "dojo/dom", "dojo/dom-construct", "dojo/request", "dijit/registry", "dojox/mobile", "dojox/mobile/View", "dojox/mobile/Heading", "tukos/mobile/FormLayout", "dojox/mobile/Pane",
+         "dojo/dom", "dojo/dom-construct", "dojo/request", "dijit/registry", "dojox/mobile", "dojox/mobile/View", "dojox/mobile/Heading", "tukos/mobile/FormLayout", "dojox/mobile/Pane", "tukos/PageManager",
          "dojo/domReady!"
-     ], function (dom, dct, request, registry, Mobile, View, Heading, FormLayout, Pane) {
+     ], function (dom, dct, request, registry, Mobile, View, Heading, FormLayout, Pane, Pmg) {
          // now parse the page for widgets
+        Pmg.initializeNoPage({isMobile: true});
         var loginForm = {columns: 'two', rows: [
-			{label: {innerHTML: "<?= $this->username?>" }, widget: {type: "TextBox", atts: {id: "username", title: "<?= $this->username?>", onInput: function(){dom.byId('svrFeedback').hidden = true}}}}, 
-			{label: {innerHTML: "<?= $this->password?>"}, widget: {type: 'TextBox', atts: {id: 'password', title: "<?= $this->password?>", type: "password"}}},
+			{label: {innerHTML: "<?= $this->username?>" }, widget: {type: "TextBox", atts: {id: "username", title: "<?= $this->username?>", mobileWidgetType: "TextBox", onInput: function(){dom.byId('svrFeedback').hidden = true}}}}, 
+			{label: {innerHTML: "<?= $this->password?>"}, widget: {type: 'TextBox', atts: {id: 'password', mobileWidgetType: "TextBox", title: "<?= $this->password?>", type: "password"}}},
 			{label: {}, widget: {type: 'MobileButton', atts: {title: 'login', label: "<?= $this->login?>", onClick: function(evt){
 				request.post("<?= $this->requestUrl ?>", {data: {username: registry.byId('username').get('value'), password: registry.byId('password').get('value')}, timeout: 2000}).then(
                     function(response){

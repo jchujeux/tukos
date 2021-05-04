@@ -1,22 +1,23 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dojo/Deferred", "dojo/dom-style", "dijit/layout/ContentPane", "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dojo/dom-style", "dijit/layout/ContentPane", "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
         "tukos/widgets/HtmlContent", "tukos/widgets/DnDWidget", "tukos/widgets/widgetCustomUtils"], 
-  function(declare, lang, ready, when, Deferred, domStyle, ContentPane, Pmg, WidgetsLoader, HtmlContent, DnD, wcutils){
+  function(declare, lang, ready, when, domStyle, ContentPane, Pmg, WidgetsLoader, HtmlContent, DnD, wcutils){
 	var editors = {}, isPlaced = false, editorTypes = {normal: 'Editor', simple: 'MobileEditor'};
 	return declare([ContentPane, DnD], {
 		postCreate: function(){
 			this.inherited(arguments);
         	this.customizableAtts = lang.mixin({height: wcutils.sizeAtt('height')}, this.customizableAtts);
-    		this.htmlContent = new HtmlContent({style: {width: '100%', height: this.height || "auto"}, value: this.value || ''});           	
+			this.set('style', {padding: 0});    		
+			this.htmlContent = new HtmlContent({style: {width: '100%', height: this.height || "auto"}, value: this.value || ''});           	
         	this.watch('height', function(attr, oldValue, newValue){this.htmlContent.set('style', {height: newValue})});
 			this.addChild(this.htmlContent);
 			this.onClickHandle = this.on('click', this.onClickCallback);
 			this.viewSource = false;
-			this.editorType = this.editorType || 'normal';
+			this.editorType = this.editorType || Pmg.isMobile() ? 'simple' : 'normal';
 		},
 		onClickCallback: function(){
-			this.onClickHandle.remove();
 			if (!this.disabled && !this.readonly){
 				var editorType = this.editorType;
+				this.onClickHandle.remove();
 				if (!editors[editorType]){
 					when(WidgetsLoader.loadWidget(editorTypes[editorType]), lang.hitch(this, function(Editor){
 						editors[editorType] = new Editor({style: {width: '100%'/*, minHeight: '150px'*/}, toolbarMode: 'alwaysOn'}, dojo.doc.createElement("div"));
@@ -29,6 +30,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 					}
 				}
 			}
+		},
+		_setDisabledAttr: function(value){
+			this.disabled = value;
+			this.htmlContent.set('style', {backgroundColor: value ? '#F0F0F0' : ''});
 		},
 		resetEditor: function(){
 			editors[this.editorType] = null;

@@ -2,10 +2,10 @@
  *  Provides a grid overview capability, allowing to display contents of a tukos object table
  *      -> 'overview': used as read-only cells, selector allow to select specific actions on selected rows via the save button
  */
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/dom-construct", "dojo/string", "dojo/query", "dgrid/extensions/DnD", "tukos/utils", "tukos/PageManager", "tukos/TukosDgrid", "tukos/dstore/Request",
-		 "tukos/widgets/WidgetsLoader", "dijit/form/TextBox", "dijit/form/Button", "dijit/TooltipDialog", "dijit/popup", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, when, on, dct, string, query, DnD, utils, Pmg, TukosDgrid, Request, WidgetsLoader, TextBox, Button, TooltipDialog, popup, messages){
-    return declare([TukosDgrid, DnD], {
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/dom-construct", "dojo/string", "dojo/query", "tukos/_GridUserFilterMixin", "tukos/utils", "tukos/PageManager", "tukos/BasicGrid", "tukos/dstore/Request",
+		 "tukos/widgets/WidgetsLoader", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+    function(declare, lang, when, on, dct, string, query, _GridUserFilterMixin, utils, Pmg, BasicGrid, Request, WidgetsLoader, messages){
+    return declare([BasicGrid, _GridUserFilterMixin], {
         constructor: function(args){
             args.storeArgs.sortParam = args.storeArgs.sortParam || Pmg.get('sortParam');
             if (!args.storeArgs.target){
@@ -14,18 +14,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
                args.storeArgs.target = Pmg.requestUrl(args.storeArgs);
             }
             args.store = new Request(args.storeArgs);
-            args.store.userFilters = lang.hitch(this, this.userFilters);
             args.store.postFetchAction = lang.hitch(this, this.postFetchAction);
             args.collection = args.store.filter({contextpathid: args.form.tabContextId()});
         },
         postCreate: function(){
 			this.inherited(arguments);
-            if (this.hasFilters && this.hideServerFilters !== 'yes'){
-            	this.showFilters();
-            }
-            this.dndSource.getObject = this.getObject;
-            //this.dndSource.onDropInternal = this.onDropInternal;
-            //this.dndSource.onDropExternal = this.onDropExternal;
             this.modify = {values: {}, displayedValues: {}};
             this.contextMenuItems.header.push({atts: {label: messages.showhidetargetvalues  , onClick: lang.hitch(this, function(evt){this.showColValues();})}});
         },

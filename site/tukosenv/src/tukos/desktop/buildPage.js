@@ -1,6 +1,6 @@
-define(["dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/ready", "dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/layout/AccordionContainer",
-	"dijit/focus", "tukos/desktop/NavigationMenu", "tukos/TabsManager", "tukos/AccordionManager", "tukos/TabOnClick", "tukos/utils", "tukos/PageManager"], 
-function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, ContentPane, AccordionContainer, focusUtil, NavigationMenu, TabsManager, AccordionManager, TabOnClick, utils, Pmg) {
+define(["dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/ready", "dojo/when", "dijit/registry", "dijit/layout/BorderContainer", "dijit/layout/TabContainer", "dijit/layout/ContentPane", "dijit/layout/AccordionContainer",
+	"dijit/focus", "tukos/desktop/NavigationMenu", "tukos/TabsManager", "tukos/AccordionManager", "tukos/TabOnClick", "tukos/utils", "tukos/widgets/WidgetsLoader", "tukos/PageManager"], 
+function (lang, dom, domStyle, ready, when, registry, BorderContainer, TabContainer, ContentPane, AccordionContainer, focusUtil, NavigationMenu, TabsManager, AccordionManager, TabOnClick, utils, WidgetsLoader, Pmg) {
 	return {
 		initialize: function(){
 			var self = this, obj = Pmg.cache, appLayout = new BorderContainer({design: 'sidebar'}, "appLayout"), pageCustomization = obj.pageCustomization || {}, hideLeftPane = pageCustomization.hideLeftPane === 'YES', 
@@ -54,7 +54,6 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
 			               });
 			           }else{
 			           	domStyle.set('leftPanel', 'display', 'none');
-			           	//newPageCustomization.hideLeftPane = 'YES';
 						Pmg.addCustom('hideLeftPane', 'YES');
 			           	leftPaneButton.set("iconClass", "ui-icon tukos-right-arrow");
 			           	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
@@ -105,16 +104,15 @@ function (lang, dom, domStyle, ready, registry, BorderContainer, TabContainer, C
 				       });
 				   	Pmg.setFeedback(obj.feedback);
 			   });
+/*		       when(WidgetsLoader.instantiationCompleted(), function(){
+			       		appLayout.resize();
+			       });*/
 			});
 	        Pmg.mayHaveNavigator = function(){
 	        	return registry.byId('showHideLeftPane');
 	        };
 			Pmg.showInNavigator = lang.hitch(this, this.showInNavigator);
 			//Pmg.alert = lang.hitch(this, this.alert);
-	        Pmg.editorGotoTab = function(target, event){
-	            event.stopPropagation();
-	        	Pmg.tabs.gotoTab(target);
-	        };
 		},
         resizeLayoutPanes: function(leftPanelDisplay){
         	var appLayout = registry.byId('appLayout');

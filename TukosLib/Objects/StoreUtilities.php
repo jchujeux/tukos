@@ -2,7 +2,6 @@
 namespace TukosLib\Objects;
 
 use TukosLib\Utils\Utilities as Utl;
-
 use TukosLib\TukosFramework as Tfk;
 
 class StoreUtilities {
@@ -10,60 +9,23 @@ class StoreUtilities {
     public static $tukosModel = null;
     public static $tukosTableName = null;
     public static $store = null;
+    public static $objectsStore = null;
     public static $hasObjectCols = false;
     public static $hasTukosCols = false;
     public static $hasSubSelect = false;
     private static $idColsCache = [];
+    private static $extendedNamesCache = [];
+    private static $extendedNamesObjectCache = [];
     
     public static function instantiate(){
         if (is_null(self::$tukosModel)){
             self::$tukosModel = Tfk::$registry->get('tukosModel');
             self::$tukosTableName = self::$tukosModel->tableName();
             self::$store = self::$tukosModel->store;
+            self::$objectsStore = Tfk::$registry->get('objectsStore');
         } 
     }
-
-	private static function translatedExtendedIds($ids){
-        if (empty($ids)){
-        		return [];
-        }else{
-			$result = [];
-            $values = self::extendedNameCols($ids);
-	        $extendedNameColsCache = [];
-	    	$objectStore = Tfk::$registry->get('objectsStore');
-	        foreach ($values as $objectName => $objectValues){
-	    		$model = $objectStore->objectModel($objectName);
-	        	$extendedNameIdCols = array_intersect($model->extendedNameCols, $model->idCols);
-	        	foreach ($objectValues as $id => $extendedNameValues){
-		        	$presentExtendedNameIdCols = array_intersect($extendedNameIdCols, array_keys($extendedNameValues));
-		        	foreach ($presentExtendedNameIdCols as $col){
-						$idColValue = $extendedNameValues[$col];
-		        		$extendedNameValues[$col] = implode(' ', self::extendedNameColsForId($idColValue, $values, $extendedNameColsCache));
-		        	}	
-		        	$result[$id] = ['name' => implode(' ', $extendedNameValues), 'object' => $objectName];
-		        }
-	        }
-	        return $result;
-        }
-    }
-    
-    function extendedNameColsForId($id, $values, $extendedNameColsCache){
-   		if (isset($extendedNameColsCache[$id])){
-   			return $extendedNameColsCache[$id];
-   		}else{
-   			foreach($values as $objectName => $objectValues){
-   				if (isset($objectValues[$id])){
-   					$extendedNameColsCache[$id] = $objectValues[$id];
-   					return $extendedNameColsCache[$id];
-   				}
-   			}
-   			$extendedNameColsCache[$id] = [];
-   			return [];
-   		}
-    }
-    
     function objectTranslatedExtendedNames($model, $storeAtts = []){
-    	$objectName = $model->objectName;
     	$requestedCols = Utl::getItem('cols', $storeAtts, []);
     	$storeAtts['cols'] = array_unique(array_merge(Utl::getItem('cols', $storeAtts, ['id']), $model->extendedNameCols));
     	$values = Utl::toAssociative($model->translateAll($model->getAllExtended($storeAtts)), 'id');
@@ -72,97 +34,76 @@ class StoreUtilities {
     	}else{
 	    	$extendedNameIdCols = array_intersect($model->aliasExtendedNameCols, $model->idCols);
 	    	if (!empty($extendedNameIdCols)){
-	    		$extraIds = [];
-	    		$extendedNameColsCache = [];
+	    		$extraIds = $extraExtendedNames = [];
 	    		foreach($extendedNameIdCols as $col){
 	    			$extraIds = array_filter(array_unique(array_merge($extraIds, array_unique(array_column($values, $col)))));
 	    		}
 	    		if(!empty($extraIds)){
-	    			$objectIds = array_keys($values);
-	    			$missingIds = array_diff($extraIds, $objectIds);
-	    			if (!empty($missingIds)){
-	    				$extraValues = self::extendedNameCols($missingIds);
-	    			}
-	    			$idsInValues = array_intersect($objectIds, $missingIds);
-	    			foreach ($idsInValues as $id){
-    					$extraValues[$objectName][$id] = values[$id];
-	    			}
-	    		}else{
-	    			$extraValues = [];
+	    			$extraExtendedNames = self::translatedExtendedNames($extraIds);
 	    		}
 	    	}
 			$result = [];
-			$keepName = in_array('name', $requestedCols);
+			$keepName = in_array('name', $requestedCols) && !$model->extendedNameCols !== ['name'];
 			$colsToRemove = array_diff($model->aliasExtendedNameCols, $requestedCols);
 			foreach ($values as $id => $value){
 			    if ($keepName){
 			        $value['sname'] = $value['name'];
 			    }
 			    $extendedNameValues = Utl::getItems($model->aliasExtendedNameCols, $value);
-			    $presentExtendedNameIdCols = array_intersect($extendedNameIdCols, array_keys($extendedNameValues));
+			    $presentExtendedNameIdCols = array_intersect($extendedNameIdCols, array_keys(array_filter($extendedNameValues)));
 		        foreach ($presentExtendedNameIdCols as $col){
-					$idColValue = $extendedNameValues[$col];
-		        	$extendedNameValues[$col] = implode(' ', self::extendedNameColsForId($idColValue, $extraValues, $extendedNameColsCache));
+					$colId = $extendedNameValues[$col];
+		        	$extendedNameValues[$col] = Utl::getItem($colId, $extraExtendedNames, $colId);
 		        }	
 		        Utl::extractItems($colsToRemove, $value);
-		        $result[$id] = array_merge($value, ['name' => implode(' ', $extendedNameValues)]);
+		        $result[$id] = array_merge($value, ['name' => (self::$extendedNamesCache[$id] = implode(' ', $extendedNameValues))]);
+		        self::$extendedNamesObjectCache[$id] = $model->objectName;
 			}
 			return $result;
     	}
     }
-
-    function translatedExtendedName($model, $id){
-    	$extendedNameValues = $model->getOne(['where' => ['id' => $id], 'cols' => $model->extendedNameCols]);
-    	$model->translateOne($extendedNameValues);
-    	if (empty($extendedNameValues)){
-    		return [];
-    	}else{
-    		$extendedNameIdCols = array_intersect($model->aliasExtendedNameCols, $model->idCols);
-    		if (!empty($extendedNameIdCols)){
-    			$extraIds = [];
-    			$extendedNameColsCache = [];
-    			foreach($extendedNameIdCols as $col){
-    				$extraIds = array_filter(array_unique(array_merge($extraIds, [$extendedNameValues[$col]])));
-    			}
-    			if(!empty($extraIds)){
-    				$extraValues = self::extendedNameCols($extraIds);
-    			}else{
-    				$extraValues = [];
-    			}
-    		}
-  			$presentExtendedNameIdCols = array_intersect($extendedNameIdCols, array_keys($extendedNameValues));
-   			foreach ($presentExtendedNameIdCols as $col){
-   				$idColValue = $extendedNameValues[$col];
-   				$extendedNameValues[$col] = implode(' ', self::extendedNameColsForId($idColValue, $extraValues, $extendedNameColsCache));
-   			}
-   			return implode(' ', $extendedNameValues);
-    	}
+    function translatedExtendedNames($ids){
+        $extendedNames = [];
+        foreach($ids as $id){
+            if ($extendedName = Utl::getItem($id, self::$extendedNamesCache)){
+                $extendedNames[$id] = $extendedName;
+            }else{
+                $idsToProcess[] = $id;
+            }
+        }
+        if (isset($idsToProcess)){
+            $objectNamesAndIds = Utl::toAssociativeGrouped(self::$tukosModel->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $idsToProcess]], 'cols' => ['id', 'object'], 'union' => self::$tukosModel->parameters['union']]), 'object', 'true');
+            $extraIds = $values = [];
+            foreach ($objectNamesAndIds as $objectName => $objectIds){
+                $model = self::$objectsStore->objectModel($objectName);
+                $values[$objectName] = Utl::toAssociative($model->translateAll($model->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $objectIds]], 'cols' => array_merge(['id'], $model->extendedNameCols)])), 'id');
+                $extendedNameIdCols = array_intersect($model->aliasExtendedNameCols, $model->idCols);
+                if (!empty($extendedNameIdCols)){
+                    $extendedNameIdColsByObject[$objectName] = $extendedNameIdCols;
+                    foreach($extendedNameIdCols as $col){
+                        $extraIds = array_filter(array_unique(array_merge($extraIds, array_unique(array_column($values[$objectName], $col)))));
+                    }
+                }else{
+                    $extendedNameIdColsByObject[$objectName] = [];
+                }
+            }
+            $missingIds = array_diff($extraIds, $idsToProcess);
+            if (!empty($missingIds)){
+                self::translatedExtendedNames($missingIds);
+            }
+            foreach ($values as $objectName => $idsExtendedNameCols){
+                foreach ($idsExtendedNameCols as $id => $extendedNameCols){
+                    foreach($extendedNameIdColsByObject[$objectName] as $col){
+                        $colId = $extendedNameCols[$col];
+                        $extendedNameCols[$col] = Utl::getItem($colId, self::$extendedNamesCache, $colId);
+                    }
+                    $extendedNames[$id] = self::$extendedNamesCache[$id] = implode(' ', $extendedNameCols);
+                    self::$extendedNamesObjectCache[$id] = $objectName;
+                }
+            }
+        }
+        return $extendedNames;
     }
-    
-    function extendedNameCols($ids){
-    	$objectNamesAndIds = Utl::toAssociativeGrouped(self::$tukosModel->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $ids]], 'cols' => ['id', 'object'], 'union' => self::$tukosModel->parameters['union']]), 'object', 'true');
-    	$objectStore = Tfk::$registry->get('objectsStore');
-    	$extraIds = $values = [];
-    	foreach ($objectNamesAndIds as $objectName => $objectIds){
-    		$model = $objectStore->objectModel($objectName);
-    		$values[$objectName] = Utl::toAssociative($model->translateAll($model->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => $objectIds]], 'cols' => array_merge(['id'], $model->extendedNameCols)])), 'id');
-    		$extendedNameIdCols = array_intersect($model->aliasExtendedNameCols, $model->idCols);
-    		if (!empty($extendedNameIdCols)){
-    			foreach($extendedNameIdCols as $col){
-    				$extraIds = array_filter(array_unique(array_merge($extraIds, array_unique(array_column($values[$objectName], $col)))));
-   				}
-   				$missingIds = array_diff($extraIds, $ids);
-    		}
-   		}
-   		if (!empty($missingIds)){
-   			$extraValues = self::extendedNameCols($missingIds);
-   			return Utl::array_merge_recursive_replace($values, $extraValues);
-   		}else{
-   			return $values;
-   		}
-    }
-
-    
     public static function addItemIdCols($item, $idCols){
         self::$idColsCache = array_unique(array_merge(self::$idColsCache, array_filter(array_values(Utl::getItems(array_intersect(array_keys($item), $idCols), $item)))));
     }
@@ -181,6 +122,18 @@ class StoreUtilities {
     }
     public static function resetIdColsCache(){
         self::$idColsCache = [];
+    }
+    private static function translatedExtendedIds($ids){
+        if (empty($ids)){
+            return [];
+        }else{
+            $result = [];
+            $values = self::translatedExtendedNames($ids);
+            foreach($values as $id => $extendedName){
+                $result[$id] = ['name' => $extendedName, 'object' => self::$extendedNamesObjectCache[$id]];
+            }
+            return $result;
+        }
     }
     public static function translatedExtendedIdCols($emptyIdColsCache = true){
     	$extendedIdCols =  self::translatedExtendedIds(self::$idColsCache);

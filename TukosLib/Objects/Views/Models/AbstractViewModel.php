@@ -4,6 +4,7 @@ namespace TukosLib\Objects\Views\Models;
 
 use TukosLib\Objects\Views\Models\ModelsAndViews;
 use TukosLib\Utils\Utilities as Utl;
+//use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
 
 abstract class AbstractViewModel/* extends ModelsAndViews*/{
@@ -43,6 +44,7 @@ abstract class AbstractViewModel/* extends ModelsAndViews*/{
             foreach ($this->view->mustGetCols as $mustGetCol){
                 if (!in_array($mustGetCol, $colsRequired)){
                     $colsRequired[] = $mustGetCol;
+                    //Feedback::add("added col $mustGetCol in adjustedCols");
                 }
             }
             return  array_intersect($colsRequired, $this->view->allowedGetCols());

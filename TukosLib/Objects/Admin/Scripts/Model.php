@@ -91,7 +91,7 @@ class Model extends AbstractModel {
                                 }
                             }
                         }
-                    $script = new $scriptName($scriptInfo['id'], $scriptInfo['parameters'], $scriptInfo['runmode']);
+                    $script = new $scriptName($scriptInfo['id'], $scriptInfo['parameters'], true);
                     Feedback::add($this->tr('Scriptisrunning'));
                     return 'SCRIPTISRUNNING';
                 }else{

@@ -5,7 +5,7 @@ define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferre
            
           eval: function(body, args){
             if (args !== undefined){
-                return eval('(function(' + args + '){' + body + '})');
+                return eval('(function(' + args + '){\n' + body + '\n})');
             }else{
                 return eval(body);
             }

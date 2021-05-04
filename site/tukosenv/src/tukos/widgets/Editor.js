@@ -1,13 +1,13 @@
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/connect", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/has", "dojo/dom", "dojo/dom-style", "dojo/dom-class", "dojo/when", "dojo/aspect", "dijit/Editor",  "dijit/_editor/RichText",
-         "tukos/widgets/editor/ShortCutKeys", "tukos/PageManager", "tukos/expressions",
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/has", "dojo/dom-style", "dojo/dom-class", "dojo/when", "dojo/aspect", "dijit/Editor",
+         "tukos/widgets/editor/ShortCutKeys", "tukos/expressions",
          "dijit/_editor/plugins/FontChoice", "dijit/_editor/plugins/TextColor", "tukos/widgets/editor/plugins/LinkDialog",  "dojoFixes/dijit/_editor/plugins/FullScreen",
          "dijit/_editor/plugins/Print", "dojoFixes/dijit/_editor/plugins/ViewSource",
          "dojox/editor/plugins/StatusBar", "dojox/editor/plugins/FindReplace", 
-         "tukos/widgets/editor/plugins/TablePlugins", "tukos/utils", "tukos/hiutils", "tukos/menuUtils", "tukos/widgets/editor/plugins/TukosLinkDialog",
+         "tukos/widgets/editor/plugins/TablePlugins", "tukos/utils", "tukos/hiutils", "tukos/widgets/editor/plugins/TukosLinkDialog",
          "tukos/widgets/editor/plugins/TemplateProcess","tukos/widgets/editor/plugins/Inserter","tukos/widgets/editor/plugins/MathMLEdit","tukos/widgets/editor/plugins/SelectionEditor","tukos/widgets/editor/plugins/FitImage",
          "tukos/StoreComboBox", "dojo/domReady!"], 
-    function(declare, array, connect, lang, Deferred, has, dom, domStyle, dcl, when, aspect, Editor, RichText, ShortCutKeys, PageManager, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
-    		 TablePlugins, utils, hiutils, mutils, TukosLinkDialog, TemplateProcess, Inserter, MathMLEdit, SelectionEditor, FitImage, StoreComboBox){
+    function(declare, lang, Deferred, has, domStyle, dcl, when, aspect, Editor, ShortCutKeys, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
+    		 TablePlugins, utils, hiutils, TukosLinkDialog, TemplateProcess, Inserter, MathMLEdit, SelectionEditor, FitImage, StoreComboBox){
 	return declare([Editor, ShortCutKeys], {
 
     	constructor: function(args){

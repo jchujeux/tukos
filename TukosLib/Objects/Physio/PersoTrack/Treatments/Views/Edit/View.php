@@ -52,7 +52,7 @@ class View extends EditView{
             ]
         ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
-        $this->onOpenAction = $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies');
+        $this->onOpenAction = $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies') . $this->view->openEditAction();
     }
 }
 ?>

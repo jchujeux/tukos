@@ -541,18 +541,6 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         return $result;
     }
-/*
-    public function restore($ids){
-        $where = [['col' => 'id', 'opr' => 'in', 'values' => $ids]];
-        $result = $this->updateItems([], ['where' => $where, 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]]);
-        if (property_exists($this, 'processInsertForBulk') && method_exists($this, $processInsertForBulk = $this->processInsertForBulk)){
-            $restoredItems = $this->getAll(['where' => $where, 'cols' => property_exists($this, 'additionalColsForBulkDelete') ? array_merge(['id'], $this->additionalColsForBulkDelete) : ['id']]);
-            foreach ($restoredItems as $item){
-                $this->$processInsertForBulk($item);
-            }
-        }
-    }
- */
     public function setDeleteChildren($childrenObjectsToSuspendBulk = []){
         $this->processDeleteForBulk = 'processDeleteChildrenForBulk';
         $this->_postProcess = '_postProcessDeleteChildren';

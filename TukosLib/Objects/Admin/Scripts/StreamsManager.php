@@ -12,6 +12,7 @@ class StreamsManager{
     * hence the parameter outputEncoding below that must be checked for each specific server set-up.
     */
     function __construct($timeout = 2, $outputEncoding='CP850'){
+        $this->user  = Tfk::$registry->get('user');
         $this->objectsStore = Tfk::$registry->get('objectsStore');
         $this->timeout = $timeout;
         $this->process = [];
@@ -23,14 +24,17 @@ class StreamsManager{
    /*
     * Launches a new command
     */ 
-    public function startStream($id, $cmd, $scriptObj = true){
+    public function startStream($id, $cmd, $scriptObj = false){
         $desc = [0 => ["pipe", "r"], 1 => ["pipe", "w"], 2 => $scriptObj ? ["pipe", "w"] : ["file", Tfk::$tukosTmpDir . $id . "streamerror.txt", 'a']];
         if (empty($this->process[$id])){
             try{
                 //Feedback::add("streamsManager - osName: " . Tfk::osName() . " cmd: $cmd");
                 $this->process[$id]['resource'] = proc_open(Tfk::osName() === 'Linux' ? addslashes($cmd) : $cmd, $desc, $pipes);
                 if ($scriptObj){
+                    $lockedMode = $this->user->getLockedMode();
+                    $this->user->setLockedMode(false);
                     $this->scriptObj->updateOne(['id' => $id, 'status' => 'RUNNING', 'laststart' => date('Y-m-d H:i:s')]);
+                    $this->user->setLockedMode($lockedMode);
                 }
                 $this->process[$id]['pipes'] = $pipes;
                 return true;
@@ -48,7 +52,10 @@ class StreamsManager{
         }
        proc_close($this->process[$id]['resource']);
         if ($scriptObj){
+            $lockedMode = $this->user->getLockedMode();
+            $this->user->setLockedMode(false);
             $this->scriptObj->updateOne(['id' => $id, 'status' => 'READY', 'lastend' => date('Y-m-d H:i:s')]);
+            $this->user->setLockedMode($lockedMode);
         }
         unset($this->process[$id]); 
     }

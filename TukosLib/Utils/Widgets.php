@@ -137,7 +137,8 @@ class Widgets{
     public static function lazyEditor($atts, $editOnly = true){
     	$defAtts = [
             'edit' => [],
-    			'storeedit' => ['editOn'  => 'click'],
+    		'storeedit' => ['editOn'  => 'click', 'minWidth' => 200],
+    	    'overview' => ['minWidth' => 200]
     	];
     	return ['type' =>'LazyEditor', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
@@ -191,7 +192,7 @@ class Widgets{
     public static function numberUnitBox($atts, $editOnly = true){
         $defAtts = ['edit' => ['title' => '', 
                                'number' => ['style' => ['width' => '3em']],
-                               'unit'  => ['idProperty' => 'id', /*'labelProperty' => 'name', 'labelAttr' => 'name', */'placeHolder' => 'Enter Unit', 
+                               'unit'  => ['idProperty' => 'id', 'placeHolder' => Tfk::tr('Unit') . ' ...', 
                                            'required'   => true, 'style' => ['width' => "auto"],
                                            'fetchProperties' =>['sort' => [['attribute' => 'name', 'descending' => false]]],
                                            'storeArgs' => ['data' => null]]],

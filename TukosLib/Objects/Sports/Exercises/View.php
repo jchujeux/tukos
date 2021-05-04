@@ -22,16 +22,15 @@ class View extends AbstractView {
             'stress' => ViewUtils::storeSelect('stress', $this, 'Mechanical stress', [true, 'ucfirst', true]),
             'series' => ViewUtils::numberTextBox($this, 'Series', ['atts' => ['edit' => ['style' => ['width' => '5em']]]]),
             'repeats'=>ViewUtils::numberUnitBox('repeats', $this, 'Repeatsorduration', ['atts' => [
-                'storeedit' => ['formatType' => 'numberunit'],
-                'overview' => ['formatType' => 'numberunit'],
-            ]]),
+                'edit' => ['unit' => ['placeHolder' => $this->tr('Select') . ' ...']],
+            ]], [true, 'plural', false]),
             'extra'=>ViewUtils::numberUnitBox('extra', $this, 'Options1', ['atts' => [
-                'edit' => ['noNumberUnit' => Sports::$noNumberUnitExtra],
+                'edit' => ['noNumberUnit' => Sports::$noNumberUnitExtra, 'unit' => ['placeHolder' => $this->tr('Select') . ' ...']]
                 //'storeedit' => ['formatType' => 'numberunit'],
                 //'overview' => ['formatType' => 'numberunit'],
             ]]),
             'extra1'=>ViewUtils::numberUnitBox('extra1', $this, 'Options2', ['atts' => [
-                'edit' => ['noNumberUnit' => Sports::$noNumberUnitExtra],
+                'edit' => ['noNumberUnit' => Sports::$noNumberUnitExtra1, 'unit' => ['placeHolder' => $this->tr('Select') . ' ...']]
             ]]),
             'progression' => ViewUtils::lazyEditor($this, 'progression', ['atts' => ['edit' => ['height' => '300px']]]),
             'comments' => ['atts' => ['edit' => ['height' => '300px']]]

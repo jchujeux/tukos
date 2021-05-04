@@ -2,10 +2,10 @@
     Provides a popup menu to allow parent selection in case of multi-table parent  
     - usage: 
 */
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuItem", "dijit/MenuItem", "dijit/DropDownMenu", "dijit/form/MappedTextBox",
-         "dijit/_HasDropDown", "tukos/utils", "tukos/PageManager", "dijit/Tooltip",  "tukos/widgets/WidgetsLoader",
-         "dojo/text!dijit/form/templates/DropDownBox.html", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, on, PopupMenuItem, MenuItem, DropDownMenu, MappedTextBox, _HasDropDown, utils, Pmg, Tooltip, widgetsLoader, template, messages){
+define (["dojo/_base/declare", "dojo/dom-attr", "dijit/popup", "dijit/PopupMenuItem", "dijit/MenuItem", "dijit/DropDownMenu", "dijit/form/MappedTextBox",
+         "dijit/_HasDropDown", "tukos/PageManager", "dijit/Tooltip",  "tukos/widgets/WidgetsLoader",
+         "dojo/text!dijit/form/templates/DropDownBox.html"], 
+    function(declare, domAttr, popup, PopupMenuItem, MenuItem, DropDownMenu, MappedTextBox, _HasDropDown, Pmg, Tooltip, widgetsLoader, template){
     return declare([MappedTextBox, _HasDropDown], {
         templateString: template,
 		baseClass: "dijitTextBox dijitComboBox",
@@ -23,54 +23,52 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dijit/PopupMenuIte
         postCreate: function(){
         	this.inherited(arguments);
         	this.object = this.defaultObject;
-			if (Pmg.isMobile()){
-				this.set('readonly', true);
-			}
         },
+		_onFocus: function(){
+			if (Pmg.isMobile()){
+				domAttr.set(this.textbox, 'readonly', 'readonly');
+			}
+		},
         openDropDown: function(){
             var self = this;
             var onChangeCallBack = function(newValue){
                 self.set('value', newValue);
                 self.object = newValue ? this.object : self.defaultObject;
+				this.set('value', '', false);
                 self.closeDropDown();
             }
-            var mouseOverCallBack = function(evt){
-                var self1 = this;
-                this.timeout = setTimeout(
-                    function(){
-                        if (self1.popup === self.emptyDropDown){
-                            dojo.when(widgetsLoader.instantiate('ObjectSelect', self1.objectSelectAtts), function(theObjectSelect){
-                            	self1.set('popup', theObjectSelect);                            	
-                            });
-                        }
-                    },
-                    200
-                );
-            }
-            var mouseOutCallback = function(evt){
-                clearTimeout(this.timeout);
-            }
             if (!this.dropDown){
-                this.dropDown = new DropDownMenu({});
+                this.dropDown = new DropDownMenu({onItemClick: function(item, evt){
+                    if (item.popup === self.emptyDropDown){
+                        dojo.when(widgetsLoader.instantiate('ObjectSelect', item.objectSelectAtts), function(theObjectSelect){
+                        	item.set('popup', theObjectSelect);
+							popup.open({parent: item, popup: item.popup, around: item.domNode, orient: Pmg.isMobile() ? undefined : ['after-centered'], onExecute: function(){popup.close(item.popup);}, onCancel: function(){popup.close(item.popup);}, onClose: function(){}});
+                        });
+                    }else if (item.popup){
+						popup.open({parent: item, popup: item.popup, around: item.domNode, orient: Pmg.isMobile() ? undefined: ['after-centered'], onExecute: function(){popup.close(item.popup);}, onCancel: function(){popup.close(item.popup);}, onClose: function(){}});
+					}else{
+						self.set('value', '');
+					}
+				}});
                 this.emptyDropDown = new DropDownMenu({});
-				this.dropDown.addChild(new MenuItem({onClick: function(){self.set('value', '');}}));
+				this.dropDown.addChild(new MenuItem());
                 if (self.items){
                     for (var i in self.items){
                         self.items[i].onChange = onChangeCallBack;
                         self.items[i].form = this.form || this.getParent().form;
-                        this.dropDown.addChild(new PopupMenuItem({label: self.items[i].label, popup: this.emptyDropDown, objectSelectAtts: self.items[i], onMouseOver: mouseOverCallBack, onMouseOut: mouseOutCallback}));
+                        this.dropDown.addChild(new PopupMenuItem({label: self.items[i].label, popup: this.emptyDropDown, objectSelectAtts: self.items[i], onMouseOver: function(evt){evt.preventDefault();evt.stopPropagation();}/*, onMouseUp: mouseOutCallback*/}));
                     }
                     this.inherited(arguments);
                 }else{
 	                var _arguments = arguments;
                 	Pmg.serverDialog({action: 'Get', view: 'NoView', mode: this.form.paneMode, object: this.form.object, 
-                					  query: {params: {actionModel: 'GetObjectModules'}, actioncontextpathid: this.form.tabContextId(), contextid: self.form.valueOf('id')}}, [], [], messages.actionDone).then(
+                					  query: {params: {actionModel: 'GetObjectModules'}, actioncontextpathid: this.form.tabContextId(), contextid: self.form.valueOf('id')}}, [], [], Pmg.message('actionDone')).then(
 	                	function(response){
 	                        var items = response.modules;
 	                		for (var i in items){
 	                            items[i].onChange = onChangeCallBack;
 	                            items[i].form = self.form || self.getParent().form;
-	                            self.dropDown.addChild(new PopupMenuItem({label: items[i].label, popup: self.emptyDropDown, objectSelectAtts: items[i], onMouseOver: mouseOverCallBack, onMouseOut: mouseOutCallback}));
+	                            self.dropDown.addChild(new PopupMenuItem({label: items[i].label, popup: self.emptyDropDown, objectSelectAtts: items[i], onMouseOver: function(evt){evt.preventDefault();evt.stopPropagation();}}));
 	                        }
 	                        self.inherited(_arguments);	
 	                }); 

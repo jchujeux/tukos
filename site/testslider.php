@@ -6,7 +6,6 @@
 	<title>Demo: Horizontall Slider with Rules and RuleLabels</title>
 	<link rel="stylesheet" href="../../_common/demo.css" media="screen">
 	<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dijit/themes/claro/claro.css" media="screen">
-		<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.14.1/dojox/calendar/themes/claro/Calendar.css" media="screen">
 </head>
 <body class="claro">
 <h1>Demo: Simple Horizontal Slider</h1>
@@ -25,11 +24,11 @@
 <script>
 
 	// Load the dependencies
-	require(["dijit/form/HorizontalSlider", "dijit/form/HorizontalRuleLabels", "dijit/form/HorizontalRule", "dojo/parser", "dojox/calendar/MobileCalendar", "dojo/store/Memory", "dojo/store/Observable", "dojo/domReady!"],
+	require(["dijit/form/HorizontalSlider", "dijit/form/HorizontalRuleLabels", "dijit/form/HorizontalRule", "dojo/parser", "dojox/calendar/MobileCalendar", "dojo/Store/Memory", "dojo/Store/Observable", "dojo/domReady!"],
 			function(HorizontalSlider, HorizontalRuleLabels, HorizontalRule, parser, Calendar, Memory, Observable){
 
 				parser.parse();
-				var cal = new Calendar({dateInterval: "week", columnViewProps: {minHours:0,maxHours:24}, style: "position:relative;width:100%;height:100%;margin: 0px auto;", store: new Observable(new Memory({data: []}))}, "mycalendar");
+				var cal = new Calendar({store: new Observable(new Memory({data: []}))}, "mycalendar");
 
 			});
 

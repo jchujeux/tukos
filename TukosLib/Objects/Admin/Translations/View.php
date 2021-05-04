@@ -4,6 +4,7 @@ namespace TukosLib\Objects\Admin\Translations;
 use TukosLib\Objects\ObjectTranslator;
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
@@ -39,6 +40,11 @@ class View extends AbstractView {
     }
     function gridCols(){// cols which are rendered on the overview grid & on subobjects grids
         return array_keys($this->dataWidgets);
+    }
+    function tabEditTitle ($values){
+        return (empty($values['id'])
+            ? $this->tr($this->objectName) . ' (' . $this->tr('new') . ')'
+            : Utl::concat(Utl::getItems($this->model->extendedNameCols, $values),' ', 25)  . ' (' . ucfirst($this->tr($this->objectName)) . '  '  . $values['id'] . ')');
     }
 }
 ?>

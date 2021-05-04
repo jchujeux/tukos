@@ -8,8 +8,20 @@ function(declare, lang, dct, Memory, query, Widget, TextBox, Select, registry, u
         ColFilter = declare(Widget, {
         	postCreate: function(){
         		this.inherited(arguments);
-        		var self = this, onChange = function(){self.hasChanged = true;}, onBlur = function(){if(self.hasChanged){self.onFilterChange(self);self.hasChanged = false;}},
-        			onKeyDown = function(evt){if (evt.keyCode === 13){self.onFilterChange(self); self.grid.set('collection', self.grid.store.filter({contextpathid: self.grid.form.tabContextId()}))}};
+        		var self = this, onChange = function(){self.hasChanged = true;}, 
+					onBlur = function(){
+						if(self.hasChanged){
+							self.onFilterChange(self);
+							self.hasChanged = false;
+						}
+					},
+        			onKeyDown = function(evt){
+						if (evt.keyCode === 13){
+							var grid = self.grid, store = grid.store;
+							self.onFilterChange(self); 
+							grid.set('collection', typeof store.getRootCollection === 'function' ? store.getRootCollection() : store.filter({contextpathid: self.grid.form.tabContextId()}))
+						}
+					};
         		this.inherited(arguments);
         		this.oprWidget = new Select(lang.mixin({placeHolder: Pmg.message('selectfilter'), labelAttr: 'name',
         			store: typeof this.filters === 'object' ? new Memory({data: this.filters}) : oprStore, onBlur: onBlur, onKeyDown: onKeyDown, onChange: onChange}, this.oprAtts
@@ -38,11 +50,24 @@ function(declare, lang, dct, Memory, query, Widget, TextBox, Select, registry, u
             }
         });
 	return declare(null, {
+        constructor: function(args){
+            for (var i in args.columns){
+                var column = args.columns[i], field = column['field'];
+                if (column.filter){
+                	this.hasFilters = true;
+                }
+                if (column.rowsFilters){
+                	this.mayHaveFilters = true;
+                }
+            }
+        },
         postCreate: function(){
         	this.inherited(arguments);
-       	 	this.contextMenuItems.header.push({atts: {label: Pmg.message('showhidefilters'), onClick: lang.hitch(this, function(evt){this.showHideFilters();})}}); 
+			if (this.mayHaveFilters){
+				this.contextMenuItems.header.push({atts: {label: Pmg.message('showhidefilters'), onClick: lang.hitch(this, function(evt){this.showHideFilters();})}}); 
+			}       	 	
+            this.store.userFilters = lang.hitch(this, this.userFilters);
     		if (this.hasFilters && this.hideServerFilters !== 'yes'){
-            	this.store.userFilters = lang.hitch(this, this.userFilters);
             	this.showHideFilters();
             }
         },
