@@ -29,21 +29,15 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
         },
 
         markAsChanged: function(widget, styleFlag){
-           var name = widget.widgetName;
         	if (styleFlag !== 'noStyle'){
         		this.setStyleToChanged(widget);
-           }
-            widget.form.changedWidgets[name] = widget;
-            if (widget.form.watchContext === 'user'){
-            	widget.form.userChangedWidgets[name] = widget;
-            }
-        },
-/*        
+           	}
+           	widget.form.setChangedWidget(widget);
+        }, 
         markAsUnchanged: function(widget){
             this.setStyleToUnchanged(widget);
-            delete(widget.form.changedWidgets[widget.widgetName]); 
+            widget.form.setUnchangedWidget(widget);
         },
-*/
         setWatchers: function(widget){
             if (!widget.onWatchLocalAction || !widget.onWatchLocalAction['value']){
                 widget.watch('value',  lang.hitch(this, this.watchCallback, widget));

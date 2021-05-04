@@ -45,7 +45,6 @@ function(declare, lang, on, ready, string, registry, utils, Pmg){
                         			paneDescription: {
                         				widgetsDescription: {
                         					message: {type: 'HtmlContent', atts: {label: '', style: {marginLeft: '3em'}}},
-                        					//cols: {type: 'ReadonlyGrid', atts: {
                             				cols: {type: 'BasicGrid', atts: {
                             					label: Pmg.message('columns to modify'), allowSelectAll: true, collection: new Memory({data: []}),
                             					columns: {selector: {selector: 'checkbox', width: 50}, col: {label: Pmg.message('column'), width: 200}, value: {label: Pmg.message('newValue')}}}},

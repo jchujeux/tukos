@@ -1,7 +1,6 @@
-define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/on", "dojo/store/Memory",  "dojo/store/Observable", "dojo/json", "dijit/registry",
-	     "dojoFixes/dstore/legacy/DstoreAdapter", "tukos/widgets/calendar/DnD", 
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/store/Memory",  "dojo/store/Observable", "tukos/widgets/calendar/DnD", 
          "tukos/utils", "tukos/dateutils", "tukos/menuUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, arrayUtil, lang, on, Memory, Observable, JSON, registry, DstoreAdapter, DnD, utils, dutils, mutils, Pmg, messages){
+    function(declare, lang, Memory, Observable, DnD, utils, dutils, mutils, Pmg, messages){
     return declare([DnD], {
         constructor: function(args){
             args.store=  Observable(new Memory({}));

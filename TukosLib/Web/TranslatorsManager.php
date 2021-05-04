@@ -130,6 +130,12 @@ class TranslatorsManager {
                     ? $name
                     : preg_replace('/([^\\\\])"/', '$1\\"', $nameTranslation);
                     $mode = json_decode(json_decode('"' . $mode . '"', true), true);// because $mode is a substring of $template which is json encoded
+                $isPlural = is_array($mode) ? in_array('plural', $mode) : $mode === 'plural';
+                if ($isPlural){
+                    $isOK = true;
+                }
+                $translatedNames = explode('¤', $translatedName);
+                $translatedName = $isPlural ? Utl::getItem(1, $translatedNames, $translatedNames[0] . 's') : $translatedNames[0];
                 if (!empty($mode)){
                     if (is_array($mode)){
                         $translation = $translatedName;
@@ -211,6 +217,7 @@ class TranslatorsManager {
                 return mb_strtolower($translation);
             case 'ucwords':
                 return ucwords(mb_strtolower($translation));
+            case 'plural':
             case 'none':
             case null:
             case '':

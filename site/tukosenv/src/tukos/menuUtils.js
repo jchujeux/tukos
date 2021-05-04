@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/Menu", "tukos/widgets/WidgetsLoader", "tukos/utils", "tukos/PageManager"], 
-function(declare, lang, when, Menu, widgetsLoader, utils, Pmg){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "dijit/Menu", "tukos/widgets/WidgetsLoader", "tukos/utils", "tukos/PageManager"], 
+function(declare, lang, Deferred, when, Menu, widgetsLoader, utils, Pmg){
 	var buildMenu = function(description, mode, theMenu, addTriggers, addContext){
 	    	var type = description.type || 'Menu', atts = description.atts, items = description.items,
 				setTriggers = function(widget){
@@ -28,6 +28,9 @@ function(declare, lang, when, Menu, widgetsLoader, utils, Pmg){
 				case 'itemsOnly':
 		        	when(theMenu, function(theMenu){
 						var childrenItems = {};
+						if (Pmg.isMobile()){
+							theMenu._orient = ['below'];
+						}
 						utils.forEach(items, function(item, i){
 			        		var type = item.type, atts = item.atts;
 			        		switch (type){
@@ -40,11 +43,11 @@ function(declare, lang, when, Menu, widgetsLoader, utils, Pmg){
 			        				break;
 			        			case 'PopupMenuItem':
 			        			case 'PopupMenuBarItem':
-			    					when(buildMenu(item.popup, 'full', null, addTriggers, addContext), function(popup){
+									when(buildMenu(item.popup, 'full', null, addTriggers, addContext), function(popup){
 				        				atts.popup = popup;
 				        				when(widgetsLoader.instantiate(type, atts), function(popupItem){
 				        					setContext(popupItem);
-				        					popupItem.on('mouseover', function(evt){
+				        					popupItem.on(Pmg.isMobile() ? 'mousedown' : 'mouseover', function(evt){
 				        						var self = this;
 				        						if (!this.popup.isBuilt){
 					                				when(buildMenu({items: this.popup.items}, 'itemsOnly', this.popup, addTriggers, addContext), function(popup){
@@ -61,7 +64,7 @@ function(declare, lang, when, Menu, widgetsLoader, utils, Pmg){
 			        				console.log('this is not supposed to happen - menuUtils.buildMenu()');
 			        		}
 						});
-						dojo.ready(function(){
+						/*when(widgetsLoader.instantiationCompleted(),*/dojo.ready(function(){
 							for(var i in items){
 								theMenu.addChild(childrenItems[i]);
 							};

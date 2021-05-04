@@ -116,13 +116,29 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
                 return true;
             }
        },
-       hasChanged: function(widgetName){
+		setChangedWidget: function(widget){
+			var name = widget.widgetName;
+			this.changedWidgets[name] = widget;
+            if (this.watchContext === 'user'){
+            	this.userChangedWidgets[name] = widget;
+            }
+		},
+		setUnchangedWidget: function(widget){
+			delete(this.changedWidgets[widget.widgetName]); 
+			delete(this.userChangedWidgets[widget.widgetName]); 
+		},
+		hasChanged: function(widgetName){
            return widgetName ? this.changedWidgets[widgetName] : !utils.empty(this.changedWidgets);
        },
+		changesCount: function(){
+			return utils.count(this.changedWidgets);
+		},
        userHasChanged: function(){
-    	   var hasChanged = {};
-    	   if (!utils.empty(this.userChangedWidgets)){
-    		   hasChanged = {widgets: true};
+    	   var hasChanged = {}, postElts = this.get('postElts');
+    	   if (utils.some(this.userChangedWidgets, function(widget, widgetName){
+					return utils.in_array(widgetName, postElts);
+				})){
+				hasChanged.widgets = true;
     	   }
     	   if (!utils.empty(this.customization) && (Pmg.getCustom('ignoreCustomOnClose') !== 'YES')){
     		   hasChanged.customization = true;

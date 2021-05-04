@@ -18,15 +18,13 @@ class Model extends AbstractModel {
             'otherexceptional' => 'VARCHAR(512) DEFAULT NULL',
         ];
         parent::__construct(
-            $objectName, $translator, 'physiopersodailies',  ['parentid' => ['physiopersotreatments']/*, 'patient' => ['physiopatients']*/], [], $colsDefinition, [], [], ['custom'], ['physiopersotreatments.patient',  'startdate']);
+            $objectName, $translator, 'physiopersodailies',  ['parentid' => ['physiopersotreatments']], [], $colsDefinition, [], [], ['custom'], ['parentid',  'startdate']);
+        $this->additionalColsForBulkDelete = ['startdate'];
+        $this->processDeleteForBulk = 'processDeleteForBulk';
+        $this->datesToProcess = [];
+        $this->_postProcess = '_postProcess';
     }   
-    public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null, $absentColsFlag = 'forbid'){
-        if (array_search('physiopersotreatments.patient', $atts['cols'])!== false){
-            $atts['join'][] = ['inner', 'physiopersotreatments', 'tukos.parentid = physiopersotreatments.id'];
-        }
-        return parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue, $absentColsFlag);
-    }
-    public function getOneExtended($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
+/*    public function getOneExtended($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
         $item = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
         if (!empty($item['parentid'])){
             $treatmentModel = Tfk::$registry->get('objectsStore')->objectModel('physiopersotreatments');
@@ -38,12 +36,17 @@ class Model extends AbstractModel {
             $item = array_merge($item, $plan);
         }
         return $item;
-    }
-    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
-        if (array_search('physiopersotreatments.patient', $atts['cols']) !== false){
-            $atts['join'][] = ['inner', 'physiopersotreatments', 'tukos.parentid = physiopersotreatments.id'];
+    }*/
+    public function processDeleteForBulk($values){
+        if ($startDate = Utl::getItem('startdate', $values)){
+            $this->datesToProcess[] = $startDate;
         }
-        return parent::getAll($atts, $jsonColsPaths, $jsonNotFoundValues, $processLargeCols);
+    }
+    public function _postProcess(){
+        if (!empty($this->datesToProcess)){
+            Tfk::$registry->get('objectsStore')->objectModel("physiopersosessions")->delete([[['col' => 'startdate', 'opr' => 'IN', 'values' => array_unique($this->datesToProcess)]]]);
+            $this->datesToProcess = [];
+        }
     }
 }
 ?>

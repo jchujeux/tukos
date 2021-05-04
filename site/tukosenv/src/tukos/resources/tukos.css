@@ -5,7 +5,6 @@ html, body {
 	margin: 0;
 	padding: 0
 }
-
 .pageOverlay {
 	top: 0;
 	left: 0;
@@ -76,7 +75,10 @@ html, body {
 	background-color: lightblue;
 }
 
-.dgrid {
+.dgrid{
+	height: auto;
+}
+.dgrid-content{
 	height: auto;
 }
 

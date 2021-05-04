@@ -33,7 +33,7 @@ define([
             },
     		rlike: function (value, required, object) {
     			//return (required === '' ? '.*' : required).test(value, object);
-    			return required === '' ? true : (new RegExp(required)).test(value, object);
+    			return required === '' ? true : (new RegExp(required, 'i')).test(value, object);
     		},
     		notrlike: function(value, required, object){
             	console.log('notrlike to be implemented');

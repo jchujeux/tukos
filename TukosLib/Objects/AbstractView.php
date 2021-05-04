@@ -70,6 +70,11 @@ abstract class AbstractView extends ObjectTranslator{
             'created'   => ViewUtils::timeStampDataWidget($this, 'Creation date', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'WhiteSmoke'], 'readonly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             
         ];
+        if (Tfk::$registry->isMobile){
+            foreach(['permission', 'acl', 'grade', 'contextid', 'updator', 'creator', 'created'] as $widget){
+                $this->dataWidgets[$widget]['atts']['edit']['hidden'] = true;
+            }
+        }
         if ($this->user->rights() === 'SUPERADMIN'){
             $this->dataWidgets['configstatus'] = ViewUtils::storeSelect('configStatus', $this, 'Config Status', null, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]);
         }
@@ -171,7 +176,7 @@ abstract class AbstractView extends ObjectTranslator{
         if (empty($values['id'])){
         	return $this->tr($this->objectName) . ' (' . $this->tr('new') . ')';
         }else{
-            $name = SUtl::translatedExtendedName($this->model, $values['id']);
+            $name = SUtl::translatedExtendedNames([$values['id']])[$values['id']];
         }
         return $name . ' (' . ucfirst($this->tr($this->objectName)) . '  '  . $values['id'] . ')';
     }

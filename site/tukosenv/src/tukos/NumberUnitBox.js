@@ -13,16 +13,17 @@ function(declare, lang, dst, Widget, _FocusMixin, TextBox, StoreSelect, wutils, 
             	if (self.onChange){
             		self.onChange(newValue);
             	}
-            	if ((self.noNumberUnit || {})[newValue]){
+            	if (!newValue || (self.noNumberUnit || {})[newValue]){
             		self.numberField.set('value', '');
             		self.numberField.set('disabled', true);
             		dst.set(self.numberField.domNode, 'display', 'none');
             	}else{
             		self.numberField.set('disabled', false);
-            		dst.set(self.numberField.domNode, 'display', 'in-line');
+            		dst.set(self.numberField.domNode, 'display', '');
             	}
             });
             this.domNode.appendChild(this.unitField.domNode);   
+            dst.set(self.numberField.domNode, 'display', 'none');
         },
         focus: function(){
             this.numberField.focus();

@@ -5,8 +5,8 @@ define(['dojo/_base/declare', 'dojo/_base/lang', "dojo/_base/window", 'dojo/_bas
             this.inherited(arguments);            
             var self = this, label, div, remember = false;            
             div = dct.create('div', {className: 'dijitDialogPaneContent dialogConfirm'}, this.domNode, 'last');            
-            this.domNode.appendChild((this.okButton = new Button({label: Pmg.message('ok'), onClick: function(){self.dfd.resolve(true); self.hide();}})).domNode);
-        	this.domNode.appendChild((this.cancelButton = new Button({label: Pmg.message('cancel'), onClick: function(){self.dfd.cancel(true);self.hide();}})).domNode);
+            this.domNode.appendChild((this.okButton = new Button({label: Pmg.message('Ok'), onClick: function(){self.dfd.resolve(true); self.hide();}})).domNode);
+        	this.domNode.appendChild((this.cancelButton = new Button({label: Pmg.message('Cancel'), onClick: function(){self.dfd.cancel(true);self.hide();}})).domNode);
         	win.body().appendChild(this.domNode);
         },
         show: function(atts, mode) {

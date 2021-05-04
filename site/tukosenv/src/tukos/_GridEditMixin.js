@@ -1,10 +1,6 @@
-/*
- *  tukos grids  mixin for dynamic widget information handling and cell rendering (widgets values and attributes that may be modified by the user or the server)
- *   - usage: 
- */
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all", "dojo/on", "dojo/when", "dijit/registry", "dijit/focus", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/sheetUtils", 
-         "tukos/widgetUtils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/widgets/WidgetsLoader", "tukos/PageManager", "tukos/TukosTooltipDialog", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-function(declare, lang, all, on, when, registry, focusUtil, utils, dutils, eutils, sutils, wutils, mutils, wcutils, WidgetsLoader, Pmg, TukosTooltipDialog, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "tukos/dgrid/Editor", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/sheetUtils", 
+         "tukos/widgetUtils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager", "tukos/TukosTooltipDialog", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mutils, wcutils, Pmg, TukosTooltipDialog, messages){
 	var copyDialogTooltip, 
 		applyCallback = function(){
 	        var grid = copyDialogTooltip.grid, numberOfCopies = parseInt(copyDialogTooltip.pane.valueOf('copies') || '1'), incrementFrom = copyDialogTooltip.pane.valueOf('incrementfrom') , noRefresh = grid.noRefreshOnUpdateDirty;
@@ -57,7 +53,7 @@ function(declare, lang, all, on, when, registry, focusUtil, utils, dutils, eutil
 			copyDialogTooltip.pane.setValuesOf({copies: 1, incrementfrom: ''});
 			return copyDialogTooltip;
 		};
-    return declare(null, {
+    return declare([Editor], {
         constructor: function(args){
             if (args.newColumnArgs){
                 args.newColumnArgs.input = lang.clone(args.newColumnArgs)
@@ -88,6 +84,15 @@ function(declare, lang, all, on, when, registry, focusUtil, utils, dutils, eutil
                     mutils.buildContextMenu(editor,{type: 'DynamicMenu', atts: {targetNodeIds: [editor.domNode]}, items: lang.hitch(wcutils, wcutils.customizationContextMenuItems)(editor, column)});
                 }
             	//focusUtil.focus(editor.containerNode);// required for LazyEditor which is a ContentCOntainer and then does not get focused by default. Focus is required for onBlur to be activated and shared editor be removed
+            }));
+            this.on("dgrid-datachange", lang.hitch(this, function(evt){
+                if (evt.oldValue !== evt.value){
+                    var column = evt.cell.column;
+                    if (column.displayedValue == undefined){
+                        column.displayedValue = [];
+                    }
+                    this.isUserEdit = true;
+                }
             }));
         },
         newRowPrefixNamedId: function(id){
@@ -144,10 +149,6 @@ function(declare, lang, all, on, when, registry, focusUtil, utils, dutils, eutil
             return idProperty;
         },
 
-        cellValue: function(row, field){
-            var id = row[this.collection.idProperty];
-            return (this.dirty[id] && this.dirty[id][field] !== undefined ? this.dirty[id][field] : (row[field] ? row[field] : ''));    
-        },
         getNewId: function(){
             if (this.newRowPrefix){
             	this.newRowPrefixId += 1;
@@ -385,8 +386,8 @@ function(declare, lang, all, on, when, registry, focusUtil, utils, dutils, eutil
             if ('rowId' in this.columns){
                 this.offsetRowsId(item.rowId, -1);
             }
-            this.collection.removeSync(idgToDelete);
             this.deleteDirty(idgToDelete, isUserRowEdit);
+            this.collection.removeSync(idgToDelete);
             this.noRefreshOnUpdateDirty = noRefresh;
         },
         deleteRows: function(rows, skipDeleteAction, isUserRowEdit){
@@ -552,8 +553,15 @@ function(declare, lang, all, on, when, registry, focusUtil, utils, dutils, eutil
             	this.maxServerId = maxId;
             }
             this.noRefreshOnUpdateDirty = noRefresh;
-            this.set('collection', this.store.getRootCollection());
-            this.setSummary();
+			/*if (this.setValueDelay){
+				setTimeout(lang.hitch(this, function(){
+					this.set('collection', this.store.getRootCollection());
+            		this.setSummary();
+				}), this.setValueDelay);
+			}else{*/
+				this.set('collection', this.store.getRootCollection());
+            	this.setSummary();
+			//}
         },
 
         _setDuplicate: function(value){
@@ -580,123 +588,6 @@ function(declare, lang, all, on, when, registry, focusUtil, utils, dutils, eutil
             }
             return row;
         }, 
-
-        onDropInternal: function (nodes, copy, targetItem) {//override dgrid/extensions/dnd
-            var grid = this.grid,
-                store = grid.collection,
-                targetSource = this,
-                anchor = targetSource._targetAnchor,
-                targetRow,
-                nodeRow;
-    
-            if (anchor) { // (falsy if drop occurred in empty space after rows)
-                targetRow = this.before ? anchor.previousSibling : anchor.nextSibling;
-            }
-    
-            nodeRow = grid.row(nodes[0]);
-            if (!copy && (targetRow === nodes[0] ||
-                    (!targetItem && nodeRow && grid.down(nodeRow).element === nodes[0]))) {
-                return;//drop is not moving anything
-            }
-    
-            nodes.forEach(function (node) {
-                when(targetSource.getObject(node), function (object) {
-                    var id = store.getIdentity(object);
-                    if (copy){
-                        grid.createNewRow(lang.clone(object), targetItem, (targetItem ? 'before' : 'append'));
-                    }else{
-                        grid.moveRow(object, targetItem, (targetItem ? 'before' : 'append'));
-                    }
-                    // Self-drops won't cause the dgrid-select handler to re-fire,
-                    // so update the cached node manually
-                    if (targetSource._selectedNodes[id]) {
-                        targetSource._selectedNodes[id] = grid.row(id).element;
-                    }
-                });
-            });
-            grid.refresh({keepScrollPosition: true});
-        },
-
-        onDropExternal: function (sourceSource, nodes, copy, targetItem) {
-            var tGrid = this.grid, sGrid = sourceSource.grid, noRefresh = this.noRefreshOnUpdateDirty;
-            this.noRefreshOnUpdateDirty = true;
-        	if (tGrid.onDropCondition){
-            	if (!tGrid.onDropConditionFunction){
-            		tGrid.onDropConditionFunction = eutils.eval(tGrid.onDropCondition);
-            	}
-            	if (!tGrid.onDropConditionFunction(sGrid, tGrid)){
-            		return;
-            	}
-            }
-        	var store = tGrid.collection, mapping = tGrid.onDropMap && tGrid.onDropMap[sGrid.widgetName];
-            if (mapping){
-                var dropMode = mapping.mode, fieldsMapping = mapping.fields;
-            }
-            if (mapping && dropMode ===  'update'){
-                nodes.forEach(function(node){
-                    when (sourceSource.getObject(node), function(object){
-                        for (field in fieldsMapping){
-                            var sourceField = fieldsMapping[field];
-                            if (object[sourceField]){
-                                targetItem[field] = object[sourceField];
-                                tGrid.updateDirty(targetItem.idg, field, targetItem[field]);
-                            }
-                        }
-                        tGrid.collection.putSync(targetItem, {overwrite: true});
-                    });
-                });
-            }else{    
-                // TODO: bail out if sourceSource.getObject isn't defined?
-                nodes.forEach(function (node) {
-                    when(sourceSource.getObject(node), function (object) {
-                        if (!copy) {
-                            if (sGrid) {                            
-                                sGrid.deleteRowItem(object);
-                            }
-                            else {
-                                sourceSource.deleteSelectedNodes();
-                            }
-                        }
-                        if (mapping){
-                             var newItem = {};
-                             for (field in fieldsMapping){
-                                var sourceField = fieldsMapping[field];
-                                if (object[sourceField]){
-                                    newItem[field] = object[sourceField];
-                                }
-                            }
-                        }else{
-                            var newItem = lang.clone(object);
-                        }
-                        var init={};
-                        tGrid.prepareInitRow(init);
-                        tGrid.createNewRow(lang.mixin(init, utils.filter(newItem)), targetItem, (targetItem ? 'before' : 'append'));
-                    });
-                });
-            }
-            if (!copy){
-                sourceSource.selectNone(); // deselect all
-            }
-            if (sGrid){
-                sGrid.setSummary();
-            } 
-            tGrid.setSummary();
-            this.noRefreshOnUpdateDirty = noRefresh;
-            if (!noRefresh){
-                tGrid.refresh({keepScrollPosition: true});           	
-            }
-            setTimeout(
-                function(){
-                    tGrid.layoutHandle.resize();
-                    tGrid.bodyNode.scrollTop = tGrid.bodyNode.scrollHeight;
-                    if (sGrid){
-                        sGrid.bodyNode.scrollTop = sGrid.bodyNode.scrollHeight;
-                    }
-                },
-                0
-            );
-        },
-
         notifyWidgets: function(args){
             this.form.notifyWidgetsDepth = this.form.notifyWidgetsDepth || 0;
         	if (!(this.inNotifyWidgets || this.noNotifyWidgets)){

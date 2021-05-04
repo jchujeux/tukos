@@ -15,6 +15,8 @@ use TukosLib\Web\TranslatorsManager;
 use TukosLib\Objects\ObjectsManager;
 use TukosLib\Objects\TukosModel;
 use TukosLib\Objects\Admin\Scripts\StreamsManager;
+use TukosLib\Utils\Widgets;
+use TukosLib\Utils\Utilities as Utl;
 
 class Configure{
 
@@ -47,24 +49,38 @@ class Configure{
         
         $request =Tfk::$registry->request;
         $query = Tfk::$registry->urlQuery;
-        if (!isset($query['id']) && !isset($query['notab'])){
+        if ($request['controller'] === 'Page' && !isset($query['id']) && !isset($query['notab'])){
             $query['notab'] = 'yes';
             Tfk::$registry->urlQuery = $query;
         }
             
+        $queryId = Utl::getItem('id', $query, '""');
         $this->modulesMenuLayout = array_merge(($request['object'] === 'physiopersotreatments' && $request['view'] === 'Edit' && isset($query['id'])) 
-            ? ['@physiopersoplans' => ['type' => 'MenuBarItem', 'atts' => ['onClickArgs' => ['object' => 'physiopersoplans', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['id' => ['object' => 'physiopersotreatments', 'id' => $query['id'], 'col' => 'parentid']]]]],
-               '@physiopersotreatments' => ['type' => 'MenuBarItem', 'atts' => ['onClickArgs' => ['object' => 'physiopersotreatments', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['id' => $query['id']]]]]
+            ? ['@physiopersoplans' => ['type' => 'MenuBarItem', 'atts' => ['onClickArgs' => ['object' => 'physiopersoplans', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['id' => ['object' => 'physiopersotreatments', 'id' => $queryId, 'col' => 'parentid']]]]],
+               '@physiopersotreatments' => ['type' => 'MenuBarItem', 'atts' => ['onClickArgs' => ['object' => 'physiopersotreatments', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['id' => $queryId]]]]
               ]
             : ['$physiopersoplans' => [], '$physiopersotreatments' => []],
-            ['#physiopersodailies' => [],
-                '@help' => [
-                    [/*'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],*/
-                    'guidedtour' => ['type' => 'MenuItem', 'atts' => [
-                        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('GuidedtourTukosMSQR')]]])]]]],
-                    'tutotukos' => ['type' => 'MenuItem', 'atts' => [
-                        'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('TutotukosMSQR')]]])]]]]
-                    ]]
+//            ['#physiopersodailies' => isset($queryId) ? ['customAtts' => ['new' => ['popup' => ['items' => [0 => ['atts' => ['onClickArgs' => ['query' => ['storeatts' => ['init' => ['startdate' => date('Y-m-d'), 'parentid' => $queryId]]]]]]]]]]] : [],
+            ['@physiopersodailies' => [[
+                'new' => ['type' => 'PopupMenuItem', 'atts' => ['label' => Tfk::tr('new')], 'popup' => ['type' => 'TukosTooltipDialog', 'atts' => ['paneDescription' => [
+                    'widgetsDescription' => [
+                        'startdate' => ['type' => 'TukosDateBox', 'atts' => ['style' => ['width' => '6em'], 'value' => date('Y-m-d')]],
+                        'ok' => ['type' => 'TukosButton', 'atts' => ['label' => Tfk::tr('Ok'), 'onClickAction' => "var date = this.form.valueOf('startdate'); Pmg.tabs.request({object: 'physiopersodailies', view: 'Edit', mode: 'Tab', action: 'Tab', 
+                            query: {storeatts: {where: {startdate: date, parentid: {$queryId}}, init: {startdate: date, parentid: {$queryId}}}}});this.form.close();dijit.popup.close(dijit.getEnclosingWidget(this.form))"]]
+                    ],
+                    'layout' => ['tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false], 'widgets' => ['startdate', 'ok']]
+                ]]]],
+                'edit' => ['type' => 'PopupMenuItem', 'atts' => ['label' => Tfk::tr('edit')],
+                    'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectanitem'), 'onChangeArgs' => ['object' => 'physiopersodailies', 'view' => 'edit', 'mode' => 'Tab', 'action' => 'Tab'], 'object' => 'physiopersodailies', 'mode' => 'Tab'], true)],
+                'overview' => ['type' => 'MenuItem', 'atts' => ['onClickArgs' => ['object' => 'physiopersodailies', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab'], 'label' => Tfk::tr('overview')]],
+            ]],
+            '@help' => [
+                [/*'overview' => ['type' => 'MenuItem',     'atts' => ['onClickArgs' => ['object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab']]],*/
+                'guidedtour' => ['type' => 'MenuItem', 'atts' => [
+                    'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('GuidedtourTukosMSQR')]]])]]]],
+                'tutotukos' => ['type' => 'MenuItem', 'atts' => [
+                    'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('TutotukosMSQR')]]])]]]]
+                ]]
             ]);
         $this->transverseModules = ['help'];
         $this->objectModulesDefaultContextName = ['tukos' => 'tukos', 'customviews' => 'tukos'];

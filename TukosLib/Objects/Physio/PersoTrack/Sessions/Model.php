@@ -20,8 +20,7 @@ class Model extends AbstractModel {
             'painduring' => 'TINYINT DEFAULT NULL',
             'painafter' => 'TINYINT DEFAULT NULL',
         ];
-        parent::__construct(
-            $objectName, $translator, 'physiopersosessions',  ['parentid' => ['physiopersotreatments']], [], $colsDefinition, [], [], ['custom'], ['name', 'startdate']);
+        parent::__construct($objectName, $translator, 'physiopersosessions',  ['parentid' => ['physiopersotreatments']], [], $colsDefinition, [], [], ['custom'], ['name', 'startdate']);
     }   
     public function getOneExtended($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
         $item = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);

@@ -7,6 +7,10 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
         // Show the footer area, which will hold the summary row
         showFooter: true,
 
+        cellValue: function(row, field){
+            var id = row[this.collection.idProperty];
+            return (this.dirty[id] && this.dirty[id][field] !== undefined ? this.dirty[id][field] : (row[field] ? row[field] : ''));    
+        },
         setSummary: function(){
         	if (this.summaryRow){
     			var oldSummary = this.summary;

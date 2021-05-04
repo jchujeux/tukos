@@ -38,6 +38,9 @@ class UserInformation{
                 if (count($usersInfo) === 2){
                     $this->tukosInfo = $usersInfo[0]['name'] === 'tukos' ? $usersInfo[$key = 0] : $usersInfo[$key = 1];
                     $this->userInfo = $usersInfo[1 - $key];
+                    if ($userName === 'sysadmin' && Tfk::$registry->get('appConfig')->dataSource['dbname'] === 'tukosconfig'){
+                        $this->setLockedMode(false);
+                    }
                 }else{
                     Feedback::add(Tfk::tr('Username') . ': ' . $userName);
                     return false;
@@ -254,8 +257,11 @@ class UserInformation{
             return false;
         }
     }
-    public function setLockedMode($on){
-        $this->lockedMode = $on;
+    public function setLockedMode($trueFalse){
+        $this->lockedMode = $trueFalse;
+    }
+    public function getLockedMode(){
+        return $this->lockedMode;
     }
     public function hasUpdateRights($item, $newItem=[]){
         if ($this->lockedMode && in_array(Utl::getItem('permission', $item) , ['PL', 'RL']) && !empty($newItem) && Utl::getItem('permission', $newItem, $item['permission']) === $item['permission']){

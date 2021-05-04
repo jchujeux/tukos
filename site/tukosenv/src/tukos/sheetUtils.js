@@ -100,11 +100,12 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
         	return this.evalFormula(grid, grid.cellValueOf(field, idProperty), field, idProperty, needsStringDelimiters);
         },
         evalFormula: function(grid, formulaOrValue, field, idProperty, needsStringDelimiters){
-            var noRefresh = grid.noRefreshOnUpdateDirty, returnValue;
-            grid.noRefreshOnUpdateDirty = true;
-        	if (formulaOrValue == undefined){
+            var returnValue;
+        	if (formulaOrValue === undefined || formulaOrValue === null){
                 returnValue = '';
             }else if (typeof formulaOrValue === 'string' && formulaOrValue.charAt(0) === '='){
+				var noRefresh = this.noRefreshOnUpdateDirty;           	
+				grid.noRefreshOnUpdateDirty = true;
                 try{
                     if (!grid.formulaCache[idProperty]){
                         grid.formulaCache[idProperty] = {};
@@ -113,10 +114,10 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
                 }catch(err){
                 	returnValue = '%' + err;
                 }
+            	grid.noRefreshOnUpdateDirty = noRefresh;
             }else{
                 returnValue = (needsStringDelimiters && typeof formulaOrValue === 'string' && isNaN(formulaOrValue) ? '"' + formulaOrValue + '"' : formulaOrValue);
             }
-            grid.noRefreshOnUpdateDirty = noRefresh;
             return returnValue;
         },
         formulaesMap: function(grid, callback){

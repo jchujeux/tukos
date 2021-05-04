@@ -1,9 +1,6 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/when", "dojo/promise/all", "dojo/aspect", "dijit/registry"/*, "tukos/mobile/ScrollableContainer"*/, "dojox/mobile/Container", "dojox/mobile/FormLayout", 
 		"dojox/mobile/ToolBarButton", "tukos/widgets/WidgetsLoader", "tukos/_ObjectPaneMixin", "tukos/utils", "tukos/widgetUtils", "tukos/PageManager"], 
     function(declare, lang, dct, dst, when, all, aspect, registry/*, ScrollableContainer*/, Container, FormLayout, ToolBarButton, widgetsLoader, _ObjectPaneMixin, utils, wutils, Pmg){
-    
-	var mobileWidgetTypes = {TextBox: 'MobileTextBox', FormattedTextBox: 'MobileFormattedTextBox', LazyEditor: 'MobileEditor', ObjectReset: 'MobileObjectReset', ObjectSave: 'MobileObjectAction', ObjectNew: 'MobileObjectAction',
-							 OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction', Textarea: 'MobileTextBox'/*, StoreSelect: "MobileStoreSelect"*/, TimeTextBox: "MobileTimePicker", TukosNumberBox: "MobileNumberBox"};
 	return declare([Container, _ObjectPaneMixin], {
         postCreate: function(){
             var self = this;
@@ -70,7 +67,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                 this.addChild(theFormLayout = new FormLayout({columns: (tableAtts.showLabels && tableAtts.orientation!== 'vert') ? 'two' : 'single'}));
             	layout.widgets.forEach(lang.hitch(this, function(widgetName){
                     var widgetDescription = this.widgetsDescription[widgetName], widgetAtts = widgetDescription.atts, instantiatingWidget, widgetType, widgetLayout, widgetLabel, widgetFieldSet, widgetScrollPane;
-                	if (widgetDescription && (widgetType = (widgetDescription.atts.mobileWidgetType || mobileWidgetTypes[widgetDescription['type']] || widgetDescription['type']))){
+                	if (widgetDescription && (widgetType = widgetDescription['type'])){
     	                self.widgetsName.push(widgetName);
                     		widgetLayout = dct.create('div', null, theFormLayout.domNode);
                     	if (tableAtts.showLabels){
@@ -103,7 +100,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
             if (tableAtts && layout.widgets){
             	layout.widgets.forEach(lang.hitch(this, function(widgetName){
                     var widgetDescription = this.widgetsDescription[widgetName], instantiatingWidget, widgetType;
-                	if (widgetName !== 'feedback' && widgetDescription && (widgetType = (mobileWidgetTypes[widgetDescription['type']] || widgetDescription['type']))){
+                	if (widgetName !== 'feedback' && widgetDescription && (widgetType = widgetDescription['type'])){
     	                self.widgetsName.push(widgetName);
                 		dojo.when(instantiatingWidget = widgetsLoader.instantiate(widgetType, utils.mergeRecursive({id: this.id + widgetName, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, pane: this,
                 			form: this, widgetType: widgetType, widgetName: widgetName}, widgetDescription['atts']), optionalWidgetInstantiationCallback), function(theWidget){

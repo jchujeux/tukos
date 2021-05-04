@@ -10,21 +10,22 @@ class View extends AbstractView {
     
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Treatment', 'Summary');
-        //$exercisesView = Tfk::$registry->get('objectsStore')->objectView('sptexercises');
         $customDataWidgets = [
             'name' => ViewUtils::lazyEditor($this, 'Summary', ['atts' => ['edit' => ['height' => '100px', 'editorType' => 'simple']]]),
             'comments' => ['atts' => ['edit' => ['height' => '100px']]],
-            'parentid' => ['atts' => ['edit' => ['onChangeLocalAction' => ['parentid' => ['localActionStatus' =>$this->relatedTreatmentAction()]]]]],
+            'parentid' => ['atts' => ['edit' => ['onWatchLocalAction' => ['value' => ['parentid' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => true], 'action' => $this->relatedTreatmentAction()]]]]]]],
             'exercises' => $this->exercises(),
-            'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
-            'painduring' => ViewUtils::storeSelect('pain', $this, 'Painduring', [true, 'ucfirst', true], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em'],
-                'onWatchLocalAction' => $this->painOnWatchLocalAction('painnextday')]]]),
-            'painafter' => ViewUtils::storeSelect('pain', $this, 'Painafter', [true, 'ucfirst', true], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em'],
-                'onWatchLocalAction' => $this->painOnWatchLocalAction('painnextday')]]]),
+            'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['edit' => ['onChangeLocalAction' => ['startdate' => ['localActionStatus' => "return sWidget.form.localActions.dateChangeLocalAction(sWidget, tWidget, newValue, oldValue);"]]],
+            //'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['edit' => ['beforeActions' => ['_onDayClick' => "if (this.markIfChanged){this.form.localActions.dateChangeLocalAction();}"]],
+                'storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
+            'painduring' => ViewUtils::storeSelect('pain', $this, 'Painduring', [true, 'ucfirst', true], ['atts' => ['edit' => ['hasColor' => true, 'style' => ['width' => '100%', 'maxWidth' => '30em'],
+                'onWatchLocalAction' => $this->painOnWatchLocalAction('painduring')]]]),
+            'painafter' => ViewUtils::storeSelect('pain', $this, 'Painafter', [true, 'ucfirst', true], ['atts' => ['edit' => ['hasColor' => true, 'style' => ['width' => '100%', 'maxWidth' => '30em'],
+                'onWatchLocalAction' => $this->painOnWatchLocalAction('painafter')]]]),
             'painnextday' => ViewUtils::storeSelect('pain', $this, 'Painnextday', [true, 'ucfirst', true], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em'],
                 'onWatchLocalAction' => $this->painOnWatchLocalAction('painnextday')]]]),
-            'mood' => ViewUtils::storeSelect('stress', $this, 'Stress', [true, 'ucfirst', true], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
-            'fatigue' => ViewUtils::storeSelect('stress', $this, 'Fatigue', [true, 'ucfirst', true], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+            //'mood' => ViewUtils::storeSelect('stress', $this, 'Stress', [true, 'ucfirst', true], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+            //'fatigue' => ViewUtils::storeSelect('stress', $this, 'Fatigue', [true, 'ucfirst', true], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
             'otherexceptional' => ViewUtils::LazyEditor($this, 'MoodFatigue', ['atts' => ['edit' => ['height' => '100px', 'editorType' => 'simple']]]),
         ];
         $this->mustGetCols = array_merge($this->mustGetCols, array_keys($customDataWidgets));
@@ -34,17 +35,24 @@ class View extends AbstractView {
                     'title' => $this->tr('Sessions'), 'allDescendants' => true, 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'startdate',
                     'endDateTimeCol' => 'startdate',
                     'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
-                    //'onChangeNotify' => ['calendar' => ['startdate' => 'startTime',  'duration' => 'duration',  'name' => 'summary', 'comments' => 'comments', 'stress' => 'stress', 'series' => 'series', 'repeats' => 'repeats', 'extra' => 'extra']],
                     'showFooter' => false,
                     'summaryRow' => ['cols' => [
                         'name' => ['content' =>  [['rhs' => "return (res ? res + '<br>' : '') + #name#;"]]],
                         'painduring' => ['content' => [['rhs' => "var pain = #painduring#; return Math.max(pain, res);"]]],
                         'painafter' => ['content' => [['rhs' => "var pain = #painafter#; return Math.max(pain, res);"]]],
                     ]],
-                    'onWatchLocalAction' => ['summary' => ['physiopersosessions' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => <<<EOT
+                    'setValueDelay' => 100,
+                    'onWatchLocalAction' => ['summary' => ['physiopersosessions' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => <<<EOT
 var form = sWidget.form, summary = sWidget.summary;
 (['name', 'painduring', 'painafter']).forEach(function(widgetName){
-form.setValueOf(widgetName, summary[widgetName]);
+    var widget = form.getWidget(widgetName);
+    if (summary[widgetName] !== "0"){
+        widget.set('disabled', true);
+        widget.set('value', summary[widgetName]);
+    }else{
+        widget.set('disabled', false);
+        widget.set('value', '');
+    }
 });
 EOT
                     ]]]],
@@ -56,7 +64,7 @@ EOT
                     [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
             ],
         ];
-        $this->customize($customDataWidgets, $subObjects, ['grid' => ['exercises']]);
+        $this->customize($customDataWidgets, $subObjects, ['post' => ['exercises'], 'grid' => ['exercises']]);
     }
     function exercises(){
         $exercisesView = Tfk::$registry->get('objectsStore')->objectView('sptexercises');
@@ -68,6 +76,15 @@ EOT
                 'onWatchLocalAction' => ['collection' => ['physiopersosessions' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => true], 'action' => $this->exercisesLocalAction()]]]]
             ]]]);
     }
+    function OpenEditAction(){
+        return <<<EOT
+var form = this;
+require (["tukos/objects/physio/persoTrack/dailyAssesments/LocalActions"], function(LocalActions){
+    form.localActions = new LocalActions({form: form});
+});
+EOT
+        ;
+    }
     public static function relatedTreatmentAction(){
         return <<<EOT
 var cols = ['exercises'];
@@ -76,7 +93,7 @@ Pmg.serverDialog({object: 'physiopersotreatments', view: 'Edit', action: 'GetIte
         var form = sWidget.form, setValueOf = lang.hitch(form, form.setValueOf), item = response.data.value, items;
         delete item.id;
         cols.forEach(function(widgetName){
-            setValueOf(widgetName === 'parentid' ? 'patient' : widgetName, item[widgetName]);
+            setValueOf(widgetName, item[widgetName]);
         });
         Pmg.setFeedback(Pmg.message('actionDone'));
     }
@@ -91,7 +108,7 @@ exercises.forEach(function(exercise){
     data.push({id: exercise.idg, name: exercise.name});
 });
 tWidget.columns.exerciseid.editorArgs.storeArgs.data = data;
-if (tWidget.getEditorInstance('exerciseid')){
+if ( tWidget.getEditorInstance && tWidget.getEditorInstance('exerciseid')){
     when (tWidget.getEditorInstance('exerciseid'), function(editorInstance){
         editorInstance.store.setData(data);
     });

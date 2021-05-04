@@ -40,7 +40,7 @@ trait  GridWidgets{
     }
     public static function simpleDgrid($atts, $editOnly = true){
         if ($editOnly){
-            $defAtts = ['title' => '', 'colspan' => 1, 'columns' => [], 'initialId'  => true];
+            $defAtts = ['title' => '', 'colspan' => 1, 'columns' => [], 'initialId'  => true, 'adjustLastColumn' => false];
             $gridMode = Utl::extractItem('gridMode', $atts);
             if (isset($atts['colsDescription'])){
                 foreach ($atts['colsDescription'] as $col => $element){
@@ -86,7 +86,7 @@ trait  GridWidgets{
     }
     public static function storeDgrid($atts, $editOnly = true){
         if ($editOnly){
-            $defAtts = ['title' => '', 'colspan' => 1, 'columns' => [], 'initialId'  => false, 'keepScrollPosition' => true, 'dndParams' => ['skipForm' => true]];
+            $defAtts = ['title' => '', 'colspan' => 1, 'columns' => [], 'initialId'  => false, 'keepScrollPosition' => true, 'adjustLastColumn' => false, 'dndParams' => ['skipForm' => true]];
             if (!empty($atts['columns']['selected'])){
             	$defAtts['columns']['selected'] = self::colGridAtts(Utl::extractItem('selected', $atts['columns']), 'selected', 'storeedit');
             }
@@ -161,7 +161,7 @@ trait  GridWidgets{
                 if (isset($atts['placeHolder'])){
                 		$atts['editorArgs']['placeHolder'] = Utl::extractItem('placeHolder', $atts);
                 }
-                $atts['editor'] = ($type === 'LazyEditor') ? 'Editor' : $type;
+                $atts['editor'] = ($type === 'LazyEditor') ? (Tfk::$registry->isMobile ? 'MobileEditor' : 'Editor') : $type;
                 $atts['widgetType'] = $atts['editor'];
                 $atts['canEdit'] = (!empty($element['atts'][$mode]['canEdit']) ? $element['atts'][$mode]['canEdit'] : 'canEditRow');
             }
