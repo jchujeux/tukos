@@ -67,7 +67,8 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         
         postCreate: function(){
             this.inherited(arguments);
-            this.noCopyCols = this.noCopyCols || ['id', 'idg',  'rowId', 'connectedIds'];
+            //this.noCopyCols = this.noCopyCols || ['id', 'idg',  'rowId', 'connectedIds'];
+            this.noCopyCols = ['id', 'idg',  'rowId', 'connectedIds'].concat(this.noCopyCols || []);
             var pasteCellCallback = function(evt){
                 var copiedCell = Pmg.getCopiedCell();
                 if (evt.ctrlKey && copiedCell){
@@ -163,7 +164,8 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         },
         updateDirty: function(idPropertyValue, field, value, isNewRow, isUserEdit){
             var collection = this.collection, grid = this, collectionRow = this.collection.getSync(idPropertyValue), oldValue;
-            if (isNewRow || ((oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field]) !== value)){
+            //if (isNewRow || ((oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field]) !== value)){
+            if (isNewRow || !utils.isEquivalent(oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field], value)){
                 this.inherited(arguments);
                 collectionRow[field] = value;
                 if (!grid.noRefreshOnUpdateDirty){
@@ -194,7 +196,6 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 delete this.form.changedWidgets[wName];
                 delete this.form.userChangedWidgets[wName]
             }
-            this.setSummary();
         },
 
         onCellChangeLocalAction: function(idPropertyValue, column, newValue, oldValue){
@@ -388,6 +389,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             }
             this.deleteDirty(idgToDelete, isUserRowEdit);
             this.collection.removeSync(idgToDelete);
+			this.setSummary();
             this.noRefreshOnUpdateDirty = noRefresh;
         },
         deleteRows: function(rows, skipDeleteAction, isUserRowEdit){
@@ -553,15 +555,8 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             	this.maxServerId = maxId;
             }
             this.noRefreshOnUpdateDirty = noRefresh;
-			/*if (this.setValueDelay){
-				setTimeout(lang.hitch(this, function(){
-					this.set('collection', this.store.getRootCollection());
-            		this.setSummary();
-				}), this.setValueDelay);
-			}else{*/
-				this.set('collection', this.store.getRootCollection());
-            	this.setSummary();
-			//}
+			this.set('collection', this.store.getRootCollection());
+            this.setSummary();
         },
 
         _setDuplicate: function(value){

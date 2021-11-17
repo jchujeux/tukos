@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/TooltipDialog", "dijit/popup",  "dijit/focus", "tukos/TukosPane", "tukos/evalutils"], 
-    function(declare, lang, when, TooltipDialog, popup, focus, TukosPane, eutils){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/TooltipDialog", "dijit/popup",  "dijit/focus", "tukos/TukosPane"], 
+    function(declare, lang, when, TooltipDialog, popup, focus, TukosPane){
     return declare(TooltipDialog, {
          postCreate: function(){
             var self = this;

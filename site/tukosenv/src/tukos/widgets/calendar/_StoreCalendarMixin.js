@@ -35,9 +35,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/store/Memory",  "dojo/st
                 ]}}]);
         		setTimeout(function(){self.contextMenu.menu.items = self.contextMenu.description.items;}, 100);
         	});
-        	this.on('contextMenu', function(evt){
-        		console.log('in calendar contextmenu callback');
-        	});
             this.nextItemId = 0;
 
         }, 
@@ -203,8 +200,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/store/Memory",  "dojo/st
             		targetItem.startTime = currentCalendarItem.startTime;
             	}
             }
-            if (targetItem.startTime && typeof targetItem.duration === 'string'){
-            	targetItem.endTime = dutils.addDurationString(targetItem.duration, targetItem.startTime, this.durationFormat);
+			if (targetItem.startTime && typeof targetItem.duration === 'string'){
+            	targetItem.endTime = dutils.addDurationString(targetItem.duration >= 'T00:15:00' ? targetItem.duration : 'T00:15:00', targetItem.startTime, this.durationFormat);
             }else if (typeof targetItem.endTime === 'string') {
             	targetItem.endTime = dutils.parseDate(targetItem.endTime);
             }

@@ -72,5 +72,8 @@ class Show extends ObjectTranslator{
     function save($query, $valuesToSave){
         return false;
     }
+    function getToTranslate(){
+        return $this->view->getToTranslate();
+    }
 }
 ?>

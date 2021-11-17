@@ -4,10 +4,10 @@ namespace TukosLib\Objects\BusTrack\Invoices\Customers\Views\Edit;
 class ViewActionStrings{
     static function onExportOpen($tr){
         return <<<EOT
-var self = this, form = this.form, html = '', tableAtts = 'style="text-align:center; border: solid black;border-collapse: collapse;margin-left:auto;margin-right: auto;width:70%;"', 
+var self = this, form = this.form, html = '', tableAtts = 'style="text-align:center; border: solid;border-collapse: collapse;margin-left:auto;margin-right: auto;width:70%;"', 
     thAtts = style="border: 1px solid;border-collapse: collapse;padding: 2px;" ,  tdAtts = 'style="border: 1px solid;border-collapse: collapse;padding: 2px;"',
     paymentsItemsWidget = form.getWidget('paymentsitems'), paymentsWidget = form.getWidget('payments'), filter = new paymentsWidget.collection.Filter(), payment, leftToPay,
-    rows = [{tag: 'tr', content: [{tag: 'th', atts: 'colspan=6 style="border: solid black;"', content: "{$tr('Paymentsmade')}"}]}], rowContent = [], itemCols = ['name', 'amount'], paymentCols = ['date', 'paymenttype', 'reference'];
+    rows = [{tag: 'tr', content: [{tag: 'th', atts: 'colspan=5 style="border: solid black;"', content: "{$tr('Paymentsmade')}"}]}], rowContent = [], itemCols = ['name', 'amount'], paymentCols = ['date', 'paymenttype', 'reference'];
 paymentCols.forEach(function(col){
     rowContent.push({tag: 'th', atts: tdAtts, content: paymentsWidget.colDisplayedTitle(col)});
 });

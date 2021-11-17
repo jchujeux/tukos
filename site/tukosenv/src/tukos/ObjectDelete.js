@@ -23,11 +23,15 @@ define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "diji
                             if (updatedWidget){
                                 postValues['updated'] = updatedWidget.get('value');
                             }
-                            self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Delete')}, postValues, self.form.get('dataElts'), Pmg.message('actionDone')); 
+                            self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Delete')}, postValues, self.form.get('dataElts'), Pmg.message('actionDone'), true).then(function(){
+								self.postAction();
+							}); 
                         },
                         function(){Pmg.setFeedback(Pmg.message('actionCancelled'));});
                 }
             });                    
-        }
+        },
+		postAction: function(){
+		}
     });
 });

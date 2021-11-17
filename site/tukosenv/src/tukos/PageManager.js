@@ -1,6 +1,6 @@
-define(["dojo/ready", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", 
+define(["dojo/ready", "dojo/has", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", 
 		"dojo/json", "dojo/date/locale", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/utils"],
-function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, dojoDateLocale, _WidgetsExtend, _WidgetsFormExtend, utils){
+function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, dojoDateLocale, _WidgetsExtend, _WidgetsFormExtend, utils){
     var stores, tabs, openedBrowserTabs = {},
         objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
@@ -11,13 +11,21 @@ function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _
 		initializeTukosForm: function(obj){
 			tukos = {Pmg: this};
 			this.cache = obj;
-			this.cache.messages = this.cache.messages || {};				
+			this.cache.messages = this.cache.messages || {};
+			var self = this;
+			has.add("mobileTukos", function(){
+				return self.isMobile();
+			});
 	   },
 	   initializeBlog: function(obj){
 		   tukos = {Pmg: this};
 		   this.cache = obj;
 		   this.cache.messages = this.cache.messages || {};
+		   this.setObjectsMessages('tabsDescription');
            var self = this;
+			has.add("mobileTukos", function(){
+				return self.isMobile();
+			});
            Date.prototype.toJSON = function(){
                return dojoDateLocale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
            };
@@ -30,7 +38,11 @@ function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _
 		   tukos = {Pmg: this};
 		   this.cache = obj;
 		   this.cache.messages = this.cache.messages || {};
+		   this.setObjectsMessages('formDescription');
            var self = this;
+			has.add("mobileTukos", function(){
+				return self.isMobile();
+			});
            Date.prototype.toJSON = function(){
                return dojoDateLocale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
            };
@@ -41,16 +53,24 @@ function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _
 	   },
 	   initializeNoPage: function(obj){
 	   		this.cache= obj;
+			var self = this;
+			has.add("mobileTukos", function(){
+				return self.isMobile();
+			});
 	   },
 	   initialize: function(obj) {
             tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
             this.cache = obj;
             this.cache.extras = this.cache.extras || {};
             this.cache.messages = this.cache.messages || {};
+		   this.setObjectsMessages('tabsDescription');
             var self = this;
             Date.prototype.toJSON = function(){
                 return dojoDateLocale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
             };
+			has.add("mobileTukos", function(){
+				return self.isMobile();
+			});
             require([obj.isMobile ? "tukos/mobile/buildPage" : "tukos/desktop/buildPage", "tukos/StoresManager"], function(buildPage, StoresManager){
             	stores = new StoresManager();
             	buildPage.initialize();
@@ -128,7 +148,13 @@ function(ready, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _
 			);
 			return promise;			
 		},
-        get: function(item){
+		setObjectsMessages: function(descriptionType){
+			var self = this;
+			this.cache[descriptionType].forEach(function(description){
+				self.addMessagesToCache(description.messages, description.formContent.object);
+			});
+		},        
+		get: function(item){
             return this.cache[item];
         },
         set: function(item, value){

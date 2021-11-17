@@ -13,14 +13,13 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom", "dijit/form/Butto
                     	});
                     }
                 	Pmg.setFeedback(Pmg.message('actionDoing'));
-                    return self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Reset'), query: self.urlArgs 
+                    self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Reset'), query: self.urlArgs 
 							? (idValue ? lang.mixin({id: idValue}, self.urlArgs.query) : self.urlArgs.query)
-							: (idValue ? {id: idValue} : {})}, sendOnReset, self.form.get('dataElts'), null, idValue ? false : true).then(function(response){
-								self.postReset();
-								return response;
+							: (idValue ? {id: idValue} : {})}, sendOnReset, self.form.get('dataElts'), null, idValue ? false : true).then(function(){
+								self.postAction();
 							}); 
                 }
-                form.checkChangesDialog(setResetValues);
+                form.checkChangesDialog(setResetValues, true);
             }
             this.on("click", function(evt){
                 evt.stopPropagation();
@@ -28,7 +27,7 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom", "dijit/form/Butto
                 setTimeout(self.resetDialogue, 100);
             });
         },
-		postReset: function(){
+		postAction: function(){
 		}
     });
 });

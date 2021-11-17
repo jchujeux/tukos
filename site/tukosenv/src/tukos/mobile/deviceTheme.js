@@ -99,7 +99,7 @@
 			var n = scripts[i];
 			var src = n.getAttribute("src") || "";
 			if(src.match(/\/deviceTheme\.js/i)){
-				config.baseUrl = src.replace("deviceTheme\.js", "../../dojo/");
+				//config.baseUrl = src.replace("deviceTheme\.js", "../../dojo/");
 				var conf = (n.getAttribute("data-dojo-config") || n.getAttribute("djConfig"));
 				if(conf){
 					var obj = eval("({ " + conf + " })");
@@ -129,7 +129,8 @@
 		this.toUrl = function(/*String*/path){
 			// summary:
 			//		A wrapper for require.toUrl to support non-dojo usage.
-			return require ? require.toUrl(path) : config.baseUrl + "../" + path;
+			//return require ? require.toUrl(path) : config.baseUrl + "../" + path;
+			return dojoBaseLocation + path;
 		};
 
 		this.setDm = function(/*Object*/_dm){

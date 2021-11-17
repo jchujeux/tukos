@@ -11,7 +11,9 @@ define (["dojo/_base/declare", "dojo/when", "dijit/form/Button", "dijit/popup", 
                     var dropDown = self.dropDown,
                         newAction = function(dupid){
                         	form.resetChangedWidgets();
-                    		form.serverDialog({action: 'Edit', query: dupid ? {dupid: dupid} : {}}, [], form.get('dataElts'), Pmg.message('actionDone'), true); 
+                    		form.serverDialog({action: 'Edit', query: dupid ? {dupid: dupid} : {}}, [], form.get('dataElts'), Pmg.message('actionDone'), true).then(function(){
+								self.postAction();
+							}); 
                         	popup.close(self.dropDown);
                     	},
                     	onNewAction = function(evt){
@@ -37,18 +39,10 @@ define (["dojo/_base/declare", "dojo/when", "dijit/form/Button", "dijit/popup", 
                     	
                     }
                 };
-                form.checkChangesDialog(setNewValues);
-/*
-                if (form.userHasChanged()){
-                    Pmg.confirmForgetChanges(changes).then(
-                        function(){setNewValues(true);},
-                        function(){Pmg.setFeedback(Pmg.message('actionCancelled'));}
-                    );
-                }else{
-                	setNewValues();
-                }
-*/
+                form.checkChangesDialog(setNewValues, true);
             });
-        }
+        },
+		postAction: function(){
+		}
     });
 });

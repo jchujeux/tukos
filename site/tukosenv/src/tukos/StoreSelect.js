@@ -58,11 +58,17 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/dom-
 			return this.inherited(arguments);
 		},
 		_setDisabledAttr: function(value){
-			if (this.hasColor){
+			if (this.backgroundColors){
 				this.isDisabled = value;
 				this.set('readonly', value);
 			}else{
 				this.inherited(arguments);
+			}
+		},
+		_setValueAttr: function(value){
+			this.inherited(arguments);
+			if (this.backgroundColors){
+				this.set('style', {backgroundColor: this.backgroundColors[value]});
 			}
 		}
     }); 

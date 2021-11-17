@@ -12,13 +12,14 @@ class TukosFramework{
 
     const dojoModules = ['dojo', 'dijit', 'dojox'];
 
-    const publicDir = '/tukos/'; // this is the beginnning of the url path, i.e. '/tukos/' is aliased with '/tukos/site/' in apache config
+    const tukosSchedulerUserId = 12, tukosUserId = 13, tukosBackOfficeUserId = 15;
     
-    public static $tukosPhpDir, $phpVendorDir, $vendorDir = [], $tukosTmpDir, $tukosPhpImages,
+    public static $publicDir, $tukosPhpDir, $phpVendorDir, $vendorDir = [], $tukosTmpDir, $tukosPhpImages,
                   $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment, $tukosBaseLocation, $dojoBaseLocation, $tukosFormsDojoBaseLocation, $dojoCdnBaseLocation, $tukosFormsTukosBaseLocation, 
                   $tukosDomainName, $tukosFormsDomainName, $htmlToPdfCommand; 
   
     public static function initialize ($mode, $appName = null, $phpDir = null){
+        self::$publicDir = getenv('tukosPublicDir');// this is the beginnning of the url path, i.e. '/tukos/' is aliased with '/tukos/site/' in apache config
         self::$tukosPhpDir = $phpDir;
         self::$tukosTmpDir = $phpDir . '/tmp/';
         self::$tukosPhpImages = $phpDir . 'site/images/';
@@ -40,12 +41,12 @@ class TukosFramework{
     public static function setEnvironment($environment){
     	self::$environment = empty($environment) ? 'production' : $environment;
     	if (self::$environment === 'development'){
-    	    self::$tukosBaseLocation = self::publicDir . "tukosenv/src/";
+    	    self::$tukosBaseLocation = self::$publicDir . "tukosenv/src/";
             self::$tukosFormsTukosBaseLocation = self::$tukosBaseLocation;
             self::$tukosFormsDojoBaseLocation = self::$tukosBaseLocation;
             self::$tukosFormsDomainName = 'localhost';
     	}else{
-   	        self::$tukosBaseLocation = self::publicDir . 'tukosenv/release/';
+   	        self::$tukosBaseLocation = self::$publicDir . 'tukosenv/release/';
     	}
     	if (empty(self::$dojoBaseLocation)){
     	    self::$dojoBaseLocation = self::$tukosBaseLocation;

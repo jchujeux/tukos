@@ -1,6 +1,6 @@
 define(["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom-construct",  "dojo/dom-style", "dojo/Deferred",  "dijit/_WidgetBase", "dojox/charting/Chart",
-        "dojox/charting/themes/ThreeD", "dojox/charting/StoreSeries", "dojo/store/Observable", "dojo/store/Memory"/*, "dstore/Memory"*/, "dojo/ready", "tukos/utils", "tukos/widgets/widgetCustomUtils"], 
-function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, Observable, Memory/*, DMemory*/, ready, utils, wcutils){
+        "dojox/charting/themes/ThreeD", "dojox/charting/StoreSeries", "dojo/store/Observable", "dojo/store/Memory"/*, "dstore/Memory"*/, "dojo/ready", "tukos/utils", "tukos/evalutils", "tukos/widgets/widgetCustomUtils"], 
+function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, Observable, Memory/*, DMemory*/, ready, utils, evalutils, wcutils){
     var classesPath = {
         Default:  "dojox/charting/plot2d/", Columns: "dojox/charting/plot2d/", ClusteredColumns: "dojox/charting/plot2d/", Lines: "dojox/charting/plot2d/", Areas: "dojox/charting/plot2d/", Pie: "dojox/charting/plot2d/",
         Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "tukos/widgets/", Axis2d:  "*dojox/charting/axis2d/Default", Tooltip: "dojox/charting/action2d/", BasicGrid: "tukos/",
@@ -77,6 +77,9 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
                     for (var plotName in this.plots){
                         var plotOptions = this.plots[plotName];
                         plotOptions.type = this.chartClasses[plotOptions.plotType];
+						if (typeof plotOptions.styleFunc === 'string'){
+							plotOptions.styleFunc = evalutils.eval(plotOptions.styleFunc);
+						}
                         this.chart.addPlot(plotName, plotOptions);
 	                    if (this.chartClasses['Tooltip']){
 	                    	plotOptions.tooltip = new this.chartClasses['Tooltip'](this.chart, plotName);
@@ -85,19 +88,23 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 	                    	plotOptions.mouseZoomAndPan = new this.chartClasses['MouseZoomAndPan'](this.chart, plotName);
 	                    }
                     }
-            		lang.hitch(this, this.createTableWidget)();
+					if (this.tableAtts){
+						lang.hitch(this, this.createTableWidget)();
+					}            		
                     this.onLoadDeferred.resolve();
                 }), 0);
             }));
             this.watch('style', lang.hitch(this, function(){
             	this.set('value', this.value);
             }));
-            this.watch('showTable', lang.hitch(this, function(){
-            	this.set('value', this.value);
-            }));
-            this.watch('tableWidth', lang.hitch(this, function(){
-            	this.set('value', this.value);
-            }));
+            if (this.tableAtts){
+				this.watch('showTable', lang.hitch(this, function(){
+	            	this.set('value', this.value);
+	            }));
+	            this.watch('tableWidth', lang.hitch(this, function(){
+	            	this.set('value', this.value);
+	            }));
+			}
             this.watch('chartHeight', lang.hitch(this, function(){
             	this.set('value', this.value);
             }));
@@ -121,18 +128,20 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
                 this.onLoadDeferred.then(lang.hitch(this, function(){
                     var chart = this.chart, showTable = this.showTable, tableNode = this.tableNode, chartNode = this.chartNode, width = dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height"),
                     	tableHeight = (parseInt(height)-20) + 'px';
-                	if (showTable === 'yes'){
-                		dst.set(this.table, {tableLayout: "fixed"});
-                		dst.set(tableNode, {display: "block"});
-                		dst.set(tableNode.parentNode, {width: this.tableWidth || '20%'});
-                		this.tableWidget.set('maxHeight', tableHeight);
-                		this.tableWidget.set('value', value.tableStore || value.store);
-                	}else{
-                		if (tableNode){
-                    		dst.set(tableNode, {display: "none"});   
-                    		dst.set(this.table, {tableLayout: "auto"});
-                		}
-                	}
+                	if (this.tableAtts){
+						if (showTable === 'yes'){
+	                		dst.set(this.table, {tableLayout: "fixed"});
+	                		dst.set(tableNode, {display: "block"});
+	                		dst.set(tableNode.parentNode, {width: this.tableWidth || '20%'});
+	                		this.tableWidget.set('maxHeight', tableHeight);
+	                		this.tableWidget.set('value', value.tableStore || value.store);
+	                	}else{
+	                		if (tableNode){
+	                    		dst.set(tableNode, {display: "none"});   
+	                    		dst.set(this.table, {tableLayout: "auto"});
+	                		}
+	                	}
+					}
                 	dst.set(chartNode, {height: height});
 					for (var axisName in value.axes){
                             chart.addAxis(axisName, utils.mergeRecursive(this.axes[axisName], value.axes[axisName]));

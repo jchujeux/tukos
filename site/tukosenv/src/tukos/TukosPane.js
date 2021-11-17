@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/ready", "dijit/layout/ContentPane", "tukos/widgetUtils", "tukos/_TukosLayoutMixin", "tukos/_TukosPaneMixin",  "tukos/widgets/WidgetsHider"], 
-    function(declare, lang, dct, ready, ContentPane, wutils, _TukosLayoutMixin, _TukosPaneMixin, WidgetsHider){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dijit/layout/ContentPane", "tukos/widgetUtils", "tukos/_TukosLayoutMixin", "tukos/_TukosPaneMixin"], 
+    function(declare, lang, dct, ContentPane, wutils, _TukosLayoutMixin, _TukosPaneMixin){
     return declare([ContentPane, _TukosLayoutMixin, _TukosPaneMixin], {
         postCreate: function(){
             this.inherited(arguments);
@@ -23,20 +23,18 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/re
         },
         
         loadPane: function(){
-        	var paneTable = this.tableLayout(this.layout, this, lang.hitch(wutils, wutils.setWatchers)); 
+        	var self = this;
+			this.tableLayout(this.layout, this, lang.hitch(wutils, wutils.setWatchers)); 
             this.onInstantiated(lang.hitch(this, function(){
                 this.markIfChanged = true;
                 this.watchOnChange = true;
                 this.watchContext = 'user';
                 if (this.widgetsHider){
-                    var hiderArgs = this.widgetsHiderArgs || {}, spanOrDiv = hiderArgs.span || "div", place = hiderArgs.place, widgetsHider = new WidgetsHider(lang.mixin({form: this}, hiderArgs), dojo.doc.createElement(spanOrDiv));
-                    if (place){
-                        ready(function(){
-                            dct.place(widgetsHider.domNode, place.refNode, place.where);                        	
-                        });                        	
-                    }else{
-                    	this.addChild(widgetsHider);
-                    }
+					require(["tukos/WidgetsHiderButton"], function(WidgetsHiderButton){
+						self.widgetsHiderButton = new WidgetsHiderButton({form: self, 'class': 'ui-icon dgrid-hider-toggle'});
+						self.widgetsHiderButton.set('iconClass', 'ui-icon dgrid-hider-toggle');
+						dct.place(self.widgetsHiderButton.domNode, self.domNode);
+					});
                 }
             }));
             this.isLoaded = true;     	

@@ -86,7 +86,7 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
 		domClass.add(this.domNode, "dijitTableLayout");
 
 		// Call startup on all child widgets
-		arrayUtil.forEach(children, function(child){
+		children.forEach(function(child){
 			if(!child.started && !child._started) {
 				child.startup();
 			}

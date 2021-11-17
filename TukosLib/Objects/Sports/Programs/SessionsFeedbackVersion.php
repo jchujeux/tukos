@@ -14,7 +14,7 @@ Abstract class SessionsFeedbackVersion {
     }
     public function getFormDataWidgets(){
         $dataWidgets = array_merge(
-            array_intersect_key($this->view->dataWidgets, array_flip($this->formObjectWidgets())), ['sportsman' => ViewUtils::textBox($this->view, 'name', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '100%']]]])]
+            array_intersect_key($this->view->dataWidgets, array_flip($this->formObjectWidgets())), ['sportsman' => ViewUtils::textBox($this->view, 'name', ['atts' => ['edit' => ['readonly' => true, 'style' => ['color' => 'grey', 'width' => '100%', 'fontWeight' => 'bolder']]]])]
         );
         $dataWidgets['id']['atts']['edit']['hidden'] = true;
         $dataWidgets['sport']['atts']['edit']['storeArgs']['data'] = Utl::idsNamesStore(['running', 'bicycle', 'swimming', 'bodybuilding'], $this->view->tr);

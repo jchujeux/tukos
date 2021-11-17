@@ -34,10 +34,10 @@ class View extends EditView{
                                 'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                                 'widgets' => ['painduring', 'painafter', 'painnextday']
                             ],
-                            /*'row3' => [
-                                'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
-                                'widgets' => ['mood', 'fatigue']
-                            ],*/
+                            'row3' => [
+                                'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true],
+                                'widgets' => ['duration', 'distance', 'elevationgain', 'intensity', 'gcmechload']
+                            ],
                             'row4' => [
                                 'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                                 'widgets' => ['otherexceptional', 'comments']

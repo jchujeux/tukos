@@ -4,6 +4,7 @@ function (ready, dom, dst, dct, View, Heading, ToolbarButton, ObjectPane, TukosT
 		initialize: function(){
 			var appLayout = new View(null, "appLayout"), formContent = Pmg.cache.formDescription[0].formContent;
 			formContent.viewPane = appLayout;
+        	appLayout.addChild(appLayout.heading = new Heading({fixed: 'top'}));
         	appLayout.addChild(appLayout.actionsHeading = new Heading());
 			var form = new ObjectPane(formContent);
     		appLayout.addChild(new TukosTextarea({id: form.id + 'feedback', style: {
@@ -14,7 +15,7 @@ function (ready, dom, dst, dct, View, Heading, ToolbarButton, ObjectPane, TukosT
 		    ready(function(){
 			   	Pmg.setFeedback(Pmg.cache.feedback);
 			   	appLayout.startup();
-			   	dct.place("<span>" + formContent.title + "</span>", appLayout.actionsHeading.domNode);
+			   	dct.place("<span>" + formContent.title + "</span>", appLayout.heading.domNode);
 		    });
 		}
 	}

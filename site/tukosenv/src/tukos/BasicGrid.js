@@ -16,7 +16,9 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
                      ],
                      idCol: [{atts: {label: Pmg.message('editinnewtab'), onClick: function(evt){self.editInNewTab(self)}}}].concat(
                     		 [{atts: {label: Pmg.message('togglerowheight'), onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}]),
-                     header: []
+                     header: [
+                        {atts: {label: Pmg.message('exporttocsv'), onClick: lang.hitch(this, function(evt){this.exportToCsv(this);})}}
+					]
             };
         },
         setColArgsFunctions: function(colArgs){
@@ -38,9 +40,9 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         		});
         	}
             ['maxHeight', 'maxWidth', 'minWidth', 'width'].forEach(function(att){
-			if (self[att]){
-				self.set(att, self[att]);
-			}	
+				if (self[att]){
+					self.set(att, self[att]);
+				}	
             });
             this.formulaCache = {};
             var copyCellCallback = function(evt){
@@ -85,13 +87,20 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             }
             this.on(on.selector(".dgrid-row, .dgrid-header", "contextmenu"), lang.hitch(this, this.contextMenuCallback));
         },
-		resize: function(){
-			this.adjustMinWidthAutoColumns('min');
-			this.inherited(arguments);
-			/*if (this.adjustMinWidthAutoColumns('min')){
+		/*resize: function(){
+			if (!this.isBulk){
+				var customizationPath = this.customizationPath;
+				this.customizationPath = '';
+				console.log('grid: ' + this.widgetName + ' computed width: ' + dst.getComputedStyle(this.domNode).width);
+				if (this.freezeWidth){
+					//dst.set(this.domNode, 'width', (parseInt(dst.getComputedStyle(this.domNode).width) - 24) + 'px');
+					this.freezeWidth = true;
+				}
+				this.adjustMinWidthAutoColumns('auto');
 				this.inherited(arguments);
-			}*/
-		},
+				this.customizationPath = customizationPath;
+			}
+		},*/
 		_setAllowApplicationFilter: function(newValue){
         	wutils.watchCallback(this, 'allowApplicationFilter', this.allowApplicationFilter, newValue);
         	this.allowApplicationFilter = newValue;
@@ -105,6 +114,15 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         },
     	_setMaxHeight: function(value){
             this.bodyNode.style.maxHeight = value;
+        },
+    	_setMaxWidth: function(value){
+            this.bodyNode.style.maxWidth = value;
+        },
+    	_setMinHeight: function(value){
+            this.bodyNode.style.mainHeight = value;
+        },
+    	_setMinWidth: function(value){
+            this.bodyNode.style.minWidth = value;
         },
         canEditRow: function(object){
             return !this.grid.disabled && ((typeof object.canEdit === "undefined") || object.canEdit);
@@ -221,7 +239,33 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 						node.innerHTML = data[field] = response.item[targetCol];	
         	}));
         },
-        toggleFormatterRowHeight: function(grid){
+        exportToCsv: function(grid){
+			grid.collection.sort(grid.sort).fetch().then(function(rows){
+				var element = document.createElement('a'), csvContent, activeColumns = [], headerContent = '';
+				utils.forEach(grid.columns, function(column, col){
+					if (col != "0" && !column.hidden){
+						activeColumns.push(col);
+						headerContent += '"' + column.label.replaceAll('"', '""') +  '"' + ",";							
+					}
+				});
+				csvContent = headerContent.slice(0, -1);
+				rows.forEach(function(rowObject){
+					var rowContent = "";
+					csvContent += "\r\n";
+					activeColumns.forEach(function (col){
+						rowContent += '"' + (rowObject[col] ? rowObject[col].replaceAll('"', '""') : '') +  '"' + ",";							
+					});
+					csvContent += rowContent.slice(0, -1);
+				});
+				element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+				element.setAttribute('download', "export.csv");
+				element.style.display = 'none';
+				document.body.appendChild(element);
+				element.click();
+		  		document.body.removeChild(element);
+			});
+		},
+		toggleFormatterRowHeight: function(grid){
             var row = grid.clickedCell.row,
                 column = grid.clickedCell.column;
             grid.rowHeights[row.id] = (grid.rowHeights[row.id] == column.maxHeightFormatter ? column.minHeightFormatter : column.maxHeightFormatter); 

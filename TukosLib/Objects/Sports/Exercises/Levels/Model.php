@@ -9,7 +9,7 @@ class Model extends AbstractModel {
         $colsDefinition =  [
             'level'      => "MEDIUMINT DEFAULT NULL"
         ];
-        parent::__construct($objectName, $translator, 'sptexerciseslevels', ['parentid' => ['organizations']], [], $colsDefinition, [], ['custom']);
+        parent::__construct($objectName, $translator, 'sptexerciseslevels', ['parentid' => ['organizations', 'sptexerciseslevels']], [], $colsDefinition, [], ['custom']);
     }
     function initialize($init=[]){
         return parent::initialize(array_merge(['date' => date('Y-m-d')], $init));

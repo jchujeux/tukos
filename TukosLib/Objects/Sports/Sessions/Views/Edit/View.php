@@ -19,7 +19,7 @@ class View extends EditView{
             ],
             'row1b' => [
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-                'widgets' => array_merge(['mode', 'distance', 'elevationgain', 'feeling', 'athletecomments', 'athleteweeklyfeeling', 'coachcomments', 'coachweeklycomments', 'sensations', 'perceivedeffort', 'mood', 'sts', 'lts', 'tsb'], 
+                'widgets' => array_merge(['mode', 'distance', 'elevationgain'/*, 'feeling'*/, 'athletecomments', 'coachcomments', 'sensations', 'perceivedeffort', 'mood', 'sts', 'lts', 'tsb'], 
                                          GC::sessionsWidgets($this->view))
             ],
             'row2' => [

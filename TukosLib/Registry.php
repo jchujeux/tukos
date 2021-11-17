@@ -75,13 +75,13 @@ class Registry{
             $this->request['object'] = strtolower($this->request['object']);
             $this->appName = $this->setAppName($this->request['application']);
             $this->controller = $this->request['controller'];
-            $this->appUrl          = Tfk::publicDir . "index20.php/{$this->appName}/";
+            $this->appUrl          = Tfk::$publicDir . "index20.php/{$this->appName}/";
             $this->pageUrl         = "{$this->appUrl}Page/";
             $this->dialogueUrl   = "{$this->appUrl}Dialogue/";
         }
         $this->urlQuery = $_GET;
         $this->organization = Utl::extractItem('org', $this->urlQuery, 'tukos');
-        $this->logo = ['tukos' => Tfk::publicDir . 'images/tukosswissknife.jpg', 'tds' => Tfk::publicDir . 'images/tdspetit.jpg'][$this->organization];
+        $this->logo = ['tukos' => Tfk::$publicDir . 'images/tukosswissknife.jpg', 'tds' => Tfk::$publicDir . 'images/tdspetit.jpg'][$this->organization];
         $this->headerBanner = ['tukos' => 'headerBanner', 'tds' => 'tdsHeaderBanner'][$this->organization];
     }        
     public function setAppName($appName){

@@ -1,12 +1,15 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/Deferred", "dojo/promise/all",  "dojoFixes/dojox/layout/TableContainer", "tukos/PageManager", "tukos/utils", "tukos/widgetUtils", "tukos/widgets/WidgetsLoader"], 
-    function(declare, lang, deferred, all, TableContainer, Pmg, utils, wutils, widgetsLoader){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all",  "dojo/has!mobileTukos?tukos/mobile/TableContainer:dojoFixes/dojox/layout/TableContainer", "tukos/PageManager", "tukos/utils", "tukos/widgetUtils", "tukos/widgets/WidgetsLoader"], 
+    function(declare, lang, all, TableContainer, Pmg, utils, wutils, widgetsLoader){
     return declare(null, {
 
         constructor: function(){
             this.instantiatingWidgets = {};
         },
-        tableLayout:    function(layout, fromParent, optionalWidgetInstantiationCallback){
-            var self = this, instantiatingWidgets = [], widgets = [];
+        tableLayout:    function(layout, fromParent, optionalWidgetInstantiationCallback, optionalCommonWidgetsAtts){
+            var self = this, instantiatingWidgets = [], widgets = [], commonAtts = {pane: this, form: this};
+			if (typeof optionalCommonWidgetsAtts === 'object'){
+				commonAtts = utils.mergeRecursive(commonAtts, optionalCommonWidgetsAtts);
+			}
             if (layout.tableAtts){
                 var parent  = new TableContainer(layout.tableAtts, dojo.doc.createElement('div'));
                 fromParent.addChild(parent);
@@ -18,9 +21,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/Deferred", "dojo/promise
             }
             for (var i in layout.widgets){
                 var widgetName = layout.widgets[i], widgetDescription = this.widgetsDescription[widgetName];
-                if (widgetDescription){
-	                var theDijitType = this.widgetsDescription[widgetName]['type'];
-	                var theDijitAtts  = this.widgetsDescription[widgetName]['atts'];
+                if (widgetDescription && widgetDescription.atts){
+	                var theDijitType = widgetDescription.type;
+	                var theDijitAtts  = widgetDescription.atts;
 	                this.widgetsName.push(widgetName);
 	                theDijitAtts.id  = this.id + widgetName;
 	                theDijitAtts.pane  = theDijitAtts.form = this;

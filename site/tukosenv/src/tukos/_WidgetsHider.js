@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dijit/popup", "dijit/TooltipDialog"], 
-function(declare, lang, dct, dst, popup, TooltipDialog){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dijit/popup", "dijit/TooltipDialog", "dijit/focus", "tukos/PageManager"], 
+function(declare, lang, dct, dst, popup, TooltipDialog, focus, Pmg){
     return declare(TooltipDialog, {
         postCreate: function(){
         	this.inherited(arguments);
@@ -18,12 +18,22 @@ function(declare, lang, dct, dst, popup, TooltipDialog){
                 }
             };
             this.set('content', hiderTable);
-            document.body.appendChild(this.domNode);
+			if (!Pmg.isMobile()){
+				this.onBlur = function(){
+					setTimeout(function(){
+						self.close();
+					}, 300);
+				}
+			}
+            //document.body.appendChild(this.domNode);
 		},
 		close: function(){
 			if (this.isOpened){
 				popup.close(this);
 				this.isOpened = false;
+				if (Pmg.isMobile()){
+					this.button.set('icon',  "mblDomButtonBlueCirclePlus");
+				}
 				return true;
 			}else{
 				return false;
@@ -31,7 +41,11 @@ function(declare, lang, dct, dst, popup, TooltipDialog){
 		},
 		toggleHiderMenu: function(){
 			if (!this.close()){
-				popup.open({popup: this, around: this.parent.domNode});
+                if (Pmg.isMobile()){
+					this.button.set('icon', "mblDomButtonBlueCircleMinus");
+				}
+				popup.open({popup: this, around: this.buttonNode});
+				focus.focus(this.domNode);
 				this.isOpened = true;
 			}
         },

@@ -6,6 +6,7 @@ function(declare, lang, dst, Widget, _FocusMixin, TextBox, StoreSelect, wutils, 
             var self = this;
             this.numberField = new TextBox(this.number, dojo.doc.createElement('span'));
             this.numberField.watch('value', lang.hitch(wutils, wutils.subWidgetWatchCallback, this, this.numberField));
+            dst.set(this.numberField.domNode, 'display', 'none');
             this.domNode.appendChild(this.numberField.domNode); 
             this.unitField = new StoreSelect(this.unit, dojo.doc.createElement('span')); 
             this.unitField.watch('value', lang.hitch(wutils, wutils.subWidgetWatchCallback, this, this.unitField));
@@ -15,7 +16,7 @@ function(declare, lang, dst, Widget, _FocusMixin, TextBox, StoreSelect, wutils, 
             	}
             	if (!newValue || (self.noNumberUnit || {})[newValue]){
             		self.numberField.set('value', '');
-            		self.numberField.set('disabled', true);
+            		//self.numberField.set('disabled', true);
             		dst.set(self.numberField.domNode, 'display', 'none');
             	}else{
             		self.numberField.set('disabled', false);
@@ -23,10 +24,9 @@ function(declare, lang, dst, Widget, _FocusMixin, TextBox, StoreSelect, wutils, 
             	}
             });
             this.domNode.appendChild(this.unitField.domNode);   
-            dst.set(self.numberField.domNode, 'display', 'none');
         },
         focus: function(){
-            this.numberField.focus();
+            this.numberField.domNode.style.display === 'none' ? this.unitField.focus() : this.numberField.focus();
         },
         setStyleToChanged: function(){
             this.numberField.set('style', {backgroundColor: wutils.changeColor});
@@ -52,7 +52,8 @@ function(declare, lang, dst, Widget, _FocusMixin, TextBox, StoreSelect, wutils, 
             }
         },
         _getValueAttr: function(){
-            return this.concat ? this.numberField.get('value') + this.unitField.get('value') : JSON.stringify([this.numberField.get('value'), this.unitField.get('value')]);
+            var numberValue = this.numberField.get('value'), unitValue = this.unitField.get('value');
+			return this.concat ? numberValue + unitValue : ((numberValue == '' && unitValue == '') ? '' : JSON.stringify([numberValue, unitValue]));
         },
 		_getDisplayedValueAttr: function(){
 			var unitValue = this.unitField.get('value');

@@ -24,6 +24,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "do
                 widthAndHeightConstraints = {stylewidth: stylewidth, minWidth: minWidth, maxWidth: maxWidth, styleheight: styleheight, minHeight: minHeight, maxHeight: maxHeight},
                 dgridCustomAtts = {
                     maxHeight: {att: 'maxHeight', name: messages.maxHeight, units: sizeConstraintUnits}, 
+                    maxWidth: {att: 'maxWidth', name: messages.maxWidth, units: sizeConstraintUnits}, 
                     allowApplicationFilter: {att: 'allowApplicationFilter', name: messages.allowApplicationFilter, units: filtersUnits},
                     hideServerFilters: {att: 'hideServerFilters', name: messages.hideServerFilters, units: filtersUnits}
                 },

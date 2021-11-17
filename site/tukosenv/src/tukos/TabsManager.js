@@ -54,7 +54,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
             ready(lang.hitch(this, function(){
                 this.container.addChild(theNewTab);
                 Pmg.setFeedback(args.feedback, Pmg.message('tabCreated'));
-                theNewTab.resize();
+                //theNewTab.resize();
             }));
             return theNewTab;
         },

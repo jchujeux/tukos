@@ -3,7 +3,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', "dojo/_base/window", 'dojo/_bas
     return declare(Dialog, {
         postCreate: function() {
             this.inherited(arguments);            
-            var self = this, label, div, remember = false;            
+            var self = this, label, div;            
             div = dct.create('div', {className: 'dijitDialogPaneContent dialogConfirm'}, this.domNode, 'last');            
             this.domNode.appendChild((this.okButton = new Button({label: Pmg.message('Ok'), onClick: function(){self.dfd.resolve(true); self.hide();}})).domNode);
         	this.domNode.appendChild((this.cancelButton = new Button({label: Pmg.message('Cancel'), onClick: function(){self.dfd.cancel(true);self.hide();}})).domNode);

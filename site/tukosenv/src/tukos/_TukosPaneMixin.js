@@ -1,8 +1,24 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all", "dojo/on", "dojo/aspect", "dijit/registry", "tukos/utils",
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "dojo/promise/all", "dojo/on", "dojo/aspect", "dijit/registry", "tukos/utils",
          "tukos/widgetUtils", "tukos/evalutils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, when, all, on, aspect, registry, utils,  wutils, eutils, Pmg, messages){
+    function(declare, lang, Deferred, when, all, on, aspect, registry, utils,  wutils, eutils, Pmg, messages){
     return declare(null, {
-        decorate: function(widget){
+        widgetsBeingSet: {},
+		setAttrCompleted: function(widgetName){
+			var widgetsBeingSet = this.widgetsBeingSet;
+			if (widgetsBeingSet[widgetName]){
+				var setterDfd = new Deferred(true), watcher;
+				watcher = setInterval(function(){
+						if (!widgetsBeingSet[widgetName]){
+							setterDfd.resolve();
+							clearInterval(watcher);
+						}
+					}, 100);
+				return setterDfd;
+			}else{
+				return true;
+			}
+		},            
+		decorate: function(widget){
             var self = this;
             if (widget.afterActions){
 				utils.forEach(widget.afterActions, function(action, methodName){
@@ -12,6 +28,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
             if (widget.beforeActions){
 				utils.forEach(widget.beforeActions, function(action, methodName){
 					aspect.before(widget, methodName, lang.hitch(widget, eutils.eval(action, 'args')));
+				});
+			}
+			if (widget.aroundActions){
+				utils.forEach(widget.aroundActions, function(action, methodName){
+					aspect.around(widget, methodName, lang.hitch(widget, eutils.eval(action, 'originalName')));
 				});
 			}
 			require(["tukos/menuUtils", "tukos/widgets/widgetCustomUtils"], function(mutils, wcutils){
@@ -133,6 +154,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
 		changesCount: function(){
 			return utils.count(this.changedWidgets);
 		},
+		userChangesCount: function(){
+			return utils.count(this.userChangedWidgets);
+		},
        userHasChanged: function(){
     	   var hasChanged = {}, postElts = this.get('postElts');
     	   if (utils.some(this.userChangedWidgets, function(widget, widgetName){
@@ -145,9 +169,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
     	   }
     	   return utils.empty(hasChanged) ? false : hasChanged;
        },
-       checkChangesDialog: function(action, timeout){
+       checkChangesDialog: function(action, ignoreCustom, timeout){
            var changes = this.userHasChanged();
-       	if (!changes){
+       	if (!changes || (ignoreCustom && !changes.widgets)){
                return action();
            }else{
                return Pmg.confirmForgetChanges(changes).then(
@@ -309,7 +333,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/promise/all
             return urlArgs;
         },
         openAction: function(description){
-            return eutils.actionFunction(this, 'open', description);
+            return description ? (typeof description === 'string' ? eutils.actionFunction(this, 'open', description) : description()) : '';
         }
     });
 });

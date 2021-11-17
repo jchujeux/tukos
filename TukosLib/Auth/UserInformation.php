@@ -247,7 +247,7 @@ class UserInformation{
         if (!empty($acl)){
             $rights = false;
             foreach ($acl as $rule){
-                if ($rule['userid'] === $userId){
+                if ($rule['userid'] == $userId){
                     $rights = $rights = Utl::getItem('permission', $rule, false);
                     break;
                 }

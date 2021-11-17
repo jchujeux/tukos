@@ -7,7 +7,7 @@ use TukosLib\Objects\ViewUtils;
 class View extends AbstractView {
     
     function __construct($objectName, $translator=null){
-        parent::__construct($objectName, $translator, 'Organization', 'Description');
+        parent::__construct($objectName, $translator, 'Parent', 'Description');
         $customDataWidgets = [
             'level' => ViewUtils::storeSelect('level', $this, 'Level', [true, 'ucfirst', true])
         ];

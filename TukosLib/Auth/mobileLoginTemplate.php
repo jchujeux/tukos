@@ -4,6 +4,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <title>Tukos mobile Login</title>
+    <script type="text/javascript">
+    	dojoBaseLocation = "<?= $this->dojoBaseLocation ?>";<!-- used in deviceTheme.js -->
+    </script>
     <script type="text/javascript" src="<?= $this->dojoBaseLocation ?>dojox/mobile/deviceTheme.js"></script>
     <!-- dojo configuration options -->
     <script type="text/javascript">
@@ -44,8 +47,8 @@
 			}}}}
 		]};
         var loginView = new View(null, "loginView"), loginHeading = new Heading({label: "<?= $this->authentication?>"}), formLayout = new FormLayout(loginForm), 
-        	logoWidget = new Pane({innerHTML: '<img alt="logo" src=<?= $this->logo?> style="max-height: 40px; width: auto; float: right;">'});
-        loginHeading.addChild(logoWidget);
+        	logoWidget = new Pane({innerHTML: '<div style="text-align: center;"><img alt="logo" src=<?= $this->logo?> style="max-height: 80px; width: auto;"></div>'});
+        loginView.addChild(logoWidget);
         loginView.addChild(loginHeading);
         loginView.addChild(formLayout); 
 		loginView.startup();

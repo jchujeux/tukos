@@ -11,7 +11,6 @@ $phpDir = getenv('tukosPhpDir');
 require $phpDir . '/TukosLib/TukosFramework.php';
 
 Tfk::initialize('interactive', null, $phpDir);
-
 if (!empty(Tfk::$registry->route)) {
     if ($appName = Tfk::$registry->appName){
         $configure = $appName . '\\Configure';

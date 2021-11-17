@@ -38,7 +38,8 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
 		},
 		_getValueAttr: function(){
 			var values = this.get('values');
-			values[0] = utils.pad(values[0], 2);
+			values[0] = values[0] ? utils.pad(values[0], 2) : '00';
+			values[1] = values[1] || '00';
 			return 'T' + values.join(':') + ':00';
 		}
 	});
