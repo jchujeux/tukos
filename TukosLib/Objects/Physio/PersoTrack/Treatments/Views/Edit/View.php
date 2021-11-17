@@ -2,12 +2,13 @@
 namespace TukosLib\Objects\Physio\PersoTrack\Treatments\Views\Edit;
 
 use TukosLib\Objects\Views\Edit\View as EditView;
+use TukosLib\Objects\Sports\Programs\SessionsTracking;
 use TukosLib\Objects\Views\LocalActions;
 use TukosLib\Utils\Utilities as Utl;
 
 class View extends EditView{
     
-    use LocalActions;
+    use LocalActions, SessionsTracking;
     
     function __construct($actionController){
         parent::__construct($actionController);
@@ -23,7 +24,7 @@ class View extends EditView{
                         'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                         'contents' => [
                             'row1' => [
-                                'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'widgetWidths' => ['35%', '65%']],
+                                'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'widgetWidths' => ['35%', '65%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
                                 'contents' => [
                                     'col1' => [
                                         'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
@@ -31,7 +32,7 @@ class View extends EditView{
                                     ],
                                     'col2' => [
                                         'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
-                                        'widgets' => ['calendar', 'physiopersodailies'],
+                                        'widgets' => ['calendar', 'qsmchart', 'physiopersodailies'],
                                     ],
                                 ],
                             ],
@@ -53,6 +54,7 @@ class View extends EditView{
         ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
         $this->onOpenAction = $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies') . $this->view->openEditAction();
+        $this->setSessionsTrackingActionWidget(false, 'physiopersosessions', ['duration', 'distance', 'elevationgain', 'gcavghr', 'gcmechload']);
     }
 }
 ?>

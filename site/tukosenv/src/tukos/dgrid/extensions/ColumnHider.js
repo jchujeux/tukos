@@ -33,7 +33,7 @@ define([
 		// Given one of the checkboxes from the hider menu,
 		// return the id of the corresponding column.
 		// (e.g. gridIDhere-hider-menu-check-colIDhere -> colIDhere)
-		return cb.id.substr(grid.id.length + 18);
+		return grid._unescapedIds[cb.id.substr(grid.id.length + 18)];
 	}
 
 	return declare(null, {
@@ -61,6 +61,9 @@ define([
 		// _columnHiderCheckboxes: Object
 		//		Hash containing checkboxes generated for menu items.
 		_columnHiderCheckboxes: null,
+		// JCH need to get id from the escaped id
+		_unescapedIds: {},
+
 
 		_renderHiderMenuEntries: function () {
 			// summary:
@@ -106,7 +109,7 @@ define([
 				checkId,
 				checkbox,
 				label;
-
+			this._unescapedIds[replacedId] = id;
 			if (col.hidden) {
 				// Hide the column (reset first to avoid short-circuiting logic)
 				col.hidden = false;

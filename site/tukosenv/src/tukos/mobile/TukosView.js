@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "tukos/TabOnClick", "tukos/PageManager"], 
-    function(declare, lang, View, Heading, ToolBarButton, TabOnClick, Pmg){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "tukos/TabOnClick", "tukos/PageManager"], 
+    function(declare, lang, ready, View, Heading, ToolBarButton, TabOnClick, Pmg){
     var paneModules = {objectPane: "tukos/mobile/ObjectPane", tukosPane: "tukos/TukosPane", navigationPane: "tukos/mobile/NavigationPane"};
 	return declare(View, {
     	postCreate: function (){    
@@ -56,8 +56,16 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojox/mobile/View", "dojox/mo
         	}}).placeAt(this.heading, 2);
         	require([paneModules[this.paneModuleType]], function(PaneModule){
             	self.form = new PaneModule(viewPaneContent);
+				if (self.actionsHeading){
+					new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){
+	             		console.log('here is where I need to act');
+	             		self.destroy();
+	             	}}).placeAt(self.actionsHeading, 1);
+				}
             	self.form.noLoadingIcon = true;
-            	self.addChild(self.form);        		
+				ready(function(){
+					self.addChild(self.form);        		
+				});	
         	});
         },
         destroy: function(){

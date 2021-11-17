@@ -14,7 +14,7 @@ class Save extends AbstractAction{
         $savedId = $this->saveViewModel->save($query);
         if ($savedId){
             $response = [];
-            $this->getViewModel->respond($response, ($isBackOffice = $this->request['object'] === 'backoffice') ? $query : ['id' => $savedId]);
+            $this->getViewModel->respond($response, ($isBackOffice = $this->request['object'] === 'backoffice') ? array_merge($query, ['id' => $savedId]) : ['id' => $savedId]);
             if (!$isBackOffice){
                 $response['title'] = $this->view->tabEditTitle($response['data']['value']);
             }

@@ -28,12 +28,15 @@ EOT;
 						$this->gridWidgetName => ['startTime' => 'startdatetime', 'endTime' => 'enddatetime', 'duration' => 'duration', 'allDay' => 'allday', 'summary' => 'name', 'comments' => 'comments'],
 				],
 				'onWatchLocalAction' => ['date' => [
-						'displayeddate' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => 
-							"var newDisplayedDate = dutils.formatDate(newValue), lowBound = sWidget.form.valueOf('" . $start . "'), highBound = sWidget.form.valueOf('" . $end . "');\n" .
-							"if ((lowBound && newDisplayedDate < lowBound) || (highBound && newDisplayedDate > highBound)){\n" .
-							"	Pmg.setFeedback('" . $this->tr('beyondcalendarrange') . "', '', '\\n', true); \n" .
-							"}\n" .
-							"return newDisplayedDate;"
+						'displayeddate' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => <<<EOT
+var newDisplayedDate = dutils.formatDate(newValue), lowBound = sWidget.form.valueOf('$start'), highBound = sWidget.form.valueOf('$end');
+if ((lowBound && newDisplayedDate < lowBound) || (highBound && newDisplayedDate > highBound)){
+	Pmg.setFeedback('{$this->tr('beyondcalendarrange')}', '', null, true);
+}else{
+    Pmg.setFeedback('');
+}
+return newDisplayedDate;
+EOT
 						]],
 				    $this->gridWidgetName => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter'),
 				]],
@@ -45,9 +48,9 @@ EOT;
 	protected function  displayedDateDescription($custom = []){
 		return Utl::array_merge_recursive_replace(
 			ViewUtils::tukosDateBox($this, 'displayeddate', ['atts' => ['edit' => [
-				   'value' => date('Y-m-d'),
-						'onWatchLocalAction' => ['value' => [
-							'calendar' => ['date' => ['triggers' => ['server' => false, 'user' => true], 'action' => "return newValue;" ]],
+				'value' => date('Y-m-d'),
+				'onWatchLocalAction' => ['value' => [
+							'calendar' => ['date' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return newValue;" ]],
 						    $this->gridWidgetName => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter'),
 						]],
 			]]]),
@@ -60,7 +63,6 @@ EOT;
   if (allowApplicationFilter === 'yes'){
 	var mondayStamp = dutils.getDayOfWeek(1, typeof date === 'string' ? dutils.parseDate(date) : dutils.parseDate(dutils.formatDate(date)));
 	var nextMondayStamp = dojo.date.add(mondayStamp, 'week', 1);
-	//store.applicationCollectionFilter = new store.Filter().gte(startDateTimeCol, dutils.toISO(mondayStamp)).lt(endDateTimeCol,dutils.toISO(nextMondayStamp));
     store.applicationCollectionFilter = new store.Filter().or(new store.Filter().eq(startDateTimeCol, undefined), new store.Filter().gte(startDateTimeCol, dutils.toISO(mondayStamp)).lt(endDateTimeCol,dutils.toISO(nextMondayStamp)));
   }else{
 	store.applicationCollectionFilter = new store.Filter();

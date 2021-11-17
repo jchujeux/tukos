@@ -272,15 +272,26 @@ define([
 				this._resizedColumns = true;
 			}
 		},
-		adjustMinWidthAutoColumns: function(mode){
+		adjustMinWidthAutoColumns: function(remainingRecursions){
 			var self = this, needsResize = false;
 			utils.forEach (this.columns, function(column, field){
-				if (column.minWidth  && mode === 'reset' ? true : column.headerNode.offsetWidth < column.minWidth){
-					resizeColumnWidth(self, field, mode === "reset" ? "auto" : (column.minWidth || self.minWidth), null, false);
-					needsResize = true;
+				if (!column.width && !column.hidden){
+					if (column.minWidth  && column.headerNode.offsetWidth < column.minWidth){
+						resizeColumnWidth(self, field, column.minWidth, null, false);
+						needsResize = true;
+					}else if(column.maxWidth  && column.headerNode.offsetWidth > column.maxWidth){
+						resizeColumnWidth(self, field, column.maxWidth, null, false);
+						needsResize = true;
+					}
 				}
 			});
-			return needsResize;
+			
+			if (needsResize && remainingRecursions){
+				return this.adjustMinWidthAutoColumns((remainingRecursions || 5) - 1);
+			}else{
+				console.log('adjustMinWidthAutoColumns - remaining recursions: ', remainingRecursions);
+				return needsResize;
+			}
 		},
 		_configColumn: function (column) {
 			this.inherited(arguments);

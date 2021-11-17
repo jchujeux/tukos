@@ -2,11 +2,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/h
          "tukos/widgets/editor/ShortCutKeys", "tukos/expressions",
          "dijit/_editor/plugins/FontChoice", "dijit/_editor/plugins/TextColor", "tukos/widgets/editor/plugins/LinkDialog",  "dojoFixes/dijit/_editor/plugins/FullScreen",
          "dijit/_editor/plugins/Print", "dojoFixes/dijit/_editor/plugins/ViewSource",
-         "dojox/editor/plugins/StatusBar", "dojox/editor/plugins/FindReplace", 
+         "dojox/editor/plugins/StatusBar", "dojox/editor/plugins/FindReplace", "tukos/widgets/editor/plugins/Smiley",
          "tukos/widgets/editor/plugins/TablePlugins", "tukos/utils", "tukos/hiutils", "tukos/widgets/editor/plugins/TukosLinkDialog",
          "tukos/widgets/editor/plugins/TemplateProcess","tukos/widgets/editor/plugins/Inserter","tukos/widgets/editor/plugins/MathMLEdit","tukos/widgets/editor/plugins/SelectionEditor","tukos/widgets/editor/plugins/FitImage",
          "tukos/StoreComboBox", "dojo/domReady!"], 
-    function(declare, lang, Deferred, has, domStyle, dcl, when, aspect, Editor, ShortCutKeys, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace,
+    function(declare, lang, Deferred, has, domStyle, dcl, when, aspect, Editor, ShortCutKeys, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace, Smiley,
     		 TablePlugins, utils, hiutils, TukosLinkDialog, TemplateProcess, Inserter, MathMLEdit, SelectionEditor, FitImage, StoreComboBox){
 	return declare([Editor, ShortCutKeys], {
 
@@ -15,7 +15,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/h
                             'justifyLeft', 'justifyCenter', 'justifyRight','justifyFull', 'insertHorizontalRule'/*, 'EnterKeyHandling'*/];
             args.extraPlugins = args.extraPlugins ||  
                 ['fontName', 'fontSize', 'formatBlock', 'foreColor', 'hiliteColor', 'createLink', 'unlink', 'insertImage', 'fullScreen', {name: 'viewSource', stripScripts: false}, 'TukosLinkDialog'/*, 'ChoiceList', 'TemplateProcess'*/, 
-                 'statusBar', 'insertTable', 'modifyTable', 'modifyTableSelection', 'Inserter', 'MathMLEdit', 'print', 'FindReplace', 'SelectionEditor', 'FitImage'];
+                 'statusBar', 'insertTable', 'modifyTable', 'modifyTableSelection', 'Inserter', 'MathMLEdit', 'print', 'FindReplace', 'Smiley', 'SelectionEditor', 'FitImage'];
             if (args.optionalPlugins){
                 args.extraPlugins = args.extraPlugins.concat(args.optionalPlugins);
             }

@@ -127,13 +127,10 @@ th.dgrid-cell {
 	text-align: center;
 }
 
+
 .dgrid-hider-menu {
 	width: 130px;
 	color: black;
-}
-
-.dijitTableLayout {
-	
 }
 
 .tukos-hider-toggle {
@@ -144,6 +141,7 @@ th.dgrid-cell {
 	position: absolute;
 	right: 0px;
 	top: 0px;
+	z-index: 99999;
 }
 
 .tukos-hider-menu {

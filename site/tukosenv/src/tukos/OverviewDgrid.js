@@ -24,6 +24,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
         },
         resize: function(){
 			var self = this, previousScrollPosition = this.getScrollPosition();
+			this.adjustMinWidthAutoColumns(5);
 			this.inherited(arguments);
 			setTimeout(function(){
 				self.scrollTo(previousScrollPosition);

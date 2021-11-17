@@ -1,7 +1,7 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_GridUserFilterMixin",
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_GridUserFilterMixin",
          "tukos/_GridEditMixin", "tukos/_GridEditDialogMixin", "tukos/BasicGrid", "dgrid/Tree", "tukos/dstore/MemoryTreeObjects", "tukos/dstore/LazyMemoryTreeObjects",
          "tukos/utils", "tukos/evalutils", "tukos/menuUtils", "tukos/widgetUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, _GridUserFilterMixin, _GridEditMixin, _GridEditDialogMixin, BasicGrid, Tree, MemoryTreeObjects, LazyMemoryTreeObjects,
+    function(declare, lang, dst, _GridUserFilterMixin, _GridEditMixin, _GridEditDialogMixin, BasicGrid, Tree, MemoryTreeObjects, LazyMemoryTreeObjects,
     		 utils, eutils, mutils, wutils, Pmg, messages){
     var widget =  declare([BasicGrid, Tree, _GridUserFilterMixin,  _GridEditMixin, _GridEditDialogMixin], {
 
@@ -41,25 +41,42 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/_GridUserFilterMixin",
         },
         resize: function(){
 			var self = this, previousScrollPosition = this.getScrollPosition(), viewNode;
-			this.inherited(arguments);
-	    	if (viewNode = this.form.domNode.parentNode){
-		    	var style = this.bodyNode.style, bodyHeight = parseInt(window.getComputedStyle(document.body).getPropertyValue('height')), viewHeight = parseInt(window.getComputedStyle(viewNode).getPropertyValue('height')), oldMaxWidth = style.maxWidth, oldMaxHeight = style.maxHeight,
-		    		maxHeight, newMaxHeight;
-				style.maxWidth = parseInt(window.getComputedStyle(viewNode).getPropertyValue('width'));
-				if (!style.maxHeight && viewHeight !== this.previousViewHeight){
-			    	maxHeight = style.maxHeight === '' ? 0 : parseInt(style.maxHeight);
-			    	style.maxHeight = (maxHeight + bodyHeight - viewHeight) + 'px';
-			    	newMaxHeight = parseInt(style.maxHeight);
-			    	this.previousViewHeight = viewHeight;
+			if (!this.isBulk && !this.hidden){
+				var customizationPath = this.customizationPath;// so that personnalization is not changed if a column has a width change during resize
+				this.customizationPath = '';
+				if (this.freezeWidth){
+					if (this.form.isLastInitialResize){
+						dst.set(this.domNode, 'width', (parseInt(dst.getComputedStyle(this.domNode).width)/* - 24*/) + 'px');
+						this.enforceMinWidth = true;
+					}
+					if (this.enforceMinWidth){
+						if (this.adjustMinWidthAutoColumns(5)){
+							//this.adjustMinWidthAutoColumn('auto');
+							//return;
+						};
+					}
 				}
-				if (oldMaxWidth !== style.maxWidth || oldMaxHeight !== style.maxHeight){
-					this.inherited(arguments);
-				}
-				setTimeout(function(){
-					self.scrollTo(previousScrollPosition);
-				}, 100);
-			    console.log('maxHeight: ' + maxHeight + ' bodyHeight: ' + bodyHeight + ' viewHeight: ' + viewHeight + ' newMaxHeight: ' + newMaxHeight);
-	    	}
+				this.inherited(arguments);
+		    	if (viewNode = this.form.domNode.parentNode){
+			    	var style = this.bodyNode.style, bodyHeight = parseInt(window.getComputedStyle(document.body).getPropertyValue('height')), viewHeight = parseInt(window.getComputedStyle(viewNode).getPropertyValue('height')), oldMaxWidth = style.maxWidth, oldMaxHeight = style.maxHeight,
+			    		maxHeight, newMaxHeight;
+					style.maxWidth = parseInt(window.getComputedStyle(viewNode).getPropertyValue('width'));
+					if (!style.maxHeight && viewHeight !== this.previousViewHeight){
+				    	maxHeight = style.maxHeight === '' ? 0 : parseInt(style.maxHeight);
+				    	style.maxHeight = (maxHeight + bodyHeight - viewHeight) + 'px';
+				    	newMaxHeight = parseInt(style.maxHeight);
+				    	this.previousViewHeight = viewHeight;
+					}
+					if (oldMaxWidth !== style.maxWidth || oldMaxHeight !== style.maxHeight){
+						this.inherited(arguments);
+					}
+					setTimeout(function(){
+						self.scrollTo(previousScrollPosition);
+					}, 100);
+				    console.log('maxHeight: ' + maxHeight + ' bodyHeight: ' + bodyHeight + ' viewHeight: ' + viewHeight + ' newMaxHeight: ' + newMaxHeight);
+		    	}
+				this.customizationPath = customizationPath;
+			}
         },
         deleteSelection: function(skipDeleteAction, isUserRowEdit){
         	var grid = this, toDelete = [];

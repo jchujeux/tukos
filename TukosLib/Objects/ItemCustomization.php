@@ -9,24 +9,23 @@ use TukosLib\TukosFramework as Tfk;
 
 trait ItemCustomization {
 
-    public function getItemCustomization($where, $keys){
+    public function getItemCustomization($where, $viewPaneMode, $keys = []){
         if (in_array('custom', $this->allCols)){
-            $itemCustomization = $this->getOne(['where' => $where, 'cols' => ['custom']], ['custom' => $keys]);
+            $itemCustomization = $this->getOne(['where' => $where, 'cols' => ['custom']], ['custom' => $viewPaneMode]);
             if (!empty($itemCustomization['custom'])){
-                $itemCustomization = $itemCustomization['custom'];
-                if (!empty($itemCustomization['itemcustomviewid'])){
-                    $itemCustomViewId  = $itemCustomization['itemcustomviewid'];//Utl::extractItem('itemcustomviewid', $itemCustomization);
+                $itemCustom = Utl::drillDown($itemCustomization['custom'], $keys, []);
+                if (!empty($itemCustomization['custom']['itemcustomviewid'])){
+                    $itemCustomViewId  = $itemCustomization['custom']['itemcustomviewid'];//Utl::extractItem('itemcustomviewid', $itemCustomization);
                     SUtl::addIdCol($itemCustomViewId);
-                    $view = array_shift($keys);
                     $customViewItem = Tfk::$registry->get('objectsStore')->objectModel('customviews')->getOne(['where' => ['id' => $itemCustomViewId], 'cols' => ['customization']], ['customization' => $keys], [], null);
                     if (empty($customViewItem)){
                         Feedback::add([$this->tr('customviewnotfound') => $itemCustomViewId]);
                         return $itemCustomization;
                     }else{
-                        return Utl::array_merge_recursive_replace($customViewItem['customization'], $itemCustomization);
+                        return Utl::array_merge_recursive_replace($customViewItem['customization'], $itemCustom);
                     }
                 }else{
-                    return $itemCustomization;
+                    return $itemCustom;
                 }
             }else{
                 return [];
@@ -51,7 +50,7 @@ trait ItemCustomization {
 
     public function getCombinedCustomization($where, $view, $paneMode, $keys){ 
         $paneMode = empty($paneMode) ? 'tab' : strtolower($paneMode);
-        return Utl::array_merge_recursive_replace($this->user->getCustomView($this->objectName, $view, $paneMode, $keys),   $this->getItemCustomization($where, array_merge([strtolower($view), $paneMode], $keys)));
+        return Utl::array_merge_recursive_replace($this->user->getCustomView($this->objectName, $view, $paneMode, $keys),   $this->getItemCustomization($where, [strtolower($view), $paneMode], $keys));
     }
 }
 ?>

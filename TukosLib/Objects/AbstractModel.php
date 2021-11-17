@@ -262,6 +262,7 @@ abstract class AbstractModel extends ObjectTranslator {
     }
 
     public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
+        $this->lastUpdateOneOldId = false;
         if (isset($newValues['configstatus'])){
             unset($newValues['configstatus']);
         }
@@ -275,6 +276,7 @@ abstract class AbstractModel extends ObjectTranslator {
                 return false;
             }
         }else{
+            $this->lastUpdateOneOldId = Utl::getItem('id', $oldValues, false);
             if ($this->user->hasUpdateRights($oldValues, $newValues)){
                 return $this->_update($oldValues, $newValues, $jsonFilter);
             }else{
@@ -282,6 +284,10 @@ abstract class AbstractModel extends ObjectTranslator {
                 return false;
             }
         }
+    }
+    
+    public function lastUpdateOneOldId(){
+        return $this->lastUpdateOneOldId;
     }
     
     public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){

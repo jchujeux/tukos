@@ -19,6 +19,10 @@ function (lang, dom, domStyle, ready, when, registry, BorderContainer, TabContai
 			appLayout.addChild( contentTabs );
 
 			Pmg.tabs = new TabsManager({container: contentTabs, tabsDescription: obj.tabsDescription});
+			Pmg.resizeTab = function(){
+				var container = Pmg.tabs.container;
+				container.selectedChildWidget.resize(container._containerContentBox, container._contentBox);
+			}
 			var userTabLink = new TabOnClick({url: obj.userEditUrl}, "pageusername");
 			      
 			focusUtil.on('widget-focus', function(widget){

@@ -7,7 +7,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/when",  "dojo
         	args = lang.mixin(args, {iconBase: iconBase, "class":"mblAccordionRoundRect"});
         },
 		postCreate: function(){
-            var items = this.items, item, pane, itemPane;
+            var items = this.items, item, pane;
         	this.inherited(arguments);
             for (var domain in items){
             	item = items[domain];
@@ -39,30 +39,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/when",  "dojo
         			self.fillPane(pane, item.popup);
         		}else{
         			parent.startup();
-        			accordion.addChild(pane = new Pane(lang.mixin({iconPos1: newIcon}, item.atts)));
-                    when(mutils.buildMenu(item.popup, 'full', null, lang.hitch(self, self.addTriggers)), function(dropDown){
-                        dropDown.on('blur', function(){
-							popup.close(dropDown);
-						});
-                    	pane._at.on('click', function(evt){
-                        	//evt.preventDefault();
-							//evt.stopPropagation();
-							if (this.selected){
-								popup.close(dropDown);
-							}else{
-								popup.open({parent: pane._at, popup: dropDown, around: pane._at.domNode/*, 
-									onExecute: function(){
-										popup.close(dropDown);
-										}, 
-								onCancel: function(){
-									popup.close(dropDown);
-								}*/});
-	                			focusUtil.focus(dropDown.focusNode || dropDown.domNode);            				
-							}
-            			});
-						/*pane.on('blur', function(){
-							popup.close(dropDown);
-						});*/
+        			accordion.addChild(pane = new ContentPane(lang.mixin({iconPos1: newIcon}, item.atts)));
+                    when(mutils.buildMenu(item.popup, 'full', null, lang.hitch(self, self.addTriggers)), function(contentWidget){
+                        pane.addChild(contentWidget);
                     });
         		}
         		

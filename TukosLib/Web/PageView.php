@@ -33,7 +33,8 @@ class PageView extends Translator{
     	    'pageUrl' => Tfk::$registry->pageUrl,
             'accordionDescription' => [],
             'tabsDescription' => [],
-    		'navigationTree' => 'navigationTree'
+    		'navigationTree' => 'navigationTree',
+    	    'userid' => $this->user->id()
         ];
     	$this->accordionStoreData = [];
     	$this->isMobile = Tfk::$registry->isMobile;

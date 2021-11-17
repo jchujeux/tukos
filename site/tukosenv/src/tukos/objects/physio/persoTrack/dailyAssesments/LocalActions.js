@@ -11,7 +11,7 @@ function(declare, lang, utils, wutils, Pmg){
             var setEditValues = function(){
                 form.serverDialog(lang.mixin(self.urlArgs || {action: 'Edit'}, {query: newValue ? {startdate: sWidget.get('value')} : {}}), [], form.get('dataElts'), Pmg.message('actionDone')); 
             }
-            if(form.changesCount() <= 1){
+            if(form.userChangesCount() <= 1){
                 setEditValues();
             }else{
                 Pmg.setFeedback(' ');

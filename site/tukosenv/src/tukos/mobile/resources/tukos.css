@@ -54,3 +54,9 @@
 	-webkit-transform: scaleY(0.6) rotate(45deg);
 	transform: scaleY(0.6) rotate(45deg);
 }
+
+.dijitButtonNode {
+	display: inline-flex;
+	height: 25px;
+	align-items: center;
+}

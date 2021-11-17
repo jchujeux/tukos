@@ -92,7 +92,7 @@ define(['dojo/_base/declare', 'dojo/_base/lang', 'dojo/dom-construct', "tukos/ut
                         result[col] += expression;
                     }else{
                         var res = (expression.init || 0);
-                        var rhs = expression.rhs.replace(/#(.+)#/, "self.cellValue(row,'$1')");
+                        var rhs = expression.rhs.replaceAll(/#([^#]+)#/g, "self.cellValue(row,'$1')");
                         var theFunction = eutils.eval(rhs, 'self, row, res');
                         store.filter(expression.filter).forEach(function(row){
                         	res = theFunction(self, row, res);

@@ -1,6 +1,7 @@
 <?php
 namespace TukosLib\Objects\Sports\Programs\Views\Edit;
 
+use TukosLib\TukosFramework as Tfk;
 
 trait ViewActionStrings{
 
@@ -55,8 +56,8 @@ EOT;
         customAtts = form.getWidget('calendar').get('customization').items,  backgroundColor = customAtts.style.backgroundColor, imagesAtts = customAtts.img,
         thAtts = 'style="' + cellBorderStyle + '"',  tdAtts = thAtts,   
         buildWeeklyTable = lang.hitch(this, function(mode, title, firstDay, lastDay, weekOfTheYear, weekOfProgram, selectedCols){
-    var colsFormat = {session: 'string', duration: 'tHHMMSSToHHMM', intensity: 'string', sport: 'string', sportimage: 'image', stress: 'string', content: 'string'},
-        i = 1, sessionsWidget = form.getWidget('sptsessions'), filter = new sessionsWidget.store.Filter(), intensityColorFlag = this.valueOf('rowintensitycolor'),
+    var colsFormat = {session: 'string', duration: 'tHHMMSSToHHMM', intensity: 'string', sport: 'string', sportimage: 'image', stress: 'string', content: 'string'}, i = 1, 
+        sessionsWidget = form.getWidget('sptsessions'), sessionsFilter = new sessionsWidget.store.Filter(), weekliesWidget = form.getWidget('weeklies'), weekliesFilter = new weekliesWidget.store.Filter(), intensityColorFlag = this.valueOf('rowintensitycolor'),
         contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'],
         presentation = self.valueOf('presentation');
     selectedCols.unshift('session');    
@@ -65,7 +66,7 @@ EOT;
         rowContent.push({tag: 'th', atts: thAtts, content: sessionsWidget.columns[col] ? sessionsWidget.colDisplayedTitle(col) : Pmg.message(col, 'sptprograms')});
     });
     rows.push({tag: 'tr', content: rowContent});
-    sessionsWidget.store.filter(filter.gte('startdate', firstDay).lte('startdate', lastDay)[mode === 'performed' ? 'eq' : 'ne']('mode', 'performed').gt('duration', 'T00:00:00')).sort('startdate').forEach(function(session){
+    sessionsWidget.store.filter(sessionsFilter.gte('startdate', firstDay).lte('startdate', lastDay)[mode === 'performed' ? 'eq' : 'ne']('mode', 'performed').gt('duration', 'T00:00:00')).sort('startdate').forEach(function(session){
         var intensityColorAtt = 'style="background-color: ' + ((intensityColorFlag === 'on' && session.intensity) ? backgroundColor.map[session.intensity] : backgroundColor.defaultValue)  + ';"';
         rowContent = [];        
         selectedCols.forEach(function(col){
@@ -104,13 +105,13 @@ EOT;
             {tag: 'td', atts: 'colspan=' + numberOfCols + ' style="background-color: #99ccff; color: White; font-size: large; font-weight: bold; ' + cellBorderStyle + '"', content: '<br>'}
         });
         rowContent = []; weeklyRows = [];
-        rowContent.push({tag: 'th', atts: 'style="border-right: solid black; border-bottom: solid Black; width:50%;"', content: sessionsWidget.colDisplayedTitle('athleteweeklyfeeling')});
-        rowContent.push({tag: 'th', atts: 'style="border: 0; border-bottom: solid Black; width:50%;"', content: sessionsWidget.colDisplayedTitle('coachweeklycomments')});
+        rowContent.push({tag: 'th', atts: 'style="border-right: solid black; border-bottom: solid Black; width:50%;"', content: weekliesWidget.colDisplayedTitle('athleteweeklyfeeling')});
+        rowContent.push({tag: 'th', atts: 'style="border: 0; border-bottom: solid Black; width:50%;"', content: weekliesWidget.colDisplayedTitle('coachweeklycomments')});
         weeklyRows.push({tag: 'tr', content: rowContent});
-        sessionsWidget.store.filter(filter.eq('startdate', firstDay).eq('mode', 'performed')).forEach(function(mondaySession){
+        weekliesWidget.store.filter(weekliesFilter.eq('weekof', firstDay)).forEach(function(weekly){
             rowContent = [];
-            rowContent.push({tag: 'td', atts: 'style="border-right: solid black;background-color: ' + backgroundColor.defaultValue + ';"', content: sessionsWidget.colDisplayedValue(mondaySession.athleteweeklyfeeling, 'athleteweeklyfeeling')});
-            rowContent.push({tag: 'td', atts: 'style="border: 0;background-color: LightGrey;font-style: italic"', content: sessionsWidget.colDisplayedValue(mondaySession.coachweeklycomments, 'coachweeklycomments')});
+            rowContent.push({tag: 'td', atts: 'style="border-right: solid black;background-color: ' + backgroundColor.defaultValue + ';"', content: weekliesWidget.colDisplayedValue(weekly.athleteweeklyfeeling, 'athleteweeklyfeeling')});
+            rowContent.push({tag: 'td', atts: 'style="border: 0;background-color: LightGrey;font-style: italic"', content: weekliesWidget.colDisplayedValue(weekly.coachweeklycomments, 'coachweeklycomments')});
             weeklyRows.push({tag: 'tr', content: rowContent});
         });
         rows.push({tag: 'tr', content: {tag: 'td', atts: 'style="border: solid Black;"' + ' colspan=' + numberOfCols, content: {tag: 'table', atts: 'style="text-align:center; border-collapse: collapse;border-spacing: 0; border: 0; margin: 0; width:100%;"', content: weeklyRows}}});
@@ -169,13 +170,34 @@ EOT;
     }
 EOT;
   }
+  protected function googleConfCalIdOnWatchAction(){
+      return <<<EOT
+var pane = sWidget.pane, form = pane.form;
+if (newValue){
+    pane.setWidgets({hidden: {managecalendar: false, deletecalendar: false, createcalendar: true, newname: true, newacl: true}});
+}else{
+    pane.setWidgets({hidden: {name: true, acl: true, managecalendar: true, deletecalendar: true, newname: true, newacl: true, createcalendar: true}});
+}
+form.setWidgets({value: {googlecalid: newValue, lastsynctime: null}});
+EOT;
+  }
   protected function googleConfNewCalendarOnClickAction (){
     return <<<EOT
-	var pane = this.pane, targetPane = pane.attachedWidget.form, targetGetWidget = lang.hitch(targetPane, targetPane.getWidget);
-	return when(pane.setWidgets({hidden: {newname: false, newacl: false, createcalendar: false, hide: false}, value: {newname: targetGetWidget('name').get('value'), newacl: [{rowId: 1, email: targetGetWidget('sportsmanemail').get('value'),
-            role: 'writer'}]}}), function(){
-		pane.resize();
-		setTimeout(function(){pane.getWidget('newacl').resize();}, 0)
+	var pane = this.pane, targetPane = pane.attachedWidget.form, targetGetWidget = lang.hitch(targetPane, targetPane.getWidget), newAcl = pane.getWidget('newacl');
+	return when (pane.emptyWidgets(['newname', 'newacl']), function(){
+        when(pane.setWidgets({hidden: {newname: false, newacl: false, name: true, acl: true, createcalendar: false, hide: false, managecalendar: true, updateacl: true, deletecalendar: true}, value: {googlecalid: '', name: '', newname: targetGetWidget('name').get('value'), newacl: []}}), function(){
+            var sportsManEmail = targetGetWidget('sportsmanemail').get('value'), coachEmail = targetGetWidget('coachemail').get('value');
+            if (sportsManEmail == '' || 'coachEmail' == ''){
+                Pmg.alert({title: Pmg.message('missinginformation'), content: Pmg.message('needcoach and athlete emails')});
+            }else{
+                newAcl.addRow(undefined, {rowId: 1, email: coachEmail, role: 'owner'});
+                if (sportsManEmail !== coachEmail){
+                    newAcl.addRow(undefined, {rowId: 2, email: sportsManEmail, role: 'reader'});
+                }
+                pane.resize();
+		      setTimeout(function(){pane.getWidget('newacl').resize();}, 0);
+            }
+        });
 	});
 EOT;
   }
@@ -187,10 +209,11 @@ EOT;
 		pane.serverAction({action: 'Process', query: {id: true, params: {process: 'calendarAcl', noget: true}}}, {includeWidgets: ['googlecalid']}).then(lang.hitch(this, function(response){
 		    getWidget('acl').set('value', response.acl);
 		    this.set('label', label);
-		    when(pane.setWidgets({hidden: {name: false, acl: false, updateacl: false, deletecalendar: false, hide: false}, value: {name: getWidget('googlecalid').get('value')}}), function(){
-		        pane.resize();
-		        setTimeout(function(){pane.getWidget('acl').resize();}, 0);
-	    });}));
+		    when(pane.setWidgets({hidden: {name: false, acl: false, newname: true, newacl: true, updateacl: false, deletecalendar: false, hide: false}, value: {name: getWidget('googlecalid').get('value')}}), function(){
+		          pane.resize();
+		          setTimeout(function(){pane.getWidget('acl').resize();}, 0);
+	           });
+        }));
 	}else{
 		Pmg.alert({title: '$needGoogleCalId', content: '$youNeedToClickNewCalendar'});
 	}
@@ -198,14 +221,18 @@ EOT;
   }
   protected function googleConfCreateCalendarOnClickAction(){
       return <<<EOT
-	var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');
-	this.set('label', Pmg.loading(label));
+	var pane = this.pane, label = this.get('label'), newname = pane.valueOf('newname');
+if (newname){
+    this.set('label', Pmg.loading(label));
 	pane.serverAction( {action: 'Process', query: {id: true, params: {process: 'createCalendar', noget: true}}}, {includeWidgets: ['newname', 'newacl']}).then(lang.hitch(this, function(response){
 		console.log('server action completed');
-		pane.setWidgets({hidden: {newname: true, newacl: true, createcalendar: true, hide: true}, value: {googlecalid: response.googlecalid}});
+		pane.setWidgets({hidden: {newname: true, newacl: true, managecalendar: false, createcalendar: true, hide: true}, value: {googlecalid: response.googlecalid}});
 		this.set('label', label);
 		pane.resize();
 	}));
+}else{
+    Pmg.setFeedback(Pmg.message('needtoprovideaname'), null, null, true);
+}
 EOT;
   }
   protected function googleConfUpdateAclOnClickAction(){
@@ -225,7 +252,7 @@ EOT;
       return <<<EOT
 	var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');
 	this.set('label', Pmg.loading(label));
-	pane.serverAction( {action: 'Process', query: {id: true, params: {process: 'deleteCalendar', noget: true}}, {includeWidgets: ['googlecalid']}).then(lang.hitch(this, function(){
+	pane.serverAction({action: 'Process', query: {id: true, params: {process: 'deleteCalendar', noget: true}}}, {includeWidgets: ['googlecalid']}).then(lang.hitch(this, function(){
 	    console.log('server action completed');
 		pane.setWidgets({hidden: {name: true, acl: true, newacl: true, updateacl: true, deletecalendar: true, hide: true}, value: {newname: '', name: '', newacl: '', acl: '', googlecalid: ''}});
 		targetPane.markIfChanged = false;
@@ -250,142 +277,6 @@ EOT;
 	return when(this.setWidgets({value: {googlecalid: googlecalid}}), function(){
 		pane.watchOnChange = true;
 	});
-EOT;
-  }
-  protected function _urlChangeLocalActionString($tr){
-      return <<<EOT
-    var synchroStart = pane.valueOf('gcsynchrostart'), synchroEnd = pane.valueOf('gcsynchroend'), gcMetricsToInclude = pane.getWidget('gcmetricstoinclude'), gcLink = pane.getWidget('gclink'),
-        gcUrl = string.substitute("{$this->_gcUrl}", {athlete: pane.valueOf('gcathlete'), synchrostart: synchroStart.replace(/-/g, '/'), synchroend: synchroEnd.replace(/-/g, '/'),
-            metadata: 'Sport,Workout_Title', metrics: gcMetricsToInclude.get('displayedValue').join(',')});
-    gcLink.set('value', string.substitute(Pmg.message('gclinkmessage', 'sptprograms'), 
-        {url: gcUrl, gcmetricstoinclude: '{$tr('gcmetricstoinclude')}', gcinput: '{$tr('gcinput')}', gcimport: '{$tr('gcimport')}', gcactivitiesmetrics: '{$tr('gcactivitiesmetrics')}', gcsync: '{$tr('gcsync')}'}));
-EOT;
-  }
-  protected function sessionsTrackingOnOpenAction($tr){
-      $this->view->addToTranslate(['gclinkmessage', 'nomatch', 'newsession', 'synced', 'bicycle', 'swimming', 'running', 'other']);
-      return <<<EOT
-    var form = this.form, pane = this;
-    pane.setWidgets({value: {gcsynchrostart: form.valueOf('synchrostart'), gcsynchroend: form.valueOf('synchroend')}});
-    {$this->_urlChangeLocalActionString($tr)};
-EOT;
-  }
-  protected function urlChangeLocalActionString($tr){
-      return <<<EOT
-    var pane = sWidget.pane;
-    {$this->_urlChangeLocalActionString($tr)};
-EOT;
-  }
-  protected function urlChangeLocalAction($widgetName, $tr, $customFlag = true){
-      return $this->watchLocalActionTemplate($widgetName, $this->urlChangeLocalActionString($tr) . ($customFlag ? $this->watchLocalActionString() : ''));
-  }
-  protected function gcimportOnClickAction($tr){
-      return <<<EOT
-  var pane = this.pane, gcMetricsToInclude = pane.getWidget('gcmetricstoinclude'), gcActivitiesMetrics = pane.getWidget('gcactivitiesmetrics'), gcMetricsOptions = gcMetricsToInclude.getOptions(),
-      permanentGcOptions = gcActivitiesMetrics.permanentGcOptions, colsDescription = gcActivitiesMetrics.colsDescription,
-      gcColumns = {}, form = pane.form, tukosSessions = form.getWidget('sptsessions'), synchroStart = pane.valueOf('gcsynchrostart'), synchroEnd = pane.valueOf('gcsynchroend'),
-      tukosSessionsStore = tukosSessions.store, gcCollection = gcActivitiesMetrics.get('collection'), gcDates = [], gcInput = pane.valueOf('gcinput').split(/\\n/g), gcInputLabels = gcInput.shift().split(', '), 
-      gcInputColNames = utils.flip(lang.mixin(lang.mixin({}, permanentGcOptions), gcMetricsOptions)), data = [], id = 1;
-  gcActivitiesMetrics.nonGcCols.forEach(function(name){
-      gcColumns[name] = colsDescription[name];
-  });
-  utils.forEach(permanentGcOptions, function(translatedName, name){
-      gcColumns[name] = colsDescription[name];
-  });
-  gcMetricsToInclude.get('value').forEach(function(name){
-      gcColumns[name] = colsDescription[name];
-      gcColumns[name].label = gcColumns[name].label.replace(/[_()]/g, ' ');
-  });
-  gcActivitiesMetrics.set('columns', gcColumns);
-  gcInput.forEach(function(activityString){
-    if (activityString){
-        var row = {id: id}, activity = activityString.split(',');    
-        activity.forEach(function(value, i){
-            var col = gcInputColNames[gcInputLabels[i]], description = colsDescription[col];
-            if (col){
-                switch (description.gcToTukos){
-                    case '/to-':
-                        row[col] = value.replace(/[/]/g, '-');
-                        break;
-                    case 'secondsToTime':
-                        row[col] = dutils.secondsToTime(value);
-                        break;
-                    case 'number':
-                        row[col] = Number.parseFloat(value).toFixed(description.formatOptions.places);
-                        break;
-                    case 'sliceOne':
-                        row[col] = value.slice(1, -1);
-                        break;
-                    case 'sliceOneAndGcToTukos':
-                        row[col] = description.gcToTukosOptions.map[value.slice(1, -1)];
-                        break;
-                    default:
-                        row[col] = value;
-                }
-            }
-        });
-        utils.array_unique_push(row.date, gcDates);        
-        data.push(row);    
-        id += 1;
-    }
-  });
-  gcCollection.setData(data);  
-  gcDates.forEach(function(date){
-    var gcActivities = gcCollection.filter({date: date}).sort('time').fetchSync();
-    var tukosSessions = tukosSessionsStore.filter({startdate: date, mode: 'performed'}).sort('sessionid').fetchSync();
-    for (var i = 0; i < gcActivities.length; i++){
-        if (i < tukosSessions.length){
-            gcActivities[i].tukosid = tukosSessions[i].id || Pmg.message('newsession', 'sptprograms');
-            gcActivities[i].tukosIdProp = tukosSessions[i][tukosSessionsStore.idProperty];
-        }else{
-            gcActivities[i].tukosid = Pmg.message('nomatch', 'sptprograms');
-        }
-        gcActivities[i].sessionid = i+1;
-    }
-  });
-  gcActivitiesMetrics.set('collection', gcCollection);
-  gcActivitiesMetrics.selectAll();
-EOT;
-  }
-  protected function gcsyncOnClickAction(){
-      return <<<EOT
-  var self = this, pane = this.pane, gcActivitiesMetrics = pane.getWidget('gcactivitiesmetrics'), selection = gcActivitiesMetrics.get('selection'), gcCollection = gcActivitiesMetrics.get('collection'), gcColumns = gcActivitiesMetrics.columns, 
-      form = pane.form, sessions = form.getWidget('sptsessions'), sessionsStore = sessions.store, oldestChangedItem;
-sessions.isBulkRowAction = true;  
-utils.forEach(selection, function(isSelected, idProp){
-      if (isSelected){
-        var gcActivity = gcCollection.getSync(idProp), itemToSync = {}, associatedSessionRow = gcActivity.tukosIdProp ? sessionsStore.getSync(gcActivity.tukosIdProp) : {};
-        utils.forEach(gcColumns, function(column, gcName){
-            var sessionColName = column.sessionsColName;
-            if (sessionColName && (!utils.in_array(sessionColName, ['name', 'sport']) || !associatedSessionRow[sessionColName])){
-                itemToSync[sessionColName] = gcActivity[gcName];
-            }
-        });
-        if (!utils.empty(itemToSync)){
-            itemToSync[sessionsStore.idProperty] = gcActivity.tukosIdProp;
-            itemToSync.sessionid = gcActivity.sessionid;
-        }
-        if (gcActivity.tukosIdProp){
-            sessions.updateRow(itemToSync);
-            gcActivity.tukosid = gcActivity.tukosid + ' (' + Pmg.message('synced', 'sptprograms') + ')';
-        }else{
-            itemToSync.mode = 'performed';
-            itemToSync.startdate = gcActivity.date;
-            var addedItem = sessions.addRow(undefined, itemToSync);
-            gcActivity.tukosIdProp = itemToSync[sessionsStore.idProperty];
-            gcActivity.tukosid = Pmg.message('newsession', 'sptprograms') + ' (' + Pmg.message('synced', 'sptprograms') + ')';
-        }
-        if (!oldestChangedItem || ((addedItem || itemToSync).startdate < oldestChangedItem.startdate)){
-            oldestChangedItem = addedItem || itemToSync;
-        }
-      }
-});
-gcActivitiesMetrics.set('collection', gcCollection);
-if (oldestChangedItem){
-    sessions.tsbCalculator.updateRowAction(sessions, oldestChangedItem, true);
-    sessions.refresh({keepScrollPosition: true});
-    sessions.loadChartUtils.updateCharts(sessions, true);
-    sessions.isBulkRowAction = false;
-}
 EOT;
   }
 }

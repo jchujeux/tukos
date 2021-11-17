@@ -8,11 +8,12 @@ use TukosLib\Utils\Utilities as Utl;
 
 class View extends ObjectTranslator{
 
-     private $backOfficeProperties = ['dataWidgets', 'actionWidgets',  'dataLayout', 'actionLayout', 'summaryLayout'];
+     private $backOfficeProperties = ['dataWidgets', 'actionWidgets',  'dataLayout', 'actionLayout', 'summaryLayout', 'onOpenAction'];
     function __construct($objectName, $translator=null){
         $this->objectName = $objectName;
         parent::__construct($objectName, $translator);
         $this->subObjects = [];
+        $this->toTranslate = [];
     }
     function __call($func, $arguments){
         if (in_array($func, $this->backOfficeProperties)){
@@ -81,6 +82,9 @@ class View extends ObjectTranslator{
     function tabEditTitle ($values){
         $title =  Utl::getItem('name', $values, '');
         return  strlen($title) > 20 ? substr($title, 0, 17) . ' ...' : $title;
+    }
+    function getToTranslate(){
+        return $this->backOffice->getToTranslate();
     }
 }
 ?>

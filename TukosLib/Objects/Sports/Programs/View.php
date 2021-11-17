@@ -4,6 +4,7 @@ namespace TukosLib\Objects\Sports\Programs;
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Objects\Sports\Sports;
+use TukosLib\Objects\Sports\GoldenCheetah as GC;
 use TukosLib\Objects\Collab\Calendars\CalendarsViewUtils;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
@@ -23,8 +24,8 @@ class View extends AbstractView {
 		foreach(['duration', 'distance', 'elevationgain', 'sts', 'lts', 'tsb'] as $col){
 		    $chartsCols[$col] = ['plot' => 'lines', 'tCol' => $tr($col)];
 		}
-		foreach(['load', 'intensity', 'stress', 'gctrimp100', 'perceivedload', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
-		    $chartsCols[$col] = ['plot' => 'cluster', 'tCol' => $tr($col)];
+		foreach(['load', 'intensity', 'stress', 'gctrimphr', 'gctrimppw', 'gcmechload', 'perceivedload', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
+		    $chartsCols[$col] = ['plot' => 'cluster', 'tCol' => $tr(substr($col, 0, 2) === 'gc' ? GC::gcName($col) : $col)];
 		}
 		foreach(['duration' => '(mn)', 'distance' => '(km)', 'elevationgain' => '(dam)'] as $col => $legendUnit){
 		    $chartsCols[$col]['legendUnit'] = $legendUnit;
@@ -33,7 +34,8 @@ class View extends AbstractView {
 		    $chartsCols[$col]['tooltipUnit'] = $tooltipUnit;
 		}
 		$chartsCols['elevationgain']['tooltipUnit'] = ' (m)';
-		foreach(['elevationgain' => ['day' => 10, 'week' => 10], 'gctrimp100' => ['day' => 25, 'week' => 100], 'sts' => ['day' => 1, 'week' => 0.1], 'lts' => ['day' => 1, 'week' => 0.1], 'tsb' => ['day' => 1, 'week' => 0.1]] as $col => $scalingFactor){
+		foreach(['elevationgain' => ['day' => 10, 'week' => 10], 'gctrimphr' => ['day' => 25, 'week' => 100], 'gctrimppw' => ['day' => 25, 'week' => 100], 'gcmechload' => ['day' => 10, 'week' => 50], 'sts' => ['day' => 1, 'week' => 0.1], 'lts' => ['day' => 1, 'week' => 0.1],
+		    'tsb' => ['day' => 1, 'week' => 0.1]] as $col => $scalingFactor){
 		    $chartsCols[$col]['scalingFactor'] = $scalingFactor;
 		}
 		foreach(['load' => ['day' => 120, 'week' => 600], 'perceivedload' => ['day' => 120, 'week' => 600]] as $col => $normalizationFactor){
@@ -52,14 +54,16 @@ class View extends AbstractView {
 		$chartFilter = ['planned' => 'ne', 'performed' => 'eq'];
 		$chartCols = [
 		    'planned' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'elevationgain', 'intensity', 'load', 'stress'])),
-		    'performed' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'elevationgain', 'gctrimp100', 'sts', 'lts', 'tsb', 'perceivedeffort', 'perceivedload', 'sensations', 'mood', 'fatigue']))
+		    'performed' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'elevationgain', 'gctrimphr', 'gctrimppw', 'gcmechload', 'sts', 'lts', 'tsb', 'perceivedeffort', 'perceivedload', 'sensations', 'mood', 'fatigue']))
 		];
 		$summaryRow = ['cols' => [
 		    'day' => ['content' =>  ['Total']],
 		    'duration' => ['atts' => ['formatType' => 'minutesToHHMM'], 'content' => [['rhs' => "var duration = #duration#.split(':'); return res + duration[0]*60 + Number(duration[1]);"]]],
 		    'distance' => ['content' => [['rhs' => "return res + Number(#distance#);"]]],
 		    'elevationgain' => ['content' => [['rhs' => "return res + Number(#elevationgain#);"]]],
-		    'gctrimp100' => ['content' => [['rhs' => "return res + Number(#gctrimp100#);"]]]
+		    'gctrimphr' => ['content' => [['rhs' => "return res + Number(#gctrimphr#);"]]],
+		    'gctrimppw' => ['content' => [['rhs' => "return res + (Number(#gctrimppw#) || Number(#gctrimphr#));"]]],
+		    'gcmechload' => ['content' => [['rhs' => "return res + Number(#gcmechload#);"]]]
 		]];
 		$chartsAtts = [
 		    'loadchart' => ['name' => 'loadchart', 'type' => $chartTypes['program'], 'filter' => $chartFilter['planned'], 'cols' => $chartCols['planned']],
@@ -138,7 +142,12 @@ class View extends AbstractView {
 		    ]]];
 		};
 		$customDataWidgets = [
-			'comments' => ['atts' => ['edit' => ['height' => '200px']]],
+		    'parentid' => ['atts' => ['edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['sportsmanemail' => ['value' => "return sWidget.getItemProperty('email');"]]]]],
+		    'comments' => ['atts' => ['edit' => ['height' => 'auto']]],
+		    'coach' => ViewUtils::objectSelect($this, 'Coach', 'people', ['atts' => [
+		        'edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['coachemail' => ['value' => "return sWidget.getItemProperty('email');"]]],
+		        'overview' => ['hidden' => true]
+		    ]]),
 		    'fromdate' => ViewUtils::tukosDateBox($this, 'Begins on', ['atts' => ['edit' => [
 							'onChangeLocalAction' => [
 								'todate'  => ['value' => "if (!newValue){return '';}else{return dutils.dateString(newValue, sWidget.valueOf('#duration'), sWidget.valueOf('#todate'),true)}" ],
@@ -153,7 +162,7 @@ class View extends AbstractView {
 							'unit' => ['style' => ['width' => '6em'], 'onWatchLocalAction' => ['value' => "widget.numberField.set('value', dutils.convert(widget.numberField.get('value'), oldValue, newValue));"]],
 					],
 					'storeedit' => ['formatType' => 'numberunit'],
-					'overview' => ['formatType' => 'numberunit'],
+					'overview' => ['formatType' => 'numberunit', 'hidden' => true],
 			]]),
 			'todate'   => ViewUtils::tukosDateBox($this, 'Ends on', ['atts' => ['edit' => [
 							'onChangeLocalAction' => [
@@ -167,27 +176,31 @@ class View extends AbstractView {
 			),
 			'displayeddate' => $this->displayedDateDescription(['atts' => ['edit' => ['onWatchLocalAction' => ['value' => $dateChangeLocalAction(true)]]]]),
             'googlecalid' => ViewUtils::textBox($this, 'Googlecalid', ['atts' => ['edit' => ['readonly' => true]]]),
-            'sportsmanemail' => ViewUtils::textBox($this, 'Email', ['atts' => ['edit' => ['disabled' => true, 'hidden' => true]]]),
-			'lastsynctime' => ViewUtils::timeStampDataWidget($this, 'Lastsynctime', ['atts' => ['edit' => ['disabled' => true]]]),
-			'synchrostart' => ViewUtils::tukosDateBox($this, 'Synchrostart', ['atts' => ['edit' => ['onWatchLocalAction' => ['value' => [
-                        'synchroweeksbefore' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "return '';" ]],
-                ]]]]]),
-			'synchroend' => ViewUtils::tukosDateBox($this, 'Synchroend', ['atts' => ['edit' => ['onWatchLocalAction' => ['value' => [
-                        'synchroweeksafter' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "return '';" ]],
-                ]]]]]),
-			'synchroweeksbefore' => ViewUtils::tukosNumberBox($this, 'Synchroweeksbefore', ['atts' => ['edit' => ['style' => ['width' => '3em'], 'onWatchLocalAction' => ['value' => [
-                        'synchrostart' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => 
-                        "return dutils.formatDate(dutils.dateAdd(dutils.getDayOfWeek(1, new Date(sWidget.valueOf('#displayeddate'))), 'week', -newValue));" ]],
-                ]]]]]),
-			'synchroweeksafter' => ViewUtils::tukosNumberBox($this, 'Synchroweeksafter', ['atts' => ['edit' => ['style' => ['width' => '3em'], 'onWatchLocalAction' => ['value' => [
-                        'synchroend' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => 
+		    'sportsmanemail' => ViewUtils::textBox($this, 'SportsmanEmail', ['atts' => ['edit' => [/*'disabled' => true, */'hidden' => true], 'overview' => ['hidden' => true]]]),
+		    'coachemail' => ViewUtils::textBox($this, 'CoachEmail', ['atts' => ['edit' => [/*'disabled' => true, */'hidden' => true], 'overview' => ['hidden' => true]]]),
+		    'lastsynctime' => ViewUtils::timeStampDataWidget($this, 'Lastsynctime', ['atts' => ['edit' => ['disabled' => true]]]),
+			'synchrostart' => ViewUtils::tukosDateBox($this, 'Synchrostart', ['atts' => [
+			    'edit' => ['onWatchLocalAction' => ['value' => ['synchroweeksbefore' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "return '';" ]]]]],
+			]]),
+			'synchroend' => ViewUtils::tukosDateBox($this, 'Synchroend', ['atts' => [
+			    'edit' => ['onWatchLocalAction' => ['value' => ['synchroweeksafter' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "return '';" ]]]]],
+			]]),
+			'synchroweeksbefore' => ViewUtils::tukosNumberBox($this, 'Synchroweeksbefore', ['atts' => [
+			    'edit' => ['style' => ['width' => '3em'], 'onWatchLocalAction' => ['value' => ['synchrostart' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => 
+                        "return dutils.formatDate(dutils.dateAdd(dutils.getDayOfWeek(1, new Date(sWidget.valueOf('#displayeddate'))), 'week', -newValue));" ]]]]],
+			    'overview' => ['hidden' => true]
+			]]),
+			'synchroweeksafter' => ViewUtils::tukosNumberBox($this, 'Synchroweeksafter', ['atts' => [
+			    'edit' => ['style' => ['width' => '3em'], 'onWatchLocalAction' => ['value' => ['synchroend' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => 
                         	"var nextMonday = sWidget.valueOf('#synchnextmonday') === 'YES';" . 
                         	"return dutils.formatDate(dutils.dateAdd(dutils.getDayOfWeek(nextMonday ? 1 : 7, new Date(sWidget.valueOf('#displayeddate'))), 'week', nextMonday ? newValue + 1 : newValue));" 
-                        ]],
-                ]]]]]),
-			'synchnextmonday' => viewUtils::storeSelect('synchnextmonday', $this, 'Synchnextmonday', null, ['atts' => ['edit' => ['style' => ['width' => '4em'], 'onWatchLocalAction' => ['value' => [
-					'synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $this->synchroStartLocalAction('#displayeddate', 'newValue'),]],
-			]]]]]),
+                        ]]]]],
+			    'overview' => ['hidden' => true]
+			]]),
+			'synchnextmonday' => viewUtils::storeSelect('synchnextmonday', $this, 'Synchnextmonday', null, ['atts' => [
+			    'edit' => ['style' => ['width' => '4em'], 'onWatchLocalAction' => ['value' => ['synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $this->synchroStartLocalAction('#displayeddate', 'newValue')]]]]],
+			    'overview' => ['hidden' => true]
+			]]),
 			'questionnairetime'  =>  ViewUtils::timeStampDataWidget($this, 'QuestionnaireTime', ['atts' => ['edit' => ['disabled' => true]]]),
 		    'loadchart' => $loadChartDescription($chartsAtts['loadchart'],$this->loadChartLocalAction('loadchart')),
 		    'weekloadchart' => $loadChartDescription($chartsAtts['weekloadchart'], $this->weekLoadChartLocalAction('weekloadchart')),
@@ -196,19 +209,20 @@ class View extends AbstractView {
 			'calendar' => $this->calendarWidgetDescription([
 				'type' => 'StoreSimpleCalendar', 
 			    'atts' => ['edit' => [
-					'columnViewProps' => ['minHours' => 0, 'maxHours' => 4],
+			        //'date' => date('Y-m-d', strtotime('next monday')),
+			        'columnViewProps' => ['minHours' => 0, 'maxHours' => 4],
 					'style' => ['height' => '350px', 'width' => '700px'], 
 					'timeMode' => 'duration', 'durationFormat' => 'time', 'moveEnabled' => true,
 					'customization' => ['items' => [
 						 'style' => ['backgroundColor' => ['field' => 'intensity', 'map' => Sports::$intensityColorsMap, 'defaultValue' => 'Peru'], 
 						     'color' => ['field' => 'mode', 'map' => ['planned' => 'white', 'performed' => 'black']],
 						 'fontStyle' => ['field' => 'mode', 'map' => ['planned' => 'normal', 'performed' => 'italic']]],
-						 'img'   => ['field' => 'sport', 'map' => Sports::$sportImagesMap, 'imagesDir' => Tfk::publicDir . 'images/'],
+						 'img'   => ['field' => 'sport', 'map' => Sports::$sportImagesMap, 'imagesDir' => Tfk::$registry->rootUrl . Tfk::$publicDir . 'images/'],
 						 'ruler' => ['field' => 'stress', 'map' => Sports::$stressOptions, 'atts' => ['minimum' => 0, 'maximum' => 4, 'showButtons' => false, 'discreteValues' => 5]],
 					]],
 					'onChangeNotify' => [$this->gridWidgetName => [
 						'startTime' => 'startdate', 'duration' => 'duration', 'summary' => 'name', 'comments' => 'comments', 'intensity' => 'intensity', 'stress' => 'stress', 'sport' => 'sport', 'warmup' => 'warmup',
-						'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'gctrimp100' => 'gctrimp100'
+					    'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'gctrimphr' => 'gctrimphr', 'gctrimppw' => 'gctrimppw'
 					]],
 					'onWatchLocalAction' => ['date' => $dateChangeLocalAction(false)]]]], 
 				'fromdate', 'todate'),
@@ -216,40 +230,50 @@ class View extends AbstractView {
     		        'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
     		        'weekof' => viewUtils::tukosDateBox($this, 'Weekof'),
     		        'athleteweeklyfeeling'    => ViewUtils::textArea($this, 'AthleteWeeklyFeeling'),
-    		        'coachweeklycomments'  => ViewUtils::textArea($this, 'CoachWeeklyComments'),
+    		        'coachweeklycomments'  => ViewUtils::lazyEditor($this, 'CoachWeeklyComments'),
     		    ],
     	        ['atts' => ['edit' => [
     	            'sort' => [['property' => 'weekof', 'descending' => true]], 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'weekof', 'endDateTimeCol' => 'weekof',
     	            'onWatchLocalAction' => ['allowApplicationFilter' => ['weeklies' => $this->dateChangeGridLocalAction("tWidget.form.valueOf('displayeddate')", 'tWidget', 'newValue')]]
     	        ]]]
 	        ),
-		    'stsdays' => ViewUtils::tukosNumberBox($this, 'stsdays', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.'], 
-		        'onChangeLocalAction' => ['stsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('stsdays')]]]]]),
-		    'ltsdays' => ViewUtils::tukosNumberBox($this, 'ltsdays', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.'],
-		        'onChangeLocalAction' => ['ltsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('ltsdays')]]]]]),
-		    'stsratio' => ViewUtils::tukosNumberBox($this, 'stsratio', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.00'],
-		        'onChangeLocalAction' => ['stsratio' => ['localActionStatus' => $this->tsbParamsChangeAction('stsratio')]]]]]),
-		    'initialsts' => ViewUtils::tukosNumberBox($this, 'initialsts', ['atts' => ['edit' => ['style' => ['width' => '5em'],// 'constraints' => ['pattern' => '0.'],
-		        'onChangeLocalAction' => ['initialsts' => ['localActionStatus' => $this->tsbParamsChangeAction('initialsts')]]]]]),
-		    'initiallts' => ViewUtils::tukosNumberBox($this, 'initiallts', ['atts' => ['edit' => ['style' => ['width' => '5em'],// 'constraints' => ['pattern' => '0.'],
-		        'onChangeLocalAction' => ['initiallts' => ['localActionStatus' => $this->tsbParamsChangeAction('initiallts')]]]]]),
+		    'stsdays' => ViewUtils::tukosNumberBox($this, 'stsdays', ['atts' => [
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.'], 'onChangeLocalAction' => ['stsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('stsdays')]]],
+		        'overview' => ['hidden' => true]
+		    ]]),
+		    'ltsdays' => ViewUtils::tukosNumberBox($this, 'ltsdays', ['atts' => [
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.'], 'onChangeLocalAction' => ['ltsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('ltsdays')]]],
+		        'overview' => ['hidden' => true]
+		    ]]),
+		    'stsratio' => ViewUtils::tukosNumberBox($this, 'stsratio', ['atts' => [
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.00'], 'onChangeLocalAction' => ['stsratio' => ['localActionStatus' => $this->tsbParamsChangeAction('stsratio')]]],
+		        'overview' => ['hidden' => true]
+		    ]]),
+		    'initialsts' => ViewUtils::tukosNumberBox($this, 'initialsts', ['atts' => [
+		        'edit' => ['style' => ['width' => '5em'], 'onChangeLocalAction' => ['initialsts' => ['localActionStatus' => $this->tsbParamsChangeAction('initialsts')]]],
+		        'overview' => ['hidden' => true]
+		    ]]),
+		    'initiallts' => ViewUtils::tukosNumberBox($this, 'initiallts', ['atts' => [
+		        'edit' => ['style' => ['width' => '5em'], 'onChangeLocalAction' => ['initiallts' => ['localActionStatus' => $this->tsbParamsChangeAction('initiallts')]]],
+		        'overview' => ['hidden' => true]
+		    ]]),
 		];
 	
 		$subObjects = [
 			'sptsessions' => [
 				'atts' => [
-				    'title' => $this->tr('Sessions'), /*'storeType' => 'LazyMemoryTreeObjects',  */ 'allDescendants' => true, 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'startdate',
-				        'endDateTimeCol' => 'startdate',
+				    'title' => $this->tr('Sessions'), 'allDescendants' => true, 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'startdate',
+				        'endDateTimeCol' => 'startdate', 'freezeWidth' => true, 'minWidth' => '60',
 					'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
 					'onChangeNotify' => [
 						'calendar' => [
 							'startdate' => 'startTime',  'duration' => 'duration',  'name' => 'summary', 'comments' => 'comments', 'intensity' => 'intensity', 'stress' => 'stress', 'sport' => 'sport', 
 						      'warmup' => 'warmup',
-							'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'gctrimp100' => 'gctrimp100'
+						    'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'gctrimphr' => 'gctrimphr', 'gctrimppw' => 'gctrimppw'
 					]],
 					'onDropMap' => [
                         'templates' => ['fields' => ['name' => 'name', 'comments' => 'comments', 'startdate' => 'startdate', 'duration' => 'duration', 'intensity' => 'intensity', 'stress' => 'stress', 
-                        	'sport' => 'sport', 'warmup' => 'warmup', 'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'gctrimp100' => 'gctrimp100'
+                            'sport' => 'sport', 'warmup' => 'warmup', 'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'gctrimphr' => 'gctrimphr', 'gctrimppw' => 'gctrimppw'
                         ]],
 						'warmup' => ['mode' => 'update', 'fields' => ['warmup' => 'summary']],
 						'mainactivity' => ['mode' => 'update', 'fields' => ['mainactivity' => 'summary']],
@@ -259,6 +283,7 @@ class View extends AbstractView {
 					'onWatchLocalAction' => [
 					    'allowApplicationFilter' => ['sptsessions' => $this->dateChangeGridLocalAction("tWidget.form.valueOf('displayeddate')", 'tWidget', 'newValue')],
 					    'collection' => [
+					        'sptsessions' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->sptSessionsTsbAction()]],
 					        'calendar' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => 'tWidget.currentView.invalidateLayout();return true;']],
 					        'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekloadchart'),]],
 					        'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekperformedloadchart')]],
@@ -270,7 +295,7 @@ class View extends AbstractView {
 				    'deleteRowAction' => $this->deleteRowAction(),
 				    'colsDescription' => [
 				        'startdate' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['startdate' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
-				        'gctrimp100' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['gctrimp100' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
+				        'gctrimphr' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['gctrimphr' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
 				        'mode' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['mode' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]]
 				    ],
 			        'afterActions' => [
@@ -280,107 +305,154 @@ class View extends AbstractView {
 			            'deleteRows' => $this->afterDeleteRows(),
 				    ],
 				    'beforeActions' => [
+				        'createNewRow' => $this->beforeCreateRow(),
 				        'deleteRows' => $this->beforeDeleteRows(),
 				        'updateRow' => $this->beforeRowChange(),
 				        //'deleteRow' => $this->beforeRowChange('delete')
-	               ]
+	               ],
+				    'noCopyCols' => ['googleid'],
 				],
 				'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], 
 				    [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
+                 'removeCols' => ['sportsman','grade', 'configstatus', 'acl'],
+			    'hiddenCols' => ['parentid', 'stress', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'gctriscore', 'gcavghr', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time',
+			        'contextid', 'updated'],
+			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
 			],
 
 			'templates' => [
 				'object' => 'sptsessions',
 				'atts' => [
 					'title' => $this->tr('sessionstemplates'),/* 'storeType' => 'LazyMemoryTreeObjects', */
-					'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false],
+					'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], 'freezeWidth' => true,
 				],
 				'filters' => ['grade' => 'TEMPLATE'],
-				'allDescendants' => true, // 'hasChildrenOnly',
+			    'removeCols' => ['sportsman', 'sessionid', 'googleid', 'mode', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'gctriscore', 'gcavghr', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time', 'grade', 'configstatus', 'acl'],
+			    'hiddenCols' => ['parentid', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'distance', 'elevationgain', 'comments', 'contextid', 'updated'],
+			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'], // temporary: these were suppressed but maybe present in some customization items
+			    'allDescendants' => true, // 'hasChildrenOnly',
 			],
 
 			'warmup' => [
 				'object' => 'sptsessionsstages',
-				'atts' => ['title' => $this->tr('warmuptemplates'),/* 'storeType' => 'LazyMemoryTreeObjects', */ 'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false]],
+				'atts' => ['title' => $this->tr('warmuptemplates'),/* 'storeType' => 'LazyMemoryTreeObjects', */ 'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], 'hidden' => true],
 				'filters' => ['stagetype' => 'warmup'],
 				 'allDescendants' => true,
 			],
 			'mainactivity' => [
 				'object' => 'sptsessionsstages',
-				'atts' => ['title' => $this->tr('mainactivitytemplates'),/* 'storeType' => 'LazyMemoryTreeObjects', */  'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false]],
+				'atts' => ['title' => $this->tr('mainactivitytemplates'),/* 'storeType' => 'LazyMemoryTreeObjects', */  'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], 'hidden' => true],
 				'filters' => ['stagetype' => 'mainactivity'],
 				'allDescendants' => 'true'
 			],
 			'warmdown' => [
 				'object' => 'sptsessionsstages',
-				'atts' => ['title' => $this->tr('warmdowntemplates'), /*'storeType' => 'LazyMemoryTreeObjects',*/ 'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false]],
+				'atts' => ['title' => $this->tr('warmdowntemplates'), /*'storeType' => 'LazyMemoryTreeObjects',*/ 'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], 'hidden' => true],
 				'filters' => ['stagetype' => 'warmdown'],
 				 'allDescendants' => true, 
 			],
 		];
-		foreach (array_diff_key($chartsCols, array_flip(['gctrimp100'])) as $col => $description){
+		foreach (array_diff_key($chartsCols, array_flip(['gctrimphr'/*, 'gctrimppw'*/, 'load', 'perceivedload', 'fatigue'])) as $col => $description){
 		    $subObjects['sptsessions']['atts']['colsDescription'][$col] = ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => [$col => ['localActionStatus'  => $this->cellChartChangeLocalAction()]]]]]];
 		}
-		$this->customize($customDataWidgets, $subObjects, [ 'grid' => ['calendar', 'displayeddate', 'loadchart', 'weeklies'], 'get' => ['displayeddate', 'loadchart', 'performedloachart', 'weekloadchart', 'weekperformedloadchart'],
+		$this->customize($customDataWidgets, $subObjects, [ 'grid' => ['calendar', 'displayeddate', 'synchrostart', 'synchroend', 'loadchart', 'performedloadchart', 'weekloadchart', 'weekperformedloadchart', 'weeklies'],
+		    'get' => ['displayeddate', 'loadchart', 'performedloachart', 'weekloadchart', 'weekperformedloadchart'],
 		    'post' => ['displayeddate', 'loadchart', 'performedloadchart', 'weekloadchart', 'weekperformedloadchart', 'synchrostart', 'synchroend']], ['weeklies' => []]);
 	}
-	function OpenEditAction(){
+	function sptSessionsTsbAction(){
 	    return <<<EOT
-var form = this;	    
 require (["tukos/objects/sports/TsbCalculator", "tukos/objects/sports/LoadChart"], function(TsbCalculator, LoadChart){
-    var grid = form.getWidget('sptsessions'), params = {};
+    var grid = sWidget, form = grid.form, params = {};
     ['stsdays', 'ltsdays', 'stsratio', 'initialsts', 'initiallts'].forEach(function(name){
         params[name] = form.valueOf(name);
     });
-    grid.tsbCalculator = new TsbCalculator({sessionsStore: grid.store});
-    grid.tsbCalculator.initialize(params);
+    sWidget.tsbCalculator = new TsbCalculator({sessionsStore: sWidget.store});
+    sWidget.tsbCalculator.initialize(params);
+    sWidget.tsbCalculator.updateRowAction(sWidget, false, true);
     grid.loadChartUtils = new LoadChart({sessionsStore: grid.store});
     grid.loadChartUtils.setProgramLoadChartValue(form, 'loadchart');
     grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');
     grid.loadChartUtils.setWeekLoadChartValue(form, 'weekloadchart');
     grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');
 });
+return true;
 EOT
-;
+	    ;
+	}
+	function OpenEditAction(){
+	    $currentDate = date('Y-m-d');
+	    return <<<EOT
+var fromDate, toDate;
+if ('$currentDate' < (fromDate = this.valueOf('fromdate'))){
+    this.setValueOf('displayeddate', fromDate);
+}else if('$currentDate' > (toDate = this.valueOf('todate'))){
+    this.setValueOf('displayeddate', toDate);
+}
+EOT
+        ;
 	}
 	function beforeRowChange(){
 	    return <<<EOT
-var idp = this.collection.idProperty, row = this.collection.getSync((args || this.clickedRow.data)[idp]);
-this.rowBeforeChange = lang.clone(row);
+if (!this.isBulkRowAction){
+    var idp = this.collection.idProperty, rowChanges = (args || this.clickedRow.data), rowBeforeChange = this.collection.getSync(rowChanges[idp]);
+    this.rowBeforeChange = lang.clone(rowBeforeChange);
+    if ((rowChanges.startdate && (rowChanges.startdate !== rowBeforeChange.startdate)) || (rowChanges.parentid && (rowChanges.parentid !== rowBeforeChange.parentid)) || (rowChanges.mode !== undefined && (rowChanges.mode != rowBeforeChange.mode))){
+        rowChanges.sessionid = 1;
+        this.store.filter((new this.store.Filter()).eq('startdate', rowChanges.startdate)[rowChanges.mode === 'performed' ? 'eq' : 'ne']('mode', 'performed')).sort('sessionid', 'descending').fetchRangeSync({start: 0, end: 1}).forEach(function(largestSessionIdRow){
+            rowChanges.sessionid = Number(largestSessionIdRow.sessionid) + 1;
+        });
+    }
+}
+EOT
+	    ;
+	}
+	function beforeCreateRow(){
+	    return <<<EOT
+var row = args || this.clickedRow.data;
+if (!this.isBulkRowAction && row.startdate){
+    this.store.filter((new this.store.Filter()).eq('startdate', row.startdate)[row.mode === 'performed' ? 'eq' : 'ne']('mode', 'performed')).sort('sessionid', 'descending').fetchRangeSync({start: 0, end: 1}).forEach(function(largestSessionIdRow){
+        row.sessionid = Number(largestSessionIdRow.sessionid) + 1;
+    });
+}
 EOT
 	    ;
 	}
 	function afterCreateRow(){
 	    return <<<EOT
-var row = arguments[1][0] || this.clickedRow.data;
-if (!row.startdate){
-    return;
+console.log('afterCreateRow');
+if (!this.isBulkRowAction){
+    var row = arguments[1][0] || this.clickedRow.data;
+    if (!row.startdate){
+        return;
+    }
+    if (row.mode === 'performed'){
+        this.tsbCalculator.updateRowAction(this, this.store.getSync(row[this.store.idProperty]), true);
+    }
+    this.loadChartUtils.updateCharts(this, row.mode);
 }
-if (row.mode === 'performed'){
-    this.tsbCalculator.updateRowAction(this, this.store.getSync(row[this.store.idProperty]), true);
-}
-this.loadChartUtils.updateCharts(this, row.mode);
 EOT
 	    ;
 	}
 	function afterUpdateRow(){
 	    return <<<EOT
-var row = arguments[1][0] || this.clickedRow.data, rowBeforeChange = this.rowBeforeChange, startingRow, isPerformed;
-if (rowBeforeChange.mode !== row.mode || rowBeforeChange.startdate !== row.startdate || rowBeforeChange.gctrimp100 !== row.gctrimp100){
-    if (row.mode === 'performed' || rowBeforeChange.mode === 'performed'){
-        if (rowBeforeChange.startdate !== row.startdate){
-            startingRow = false;
-        }else{
-            startingRow = row;
+if (!this.isBulkRowAction){
+    var row = arguments[1][0] || this.clickedRow.data, rowBeforeChange = this.rowBeforeChange, startingRow, isPerformed;
+    if (rowBeforeChange.mode !== row.mode || rowBeforeChange.startdate !== row.startdate || rowBeforeChange.gctrimphr !== row.gctrimphr){
+        if (row.mode === 'performed' || rowBeforeChange.mode === 'performed'){
+            if (rowBeforeChange.startdate !== row.startdate){
+                startingRow = false;
+            }else{
+                startingRow = row;
+            }
+            isPerformed = row.mode === rowBeforeChange.mode ? 'performed' : 'changed';
         }
-        isPerformed = row.mode === rowBeforeChange.mode ? 'performed' : 'changed';
     }
+    if (startingRow !== undefined){
+        this.tsbCalculator.updateRowAction(this, startingRow ? this.store.getSync(startingRow[this.store.idProperty]) : false, true);
+    }
+    this.loadChartUtils.updateCharts(this, isPerformed);
+    delete this.rowBeforeChange;
 }
-if (startingRow !== undefined){
-    this.tsbCalculator.updateRowAction(this, startingRow ? this.store.getSync(startingRow[this.store.idProperty]) : false, true);
-}
-this.loadChartUtils.updateCharts(this, isPerformed);
-delete this.rowBeforeChange;
 EOT
 	    ;
 	}
@@ -401,7 +473,7 @@ if (tsbCalculator.isActive()){
     when(tsbCalculator.getCollection().fetchSync(), function(data){
 		previousItem = iterator.initialize(data, 'last');
         args.forEach(function(row){
-            if (row.gctrimp100){
+            if (row.gctrimphr){
 				while (previousItem !== false && previousItem.startdate >= row.startdate){
 					previousItem = iterator.previous();
 				}
@@ -447,7 +519,7 @@ if (tWidget.column){
         grid.updateDirty(rowIdp, 'tsb', '');
     }
     if (row.mode === 'performed'){
-        grid.tsbCalculator.updateRowAction(grid, (col === 'gctrimp100' || (col === 'mode' && newValue === 'performed')) ? row : false, true);
+        grid.tsbCalculator.updateRowAction(grid, (col === 'gctrimphr' || (col === 'mode' && newValue === 'performed')) ? row : false, true);
     }
     grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');
     grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');

@@ -61,14 +61,14 @@ class BlogView extends Translator{
             $blogTemplate = "MobileBlogTemplate.php";
         }else{
             $blogTemplate = "BlogTemplate.php";
-            $logoImageTag = '';// '<img alt="logo" src="' . Tfk::publicDir . 'images/tukosswissknife.png" style="height: ' . ($this->isMobile ? '40' : '100') . 'px; width: ' . ($this->isMobile ? '60' : '150') . 'px;' . ($this->isMobile ? 'float: right;' : '') . '">';
+            $logoImageTag = '';// '<img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.png" style="height: ' . ($this->isMobile ? '40' : '100') . 'px; width: ' . ($this->isMobile ? '60' : '150') . 'px;' . ($this->isMobile ? 'float: right;' : '') . '">';
             $this->pageManagerArgs['headerContent'] = <<<EOT
 <table width="100%"><tr><td style="text-align:left;">{$logoImageTag}<span id="tukosHeaderLoading"></span></td><td style="text-align:center;"><H1>{$this->tr('tukosBlogTitle')}</H1></td><td style="text-align:right;"><b><i>The Ultimate Knowledge Organizational System</i></b></td></table>
 EOT
             ;
             $blogModel = Tfk::$registry->get('objectsStore')->objectModel('blog');
             $onClickString = $blogModel->onClickGotoTabString('edit', "name:'{$this->tr('BlogWelcome')}'");
-            $this->pageManagerArgs['rightPaneContent'] = '<div style="background-color: #d0e9fc;text-align: center;" ' . $onClickString . '></br><img alt="logo" src="' . Tfk::publicDir . 'images/tukosswissknife.png" style="height:150px; width: 200px;"></br>' . 
+            $this->pageManagerArgs['rightPaneContent'] = '<div style="background-color: #d0e9fc;text-align: center;" ' . $onClickString . '></br><img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.png" style="height:150px; width: 200px;"></br>' . 
                 '<span style="' . HUtl::urlStyle() . "\">{$this->tr('BlogWelcome')}</span></div>";
         }
         $template->pageManagerArgs = json_encode($this->pageManagerArgs);

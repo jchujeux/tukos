@@ -8,8 +8,8 @@ trait CustomDelete{
     function response($query){
         $customizationToDelete = $this->dialogue->getValues();        
         if (!empty($toDelete = Utl::extractItem('itemCustom', $customizationToDelete))){
-            $remainingItemCustomization = $this->model->deleteItemCustomization(['id' => $query['id']], ['edit' => [strtolower($this->paneMode) => $toDelete['items']]]);
-            $response['itemCustom'] = isset($remainingItemCustomization['edit'][$this->paneMode]) ? $remainingItemCustomization['edit'][$this->paneMode] : [];
+            $remainingItemCustomization = $this->model->deleteItemCustomization(['id' => $query['id']], ['edit' => [$viewMode = strtolower($this->paneMode) => $toDelete['items']]]);
+            $response['itemCustom'] = isset($remainingItemCustomization['edit'][$viewMode]) ? $remainingItemCustomization['edit'][$viewMode] : [];
         }
         $customViewsModel = $this->objectsStore->objectModel('customviews');
         foreach($customizationToDelete as $tukosOrUserOrItem => $toDelete){

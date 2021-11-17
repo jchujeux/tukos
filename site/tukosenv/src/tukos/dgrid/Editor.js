@@ -503,6 +503,7 @@ define([
 				tagArgs = {};
 
 			args = column.editorArgs || {};
+			args.widgetName = column.field;
 			if (typeof args === 'function') {
 				args = args.call(this, column);
 			}
@@ -735,7 +736,8 @@ define([
 			var self = this;
 
 			// test whether old and new values are inequal, with coercion (e.g. for Dates)
-			if ((oldValue && oldValue.valueOf()) !== (value && value.valueOf())) {
+			//if ((oldValue && oldValue.valueOf()) !== (value && value.valueOf())) {
+			if (!utils.isEquivalent(oldValue && oldValue.valueOf(), value && value.valueOf())) {
 				var cell = this.cell(cellElement);
 				var row = cell.row;
 				var column = cell.column;

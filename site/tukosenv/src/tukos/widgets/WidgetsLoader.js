@@ -7,7 +7,7 @@ define (["dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "tukos/PageManag
                 DropDownButton: "dijit/form/", RadioButton: "dijit/form/", Menu: "dijit/", MenuItem: "dijit/", MenuBarItem: "dijit/", PopupMenuItem: "dijit/", PopupMenuBarItem: "dijit/", DropDownMenu: "dijit/", ContentPane: "dijit/layout/",
                 TukosDateBox: "tukos/", Editor: "tukos/widgets/", LazyEditor: "tukos/widgets/",
                 FormattedTextBox: "tukos/widgets/", MultiSelect: "tukos/", StoreSelect: "tukos/", ObjectSelect: "tukos/", ObjectSelectMulti: "tukos/", ObjectSelectDropDown: "tukos/",
-                TukosNumberBox: "tukos/", TukosCurrencyBox: "tukos/", NumberUnitBox: "tukos/", DateTimeBox: "tukos/", TukosButton: "tukos/widgets/", DropDownTextBox: "tukos/widgets/", 
+                TukosNumberBox: "tukos/", TukosCurrencyBox: "tukos/", NumberUnitBox: "tukos/", DateTimeBox: "tukos/", TukosButton: "tukos/widgets/", TukosRadioButton: "tukos/widgets/", DropDownTextBox: "tukos/widgets/", 
                 ColorPickerTextBox: "tukos/widgets/", RestSelect: "tukos/", ObjectExport: "tukos/", ObjectSave: "tukos/", ObjectReset: "tukos/", ObjectProcess: "tukos/", ObjectNew: "tukos/", ObjectEdit: "tukos/", ObjectDelete: "tukos/", 
                 ObjectDuplicate: "tukos/", ObjectCalendar: "tukos/", ObjectFieldClear: "tukos/", OverviewAction: "tukos/", OverviewEdit: "tukos/", OnDemandGrid: "tukos/", SimpleDgrid: "tukos/",  StoreDgrid: "tukos/",  StoreDgridNoDnd: "tukos/", SimpleDgridNoDnd: "tukos/",
                 OverviewDgrid: "tukos/", BasicGrid: "tukos/", StoreTree: "tukos/", ContextTree: "tukos/", NavigationTree: "tukos/", PieChart: "tukos/", ColumnsChart: "tukos/", Chart: "tukos/",
@@ -17,10 +17,11 @@ define (["dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "tukos/PageManag
                 MobileTextBox: "tukos/mobile/TukosTextarea*", MobileButton: "dojox/mobile/Button*",
                 MobileFormattedTextBox: "tukos/mobile/FormattedTextBox*", MobileEditor: "tukos/mobile/Editor*", MobileLazyEditor: "tukos/mobile/LazyEditor*", MobileObjectReset: "tukos/mobile/ObjectAction*",
                 MobileObjectAction: "tukos/mobile/ObjectAction*", MobileOverviewGrid: "tukos/mobile/OverviewGrid*", MobileOverviewAction: "tukos/mobile/OverviewAction*", MobileStoreSelect: "tukos/mobile/StoreSelect*",
-                MobileSliderSelect: "tukos/mobile/SliderSelect*", MobileTimePicker: "tukos/mobile/TimePicker*", MobileNumberBox: "tukos/mobile/NumberPicker*", MobileStoreCalendar: "tukos/mobile/StoreCalendar*"/*, TukosCheckBox: "tukos/Widgets/Checkbox*"*/
+                MobileSliderSelect: "tukos/mobile/SliderSelect*", MobileTimePicker: "tukos/mobile/TimePicker*", MobileNumberBox: "tukos/mobile/NumberPicker*", MobileStoreCalendar: "tukos/mobile/StoreCalendar,*"/*, TukosCheckBox: "tukos/Widgets/Checkbox*"*/,
+				MobileTukosPane: "tukos/mobile/TukosPane*", MobileAccordionGrid: "tukos/mobile/AccordionGrid*"
             },
-			mobileWidgetTypes: {TextBox: 'MobileTextBox', FormattedTextBox: 'MobileFormattedTextBox', LazyEditor: 'LazyEditor', ObjectReset: 'MobileObjectReset', ObjectSave: 'MobileObjectAction', ObjectNew: 'MobileObjectAction'/*, StoreSimpleCalendar: "MobileStoreCalendar",
-				StoreCalendar: "MobileStoreCalendar"*/, OverviewDgrid: 'MobileOverviewGrid', OverviewAction: 'MobileOverviewAction', Textarea: 'MobileTextBox'/*, StoreSelect: "MobileStoreSelect"*/, TimeTextBox: "MobileTimePicker", TukosNumberBox: "MobileNumberBox", StoreDgrid: "StoreDgridNoDnd",
+			mobileWidgetTypes: {TextBox: 'MobileTextBox', FormattedTextBox: 'MobileFormattedTextBox'/*, LazyEditor: 'LazyEditor', ObjectReset: 'MobileObjectReset', ObjectSave: 'MobileObjectAction', ObjectNew: 'MobileObjectAction', StoreSimpleCalendar: "MobileStoreCalendar",
+				StoreCalendar: "MobileStoreCalendar"*/, OverviewDgrid: 'MobileOverviewGrid'/*, OverviewAction: 'MobileOverviewAction'*/, Textarea: 'MobileTextBox'/*, StoreSelect: "MobileStoreSelect"*/, TimeTextBox: "MobileTimePicker", TukosNumberBox: "MobileNumberBox", StoreDgrid: "StoreDgridNoDnd",
 				SimpleDgrid: "SimpleDgridNoDnd"},
             loadedWidgets: {}, loadingWidgets: {},
 			instantiationCompleted: function(){

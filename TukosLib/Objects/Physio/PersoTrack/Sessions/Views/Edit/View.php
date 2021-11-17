@@ -14,7 +14,7 @@ class View extends EditView{
         $customContents = [
             'row1' => [
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-                'widgets' => ['id', 'parentid', 'exercises', 'name', 'startdate', 'sessionid', 'duration']
+                'widgets' => ['id', 'parentid', 'exercises', 'name', 'startdate', 'whenintheday', 'sessionid', 'duration']
             ],
             'row2' => [
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
@@ -22,15 +22,9 @@ class View extends EditView{
             ],
             'row3' => [
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-                'widgets' => ['painduring', 'painafter'/*, 'painnextday', 'mood', 'fatigue', 'otherexceptional'*/],
+                'widgets' => ['painduring', 'painafter'],
             ],
-/*
-            'row4' => [
-                'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-                'widgets' => ['patientsessioncomments', 'therapistsessioncomments', 'patientweeklycomments', 'therapistweeklycomments']
-            ]
-*/
-                ];
+        ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowcomments', 'rowbottom', 'rowacl'], $this->dataLayout['contents']));
     }
 }

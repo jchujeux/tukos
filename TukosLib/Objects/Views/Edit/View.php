@@ -5,6 +5,7 @@ use TukosLib\Objects\Views\Edit\SubObjects;
 use TukosLib\Objects\Directory;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
+use TukosLib\TukosFramework as Tfk;
 
 class View {
 
@@ -39,7 +40,11 @@ class View {
             'feedback'  => Widgets::tukosTextArea(
                     ['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 100, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),
         ];
-
+        if (Tfk::$registry->isMobile){
+            foreach(['edit', 'new', 'duplicate', 'export', 'process', 'clearFeedback', 'feedback'] as $action){
+                $this->actionWidgets[$action]['atts']['hidden'] = true;
+            }
+        }
         $this->dataLayout = [
             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
             'contents' => [

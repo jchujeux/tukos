@@ -6,11 +6,12 @@ use TukosLib\Objects\Views\Edit\View as EditView;
 use TukosLib\Objects\Views\LocalActions;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
+use TukosLib\Objects\Sports\Programs\SessionsTracking;
 use TukosLib\Objects\Sports\GoldenCheetah as GC;
 
 class View extends EditView{
 
-    use LocalActions, ViewActionStrings;
+    use LocalActions, ViewActionStrings, SessionsTracking;
     
 	function __construct($actionController){
        parent::__construct($actionController);
@@ -21,8 +22,8 @@ class View extends EditView{
         };
         $customContents = [
             	'row1' => [
-                    'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => '130'],
-                    'widgets' => ['id', 'parentid', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter',
+                    'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => '130'],
+                    'widgets' => ['id', 'parentid', 'coach', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'coachemail', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter',
                         'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'stsratio', 'initialsts', 'initiallts']
                 ],
             	'row2' => [
@@ -32,7 +33,7 @@ class View extends EditView{
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 
                             'contents' => [
                                 'row1' => [
-                                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'widgetWidths' => ['50%', '50%']],
+                                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'widgetWidths' => ['50%', '50%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
                                     'widgets' => ['comments', 'calendar']],
                                 'row2' => [
                                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
@@ -57,7 +58,7 @@ class View extends EditView{
                 ]
         ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
-        $this->onOpenAction = $this->onViewOpenAction() .  $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies') . $this->view->OpenEditAction();
+        $this->onOpenAction =  $this->view->OpenEditAction() . $this->onViewOpenAction() .  $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies');
         $plannedOptionalCols = ['name', 'duration', 'intensity', 'sport', 'sportimage', 'stress', 'distance', 'elevationgain', 'content']; $plannedColOptions = [];
         $performedOptionalCols = ['name', 'duration', 'sport', 'sportimage', 'distance', 'elevationgain', 'perceivedeffort', 'sensations', 'mood', 'athletecomments', 'coachcomments']; $plannedColOptions = [];
         $optionalWeeks = ['performedthisweek', 'plannedthisweek', 'performedlastweek', 'plannedlastweek'];
@@ -70,8 +71,8 @@ class View extends EditView{
         foreach($optionalWeeks as $week){
            $weekOptions[$week] = $tr($week);
        }
-        $this->actionWidgets['reset']['atts']['afterActions'] = [
-            'postReset' => <<<EOT
+       $this->actionWidgets['new']['atts']['afterActions'] = $this->actionWidgets['delete']['atts']['afterActions'] = $this->actionWidgets['reset']['atts']['afterActions'] = [
+            'postAction' => <<<EOT
 var grid = this.form.getWidget('sptsessions');
 grid.loadChartUtils.updateCharts(grid, 'changed');
 EOT
@@ -179,7 +180,7 @@ EOT
 		        'widgetsDescription' => [
 		            'googlecalid' => Widgets::restSelect(Widgets::complete([
 		                'title' => $this->view->tr('googlecalid'),	'storeArgs' => ['object' => 'calendars', 'params' => ['getOne' => 'calendarSelect', 'getAll' => 'calendarsSelect']],
-		                'onWatchLocalAction' =>  ['value' => ['googlecalid' => ['localActionStatus' => ['action' => "sWidget.pane.form.setValueOf('googlecalid', newValue);sWidget.pane.form.setValueOf('lastsynctime', null);"]],]]
+		                'onWatchLocalAction' =>  ['value' => ['googlecalid' => ['localActionStatus' => ['action' => $this->googleConfCalIdOnWatchAction()]],]]
 		            ])),
 		            'newcalendar' => ['type' => 'TukosButton', 'atts' => ['label' => $this->view->tr('newcalendar'), 'onClickAction' => $this->googleConfNewCalendarOnClickAction(),
 		            ]],
@@ -245,93 +246,54 @@ EOT
 		        ],
 		        'onOpenAction' => $this->googleConfOnOpenAction(),
 		    ]];
-		//$durationFormat = ['renderCell' => 'renderContent', 'formatType' => 'secondsToHHMMSS']; $numberFormat = ['renderCell' => 'renderContent', 'formatType' => 'number', 'formatOptions' => ['places' => 0]];
-		$this->actionWidgets['sessionstracking'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Sessionstracking'), 'allowSave' => true, 'includeWidgets' => ['parentid', 'synchrostart', 'synchroend']]];
-		$this->actionLayout['contents']['actions']['widgets'][] = 'sessionstracking';
-		$this->actionWidgets['sessionstracking']['atts']['dialogDescription'] = [
-		    //'closeOnBlur' => true,
-		    'paneDescription' => [
-		        'widgetsDescription' => [
-		            'eventformurl' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showeventtrackingformurl'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('eventformurl')])),
-		            'formlogo' => Widgets::textBox(Widgets::complete(['label' => $tr('trackingformlogo'), 'style' => ['width' => '15em'], 'onWatchLocalAction' => $this->watchLocalAction('formlogo')])),
-		            'formpresentation' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['MobileTextBox', 'default'], $tr)], 'label' => $tr('formpresentation'),
-		                'onWatchLocalAction' => $this->watchLocalAction('formpresentation')])),
-		            'version' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['V2'], $tr, [false, 'ucfirst', false])], 'label' => $tr('version'),
-		                'value' => $this->view->model->defaultSessionsTrackingVersion, 'onWatchLocalAction' => $this->watchLocalAction('version')])),
-		            'gcathlete' => Widgets::textBox(Widgets::complete(['title' => $tr('Gcathlete'), 'style' => ['width' => '15em'], 'onWatchLocalAction' => $this->urlChangeLocalAction('gcathlete', $tr)])),
-		            'gcsynchrostart' => Widgets::tukosDateBox(['title' => $tr('synchrostart'), 'onWatchLocalAction' => $this->urlChangeLocalAction('gcsynchrostart', $tr, false)]),
-		            'gcsynchroend' => Widgets::tukosDateBox(['title' => $tr('synchroend'), 'onWatchLocalAction' => $this->urlChangeLocalAction('gcsynchrostart', $tr, false)]),
-		            'gcmetricstoinclude' => Widgets::multiSelect(Widgets::complete(['title' => $tr('gcmetricstoinclude'), 'options' => GC::metricsOptions($tr), 'style' => ['height' => '150px'], 
-		                'onWatchLocalAction' =>  $this->urlChangeLocalAction('gcmetricstoinclude', $tr)])),
-		            'gcactivitiesmetrics' => Widgets::basicGrid(Widgets::complete(['label' => $tr('gcactivitiesmetrics'), 'allowSelectAll' => true, 'dynamicColumns' => true, 'adjustLastColumn' => false, 'minRowsPerPage' => 500,
-		                'colsDescription' => GC::metricsColsDescription($tr), 'nonGcCols' => GC::nonGcCols(), 'permanentGcOptions' => GC::permanentGcOptions()])),
-		            'gclink' => Widgets::htmlContent(['title' => $tr('gclink'), 'readonly' => true]),
-		            'gcinput' => Widgets::textArea(Widgets::complete(['title' => $tr('gcinput')])),
-		            'gcimport' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('gcimport'), 'onClickAction' => $this->gcimportOnClickAction($tr)]],
-		            'gcsync' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('gcsync'), 'onClickAction' => $this->gcsyncOnClickAction($tr)]],
-		            'close' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('close'), 'onClickAction' => "this.pane.close();\n"]],
-		        ],
-		        'layout' => [
-		            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
-		            'contents' => [
-		                'row1' => [
-		                    'tableAtts' =>['cols' => 4,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
-		                    'widgets' => ['eventformurl', 'formlogo', 'formpresentation', 'version'],
-		                ],
-		                'headerRow' => [
-		                    'tableAtts' => ['cols' =>  1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 
-		                    'contents' => [
-		                        'title' => [
-		                            'tableAtts' => ['cols' =>  1, 'customClass' => 'labelsAndValues', 'label' => $tr('gcsynchronization')]
-		                        ]
-		                ]],
-		                'row2' => [
-		                    'tableAtts' =>['cols' => 4,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
-		                    'widgets' => ['gcathlete', 'gcsynchrostart', 'gcsynchroend'],
-		                ],
-		                'row3' => [
-		                    'tableAtts' =>['cols' => 2,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'widgetWidths' => ['10%', '90%']],
-		                    'contents' => [
-		                        'col1' => [
-		                            'tableAtts' =>['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
-		                            'widgets' => ['gcmetricstoinclude']
-		                        ],
-		                        'col2' => [
-		                            'tableAtts' => ['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => false],
-		                            'contents' => [
-		                                'row1' => [
-		                                    'tableAtts' => ['cols' => 2,  'customClass' => 'labelsAndValues', 'showLabels' => false],
-		                                    'contents' => [
-		                                        'col1' => [
-		                                            'tableAtts' => ['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => false],
-		                                            'widgets' => ['gclink']
-		                                        ],
-		                                        'col2' => [
-		                                            'tableAtts' => ['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => false],
-		                                            'widgets' => ['gcimport', 'gcsync']
-		                                        ]
-		                                    ]
-		                                ],
-		                                'row2' => [
-		                                    'tableAtts' => ['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
-		                                    'widgets' => ['gcinput'],
-		                                ],
-		                            ],
-		                        ]
-		                    ],
-		                ],
-		                'row4' => [
-		                    'tableAtts' =>['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
-		                    'widgets' => ['gcactivitiesmetrics'],
-		                ],
-		                'row5' => [
-		                    'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => false],
-		                    'widgets' => ['close'],
-		                ],
-		            ],
-		        ],
-		        'onOpenAction' => $this->sessionsTrackingOnOpenAction($tr),
-		    ]];
+        $this->setSessionsTrackingActionWidget();
+        $this->actionWidgets['viewplanned'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewplanned'), 'value' => 'viewplanned', 'onClickAction' => $this->viewModeOnClick('viewplanned')]];
+        $this->actionWidgets['viewperformed'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewperformed'), 'value' => 'viewperformed', 'onClickAction' => $this->viewModeOnClick('viewperformed')]];
+        $this->actionWidgets['viewall'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewall'), 'value' => 'viewall', 'onClickAction' => $this->viewModeOnClick('viewall')]];
+        $this->actionLayout['tableAtts']['cols'] = 3;
+        $this->actionLayout['contents'] = array_merge(array_splice($this->actionLayout['contents'], 0, 1), 
+            ['sessionViewOptions' => ['tableAtts' => ['cols' => 1, 'customClass' => 'actionTable', 'showLabels' => true,  'label' => '<b>' . $this->view->tr('SessionsMode') . ':</b>'], 'widgets' => [ 'viewplanned',  'viewperformed', 'viewall']]],
+            $this->actionLayout['contents']);
+	}
+	public function viewModeOnClick($optionName){
+	    $performedColumns = json_encode(array_merge(['sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb'], GC::performedAddedCols()));
+	    return <<<EOT
+console.log('selected: ' + this.valueOf('{$optionName}'));
+var form = this.form, sessionsWidget = form.getWidget('sptsessions'), modeColumns, column, customizationPath = sessionsWidget.customizationPath;
+sessionsWidget.viewModeHiddenCols = sessionsWidget.viewModeHiddenCols || [];
+sessionsWidget.customizationPath = '';
+sessionsWidget.isBulk = true;
+sessionsWidget.viewModeHiddenCols.forEach(function(col){
+    sessionsWidget.toggleColumnHiddenState(col, false);
+});
+sessionsWidget.viewModeHiddenCols = [];
+switch ('{$optionName}'){
+    case 'viewplanned':
+        {$performedColumns}.forEach(function(col){
+            if ((column = sessionsWidget.columns[col]) && !column.hidden){
+                sessionsWidget.toggleColumnHiddenState(col, true);
+                sessionsWidget.viewModeHiddenCols.push(col);
+            }
+        });
+        break;
+    case 'viewperformed':
+        ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails'].forEach(function(col){
+            if ((column = sessionsWidget.columns[col]) && !column.hidden){
+                sessionsWidget.toggleColumnHiddenState(col, true);
+                sessionsWidget.viewModeHiddenCols.push(col);
+            }
+        });
+        break;
+    case 'viewall':
+        break;
+}
+sessionsWidget.customizationPath = customizationPath;
+sessionsWidget.isBulk = false;
+//sessionsWidget.refresh();
+form.resize();
+sessionsWidget.resize();
+EOT
+        ;
 	}
 }
 ?>

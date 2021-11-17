@@ -5,6 +5,8 @@ use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
+use TukosLib\Objects\Physio\Physio;
+use TukosLib\Objects\Sports\GoldenCheetah as GC;
 
 class View extends AbstractView {
 
@@ -13,27 +15,31 @@ class View extends AbstractView {
         parent::__construct($objectName, $translator, 'Treatment', 'Description');
         $exercisesView = Tfk::$registry->get('objectsStore')->objectView('sptexercises');
         $customDataWidgets = Utl::array_merge_recursive_replace(array_merge([
-                'parentid' => ['atts' => ['edit' => ['onChangeLocalAction' => ['parentid' => ['localActionStatus' =>$this->relatedTreatmentAction()]]]]],
-                'exercises' => $this->exercises(),
-                'name'      => ['atts' => ['edit' =>  ['style' => ['width' => '30em']], 'storeedit' => ['width' => 100]],],
-                'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
-                'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'lowercase', true]),
-                'exerciseid' => ['type' => 'storeSelect', 'atts' => ['edit' =>  ['storeArgs' => ['data' => []], 'label' => $this->tr('ExerciseId'),
-                    'onChangeLocalAction' => ['exerciseid' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => $this->exerciseIdLocalAction()]]]]]],
-                'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => [
-                    'edit' => ['label' => $this->tr('Duration') . ' (hh:mn)', 'constraints' => ['timePattern' => 'HH:mm:ss', 'clickableIncrement' => 'T00:15:00', 'visibleRange' => 'T01:00:00']],
-                ]]),
-            ], array_intersect_key($exercisesView->dataWidgets(), [/*'name' => true, */'stress' => true, 'series' => true, 'repeats' => true, 'extra' => true, 'extra1' => true]), [
-                'stress'        => ViewUtils::storeSelect('stress', $this, 'Mechanical stress', [true, 'ucfirst', true]),
-                'painduring' => ViewUtils::storeSelect('pain', $this, 'Painduring', [true, 'ucfirst', true], ['atts' => ['edit' => [ 'style' => ['width' => '100%', 'maxWidth' => '30em'],
-                    'onWatchLocalAction' => $this->painOnWatchLocalAction('painduring')]]]),
-                'painafter' => ViewUtils::storeSelect('pain', $this, 'Painafter', [true, 'ucfirst', true], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em'],
-                    'onWatchLocalAction' => $this->painOnWatchLocalAction('painafter')]]]),
-            ]), [
-                'series' => ['atts' => ['edit' => ['onChangeLocalAction' => ['series' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],
-                'repeats' => ['atts' => ['edit' => ['onChangeLocalAction' => ['repeats' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],
-                'extra' => ['atts' => ['edit' => ['onChangeLocalAction' => ['extra' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],
-                'extra1' => ['atts' => ['edit' => ['onChangeLocalAction' => ['extra1' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],
+                    'parentid' => ['atts' => ['edit' => ['onChangeLocalAction' => ['parentid' => ['localActionStatus' =>$this->relatedTreatmentAction()]]]]],
+                    'exercises' => $this->exercises(),
+                    'name'      => ['atts' => ['edit' =>  ['style' => ['width' => '30em']], 'storeedit' => ['width' => 100]],],
+                    'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
+                    'whenintheday' => ViewUtils::storeSelect('whenInTheDay', $this, 'Whenintheday', [true, 'lowercase', true], ['atts' => ['edit' => ['onChangeLocalAction' => ['wheninthe day' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]]),
+                    'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'lowercase', true]),
+                    'exerciseid' => ['type' => 'storeSelect', 'atts' => ['edit' =>  ['storeArgs' => ['data' => []], 'label' => $this->tr('ExerciseId'),
+                        'onChangeLocalAction' => ['exerciseid' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => $this->exerciseIdLocalAction()]]]]]],
+                    'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => [
+                        'edit' => ['label' => $this->tr('Duration') . ' (hh:mn)', 'constraints' => ['timePattern' => 'HH:mm:ss', 'clickableIncrement' => 'T00:15:00', 'visibleRange' => 'T01:00:00']],
+                    ]]),
+                    'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.']]]]),
+                    'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#000.']]]]),
+                ], 
+                array_intersect_key($exercisesView->dataWidgets(), [/*'name' => true, */'stress' => true, 'series' => true, 'repeats' => true, 'extra' => true, 'extra1' => true]), [
+                    'stress'        => ViewUtils::storeSelect('stress', $this, 'Mechanical stress', [true, 'ucfirst', true]),
+                    'painduring' => ViewUtils::storeSelect('pain', $this, 'Painduring', [true, 'ucfirst', true], ['atts' => ['edit' => ['backgroundColors' => Physio::$painColors, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+                    'painafter' => ViewUtils::storeSelect('pain', $this, 'Painafter', [true, 'ucfirst', true], ['atts' => ['edit' => ['backgroundColors' => Physio::$painColors, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+                ], 
+                GC::widgetsDescription($this, ['gcmechload'])
+            ), 
+            [       'series' => ['atts' => ['edit' => ['onChangeLocalAction' => ['series' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],
+                    'repeats' => ['atts' => ['edit' => ['onChangeLocalAction' => ['repeats' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],
+                    'extra' => ['atts' => ['edit' => ['onChangeLocalAction' => ['extra' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],
+                    'extra1' => ['atts' => ['edit' => ['onChangeLocalAction' => ['extra1' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],
             ]
         );
         $this->mustGetCols = array_merge($this->mustGetCols, array_keys($customDataWidgets));
@@ -52,7 +58,7 @@ EOT
     function exerciseChangeLocalAction(){
         return <<<EOT
 
-sWidget.setValueOf('name', sWidget.valueOf('exerciseid', true) + ' ' + sWidget.valueOf('sessionid', true) + ': ' + sWidget.valueOf('series', true) + '*' + utils.transform(sWidget.valueOf('repeats'), 'numberunit', null, Pmg) + ' ' + 
+sWidget.setValueOf('name', sWidget.valueOf('exerciseid', true) + ' ' + sWidget.valueOf('whenintheday', true) + ': ' + sWidget.valueOf('series', true) + '*' + utils.transform(sWidget.valueOf('repeats'), 'numberunit', null, Pmg) + ' ' + 
     sWidget.valueOf('extra', true) + ' ' + sWidget.displayedValueOf('extra1'));
 return true;
 EOT;
@@ -93,13 +99,6 @@ tWidget.store.setData(data);
 console.log('I am in exercisesLocalAction value: ', tWidget.get('value'));
 return true;
 EOT;
-    }
-    public static function painOnWatchLocalAction($widgetName){
-        return ['value' => [$widgetName => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => true], 'action' => <<<EOT
-sWidget.set('style', {backgroundColor: {1: 'LIGHTGREEN', 2: 'ORANGE', 3: 'RED', 4: 'RED'}[newValue]});
-return true;  
-EOT
-        ]]]];
     }
 }
 ?>

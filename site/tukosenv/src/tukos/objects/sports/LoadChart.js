@@ -30,7 +30,7 @@ return declare(null, {
 						self.collection.filter(filter.eq('startdate', dayDate)[sessionsFilter]('mode', 'performed')).forEach(function(session){
 							if (session.sport !== 'rest'){
 								hasSession = true;
-								self.buildChartItem(chartItem, session, presentCols, chartAtts);
+								self.buildChartItem(chartItem, session, presentCols, chartAtts, true);
 								previousSession = session;
 					        }
 						});
@@ -108,9 +108,9 @@ return declare(null, {
 				});
 			}
 		},
-		buildChartItem: function(chartItem, session, presentCols, chartAtts){
+		buildChartItem: function(chartItem, session, presentCols, chartAtts, week){
 			if (session.duration){
-				var duration = dutils.seconds(session.duration, 'time') / 60, hasSession = true;          
+				var duration = dutils.seconds(session.duration, 'time') / 60;          
 				presentCols.forEach(function(col){
 	                var colAtts = chartAtts.cols[col];
 					switch	(col){
@@ -129,6 +129,9 @@ return declare(null, {
 						case 'lts':
 						case 'tsb':
 							chartItem[col] = Number(session[col] || 0);
+							break;
+						case 'gctrimppw':
+							chartItem[col] += week ? Number(session[col]) : (Number(session[col]) || Number(session.gctrimphr));
 							break;
 						default:
 							chartItem[col] += Number(session[col] || 0) * (colAtts.isDurationAverage ? duration : 1);

@@ -50,6 +50,13 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
 				}
             }
         },
+		isEquivalent: function(value1, value2){
+			if (typeof value1 === "number" && typeof value2 === "number"){
+				return value1 === value2
+			}else{
+				return String(value1 || '') == String(value2 || '');
+			}
+		},
         forEach: function(object, callback){
             for (var key in object){
                 if (object.hasOwnProperty(key)){

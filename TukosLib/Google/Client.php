@@ -31,8 +31,9 @@ class Client {
   			}
   			$pageToken = $list->getNextPageToken();
   			if ($pageToken) {
-  				array_push($arguments, array_merge(array_pop($arguments), ['pageToken' => $pageToken]));
+  			    $arguments[] = ['pageToken' => $pageToken];
   				$list = call_user_func_array($function, $arguments);
+  				array_pop($arguments);
   			} else {
     			break;
   			}

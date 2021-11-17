@@ -27,14 +27,11 @@ class Model extends AbstractModel {
                 'mode' => 'VARCHAR(10) DEFAULT NULL',
                 'distance' => 'VARCHAR(10) DEFAULT NULL',
                 'elevationgain' => 'VARCHAR(10) DEFAULT NULL',
-                'feeling' => 'VARCHAR(255) DEFAULT NULL',
                 'sensations' => 'INT DEFAULT NULL',
                 'perceivedeffort' => 'INT DEFAULT NULL',
                 'mood' => 'INT DEFAULT NULL',
-                'athletecomments' => 'VARCHAR(512) DEFAULT NULL',
-                'athleteweeklyfeeling' => 'VARCHAR(512) DEFAULT NULL',
-                'coachcomments' => 'VARCHAR(512) DEFAULT NULL',
-                'coachweeklycomments' => 'VARCHAR(512) DEFAULT NULL',
+                'athletecomments' => 'longtext DEFAULT NULL',
+                'coachcomments' => 'longtext DEFAULT NULL',
                 'sts' => 'FLOAT DEFAULT NULL',
                 'lts' => 'FLOAT DEFAULT NULL',
                 'tsb' => 'FLOAT DEFAULT NULL',
@@ -44,7 +41,15 @@ class Model extends AbstractModel {
             $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition);
     }   
     function initialize($init=[]){
-        return parent::initialize(array_merge(['duration' => '60', 'warmup' => '', 'mainactivity' => '', 'warmdown' => ''], $init));
+        return parent::initialize(array_merge(['duration' => '60', 'warmup' => '', 'mainactivity' => '', 'warmdown' => '', 'sessionid' => 1], $init));
+    }
+    function adjustSessionId($query, $values){
+        $existingSessionIds = array_column($this->getAll ([
+            'where' => ['parentid' => $query['parentid'], 'startdate' => $query['startdate'], 
+                ($query['mode'] === 'performed') ? ['col' => 'mode', 'opr' => '=', 'values' => 'performed'] : [['col' => 'mode', 'opr' => '!=', 'values' => 'performed'], ['col' => 'mode', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]], 
+            'cols' => ['sessionid']]), 'sessionid');
+        $sessionId = empty($existingSessionIds) ? 1 : (max($existingSessionIds) + 1);
+        return ['data' => ['sessionid' => $sessionId]];
     }
 }
 ?>

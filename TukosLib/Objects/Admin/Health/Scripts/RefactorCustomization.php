@@ -7,16 +7,12 @@ namespace TukosLib\Objects\Admin\Health\Scripts;
 
 use TukosLib\Utils\Utilities as Utl;
 
-use Zend\Console\Getopt;
 
-use TukosLib\Objects\Directory;
 use TukosLib\TukosFramework as Tfk;
 
 class RefactorCustomization {
 
     function __construct($parameters){ 
-        $appConfig    = Tfk::$registry->get('appConfig');
-        $user         = Tfk::$registry->get('user');
         $store        = Tfk::$registry->get('store');
 
         try{
@@ -39,7 +35,7 @@ class RefactorCustomization {
             	$store->update(['custom' => $newCustomization], ['where' => ['id' => $item['id']], 'table' => 'tukos']);
             });
             echo "Done !";
-        }catch(Getopt_exception $e){
+        }catch(\Zend_Console_Getopt_Exception $e){
             Tfk::debug_mode('log', 'an exception occured while parsing command arguments in RefactorCustomizaton: ', $e->getUsageMessage());
         }
     }

@@ -24,7 +24,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             var refreshAction = function(){
                 var query = {};
                 if (!theForm){
-                	var paneId = currentPane.id, panesConfig = Pmg.getCustom('panesConfig'), paneConfig;
+                	//var paneId = currentPane.id, panesConfig = Pmg.getCustom('panesConfig'), paneConfig;
                 	if (currentPane.associatedtukosid){
 						query.id = currentPane.associatedtukosid;
 					}

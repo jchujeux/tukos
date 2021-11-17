@@ -2,9 +2,21 @@ define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/PageManag
 function(declare, lang, utils, Pmg){
     return declare(null, {
         constructor: function(args){
-			var form = args.form, sessionsGrid = this.sessionsGrid = form.getWidget('physiopersosessions'), dailiesGrid = this.dailiesGrid = form.getWidget('physiopersodailies');
+			var form = args.form, sessionsGrid = this.sessionsGrid = form.getWidget('physiopersosessions'), dailiesGrid = this.dailiesGrid = form.getWidget('physiopersodailies'), exportButton = form.getWidget('export');
 			this.sessionsStore = sessionsGrid.store;
 			this.dailiesStore = dailiesGrid.store;
+			exportButton.clientDialogDescription = {paneDescription: {onOpenAction: function(){
+				var pane = exportButton.dropDown.pane, patient;
+				console.log('I am in exportbutton');
+				if (!pane.valueOf('to') && (patientId = form.valueOf('patient'))){
+                	Pmg.serverDialog({object: 'users', view: 'NoView', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'GetItems'}}}, {data: utils.newObj([[patientId, ['email']]])}).then(
+                    	function (response){
+							pane.setValueOf('to', response.data[patientId].email);
+						}
+					);	
+					
+				}
+			}}};
         },
 		getSessionsFilter: function(){
 			return this.sessionsFilter || (this.sessionsFilter =  new this.sessionsStore.Filter());
@@ -21,7 +33,6 @@ function(declare, lang, utils, Pmg){
 				});
 				dateDaily = this.dailiesStore.filter(this.getDailiesFilter().eq('startdate', date)).fetchSync();
 				if (dateDaily.length === 0){
-					fieldToUpdate = ['name', 'painduring', 'painafter'];
 					changes.startdate = date;
 				}
 				dateSessions = this.sessionsStore.filter(this.getSessionsFilter().eq('startdate', date)).fetchSync();
@@ -30,7 +41,8 @@ function(declare, lang, utils, Pmg){
 						switch (field){
 							case 'name' : changes.name += session.name + '<br>'; break;
 							case 'painduring' : changes.painduring = (session.painduring > changes.painduring) ? session.painduring : changes.painduring; break;
-							case 'painafter' : changes.painafter = (session.painafter > changes.painafter) ? session.painafter : changes.painafter;
+							case 'painafter' : changes.painafter = (session.painafter > changes.painafter) ? session.painafter : changes.painafter; break;
+							default: changes[field] += session[field];
 						}
 					});
 				});
@@ -49,22 +61,30 @@ function(declare, lang, utils, Pmg){
 		startdateChangeLocalAction: function(sWidget, tWidget, newValue, oldValue){
 			var oldStartDate = oldValue, newStartDate = newValue;
 			if (oldStartDate){
-				this.dailyAssesmentUpdate(oldStartDate, ['name', 'painduring', 'painafter']);
+				this.dailyAssesmentUpdate(oldStartDate, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'gctrimphr', 'gcmechload']);
 			}
 			if (newStartDate){
-				this.dailyAssesmentUpdate(newStartDate, ['name', 'painduring', 'painafter']);
+				this.dailyAssesmentUpdate(newStartDate, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'gctrimphr', 'gcmechload']);
 			}
 			this.dailiesGrid.refresh({keepScrollPosition: true});
 		},
-		fieldChangeLocalAction: function(field){
+/*		fieldChangeLocalAction: function(field){
 			var session = this.sessionsStore.getSync(this.sessionsGrid.clickedRow.data[this.sessionsStore.idProperty]), date = session['startdate'];
 			if (date){
 				this.dailyAssesmentUpdate(date, [field]);
 				this.dailiesGrid.refresh({keepScrollPosition: true});
 			}
 			return true;
+		},*/
+		sessionCellEditChangeLocalAction: function(sWidget, tWidget, newValue, oldValue){
+			var session = this.sessionsStore.getSync(this.sessionsGrid.clickedRow.data[this.sessionsStore.idProperty]), date = session['startdate'];
+			if (date){
+				this.dailyAssesmentUpdate(date, [sWidget.widgetName]);
+				this.dailiesGrid.refresh({keepScrollPosition: true});
+			}
+			return true;
 		},
-		nameChangeLocalAction: function(sWidget, tWidget, newValue, oldValue){
+/*		nameChangeLocalAction: function(sWidget, tWidget, newValue, oldValue){
 			return this.fieldChangeLocalAction('name');
 		},
 		painduringChangeLocalAction: function(sWidget, tWidget, newValue, oldValue){
@@ -72,11 +92,11 @@ function(declare, lang, utils, Pmg){
 		},
 		painafterChangeLocalAction: function(sWidget, tWidget, newValue, oldValue){
 			return this.fieldChangeLocalAction('painafter');
-		},
+		},*/
 		afterCreateSessionRow: function(){
 			var session = arguments[0] || this.sessionsGrid.clickedRow.data;
 			if (session.startdate){
-			    this.dailyAssesmentUpdate(session.startdate, ['name', 'painduring', 'painafter']);
+			    this.dailyAssesmentUpdate(session.startdate, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'gctrimphr', 'gcmechload']);
 				this.dailiesGrid.refresh({keepScrollPosition: true});
 			}
 		},
@@ -100,7 +120,7 @@ function(declare, lang, utils, Pmg){
 			dates = utils.array_unique(dates);
 			dates.forEach(function(date){
 				if (date){
-					self.dailyAssesmentUpdate(date, ['name', 'painduring', 'painafter']);
+					self.dailyAssesmentUpdate(date, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'gctrimphr', 'gcmechload']);
 					needsRefresh = true;
 				}
 			});

@@ -7,6 +7,10 @@ use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {
     
+    public static function translationSets(){
+        return ['sports'];
+    }
+    
     function __construct($objectName, $translator=null){
         $colsDefinition = [
             'patient' => 'MEDIUMINT DEFAULT NULL',

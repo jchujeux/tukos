@@ -5,6 +5,7 @@ namespace TukosLib\Objects\Views\Overview;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
 use TukosLib\Objects\Directory;
+use TukosLib\TukosFramework as Tfk;
 
 class View {
 
@@ -52,7 +53,11 @@ class View {
        'clearFeedback' => ['type' => 'ObjectFieldClear','atts' => ['label' => $this->view->tr('Clear Feedback'), 'fieldToClear' => 'feedback']],
            'feedback'  => Widgets::tukosTextArea(['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 80, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),
         ];
-        
+        if (Tfk::$registry->isMobile){
+            foreach(['edit', 'import', 'export', 'process', 'clearFeedback', 'feedback'] as $action){
+                $this->actionWidgets[$action]['atts']['hidden'] = true;
+            }
+        }
         $this->dataLayout = [
             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'spacing' => '0', 'showLabels' => false],
             'widgets' => ['overview'],

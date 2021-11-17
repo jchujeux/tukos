@@ -126,7 +126,7 @@ trait  GridWidgets{
     
     public static function colGridAtts($element, $col, $mode='storeedit'){
         $defColAtts = [
-            'width'     => 'auto', 'overflow' => 'auto',
+            /*'minWidth'     => '40', */'overflow' => 'auto',
             'renderCell' => 'renderContent', 'minHeightFormatter' => '5em', 'maxHeightFormatter' => '30em',
             'rowsFilters' => true,
         ];

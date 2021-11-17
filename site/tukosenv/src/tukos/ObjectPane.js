@@ -1,10 +1,10 @@
-define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/ContentPane", "dijit/layout/BorderContainer", "dijit/registry", "tukos/utils",  "tukos/widgetUtils", "tukos/_TukosLayoutMixin", "tukos/_ObjectPaneMixin", 
-		 "tukos/widgets/WidgetsHider", "tukos/PageManager"], 
-    function(declare, lang, when, ContentPane, BorderContainer, registry, utils, wutils, _TukosLayoutMixin,  _ObjectPaneMixin, WidgetsHider, Pmg){
+define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-construct",  "dijit/layout/ContentPane", "dijit/layout/BorderContainer", "dijit/registry", "tukos/utils",  "tukos/widgetUtils", "tukos/_TukosLayoutMixin", "tukos/_ObjectPaneMixin", "tukos/PageManager"], 
+    function(declare, lang, when, dct, ContentPane, BorderContainer, registry, utils, wutils, _TukosLayoutMixin,  _ObjectPaneMixin, Pmg){
     return declare([BorderContainer, _TukosLayoutMixin, _ObjectPaneMixin], {
 
         postCreate: function(){
-            this.inherited(arguments);
+			var self = this;            
+			this.inherited(arguments);
             this.widgetType = "ObjectPane";
 			this.Pmg = Pmg;
             this.widgetsName = [];
@@ -34,21 +34,36 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dijit/layout/Co
             this.watchContext = 'server';
             this.onInstantiated(lang.hitch(this, function(){
                 if (actionPane && this.widgetsHider !== false){
-                    actionPane.addChild(new WidgetsHider({form: this}, dojo.doc.createElement("div")));
+            		this.widgetsHiderButton = dct.create('button', {'class': 'ui-icon dgrid-hider-toggle', type: 'button'}, actionPane.domNode);
+                	this.widgetsHiderButton.onclick = function(){
+                		var widgetsHiderButton = self.widgetsHiderButton, hider = widgetsHiderButton.hider;
+                		if(!hider){
+                    		require(["tukos/_WidgetsHider"], function(_WidgetsHider){
+                    			(hider = widgetsHiderButton.hider = new _WidgetsHider({form: self, buttonNode: widgetsHiderButton})).toggleHiderMenu();
+                    		});
+                		}else{
+                			hider.toggleHiderMenu();
+                		}
+                	};
                 }
                 if (this.data && this.data.value && !this.data.value.id){
                     this.markIfChanged = true;
                 }
-                when (this.setWidgets(this.data), lang.hitch(this, function(result){
-                    if (this.onOpenAction){
-                        this.openAction(this.onOpenAction);
-                    }
-                    setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
-                    	this.markIfChanged = true;
-                        this.watchContext = 'user';
-                        this.setUserContextPaths(); 
-                    }));
-                }));
+                dojo.ready(lang.hitch(this, function(){
+					when (this.setWidgets(this.data), lang.hitch(this, function(result){
+	                    if (this.onOpenAction){
+	                        this.openAction(this.onOpenAction);
+	                    }
+	                    setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
+	                    	this.markIfChanged = true;
+	                        this.watchContext = 'user';
+	                        this.setUserContextPaths(); 
+	                    }));
+						this.isLastInitialResize = true;
+						this.resize();
+						this.isLastInitialResize = false;
+	                }));
+				}));
             }));
         },
         setUserContextPaths: function(){

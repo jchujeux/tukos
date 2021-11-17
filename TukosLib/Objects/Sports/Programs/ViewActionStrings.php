@@ -6,14 +6,16 @@ trait ViewActionStrings{
 
   protected function dateChangeLoadChartLocalAction(){
       return <<<EOT
-      tWidget.plots.week.values = dutils.difference(dutils.getDayOfWeek(1, new Date(tWidget.form.valueOf('fromdate'))), newValue, 'week') + 1;
+if (tWidget.chart){
+    tWidget.plots.week.values = dutils.difference(dutils.getDayOfWeek(1, new Date(tWidget.form.valueOf('fromdate'))), newValue, 'week') + 1;
 	tWidget.chart.addPlot('week', tWidget.plots.week);
 	try{
         tWidget.chart.render();
     }catch(err){
         console.log('Error rendering chart in localChartAction for widget: ' + tWidget.widgetName);
     }
-	return true;
+}
+return true;
 EOT;
   }
   protected function loadChartLocalAction($chartWidgetName){

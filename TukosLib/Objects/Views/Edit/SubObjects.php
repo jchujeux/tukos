@@ -42,12 +42,15 @@ class SubObjects {
                         'storeType' => 'MemoryTreeObjects',
                         'storeArgs' => ['idProperty' => 'idg'],
             			'isSubObject' => true,
-            			'editDialogAtts' => ['ignoreColumns' => ['contextid', 'permission', 'grade', 'updated', 'updator', 'created', 'creator', 'custom']]
+            			'editDialogAtts' => ['ignoreColumns' => ['contextid', 'permission', 'grade', 'updated', 'updator', 'created', 'creator', 'custom', 'configstatus']]
             ];
             foreach ($subObject['filters'] as $col => $target){
-                if (is_string($col) && !in_array($col[0], ['&', '#'])){
+                if (isset($defAtts['colsDescription'][$col]) && is_string($col) && !in_array($col[0], ['&', '#'])){
                     $defAtts['colsDescription'][$col]['atts']['storeedit']['rowsFilters'] =  'disabled';
                 }
+            }
+            foreach (Utl::getItem('hiddenCols', $subObject, []) as $col){
+                $defAtts['colsDescription'][$col]['atts']['storeedit']['hidden'] = true;
             }
             $view->dataWidgets[$widgetName] = [
                 'type' => 'storeDgrid', 

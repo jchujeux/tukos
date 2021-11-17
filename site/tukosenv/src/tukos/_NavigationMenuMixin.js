@@ -7,17 +7,18 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dijit/popup", "
 			evt.stopPropagation();
             focusUtil.curNode && focusUtil.curNode.blur();
         	Pmg.tabs.gotoTab(this.onClickArgs);
+			if (Pmg.isMobile()){
+				return false;
+			};
         },
         onChangeObjectSelect: function(newValue){
-            if (!(newValue === '')){
+            if (newValue !== ''){
                 var self = this;
                 this.onChangeArgs.object = this.object;
                 this.onChangeArgs.query =( this.sendAsNew ? {dupid: newValue, grade: 'NORMAL'} : {id: newValue});
-                Pmg.tabs.request(this.onChangeArgs);
-                setTimeout(function(){
-                        self.set('value', '', false, '');
-                    }, 100
-                );
+                Pmg.tabs.request(this.onChangeArgs).then(function(){
+					self.set('value', '', false, '');
+				});
             }
             dijit.popup.close(dijit.getEnclosingWidget(this));                
         },

@@ -2,7 +2,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
     function(declare, lang, on, all, ready, when, utils, TukosTooltipDialog, Pmg, JSON, messages){
 	return declare(null, {
         editInPopup: function(evt){
-			//this.openEditDialog(this.clickedRowValues(), {x: evt.clientX, y: evt.clientY});
 			this.openEditDialog(this.clickedRowValues(), {x: 0, y: 0});
         },
 		openEditDialog: function(item, openArgs){
@@ -28,7 +27,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             utils.forEach(columns, function(column, col){
             	if (!utils.in_array(col, ignoreColumns)){
             		var widgetType = column.widgetType || 'TextBox';
-            		widgetsDescription[col] = {type: widgetType, atts: lang.clone(column.editorArgs) || {label: column.label, disabled: true}};
+            		widgetsDescription[col] = {type: widgetType, atts: column.disabled ? {label: column.label, disabled: true} : lang.clone(column.editorArgs)};
             		(widgetType === 'Editor' ? editorWidgets : otherWidgets).push(col);
             	}
             });
@@ -53,10 +52,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             pane.itemId = item[this.collection.idProperty];
 			pane.emptyWidgets(pane.postElts);
 			pane.resetChangedWidgets();
-            pane.watchOnChange = pane.markIfChanged = false;
+            pane.watchOnChange = true;
+			pane.watchContext = 'server';
+			pane.markIfChanged = false;
             when(editDialog.open(openArgs), lang.hitch(this, function(){
                 when (pane.setWidgets({value: item}), function(){
                 	pane.watchOnChange = pane.markIfChanged = true;
+					pane.watchContext = 'user';
                 	pane.resize();
                 });
             }));

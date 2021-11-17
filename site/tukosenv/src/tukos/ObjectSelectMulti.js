@@ -32,9 +32,8 @@ define (["dojo/_base/declare", "dojo/dom-attr", "dijit/popup", "dijit/PopupMenuI
         openDropDown: function(){
             var self = this;
             var onChangeCallBack = function(newValue){
-                self.set('value', newValue);
+				self.set('value', newValue);
                 self.object = newValue ? this.object : self.defaultObject;
-				this.set('value', '', false);
                 self.closeDropDown();
             }
             if (!this.dropDown){
@@ -45,6 +44,7 @@ define (["dojo/_base/declare", "dojo/dom-attr", "dijit/popup", "dijit/PopupMenuI
 							popup.open({parent: item, popup: item.popup, around: item.domNode, orient: Pmg.isMobile() ? undefined : ['after-centered'], onExecute: function(){popup.close(item.popup);}, onCancel: function(){popup.close(item.popup);}, onClose: function(){}});
                         });
                     }else if (item.popup){
+						item.popup.set('value', item.popup.object === self.object ? self.value : '', false);
 						popup.open({parent: item, popup: item.popup, around: item.domNode, orient: Pmg.isMobile() ? undefined: ['after-centered'], onExecute: function(){popup.close(item.popup);}, onCancel: function(){popup.close(item.popup);}, onClose: function(){}});
 					}else{
 						self.set('value', '');

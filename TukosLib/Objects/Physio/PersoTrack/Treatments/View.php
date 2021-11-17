@@ -8,10 +8,11 @@ use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
     
-    use CalendarsViewUtils;
+    use CalendarsViewUtils, QSMChart;
     
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'PhysioPersoPlan', 'Description');
+        $this->addToTranslate(['dateofday', 'dayoftreatment']);
         $this->doNotEmpty = ['displayeddate'];
         //$tr = $this->tr;
         $this->setGridWidget('physiopersosessions');
@@ -19,6 +20,7 @@ class View extends AbstractView {
         $this->allowedNestedRowWatchActions = 0;
         $dateChangeLocalAction = function($serverTrigger){
             return [
+                'qsmchart' => ['localActionStatus' => ['triggers' => ['server' => $serverTrigger, 'user' => true], 'action' => $this->dateChangeChartLocalAction()]],
                 'weeklies' => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter')
             ];
         };
@@ -29,6 +31,7 @@ class View extends AbstractView {
             'fromdate' => ViewUtils::tukosDateBox($this, 'Begins on', ['atts' => ['edit' => [
                 'onChangeLocalAction' => [
                     'todate'  => ['value' => "if (!newValue){return '';}else{return dutils.dateString(newValue, sWidget.valueOf('#duration'), sWidget.valueOf('#todate'),true)}" ],
+                    'qsmchart' => ['localActionStatus' => $this->chartLocalAction()],
                 ]]]]),
             'duration'  =>ViewUtils::numberUnitBox('timeInterval', $this, 'Duration', ['atts' => [
                 'edit' => [
@@ -43,6 +46,7 @@ class View extends AbstractView {
             'todate'   => ViewUtils::tukosDateBox($this, 'Ends on', ['atts' => ['edit' => [
                 'onChangeLocalAction' => [
                     'duration'  => ['value' => "if (!newValue){return '';}else{return dutils.durationString(sWidget.valueOf('#fromdate'), newValue, sWidget.valueOf('#duration'),true)}" ],
+                    'qsmchart' => ['localActionStatus' => $this->chartLocalAction()],
                 ],
             ]]]),
             'displayeddate' => $this->displayedDateDescription(['atts' => ['edit' => ['onWatchLocalAction' => ['value' => $dateChangeLocalAction(true)]]]]),
@@ -57,7 +61,7 @@ class View extends AbstractView {
                         'style' => ['backgroundColor' => ['field' => 'intensity', 'map' => Sports::$intensityColorsMap, 'defaultValue' => 'Peru'],
                             'color' => ['field' => 'mode', 'map' => ['planned' => 'white', 'performed' => 'black']],
                             'fontStyle' => ['field' => 'mode', 'map' => ['planned' => 'normal', 'performed' => 'italic']]],
-                        'img'   => ['field' => 'sport', 'map' => Sports::$sportImagesMap, 'imagesDir' => Tfk::publicDir . 'images/'],
+                        'img'   => ['field' => 'sport', 'map' => Sports::$sportImagesMap, 'imagesDir' => Tfk::$publicDir . 'images/'],
                         'ruler' => ['field' => 'stress', 'map' => Sports::$stressOptions, 'atts' => ['minimum' => 0, 'maximum' => 4, 'showButtons' => false, 'discreteValues' => 5]],
                     ]],
 */
@@ -79,6 +83,7 @@ class View extends AbstractView {
             'exercises' => $this->exercises(),
                 'protocol' => ViewUtils::htmlContent($this, 'TherapeuticalProtocol', ['atts' => ['edit' => ['style' => ['maxHeight' => '150px', 'overflow' => 'auto']]]]),
             'torespect' => ViewUtils::htmlContent($this, 'QSMToRespect', ['atts' => ['edit' => ['style' => ['maxHeight' => '150px', 'overflow' => 'auto']]]]),
+            'qsmchart' => $this->qsmChartDescription()
         ];
         
         $subObjects = [
@@ -119,7 +124,7 @@ class View extends AbstractView {
             ],
             'physiopersodailies' => [
                 'atts' => [
-                    'title' => $this->tr('Physiopersodailies'), 'allDescendants' => true,
+                    'title' => $this->tr('Physiopersodailies'), 'allDescendants' => true, 'maxWidth' => '900px',
                     'sort' => [['property' => 'startdate', 'descending' => true]],
                     'renderCallback' => "if (column.field in  {painduring: true, painafter: true, painnextday: true}){var newColor = {1: 'LIGHTGREEN', 2: 'ORANGE', 3: 'RED', 4: 'RED'}[rowData[column.field]];domstyle.set(tdCell, 'backgroundColor', newColor);domstyle.set(node, 'backgroundColor', newColor);}",
                 ],
@@ -127,6 +132,10 @@ class View extends AbstractView {
                     [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
             ],
         ];
+        $this->customContentAtts = ['edit' => ['widgetsDescription' => ['export' => ['atts' => ['conditionDescription' => "return this.valueOf('id');"]]]]];
+        foreach ($customDataWidgets['qsmchart']['atts']['edit']['chartAtts']['type']['cols'] as $col => $description){
+            $subObjects['physiopersodailies']['atts']['colsDescription'][$col] = ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => [$col => ['localActionStatus'  => $this->cellChartChangeLocalAction()]]]]]];
+        }
         $this->customize($customDataWidgets, $subObjects, ['grid' => ['calendar', 'displayeddate', 'weeklies'], 'get' => ['displayeddate'], 'post' => ['displayeddate']], ['weeklies' => []]);
     }
     function exercises(){
@@ -141,7 +150,6 @@ class View extends AbstractView {
      }
      public static function relatedPlanAction(){
          return <<<EOT
-var cols = ['name', 'parentid', 'objective', 'exercises', 'protocol', 'torespect'];
 Pmg.serverDialog({object: 'physiopersoplans', view: 'Edit', action: 'GetItem', query: {id: newValue, storeatts: JSON.stringify({cols: ['name', 'parentid', 'objective', 'exercises', 'protocol', 'torespect']})}}).then(
     function(response){
         var form = sWidget.form, setValueOf = lang.hitch(form, form.setValueOf), item = response.data.value, items;
@@ -149,8 +157,12 @@ Pmg.serverDialog({object: 'physiopersoplans', view: 'Edit', action: 'GetItem', q
         utils.forEach(item, function(value, widgetName){
             setValueOf(widgetName === 'parentid' ? 'patient' : widgetName, value);
         });
-        setValueOf('acl', {1:{rowId:1,userid:newValue,permission:2}});        
-        Pmg.setFeedback(Pmg.message('actionDone'));
+    	return Pmg.serverDialog({object: 'users', view: 'Edit', action: 'GetItem', query: {parentid: item.parentid, storeatts: JSON.stringify({cols: []})}}).then(
+        	function (response){
+                setValueOf('acl', {1:{rowId:1,userid: response.data.value.id,permission:2}});        
+                Pmg.setFeedback(Pmg.message('actionDone'));
+			}
+		);	
     }
 );
 return true;
@@ -174,16 +186,25 @@ EOT;
      }
      function OpenEditAction(){
          return <<<EOT
-var form = this;
-require (["tukos/objects/physio/persoTrack/dailyAssesments/LocalActions"], function(LocalActions){
+var form = this, grid = form.getWidget('physiopersodailies'), chart = form.getWidget('qsmchart');
+chart.plots.day.values = dutils.difference(form.valueOf('fromdate'), form.valueOf('displayeddate'), 'day') + 1;
+chart.chart.addPlot('day', chart.plots.day);
+try{
+    chart.chart.render();
+}catch(err){
+    console.log('Error rendering chart in localChartAction for widget qsmchart ');
+}
+require (["tukos/objects/physio/persoTrack/treatments/LocalActions", "tukos/objects/physio/persoTrack/treatments/QSMChart"], function(LocalActions, QSMChart){
     form.localActions = new LocalActions({form: form});
+    form.QSMChart = new QSMChart({dailiesStore: grid.store});
+    form.QSMChart.setChartValue(form, 'qsmchart');
 });
 EOT
          ;
      }
      function sessionChangeLocalAction($colName){
          return <<<EOT
-return sWidget.form.localActions ? sWidget.form.localActions.{$colName}ChangeLocalAction(sWidget, tWidget, newValue, oldValue) : true;
+return sWidget.form.localActions ? sWidget.form.localActions.sessionCellEditChangeLocalAction(sWidget, tWidget, newValue, oldValue) : true;
 EOT;
      }
 }

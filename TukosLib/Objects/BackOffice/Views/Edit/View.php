@@ -53,7 +53,7 @@ class View {
             $isMobile = Tfk::$registry->isMobile;
             $this->actionWidgets = [
                 'title' => ['type' => 'HtmlContent', 'atts' => ['value' => '<h1>' . $tr('Tukos Questionnaire') . '</h1>']],
-                'logo' => ['type' => 'HtmlContent', 'atts' => ['value' => '<img alt="logo" src="' . Tfk::publicDir . 'images/tukosswissknife.jpg" style="height: ' . ($isMobile ? '40' : '80') . 'px; width: ' . ($isMobile ? '100' : '200') . 'px;' . ($isMobile ? 'float: right;' : '') . '>']],
+                'logo' => ['type' => 'HtmlContent', 'atts' => ['value' => '<img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.jpg" style="height: ' . ($isMobile ? '40' : '80') . 'px; width: ' . ($isMobile ? '100' : '200') . 'px;' . ($isMobile ? 'float: right;' : '') . '>']],
                 'send' => ['type' => 'ObjectSave', 'atts' => ['serverAction' => 'Save', 'label' => $this->view->tr('Send'), 'sendToServer' => ['changedValues'],
                     'urlArgs' => ['action' => 'Save', 'query' => ['form' => 'BackOfficeForm', 'object' => 'backOfficeObject']],
                 ]],
@@ -66,7 +66,7 @@ class View {
             $this->actionWidgets = Utl::array_merge_recursive_replace($this->actionWidgets, $this->view->getActionWidgets($query));
         }
         $dataElts = $this->view->dataElts($query);
-        return [
+        $formContent =  [
             'object'         => $this->view->objectName,
             'contextPaths'  => [[0]],
             'viewMode'      => 'Edit',
@@ -85,6 +85,10 @@ class View {
             'widgetsHider' => false,
             'title' => $this->view->getTitle($query)
         ];
+        if (!empty($onOpenAction = $this->view->onOpenAction($query))){
+            $formContent['onOpenAction'] = $onOpenAction;
+        }
+        return $formContent;
     } 
 }
 ?>

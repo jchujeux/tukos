@@ -2,21 +2,32 @@
 namespace TukosLib\Objects\Physio\PersoTrack\DailyAssesments;
 
 use TukosLib\Objects\AbstractModel;
+use TukosLib\Objects\Sports\GoldenCheetah as GC;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {
 
+    public static function translationSets(){
+        return ['sports'];
+    }
     function __construct($objectName, $translator=null){
-        $colsDefinition = [
-            'startdate'  => 'VARCHAR(30)  DEFAULT NULL',
-            'painduring' => 'TINYINT DEFAULT NULL',
-            'painafter' => 'TINYINT DEFAULT NULL',
-            'painnextday' => 'TINYINT DEFAULT NULL',
-            'mood' => 'TINYINT DEFAULT NULL',
-            'fatigue' => 'TINYINT DEFAULT NULL',
-            'otherexceptional' => 'VARCHAR(512) DEFAULT NULL',
-        ];
+        $colsDefinition = array_merge([
+                'startdate'  => 'VARCHAR(30)  DEFAULT NULL',
+                'painduring' => 'TINYINT DEFAULT NULL',
+                'painafter' => 'TINYINT DEFAULT NULL',
+                'painnextday' => 'TINYINT DEFAULT NULL',
+                //'mood' => 'TINYINT DEFAULT NULL',
+                //'fatigue' => 'TINYINT DEFAULT NULL',
+                'otherexceptional' => 'VARCHAR(512) DEFAULT NULL',
+                'duration'   => 'VARCHAR(30)  DEFAULT NULL',
+                'intensity'  =>  'TINYINT DEFAULT NULL',
+                'distance' => 'VARCHAR(10) DEFAULT NULL',
+                'elevationgain' => 'VARCHAR(10) DEFAULT NULL',
+                'gcmechload' => 'MEDIUMINT DEFAULT NULL'
+            ],
+            GC::colsDefinition(['gcmechload'])
+        );
         parent::__construct(
             $objectName, $translator, 'physiopersodailies',  ['parentid' => ['physiopersotreatments']], [], $colsDefinition, [], [], ['custom'], ['parentid',  'startdate']);
         $this->additionalColsForBulkDelete = ['startdate'];
