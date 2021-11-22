@@ -504,7 +504,7 @@ abstract class AbstractModel extends ObjectTranslator {
         return $result;
     }
     public function duplicateOneExtended($id, $cols, $jsonColsPaths = [], $jsonNotFoundValue=null){
-        $duplicate =  $this->getOne(['where' => ['id' => $id], 'cols' => array_diff($cols, ['id', 'created', 'creator', 'updated', 'updator', 'history'])], $jsonColsPaths, $jsonNotFoundValue);
+        $duplicate =  $this->getOneExtended(['where' => ['id' => $id], 'cols' => array_diff($cols, ['id', 'created', 'creator', 'updated', 'updator', 'history'])], $jsonColsPaths, $jsonNotFoundValue);
         $initial = array_intersect_key($this->initialize(), $duplicate);
         foreach($initial as $col => $value){
         	if ($duplicate[$col] === null){

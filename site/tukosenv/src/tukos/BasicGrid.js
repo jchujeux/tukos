@@ -5,6 +5,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 	return declare([Grid, DijitRegistry, Keyboard, Hider, Resizer, Selector, _GridSummaryMixin], {
         constructor: function(args){
             var self = this;
+			this.adjustLastColumn = false;
         	for (var i in args.columns){
                 this.setColArgsFunctions(args.columns[i]);
             }
@@ -86,21 +87,15 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             	this.set('columns', {});
             }
             this.on(on.selector(".dgrid-row, .dgrid-header", "contextmenu"), lang.hitch(this, this.contextMenuCallback));
+			this.isFirstResize = true;
         },
-		/*resize: function(){
-			if (!this.isBulk){
-				var customizationPath = this.customizationPath;
-				this.customizationPath = '';
-				console.log('grid: ' + this.widgetName + ' computed width: ' + dst.getComputedStyle(this.domNode).width);
-				if (this.freezeWidth){
-					//dst.set(this.domNode, 'width', (parseInt(dst.getComputedStyle(this.domNode).width) - 24) + 'px');
-					this.freezeWidth = true;
-				}
-				this.adjustMinWidthAutoColumns('auto');
-				this.inherited(arguments);
-				this.customizationPath = customizationPath;
+		resize: function(){
+			if (!this.layoutHandle && this.isFirstResize){
+				this.setInitialColsWidth();
+				this.isFirstResize = false;
 			}
-		},*/
+			this.inherited(arguments);
+		},
 		_setAllowApplicationFilter: function(newValue){
         	wutils.watchCallback(this, 'allowApplicationFilter', this.allowApplicationFilter, newValue);
         	this.allowApplicationFilter = newValue;

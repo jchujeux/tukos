@@ -45,15 +45,17 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
 				var customizationPath = this.customizationPath;// so that personnalization is not changed if a column has a width change during resize
 				this.customizationPath = '';
 				if (this.freezeWidth){
-					if (this.form.isLastInitialResize){
-						dst.set(this.domNode, 'width', (parseInt(dst.getComputedStyle(this.domNode).width)/* - 24*/) + 'px');
-						this.enforceMinWidth = true;
-					}
-					if (this.enforceMinWidth){
-						if (this.adjustMinWidthAutoColumns(5)){
-							//this.adjustMinWidthAutoColumn('auto');
-							//return;
-						};
+					if (this.layoutHandle.unfreezeWidth){
+						dst.set(this.domNode, 'width', 'auto');
+						this.layoutHandle.unfrozenWidths += 1;
+					}else{
+						if (this.form.needsToFreezeWidth){
+							dst.set(this.domNode, 'width', Math.max(parseInt(dst.getComputedStyle(this.domNode).width), (this.minGridWidth || 0)) + 'px');
+							this.enforceMinWidth = true;
+						}
+						if (this.enforceMinWidth){
+							this.adjustMinWidthAutoColumns(5);
+						}
 					}
 				}
 				this.inherited(arguments);
@@ -73,7 +75,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
 					setTimeout(function(){
 						self.scrollTo(previousScrollPosition);
 					}, 100);
-				    console.log('maxHeight: ' + maxHeight + ' bodyHeight: ' + bodyHeight + ' viewHeight: ' + viewHeight + ' newMaxHeight: ' + newMaxHeight);
+				    //console.log('maxHeight: ' + maxHeight + ' bodyHeight: ' + bodyHeight + ' viewHeight: ' + viewHeight + ' newMaxHeight: ' + newMaxHeight);
 		    	}
 				this.customizationPath = customizationPath;
 			}

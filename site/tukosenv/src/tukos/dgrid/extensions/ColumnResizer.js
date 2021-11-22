@@ -273,9 +273,18 @@ define([
 			}
 		},
 		adjustMinWidthAutoColumns: function(remainingRecursions){
+			var self = this;
+			utils.forEach (this.columns, function(column, field){
+				if (!column.hidden && (column.minWidth || column.maxWidth) && (column.width && column.width !== 'auto')){
+						resizeColumnWidth(self, field, 'auto', null, false);
+				}
+			});
+			return this._adjustMinWidthAutoColumns(remainingRecursions);
+		},
+		_adjustMinWidthAutoColumns: function(remainingRecursions){
 			var self = this, needsResize = false;
 			utils.forEach (this.columns, function(column, field){
-				if (!column.width && !column.hidden){
+				if (!column.hidden){
 					if (column.minWidth  && column.headerNode.offsetWidth < column.minWidth){
 						resizeColumnWidth(self, field, column.minWidth, null, false);
 						needsResize = true;
@@ -287,7 +296,7 @@ define([
 			});
 			
 			if (needsResize && remainingRecursions){
-				return this.adjustMinWidthAutoColumns((remainingRecursions || 5) - 1);
+				return this._adjustMinWidthAutoColumns((remainingRecursions || 5) - 1);
 			}else{
 				console.log('adjustMinWidthAutoColumns - remaining recursions: ', remainingRecursions);
 				return needsResize;

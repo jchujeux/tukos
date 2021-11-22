@@ -58,7 +58,7 @@ class View extends EditView{
                 ]
         ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
-        $this->onOpenAction =  $this->view->OpenEditAction() . $this->onViewOpenAction() .  $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies');
+        $this->onOpenAction =  $this->view->OpenEditAction() . $this->onViewOpenAction() .  $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies') . $this->viewModeOptionOpenAction();
         $plannedOptionalCols = ['name', 'duration', 'intensity', 'sport', 'sportimage', 'stress', 'distance', 'elevationgain', 'content']; $plannedColOptions = [];
         $performedOptionalCols = ['name', 'duration', 'sport', 'sportimage', 'distance', 'elevationgain', 'perceivedeffort', 'sensations', 'mood', 'athletecomments', 'coachcomments']; $plannedColOptions = [];
         $optionalWeeks = ['performedthisweek', 'plannedthisweek', 'performedlastweek', 'plannedlastweek'];
@@ -247,51 +247,32 @@ EOT
 		        'onOpenAction' => $this->googleConfOnOpenAction(),
 		    ]];
         $this->setSessionsTrackingActionWidget();
-        $this->actionWidgets['viewplanned'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewplanned'), 'value' => 'viewplanned', 'onClickAction' => $this->viewModeOnClick('viewplanned')]];
-        $this->actionWidgets['viewperformed'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewperformed'), 'value' => 'viewperformed', 'onClickAction' => $this->viewModeOnClick('viewperformed')]];
-        $this->actionWidgets['viewall'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewall'), 'value' => 'viewall', 'onClickAction' => $this->viewModeOnClick('viewall')]];
+        $this->actionWidgets['viewplanned'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewplanned'), 'value' => 'viewplanned', 'onClickAction' => $this->viewModeOptionOnClick('viewplanned')]];
+        $this->actionWidgets['viewperformed'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewperformed'), 'value' => 'viewperformed', 'onClickAction' => $this->viewModeOptionOnClick('viewperformed')]];
+        $this->actionWidgets['viewall'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewall'), 'value' => 'viewall', 'onClickAction' => $this->viewModeOptionOnClick('viewall')]];
         $this->actionLayout['tableAtts']['cols'] = 3;
         $this->actionLayout['contents'] = array_merge(array_splice($this->actionLayout['contents'], 0, 1), 
             ['sessionViewOptions' => ['tableAtts' => ['cols' => 1, 'customClass' => 'actionTable', 'showLabels' => true,  'label' => '<b>' . $this->view->tr('SessionsMode') . ':</b>'], 'widgets' => [ 'viewplanned',  'viewperformed', 'viewall']]],
             $this->actionLayout['contents']);
 	}
-	public function viewModeOnClick($optionName){
+	public function viewModeOptionOpenAction(){
 	    $performedColumns = json_encode(array_merge(['sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb'], GC::performedAddedCols()));
 	    return <<<EOT
-console.log('selected: ' + this.valueOf('{$optionName}'));
-var form = this.form, sessionsWidget = form.getWidget('sptsessions'), modeColumns, column, customizationPath = sessionsWidget.customizationPath;
-sessionsWidget.viewModeHiddenCols = sessionsWidget.viewModeHiddenCols || [];
-sessionsWidget.customizationPath = '';
-sessionsWidget.isBulk = true;
-sessionsWidget.viewModeHiddenCols.forEach(function(col){
-    sessionsWidget.toggleColumnHiddenState(col, false);
+var form = this;
+require (["tukos/objects/sports/programs/LocalActions"], function(LocalActions){
+    form.localActions = new LocalActions({form: form, plannedColumns: ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails'], performedColumns: {$performedColumns}});
+    if (form.viewModeOption){
+        form.getWidget(form.viewModeOption).set('checked', true);
+        form.localActions.viewModeOption(form.viewModeOption);
+    }
 });
-sessionsWidget.viewModeHiddenCols = [];
-switch ('{$optionName}'){
-    case 'viewplanned':
-        {$performedColumns}.forEach(function(col){
-            if ((column = sessionsWidget.columns[col]) && !column.hidden){
-                sessionsWidget.toggleColumnHiddenState(col, true);
-                sessionsWidget.viewModeHiddenCols.push(col);
-            }
-        });
-        break;
-    case 'viewperformed':
-        ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails'].forEach(function(col){
-            if ((column = sessionsWidget.columns[col]) && !column.hidden){
-                sessionsWidget.toggleColumnHiddenState(col, true);
-                sessionsWidget.viewModeHiddenCols.push(col);
-            }
-        });
-        break;
-    case 'viewall':
-        break;
-}
-sessionsWidget.customizationPath = customizationPath;
-sessionsWidget.isBulk = false;
-//sessionsWidget.refresh();
-form.resize();
-sessionsWidget.resize();
+EOT
+	    ;
+	}
+	public function viewModeOptionOnClick($optionName){
+        return <<<EOT
+console.log('selected: ' + this.valueOf('{$optionName}'));
+this.form.localActions.viewModeOption('{$optionName}', true);
 EOT
         ;
 	}

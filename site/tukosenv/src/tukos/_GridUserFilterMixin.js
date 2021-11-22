@@ -118,6 +118,9 @@ function(declare, lang, dct, Memory, query, Widget, TextBox, Select, registry, u
         			userFilters[field] = column.filter;
         		}
         	});
+			if (this.extraUserFilters){
+				userFilters = lang.mixin(userFilters, this.extraUserFilters);
+			}
         	return userFilters;
         }
     });

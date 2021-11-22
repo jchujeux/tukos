@@ -1,6 +1,6 @@
 
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tukos/_PanesManager", "tukos/TukosTab",  "dijit/registry", "dijit/Dialog", "tukos/utils", "tukos/PageManager", "dojo/json"], 
-    function(declare, lang, dom, ready, _PanesManager, TukosTab, registry, Dialog, utils, Pmg, JSON){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tukos/_PanesManager", "tukos/TukosTab", "dijit/Dialog", "tukos/utils", "tukos/PageManager", "dojo/json"], 
+    function(declare, lang, dom, ready, _PanesManager, TukosTab, Dialog, utils, Pmg, JSON){
     return declare([_PanesManager], {
         constructor: function(args){
             var self = this, descriptions = this.tabsDescription, created, selected;

@@ -324,7 +324,7 @@ class View extends AbstractView {
 				'object' => 'sptsessions',
 				'atts' => [
 					'title' => $this->tr('sessionstemplates'),/* 'storeType' => 'LazyMemoryTreeObjects', */
-					'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], 'freezeWidth' => true,
+					'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], 'freezeWidth' => true, 'minGridWidth' => '300'
 				],
 				'filters' => ['grade' => 'TEMPLATE'],
 			    'removeCols' => ['sportsman', 'sessionid', 'googleid', 'mode', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'gctriscore', 'gcavghr', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time', 'grade', 'configstatus', 'acl'],

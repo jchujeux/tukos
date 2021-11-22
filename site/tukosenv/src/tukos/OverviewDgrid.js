@@ -2,9 +2,9 @@
  *  Provides a grid overview capability, allowing to display contents of a tukos object table
  *      -> 'overview': used as read-only cells, selector allow to select specific actions on selected rows via the save button
  */
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/dom-construct", "dojo/string", "dojo/query", "tukos/_GridUserFilterMixin", "tukos/utils", "tukos/PageManager", "tukos/BasicGrid", "tukos/dstore/Request",
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/query", "tukos/_GridUserFilterMixin", "tukos/utils", "tukos/PageManager", "tukos/BasicGrid", "tukos/dstore/Request",
 		 "tukos/widgets/WidgetsLoader", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, when, on, dct, string, query, _GridUserFilterMixin, utils, Pmg, BasicGrid, Request, WidgetsLoader, messages){
+    function(declare, lang, when, on, dct, dst, string, query, _GridUserFilterMixin, utils, Pmg, BasicGrid, Request, WidgetsLoader, messages){
     return declare([BasicGrid, _GridUserFilterMixin], {
         constructor: function(args){
             args.storeArgs.sortParam = args.storeArgs.sortParam || Pmg.get('sortParam');
@@ -23,7 +23,12 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
             this.contextMenuItems.header.push({atts: {label: messages.showhidetargetvalues  , onClick: lang.hitch(this, function(evt){this.showColValues();})}});
         },
         resize: function(){
-			var self = this, previousScrollPosition = this.getScrollPosition();
+			var self = this, previousScrollPosition = this.getScrollPosition(), customizationPath = this.customizationPath;// so that personnalization is not changed if a column has a width change during resize
+			this.customizationPath = '';
+			if (!this.enforceMinWidth){
+				dst.set(this.domNode, 'width', (parseInt(dst.getComputedStyle(this.domNode).width)/* - 24*/) + 'px');
+				this.enforceMinWidth = true;
+			}
 			this.adjustMinWidthAutoColumns(5);
 			this.inherited(arguments);
 			setTimeout(function(){
@@ -31,6 +36,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
 			}, 100);
         	var style = this.bodyNode.style;
 			style.maxHeight = (parseInt(this.parentContentPane.domNode.style.height) - parseInt(style.marginTop) - parseInt(style.marginBottom)- 2) + 'px';
+			this.customizationPath = customizationPath;
         },
         allowSelect: function(row){
             if (typeof row.id == 'undefined'){//is the header rather than a data row (?)

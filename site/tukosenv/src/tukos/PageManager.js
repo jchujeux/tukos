@@ -151,7 +151,9 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 		setObjectsMessages: function(descriptionType){
 			var self = this;
 			this.cache[descriptionType].forEach(function(description){
-				self.addMessagesToCache(description.messages, description.formContent.object);
+				if (description.messages && description.formContent){
+					self.addMessagesToCache(description.messages, description.formContent.object);
+				}
 			});
 		},        
 		get: function(item){
