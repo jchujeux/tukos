@@ -101,12 +101,15 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
 		//		does not resize, as it takes up 100% of the
 		//		available width.
 		arrayUtil.forEach(this.getChildren(), function(child){
-			if(typeof child.resize == "function") {
+			if(!child.hidden && typeof child.resize == "function") {
 				child.resize();
 			}
 		});
                 if (!this.resizeOnly){
-                	this.layout();
+					if (arguments[0] != undefined){
+						this.set('style', {width: 'auto'});
+					}            	
+					this.layout();
                 }
                 if (this.table){
                     if (arguments[0] != undefined && this.table.clientWidth > arguments[0].w){
@@ -280,7 +283,7 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
 		// Refresh the layout of any child widgets, allowing them to resize
 		// to their new parent.
 		arrayUtil.forEach(children, function(child){
-			if(typeof child.layout == "function" && this.isLayoutContainer) { // JCH bug fix suggested at: http://bugs.dojotoolkit.org/ticket/12599
+			if(!child.hidden && typeof child.layout == "function" && this.isLayoutContainer) { // JCH bug fix suggested at: http://bugs.dojotoolkit.org/ticket/12599
 				child.layout();
 			}
 		});

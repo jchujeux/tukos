@@ -61,10 +61,18 @@ function(declare, lang, dct, dst, popup, TooltipDialog, focus, Pmg){
                     widget.set('hidden', !checked);//JCH: for disabled textarea, this generates NS_ERROR_UNEXPECTED under firefox(!)
                 }
                 if (widget.layoutHandle){
-                	widget.layoutHandle.resize();
+                	widget.layoutHandle.unfreezeWidth = true;
+					widget.layoutHandle.unfrozenWidths = 0;
+					widget.layoutHandle.resize();
+					widget.layoutHandle.unfreezeWidth = false;
+					//widget.layoutHandle.resize();
                 }
-                if (!widget.hidden && typeof widget.resize === 'function'){
-                	setTimeout(function(){widget.resize();}, 0);// for dgrid's noDataMessage not to overlap header
+                if (widget.layoutHandle.unfrozenWidths){
+                	setTimeout(function(){// for dgrid's noDataMessage not to overlap header
+						widget.layoutHandle.needsToFreezeWidth = true;
+						widget.layoutHandle.resize();
+						widget.layoutHandle.needsToFreezeWidth = false;
+					}, 0);
             	}
             }
             lang.setObject('customization.widgetsDescription.' + widget.widgetName + '.atts.hidden', widget.hidden, widget.form);

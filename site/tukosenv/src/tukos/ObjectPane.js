@@ -59,9 +59,9 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 	                        this.watchContext = 'user';
 	                        this.setUserContextPaths(); 
 	                    }));
-						this.isLastInitialResize = true;
+						this.needsToFreezeWidth = true;
 						this.resize();
-						this.isLastInitialResize = false;
+						this.needsToFreezeWidth = false;
 	                }));
 				}));
             }));

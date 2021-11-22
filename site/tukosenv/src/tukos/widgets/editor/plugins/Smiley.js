@@ -88,10 +88,10 @@ var Smiley = dojo.declare("dojox.editor.plugins.Smiley", _Plugin, {
 				}, 0);
 				return true;
 			})
-			this.editor.onLoadDeferred.addCallback(dojo.hitch(this, function(){
+/*			this.editor.onLoadDeferred.addCallback(dojo.hitch(this, function(){
 				this.editor.addKeyHandler(dojo.keys.DELETE, false, false, deleteHandler);
 				this.editor.addKeyHandler(dojo.keys.BACKSPACE, false, false, deleteHandler);
-			}));
+			}));*/
 		}
 	}
 });
