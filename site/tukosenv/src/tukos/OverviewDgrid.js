@@ -25,8 +25,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
         resize: function(){
 			var self = this, previousScrollPosition = this.getScrollPosition(), customizationPath = this.customizationPath;// so that personnalization is not changed if a column has a width change during resize
 			this.customizationPath = '';
-			if (!this.enforceMinWidth){
-				dst.set(this.domNode, 'width', (parseInt(dst.getComputedStyle(this.domNode).width)/* - 24*/) + 'px');
+			if (this.freezeWidth && !this.enforceMinWidth){
+				dst.set(this.domNode, 'width', (parseInt(dst.getComputedStyle(this.domNode).width)) + 'px');
 				this.enforceMinWidth = true;
 			}
 			this.adjustMinWidthAutoColumns(5);

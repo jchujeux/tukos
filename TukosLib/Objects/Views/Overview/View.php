@@ -26,6 +26,7 @@ class View {
                 'storeArgs'       => ['object' => $this->objectName, 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'GridSelect'],
                 'object'           => $this->objectName,
 				'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false],
+                'freezeWidth' => true
             ]],
         ];
         $this->view->dataWidgets['totalrecords'] = [

@@ -113,7 +113,7 @@ trait SessionsTracking {
 EOT;
     }
     protected function sessionsTrackingOnOpenAction($tr){
-        $this->view->addToTranslate(['gclinkmessage', 'nomatch', 'newsession', 'synced', 'bicycle', 'swimming', 'running', 'other']);
+        $this->view->addToTranslate(['gclinkmessage', 'nomatch', 'newsession', 'synced', 'bicycle', 'swimming', 'running', 'other', 'noneedtosync']);
         return <<<EOT
     var form = this.form, pane = this;
     pane.setWidgets({value: {gcsynchrostart: form.valueOf('synchrostart'), gcsynchroend: form.valueOf('synchroend')}});

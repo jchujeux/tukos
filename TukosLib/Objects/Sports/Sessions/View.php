@@ -4,6 +4,7 @@ namespace TukosLib\Objects\Sports\Sessions;
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Objects\Sports\GoldenCheetah as GC;
+use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
 
@@ -11,6 +12,7 @@ class View extends AbstractView {
     
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Parent', 'Description');
+        $isMobile = Tfk::$registry->isMobile;
         $customDataWidgets = array_merge([
             'name'      => ['atts' => ['edit' =>  ['label' =>$this->tr('Theme'), 'style' => ['width' => '30em']]],],
             'parentid' => ['atts' => ['edit' =>  ['onChangeLocalAction' => ['sessionid' => ['localActionStatus' => $this->adjustSessionIdLocalAction('parentid')]]]]],
@@ -20,10 +22,10 @@ class View extends AbstractView {
                 'storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
             'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'ucfirst', true]),
             'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => [
-                'edit' => ['label' => $this->tr('Duration') . ' (hh:mn)', 'constraints' => ['timePattern' => 'HH:mm:ss', 'clickableIncrement' => 'T00:15:00', 'visibleRange' => 'T01:00:00']],
+                'edit' => ['label' => $this->tr('Duration') . ' (hh:mn)', 'constraints' => ['timePattern' => 'HH:mm:ss', 'clickableIncrement' => 'T00:15:00', 'visibleRange' => 'T01:00:00'], 'style' => ['width' => '6em']],
             ]]),
-            'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.']]]]),
-            'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#000.']]]]),
+            'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['mobileWidgetType' => 'DecimalNumberPicker', 'label' => $this->tr('Distance') . ' (km)', 'style' => ['width' => '5em'], 'constraints' => $isMobile ? ['pattern' => '#000.0'] : ['places' => 1]]]]),
+            'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'style' => ['width' => '5em'], 'constraints' => $isMobile ? ['pattern' => '#000.'] : []]]]),
             'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity', [true, 'ucfirst', true]),
             'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', null, ['atts' => ['edit' => [
                     'onWatchLocalAction' => ['value' => [

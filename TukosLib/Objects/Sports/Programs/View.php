@@ -234,7 +234,8 @@ class View extends AbstractView {
     		    ],
     	        ['atts' => ['edit' => [
     	            'sort' => [['property' => 'weekof', 'descending' => true]], 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'weekof', 'endDateTimeCol' => 'weekof',
-    	            'onWatchLocalAction' => ['allowApplicationFilter' => ['weeklies' => $this->dateChangeGridLocalAction("tWidget.form.valueOf('displayeddate')", 'tWidget', 'newValue')]]
+    	            'onWatchLocalAction' => ['allowApplicationFilter' => ['weeklies' => $this->dateChangeGridLocalAction("tWidget.form.valueOf('displayeddate')", 'tWidget', 'newValue')]],
+    	            'beforeActions' => ['createNewRow' => $this->weekliesBeforeCreateNewRow()]
     	        ]]]
 	        ),
 		    'stsdays' => ViewUtils::tukosNumberBox($this, 'stsdays', ['atts' => [
@@ -390,6 +391,13 @@ if ('$currentDate' < (fromDate = this.valueOf('fromdate'))){
 }
 EOT
         ;
+	}
+	function weekliesBeforeCreateNewRow(){
+	    return <<<EOT
+var row = args || this.clickedRow.data;
+row.weekof = this.valueOf('displayeddate');
+EOT
+	    ;
 	}
 	function beforeRowChange(){
 	    return <<<EOT

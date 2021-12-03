@@ -444,6 +444,9 @@ define([
 				return; 
 			}
 			var to = this.getPos();
+			if (this._itemHeight == 0){// DecimalNumberPicker needs this
+				this._itemHeight = this.panelNodes[1].childNodes[0].offsetHeight;
+			}
 			to.y += steps * this._itemHeight;
 			this.slideTo(to, 0);
 		},

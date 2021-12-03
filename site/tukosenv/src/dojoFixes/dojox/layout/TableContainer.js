@@ -107,12 +107,12 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
 		});
                 if (!this.resizeOnly){
 					if (arguments[0] != undefined){
-						this.set('style', {width: 'auto'});
+						this.set('style', {width: ''});
 					}            	
 					this.layout();
                 }
                 if (this.table){
-                    if (arguments[0] != undefined && this.table.clientWidth > arguments[0].w){
+                    if (arguments[0] != undefined && this.table.clientWidth > arguments[0].w+5){// +5 set empirically to avoid unnnecessary scolling horizontal bar in freezeWidth mode
                         this.set('style', {width: this.table.clientWidth+'px'}); //JCH - to allow horizontal scrolling of the parent pane (that needs to be aware of width > its own width)
                     }else{
                        this.set('style', {width: 'auto'});
