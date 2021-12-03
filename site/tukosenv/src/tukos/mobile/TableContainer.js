@@ -47,7 +47,7 @@ define(["dojo/_base/declare", "dojo/dom-construct", "dojo/dom-style", "dojox/mob
 						if (self.showLabels){
 							dct.create('label', {innerHTML: child.label}, widgetLayout);
 						}
-						widgetFieldSet = dct.create('fieldset', null, widgetLayout);
+						widgetFieldSet = dct.create('fieldset', {style: {fontWeight: 'normal'}}, widgetLayout);
 						widgetFieldSet.appendChild(child.domNode);
 					}
 					dst.set(child.domNode.parentNode.parentNode, 'display', child.get('hidden') ? 'none' : '');

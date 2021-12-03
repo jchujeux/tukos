@@ -1,8 +1,13 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style", "dojox/mobile/SpinWheelTimePicker", "tukos/utils", "tukos/widgetUtils"], 
-  function(declare, lang, aspect, dst, SpinWheelTimePicker, utils, wutils){
-	return declare([SpinWheelTimePicker], {
-    	constructor: function(args){
-    		args.style = lang.mixin({height: '90px'}, args.style);
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/aspect", "dojo/dom-style", "dojox/mobile/_TimePickerMixin", "dojox/mobile/SpinWheel", "dojox/mobile/SpinWheelSlot", "tukos/utils", "tukos/widgetUtils"], 
+  function(declare, lang, domClass, aspect, dst, TimePickerMixin, SpinWheel, SpinWheelSlot, utils, wutils){
+	return declare([SpinWheel, TimePickerMixin], {
+	slotClasses: [SpinWheelSlot, SpinWheelSlot],
+	slotProps: [
+			{labelFrom:0, labelTo:23, style:{width:"50px", textAlign:"right"}},
+			{labelFrom:0, labelTo:59, zeroPad:2, style:{width:"40px", textAlign:"right"}}
+		],
+	constructor: function(args){
+    		args.style = lang.mixin({height: '40px'}, args.style);
     	},
 		postCreate: function(){
 			var self = this;
@@ -14,12 +19,16 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
             	});
             });
 		},
-		startup: function(){
+		buildRendering: function(){
+			this.inherited(arguments);
+			domClass.add(this.domNode, "mblSpinWheelTimePicker");
+		},
+		/*startup: function(){
 			var barNode = Array.apply(null, this.domNode.getElementsByClassName('mblSpinWheelBar')).shift();
 			console.log(' barNode height: ' + dst.get(barNode, "height"));
 			dst.set(barNode, {top: (parseInt(this.style.height) - dst.get(barNode, "height"))/2 + 'px'});
 			this.inherited(arguments);
-		},
+		},*/
         setStyleToChanged: function(widget){
             this.getChildren().forEach(function(slot){
             	slot.set('style', {backgroundColor: wutils.changeColor});

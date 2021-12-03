@@ -14,7 +14,8 @@ class SessionsFeedbackV2 extends SessionsFeedbackVersion{
         $this->hideIfEmptyWidgets = ['coachcomments', 'coachweeklycomments'];
         $this->numberWidgets = ['distance', 'elevationgain'];
         $this->ratingWidgets = ['perceivedeffort', 'sensations', 'mood'];
-        $this->row2LayoutWidgets = ['name', 'sport', 'duration', 'distance', 'elevationgain', 'perceivedeffort',  'sensations', 'mood'];
+        $this->row2LayoutWidgets = ['name', 'sport', 'duration', 'distance', 'elevationgain'];
+        $this->row3LayoutWidgets = ['perceivedeffort',  'sensations', 'mood'];
         $this->synchroWidgets = [/*'name', 'sport', */'duration', 'distance', 'elevationgain'];
     }
 }

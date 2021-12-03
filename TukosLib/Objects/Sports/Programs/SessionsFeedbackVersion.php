@@ -35,6 +35,9 @@ Abstract class SessionsFeedbackVersion {
     public function row2LayoutWidgets(){
         return $this->row2LayoutWidgets;
     }
+    public function row3LayoutWidgets(){
+        return $this->row3LayoutWidgets;
+    }
     public function setTranslatedStoreSelects(){
         if (!isset($this->translatedStores)){
             $this->translatedStores = [];

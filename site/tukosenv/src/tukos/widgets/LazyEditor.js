@@ -7,7 +7,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			this.inherited(arguments);
         	this.customizableAtts = lang.mixin({height: wcutils.sizeAtt('height')}, this.customizableAtts);
 			this.set('style', {padding: 0});    		
-			this.htmlContent = new HtmlContent({style: {width: '100%', height: this.height || "auto"}, value: this.value || ''});           	
+			this.htmlContent = new HtmlContent({noMathJax: true, style: {width: '100%', height: this.height || "auto"}, value: this.value || ''});           	
         	this.watch('height', function(attr, oldValue, newValue){this.htmlContent.set('style', {height: newValue})});
 			this.addChild(this.htmlContent);
 			this.onClickHandle = this.on('click', this.onClickCallback);

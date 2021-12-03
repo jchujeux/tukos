@@ -3,7 +3,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
 	return declare([SpinWheel], {
     	constructor: function(args){
     		delete args.style.width;
-    		args.style = lang.mixin({height: '90px'}, args.style);
+    		args.style = lang.mixin({height: '40px'}, args.style);
     		this.digits = args.constraints.pattern.split('.');
     		this.slotClasses = [];
     		this.slotProps = [];
@@ -11,7 +11,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
     			this.slotClasses.push(SpinWheelSlot);
     			this.slotProps.push({labelFrom:0, labelTo:9, style:{width:"30px", textAlign:"right"}});
     		};
-    		args.style = lang.mixin({height: '90px', width: (32*this.digits[0].length + 10) + 'px'}, args.style);// set empirically
+    		args.style = lang.mixin({height: '40px', width: (32*this.digits[0].length + 10) + 'px'}, args.style);// set empirically
     	},
 		postCreate: function(){
 			var self = this;
@@ -23,11 +23,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
             	});
             });
 		},
-		startup: function(){
+		/*startup: function(){
 			var barNode = Array.apply(null, this.domNode.getElementsByClassName('mblSpinWheelBar')).shift()
 			dst.set(barNode, {top: (parseInt(this.style.height) - dst.get(barNode, "height"))/2 + 'px'});
 			this.inherited(arguments);
-		},
+		},*/
         setStyleToChanged: function(widget){
             this.getChildren().forEach(function(slot){
             	slot.set('style', {backgroundColor: wutils.changeColor});

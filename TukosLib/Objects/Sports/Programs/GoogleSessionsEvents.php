@@ -46,7 +46,7 @@ trait GoogleSessionsEvents {
             $where[] = ['col' => 'startdate', 'opr' => '<=', 'values' => $maxTimeToSync];
         }
         $sessionsToSync = $sessionsModel->getAll([
-            'where' => $this->user->filter($where, 'sptsessions'), 'cols' => ['id', 'name', 'startdate', 'sessionid', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'mainactivity', 'warmdown', 'comments', 'googleid', 'mode']
+            'where' => $this->user->filter($where, 'sptsessions'), 'cols' => ['id', 'name', 'startdate', 'sessionid', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'mainactivity', 'warmdown', 'comments', 'googleid', 'mode', 'sensations', 'athletecomments', 'coachcomments']
         ]);
         $calId = empty($atts['googlecalid']) ? $atts['googlecalid'] : $atts['googlecalid'];
         $existingGoogleEvents = [];
@@ -131,7 +131,7 @@ trait GoogleSessionsEvents {
             }
             return $eventDescription;
         };
-        $session = $sessionsModel->getOne(['where' => ['id' => $sessionIdToSync],  'cols' => ['id', 'name', 'startdate', 'sessionid', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'mainactivity', 'warmdown', 'comments', 'googleid', 'mode']]);
+        $session = $sessionsModel->getOne(['where' => ['id' => $sessionIdToSync],  'cols' => ['id', 'name', 'startdate', 'sessionid', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'mainactivity', 'warmdown', 'comments', 'googleid', 'mode', 'sensations', 'athletecomments', 'coachcomments']]);
         $description = $this->googleDescription($session, $sessionView, $id, $includeTrackingFormUrl, $gcFlag, $logoFile, $formPresentation, $formVersion);
         $eventDescription = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(
             ['start' => ['date' => $session['startdate']], 'end' => ['date' => date('Y-m-d', strtotime($session['startdate'] . ' +1 day'))], 'summary' => "({$this->tr('performedprefix')}){$session['name']}", 'description' => $description])), true);
@@ -157,12 +157,17 @@ trait GoogleSessionsEvents {
         return [];
     }
     public function googleDescription($session, $sessionView, $programId, $includeTrackingFormUrl = false, $gcFlag,  $logoFile = '', $presentation = '', $version = ''){
-        $attCols = ['duration' => 'minutesToHHMM',  'intensity' => 'StoreSelect', 'sport' => 'string', 'stress' => 'string'];
-        $contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'];
+        if ($session['mode'] === 'performed'){
+            $attCols = ['duration' => 'minutesToHHMM',  'sport' => 'string', 'sensations' => 'StoreSelect'];
+            $contentCols = ['athletecomments', 'coachcomments'];
+        }else{
+            $attCols = ['duration' => 'minutesToHHMM',  'intensity' => 'StoreSelect', 'sport' => 'string', 'stress' => 'string'];
+            $contentCols = ['warmup', 'mainactivity', 'warmdown', 'comments'];
+        }
         $description = '';
         foreach($attCols as $col => $attType){
             if (!empty($session[$col])){
-                $description .= "<b>{$this->tr($col)}" . ($col === 'duration' ? " {$this->tr('estimated')}</b> (HH:MM): " : "</b>: ") . ($attType === 'StoreSelect'
+                $description .= "<b>{$this->tr($col)}" . ($col === 'duration' && $session['mode'] != 'performed' ? " {$this->tr('estimated')}</b> (HH:MM): " : "</b>: ") . ($attType === 'StoreSelect'
                     ? Utl::format($session[$col], $attType, $this->tr,  $sessionView->dataWidgets[$col]['atts']['edit']['storeArgs']['data'], $this->storeSelectCache)
                     : Utl::format($session[$col], $attType, $this->tr))
                     . '<br>';

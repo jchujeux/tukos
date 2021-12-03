@@ -18,6 +18,7 @@ class View extends AbstractView {
             ])
         ];
         $this->customize($customDataWidgets);
+        $this->customContentAtts = ['overview' => ['widgetsDescription' => ['overview' => ['atts' => ['freezeWidth' => false]]]]];
     }
     function gridCols(){
     	return array_merge(parent::gridCols(), ['object']);

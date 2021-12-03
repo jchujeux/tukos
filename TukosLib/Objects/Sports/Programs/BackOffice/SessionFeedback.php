@@ -61,11 +61,15 @@ class SessionFeedback extends ObjectTranslator{
                     'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true],
                     'widgets' => $this->version->row2LayoutWidgets()
                 ],
-                'row3' => [
+                'row3' =>[
+                    'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true],
+                    'widgets' => $this->version->row3LayoutWidgets()
+                ],
+                'row4' => [
                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true],
                     'widgets' => ['athletecomments', 'coachcomments']
                 ],
-                'row4' => [
+                'row5' => [
                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'label' => "<b>{$this->view->tr('weeklyfeedback')}</b>"],
                     'widgets' => ['athleteweeklyfeeling', 'coachweeklycomments']
                 ]
@@ -151,7 +155,7 @@ class SessionFeedback extends ObjectTranslator{
         if ($weeklies = $programInformation['weeklies']){
             $weekOf = Dutl::mondayThisWeek($performedSession['startdate']);
             foreach($weeklies as $item){
-                if ($item['weekof'] === $weekOf){
+                if (Utl::getItem('weekof', $item) === $weekOf){
                     foreach ($this->version->formWeeklyCols as $col){
                         if (!empty($item[$col])){
                             $performedSession[$col] = $item[$col];
@@ -178,6 +182,28 @@ class SessionFeedback extends ObjectTranslator{
                         $id = $this->sessionsModel->lastUpdateOneOldId();
                     }
             }else{
+                $newDate = Utl::getItem('startdate', $values); $newSessionId = Utl::getItem('sessionid', $values);
+                if ($newDate || $newSessionId){
+                    $existingSession = $this->sessionsModel->getOne(['where' => $this->user->filterPrivate(['id' => $id], 'sptsessions'), 'cols' => ['id', 'sessionid']]);
+                    $existingSessionsAtNewDate = $this->sessionsModel->getAll(['where' => $this->user->filterPrivate(['parentid' => $programId, 'startdate' => $newDate, 'mode' => 'performed'], 'sptsessions'), 'cols' => ['id', 'sessionid']]);
+                    $dateHasChanged = true; $maxSessionId = 0; $sessionIdHasChanged = true; $sessionIdAlreadyExists = false;
+                    foreach($existingSessionsAtNewDate as $session){
+                        if ($session['id'] === $id){
+                            $dateHasChanged = false;
+                            if ($newSessionId === $session['sessionid']){
+                                $sessionIdHasChanged = false;
+                                break;
+                            }
+                        }
+                        if ($newSessionId === $session['sessionid'] || $existingSession['sessionid'] === $session['sessionid']){
+                            $sessionIdAlreadyExists = true;
+                        }
+                        $maxSessionId = ($session['sessionid'] > $maxSessionId) ? $session['sessionid'] : $maxSessionId;
+                    }
+                }
+                if (($dateHasChanged || $sessionIdHasChanged) && (!$newSessionId || $sessionIdAlreadyExists)){
+                    $values['sessionid'] = $maxSessionId + 1;
+                }
                 if (!$this->sessionsModel->updateOne($values, ['where' => $this->user->filterPrivate(['id' => $id], 'sptsessions')])){
                     $savedCount = 0;
                 }
@@ -273,6 +299,7 @@ hasSomeValue = {$this->weeklyFields}.some(function(name){
     self.getWidget(name).set('hidden', !hasSomeValue);
 });
 this.getWidget('showweeklies').set('label', Pmg.message(hasSomeValue ? 'hideweeklies' : 'showweeklies', 'backoffice'));
+console.log('label for showweeklies: ' + Pmg.message(hasSomeValue ? 'hideweeklies' : 'showweeklies', 'backoffice'));
 this.weekliesAreShown = hasSomeValue;
 this.resize();
 EOT
