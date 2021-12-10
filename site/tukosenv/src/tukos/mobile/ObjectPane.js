@@ -49,6 +49,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", 
                     this.markIfChanged = true;
                 }
                 dojo.ready(lang.hitch(this, function(){
+					this.resize();//or else spinwheelSlot get('value') gets screwed-up
 					when (this.setWidgets(this.data), lang.hitch(this, function(result){
 	                    if (this.onOpenAction){
 	                        this.openAction(this.onOpenAction);

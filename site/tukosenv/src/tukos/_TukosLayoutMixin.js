@@ -6,7 +6,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all",  "dojo/has
             this.instantiatingWidgets = {};
         },
         tableLayout:    function(layout, fromParent, optionalWidgetInstantiationCallback, optionalCommonWidgetsAtts){
-            var self = this, instantiatingWidgets = [], widgets = [], commonAtts = {pane: this, form: this};
+            var self = this, instantiatingWidgets = {}, widgets = [], commonAtts = {pane: this, form: this};
 			if (typeof optionalCommonWidgetsAtts === 'object'){
 				commonAtts = utils.mergeRecursive(commonAtts, optionalCommonWidgetsAtts);
 			}
@@ -25,10 +25,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all",  "dojo/has
 	                var theDijitType = widgetDescription.type;
 	                var theDijitAtts  = widgetDescription.atts;
 	                this.widgetsName.push(widgetName);
-	                theDijitAtts.id  = this.id + widgetName;
-	                theDijitAtts.pane  = theDijitAtts.form = this;
-	                theDijitAtts.widgetType = theDijitType;
-	                theDijitAtts.widgetName = widgetName;
+					theDijitAtts = lang.mixin(theDijitAtts, lang.mixin({id: this.id + widgetName, widgetType: theDijitType, widgetName: widgetName}, commonAtts));
 	                var instantiatingWidget = widgetsLoader.instantiate(theDijitType, theDijitAtts, optionalWidgetInstantiationCallback);
 	                if (typeof instantiatingWidget.then === "function"){
 	                    this.instantiatingWidgets[widgetName] = instantiatingWidgets[i] = widgets[i] = instantiatingWidget;
@@ -44,7 +41,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all",  "dojo/has
                 	Pmg.addFeedback('no widgetDescription for widget: ' + widgetName);
                 }
             }
-            
             if (! utils.empty(instantiatingWidgets)){
                 all(instantiatingWidgets).then(lang.hitch(this, 
                     function(parent, instantiatedWidgets){

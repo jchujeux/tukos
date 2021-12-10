@@ -37,8 +37,6 @@ class PageView extends Translator{
     	    'userid' => $this->user->id()
         ];
     	$this->accordionStoreData = [];
-    	$this->isMobile = Tfk::$registry->isMobile;
-
     }
     function addToPageManagerArgs($attribute, $value){
         $this->pageManagerArgs[$attribute] = $value;
@@ -185,7 +183,7 @@ class PageView extends Translator{
         $this->pageManagerArgs['objectsDomainAliases'] = Directory::objectsDomainAliases();
         $this->pageManagerArgs['userRights'] = $this->user->rights();
         
-        if ($this->pageManagerArgs['isMobile'] = $this->isMobile){
+        if ($this->pageManagerArgs['isMobile'] = Tfk::$registry->isMobile){
             $this->pageManagerArgs['headerContent'] = $this->tr(Tfk::$registry->appName . 'HeaderBanner');
             $pageTemplate = "MobilePageTemplate.php";
         }else{

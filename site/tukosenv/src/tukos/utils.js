@@ -438,6 +438,19 @@ function(dojo, lang, stamp, number, currency, JSON, messages){
         			setTimeout(function(){wait = false;}, limit);
         	    }
         	  }
-        }
+        },
+		waitUntil: function(untilCallback, actionCallback, delay){
+			if (untilCallback()){
+				actionCallback();
+			}else{
+				var waiter, wait = function(){
+					if (untilCallback()){
+						clearInterval(waiter);
+						actionCallback();
+					}
+				},
+				waiter = setInterval(wait, delay);
+			}
+		}
     }
 });

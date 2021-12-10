@@ -41,7 +41,7 @@ class Model extends AbstractModel {
             $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition);
     }   
     function initialize($init=[]){
-        return parent::initialize(array_merge(['duration' => '60', 'warmup' => '', 'mainactivity' => '', 'warmdown' => '', 'sessionid' => 1], $init));
+        return parent::initialize(array_merge(['warmup' => '', 'mainactivity' => '', 'warmdown' => '', 'sessionid' => 1], $init));
     }
     function adjustSessionId($query, $values){
         $existingSessionIds = array_column($this->getAll ([

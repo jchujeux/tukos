@@ -35,19 +35,6 @@ class Model extends AbstractModel {
         $this->datesToProcess = [];
         $this->_postProcess = '_postProcess';
     }   
-/*    public function getOneExtended($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
-        $item = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
-        if (!empty($item['parentid'])){
-            $treatmentModel = Tfk::$registry->get('objectsStore')->objectModel('physiopersotreatments');
-            $planId = $treatmentModel->getOne(['where' => ['id' => $item['parentid']], 'cols' => ['parentid']])['parentid'];
-            if (!empty($planId)){
-                $planModel = Tfk::$registry->get('objectsStore')->objectModel('physiopersoplans');
-                $plan = $planModel->getOneExtended(['where' => ['id' => $planId], 'cols' => ['exercises']], ['exercises' => []]);
-            }
-            $item = array_merge($item, $plan);
-        }
-        return $item;
-    }*/
     public function processDeleteForBulk($values){
         if ($startDate = Utl::getItem('startdate', $values)){
             $this->datesToProcess[] = $startDate;

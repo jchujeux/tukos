@@ -62,8 +62,9 @@ class Registry{
             $this->isMobile = (new MobileDetect)->isMobile();
             $this->request = array_merge(['controller' => 'Page', 'object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab'], $this->route);
             if ($this->isMobile){
-                if (strtolower($this->request['controller']) === 'page'){
-                    $this->request['controller'] = 'MobilePage';
+                switch (strtolower($this->request['controller'])){
+                    case 'page': $this->request['controller'] = 'MobilePage'; break;
+                    case 'blog': $this->request['controller'] = 'MobileBlog'; break;
                 }
                 if (strtolower($this->request['mode']) === 'tab'){
                     $this->request['mode'] = 'Mobile';

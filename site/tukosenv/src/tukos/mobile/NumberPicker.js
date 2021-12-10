@@ -19,7 +19,8 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
             var slots = this.getChildren();
             slots.forEach(function(slot){
             	aspect.after(slot, "slideTo", function(){
-            		self.set('value', self.get('value'));
+            		var _self = this;
+					utils.waitUntil(function(){return !_self._duringSlideTo}, function(){self.set('value', self.get('value'));}, 200);
             	});
             });
 		},
@@ -38,14 +39,19 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-style"
             	slot.set('style', {backgroundColor: ''});
             });
         }, 
+		reset: function(){
+			
+		},
 		_setValueAttr: function(value){
+			if (! this._started){
+				this.startup();
+			}
 			var values = [], digits = this.digits[0].length, divider = Math.pow(10, digits-1), remainder = parseInt(value), digit;
 			this._set('value', value);
 			for (var i = 0; i < digits; i++){
-				digit = Math.trunc(remainder / divider);
+				values[i] = digit = Math.trunc(remainder / divider);
 				remainder = remainder - digit * divider;
 				divider = divider / 10;
-				values[i] = digit;
 			}
 			this.set('values', values);
 		},
