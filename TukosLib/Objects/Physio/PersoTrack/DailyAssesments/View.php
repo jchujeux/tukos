@@ -48,12 +48,11 @@ class View extends AbstractView {
                         'name' => ['content' =>  [['rhs' => "return (res ? res + '<br>' : '') + #name#;"]]],
                         'painduring' => ['content' => [['rhs' => "var pain = #painduring#; return Math.max(pain, res);"]]],
                         'painafter' => ['content' => [['rhs' => "var pain = #painafter#; return Math.max(pain, res);"]]],
-                        'duration' => ['content' => [['rhs' => "return res + #duration#;"]]],
+                        'duration' => ['content' => [['rhs' => $this->durationSummaryAction()]]],
                         'distance' => ['content' => [['rhs' => "return res + #distance#;"]]],
                         'elevationgain' => ['content' => [['rhs' => "return res + #elevationgain#;"]]],
                         'gcmechload' => ['content' => [['rhs' => "return res + #gcmechload#;"]]],
                     ]],
-                    'setValueDelay' => 100,
                     'onWatchLocalAction' => ['summary' => ['physiopersosessions' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => <<<EOT
 var form = sWidget.form, summary = sWidget.summary;
 (['name', 'painduring', 'painafter', 'duration', 'distance', 'elevationgain', 'gcmechload']).forEach(function(widgetName){
@@ -126,7 +125,7 @@ exercises.forEach(function(exercise){
 });
 tWidget.columns.exerciseid.editorArgs.storeArgs.data = data;
 tWidget.columns.exerciseid.storeCache = {};
-tWidget.refresh();
+tWidget.resize();
 if ( tWidget.getEditorInstance && tWidget.getEditorInstance('exerciseid')){
     when (tWidget.getEditorInstance('exerciseid'), function(editorInstance){
         editorInstance.store.setData(data);
@@ -152,6 +151,23 @@ return function(method){
     }
 EOT
     ;}
+    public function durationSummaryAction(){
+        return <<<EOT
+var duration = #duration#;
+    if (typeof duration === 'string' && duration.length >= 1){
+    if (res === 0){
+        return duration;
+    }else{    
+        var resValues = res.substring(1).split(':').slice(0,2), durationValues = duration.substring(1).split(':').slice(0,2), resValue;
+    	resValues[0] = parseInt(resValues[0]); durationValues[0] = parseInt(durationValues[0]);
+        resValue  = (parseInt(resValues[0]) + parseInt(durationValues[0])) * 60 + parseInt(resValues[1]) + parseInt(durationValues[1]);
+        resValues = [Math.floor(resValue / 60), resValue % 60];
+        return 'T' + [resValues[0] ? utils.pad(resValues[0], 2) : '00', resValues[1] || '00'].join(':') + ':00';
+    }
+}
+EOT
+        ;
+    }
 }
 ?>
 

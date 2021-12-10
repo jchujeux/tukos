@@ -7,9 +7,9 @@ function(declare, lang, utils, wutils, Pmg){
 			this.sessionsStore = sessionsGrid.store;
         },
 		dateChangeLocalAction: function(sWidget, tWidget, newValue, oldValue){
-			var form = this.form;            
+			var form = this.form, newDate = sWidget.get('value');            
             var setEditValues = function(){
-                form.serverDialog(lang.mixin(self.urlArgs || {action: 'Edit'}, {query: newValue ? {startdate: sWidget.get('value')} : {}}), [], form.get('dataElts'), Pmg.message('actionDone')); 
+                form.serverDialog(lang.mixin(self.urlArgs || {action: 'Edit'}, {query: newValue ? {storeatts: {where: {startdate: newDate}, init: {startdate: newDate}}} : {}}), [], form.get('dataElts'), Pmg.message('actionDone')); 
             }
             if(form.userChangesCount() <= 1){
                 setEditValues();

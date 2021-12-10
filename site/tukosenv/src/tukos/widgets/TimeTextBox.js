@@ -5,6 +5,7 @@ define(["dojo/_base/declare", "dijit/form/TimeTextBox", "tukos/utils"],
         openDropDown: function(callback){
         	this.inOpenDropDown = true;
         	this.inherited(arguments);
+			this.dropDown.domNode.parentNode.scrollTop=(0);//so that 00:00:00 appears on top
         	this.inOpenDropDown = false;
         },
         _getValueAttr: function(){

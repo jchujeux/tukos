@@ -12,7 +12,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			this.dirty = {};
 			this.deleted = [];
             this.addChild(this.actionsHeading = actionsHeading = new Heading({}));
-		dojo.when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.addRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, pane: this.form,
+			dojo.when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.addRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, pane: this.form,
                 			form: this.form, onClick: lang.hitch(this, this.addRow)}, {})), function(theWidget){
                 				actionsHeading.addChild(theWidget);
                 				theWidget.layoutContainer = theWidget.domNode;
@@ -128,7 +128,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			if (!rowPane.editorPane){
 				when(WidgetsLoader.instantiate(rowPane.editor.type, lang.mixin(this.rowPaneAtts(), rowPane.editor.atts)), function(editorPane){
 					rowPane.editorPane = editorPane;
-					rowPane.addChild(editorPane);
+					ready(function(){
+						rowPane.addChild(editorPane);
+						rowPane.resize();
+					});
 				});
 	            rowPane.addChild(editorActionsHeading = new Heading({}));
 				dojo.when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.deleteRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, pane: rowPane.editorPane, rowPane: rowPane,
@@ -199,7 +202,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 		},
 		setSummary: function(){
 			if (this.summaryRow){
-				this.set('summary', this.getStoreSummary(this.collection, this.summaryRow.cols));
+				ready(lang.hitch(this, function(){
+					this.set('summary', this.getStoreSummary(this.collection, this.summaryRow.cols));
+				}));
 			}
 		},
        getStoreSummary: function (store, summaryCols) {

@@ -36,7 +36,7 @@ class ViewUtils{
     static public function numberTextBox($view, $label, $custom=[]){
         return Utl::array_merge_recursive_replace([
         		'type' => 'numberTextBox', 
-        		'atts' => ['edit' => ['label' => $view->tr($label)]],
+            'atts' => ['edit' => ['label' => $view->tr($label), 'constraints' => ['pattern' =>  "0.######"]]],
             //'objToEdit' => ['floatval' => []],  'objToStoreEdit' => ['floatval' => []],  'objToOverview' => ['floatval' => []],
         	],
         	$custom);
@@ -119,7 +119,7 @@ class ViewUtils{
     static public function storeSelect($optionsName, $view, $label, $storeOptions=[true, 'ucfirst', false], $custom=[]){
         return Utl::array_merge_recursive_replace([
                 'type' => 'storeSelect',   
-                'atts' => ['edit' =>  ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr, $storeOptions)], 'label' => $view->tr($label)]],
+                'atts' => ['edit' =>  ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr, $storeOptions)], 'label' => $view->tr($label)]/*, 'style' => ['maxWith' => '10em']*/],
             ],
             $custom
         );

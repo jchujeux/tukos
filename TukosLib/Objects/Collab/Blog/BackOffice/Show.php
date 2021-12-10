@@ -20,7 +20,7 @@ class Show extends ObjectTranslator{
         $this->dataWidgets = [
             'posttitle' => ViewUtils::htmlContent($this->view, 'postTitle', ['atts' => ['edit' => ['widgetCellStyle' => ['backgroundColor' => '#d0e9fc']]]]),
             'postedbyandwhen' => ViewUtils::htmlContent($this->view, 'postedby',  ['atts' => ['edit' => ['widgetCellStyle' => ['textAlign' =>'right', 'backgroundColor' => '#d0e9fc']]]]),
-            'comments' => ViewUtils::htmlContent($this->view, 'post', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'white', 'paddingTop' => '1em', 'paddingTop' => '1em']]]]),
+            'comments' => ViewUtils::htmlContent($this->view, 'post', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'white', 'color' => 'black', 'paddingTop' => '1em', 'paddingTop' => '1em']]]]),
         ];
         $this->dataElts = array_keys($this->dataWidgets);
         $this->dataLayout = [

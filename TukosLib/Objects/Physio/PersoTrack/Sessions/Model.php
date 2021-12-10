@@ -43,9 +43,6 @@ class Model extends AbstractModel {
         }
         return $item;
     }
-    function initialize($init=[]){
-        return parent::initialize(array_merge(['duration' => '60'], $init));
-    }
 }
 ?>
 

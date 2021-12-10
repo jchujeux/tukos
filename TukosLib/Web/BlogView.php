@@ -21,7 +21,6 @@ class BlogView extends Translator{
     	$this->pageManagerArgs = [
             'dialogueUrl' => Tfk::$registry->dialogueUrl,
         ];
-    	$this->isMobile = Tfk::$registry->isMobile;
 
     }
     function addTab($description){
@@ -56,12 +55,11 @@ class BlogView extends Translator{
         $template->dojoBaseLocation = Tfk::dojoBaseLocation();
         $template->language = Tfk::$registry->get('translatorsStore')->getLanguage();
         $template->loadingMessage = $this->tr('Loading') . '...';
-        $blogTemplate = $this->isMobile ? "MobileBlogTemplate.php" : "BlogTemplate.php";
-        if ($this->isMobile){
+        if ($this->pageManagerArgs['isMobile'] = $isMobile = Tfk::$registry->isMobile){
             $blogTemplate = "MobileBlogTemplate.php";
         }else{
             $blogTemplate = "BlogTemplate.php";
-            $logoImageTag = '';// '<img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.png" style="height: ' . ($this->isMobile ? '40' : '100') . 'px; width: ' . ($this->isMobile ? '60' : '150') . 'px;' . ($this->isMobile ? 'float: right;' : '') . '">';
+            $logoImageTag = '';// '<img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.png" style="height: ' . ($isMobile ? '40' : '100') . 'px; width: ' . ($this->isMobile ? '60' : '150') . 'px;' . ($isMobile ? 'float: right;' : '') . '">';
             $this->pageManagerArgs['headerContent'] = <<<EOT
 <table width="100%"><tr><td style="text-align:left;">{$logoImageTag}<span id="tukosHeaderLoading"></span></td><td style="text-align:center;"><H1>{$this->tr('tukosBlogTitle')}</H1></td><td style="text-align:right;"><b><i>The Ultimate Knowledge Organizational System</i></b></td></table>
 EOT
