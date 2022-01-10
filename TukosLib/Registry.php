@@ -60,6 +60,7 @@ class Registry{
                 $this->route[$routeSteps[$key]] = $value;
             }
             $this->isMobile = (new MobileDetect)->isMobile();
+            $this->isCrawler = isset($_SERVER['HTTP_USER_AGENT']) && preg_match('/bot|crawl|slurp|spider|mediapartners/i', $_SERVER['HTTP_USER_AGENT']);
             $this->request = array_merge(['controller' => 'Page', 'object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab'], $this->route);
             if ($this->isMobile){
                 switch (strtolower($this->request['controller'])){

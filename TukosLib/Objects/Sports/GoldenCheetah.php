@@ -19,6 +19,7 @@ class GoldenCheetah {
             'timemoving' => ['gcName' => 'Time_Riding', 'description' => ['sessions' => ['colType' => 'VARCHAR(30)  DEFAULT NULL', 'widgetType' => 'minutesTextBox'], 'gcCols' => self::durationFormat]],
             'gctriscore' => ['gcName' => 'TriScore', 'description' => ['sessions' => ['colType' => 'VARCHAR(10) DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
             'gcavghr' => ['gcName' => 'Average_Heart_Rate', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
+            'gcavgpw' => ['gcName' => 'Average_Power', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
             'gc95hr' => ['gcName' => '95%_Heartrate', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]], 
             'gctrimphr' => ['gcName' => 'Tukos_TRIMP_Heart_rate', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
             'gctrimppw' => ['gcName' => 'Tukos_TRIMP_Power', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
@@ -125,7 +126,7 @@ class GoldenCheetah {
         return $descriptions;
     }
     public static function performedAddedCols(){
-        return ['gctriscore', 'gcavghr', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time'];
+        return ['gctriscore', 'gcavghr', 'gcavgpw', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time'];
         
     }
 }

@@ -2,7 +2,7 @@
 namespace TukosLib\Objects\Collab\Blog;
 
 use TukosLib\Objects\AbstractModel;
-use TukosLib\Utils\HtmlUtilities as HUtl;
+use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {
@@ -22,21 +22,19 @@ class Model extends AbstractModel {
         return " onclick=\"{$this->gotoTabString($view, $queryString)}\"";
     }
     function getRecentPosts(){
-        $posts = $this->getAll(['where' => $this->user->filterPrivate([], $this->objectName), 'cols' => ['id', 'name', 'comments', 'updated', 'updator'], 'orderBy' => ['updated' => 'DESC'], 'limit' => 5]);
-/*
-        $rows = [];
-        foreach($posts as $post){
-            $rows[] = ['tag' => 'tr', 'content' => [['tag' => 'td', 'content' => $post['name']]]];
-        }
-        return HUtl::buildHtml(['tag' => 'table', 'atts' => 'style=border: solid;width:100%', 'content' => $rows]);
-*/
+        return $this->getPosts([], 5);
+    }
+    function searchPosts($query, $atts){
+        return ['data' => $this->getPosts([[['col' => 'name', 'opr' => 'RLIKE', 'values' => $atts['searchbox']], ['col' => 'comments', 'opr' => 'RLIKE', 'values' => $atts['searchbox'], 'or' => true]]])];
+    }
+    function getPosts($where, $limit = 1000){
+        $posts = $this->getAll(['where' => $this->user->filterPrivate($where), 'cols' => ['id', 'name', 'updated'], 'orderBy' => ['updated' => 'DESC'], 'limit' => $limit]);
         $rootId = $this->user->getRootId();
         foreach($posts as &$post){
             $post['parentid'] = $rootId;
             $post['hasChildren'] = false;
             $post['onClickGotoTab'] = 'edit';
             $post['updated'] =  substr($post['updated'], 0, 10);
-            //$post['name'] = $post['name'] . ' (' . substr($post['updated'], 0, 10) . ')';//" ({$this->user->peoplefirstAndLastNameOrUserName($post['updator'])}, {$post['updated']})";
         }
         $posts[] = ['id' => $rootId, 'name' => 'tukos', 'hasChildren' => true];
         return $posts;

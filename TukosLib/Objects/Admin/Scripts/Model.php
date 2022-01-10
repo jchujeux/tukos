@@ -19,11 +19,11 @@ class Model extends AbstractModel {
                             'parameters'    =>  'longtext ',
                             'runmode'       =>  "ENUM ('ATTACHED', 'DETACHED') ",
                             'status'        =>  "ENUM ('DISABLED', 'READY', 'RUNNING') ",
-                            'startdate'     =>  "timestamp DEFAULT NULL",
-                            'enddate'       =>  "timestamp DEFAULT NULL",
+                            'startdate'     =>  "timestamp  NULL DEFAULT NULL",
+                            'enddate'       =>  "timestamp NULL DEFAULT NULL",
                             'timeinterval'  =>  'VARCHAR(80)',
-                            'laststart'     =>  "timestamp DEFAULT NULL",
-                            'lastend'       =>  "timestamp DEFAULT NULL",];
+                            'laststart'     =>  "timestamp NULL DEFAULT NULL",
+                            'lastend'       =>  "timestamp NULL DEFAULT NULL",];
         parent::__construct($objectName, $translator, 'scripts', ['parentid' => ['users', 'networks']], [], $colsDefinition, [], ['runmode', 'status']);
 
         $this->initVals = ['parentid' => $this->user->id(), 'status' => 'DISABLED', 'path' => 'TukosLib\Objects\Admin\Scripts\Scripts\\', 'runmode' => 'ATTACHED', 'timeinterval' => json_encode([1, 'hour'])];

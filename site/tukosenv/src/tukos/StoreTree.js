@@ -31,16 +31,14 @@ define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "di
             	args.model.getRoot = function(onItem){
             		onItem(dataStore.get(root));
             	}
-            	//args.model.childrenCache[root] = dataStore.query(utils.newObj([[parentDataProperty, root]]));
             	this.initializeChildrenCache(root, dataStore, parentDataProperty, args.model);
             }
-            args.dndController = dndSource;
+            if (!args.noDnd){
+				args.dndController = dndSource;
+			}
         },
    		postCreate: function(){
             this.inherited(arguments);
-            if (this.dataStore){
-            	//this.initializeChildrenCache(this.root, this.dataStore);
-            }
             if (this.onClickAction){
 	            this.onClickFunction = eutils.eval(this.onClickAction, 'item');
 	            this.on('click', function(item){
@@ -62,8 +60,22 @@ define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "di
         	}
         },
         getLabel: function(item){
-            //return  '<span style="display:inline-block;white-space:normal;margin-right:40px;">' + item.name + (this.noIdInLabel ? '' :  '(' + item.id + ')') + '</span>';
             return  '<span style="display:inline-block;white-space:normal;margin-right:40px;">' + item.name + (this.colInLabel === false  ? '' :  '(' + item[this.colInLabel || 'id'] + ')') + '</span>';
-        }
+        },
+	    update : function() {
+	      //this.model.store.clearOnClose = true;
+	      //this.model.store.close();
+			if (this.rootNode){
+				delete this._itemNodesMap;
+				this._itemNodesMap = {};
+				this.rootNode.state = "UNCHECKED";
+				delete this.model.root.children;
+				this.model.root.children = null;
+				this.rootNode.destroyRecursive();
+			}
+			this.model.constructor(this.model)
+			this.postMixInProperties();
+			this._load();
+	    }
     }); 
 });

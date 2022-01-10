@@ -12,6 +12,7 @@ class View extends AbstractView {
         parent::__construct($objectName, $translator, 'Parent', 'Description');
         $customDataWidgets = [
             'name' => ['atts' => ['edit' => ['style' => ['width' => '50em']]]],
+            'comments' => ['atts' => ['edit' => ['height' => '800px']]],
         ];
         $subObjects['notes'] = ['atts' => ['title' => $this->tr('sub-notes')], 'filters' => ['parentid' => '@id'], 'allDescendants' => true];
         $this->customize($customDataWidgets, $subObjects);

@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", "dojo/promise/all", "dojo/aspect", "dijit/registry"/*, "tukos/mobile/ScrollableContainer"*/, "dojox/mobile/Container", 
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", "dojo/aspect", "dijit/registry", "dojox/mobile/Container", 
 		"dojox/mobile/ToolBarButton", "tukos/widgets/WidgetsLoader", "tukos/_ObjectPaneMixin", "tukos/_TukosLayoutMixin", "tukos/utils", "tukos/widgetUtils", "tukos/PageManager"], 
-    function(declare, lang, dst, when, all, aspect, registry/*, ScrollableContainer*/, Container, ToolBarButton, widgetsLoader, _ObjectPaneMixin, _TukosLayoutMixin, utils, wutils, Pmg){
+    function(declare, lang, dst, when, aspect, registry, Container, ToolBarButton, widgetsLoader, _ObjectPaneMixin, _TukosLayoutMixin, utils, wutils, Pmg){
 	return declare([Container, _ObjectPaneMixin, _TukosLayoutMixin], {
         postCreate: function(){
             var self = this;

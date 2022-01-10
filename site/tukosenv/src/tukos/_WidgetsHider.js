@@ -75,7 +75,7 @@ function(declare, lang, dct, dst, popup, TooltipDialog, focus, Pmg){
 					}, 0);
             	}
             }
-            lang.setObject('customization.widgetsDescription.' + widget.widgetName + '.atts.hidden', widget.hidden, widget.form);
+            lang.setObject('customization.widgetsDescription.' + (widget.form.widgetsHiderArgs.dialogPath || '') + widget.widgetName + '.atts.hidden', widget.hidden, widget.form.form || widget.form);
         }
     });
 }); 
