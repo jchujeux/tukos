@@ -316,7 +316,7 @@ class View extends AbstractView {
 				'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], 
 				    [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
                  'removeCols' => ['sportsman','grade', 'configstatus', 'acl'],
-			    'hiddenCols' => ['parentid', 'stress', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'gctriscore', 'gcavghr', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time',
+			    'hiddenCols' => ['parentid', 'stress', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'gctriscore', 'gcavghr', 'gcavgpw', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time',
 			        'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
 			],
@@ -328,7 +328,7 @@ class View extends AbstractView {
 					'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], 'freezeWidth' => true, 'minGridWidth' => '300'
 				],
 				'filters' => ['grade' => 'TEMPLATE'],
-			    'removeCols' => ['sportsman', 'sessionid', 'googleid', 'mode', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'gctriscore', 'gcavghr', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time', 'grade', 'configstatus', 'acl'],
+			    'removeCols' => ['sportsman', 'sessionid', 'googleid', 'mode', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'gctriscore', 'gcavghr', 'gcavgpw', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time', 'grade', 'configstatus', 'acl'],
 			    'hiddenCols' => ['parentid', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'distance', 'elevationgain', 'comments', 'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'], // temporary: these were suppressed but maybe present in some customization items
 			    'allDescendants' => true, // 'hasChildrenOnly',

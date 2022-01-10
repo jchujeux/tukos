@@ -1,0 +1,26 @@
+<table class="dijit dijitReset dijitInline dijitLeft"
+	data-dojo-attach-point="_buttonNode,tableNode,focusNode,_popupStateNode"
+	cellspacing='0' cellpadding='0' role="listbox" aria-haspopup="true">
+	<tbody role="presentation">
+		<tr role="presentation">
+			<td class="dijitReset dijitStretch dijitButtonContents"
+				role="presentation"><div
+					class="dijitReset dijitInputField dijitButtonText"
+					data-dojo-attach-point="containerNode,textDirNode"
+					role="presentation"></div>
+					<div class="dijitReset dijitInputField dijitInputContainer">
+						<input class="dijitReset dijitInputInner"
+							data-dojo-attach-point='textbox,focusNode' autocomplete="off"
+							${!nameAttrSetting} type='${type}' data-dojo-attach-event="onkeydown: _onKeyDown"/>
+					</div>
+			<td
+				class="dijitReset dijitRight dijitButtonNode dijitArrowButton dijitRightArrowButton dijitArrowButtonContainer"
+				data-dojo-attach-point="titleNode" role="presentation"><input
+				class="dijitReset dijitInputField dijitArrowButtonInner"
+				data-dojo-attach-point="arrowButton"
+				value="&#9658; " type="text" tabIndex="-1" readonly="readonly"
+				role="presentation" data-dojo-attach-event="onclick: _onClick" ${_buttonInputDisabled}
+		/></td>
+		</tr>
+	</tbody>
+</table>

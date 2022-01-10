@@ -30,13 +30,17 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/has", "dojo/on", "dojo/d
         },
 		processMathTags: function(){
 			this.lazyLoadMathJax();
-			var mathTagNodes = Array.apply(null, this.domNode.getElementsByTagName('math'));
-			mathTagNodes.forEach(function(node){
-				var mathString = node.outerHTML;
-				dct.place(MathJax.mathml2chtml(mathString), node, 'replace');
-			});
-			MathJax.startup.document.clear();
-			MathJax.startup.document.updateDocument();
+			try{// although an exception is triggerred the first time as MathJax is not defined, the conversion still takes place!
+				var mathTagNodes = Array.apply(null, this.domNode.getElementsByTagName('math'));
+				mathTagNodes.forEach(function(node){
+					var mathString = node.outerHTML;
+					dct.place(MathJax.mathml2chtml(mathString), node, 'replace');
+				});
+				MathJax.startup.document.clear();
+				MathJax.startup.document.updateDocument();
+			}catch(e){
+				console.log(e);
+			}
 		},
 		lazyLoadMathJax: function(){
 			if (!window.MathJax){

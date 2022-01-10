@@ -1,5 +1,5 @@
-define(["dojo/ready", "dojo/dom", "dojo/dom-style", "dojo/dom-construct", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "tukos/mobile/ObjectPane", "tukos/mobile/TukosTextarea", "tukos/PageManager"], 
-function (ready, dom, dst, dct, View, Heading, ToolbarButton, ObjectPane, TukosTextarea, Pmg) {
+define(["dojo/ready", "dojo/dom", "dojo/dom-style", "dojo/dom-construct", "dojox/mobile/View", "dojox/mobile/Heading", "tukos/mobile/ObjectPane", "tukos/mobile/TukosTextarea", "tukos/PageManager"], 
+function (ready, dom, dst, dct, View, Heading, ObjectPane, TukosTextarea, Pmg) {
 	return {
 		initialize: function(){
 			var appLayout = new View(null, "appLayout"), formContent = Pmg.cache.formDescription[0].formContent;

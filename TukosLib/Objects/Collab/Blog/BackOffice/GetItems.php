@@ -12,8 +12,6 @@ class GetItems extends ObjectTranslator{
         $this->user     = Tfk::$registry->get('user');
         $this->objectsStore     = Tfk::$registry->get('objectsStore');
         $this->blogModel = $this->objectsStore->objectModel('blog');
-        //$this->usersModel = $this->objectsStore->objectModel('users');
-        //$this->peopleModel = $this->objectsStore->objectModel('people');
         $this->dataWidgets = [];
     }
     function get($query){

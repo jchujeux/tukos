@@ -34,9 +34,9 @@ define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom", "dojo/dom-attr", 
 	                // in order to avoid the keyboard from showing
 	                //textbox.disabled = true;
 					domAttr.set(textbox, 'readonly', 'readonly');
-	                if (this._firstClick && !isButtonClicked) {
+	                //if (this._firstClick && !isButtonClicked) {
 	                    //this.toggleDropDown();
-	                }
+	                //}
 	                this._firstClick = false;
 	                setTimeout(function() {
 	                    //textbox.disabled = false;

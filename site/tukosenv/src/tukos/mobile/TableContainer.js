@@ -43,9 +43,9 @@ define(["dojo/_base/declare", "dojo/dom-construct", "dojo/dom-style", "dojox/mob
 				}else{
 					if (!self.isLaidOut){
 						var widgetLayout, widgetFieldSet;
-						widgetLayout = dct.create('div', null, self.domNode);
+						widgetLayout = dct.create('div', child.widgetCellStyle ? {style: child.widgetCellStyle} : null, self.domNode);
 						if (self.showLabels){
-							dct.create('label', {innerHTML: child.label}, widgetLayout);
+							dct.create('label', {innerHTML: child.label || child.title}, widgetLayout);
 						}
 						widgetFieldSet = dct.create('fieldset', {style: {fontWeight: 'normal'}}, widgetLayout);
 						widgetFieldSet.appendChild(child.domNode);

@@ -108,7 +108,7 @@ EOT;
         rowContent.push({tag: 'th', atts: 'style="border-right: solid black; border-bottom: solid Black; width:50%;"', content: weekliesWidget.colDisplayedTitle('athleteweeklyfeeling')});
         rowContent.push({tag: 'th', atts: 'style="border: 0; border-bottom: solid Black; width:50%;"', content: weekliesWidget.colDisplayedTitle('coachweeklycomments')});
         weeklyRows.push({tag: 'tr', content: rowContent});
-        weekliesWidget.store.filter(weekliesFilter.eq('weekof', firstDay)).forEach(function(weekly){
+        weekliesWidget.store.filter(weekliesFilter.gte('weekof', firstDay).lte('weekof', lastDay)).forEach(function(weekly){
             rowContent = [];
             rowContent.push({tag: 'td', atts: 'style="border-right: solid black;background-color: ' + backgroundColor.defaultValue + ';"', content: weekliesWidget.colDisplayedValue(weekly.athleteweeklyfeeling, 'athleteweeklyfeeling')});
             rowContent.push({tag: 'td', atts: 'style="border: 0;background-color: LightGrey;font-style: italic"', content: weekliesWidget.colDisplayedValue(weekly.coachweeklycomments, 'coachweeklycomments')});

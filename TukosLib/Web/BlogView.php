@@ -45,29 +45,35 @@ class BlogView extends Translator{
 
     function render(){
         $template = new Template(new EscaperFactory, new TemplateFinder, new HelperLocator);
-        $packagesLocation = ['dojo', 'dijit', 'dojox', 'dstore', 'dgrid', 'tukos', 'dojoFixes', 'redips'];
-        array_walk($packagesLocation, function(&$module){
-            $module = '{"name":"' . $module . '","location":"' . Tfk::moduleLocation($module) . '"}';
-        });
-        $template->packagesString = '[' . implode(',', $packagesLocation) . ']';
-        $template->tukosLocation = Tfk::moduleLocation('tukos');
-        $template->dgridLocation = Tfk::moduleLocation('dgrid');
-        $template->dojoBaseLocation = Tfk::dojoBaseLocation();
-        $template->language = Tfk::$registry->get('translatorsStore')->getLanguage();
-        $template->loadingMessage = $this->tr('Loading') . '...';
-        if ($this->pageManagerArgs['isMobile'] = $isMobile = Tfk::$registry->isMobile){
-            $blogTemplate = "MobileBlogTemplate.php";
+        if (Tfk::$registry->isCrawler){
+            $blogTemplate = "CrawlerBlogTemplate";
+            $template->title = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['name'];
+            $template->content = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['comments'];
         }else{
-            $blogTemplate = "BlogTemplate.php";
-            $logoImageTag = '';// '<img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.png" style="height: ' . ($isMobile ? '40' : '100') . 'px; width: ' . ($this->isMobile ? '60' : '150') . 'px;' . ($isMobile ? 'float: right;' : '') . '">';
-            $this->pageManagerArgs['headerContent'] = <<<EOT
-<table width="100%"><tr><td style="text-align:left;">{$logoImageTag}<span id="tukosHeaderLoading"></span></td><td style="text-align:center;"><H1>{$this->tr('tukosBlogTitle')}</H1></td><td style="text-align:right;"><b><i>The Ultimate Knowledge Organizational System</i></b></td></table>
+            $packagesLocation = ['dojo', 'dijit', 'dojox', 'dstore', 'dgrid', 'tukos', 'dojoFixes', 'redips'];
+            array_walk($packagesLocation, function(&$module){
+                $module = '{"name":"' . $module . '","location":"' . Tfk::moduleLocation($module) . '"}';
+            });
+                $template->packagesString = '[' . implode(',', $packagesLocation) . ']';
+                $template->tukosLocation = Tfk::moduleLocation('tukos');
+                $template->dgridLocation = Tfk::moduleLocation('dgrid');
+                $template->dojoBaseLocation = Tfk::dojoBaseLocation();
+                $template->language = Tfk::$registry->get('translatorsStore')->getLanguage();
+                $template->loadingMessage = $this->tr('Loading') . '...';
+                if ($this->pageManagerArgs['isMobile'] = Tfk::$registry->isMobile){
+                    $blogTemplate = "MobileBlogTemplate.php";
+                    $this->pageManagerArgs['headerTitle'] = $this->tr('tukosBlogTitle');
+                }else{
+                    $blogTemplate = "BlogTemplate.php";
+                    $this->pageManagerArgs['headerContent'] = <<<EOT
+<table width="100%"><tr><td style="text-align:left;"><span id="tukosHeaderLoading"></span></td><td style="text-align:center;"><H1>{$this->tr('tukosBlogTitle')}</H1></td><td style="text-align:right;"><b><i>The Ultimate Knowledge Organizational System</i></b></td></table>
 EOT
-            ;
-            $blogModel = Tfk::$registry->get('objectsStore')->objectModel('blog');
-            $onClickString = $blogModel->onClickGotoTabString('edit', "name:'{$this->tr('BlogWelcome')}'");
-            $this->pageManagerArgs['rightPaneContent'] = '<div style="background-color: #d0e9fc;text-align: center;" ' . $onClickString . '></br><img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.png" style="height:150px; width: 200px;"></br>' . 
-                '<span style="' . HUtl::urlStyle() . "\">{$this->tr('BlogWelcome')}</span></div>";
+                    ;
+                    $blogModel = Tfk::$registry->get('objectsStore')->objectModel('blog');
+                    $onClickString = $blogModel->onClickGotoTabString('edit', "name:'{$this->tr('BlogWelcome')}'");
+                    $this->pageManagerArgs['rightPaneContent'] = '<div style="background-color: #d0e9fc;text-align: center;" ' . $onClickString . '></br><img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.png" style="height:150px; width: 200px;"></br>' .
+                        '<span style="' . HUtl::urlStyle() . "\">{$this->tr('BlogWelcome')}</span></div>";
+                }
         }
         $template->pageManagerArgs = json_encode($this->pageManagerArgs);
         
