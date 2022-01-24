@@ -107,7 +107,7 @@ trait SessionsTracking {
         return <<<EOT
     var synchroStart = pane.valueOf('gcsynchrostart'), synchroEnd = pane.valueOf('gcsynchroend'), gcMetricsToInclude = pane.getWidget('gcmetricstoinclude'), gcLink = pane.getWidget('gclink'),
         gcUrl = string.substitute("{$this->_gcUrl}", {athlete: pane.valueOf('gcathlete'), synchrostart: synchroStart.replace(/-/g, '/'), synchroend: synchroEnd.replace(/-/g, '/'),
-            metadata: 'Sport,Workout_Title', metrics: gcMetricsToInclude.get('displayedValue').join(',')});
+            metadata: 'Sport,Workout_Title,Notes', metrics: gcMetricsToInclude.get('displayedValue').join(',')});
     gcLink.set('value', string.substitute(Pmg.message('gclinkmessage', "{$this->objectName}"),
         {url: gcUrl, gcmetricstoinclude: '{$tr('gcmetricstoinclude')}', gcinput: '{$tr('gcinput')}', gcimport: '{$tr('gcimport')}', gcactivitiesmetrics: '{$tr('gcactivitiesmetrics')}', gcsync: '{$tr('gcsync')}'}));
 EOT;
@@ -175,6 +175,7 @@ EOT;
             }
         });
         utils.array_unique_push(row.date, gcDates);
+        row['"Workout_Title"'] += ' / ' + row['"Notes"'];
         data.push(row);
         id += 1;
     }

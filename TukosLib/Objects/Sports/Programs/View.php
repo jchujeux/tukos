@@ -21,16 +21,16 @@ class View extends AbstractView {
 		$this->allowedNestedWatchActions = 0;
 		$this->allowedNestedRowWatchActions = 0;
 		$chartsCols = [];
-		foreach(['duration', 'distance', 'elevationgain', 'sts', 'lts', 'tsb'] as $col){
+		foreach(['duration', 'distance', 'equivalentdistance', 'elevationgain', 'sts', 'lts', 'tsb'] as $col){
 		    $chartsCols[$col] = ['plot' => 'lines', 'tCol' => $tr($col)];
 		}
 		foreach(['load', 'intensity', 'stress', 'gctrimphr', 'gctrimppw', 'gcmechload', 'perceivedload', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
 		    $chartsCols[$col] = ['plot' => 'cluster', 'tCol' => $tr(substr($col, 0, 2) === 'gc' ? GC::gcName($col) : $col)];
 		}
-		foreach(['duration' => '(mn)', 'distance' => '(km)', 'elevationgain' => '(dam)'] as $col => $legendUnit){
+		foreach(['duration' => '(mn)', 'distance' => '(km)', 'equivalentdistance' => '(km)', 'elevationgain' => '(dam)'] as $col => $legendUnit){
 		    $chartsCols[$col]['legendUnit'] = $legendUnit;
 		}
-		foreach(['distance' => ' km', 'elevationgain' => ' m'] as $col => $tooltipUnit){
+		foreach(['distance' => ' km', 'equivalentdistance' => 'km', 'elevationgain' => ' m'] as $col => $tooltipUnit){
 		    $chartsCols[$col]['tooltipUnit'] = $tooltipUnit;
 		}
 		$chartsCols['elevationgain']['tooltipUnit'] = ' (m)';
@@ -53,13 +53,14 @@ class View extends AbstractView {
 		];
 		$chartFilter = ['planned' => 'ne', 'performed' => 'eq'];
 		$chartCols = [
-		    'planned' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'elevationgain', 'intensity', 'load', 'stress'])),
-		    'performed' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'elevationgain', 'gctrimphr', 'gctrimppw', 'gcmechload', 'sts', 'lts', 'tsb', 'perceivedeffort', 'perceivedload', 'sensations', 'mood', 'fatigue']))
+		    'planned' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentdistance', 'elevationgain', 'intensity', 'load', 'stress'])),
+		    'performed' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentdistance',  'elevationgain', 'gctrimphr', 'gctrimppw', 'gcmechload', 'sts', 'lts', 'tsb', 'perceivedeffort', 'perceivedload', 'sensations', 'mood', 'fatigue']))
 		];
 		$summaryRow = ['cols' => [
 		    'day' => ['content' =>  ['Total']],
 		    'duration' => ['atts' => ['formatType' => 'minutesToHHMM'], 'content' => [['rhs' => "var duration = #duration#.split(':'); return res + duration[0]*60 + Number(duration[1]);"]]],
 		    'distance' => ['content' => [['rhs' => "return res + Number(#distance#);"]]],
+		    'equivalentdistance' => ['content' => [['rhs' => "return res + Number(#equivalentdistance#);"]]],
 		    'elevationgain' => ['content' => [['rhs' => "return res + Number(#elevationgain#);"]]],
 		    'gctrimphr' => ['content' => [['rhs' => "return res + Number(#gctrimphr#);"]]],
 		    'gctrimppw' => ['content' => [['rhs' => "return res + (Number(#gctrimppw#) || Number(#gctrimphr#));"]]],
@@ -329,7 +330,7 @@ class View extends AbstractView {
 				],
 				'filters' => ['grade' => 'TEMPLATE'],
 			    'removeCols' => ['sportsman', 'sessionid', 'googleid', 'mode', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'gctriscore', 'gcavghr', 'gcavgpw', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time', 'grade', 'configstatus', 'acl'],
-			    'hiddenCols' => ['parentid', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'distance', 'elevationgain', 'comments', 'contextid', 'updated'],
+			    'hiddenCols' => ['parentid', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'distance', 'equivalentdistance', 'elevationgain', 'comments', 'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'], // temporary: these were suppressed but maybe present in some customization items
 			    'allDescendants' => true, // 'hasChildrenOnly',
 			],
@@ -371,10 +372,11 @@ require (["tukos/objects/sports/TsbCalculator", "tukos/objects/sports/LoadChart"
     sWidget.tsbCalculator.initialize(params);
     sWidget.tsbCalculator.updateRowAction(sWidget, false, true);
     grid.loadChartUtils = new LoadChart({sessionsStore: grid.store});
-    grid.loadChartUtils.setProgramLoadChartValue(form, 'loadchart');
+    grid.loadChartUtils.updateCharts(grid, 'changed');
+/*    grid.loadChartUtils.setProgramLoadChartValue(form, 'loadchart');
     grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');
     grid.loadChartUtils.setWeekLoadChartValue(form, 'weekloadchart');
-    grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');
+    grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');*/
 });
 return true;
 EOT
@@ -529,8 +531,9 @@ if (tWidget.column){
     if (row.mode === 'performed'){
         grid.tsbCalculator.updateRowAction(grid, (col === 'gctrimphr' || (col === 'mode' && newValue === 'performed')) ? row : false, true);
     }
-    grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');
-    grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');
+    grid.loadChartUtils.updateCharts(grid, true);
+/*    grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');
+    grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');*/
 }
 return true;
 EOT
@@ -561,8 +564,9 @@ EOT
 var form = sWidget.form, grid = form.getWidget('sptsessions'); 
 grid.tsbCalculator.initialize(utils.newObj([['$param', newValue]]));
 grid.tsbCalculator.updateRowAction(grid, false, true);
-grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');
-grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');
+grid.loadChartUtils.updateCharts(grid, true);
+/*grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');
+grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');*/
 grid.refresh({skipScrollPosition: true});
 return true;
 EOT

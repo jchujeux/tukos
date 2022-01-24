@@ -1,4 +1,4 @@
-define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "dojo/json", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], function(arrayUtil, lang, ready, utils, JSON, Pmg, messages){
+define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], function(arrayUtil, lang, ready, utils, Pmg, messages){
 
         var   sizeUnits = [{id: 'auto', name: 'auto'}, {id: '%', name: '%'}, {id: 'em', name: 'em'}, {id: 'px', name: 'px'}],
                 sizeConstraintUnits =  [{id: '%', name: '%'}, {id: 'em', name: 'em'}, {id: 'px', name: 'px'}],

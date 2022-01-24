@@ -21,8 +21,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             var self = this, form = this.form, columns = this.columns, widgetsDescription, layout = {}, editDialogAtts = this.editDialogAtts || {}, ignoreColumns = editDialogAtts.ignoreColumns || [], 
             	editDialogDescription = editDialogAtts || false, editorWidgets = [], otherWidgets = [], description;
             widgetsDescription = {
-                save: {type: 'TukosButton', atts: {label: messages.save, onClick: lang.hitch(this, this.saveEditDialog)}},
-            	cancel: {type: 'TukosButton', atts: {label: messages.cancel, onClick: lang.hitch(this, this.cancelEditDialog)}}
+                apply: {type: 'TukosButton', atts: {label: Pmg.message('apply'), onClick: lang.hitch(this, this.applyEditDialog)}},
+            	close: {type: 'TukosButton', atts: {label: Pmg.message('close'), onClick: lang.hitch(this, this.closeEditDialog)}}
             };	
             utils.forEach(columns, function(column, col){
             	if (!utils.in_array(col, ignoreColumns)){
@@ -34,7 +34,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
         	description = {paneDescription: {form: form, widgetsDescription: widgetsDescription, postElts: otherWidgets.concat(editorWidgets), layout: {
 	    			tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false},
 	    			contents:{
-	                    row3: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false},  widgets: ['save', 'cancel']},
+	                    row3: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false},  widgets: ['apply', 'close']},
 	                    row1: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: true},  widgets: otherWidgets},
 	                    row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'},  widgets: editorWidgets}
 	    			}
@@ -64,13 +64,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
             }));
         },
         
-        saveEditDialog: function(){
+        applyEditDialog: function(){
         	var editDialog = this.editDialog, pane = editDialog.pane, changedValues = pane.changedValues(pane.widgetsName);
         	changedValues[this.collection.idProperty] = pane.itemId;
         	this.updateRow(changedValues);
         	this.editDialog.pane.close();
         },
-        cancelEditDialog: function(){
+        closeEditDialog: function(){
         	this.editDialog.pane.close();
         }
     });
