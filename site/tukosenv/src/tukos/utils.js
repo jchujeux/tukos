@@ -194,6 +194,18 @@ define(["dojo", "dojo/_base/lang", "dojo/date/stamp", "dojo/number", "dojo/curre
 					return self.indexOf(value) === index;
 				});
 			},
+			toObject: function(theArray, theIndexKeyName, theTargetKeyName){
+				var theObject = {};
+				if(theArray){
+					theArray.forEach(function(item){
+						theObject[item[theIndexKeyName]] = theTargetKeyName ? item[theTargetKeyName] : item;
+					});
+					return theObject;
+				}else{
+					return undefined;
+				}
+				
+			},
 			merge: function(target, source) { //Use the returned value to be sure to get the modified value in all cases
 				this.wasModified = false;
 				if (this.isObject(target) && this.isObject(source)) {

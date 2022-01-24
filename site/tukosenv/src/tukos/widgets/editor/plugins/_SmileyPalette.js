@@ -57,7 +57,11 @@ define([
 		no: "129326",
 		angel: "128519",
 		crying: "128546",
-		happy: "128514"
+		happy: "128514",
+		thumbsup: "128077",
+		thumbsdown: "128078",
+		flexedbiceps: "128170",
+		okhand: "128076"
 	};
 
 	Emoticon.fromAscii = function(/*String*/str){
@@ -92,7 +96,8 @@ define([
 			["cool", "angry", "half", "eyebrow"],
 			["frown", "shy", "goofy", "oops"],
 			["tongue", "idea", "angel", "happy"],
-			["yes", "no", "crying", ""]
+			["yes", "no", "crying", "thumbsup"],
+			["thumbsdown", "flexedbiceps", "okhand", ""]
 		],
 
 		dyeClass: Emoticon,

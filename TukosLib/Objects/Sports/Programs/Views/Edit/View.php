@@ -7,11 +7,12 @@ use TukosLib\Objects\Views\LocalActions;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
 use TukosLib\Objects\Sports\Programs\SessionsTracking;
+use TukosLib\Objects\Sports\Programs\ProgramsConfig;
 use TukosLib\Objects\Sports\GoldenCheetah as GC;
 
 class View extends EditView{
 
-    use LocalActions, ViewActionStrings, SessionsTracking;
+    use LocalActions, ViewActionStrings, SessionsTracking, ProgramsConfig;
     
 	function __construct($actionController){
        parent::__construct($actionController);
@@ -246,6 +247,7 @@ EOT
 		        ],
 		        'onOpenAction' => $this->googleConfOnOpenAction(),
 		    ]];
+        $this->setProgramsConfigActionWidget();
         $this->setSessionsTrackingActionWidget();
         $this->actionWidgets['viewplanned'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewplanned'), 'value' => 'viewplanned', 'onClickAction' => $this->viewModeOptionOnClick('viewplanned')]];
         $this->actionWidgets['viewperformed'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewperformed'), 'value' => 'viewperformed', 'onClickAction' => $this->viewModeOptionOnClick('viewperformed')]];
@@ -271,7 +273,6 @@ EOT
 	}
 	public function viewModeOptionOnClick($optionName){
         return <<<EOT
-console.log('selected: ' + this.valueOf('{$optionName}'));
 this.form.localActions.viewModeOption('{$optionName}', true);
 EOT
         ;

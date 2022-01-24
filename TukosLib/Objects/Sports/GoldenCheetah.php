@@ -32,7 +32,8 @@ class GoldenCheetah {
             'time' => ['gcName' => 'time', 'description' => ['gcCols' => []]],
             'sport' => ['gcName' => '"Sport"', 'description' => ['gcCols' => ['renderCell' => 'renderContent', 'formatType' => 'translate', 'formatOptions' => ['object' => 'sptprograms'],
                 'gcToTukos' => 'sliceOneAndGcToTukos', 'gcToTukosOptions' => ['map' => ['Bike' => 'bicycle', 'Swim' => 'swimming', 'Run' => 'running', 'Workout' => 'other']]]]],
-            'name' => ['gcName' => '"Workout_Title"', 'description' => ['gcCols' => ['label' => 'theme', 'gcToTukos' => 'sliceOne']]]
+            'name' => ['gcName' => '"Workout_Title"', 'description' => ['gcCols' => ['label' => 'theme', 'gcToTukos' => 'sliceOne']]],
+            'notes' => ['gcName' => '"Notes"', 'description' => ['gcCols' => ['label' => 'notes', 'hidden' => true,  'gcToTukos' => 'sliceOne']]],
         ];
         self::$nonGc = [
             'selector' => ['selector' => 'checkbox', 'width' => 30],

@@ -73,6 +73,12 @@ function(declare, lang, utils, Pmg){
 				form.getWidget(widgetName).set('hidden', true);
 				form.optionHiddenWidgets.push(widgetName);
 			}
+		},
+		programsConfigApplyAction: function(pane){
+			var form = this.form, sessionsWidget = form.getWidget('sptsessions');
+			form.programsConfig = {equivalentDistance: JSON.stringify(pane.valueOf('equivalentdistance'))};
+			lang.setObject('customization.programsConfig', form.programsConfig, form);
+			sessionsWidget.loadChartUtils.updateCharts(sessionsWidget, true);
 		}
 	});
 });

@@ -110,7 +110,7 @@ return declare(null, {
 		},
 		buildChartItem: function(chartItem, session, presentCols, chartAtts, week){
 			if (session.duration){
-				var duration = dutils.seconds(session.duration, 'time') / 60;          
+				var self = this, duration = dutils.seconds(session.duration, 'time') / 60;          
 				presentCols.forEach(function(col){
 	                var colAtts = chartAtts.cols[col];
 					switch	(col){
@@ -132,6 +132,9 @@ return declare(null, {
 							break;
 						case 'gctrimppw':
 							chartItem[col] += week ? Number(session[col]) : (Number(session[col]) || Number(session.gctrimphr));
+							break;
+						case 'equivalentdistance':
+							chartItem[col] += Number(session.distance || 0) * ((self.equivalentDistanceCoefficients && self.equivalentDistanceCoefficients[session.sport]) || 1.0);
 							break;
 						default:
 							chartItem[col] += Number(session[col] || 0) * (colAtts.isDurationAverage ? duration : 1);
@@ -174,11 +177,12 @@ return declare(null, {
 		},
 		updateCharts: function(grid, isPerformed, col){
 			var form = grid.form;
+			this.equivalentDistanceCoefficients = utils.toObject(form.programsConfig && JSON.parse(form.programsConfig.equivalentDistance), 'sport', 'coefficient');
 			(isPerformed 
 				? (isPerformed === 'changed' ? ['performedloadchart', 'weekperformedloadchart', 'loadchart', 'weekloadchart'] : ['performedloadchart', 'weekperformedloadchart'])
 				: ['loadchart', 'weekloadchart']).forEach(function(chartName){
 			    var chartWidget = form.getWidget(chartName);
-			    if (!col || chartWidget.get('chartAtts').cols[col]){
+			    if (!chartWidget.get('hidden') && (!col || chartWidget.get('chartAtts').cols[col])){
 			        switch(chartName){
 			            case 'loadchart':
 			            case 'performedloadchart':
