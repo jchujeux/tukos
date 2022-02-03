@@ -47,18 +47,26 @@ class Model extends AbstractModel {
     }
 
     public function invoiceTable($query, $valuesAndAtts = []){
-        $dateFormat = $this->user->dateFormat();
+        $objectsStore = Tfk::$registry->get('objectsStore');
+        $organizationsModel = $objectsStore->objectModel('organizations');
         $atts = $valuesAndAtts['atts'];
         $invoice = $valuesAndAtts['values'];
-        $colsFormatType = ['catalogid' => 'string', 'name' => 'string', 'comments' => 'string', 'quantity' => 'string', 'unitpricewot' => 'currency', 'unitpricewt' => 'currency',
-            'discount' => 'percent', 'pricewot' => 'currency', 'vatrate' => 'percent', 'pricewt' => 'currency'];
+        if ($invoice['organization'] && (($vatMode = Utl::getItem('vatmode', $organizationsModel->getOne(['where' => ['id' => $invoice['organization']], 'cols' => ['vatmode']]))) === 'exemption')){
+            $colsFormatType = ['catalogid' => 'string', 'name' => 'string', 'comments' => 'string', 'quantity' => 'string', 'unitpricewt' => 'currency',
+                'discount' => 'percent', 'pricewt' => 'currency'];
+            $this->itemsLabels['pricewt'] = 'Priceexempted';
+            $this->itemsLabels['unitpricewt'] = 'Unitprice';
+        }else{
+            $colsFormatType = ['catalogid' => 'string', 'name' => 'string', 'comments' => 'string', 'quantity' => 'string', 'unitpricewot' => 'currency', 'unitpricewt' => 'currency',
+                'discount' => 'percent', 'pricewot' => 'currency', 'vatrate' => 'percent', 'pricewt' => 'currency'];
+        }
         $optionalCols = ['catalogid', 'comments'];
         $absentOptionalCols = array_filter($optionalCols, function($col) use ($atts){
             return $atts[$col] !== 'on';
         });
         $selectedColsFormatType = array_diff_key($colsFormatType, array_flip($absentOptionalCols));
         $colsToRetrieve = array_merge(array_keys($selectedColsFormatType), ['id']);
-        $invoiceItemsModel = Tfk::$registry->get('objectsStore')->objectModel("bustrackinvoices{$this->customersOrSuppliers}items");
+        $invoiceItemsModel = $objectsStore->objectModel("bustrackinvoices{$this->customersOrSuppliers}items");
         $items = $invoiceItemsModel->getAll(['where' => ['parentid' => $invoice['id']], 'cols' => $colsToRetrieve]);
         $hasDiscountCol = false;
         $hasCommentsCol = false;
@@ -81,7 +89,8 @@ class Model extends AbstractModel {
 
         $thAtts = 'style="border: 1px solid;border-collapse: collapse;padding: 2px;min-width:80px;" ';
         
-        $thNameAtts = sprintf('style="border: 1px solid;border-collapse: collapse;padding: 2px;width: %1$s" ', in_array('comments', $absentOptionalCols) ? '40%' : '20%');
+        $nameAndCommentsWidth = $vatMode === 'exemption' ? 80 : 40;
+        $thNameAtts = sprintf('style="border: 1px solid;border-collapse: collapse;padding: 2px;width: %1$s" ', in_array('comments', $absentOptionalCols) ? $nameAndCommentsWidth . '%' : ($nameAndCommentsWidth / 2) .  '%');
         $tdAtts = 'style="border: 1px solid;border-collapse: collapse;padding: 2px;" ';
         $tdAttsLeft = 'style="border: 1px solid;border-collapse: collapse;padding: 2px;text-align: left;padding-left: 10px;" ';
         $tdNumberAtts = 'style="border: 1px solid;border-collapse: collapse;padding: 2px;text-align: right;padding-right: 10px;" ';
@@ -113,16 +122,18 @@ class Model extends AbstractModel {
 				['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format(-$invoice['discountwt'], 'currency')]]
 			];
        	}
-       	$rows[] = ['tag' => 'tr', 'content' => [
-			['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => $this->tr('Totalwot')],
-	    	['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format($invoice['pricewot'], 'currency')]]
-	    ];
-       	$rows[] = ['tag' => 'tr', 'content' => [
-       		['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => $this->tr('tax')], 
-        	['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format((float)$invoice['pricewt'] - (float)$invoice['pricewot'], 'currency')]]
-        ];
+       	if ($vatMode !== 'exemption'){
+       	    $rows[] = ['tag' => 'tr', 'content' => [
+       	        ['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => $this->tr('Totalwot')],
+       	        ['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format($invoice['pricewot'], 'currency')]]
+       	    ];
+       	    $rows[] = ['tag' => 'tr', 'content' => [
+       	        ['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => $this->tr('tax')],
+       	        ['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format((float)$invoice['pricewt'] - (float)$invoice['pricewot'], 'currency')]]
+       	    ];
+       	}
         $rows[] = ['tag' => 'tr', 'content' => [
-        	['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => '<b>' . $this->tr('Totalwt') . '</b>'],
+        	['tag' => 'td', 'atts' => 'colspan="2"' . $tdAttsLeft, 'content' => $vatMode === 'exemption' ? ('<b>' . $this->tr('Totalexemption') . '</b><br><small>' . $this->tr('Exemptionmessage') . '</small>') : ('<b>' . $this->tr('Totalwt') . '</b>')],
         	['tag' => 'td', 'atts' => $tdNumberAtts, 'content' => Utl::format($invoice['pricewt'], 'currency')]]
         ];
         $atts['invoicetable'] = HUtl::buildHtml(['tag' => 'table', 'atts' => 'style="text-align:center; border: solid; border-collapse: collapse;width:100%;"', 'content' => $rows]);

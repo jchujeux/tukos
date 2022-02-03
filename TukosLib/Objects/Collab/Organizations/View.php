@@ -29,6 +29,7 @@ class View extends AbstractView {
             'headofficeaddress' => ViewUtils::textArea($this, 'HeadOfficeAddress'),
             'invoicingaddress' => ViewUtils::textArea($this, 'InvoicingAddress'),
             'vatid' => ViewUtils::textBox($this, 'Vatid'),
+            'vatmode' => ViewUtils::storeSelect('vatmode', $this, 'Vatmode'),
             'legalid' => ViewUtils::textBox($this, 'LegalId'),
             'judicialform' => ViewUtils::textBox($this, 'JudicialForm'),
             'sharecapital' => ViewUtils::textBox($this, 'ShareCapital')
