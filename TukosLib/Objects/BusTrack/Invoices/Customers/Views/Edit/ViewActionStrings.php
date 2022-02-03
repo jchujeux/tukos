@@ -35,7 +35,7 @@ this.getWidget('paymenttable').set('value', html);
 return this.serverAction(
     {action: 'Process', query: {id: true, params: {process: 'invoiceTable', save: true, noget: true}}},
     {includeWidgets: ['catalogid', 'comments'], 
-    includeFormWidgets: ['id', 'name', 'parentid', 'reference', 'invoicedate', 'items', 'discountwt', 'pricewot', 'pricewt', 'todeduce']}).then(lang.hitch(this, function(){
+    includeFormWidgets: ['id', 'name', 'parentid', 'organization', 'reference', 'invoicedate', 'items', 'discountwt', 'pricewot', 'pricewt', 'todeduce']}).then(lang.hitch(this, function(){
        return true;
     }));
 EOT;
