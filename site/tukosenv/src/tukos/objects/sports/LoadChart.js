@@ -130,8 +130,8 @@ return declare(null, {
 						case 'tsb':
 							chartItem[col] = Number(session[col] || 0);
 							break;
-						case 'gctrimppw':
-							chartItem[col] += week ? Number(session[col]) : (Number(session[col]) || Number(session.gctrimphr));
+						case 'trimppw':
+							chartItem[col] += week ? Number(session[col]) : (Number(session[col]) || Number(session.trimphr));
 							break;
 						case 'equivalentdistance':
 							chartItem[col] += Number(session.distance || 0) * ((self.equivalentDistanceCoefficients && self.equivalentDistanceCoefficients[session.sport]) || 1.0);

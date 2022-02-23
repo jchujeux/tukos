@@ -123,8 +123,7 @@ class Get extends ViewsGetModel {
     		$response, 
     		$customMode === 'object'
     				? $this->user->getCustomView($this->objectName, 'edit', $this->paneMode, [])
-    				: $this->model->getCombinedCustomization(['id' => Utl::getItem('id', $value)], 'edit', $this->paneMode, []),
-    	    false
+    				: $this->model->getCombinedCustomization(['id' => Utl::getItem('id', $value)], 'edit', $this->paneMode, [])
     	);
         if (!$allowCustomValue){
             $response['data']['value'] = $value;

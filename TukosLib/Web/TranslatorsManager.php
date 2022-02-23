@@ -111,7 +111,7 @@ class TranslatorsManager {
         };
     }
     function substituteTranslations($template){
-        $names = []; $setNames = []; $pattern = "/[#]{([^}]*)}@/";
+        $names = []; $setNames = []; $pattern = "/[#]{([^}][^@]*)}@/";
         preg_match_all($pattern, $template, $matches);
         if (!empty($matches[1])){
             $matchesToTranslate = array_unique($matches[1]);
@@ -226,6 +226,8 @@ class TranslatorsManager {
                 switch ($mode[0]){
                     case 'replace':
                         return str_replace($mode[1], $mode[2], $translation);
+                    case 'substitute':
+                        return Utl::substitute($translation, $mode[1]);
                     default:
                         return $translation;
                         

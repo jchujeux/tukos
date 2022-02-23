@@ -43,9 +43,8 @@ if (!empty($params['class'])){
     if ($scriptIds = Utl::getItem('scriptids', $params)){
         $scriptsToConsider = $scripts->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => json_decode($scriptIds)]], 'cols' => $colsToGet]);
     }else{
-        $scriptsToConsider = $scripts->getAll(['where' => [['col' => 'status', 'opr' => 'IN', 'values' => ['READY']]], 'cols' => $colsToGet]);
+        $scriptsToConsider = $scripts->getAll(['where' => [['col' => 'status', 'opr' => 'IN', 'values' => ['READY']], ['col' => 'timeinterval', 'opr' => 'IS NOT NULL', 'values' => null], ['col' => 'timeinterval', 'opr' => '<>', 'values' => '["",""]']], 'cols' => $colsToGet]);
     }
-    
     $feedback = [];
     foreach ($scriptsToConsider as $scriptInfo){
         $scriptInfo['runmode'] = 'ATTACHED';

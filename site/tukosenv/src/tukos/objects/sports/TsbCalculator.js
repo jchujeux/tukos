@@ -71,7 +71,7 @@ function(declare, when, ArrayIterator, utils, dutils){
 							iterator.next();
 					}
 					if (item){
-						sessionStress = item.gctrimphr || 0;
+						sessionStress = item.trimphr || 0;
 						currentRow = cudMode === 'delete' ? iterator.next() : item;
 						updateRowOrDirty = function(col, value){
 							if (Math.abs(value - Number(currentRow[col] || 0)) > 0.01){
@@ -114,11 +114,11 @@ function(declare, when, ArrayIterator, utils, dutils){
 							}
 							while (item = iterator.next()){
 								daysDifference = dutils.difference(previousItem.startdate, item.startdate);
-								sts = self.exponentialAvg(item.gctrimphr || 0, previousItem.sts, daysDifference, self.stsDailyDecay);
+								sts = self.exponentialAvg(item.trimphr || 0, previousItem.sts, daysDifference, self.stsDailyDecay);
 								if (Math.abs(sts - Number(item.sts || 0)) > 0.01){
 									grid.updateDirty(item[idp], 'sts', sts);
 								}
-								lts = self.exponentialAvg(item.gctrimphr || 0, previousItem.lts, daysDifference, self.ltsDailyDecay);
+								lts = self.exponentialAvg(item.trimphr || 0, previousItem.lts, daysDifference, self.ltsDailyDecay);
 								if (Math.abs(lts - Number(item.lts || 0)) > 0.01){
 									grid.updateDirty(item[idp], 'lts', lts);
 								}

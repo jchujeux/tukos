@@ -24,7 +24,7 @@ class View extends AbstractView {
 		foreach(['duration', 'distance', 'equivalentdistance', 'elevationgain', 'sts', 'lts', 'tsb'] as $col){
 		    $chartsCols[$col] = ['plot' => 'lines', 'tCol' => $tr($col)];
 		}
-		foreach(['load', 'intensity', 'stress', 'gctrimphr', 'gctrimppw', 'gcmechload', 'perceivedload', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
+		foreach(['load', 'intensity', 'stress', 'trimphr', 'trimppw', 'mechload', 'perceivedload', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
 		    $chartsCols[$col] = ['plot' => 'cluster', 'tCol' => $tr(substr($col, 0, 2) === 'gc' ? GC::gcName($col) : $col)];
 		}
 		foreach(['duration' => '(mn)', 'distance' => '(km)', 'equivalentdistance' => '(km)', 'elevationgain' => '(dam)'] as $col => $legendUnit){
@@ -34,7 +34,7 @@ class View extends AbstractView {
 		    $chartsCols[$col]['tooltipUnit'] = $tooltipUnit;
 		}
 		$chartsCols['elevationgain']['tooltipUnit'] = ' (m)';
-		foreach(['elevationgain' => ['day' => 10, 'week' => 10], 'gctrimphr' => ['day' => 25, 'week' => 100], 'gctrimppw' => ['day' => 25, 'week' => 100], 'gcmechload' => ['day' => 10, 'week' => 50], 'sts' => ['day' => 1, 'week' => 0.1], 'lts' => ['day' => 1, 'week' => 0.1],
+		foreach(['elevationgain' => ['day' => 10, 'week' => 10], 'trimphr' => ['day' => 25, 'week' => 100], 'trimppw' => ['day' => 25, 'week' => 100], 'mechload' => ['day' => 10, 'week' => 50], 'sts' => ['day' => 1, 'week' => 0.1], 'lts' => ['day' => 1, 'week' => 0.1],
 		    'tsb' => ['day' => 1, 'week' => 0.1]] as $col => $scalingFactor){
 		    $chartsCols[$col]['scalingFactor'] = $scalingFactor;
 		}
@@ -54,7 +54,7 @@ class View extends AbstractView {
 		$chartFilter = ['planned' => 'ne', 'performed' => 'eq'];
 		$chartCols = [
 		    'planned' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentdistance', 'elevationgain', 'intensity', 'load', 'stress'])),
-		    'performed' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentdistance',  'elevationgain', 'gctrimphr', 'gctrimppw', 'gcmechload', 'sts', 'lts', 'tsb', 'perceivedeffort', 'perceivedload', 'sensations', 'mood', 'fatigue']))
+		    'performed' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentdistance',  'elevationgain', 'trimphr', 'trimppw', 'mechload', 'sts', 'lts', 'tsb', 'perceivedeffort', 'perceivedload', 'sensations', 'mood', 'fatigue']))
 		];
 		$summaryRow = ['cols' => [
 		    'day' => ['content' =>  ['Total']],
@@ -62,9 +62,9 @@ class View extends AbstractView {
 		    'distance' => ['content' => [['rhs' => "return res + Number(#distance#);"]]],
 		    'equivalentdistance' => ['content' => [['rhs' => "return res + Number(#equivalentdistance#);"]]],
 		    'elevationgain' => ['content' => [['rhs' => "return res + Number(#elevationgain#);"]]],
-		    'gctrimphr' => ['content' => [['rhs' => "return res + Number(#gctrimphr#);"]]],
-		    'gctrimppw' => ['content' => [['rhs' => "return res + (Number(#gctrimppw#) || Number(#gctrimphr#));"]]],
-		    'gcmechload' => ['content' => [['rhs' => "return res + Number(#gcmechload#);"]]]
+		    'trimphr' => ['content' => [['rhs' => "return res + Number(#trimphr#);"]]],
+		    'trimppw' => ['content' => [['rhs' => "return res + (Number(#trimppw#) || Number(#trimphr#));"]]],
+		    'mechload' => ['content' => [['rhs' => "return res + Number(#mechload#);"]]]
 		]];
 		$chartsAtts = [
 		    'loadchart' => ['name' => 'loadchart', 'type' => $chartTypes['program'], 'filter' => $chartFilter['planned'], 'cols' => $chartCols['planned']],
@@ -223,7 +223,7 @@ class View extends AbstractView {
 					]],
 					'onChangeNotify' => [$this->gridWidgetName => [
 						'startTime' => 'startdate', 'duration' => 'duration', 'summary' => 'name', 'comments' => 'comments', 'intensity' => 'intensity', 'stress' => 'stress', 'sport' => 'sport', 'warmup' => 'warmup',
-					    'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'gctrimphr' => 'gctrimphr', 'gctrimppw' => 'gctrimppw'
+					    'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'trimphr' => 'trimphr', 'trimppw' => 'trimppw'
 					]],
 					'onWatchLocalAction' => ['date' => $dateChangeLocalAction(false)]]]], 
 				'fromdate', 'todate'),
@@ -271,11 +271,11 @@ class View extends AbstractView {
 						'calendar' => [
 							'startdate' => 'startTime',  'duration' => 'duration',  'name' => 'summary', 'comments' => 'comments', 'intensity' => 'intensity', 'stress' => 'stress', 'sport' => 'sport', 
 						      'warmup' => 'warmup',
-						    'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'gctrimphr' => 'gctrimphr', 'gctrimppw' => 'gctrimppw'
+						    'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'trimphr' => 'trimphr', 'trimppw' => 'trimppw'
 					]],
 					'onDropMap' => [
                         'templates' => ['fields' => ['name' => 'name', 'comments' => 'comments', 'startdate' => 'startdate', 'duration' => 'duration', 'intensity' => 'intensity', 'stress' => 'stress', 
-                            'sport' => 'sport', 'warmup' => 'warmup', 'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'gctrimphr' => 'gctrimphr', 'gctrimppw' => 'gctrimppw'
+                            'sport' => 'sport', 'warmup' => 'warmup', 'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'trimphr' => 'trimphr', 'trimppw' => 'trimppw'
                         ]],
 						'warmup' => ['mode' => 'update', 'fields' => ['warmup' => 'summary']],
 						'mainactivity' => ['mode' => 'update', 'fields' => ['mainactivity' => 'summary']],
@@ -297,7 +297,7 @@ class View extends AbstractView {
 				    'deleteRowAction' => $this->deleteRowAction(),
 				    'colsDescription' => [
 				        'startdate' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['startdate' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
-				        'gctrimphr' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['gctrimphr' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
+				        'trimphr' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['trimphr' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
 				        'mode' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['mode' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]]
 				    ],
 			        'afterActions' => [
@@ -317,7 +317,7 @@ class View extends AbstractView {
 				'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], 
 				    [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
                  'removeCols' => ['sportsman','grade', 'configstatus', 'acl'],
-			    'hiddenCols' => ['parentid', 'stress', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'gctriscore', 'gcavghr', 'gcavgpw', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time',
+			    'hiddenCols' => ['parentid', 'stress', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
 			        'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
 			],
@@ -329,7 +329,7 @@ class View extends AbstractView {
 					'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], 'freezeWidth' => true, 'minGridWidth' => '300'
 				],
 				'filters' => ['grade' => 'TEMPLATE'],
-			    'removeCols' => ['sportsman', 'sessionid', 'googleid', 'mode', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'gctriscore', 'gcavghr', 'gcavgpw', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time', 'grade', 'configstatus', 'acl'],
+			    'removeCols' => ['sportsman', 'sessionid', 'googleid', 'mode', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time', 'grade', 'configstatus', 'acl'],
 			    'hiddenCols' => ['parentid', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'distance', 'equivalentdistance', 'elevationgain', 'comments', 'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'], // temporary: these were suppressed but maybe present in some customization items
 			    'allDescendants' => true, // 'hasChildrenOnly',
@@ -354,7 +354,7 @@ class View extends AbstractView {
 				 'allDescendants' => true, 
 			],
 		];
-		foreach (array_diff_key($chartsCols, array_flip(['gctrimphr'/*, 'gctrimppw'*/, 'load', 'perceivedload', 'fatigue'])) as $col => $description){
+		foreach (array_diff_key($chartsCols, array_flip(['trimphr'/*, 'trimppw'*/, 'load', 'perceivedload', 'fatigue'])) as $col => $description){
 		    $subObjects['sptsessions']['atts']['colsDescription'][$col] = ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => [$col => ['localActionStatus'  => $this->cellChartChangeLocalAction()]]]]]];
 		}
 		$this->customize($customDataWidgets, $subObjects, [ 'grid' => ['calendar', 'displayeddate', 'synchrostart', 'synchroend', 'loadchart', 'performedloadchart', 'weekloadchart', 'weekperformedloadchart', 'weeklies'],
@@ -447,7 +447,7 @@ EOT
 	    return <<<EOT
 if (!this.isBulkRowAction){
     var row = arguments[1][0] || this.clickedRow.data, rowBeforeChange = this.rowBeforeChange, startingRow, isPerformed;
-    if (rowBeforeChange.mode !== row.mode || rowBeforeChange.startdate !== row.startdate || rowBeforeChange.gctrimphr !== row.gctrimphr){
+    if (rowBeforeChange.mode !== row.mode || rowBeforeChange.startdate !== row.startdate || rowBeforeChange.trimphr !== row.trimphr){
         if (row.mode === 'performed' || rowBeforeChange.mode === 'performed'){
             if (rowBeforeChange.startdate !== row.startdate){
                 startingRow = false;
@@ -483,7 +483,7 @@ if (tsbCalculator.isActive()){
     when(tsbCalculator.getCollection().fetchSync(), function(data){
 		previousItem = iterator.initialize(data, 'last');
         args.forEach(function(row){
-            if (row.gctrimphr){
+            if (row.trimphr){
 				while (previousItem !== false && previousItem.startdate >= row.startdate){
 					previousItem = iterator.previous();
 				}
@@ -529,7 +529,7 @@ if (tWidget.column){
         grid.updateDirty(rowIdp, 'tsb', '');
     }
     if (row.mode === 'performed'){
-        grid.tsbCalculator.updateRowAction(grid, (col === 'gctrimphr' || (col === 'mode' && newValue === 'performed')) ? row : false, true);
+        grid.tsbCalculator.updateRowAction(grid, (col === 'trimphr' || (col === 'mode' && newValue === 'performed')) ? row : false, true);
     }
     grid.loadChartUtils.updateCharts(grid, true);
 /*    grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');

@@ -85,7 +85,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
                         });
                     }
                     return response;
-                }
+                },
+				function(){
+                	tukosHeaderLoading.innerHTML = '';					
+				}
             );
         },
         setCurrentTabTitle: function(newTitle){ 

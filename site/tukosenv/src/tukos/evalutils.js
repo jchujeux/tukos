@@ -1,5 +1,5 @@
-define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferred", "dojo/when", "dojo/string", "dijit/registry", "dijit/focus",  "tukos/utils", "tukos/hiutils", "tukos/dateutils", "tukos/PageManager"], 
-		function(dct, domstyle, lang, Deferred, when, string, registry, focusUtil, utils, hiutils, dutils, Pmg){
+define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferred", "dojo/when", "dojo/string", "dijit/registry", "dijit/focus",  "tukos/utils", "tukos/hiutils", "tukos/dateutils", "tukos/widgetUtils", "tukos/PageManager"], 
+	function(dct, domstyle, lang, Deferred, when, string, registry, focusUtil, utils, hiutils, dutils, wutils, Pmg){
     return {
            functionNamePattern: "([^.]?)([a-zA-Z0-9]+)(\\()",
            

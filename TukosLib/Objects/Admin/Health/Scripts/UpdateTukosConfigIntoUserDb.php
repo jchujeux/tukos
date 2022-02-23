@@ -38,7 +38,7 @@ class UpdateTukosConfigIntoUserDb {
                 $optionalJoin = $configStore->tableExists($object) ? "NATURAL JOIN $object " : '';
                 $configItems = $configStore->query("SELECT * from tukos $optionalJoin WHERE id IN (" . implode(',', $ids) . ")")->fetchAll(\PDO::FETCH_ASSOC);
                 if ($keepUserChanges){
-                    $configItemsOld = Utl::toAssociative($configStoreOld->query("SELECT * from tukos $optionalJoin WHERE id IN (" . implode(',', $ids) . ")")->fetchAll(\PDO::FETCH_ASSOC), 'id');
+                    $configItemsOld = $configStoreOld->tableExists($object) ? Utl::toAssociative($configStoreOld->query("SELECT * from tukos $optionalJoin WHERE id IN (" . implode(',', $ids) . ")")->fetchAll(\PDO::FETCH_ASSOC), 'id') : [];
                 }
                 foreach ($configItems as $configItem){
                     $id = $configItem['id'];
@@ -59,7 +59,7 @@ class UpdateTukosConfigIntoUserDb {
                     Utl::extractItems(['history', 'updator', 'updated', 'creator', 'created'], $configItem);
                     if ($keepUserChanges){
                         Utl::extractItems(['id', 'updator', 'updated', 'creator', 'created'], $userItem);
-                     $colsToKeep = array_diff($userItem, Utl::getItem($id, $configItemsOld, []));
+                        $colsToKeep = array_diff($userItem, Utl::getItem($id, $configItemsOld, []));
                         if (!empty($colsToKeep)){
                             $colsToKeepIds[] = $id;
                         }
@@ -88,7 +88,7 @@ class UpdateTukosConfigIntoUserDb {
             }
             
         }catch(\Exception $e){
-            Tfk::error_message('on', 'an exception occured while runnins script FromMergeToCopyTukosConfigIntoUserDb : ', $e->getMessage());
+            Tfk::error_message('on', 'an exception occured while runnins script updateTukosConfigIntoUserDb : ', $e->getMessage());
         }
     }
 }

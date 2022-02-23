@@ -10,7 +10,6 @@ use TukosLib\TukosFramework as Tfk;
 
 trait GoogleSessionsEvents {
 	
-	
     public function googleSynchronize($query, $atts = []){
         $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
         $sessionView = Tfk::$registry->get('objectsStore')->objectView('sptsessions');
@@ -30,13 +29,13 @@ trait GoogleSessionsEvents {
             return $eventDescription;
         };
         if ($includeTrackingFormUrl){
-            $gcFlag = ($gcFlag = Utl::getItem('gcflag', $trackingConfiguration)) ? $gcFlag['atts']['checked'] : false;
+            $synchroFlag = ($synchroFlag = Utl::getItem('synchroflag', $trackingConfiguration)) ? $synchroFlag['atts']['checked'] : false;
             $logoFile = ($logo = Utl::getItem('formlogo', $trackingConfiguration)) ? $logo['atts']['value'] : '';
             $formPresentation = ($presentation = Utl::getItem('formpresentation', $trackingConfiguration)) ? $presentation['atts']['value'] : '';
             $formVersion = ($version = Utl::getItem('version', $trackingConfiguration)) ? $version['atts']['value'] : $this->defaultSessionsTrackingVersion;
         }else{
             $logoFile = $formPresentation = $formVersion = $targetDbString = '';
-            $gcFlag = false;
+            $synchroFlag = false;
         }
         $where = ['parentid' => $id/*, [['col' => 'duration', 'opr' => '<>', 'values' => '0'], ['col' => 'mode', 'opr' => '<>', 'values' => 'performed']]*/];
         if ($minTimeToSync = Utl::getItem('synchrostart', $atts, '', '')){
@@ -67,7 +66,7 @@ trait GoogleSessionsEvents {
             $deleted = 0;
             if (!empty($sessionsToSync)){
                 foreach($sessionsToSync as $key => $session){
-                    $descriptions[$key] = $this->googleDescription($session, $sessionView, $id, $includeTrackingFormUrl, $gcFlag, $logoFile, $formPresentation, $formVersion);
+                    $descriptions[$key] = $this->googleDescription($session, $sessionView, $id, $includeTrackingFormUrl, $synchroFlag, $logoFile, $formPresentation, $formVersion);
                 }
                 $translator = Tfk::$registry->get('translatorsStore');
                 $descriptions = json_decode($translator->substituteTranslations(json_encode($descriptions)), true);
@@ -114,7 +113,7 @@ trait GoogleSessionsEvents {
         return [];
     }
 
-    public function googleSynchronizeOne($programId, $calId, $sessionIdToSync, $gcFlag, $logoFile, $formPresentation, $formVersion){
+    public function googleSynchronizeOne($programId, $calId, $sessionIdToSync, $synchroFlag, $logoFile, $formPresentation, $formVersion){
         $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
         $sessionView = Tfk::$registry->get('objectsStore')->objectView('sptsessions');
         $this->storeSelectCache = [];
@@ -132,7 +131,7 @@ trait GoogleSessionsEvents {
             return $eventDescription;
         };
         $session = $sessionsModel->getOne(['where' => ['id' => $sessionIdToSync],  'cols' => ['id', 'name', 'startdate', 'sessionid', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'mainactivity', 'warmdown', 'comments', 'googleid', 'mode', 'sensations', 'athletecomments', 'coachcomments']]);
-        $description = $this->googleDescription($session, $sessionView, $id, $includeTrackingFormUrl, $gcFlag, $logoFile, $formPresentation, $formVersion);
+        $description = $this->googleDescription($session, $sessionView, $id, $includeTrackingFormUrl, $synchroFlag, $logoFile, $formPresentation, $formVersion);
         $eventDescription = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(
             ['start' => ['date' => $session['startdate']], 'end' => ['date' => date('Y-m-d', strtotime($session['startdate'] . ' +1 day'))], 'summary' => "({$this->tr('performedprefix')}){$session['name']}", 'description' => $description])), true);
         if (!empty($intensity = $session['intensity'])){
@@ -156,7 +155,7 @@ trait GoogleSessionsEvents {
         }
         return [];
     }
-    public function googleDescription($session, $sessionView, $programId, $includeTrackingFormUrl = false, $gcFlag,  $logoFile = '', $presentation = '', $version = ''){
+    public function googleDescription($session, $sessionView, $programId, $includeTrackingFormUrl = false, $synchroFlag,  $logoFile = '', $presentation = '', $version = ''){
         if ($session['mode'] === 'performed'){
             $attCols = ['duration' => 'minutesToHHMM',  'sport' => 'string', 'sensations' => 'StoreSelect'];
             $contentCols = ['athletecomments', 'coachcomments'];
@@ -184,7 +183,7 @@ trait GoogleSessionsEvents {
             $description .= '<a href="' .  Tfk::$registry->rootUrl . Tfk::$registry->appUrl .
             "Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&version=$version&parentid=$programId&date={$session['startdate']}&name=$sessionName&sport=$sport" . 
             ($session['mode'] === 'performed' ? "&id={$session['id']}" : '') . (empty($session['sessionid']) ? '' : "&sessionid={$session['sessionid']}") .
-            ($gcFlag ? "&gcflag=$gcFlag" : '') . ($logoFile ? "&logo=$logoFile" : '') . ($presentation ? "&presentation=$presentation" : '');
+            ($synchroFlag ? "&synchroflag=$synchroFlag" : '') . ($logoFile ? "&logo=$logoFile" : '') . ($presentation ? "&presentation=$presentation" : '');
         }
         return $description;
     }

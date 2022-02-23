@@ -5,14 +5,13 @@ use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\TukosFramework as Tfk;
 use TukosLib\Objects\Physio\Physio;
-use TukosLib\Objects\Sports\GoldenCheetah as GC;
 
 class View extends AbstractView {
 
     
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Treatment', 'Summary');
-        $customDataWidgets = array_merge([
+        $customDataWidgets = [
                 'name' => ViewUtils::lazyEditor($this, 'Summary', ['atts' => ['edit' => ['height' => '100px', 'editorType' => 'simple']]]),
                 'comments' => ['atts' => ['edit' => ['height' => '100px']]],
                 'parentid' => ['atts' => ['edit' => ['onWatchLocalAction' => ['value' => ['parentid' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => true], 'action' => $this->relatedTreatmentAction()]]]]]]],
@@ -29,10 +28,8 @@ class View extends AbstractView {
                 'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity', [true, 'ucfirst', true]),
                 'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.']]]]),
                 'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#000.']]]]),
-            ],
-            GC::widgetsDescription($this, ['gcmechload'])
-            
-        );
+                'mechload' => ViewUtils::numberTextBox($this, 'Tukos_Mechanical_Load'),
+        ];
         $this->mustGetCols = array_merge($this->mustGetCols, array_keys($customDataWidgets));
         $subObjects = [
             'physiopersosessions' => [
@@ -51,11 +48,11 @@ class View extends AbstractView {
                         'duration' => ['content' => [['rhs' => $this->durationSummaryAction()]]],
                         'distance' => ['content' => [['rhs' => "return res + #distance#;"]]],
                         'elevationgain' => ['content' => [['rhs' => "return res + #elevationgain#;"]]],
-                        'gcmechload' => ['content' => [['rhs' => "return res + #gcmechload#;"]]],
+                        'mechload' => ['content' => [['rhs' => "return res + #mechload#;"]]],
                     ]],
                     'onWatchLocalAction' => ['summary' => ['physiopersosessions' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => <<<EOT
 var form = sWidget.form, summary = sWidget.summary;
-(['name', 'painduring', 'painafter', 'duration', 'distance', 'elevationgain', 'gcmechload']).forEach(function(widgetName){
+(['name', 'painduring', 'painafter', 'duration', 'distance', 'elevationgain', 'mechload']).forEach(function(widgetName){
     var widget = form.getWidget(widgetName);
     if (summary[widgetName] !== "0"){
         widget.set('disabled', true);

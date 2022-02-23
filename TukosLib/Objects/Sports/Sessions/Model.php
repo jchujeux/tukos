@@ -8,7 +8,7 @@ use TukosLib\Objects\Sports\GoldenCheetah as GC;
 class Model extends AbstractModel {
 
     function __construct($objectName, $translator=null){
-        $colsDefinition = array_merge([
+        $colsDefinition = [
                 'startdate'  => 'VARCHAR(30)  DEFAULT NULL',
                 'duration'   => 'VARCHAR(30)  DEFAULT NULL',
                 'intensity'  =>  'TINYINT DEFAULT NULL',
@@ -32,11 +32,20 @@ class Model extends AbstractModel {
                 'mood' => 'INT DEFAULT NULL',
                 'athletecomments' => 'longtext DEFAULT NULL',
                 'coachcomments' => 'longtext DEFAULT NULL',
+                'timemoving' => 'VARCHAR(30)  DEFAULT NULL',
+                'avghr' => 'MEDIUMINT DEFAULT NULL',
+                'avgpw' => 'MEDIUMINT DEFAULT NULL',
+                'hr95' => 'MEDIUMINT DEFAULT NULL',
+                'trimphr' => 'MEDIUMINT DEFAULT NULL',
+                'trimppw' => 'MEDIUMINT DEFAULT NULL',
+                'avgcadence' => 'MEDIUMINT DEFAULT NULL', 
+                'mechload' =>'MEDIUMINT DEFAULT NULL',
+                'h4time' => 'VARCHAR(10) DEFAULT NULL',
+                'h5time' => 'VARCHAR(10) DEFAULT NULL',
                 'sts' => 'FLOAT DEFAULT NULL',
                 'lts' => 'FLOAT DEFAULT NULL',
                 'tsb' => 'FLOAT DEFAULT NULL',
-        ],
-            GC::sessionsColsDefinition());
+        ];
         parent::__construct(
             $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition);
     }   

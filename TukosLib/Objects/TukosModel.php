@@ -4,6 +4,7 @@ namespace TukosLib\Objects;
 use TukosLib\Store\Store;
 use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\TukosFramework as Tfk;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Objects\Admin\Users\Model as UserModel;
 
 class TukosModel {
@@ -66,6 +67,7 @@ class TukosModel {
         $this->sharedObjectCols = array_diff($this->allCols, ['object']);
         $this->idColsObjects = ['parentid' => [$this->tableName], 'contextid' => ['contexts'], 'creator' =>['users'], 'updator' => ['users']];
         $this->parameters = json_decode($this->store->getOne(['table' => $this->optionsTable, 'where' => ['name' => 'parameters'], 'cols' => ['value']])['value'], true);
+        $this->optionsCache = [];
     }
     
     public function nextId($configStatus, $increment = true){
@@ -90,6 +92,13 @@ class TukosModel {
         $atts['table'] = $this->tableName;
         $atts['where'] = SUtl::deletedFilter($atts['where']);
         return $this->store->getAll($atts);
+    }
+    public function getOption($name){
+        if ($option = Utl::getItem($name, $this->optionsCache)){
+            return $option;
+        }else{
+            return $this->optionsCache = json_decode($this->store->getOne(['table' => $this->optionsTable, 'where' => ['name' => $name], 'cols' => ['value']])['value'], true);
+        }
     }
     
 }

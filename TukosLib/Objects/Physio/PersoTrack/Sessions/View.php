@@ -6,7 +6,6 @@ use TukosLib\Objects\ViewUtils;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 use TukosLib\Objects\Physio\Physio;
-use TukosLib\Objects\Sports\GoldenCheetah as GC;
 
 class View extends AbstractView {
 
@@ -28,13 +27,13 @@ class View extends AbstractView {
                     ]]),
                     'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.']]]]),
                     'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#000.']]]]),
-                ], 
+                    'mechload' => ViewUtils::numberTextBox($this, 'Tukos_Mechanical_Load'),
+        ], 
                 array_intersect_key($exercisesView->dataWidgets(), [/*'name' => true, */'stress' => true, 'series' => true, 'repeats' => true, 'extra' => true, 'extra1' => true]), [
                     'stress'        => ViewUtils::storeSelect('stress', $this, 'Mechanical stress', [true, 'ucfirst', true]),
                     'painduring' => ViewUtils::storeSelect('pain', $this, 'Painduring', [true, 'ucfirst', true], ['atts' => ['edit' => ['backgroundColors' => Physio::$painColors, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
                     'painafter' => ViewUtils::storeSelect('pain', $this, 'Painafter', [true, 'ucfirst', true], ['atts' => ['edit' => ['backgroundColors' => Physio::$painColors, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
-                ], 
-                GC::widgetsDescription($this, ['gcmechload'])
+                ] 
             ), 
             [       'series' => ['atts' => ['edit' => ['onChangeLocalAction' => ['series' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],
                     'repeats' => ['atts' => ['edit' => ['onChangeLocalAction' => ['repeats' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],

@@ -36,7 +36,7 @@ class View extends EditView{
                             ],
                             'row3' => [
                                 'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true],
-                                'widgets' => ['duration', 'distance', 'elevationgain', 'intensity', 'gcmechload']
+                                'widgets' => ['duration', 'distance', 'elevationgain', 'intensity', 'mechload']
                             ],
                             'row4' => [
                                 'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],

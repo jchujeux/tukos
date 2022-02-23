@@ -89,7 +89,6 @@ trait ItemHistory {
             //Feedback::add('CharTextDiff duration: ' . $timeCharTextDiff);
         }
         foreach ($modifiedJsonCols as $col){
-            //$start = microtime(true);
             if (is_string($item[$col])){ 
                 $item[$col] = json_decode($item[$col], true);
             }
@@ -109,9 +108,6 @@ trait ItemHistory {
                 );
                 $historyToCompress[$col] = Utl::array_merge_recursive_replace($oldToNew, $newNotInOld);
             }
-
-            //$end = microtime(true);
-            //Feedback::add('json-diff_recursive duration: ' . $end - $start);
         }
         return json_encode((empty($oldCompressedHistory) ? [$historyToCompress] : array_merge([$historyToCompress], $oldCompressedHistory)));
     }

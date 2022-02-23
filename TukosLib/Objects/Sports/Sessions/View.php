@@ -48,12 +48,20 @@ class View extends AbstractView {
             'mood' => ViewUtils::storeSelect('mood', $this, 'Mood', [true, 'ucfirst', true], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
             'athletecomments' => ViewUtils::textArea($this, 'AthleteComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
             'coachcomments' => ViewUtils::lazyEditor($this, 'CoachSessionComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
+            'timemoving' => ViewUtils::minutesTextBox($this, 'Time Riding'),
+            'avghr' => ViewUtils::numberTextBox($this,'Average Heart Rate'),
+            'avgpw' => ViewUtils::numberTextBox($this, 'Average Power'),
+            'hr95' => ViewUtils::numberTextBox($this, '95% Heartrate'),
+            'trimphr' => ViewUtils::numberTextBox($this, 'Tukos TRIMP Heart rate'),
+            'trimppw' => ViewUtils::numberTextBox($this, 'Tukos TRIMP Power'),
+            'mechload' => ViewUtils::numberTextBox($this, 'Tukos_Mechanical_Load'),
+            'h4time' => ViewUtils::secondsTextBox($this, 'H4 Time in Zone'),
+            'h5time' => ViewUtils::secondsTextBox($this, 'H5 Time in Zone'),
             'sts' => ViewUtils::tukosNumberBox($this, 'sts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.0']]]]),
             'lts' => ViewUtils::tukosNumberBox($this, 'lts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.0']]]]),
             'tsb' => ViewUtils::tukosNumberBox($this, 'tsb', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em']/*, 'constraints' => ['pattern' => '00.0']*/]]]),
         ],
-        	$this->filterWidgets(),
-            GC::sessionsWidgetsDescription($this)
+        	$this->filterWidgets()
         );
 
         //$this->mustGetCols = array_merge($this->mustGetCols, ['name', 'duration', 'intensity', 'stress', 'sport','warmup', 'mainactivity', 'warmdown', 'comments', 'mode', 'athleteweeklyfeeling', 'coachweeklycomments']);

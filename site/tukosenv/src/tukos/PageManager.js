@@ -225,10 +225,27 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
                     return response;
                 },
                 function(error){
-                    self.setFeedback(self.message('failedOperation')  + ': ' + error.message);
+                    self.setFeedback(self.message('failedOperation'));
                     if (isObjectFeedback){
                     	set(att, attValue);
                     }
+					headerRows = function(rowsDescription){
+						returnedString = '';
+						rowsDescription.forEach(function(description){
+							returnedString +=  '<p><b>' + self.message(description[0]) +  ':</b> ' + description[1];
+						});
+						return returnedString;
+					}
+					request(self.requestUrl({action: 'Process', mode: 'Tab', object: 'tukos',  query: {params: {noget: true, process: 'sendContent'}}, view: 'Edit'}), {handleAs: 'json', method: 'POST', timeout: 32000, 
+						data: JSON.stringify({fromwhere: {name: 'tukosBackOffice'}, to: 'tukosbackoffice@gmail.com', subject: 'tukos bug - ' + window.location, header: headerRows([['ClientErrormessage', error.message],['PageUrl', window.location], ['userid', self.cache.userid], ['UrlSent', error.response.url], ['Datasent', options.data || self.message('noDataSent')]]),
+							   content: '<p><b>' + self.message('Servererrormessage') + '</b><br>' + error.response.text, sendas: 'appendtobody'})}).then(
+							function(response){
+								self.addFeedback(self.message('Supportinformed'));
+							},
+							function (error){
+								self.addFeedback(self.message('Contactsupport'));
+							}
+						);
                     return error;
                 }
             );

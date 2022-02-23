@@ -258,7 +258,7 @@ EOT
             $this->actionLayout['contents']);
 	}
 	public function viewModeOptionOpenAction(){
-	    $performedColumns = json_encode(array_merge(['sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb'], GC::performedAddedCols()));
+	    $performedColumns = json_encode(['sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time']);
 	    return <<<EOT
 var form = this;
 require (["tukos/objects/sports/programs/LocalActions"], function(LocalActions){
