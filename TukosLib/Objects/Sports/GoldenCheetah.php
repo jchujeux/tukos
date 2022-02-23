@@ -17,15 +17,14 @@ class GoldenCheetah {
             'distance' => ['gcName' => 'Distance', 'description' => ['gcCols' => Utl::array_merge_recursive_replace(self::numberFormat, ['formatOptions' => ['places' => 1], 'headerTail' => ' (km)'])]],
             'elevationgain' => ['gcName' => 'Elevation_Gain', 'description' => ['gcCols' => array_merge(self::numberFormat, ['headerTail' => ' (m)'])]],
             'timemoving' => ['gcName' => 'Time_Riding', 'description' => ['sessions' => ['colType' => 'VARCHAR(30)  DEFAULT NULL', 'widgetType' => 'minutesTextBox'], 'gcCols' => self::durationFormat]],
-            'gctriscore' => ['gcName' => 'TriScore', 'description' => ['sessions' => ['colType' => 'VARCHAR(10) DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
-            'gcavghr' => ['gcName' => 'Average_Heart_Rate', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
-            'gcavgpw' => ['gcName' => 'Average_Power', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
-            'gc95hr' => ['gcName' => '95%_Heartrate', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]], 
-            'gctrimphr' => ['gcName' => 'Tukos_TRIMP_Heart_rate', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
-            'gctrimppw' => ['gcName' => 'Tukos_TRIMP_Power', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
-            'gcmechload' => ['gcName' => 'Tukos_Mechanical_Load', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
-            'gch4time' => ['gcName' => 'H4_Time_in_Zone', 'description' => ['sessions' => ['colType' => 'VARCHAR(10) DEFAULT NULL', 'widgetType' => 'secondsTextBox'], 'gcCols' => self::durationFormat]],
-            'gch5time' => ['gcName' => 'H5_Time_in_Zone', 'description' => ['sessions' => ['colType' => 'VARCHAR(10) DEFAULT NULL', 'widgetType' => 'secondsTextBox'], 'gcCols' => self::durationFormat]],
+            'avghr' => ['gcName' => 'Average_Heart_Rate', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
+            'avgpw' => ['gcName' => 'Average_Power', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
+            'hr95' => ['gcName' => '95%_Heartrate', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]], 
+            'trimphr' => ['gcName' => 'Tukos_TRIMP_Heart_rate', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
+            'trimppw' => ['gcName' => 'Tukos_TRIMP_Power', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
+            'mechload' => ['gcName' => 'Tukos_Mechanical_Load', 'description' => ['sessions' => ['colType' => 'MEDIUMINT DEFAULT NULL', 'widgetType' => 'numberTextBox'], 'gcCols' => self::numberFormat]],
+            'h4time' => ['gcName' => 'H4_Time_in_Zone', 'description' => ['sessions' => ['colType' => 'VARCHAR(10) DEFAULT NULL', 'widgetType' => 'secondsTextBox'], 'gcCols' => self::durationFormat]],
+            'h5time' => ['gcName' => 'H5_Time_in_Zone', 'description' => ['sessions' => ['colType' => 'VARCHAR(10) DEFAULT NULL', 'widgetType' => 'secondsTextBox'], 'gcCols' => self::durationFormat]],
         ];
         self::$permanentGc = [
             'startdate' => ['gcName' => 'date', 'description' => ['gcCols' => ['label' => 'date', 'renderCell' => 'renderContent', 'formatType' => 'date', 'gcToTukos' => '/to-']]],
@@ -40,7 +39,7 @@ class GoldenCheetah {
             'tukosid' => [],
             'sessionid' => []
         ];
-        self::$customMetrics = ['gctrimphr', 'gctrimppw', 'gcmechload'];
+        self::$customMetrics = ['trimphr', 'trimppw', 'mechload'];
     }
     public static function gcName($col){
         return self::$widgets[$col]['gcName'];
@@ -84,51 +83,6 @@ class GoldenCheetah {
     }
     public static function nonGcCols(){
         return array_keys(self::$nonGc);
-    }
-    public static function sessionsWidgets($view){
-        return array_keys(self::sessionsWidgetsDescription($view));
-    }
-    public static function sessionsColsDefinition(){
-        if (!self::$sessionsColsDefinition){
-            foreach(self::$widgets as $name => $description){
-                if ($sessionsDescription = Utl::getItem('sessions', $description['description'])){
-                    self::$sessionsColsDefinition[$name] = $sessionsDescription['colType'];
-                }
-            }
-         }
-         return self::$sessionsColsDefinition;
-    }
-    public static function colsDefinition($cols){
-        foreach ($cols as $col){
-            if ($sessionsDescription = Utl::getItem('sessions', self::$widgets[$col]['description'])){
-                $definitions[$col] = $sessionsDescription['colType'];
-            }
-        }
-        return $definitions;
-    }
-    public static function sessionsWidgetsDescription($view){
-        if (!self::$sessionsWidgetsDescription){
-            foreach(self::$widgets as $name => $description){
-                if ($sessionsDescription = Utl::getItem('sessions', $description['description'])){
-                    $func = $sessionsDescription['widgetType'];
-                    self::$sessionsWidgetsDescription[$name] = ViewUtils::$func($view, [$description['gcName'], [['replace', ['_'/*, '(', ')'*/], ' ']]]);
-                }
-            }
-        }
-        return self::$sessionsWidgetsDescription;
-    }
-    public static function widgetsDescription($view, $cols){
-        foreach ($cols as $col){
-            if ($sessionsDescription = Utl::getItem('sessions', ($description = self::$widgets[$col])['description'])){
-                $func = $sessionsDescription['widgetType'];
-                $descriptions[$col] = ViewUtils::$func($view, [$description['gcName'], [['replace', ['_'/*, '(', ')'*/], ' ']]]);
-            }
-        }
-        return $descriptions;
-    }
-    public static function performedAddedCols(){
-        return ['gctriscore', 'gcavghr', 'gcavgpw', 'gc95hr', 'gctrimphr', 'gctrimppw', 'gcmechload', 'gch4time', 'gch5time'];
-        
     }
 }
 GoldenCheetah::init();

@@ -39,7 +39,7 @@ class Model extends AbstractModel {
         	'corpulence' => 'VARCHAR(10) DEFAULT NULL ',
         	'morphotype' => 'VARCHAR(10) DEFAULT NULL ',
         	'antecedents' => 'longtext DEFAULT NULL',
-        	//'clientid' => 'VARCHAR(20) DEFAULT NULL ',
+            'stravainfo' => 'VARCHAR(511) DEFAULT NULL',
         ];
         parent::__construct($objectName, $translator, 'people', ['parentid' => ['organizations']], [], $colsDefinition, [], ['country'], ['worksheet', 'custom'], ['name', 'firstname']);
     }    

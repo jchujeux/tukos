@@ -27,7 +27,8 @@ class View extends AbstractView {
         ];
 
 
-        $subObjects['mailboxes'] = ['atts' => ['title' => $this->tr('Mailboxes'), 'disabled' => true], 'filters' => ['parentid' => '@id'], 'allDescendants' => false];
+        $subObjects = [];
+        //$subObjects['mailboxes'] = ['atts' => ['title' => $this->tr('Mailboxes'), 'disabled' => true], 'filters' => ['parentid' => '@id'], 'allDescendants' => false];
 
         $this->customize($customDataWidgets, $subObjects, ['get' => ['password'], 'grid' => ['password']]);
 

@@ -3,6 +3,7 @@ namespace TukosLib\Utils;
 use TukosLib\TukosFramework as Tfk;
 
 class HtmlUtilities{
+    private static $domDocument = null;
     public static function page ($title, $content){
         return '<!DOCTYPE HTML><html><head><meta charset="utf-8"><title>' . $title . '</title></head><body>' . $content . '</body></html>';
     }
@@ -130,6 +131,17 @@ class HtmlUtilities{
     }
     public static function urlStyle(){
         return "text-decoration:underline; color:blue; cursor:pointer;";
+    }
+    public static function getDomDocument(){
+        if (is_null(self::$domDocument)){
+            self::$domDocument = new \DOMDocument();
+        }
+        return self::$domDocument;
+    }
+    public static function imageUrl($imageTag){
+        $doc = self::getDomDocument();
+        $doc->loadHTML("<html><body>$imageTag</body></html>");
+        return $doc->getElementsByTagName('img')[0]->getAttribute('src');
     }
 }
 ?>

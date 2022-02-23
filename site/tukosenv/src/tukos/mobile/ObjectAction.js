@@ -45,9 +45,14 @@ function(declare, lang, on, Button, registry, Pmg, utils){
             	}
             });
             this.set('label', Pmg.loading(label));
-            return this.form.serverDialog({action: this.serverAction, query: self.urlArgs ? lang.mixin({id: theId}, self.urlArgs.query) : {id: theId}}, data, this.form.get('dataElts')).then(function(response){
-            	self.set('label', label);
-            });         	
+            return this.form.serverDialog({action: this.serverAction, query: self.urlArgs ? lang.mixin({id: theId}, self.urlArgs.query) : {id: theId}}, data, this.form.get('dataElts')).then(
+				function(){
+            		self.set('label', label);
+            	},
+				function(){
+					self.set('label', label)
+				}
+			);         	
         },
         changedValues: function(data){
         	lang.mixin(data, this.form.changedValues());

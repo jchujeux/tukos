@@ -365,7 +365,9 @@ abstract class AbstractModel extends ObjectTranslator {
         $this->jsonNewValues($oldValues, $newValues);
         $newValues = Utl::blankToNullArray($newValues, $this->idCols);
         
-        $differences = array_udiff_assoc($newValues, $oldValues, function($left, $right){return (($left === $right) || ($left === Utl::blankToNull($right))) ? 0 : 1;});
+        $differences = array_udiff_assoc($newValues, $oldValues, function($left, $right){
+            return (($left === $right) ||  (is_string($right) && ((is_float($left) && (floatval($right) - $left) < 0.00000000001) || (is_int($left) && intval($right) === $left))) || ($left === Utl::blankToNull($right))) ? 0 : 1;
+        });
         if (!empty($differences)){
             $updated = $differences['updated'] = date('Y-m-d H:i:s');
             $updator = $this->user->id();

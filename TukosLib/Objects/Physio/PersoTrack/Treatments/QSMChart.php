@@ -1,7 +1,6 @@
 <?php
 namespace TukosLib\Objects\Physio\PersoTrack\Treatments;
 
-use TukosLib\Objects\Sports\GoldenCheetah as GC;
 use TukosLib\TukosFramework as Tfk;
 
 trait QSMChart {
@@ -20,7 +19,7 @@ trait QSMChart {
                     'cols' => ['painduring' => ['plot' => 'cluster', 'tCol' => $tr('painduring')], 'painafter' => ['plot' => 'cluster', 'tCol' => $tr('painduring')], 'painnextday' => ['plot' => 'cluster', 'tCol' => $tr('painnextday')],
                         'duration' => ['plot' => 'Lines', 'tCol' => $tr('duration'), 'legendUnit' => ' (mn)'], 'distance' => ['plot' => 'Lines', 'tCol' => $tr('distance'), 'legendUnit' => ' (km)', 'tooltipUnit' => ' km'], 
                         'elevationgain' =>  ['plot' => 'Lines', 'tCol' => $tr('elevationgain'), 'legendUnit' => ' (dam)', 'tooltipUnit' => ' m', 'scalingFactor' => 10], 'intensity' =>  ['plot' => 'Lines', 'tCol' => $tr('intensity')], 
-                        'gcmechload' =>  ['plot' => 'Lines', 'tCol' => $tr(GC::gcName('gcmechload')), 'scalingFactor' => 10.0]]]],
+                        'mechload' =>  ['plot' => 'Lines', 'tCol' => $tr('Tukos_Mechanical_Load'), 'scalingFactor' => 10.0]]]],
                 'axes' => [
                     'x' => ['title' => $tr('dateofday'), 'titleOrientation' => 'away', 'titleGap' => 5, 'labelCol' => 'day', 'majorTicks' => true, 'majorTickStep' => 1, 'minorTicks' => false, 'titleFont' => 'normal normal normal 11pt Arial'],
                     'y1' => ['title' => $tr('pain'), 'vertical' => true, 'min' => 0, 'max' => 4, 'titleFont' => 'normal normal normal 11pt Arial'],
@@ -46,7 +45,7 @@ EOT
                     'distance' => $seriesDescription('distance', 'lines'),
                     'elevationgain' => $seriesDescription('elevationgain', 'lines'),
                     'intensity' => $seriesDescription('intensity', 'lines'),
-                    'gcmechload' => $seriesDescription('gcmechload', 'lines'),
+                    'mechload' => $seriesDescription('mechload', 'lines'),
                 ],
                 'tooltip' => true,
                 'mouseZoomAndPan' => true,

@@ -29,7 +29,7 @@ class SessionFeedback extends ObjectTranslator{
         foreach ($this->version->hideIfEmptyWidgets as $name){
             $this->dataWidgets[$name]['atts']['edit'] = array_merge($this->dataWidgets[$name]['atts']['edit'], ['hidden' => true, 'disabled' => true, 'onWatchLocalAction' => ['value' => [$name => ['hidden' => ['triggers' => ['server' => true, 'user' => false], 'action' => "return newValue ? false : true;"]]]]]);
         }
-        $this->onOpenAction = $this->getOnOpenAction(Utl::getItem('gcflag', $query, false));
+        $this->onOpenAction = $this->getOnOpenAction(Utl::getItem('gcflag', $query, Utl::getItem('synchroflag', $query, false)));
         if ($presentation = Utl::getItem('presentation', $query)){
             switch($presentation){
                 case 'MobileTextBox':
@@ -109,7 +109,7 @@ class SessionFeedback extends ObjectTranslator{
         $query['targetdb'] = rawurlencode($query['targetdb']);
         $actionWidgets['send'] = ['atts' => ['urlArgs' => ['query' => $query]]];
         $actionWidgets['reset'] = ['atts' => ['urlArgs' => ['query' => $query]]];
-        $actionWidgets['showsynchrofields'] = ['type' => 'TukosButton', 'atts' => [/*'label' => $this->view->tr('showsynchrofields'), */'hidden' => empty($query['gcflag']), 'onClickAction' => $this->showSynchroFieldsOnClickAction()]];
+        $actionWidgets['showsynchrofields'] = ['type' => 'TukosButton', 'atts' => [/*'label' => $this->view->tr('showsynchrofields'), */'hidden' => (empty($query['gcflag']) && empty($query['synchroflag'])) ? true : false, 'onClickAction' => $this->showSynchroFieldsOnClickAction()]];
         $actionWidgets['showweeklies'] = ['type' => 'TukosButton', 'atts' => ['onClickAction' => $this->showWeekliesOnClickAction()]];
         $this->view->addToTranslate(['showsynchrofields', 'hidesynchrofields', 'showweeklies', 'hideweeklies']);
         return $actionWidgets;
@@ -236,7 +236,7 @@ class SessionFeedback extends ObjectTranslator{
             //}
         }
         if ($savedCount){
-            $this->programsModel->googleSynchronizeOne($programId, $programInformation['googlecalid'], $id, Utl::getItem('gcflag', $query), Utl::getItem('logo', $query), Utl::getItem('presentation', $query), Utl::getItem('version', $query));
+            $this->programsModel->googleSynchronizeOne($programId, $programInformation['googlecalid'], $id, Utl::getItem('gcflag', $query, Utl::getItem('synchroflag', $query)), Utl::getItem('logo', $query), Utl::getItem('presentation', $query), Utl::getItem('version', $query));
             Feedback::add($this->tr('sessionsaved'));
         }else{
             Feedback::add($this->tr('nosessionchange'));
@@ -276,10 +276,10 @@ form.resize();
 EOT
         ;
     }
-    function getOnOpenAction($gcflag){
+    function getOnOpenAction($synchroflag){
         return <<<EOT
 var self = this, hasSomeValue;
-if ('$gcflag'){
+if ('$synchroflag'){
     hasSomeValue = {$this->synchroFields}.some(function(name){
         var value = self.valueOf(name);
         console.log('name = ' + name + ' - value = ', value);

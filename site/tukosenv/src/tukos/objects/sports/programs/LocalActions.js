@@ -79,6 +79,32 @@ function(declare, lang, utils, Pmg){
 			form.programsConfig = {equivalentDistance: JSON.stringify(pane.valueOf('equivalentdistance'))};
 			lang.setObject('customization.programsConfig', form.programsConfig, form);
 			sessionsWidget.loadChartUtils.updateCharts(sessionsWidget, true);
+		},
+		authorizeStrava: function(pane){
+			var form = pane.form, programId = form.valueOf('id'), athleteId = form.valueOf('parentid');
+			var contentMessage = (!utils.empty(form.changedWidgets) || !programId) ?  Pmg.message('saveOrReloadFirst') : '';
+			contentMessage += !athleteId ?  ' & <br> '  + Pmg.message('needtodefineathlete') : '';
+			pane.close();
+			if (contentMessage){
+				Pmg.alert({title: Pmg.message('cannotsynchronizestrava'), content: contentMessage});
+			}else{
+            	Pmg.setFeedback(Pmg.message('actionDoing'));
+            	this.form.serverDialog({action:'Process', query: {id: programId, athleteid: athleteId, athleteemail: form.valueOf('sportsmanemail'), coachid: form.valueOf('coach'), coachemail: form.valueOf('coachemail'),
+					params:  JSON.stringify({process: 'stravaEmailAuthorize', save: true})}}, form.changedValues(), form.get('postElts'), Pmg.message('actionDone')); 
+			}
+		},
+		synchronizeWithStrava: function(pane){
+			var form = pane.form, programId = form.valueOf('id'), athlete = form.valueOf('parentid');
+			var contentMessage = (!utils.empty(form.changedWidgets) || !programId) ?  Pmg.message('saveOrReloadFirst') : '';
+			contentMessage += !athlete ?  ' & <br> '  + Pmg.message('needtodefineathlete') : '';
+			pane.close();
+			if (contentMessage){
+				Pmg.alert({title: Pmg.message('cannotsynchronizestrava'), content: contentMessage});
+			}else{
+            	Pmg.setFeedback(Pmg.message('actionDoing'));
+            	this.form.serverDialog({action:'Process', query: {id: programId, parentid: athlete, synchrostart: pane.valueOf('stsynchrostart'), synchroend: pane.valueOf('stsynchroend'), ignoresessionflag: pane.valueOf('ignoresessionflag')/*, metricstoinclude: pane.valueOf('stmetricstoinclude')*/, 
+					params:  JSON.stringify({process: 'stravaProgramSynchronize', save: true})}}, form.changedValues(), form.get('postElts'), Pmg.message('actionDone')); 
+			}
 		}
 	});
 });

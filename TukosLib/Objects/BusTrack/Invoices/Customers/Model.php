@@ -73,7 +73,6 @@ class Model extends AbstractModel {
         foreach($items as $item){
         	if (isset($item['discount']) && $item['discount'] > 0){
         		$hasDiscountCol = true;
-        		break;
         	}
         	if (($comments = Utl::getItem('comments', $item)) && $comments !== '<br />'){
         	    $hasCommentsCol = true;
@@ -109,7 +108,7 @@ class Model extends AbstractModel {
             });
             $rows[] = ['tag' => 'tr', 'content' => $rowContent];
         }
-        $numberOfRows = 4 + ($invoice['discountwt'] > 0 ? 1 : 0);
+        $numberOfRows = $vatMode === 'exemption' ? 2 : 4 + ($invoice['discountwt'] > 0 ? 1 : 0);
         $rows[] = ['tag' => 'tr', 'content' => [['tag' => 'td', 'atts' => 'colspan="' . $numberOfCols . '" style="border: 0px;"',  'content' => '&nbsp; ']]];
         $numberOfCols3 = $numberOfCols - 3;
         $rows[] = ['tag' => 'tr', 'content' => [

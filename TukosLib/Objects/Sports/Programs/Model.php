@@ -4,13 +4,14 @@ namespace TukosLib\Objects\Sports\Programs;
 use TukosLib\Objects\AbstractModel;
 use TukosLib\Objects\Sports\Programs\Questionnaire;
 use TukosLib\Objects\Sports\Programs\GoogleSessionsEvents;
+use TukosLib\Objects\Sports\Programs\StravaSynchronize;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
 use TukosLib\TukosFramework as Tfk;
 use TukosLib\Google\Sheets;
 
 class Model extends AbstractModel {
 
-    use Questionnaire, GoogleSessionsEvents;
+    use Questionnaire, GoogleSessionsEvents, StravaSynchronize;
     
 	protected $presentationOptions = ['perdate', 'persession'];
     protected $synchnextmondayOptions = ['YES', 'NO'];

@@ -65,7 +65,7 @@ EOT
 </script>';
 
 	function sendContent($query, $atts, $where = []){
-		if ((empty($atts['from']) && empty($where)) || empty($atts['to'])){
+		if ((empty($atts['from']) && empty($atts['fromwhere']) && empty($where)) || empty($atts['to'])){
 			Feedback::add($this->tr('missingfromorto'));
 			return [];
 		}else{
@@ -75,7 +75,7 @@ EOT
 			}
 			$mailArgs['body'] = (empty($atts['header']) ? '' : $atts['header']);
 			$objectsStore =  Tfk::$registry->get('objectsStore');
-			$accountInfo = $objectsStore->objectModel('mailaccounts')->getAccountInfo(['where' => empty($where) ? ['id' => $atts['from']] : $where, 'cols' => ['name', 'eaddress', 'username', 'password', 'smtpserverid']]);
+			$accountInfo = $objectsStore->objectModel('mailaccounts')->getAccountInfo(['where' => empty($where) ? (empty($atts['fromwhere']) ? ['id' => $atts['from']] : $atts['fromwhere']) : $where, 'cols' => ['name', 'eaddress', 'username', 'password', 'smtpserverid']]);
 			$mailArgs['from'] = $accountInfo['name'] . ' <' . $accountInfo['eaddress'] . '>';
 			$mailArgs['username'] = $accountInfo['username'];
 			$mailArgs['password'] = $accountInfo['password'];

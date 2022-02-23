@@ -18,7 +18,10 @@ class Registry{
         $this->loader->add('TukosLib\\', Tfk::$tukosPhpDir);
         
         $this->loader->add('Aura\Di\\'    , $auraDir . 'package/Aura.Di/src/');
-
+        //$this->loader->add('Strava\\', Tfk::$phpVendorDir . 'basvandorst/stravaphp/src/');
+        //$this->loader->add('League\\Oauth2\\Client\\', Tfk::$phpVendorDir . 'league/oauth2-client/src/');
+        //$this->loader->add('MathPhp\\', Tfk::$phpVendorDir . 'markrogoyski/math-php/src/');
+        
         $this->container = new DiContainer(new \Aura\Di\Forge(new \Aura\Di\Config));
         
         if ($this->mode === 'interactive'){
@@ -42,10 +45,10 @@ class Registry{
         $this->loader->add('Aura\Sql\\'         , $auraDir . 'package/Aura.Sql/src/');
         $this->loader->add('Aura\SqlQuery', Tfk::$vendorDir['auraV2']);
         
-        $this->loader->add('Zend\\'       , Tfk::$vendorDir['zend']);
+        //$this->loader->add('Zend\\'       , Tfk::$vendorDir['zend']);
         $this->loader->add('Pear\\'       , Tfk::$vendorDir['pear']);
         $this->loader->add('ManuelLemos\\', Tfk::$phpVendorDir);
-        $this->loader->add('PHPMailer\\'  , Tfk::$phpVendorDir);
+        //$this->loader->add('PHPMailer\\'  , Tfk::$phpVendorDir);
         $this->loader->add('Html2Text\\'  , Tfk::$phpVendorDir);        
         $this->loader->add('Dropbox\\', Tfk::$vendorDir['Dropbox']);
     }
@@ -74,6 +77,7 @@ class Registry{
             foreach($this->request as &$value){
                 $value = ucfirst($value);
             }
+            unset($value);
             $this->request['object'] = strtolower($this->request['object']);
             $this->appName = $this->setAppName($this->request['application']);
             $this->controller = $this->request['controller'];
@@ -81,9 +85,13 @@ class Registry{
             $this->pageUrl         = "{$this->appUrl}Page/";
             $this->dialogueUrl   = "{$this->appUrl}Dialogue/";
         }
-        $this->urlQuery = $_GET;
+        $this->urlQuery = [];
+        foreach($_GET as $key => $value){// due to Strava authentication redirect changing '&' into '&amp;' (and in cases of a new authorization does it even twice!!
+            //$this->urlQuery[strpos($key, 'amp;amp;') === 0 ? substr($key, 8) : (strpos($key, 'amp;') === 0 ? substr($key, 4) : $key)] = $value;
+            $this->urlQuery[preg_replace('/^(amp;)*/', '', $key)] = $value;
+        }
         $this->organization = Utl::extractItem('org', $this->urlQuery, 'tukos');
-        $this->logo = ['tukos' => Tfk::$publicDir . 'images/tukosswissknife.jpg', 'tds' => Tfk::$publicDir . 'images/tdspetit.jpg'][$this->organization];
+        $this->logo = ['tukos' => /*$this->rootUrl*/'https://tukos.site' . Tfk::$publicDir . 'images/tukosswissknife.png', 'tds' => Tfk::$publicDir . 'images/tdspetit.jpg'][$this->organization];
         $this->headerBanner = ['tukos' => 'headerBanner', 'tds' => 'tdsHeaderBanner'][$this->organization];
     }        
     public function setAppName($appName){

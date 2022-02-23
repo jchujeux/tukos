@@ -266,18 +266,36 @@ class Utilities{
     	}
     	return $merged;
     }
-    
+    /*
+     * keys need to be the sequence 0,1, ...
+     */
+    public static function isNumeric($paArray){
+        if (!is_array($paArray)){
+            return false;
+        }else{
+            $i = 0;
+            foreach($paArray as $key => $value){
+                if ($key !== $i){
+                    return false;
+                }
+                return true;
+            }
+        }
+    }
 
    /*
     * This version does overwrite both numeric keys and string keys whereas array_merge_recursive converts those to arrays rather than overwriting
     * (provided by Brian in the php manual). Implementation for two arrays arguments only
     */
-    public static function array_merge_recursive_replace($paArray1, $paArray2, $subOnly = false, $replace = '~replace', $delete = '~delete'){
+    public static function array_merge_recursive_replace($paArray1, $paArray2, $replaceNumeric = true, $subOnly = false, $replace = '~replace', $delete = '~delete'){
     	if (!(is_array($paArray1) or is_object($paArray1))){
         	return is_array($paArray2) ? Self::bypass_recursive($paArray2, $replace) :$paArray2;
         }
         if (!(is_array($paArray2) or is_object($paArray2))) {
         	return $paArray2; 
+        }
+        if (!$replaceNumeric  && Self::isNumeric($paArray1) && Self::isNumeric($paArray2)){
+            return array_merge($paArray1, $paArray2);
         }
         foreach ($paArray2 as $sKey2 => $sValue2){
         	if(!empty($sValue2[$delete])){
@@ -288,13 +306,15 @@ class Utilities{
                 unset($paArray1[$sKey2]);
             }else{
                 if (!$subOnly || isset($paArray1[$sKey2])){
-                    $paArray1[$sKey2] = Self::array_merge_recursive_replace(@$paArray1[$sKey2], $sValue2, false, $replace, $delete);
+                    $paArray1[$sKey2] = Self::array_merge_recursive_replace(@$paArray1[$sKey2], $sValue2, $replaceNumeric, false, $replace, $delete);
                 }
             }
         }
         return $paArray1;
     }
-    
+    /*
+     * this version concatenates numeric arrays instead of replacing
+     */
     public static function bypass_recursive($paArray, $keyToBypass){
     	foreach ($paArray as $key => $value){
     		if ($key === $keyToBypass){

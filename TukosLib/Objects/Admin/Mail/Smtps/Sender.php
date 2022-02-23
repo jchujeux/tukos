@@ -1,9 +1,9 @@
 <?php
 namespace TukosLib\Objects\Admin\Mail\Smtps;
 
-use PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 use Html2Text\Html2Text;
-use TukosLib\Utils\Utilities as Utl;
 
 class Sender{
 
@@ -43,7 +43,7 @@ class Sender{
             if ($isHtml){
                 $this->mailer->isHtml(true);
                 $this->mailer->msgHTML($mailArgs['body'], '', function($html){
-                    return Html2Text::convert($html);
+                    return @Html2Text::convert($html);
                 });
             }else{
                 $this->mailer->isHtml(false);

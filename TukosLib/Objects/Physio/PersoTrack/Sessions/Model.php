@@ -2,7 +2,6 @@
 namespace TukosLib\Objects\Physio\PersoTrack\Sessions;
 
 use TukosLib\Objects\AbstractModel;
-use TukosLib\Objects\Sports\GoldenCheetah as GC;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {
@@ -11,7 +10,7 @@ class Model extends AbstractModel {
         return ['sports'];
     }
     function __construct($objectName, $translator=null){
-        $colsDefinition = array_merge([
+        $colsDefinition = [
             'startdate'  => 'VARCHAR(30)  DEFAULT NULL',
             'whenintheday' => 'TINYINT DEFAULT NULL',
             'sessionid' => 'TINYINT DEFAULT NULL',
@@ -26,8 +25,8 @@ class Model extends AbstractModel {
             'extra1' => 'VARCHAR(30)  DEFAULT NULL',
             'painduring' => 'TINYINT DEFAULT NULL',
             'painafter' => 'TINYINT DEFAULT NULL',
-        ],
-        GC::colsDefinition(['gcmechload']));
+            'mechload' => 'MEDIUMINT DEFAULT NULL'
+        ];
         parent::__construct($objectName, $translator, 'physiopersosessions',  ['parentid' => ['physiopersotreatments']], [], $colsDefinition, [], [], ['custom'], ['name', 'startdate']);
     }   
     public function getOneExtended($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){

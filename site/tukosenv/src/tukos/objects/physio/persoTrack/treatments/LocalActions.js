@@ -61,10 +61,10 @@ function(declare, lang, utils, Pmg){
 		startdateChangeLocalAction: function(sWidget, tWidget, newValue, oldValue){
 			var oldStartDate = oldValue, newStartDate = newValue;
 			if (oldStartDate){
-				this.dailyAssesmentUpdate(oldStartDate, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'gctrimphr', 'gcmechload']);
+				this.dailyAssesmentUpdate(oldStartDate, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'trimphr', 'mechload']);
 			}
 			if (newStartDate){
-				this.dailyAssesmentUpdate(newStartDate, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'gctrimphr', 'gcmechload']);
+				this.dailyAssesmentUpdate(newStartDate, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'trimphr', 'mechload']);
 			}
 			this.dailiesGrid.refresh({keepScrollPosition: true});
 		},
@@ -96,7 +96,7 @@ function(declare, lang, utils, Pmg){
 		afterCreateSessionRow: function(){
 			var session = arguments[0] || this.sessionsGrid.clickedRow.data;
 			if (session.startdate){
-			    this.dailyAssesmentUpdate(session.startdate, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'gctrimphr', 'gcmechload']);
+			    this.dailyAssesmentUpdate(session.startdate, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'trimphr', 'mechload']);
 				this.dailiesGrid.refresh({keepScrollPosition: true});
 			}
 		},
@@ -120,7 +120,7 @@ function(declare, lang, utils, Pmg){
 			dates = utils.array_unique(dates);
 			dates.forEach(function(date){
 				if (date){
-					self.dailyAssesmentUpdate(date, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'gctrimphr', 'gcmechload']);
+					self.dailyAssesmentUpdate(date, ['name', 'painduring', 'painafter', 'duration', 'elevationgain', 'trimphr', 'mechload']);
 					needsRefresh = true;
 				}
 			});
