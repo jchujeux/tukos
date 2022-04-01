@@ -202,6 +202,7 @@ class View extends AbstractView {
 			    'edit' => ['style' => ['width' => '4em'], 'onWatchLocalAction' => ['value' => ['synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $this->synchroStartLocalAction('#displayeddate', 'newValue')]]]]],
 			    'overview' => ['hidden' => true]
 			]]),
+		    'synchrosource' => ViewUtils::textBox($this, 'Synchrosource', ['atts' => ['edit' => ['hidden' => true]]]),
 			'questionnairetime'  =>  ViewUtils::timeStampDataWidget($this, 'QuestionnaireTime', ['atts' => ['edit' => ['disabled' => true]]]),
 		    'loadchart' => $loadChartDescription($chartsAtts['loadchart'],$this->loadChartLocalAction('loadchart')),
 		    'weekloadchart' => $loadChartDescription($chartsAtts['weekloadchart'], $this->weekLoadChartLocalAction('weekloadchart')),
@@ -240,23 +241,23 @@ class View extends AbstractView {
     	        ]]]
 	        ),
 		    'stsdays' => ViewUtils::tukosNumberBox($this, 'stsdays', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.'], 'onChangeLocalAction' => ['stsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('stsdays')]]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.']], 'onChangeLocalAction' => ['stsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('stsdays')]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'ltsdays' => ViewUtils::tukosNumberBox($this, 'ltsdays', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.'], 'onChangeLocalAction' => ['ltsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('ltsdays')]]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.']], 'onChangeLocalAction' => ['ltsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('ltsdays')]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'stsratio' => ViewUtils::tukosNumberBox($this, 'stsratio', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.00'], 'onChangeLocalAction' => ['stsratio' => ['localActionStatus' => $this->tsbParamsChangeAction('stsratio')]]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.00']], 'onChangeLocalAction' => ['stsratio' => ['localActionStatus' => $this->tsbParamsChangeAction('stsratio')]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'initialsts' => ViewUtils::tukosNumberBox($this, 'initialsts', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'onChangeLocalAction' => ['initialsts' => ['localActionStatus' => $this->tsbParamsChangeAction('initialsts')]]],
+		        'edit' => ['style' => ['width' => '5em']], 'onChangeLocalAction' => ['initialsts' => ['localActionStatus' => $this->tsbParamsChangeAction('initialsts')]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'initiallts' => ViewUtils::tukosNumberBox($this, 'initiallts', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'onChangeLocalAction' => ['initiallts' => ['localActionStatus' => $this->tsbParamsChangeAction('initiallts')]]],
+		        'edit' => ['style' => ['width' => '5em']], 'onChangeLocalAction' => ['initiallts' => ['localActionStatus' => $this->tsbParamsChangeAction('initiallts')]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		];
@@ -317,7 +318,7 @@ class View extends AbstractView {
 				'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], 
 				    [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
                  'removeCols' => ['sportsman','grade', 'configstatus', 'acl'],
-			    'hiddenCols' => ['parentid', 'stress', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
+			    'hiddenCols' => ['parentid', 'stress', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
 			        'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
 			],
@@ -373,10 +374,6 @@ require (["tukos/objects/sports/TsbCalculator", "tukos/objects/sports/LoadChart"
     sWidget.tsbCalculator.updateRowAction(sWidget, false, true);
     grid.loadChartUtils = new LoadChart({sessionsStore: grid.store});
     grid.loadChartUtils.updateCharts(grid, 'changed');
-/*    grid.loadChartUtils.setProgramLoadChartValue(form, 'loadchart');
-    grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');
-    grid.loadChartUtils.setWeekLoadChartValue(form, 'weekloadchart');
-    grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');*/
 });
 return true;
 EOT
@@ -423,6 +420,7 @@ if (!this.isBulkRowAction && row.startdate){
     this.store.filter((new this.store.Filter()).eq('startdate', row.startdate)[row.mode === 'performed' ? 'eq' : 'ne']('mode', 'performed')).sort('sessionid', 'descending').fetchRangeSync({start: 0, end: 1}).forEach(function(largestSessionIdRow){
         row.sessionid = Number(largestSessionIdRow.sessionid) + 1;
     });
+    row.sportsman = this.valueOf('parentid');
 }
 EOT
 	    ;
@@ -565,8 +563,6 @@ var form = sWidget.form, grid = form.getWidget('sptsessions');
 grid.tsbCalculator.initialize(utils.newObj([['$param', newValue]]));
 grid.tsbCalculator.updateRowAction(grid, false, true);
 grid.loadChartUtils.updateCharts(grid, true);
-/*grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');
-grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');*/
 grid.refresh({skipScrollPosition: true});
 return true;
 EOT

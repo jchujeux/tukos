@@ -19,7 +19,7 @@ class View extends EditView{
             ],
             'row1b' => [
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-                'widgets' => ['mode', 'distance', 'elevationgain', 'athletecomments', 'coachcomments', 'sensations', 'perceivedeffort', 'mood', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time']
+                'widgets' => ['mode', 'distance', 'elevationgain', 'athletecomments', 'coachcomments', 'sensations', 'perceivedeffort', 'mood', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'mechload', 'hr95', 'h4time', 'h5time', 'stravaid']
             ],
             'row2' => [
         		'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false,  'content' => '', 'widgetWidths' => ['60%', '40%']/*, 'style' => 'height: 100%; width: 100%'*/],

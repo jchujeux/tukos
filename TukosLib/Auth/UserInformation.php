@@ -160,11 +160,11 @@ class UserInformation{
         return $this->contextModel->getRootId();
     }
 
-    public function encrypt($string, $mode){
-        return Cipher::encrypt($string, ($mode === 'private' ? $this->ckey : $this->tukosCkey));
+    public function encrypt($string, $mode, $deterministic = false){
+        return Cipher::encrypt($string, ($mode === 'private' ? $this->ckey : $this->tukosCkey), $deterministic);
     }
-    public function decrypt($string, $mode){
-        return Cipher::decrypt($string, ($mode === 'private' ? $this->ckey : $this->tukosCkey));
+    public function decrypt($string, $mode, $deterministic = false){
+        return Cipher::decrypt($string, ($mode === 'private' ? $this->ckey : $this->tukosCkey), $deterministic);
     }
 
     public function modulesMenuLayout(){

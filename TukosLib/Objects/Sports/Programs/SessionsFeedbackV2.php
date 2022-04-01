@@ -9,7 +9,7 @@ use TukosLib\Objects\Sports\Sports;
 class SessionsFeedbackV2 extends SessionsFeedbackVersion{
     function __construct(){
         parent::__construct();
-        $this->formObjectWidgets = ['id', 'startdate', 'sessionid', 'name', 'duration', 'sport', 'distance', 'elevationgain', 'perceivedeffort', 'sensations', 'mood', 'athletecomments', 'coachcomments'];
+        $this->formObjectWidgets = ['id', 'sportsman', 'startdate', 'starttime', 'sessionid', 'name', 'duration', 'sport', 'distance', 'elevationgain', 'perceivedeffort', 'sensations', 'mood', 'athletecomments', 'coachcomments'];
         $this->formWeeklyCols = ['athleteweeklyfeeling', 'coachweeklycomments'];
         $this->hideIfEmptyWidgets = ['coachcomments', 'coachweeklycomments'];
         $this->numberWidgets = ['distance', 'elevationgain'];

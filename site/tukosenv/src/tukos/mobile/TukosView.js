@@ -8,30 +8,37 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojox/mobile/Vi
     		this.createPane();
         },
         refresh: function(viewPaneContent){
-        	var previousView, nextView, self = this;
+        	var previousView, currentView, nextView, self = this;
         	viewPaneContent.viewPane = this;
         	if (this.form){
             	this.form.destroyRecursive();
             	previousView = this.heading.previousViewButton.get('targetView');
             	nextView = this.heading.nextViewButton.get('targetView');
             	this.heading.destroyRecursive();
-            	this.actionsHeading.destroyRecursive();
+            	this.actionsHeading && this.actionsHeading.destroyRecursive();
             }
-        	this.addChild(this.heading = new Heading({label: this.title, fixed: 'top'}));
+        	this.addChild(this.heading = new Heading({label: this.title}));
+			if (!(currentView = this.mobileViews.currentPane()) && !this.mobileViews.navigationView){
+				this.heading.set('style', {display: 'none'});
+			}else{
+				currentView.heading.set('style', {display: 'block'});
+			}
         	if (this.paneModuleType === 'objectPane'){
-            	this.addChild(this.actionsHeading = new Heading({style: {display: 'none'}}));
-            	(this.actionsHeadingToggle = new ToolBarButton({icon: "mblDomButtonWhitePlus", style: "float: right", onClick: lang.hitch(this, function(){
-            		var heading = this.actionsHeading, toggle = this.actionsHeadingToggle, displayStatus = heading.get('style').display;
-            		if (displayStatus === 'none'){
-            			heading.set('style', {display: 'block'});
-            			toggle.set('icon', 'mblDomButtonWhiteMinus');
-            		}else{
-            			heading.set('style', {display: 'none'});
-            			toggle.set('icon', 'mblDomButtonWhitePlus');
-            			
-            		}
-            		this.resize();
-            	})})).placeAt(this.heading, 'first');
+				if (this.formContent.actionLayout.length > 0){
+					this.addChild(this.actionsHeading = new Heading({style: {display: 'none'}}));
+	            	(this.actionsHeadingToggle = new ToolBarButton({icon: "mblDomButtonWhitePlus", style: "float: right", onClick: lang.hitch(this, function(){
+	            		var heading = this.actionsHeading, toggle = this.actionsHeadingToggle, displayStatus = heading.get('style').display;
+	            		if (displayStatus === 'none'){
+	            			heading.set('style', {display: 'block'});
+	            			toggle.set('icon', 'mblDomButtonWhiteMinus');
+	            		}else{
+	            			heading.set('style', {display: 'none'});
+	            			toggle.set('icon', 'mblDomButtonWhitePlus');
+	            			
+	            		}
+	            		this.resize();
+	            	})})).placeAt(this.heading, 'first');
+				}            	
         	}else if(this.paneModuleType === 'navigationPane'){
             	(this.logout = new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){
             		location.replace(Pmg.get('pageUrl') + 'auth/logout',"_self");
@@ -43,10 +50,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojox/mobile/Vi
         		previousView.heading.nextViewButton.set('targetView', this);
         		nextView.heading.previousViewButton.set('targetView', this);
         	}
-        	this.heading.previousViewButton = new ToolBarButton({icon: "mblDomButtonWhiteLeftArrow", style: "float: left", targetView: previousView, onClick: function(evt){
+			this.heading.previousViewButton = new ToolBarButton({icon: "mblDomButtonWhiteLeftArrow", style: "float: left", targetView: previousView, onClick: function(evt){
         		self.mobileViews.selectPane(this.targetView, -1);
         	}}).placeAt(this.heading, 'first');
-        	if (this.paneModuleType !== 'navigationPane'){
+        	if (this.paneModuleType !== 'navigationPane' && this.mobileViews.navigationView){
             	this.heading.navigationViewButton = new ToolBarButton({icon: "mblDomButtonWhiteUpArrow", style: "float: left", onClick: lang.hitch(this, function(){
             		self.mobileViews.navigationView();
             	})}).placeAt(this.heading, 1);

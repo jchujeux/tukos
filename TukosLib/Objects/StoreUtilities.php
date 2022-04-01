@@ -25,7 +25,7 @@ class StoreUtilities {
             self::$objectsStore = Tfk::$registry->get('objectsStore');
         } 
     }
-    function objectTranslatedExtendedNames($model, $storeAtts = []){
+    public static function objectTranslatedExtendedNames($model, $storeAtts = []){
     	$requestedCols = Utl::getItem('cols', $storeAtts, []);
     	$storeAtts['cols'] = array_unique(array_merge(Utl::getItem('cols', $storeAtts, ['id']), $model->extendedNameCols));
     	$values = Utl::toAssociative($model->translateAll($model->getAllExtended($storeAtts)), 'id');
@@ -62,7 +62,7 @@ class StoreUtilities {
 			return $result;
     	}
     }
-    function translatedExtendedNames($ids){
+    public static function translatedExtendedNames($ids){
         $extendedNames = [];
         foreach($ids as $id){
             if ($extendedName = Utl::getItem($id, self::$extendedNamesCache)){

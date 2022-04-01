@@ -57,7 +57,7 @@ class TukosSportsCountryTranslations {
                     $objectModel->insert(['name' => $item[0], 'setname' => 'tukoslib',  'en_us' => $item[1], 'contextid' => 1, 'configstatus' => 'tukos'], true);
                 }
 
-                $storeProfiles = Tfk::$registry->get('store')->getProfiles();
+                $storeProfiles = Tfk::$registry->get('store')->profilerMessages();
                 $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
                 file_put_contents('/tukosstoreprofiles.html', $storeProfilesOutput);
             }catch(\Exception $e){

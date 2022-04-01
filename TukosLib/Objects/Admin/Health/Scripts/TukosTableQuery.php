@@ -82,7 +82,7 @@ class TukosTableQuery {
                     'orderBy'=> ['tukos.id DESC']
                 ]);
                 Tfk::log_message('on', ' new object item: ', $newObjectItems);
-                $storeProfiles = Tfk::$registry->get('store')->getProfiles();
+                $storeProfiles = Tfk::$registry->get('store')->profilerMessages();
                 $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
                 file_put_contents('/tukosstoreprofiles.html', $storeProfilesOutput);
             }catch(\Exception $e){

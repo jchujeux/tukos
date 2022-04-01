@@ -17,6 +17,7 @@ class StravaSessionsTracking {
         $view = $this->editView;
         $view->view->addToTranslate(['nomatch', 'newsession', 'synced', 'bicycle', 'swimming', 'running', 'other', 'noneedtosync', 'needsstravaauthorization', 'isstravaauthorized']);
         $stWidgets = [
+            'synchrostreams' => Widgets::checkBox(Widgets::complete(['title' => $tr('synchrostreams'), 'onWatchLocalAction' => $this->editView->watchCheckboxLocalAction('synchrostreams')])),
             'stsynchrostart' => Widgets::tukosDateBox(['title' => $tr('synchrostart')]),
             'stsynchroend' => Widgets::tukosDateBox(['title' => $tr('synchroend')]),
             //'stmetricstoinclude' => Widgets::multiSelect(Widgets::complete(['title' => $tr('metricstoinclude'), 'options' => ST::metricsOptions($tr, $metricsToInclude), 'style' => ['height' => '150px'], 'onWatchLocalAction' =>  $view->watchLocalAction('stmetricstoinclude')])),
@@ -36,7 +37,7 @@ class StravaSessionsTracking {
                     ]
                 ]],
             'row2' => [
-                'widgets' => ['stsynchrostart', 'stsynchroend'],
+                'widgets' => ['synchrostreams', 'stsynchrostart', 'stsynchroend'],
             ],
             'row3' => [
                 'tableAtts' =>['cols' => 2,  'customClass' => 'labelsAndValues', 'showLabels' => true/*, 'widgetWidths' => ['10%', '90%']*/],

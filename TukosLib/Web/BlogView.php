@@ -1,10 +1,7 @@
 <?php
 namespace TukosLib\Web;
 
-use Aura\View\Template;
-use Aura\View\EscaperFactory;
-use Aura\View\TemplateFinder;
-use Aura\View\HelperLocator;
+use Aura\View\ViewFactory;
 use TukosLib\Utils\Translator;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\HtmlUtilities as HUtl;
@@ -44,22 +41,22 @@ class BlogView extends Translator{
     }
 
     function render(){
-        $template = new Template(new EscaperFactory, new TemplateFinder, new HelperLocator);
+        $view = (new ViewFactory)->newInstance();
         if (Tfk::$registry->isCrawler){
             $blogTemplate = "CrawlerBlogTemplate";
-            $template->title = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['name'];
-            $template->content = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['comments'];
+            $view->title = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['name'];
+            $view->content = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['comments'];
         }else{
             $packagesLocation = ['dojo', 'dijit', 'dojox', 'dstore', 'dgrid', 'tukos', 'dojoFixes', 'redips'];
             array_walk($packagesLocation, function(&$module){
                 $module = '{"name":"' . $module . '","location":"' . Tfk::moduleLocation($module) . '"}';
             });
-                $template->packagesString = '[' . implode(',', $packagesLocation) . ']';
-                $template->tukosLocation = Tfk::moduleLocation('tukos');
-                $template->dgridLocation = Tfk::moduleLocation('dgrid');
-                $template->dojoBaseLocation = Tfk::dojoBaseLocation();
-                $template->language = Tfk::$registry->get('translatorsStore')->getLanguage();
-                $template->loadingMessage = $this->tr('Loading') . '...';
+                $view->packagesString = '[' . implode(',', $packagesLocation) . ']';
+                $view->tukosLocation = Tfk::moduleLocation('tukos');
+                $view->dgridLocation = Tfk::moduleLocation('dgrid');
+                $view->dojoBaseLocation = Tfk::dojoBaseLocation();
+                $view->language = Tfk::$registry->get('translatorsStore')->getLanguage();
+                $view->loadingMessage = $this->tr('Loading') . '...';
                 if ($this->pageManagerArgs['isMobile'] = Tfk::$registry->isMobile){
                     $blogTemplate = "MobileBlogTemplate.php";
                     $this->pageManagerArgs['headerTitle'] = $this->tr('tukosBlogTitle');
@@ -75,12 +72,14 @@ EOT
                         '<span style="' . HUtl::urlStyle() . "\">{$this->tr('BlogWelcome')}</span></div>";
                 }
         }
-        $template->pageManagerArgs = json_encode($this->pageManagerArgs);
+        $view->pageManagerArgs = json_encode($this->pageManagerArgs);
         
-        $finder = $template->getTemplateFinder();
-        $finder->setPaths([dirname(__FILE__)]);
+        $viewRegistry = $view->getViewRegistry();
+        $viewRegistry->set('Blog', dirname(__FILE__) .  "/$blogTemplate");
         
-        $this->dialogue->response->setContent (Tfk::$registry->get('translatorsStore')->substituteTranslations($template->fetch($blogTemplate)));
+        $view->setView('Blog');
+        
+        $this->dialogue->response->setContent (Tfk::$registry->get('translatorsStore')->substituteTranslations($view()));
     }
 }
 ?>

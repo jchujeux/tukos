@@ -8,7 +8,7 @@
 <body >
 	<H1><?= $this->title ?></H1>
 	<div>
-	<?=  $this->__raw()->content ?>
+	<?=  $this->content ?>
 	</div>
 </body>
 </html>

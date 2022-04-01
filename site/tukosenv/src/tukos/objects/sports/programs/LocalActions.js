@@ -94,16 +94,15 @@ function(declare, lang, utils, Pmg){
 			}
 		},
 		synchronizeWithStrava: function(pane){
-			var form = pane.form, programId = form.valueOf('id'), athlete = form.valueOf('parentid');
-			var contentMessage = (!utils.empty(form.changedWidgets) || !programId) ?  Pmg.message('saveOrReloadFirst') : '';
-			contentMessage += !athlete ?  ' & <br> '  + Pmg.message('needtodefineathlete') : '';
+			var form = pane.form, programId = form.valueOf('id'), athlete = form.valueOf('parentid'),
+				contentMessage = !athlete ?  ' & <br> '  + Pmg.message('needtodefineathlete') : '';
 			pane.close();
 			if (contentMessage){
 				Pmg.alert({title: Pmg.message('cannotsynchronizestrava'), content: contentMessage});
 			}else{
             	Pmg.setFeedback(Pmg.message('actionDoing'));
-            	this.form.serverDialog({action:'Process', query: {id: programId, parentid: athlete, synchrostart: pane.valueOf('stsynchrostart'), synchroend: pane.valueOf('stsynchroend'), ignoresessionflag: pane.valueOf('ignoresessionflag')/*, metricstoinclude: pane.valueOf('stmetricstoinclude')*/, 
-					params:  JSON.stringify({process: 'stravaProgramSynchronize', save: true})}}, form.changedValues(), form.get('postElts'), Pmg.message('actionDone')); 
+            	this.form.serverDialog({action:'Process', query: {id: programId, parentid: athlete, synchrostart: pane.valueOf('stsynchrostart'), synchroend: pane.valueOf('stsynchroend'), synchrostreams: pane.valueOf('synchrostreams'), ignoresessionflag: pane.valueOf('ignoresessionflag'), 
+					googlecalid: form.valueOf('googlecalid'), params:  JSON.stringify({process: 'stravaProgramSynchronize', save: true})}}, form.changedValues(), form.get('postElts'), Pmg.message('actionDone')); 
 			}
 		}
 	});

@@ -23,9 +23,7 @@ class View extends AbstractView {
             'hobbies' => ViewUtils::textBox($this, 'Hobbies', ['atts' => ['edit' => ['style' => ['width' => '40em']]]]),
             'maritalstatus' => ViewUtils::textBox($this, 'Maritalstatus'),
             'laterality'  => ViewUtils::storeSelect('laterality', $this, 'Laterality'),
-            'height' => ViewUtils::tukosNumberBox($this, 'Height', ['atts' => ['edit' => [
-                    'title' => $this->tr('Height') . '(m)',
-                    'style' => ['width' => '5em'],
+            'height' => ViewUtils::tukosNumberBox($this, 'Height', ['atts' => ['edit' => ['title' => $this->tr('Height') . '(m)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00'],
                     'onWatchLocalAction' => ['value' => [
                         'imc' => ['value' => ['triggers' => ['server' => true, 'user' => true], 'action' => "var weight = sWidget.form.valueOf('weight'); console.log('weight: ' + weight + ' newValue: ' + newValue);if (weight > 0 && newValue > 0){return weight / newValue / newValue;}else{return ''}"]],
                     ]],
@@ -39,9 +37,17 @@ class View extends AbstractView {
             ]]]),
             'corpulence'  => ViewUtils::storeSelect('corpulence', $this, 'Corpulence'),
             'morphotype' => ViewUtils::storeSelect('morphotype', $this, 'Morphotype'),
-            'antecedents' => ViewUtils::editor($this, 'Antecedents', ['atts' => ['edit' => ['height' => '100px']]]),
+            'antecedents' => ViewUtils::lazyEditor($this, 'Antecedents', ['atts' => ['edit' => ['height' => '100px']]]),
             'age' => ViewUtils::textBox($this, 'Age', ['atts' => ['edit' => [ 'style' => ['width' => '5em'], 'disabled' => true]]]),
             'imc' => ViewUtils::tukosNumberBox($this, 'IMC', ['atts' => ['edit' => ['disabled' => true, 'constraints' => ['pattern' => '00.']]]]),
+            'hrmin' => ViewUtils::numberTextBox($this, 'Hrmin'),
+            'hrthreshold' => ViewUtils::numberTextBox($this, 'Hrthreshold'),
+            'h4timethreshold' => ViewUtils::numberTextBox($this, 'H4timethreshold'),
+            'h5timethreshold' => ViewUtils::numberTextBox($this, 'H5timethreshold'),
+            'ftp' => ViewUtils::numberTextBox($this, 'Ftp'),
+            'speedthreshold' => ViewUtils::tukosNumberBox($this, 'Speedthreshold', ['atts' => ['edit' => ['title' => $this->tr('speedthreshold') . ' (km/h)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.0'],
+            ]]]),
+            'stravainfo' => viewUtils::textBox($this, 'stravainfo', ['atts' => ['edit' => ['hidden' => true, 'style' => ['width' => '40em']]]])
         ];
         $subObjects = [
          'sptprograms' => [

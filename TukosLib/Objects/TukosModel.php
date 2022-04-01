@@ -72,10 +72,10 @@ class TukosModel {
     
     public function nextId($configStatus, $increment = true){
 
-        $stmt = $this->store->hook->query('LOCK TABLES ' . $this->_nextIdTable . ' WRITE');
+        $stmt = $this->store->pdo->query('LOCK TABLES ' . $this->_nextIdTable . ' WRITE');
         $nextId =  $this->store->getValue(['table' => $this->_nextIdTable, 'cols' => ['nextid'], 'where' => ['configrange' => $configStatus]]);
         if($increment){ $this->store->update(['nextid' => $nextId+1, 'updated' => date('Y-m-d H:i:s')], ['table' => $this->_nextIdTable, 'where' => ['configrange' => $configStatus]]);}
-        $stmt = $this->store->hook->query('UNLOCK TABLES');
+        $stmt = $this->store->pdo->query('UNLOCK TABLES');
     	return $nextId;
     }
 

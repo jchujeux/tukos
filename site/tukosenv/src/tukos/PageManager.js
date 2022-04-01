@@ -32,6 +32,10 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
            require([obj.isMobile ? "tukos/mobile/buildBlog" : "tukos/desktop/buildBlog", "tukos/StoresManager"], function(buildBlog, StoresManager){
 	           stores = new StoresManager();
 	           buildBlog.initialize();
+		        self.editorGotoTab = function(target, event){
+		            event.stopPropagation();
+		        	self.tabs.gotoTab({action: 'Tab', mode: 'Tab', object: 'backoffice', view: 'edit', query: lang.mixin({form: 'Show', object: 'blog'}, target.query)});
+		        };
            });
 	   },
 	   initializeForm: function(obj){

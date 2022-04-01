@@ -22,7 +22,7 @@
     <div id="appLayout" class="demoLayout" ></div>
     <!-- dojo configuration options -->
     <script type="text/javascript">
-        dojoConfig = {async: true, locale: "<?= $this->language ?>", selectorEngine: 'lite', packages: <?= $this->__raw()->packagesString ?>,  
+        dojoConfig = {async: true, locale: "<?= $this->language ?>", selectorEngine: 'lite', packages: <?= $this->packagesString ?>,  
                       map: {'dojo' : {'dojo/dnd/Selector': "dojoFixes/dojo/dnd/Selector"}, 'dijit/Menu': {'dijit/popup': 'dojoFixes/dijit/popup'}, 'dojox/mobile': {'dojox/mobile/SpinWheelSlot': 'dojoFixes/dojox/mobile/SpinWheelSlot'},
                     	    'tukos/mobile': {'dojox/mobile/SpinWheel': 'dojoFixes/dojox/mobile/SpinWheel', 'dojox/mobile/SpinWheelSlot': 'dojoFixes/dojox/mobile/SpinWheelSlot'}}
         };
@@ -34,7 +34,7 @@
             <!-- Page layout -->
 			require(["tukos/PageManager"], 
             	function(PageManager){
-                	PageManager.initializeForm(<?= $this->__raw()->pageManagerArgs;?>);
+                	PageManager.initializeForm(<?= $this->pageManagerArgs;?>);
             		document.body.className += ' loaded';
         	});
         </script>

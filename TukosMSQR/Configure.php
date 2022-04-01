@@ -130,7 +130,7 @@ EOT
         $depth += 1;
         if (is_array($modulesLayout)){
             foreach($modulesLayout as $key => $layout){
-                $module = in_array($key[0], ['#', '$', '@']) ? substr($key, 1): $key;
+                $module = (is_string($key) && in_array($key[0], ['#', '$', '@'])) ? substr($key, 1): $key;
                 if ($depth === 1){
                     $contextName = (in_array($module, $this->transverseModules) ? 'tukos' : $module);
                 }

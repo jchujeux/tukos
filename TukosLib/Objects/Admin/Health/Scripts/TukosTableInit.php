@@ -24,7 +24,7 @@ class TukosTableInit {
                 'parentTable-s'=> 'parent script table (optional, required if parentid is not a users)',
             ]);
             //$store->emptyTable('tukos');// requires drop privileges for tukosAppAdmin
-            $objectsToConsider = array_intersect(Directory::getObjs(), $store->hook->fetchTableList());
+            $objectsToConsider = array_intersect(Directory::getObjs(), $store->tableList()());
             foreach ($objectsToConsider as $objectName){
                 try {
                     $objectModel = $objectsStore->objectModel($objectName);

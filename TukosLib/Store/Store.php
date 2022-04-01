@@ -1,29 +1,36 @@
 <?php
 namespace TukosLib\Store;
 
-use Aura\Sql\ConnectionFactory;
+use Aura\Sql\ExtendedPdo;
+use Aura\SqlSchema\ColumnFactory;
+use Aura\SqlSchema\MysqlSchema;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
 
 class Store {
     public function __construct($config){
-        $connectionFactory = new ConnectionFactory;
-        $this->hook = $connectionFactory->newInstance(
-            $config['datastore'], 'host=' . $config['host'] . ';dbname=' . $config['dbname'] . ';charset=utf8mb4', $config['admin'], $config['pass']);
+        $this->pdo = new ExtendedPdo(
+            $config['datastore'] . ':host=' . $config['host'] . ';dbname=' . $config['dbname'] . ';charset=utf8mb4', $config['admin'], $config['pass']);
+        $this->pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, true);
+        $this->pdo->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, true);
         $this->query = new QueryBuilder($config);
         $this->dbName = $config['dbname'];
-        $this->hook->getProfiler()->setActive(true);
+        $this->pdo->getProfiler()->setActive(true);
+        $this->pdo->getProfiler()->setLogFormat("{duration} </td><td>{statement}</td><td>{backtrace}");
     }
     public function query($textQuery, $bind=[]){
-        $stmt = $this->hook->query($textQuery, $bind);
+        $stmt = $this->pdo->query($textQuery, $bind);
         return $stmt;
     }
-    public function getProfiles(){
-        return $this->hook->getProfiler()->getProfiles();
+    public function profilerMessages(){
+        return $this->pdo->getProfiler()->getLogger()->getMessages();
+    }
+    public function getSchema(){
+        return isset($this->chema) ? $this->schema : new MysqlSchema($this->pdo, new ColumnFactory());
     }
 	public function tableList(){
-		return isset($this->tableList) ? $this->tableList : $this->tableList = $this->hook->fetchTableList();
+		return isset($this->tableList) ? $this->tableList : $this->tableList = $this->getSchema()->fetchTableList();
 	}
     public function createTable($tableName, $colsDefinition, $colsIndexes = []){
         $tableDescription = "(" . implode(",", array_map(function($col, $definition){return "`$col` $definition";}, array_keys($colsDefinition), array_values($colsDefinition)));
@@ -31,7 +38,7 @@ class Store {
             $tableDescription .= ", INDEX(" . implode("), INDEX(", array_map(function($colsIndex){return implode(",", array_map(function($col){return "`$col`";}, $colsIndex));}, $colsIndexes)) . ")";
         }
         $tableDescription .= ") ROW_FORMAT=COMPRESSED ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-        $this->hook->query("CREATE TABLE `$tableName`" . $tableDescription, []);
+        $this->pdo->query("CREATE TABLE `$tableName`" . $tableDescription, []);
         if (isset($this->tableList)){
         	$this->tableList[] = $tableName;
         }
@@ -40,24 +47,24 @@ class Store {
         return in_array($tableName, $this->tableList());
     }
     public function deleteTable($tableName){
-        $this->hook->query("DROP  TABLE `" . $tableName . "`", []);
+        $this->pdo->query("DROP  TABLE `" . $tableName . "`", []);
         if (isset($this->tableList)){
         	unset($this->tableList[$tableName]);
         }
     }
     public function emptyTable($tableName){
-        $this->hook->query("TRUNCATE  TABLE `" . $tableName . "`", []);
+        $this->pdo->query("TRUNCATE  TABLE `" . $tableName . "`", []);
     }        
         
     public function tableStatus(){
-        return $this->hook->query('SHOW TABLE STATUS FROM ' . $this->dbName);
+        return $this->pdo->query('SHOW TABLE STATUS FROM ' . $this->dbName);
     }
 
     public function tableCols($tableName){
-        return $this->hook->query("SHOW COLUMNS FROM `" . $tableName . "`")->fetchAll(\PDO::FETCH_COLUMN, 0);
+        return $this->pdo->query("SHOW COLUMNS FROM `" . $tableName . "`")->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
     public function tableColsStructure($tableName){
-        return $this->hook->query("SHOW COLUMNS FROM `" . $tableName . "`")->fetchAll(\PDO::FETCH_ASSOC);
+        return $this->pdo->query("SHOW COLUMNS FROM `" . $tableName . "`")->fetchAll(\PDO::FETCH_ASSOC);
     }
     public function addCols($colsDescription, $tableName){
         if (!empty($colsDescription)){
@@ -69,7 +76,7 @@ class Store {
             }
             $sqlStmt = "ALTER TABLE `$tableName` $alterOptions";
             Feedback::add(Tfk::tr('addingcolumn(s)') . ': ' . $sqlStmt);
-            $this->hook->query($sqlStmt);
+            $this->pdo->query($sqlStmt);
         }
     }
     public function addMissingColsIfNeeded($colsDescription, $tableName){
@@ -84,7 +91,7 @@ class Store {
             unset($atts['range']);
             unset($atts['orderBy']);
             $query = $this->query->build('newSelect', $atts);
-            $result = $this->hook->fetchAll($query, $query->getBindValues());
+            $result = $this->pdo->fetchAll((string) $query, $query->getBindValues());
             $this->foundRows = $result[0]['count(*)'];
         }else{
             $this->foundRows = $countResults;
@@ -96,7 +103,7 @@ class Store {
     function getAll($atts){
         $union = Utl::getItem('union', $atts);
         $query = $this->query->build('newSelect', $atts);
-        $result = $this->hook->fetchAll($query, $query->getBindValues());
+        $result = $this->pdo->fetchAll((string) $query, $query->getBindValues());
         $this->setFoundRows($atts, count($result));
         if ($union === 'merge'){
             if (count($result) > 1 && isset($result[0]['id'])){
@@ -129,13 +136,13 @@ class Store {
     }
     function getAssoc($atts){
         $query = $this->query->build('newSelect', $atts);
-        $result = $this->hook->fetchAssoc($query, $query->getBindValues());
+        $result = $this->pdo->fetchAssoc((string) $query, $query->getBindValues());
         $this->setFoundRows($atts, count($result));
         return $result;
     }
     function getCol($atts){
         $query = $this->query->build('newSelect', $atts);
-        $result = $this->hook->fetchCol($query, $query->getBindValues());
+        $result = $this->pdo->fetchCol((string) $query, $query->getBindValues());
         $this->setFoundRows($atts, count($result));
         return $result;
     }
@@ -145,7 +152,7 @@ class Store {
      function getOne($atts){
         $union = Utl::getItem('union', $atts);
          $query = $this->query->build('newSelect', $atts);
-        $result = $this->hook->fetchAll($query, $query->getBindValues());
+        $result = $this->pdo->fetchAll((string) $query, $query->getBindValues());
         if ($union === 'merge' && count($result) > 1){
             $db0 = Utl::extractItem('database', $result[0]);
             if ($db0){
@@ -156,48 +163,49 @@ class Store {
             }
         }
         return empty($result) ? false : $result[0];
-        //return  $this->hook->fetchOne($query, $query->getBindValues());
     }
     function getPairs($atts){
         $query = $this->query->build('newSelect', $atts);
-        return $this->hook->fetchPairs($query, $query->getBindValues());
+        return $this->pdo->fetchPairs((string) $query, $query->getBindValues());
     }
     function getValue($atts){
         if (! isset($atts['cols'])){$atts['cols'] = ['*'];}
         $query = $this->query->build('newSelect', $atts);
-        return $this->hook->fetchValue($query, $query->getBindValues());
-    }
-    function getTableList(){
-        return $this->hook->fetchTableList();
-    }
-    function getTableCols($table){
-        return $this->hook->fetchTableCols($table);
+        return $this->pdo->fetchValue((string) $query, $query->getBindValues());
     }
     function newSelect(){
-        return $this->hook->newSelect();
+        return $this->pdo->newSelect();
     }
     function newInsert(){
-        return $this->hook->newInsert();
+        return $this->pdo->newInsert();
     }
     function newUpdate(){
-        return $this->hook->newUpdate();
+        return $this->pdo->newUpdate();
     }
     function newDelete(){
-        return $this->hook->newDelete();
+        return $this->pdo->newDelete();
     }
     function insert($values, $atts){
         $query = $this->query->build('newInsert', $atts);
         $query->cols($values);
-        $stmt = $this->hook->query($query, $query->getBindValues());
+        //$stmt = $this->pdo->query((string) $query, $query->getBindValues());
+        $stmt = $this->pdo->perform((string) $query, $query->getBindValues());
+        /*$bind = $query->getBindValues();
+        $stmt = $this->pdo->prepare((string) $query, $bind);
+        $stmt->execute($bind);*/
         return $stmt->rowCount();
     }
     function lastInsertId(){
-    	return $this->hook->lastInsertId();
+    	return $this->pdo->lastInsertId();
     }
     function update($values, $atts){
         $query = $this->query->build('newUpdate', $atts);
         $query->cols($values);
-        $stmt = $this->hook->query($query, $query->getBindValues());
+        //$stmt = $this->pdo->query((string) $query, $query->getBindValues());
+        $stmt = $this->pdo->perform((string) $query, $query->getBindValues());
+        /*$bind = $query->getBindValues();
+        $stmt = $this->pdo->prepare((string) $query, $bind);
+        $stmt->execute($bind);*/
         return $stmt->rowCount();/* if no row found, returns 0, without error message*/
     }
     function delete($atts){
@@ -205,7 +213,11 @@ class Store {
             return 0;
         }else{
             $query = $this->query->build('newDelete', ['table' => $atts['table'], 'where' => $atts['where']]);
-            $stmt = $this->hook->query($query, $query->getBindValues());
+            //$stmt = $this->pdo->query((string) $query, $query->getBindValues());
+            $stmt = $this->pdo->perform((string) $query, $query->getBindValues());
+            /*$bind = $query->getBindValues();
+            $stmt = $this->pdo->prepare((string) $query, $bind);
+            $stmt->execute($bind);*/
             return $stmt->rowCount();
         }
     }

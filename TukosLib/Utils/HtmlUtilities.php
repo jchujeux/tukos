@@ -66,7 +66,7 @@ class HtmlUtilities{
         $i = 0;
         $stripped = 0;        
         while ($i < strlen($text) && $stripped < strlen($stripped_text) && $stripped < $max_length){
-            $symbol  = $text{$i};
+            $symbol  = $text[$i];
             $result .= $symbol;
             switch ($symbol){
                 case '<':

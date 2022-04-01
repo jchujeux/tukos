@@ -41,10 +41,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", 
                 		}
                 	});
             	}
-             	/*this.closeViewButton = new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){
-             		console.log('here is where I need to act');
-             		self.viewPane.destroy();
-             	}}).placeAt(this.viewPane.actionsHeading, 1);*/
                 if (this.data && this.data.value && !this.data.value.id){
                     this.markIfChanged = true;
                 }

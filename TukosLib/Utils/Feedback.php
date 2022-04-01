@@ -1,11 +1,11 @@
 <?php
-
 namespace TukosLib\Utils;
 
 use TukosLib\TukosFramework as Tfk;
 
 class Feedback {
     private static $feedback = []; 
+    private static $suspend = false;
     /*
      * Examples of use:
      *  Feedback::add('Everything went OK');
@@ -17,23 +17,32 @@ class Feedback {
      *      'final ids: 10, 20, 30, 40', Bye now']
      */
     public static function add($feedback){
-        if (is_string($feedback)){
-            self::$feedback[] = $feedback;
-        }else if (is_array($feedback)){
-            foreach ($feedback as $key => $feedbackItem){
-                if (is_int($key)){
-                    self::add($feedbackItem);
-                }else{
-                    if (is_array($feedbackItem)){
-                        self::$feedback[] = $key . ': ' . implode(', ', $feedbackItem);
+        if (self::$suspend){
+            return;
+        }else{
+            if (is_string($feedback)){
+                self::$feedback[] = $feedback;
+            }else if (is_array($feedback)){
+                foreach ($feedback as $key => $feedbackItem){
+                    if (is_int($key)){
+                        self::add($feedbackItem);
                     }else{
-                        self::$feedback[] = $key . ': ' . $feedbackItem;
+                        if (is_array($feedbackItem)){
+                            self::$feedback[] = $key . ': ' . implode(', ', $feedbackItem);
+                        }else{
+                            self::$feedback[] = $key . ': ' . $feedbackItem;
+                        }
                     }
                 }
             }
         }
     }
-    
+    public static function suspend(){
+        self::$suspend = true;
+    }
+    public static function resume(){
+        self::$suspend = false;
+    }
     public static function addErrorCode($code){
         self::add(Tfk::tr('ErrorCode') . ': ' . $code . '. ' . Tfk::tr('contactsupport'));
     }

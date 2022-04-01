@@ -23,7 +23,7 @@ class Configure{
         $this->appDir  = dirname(__FILE__);
         $key =  'XZK@w0kw' . getenv('MYSQL_ENV_VAR');
         $this->ckey = MD5($key);
-        $this->dataSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => MD5('XZK@w0kw' . getenv('MYSQL_ENV_VAR')), 'dbname'   => 'tukossports'];
+        $this->dataSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => MD5('XZK@w0kw' . getenv('MYSQL_ENV_VAR')), 'dbname'   => 'tukossportstds'];
         $this->filesStore = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => MD5('XZK@w0kw' . getenv('MYSQL_ENV_VAR')), 'dbname'   => 'tukos20sportsfiles'];
         $this->configSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname' => 'tukosconfig', 'authstore' => 'sql',	'table' => 'users', 'username_col' => 'username', 'password_col' => 'password'];
         $this->languages = ['default' => 'en-us', 'supported' => ['en-us', 'fr-fr', 'es-es']];
@@ -114,7 +114,7 @@ class Configure{
         $depth += 1;
         if (is_array($modulesLayout)){
             foreach($modulesLayout as $key => $layout){
-                $module = (($key[0] === '#' || $key[0] === '@') ? substr($key, 1): $key);
+                $module = (is_string($key) && ($key[0] === '#' || $key[0] === '@') ? substr($key, 1): $key);
                 if ($depth === 1){
                     $contextName = (in_array($module, $this->transverseModules) ? 'tukos' : $module);
                 }

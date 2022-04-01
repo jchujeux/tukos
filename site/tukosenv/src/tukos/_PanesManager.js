@@ -55,7 +55,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             if (keepOptions || !theForm){
                 return refreshAction();
             }else{
-                //return this.checkChangesDialog(theForm, lang.hitch(this, refreshAction));
                 return theForm.checkChangesDialog(refreshAction);
             }
         },
