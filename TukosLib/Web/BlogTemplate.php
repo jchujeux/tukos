@@ -19,7 +19,7 @@
                     //baseUrl: "", isDebug: false, 
                     async: true, locale: "<?= $this->language ?>",
         			selectorEngine: 'lite',
-					packages: <?= $this->__raw()->packagesString ?>,
+					packages: <?= $this->/*__raw()->*/packagesString ?>,
 		            map: {'dojo' : {'dojo/dnd/Selector': "dojoFixes/dojo/dnd/Selector"}, 'dijit/Menu': {'dijit/popup': 'dojoFixes/dijit/popup'}, 'dojox/mobile': {'dojox/mobile/SpinWheel': 'dojoFixes/dojox/mobile/SpinWheel', 'dojox/mobile/SpinWheelSlot': 'dojoFixes/dojox/mobile/SpinWheelSlot'}}
                 };
         </script>
@@ -28,7 +28,7 @@
             <!-- Page layout -->
 			require(["tukos/PageManager"], 
             	function(PageManager){
-                	PageManager.initializeBlog(<?= $this->__raw()->pageManagerArgs;?>);
+                	PageManager.initializeBlog(<?= $this->/*__raw()->*/pageManagerArgs;?>);
             		document.body.className += ' loaded';
         	});
         </script>

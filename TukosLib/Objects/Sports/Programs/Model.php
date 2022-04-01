@@ -36,7 +36,8 @@ class Model extends AbstractModel {
             'ltsdays' => 'INT DEFAULT NULL',
             'stsratio' => 'FLOAT DEFAULT NULL',
             'initialsts' => 'FLOAT DEFAULT NULL',
-            'initiallts' => 'FLOAT DEFAULT NULL'
+            'initiallts' => 'FLOAT DEFAULT NULL',
+            'synchrosource' => 'VARCHAR(30) DEFAULT NULL',
         ];
         parent::__construct($objectName, $translator, 'sptprograms', ['parentid' => ['sptathletes'], 'coach' => ['people']], ['weeklies'], $colsDefinition, [], []);
         $this->afterGoogleSync = false;

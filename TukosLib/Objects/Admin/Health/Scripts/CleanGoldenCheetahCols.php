@@ -23,7 +23,7 @@ class CleanGoldenCheetahCols {
                 foreach ($cols['toDrop'] as $col){
                     try{
                         if (isset($columnsStructure[$col])){
-                            $alterStmt = $store->hook->query("ALTER TABLE `$table` DROP `$col`");
+                            $alterStmt = $store->pdo->query("ALTER TABLE `$table` DROP `$col`");
                             echo "<br>column to delete not found: $col in table $table";
                         }else{
                             echo "<br> column not found:$col in table $table. Could not delete";
@@ -38,7 +38,7 @@ class CleanGoldenCheetahCols {
                         try{
                             $dbColStructure = $columnsStructure[$col];
                             $dbColDescription = $dbColStructure['Type'] . ($dbColStructure['Null'] === "YES" ? " NULL " : '') . (($default = $dbColStructure['Default'] === 'Pas de défaut') ? '' : ("  default  " . ($default === false ? ' NULL ' : $default))) . ($dbColStructure['Key'] === 'PRI' ? '  primarykey ' : '');
-                            $alterStmt = $store->hook->query("ALTER TABLE `$table` CHANGE COLUMN `$col` `$newCol` $dbColDescription");
+                            $alterStmt = $store->pdo->query("ALTER TABLE `$table` CHANGE COLUMN `$col` `$newCol` $dbColDescription");
                             echo "<br>renamed column $col to $newCol in table $table";
                         }catch(\Exception $e){
                             echo '<br>' . $e->getMessage();
@@ -49,11 +49,11 @@ class CleanGoldenCheetahCols {
                 }
             }
             foreach (array_merge($tablesAndColumns['sptsessions']['toRename'], ['gcflag' => 'synchroflag']) as $col => $newCol){
-                $renameStmt = $store->hook->query("UPDATE `customviews` SET customization= REPLACE(customization, '$col', '$newCol')");
+                $renameStmt = $store->pdo->query("UPDATE `customviews` SET customization= REPLACE(customization, '$col', '$newCol')");
                 if ($rows = $renameStmt->rowCount()){
                     echo "<br>customviews.customization - renaming $col: $rows rows affected";
                 }
-                $store->hook->query("UPDATE `tukos` SET custom = REPLACE(custom, '$col', '$newCol')");
+                $store->pdo->query("UPDATE `tukos` SET custom = REPLACE(custom, '$col', '$newCol')");
                 if ($rows = $renameStmt->rowCount()){
                     echo "<br>tukos.custom - renaming $col: $rows rows affected";
                 }

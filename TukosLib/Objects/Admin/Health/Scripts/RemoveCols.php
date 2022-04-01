@@ -27,13 +27,13 @@ class RemoveCols {
                 ]);
 
             $tableObj = $objectsStore->objectModel('healthtables');
-            $tablesToConsider = array_intersect(Directory::getObjs(), $store->hook->fetchTableList());
+            $tablesToConsider = array_intersect(Directory::getObjs(), $store->tableList()());
             $colsToRemove = ['idcolstables', 'childrencount','childrentables'];
             foreach ($tablesToConsider as $tableName){
                 $removedCols = [];
                 foreach ($colsToRemove as $col){
                     try{
-                        $alterStmt = $store->hook->query("ALTER TABLE `" . $tableName . "` DROP `" . $col . "`");
+                        $alterStmt = $store->pdo->query("ALTER TABLE `" . $tableName . "` DROP `" . $col . "`");
                         $removedCols[] = $col;
                     } catch (\PDOException $e){
                         echo '<br>Could not remove column ' . $col . ' in table ' . $tableName . '. Error message: '. $e->getMessage();

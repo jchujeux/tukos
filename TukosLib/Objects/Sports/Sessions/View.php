@@ -3,7 +3,7 @@ namespace TukosLib\Objects\Sports\Sessions;
 
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
-use TukosLib\Objects\Sports\GoldenCheetah as GC;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
@@ -16,16 +16,17 @@ class View extends AbstractView {
         $customDataWidgets = array_merge([
             'name'      => ['atts' => ['edit' =>  ['label' =>$this->tr('Theme'), 'style' => ['width' => '30em']]],],
             'parentid' => ['atts' => ['edit' =>  ['onChangeLocalAction' => ['sessionid' => ['localActionStatus' => $this->adjustSessionIdLocalAction('parentid')]]]]],
-            'sportsman' => ViewUtils::objectSelect($this, 'Sportsman', 'people'),
+            'sportsman' => ViewUtils::objectSelect($this, 'Sportsman', 'people', ['atts' => ['edit' => ['onChangeLocalAction' => ['trimpavghr' => ['localActionStatus' => $this->updatetrimpAvgHr()]]]]]),
             'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => [
                 'edit' => ['onChangeLocalAction' => ['sessionid' => ['localActionStatus' => $this->adjustSessionIdLocalAction('startdate')]]],
                 'storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
             'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'ucfirst', true]),
             'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => [
-                'edit' => ['label' => $this->tr('Duration') . ' (hh:mn)', 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:10', 'visibleRange' => 'T01:00']/*, 'style' => ['width' => '6em']*/],
+                'edit' => ['label' => $this->tr('Duration') . ' (hh:mn)', 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:10', 'visibleRange' => 'T01:00']/*, 'style' => ['width' => '6em']*/,
+                'onChangeLocalAction' => ['trimpavghr' => ['localActionStatus' => $this->updatetrimpAvgHr()]]],
             ]]),
             'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'constraints' => $isMobile ? ['pattern' => '#000.0'] : ['places' => 1]]]]),
-            'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'constraints' => $isMobile ? ['pattern' => '#000.'] : []]]]),
+            'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'constraints' => $isMobile ? ['pattern' => '#0000.'] : []]]]),
             'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity', [true, 'ucfirst', true]),
             'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', null, ['atts' => ['edit' => [
                     'onWatchLocalAction' => ['value' => [
@@ -49,17 +50,21 @@ class View extends AbstractView {
             'athletecomments' => ViewUtils::textArea($this, 'AthleteComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
             'coachcomments' => ViewUtils::lazyEditor($this, 'CoachSessionComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
             'timemoving' => ViewUtils::minutesTextBox($this, 'Time Riding'),
-            'avghr' => ViewUtils::numberTextBox($this,'Average Heart Rate'),
-            'avgpw' => ViewUtils::numberTextBox($this, 'Average Power'),
-            'hr95' => ViewUtils::numberTextBox($this, '95% Heartrate'),
-            'trimphr' => ViewUtils::numberTextBox($this, 'Tukos TRIMP Heart rate'),
-            'trimppw' => ViewUtils::numberTextBox($this, 'Tukos TRIMP Power'),
+            'avghr' => ViewUtils::numberTextBox($this,'Average Heart Rate', ['atts' => ['edit' => ['onChangeLocalAction' => ['trimpavghr' => ['localActionStatus' => $this->updatetrimpAvgHr()]]]]]),
+            'avgpw' => ViewUtils::numberTextBox($this, 'Average Power', ['atts' => ['edit' => ['onChangeLocalAction' => ['trimpavghr' => ['localActionStatus' => $this->updatetrimpAvgPw()]]]]]),
+            'hr95' => ViewUtils::numberTextBox($this, '95%_Heartrate'),
+            'trimphr' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Heart_rate'),
+            'trimpavghr' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Avg_Heart_rate', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
+            'trimppw' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Power'),
+            'trimpavgpw' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Avg_Power', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
             'mechload' => ViewUtils::numberTextBox($this, 'Tukos_Mechanical_Load'),
-            'h4time' => ViewUtils::secondsTextBox($this, 'H4 Time in Zone'),
-            'h5time' => ViewUtils::secondsTextBox($this, 'H5 Time in Zone'),
-            'sts' => ViewUtils::tukosNumberBox($this, 'sts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.0']]]]),
-            'lts' => ViewUtils::tukosNumberBox($this, 'lts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.0']]]]),
-            'tsb' => ViewUtils::tukosNumberBox($this, 'tsb', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em']/*, 'constraints' => ['pattern' => '00.0']*/]]]),
+            'h4time' => ViewUtils::secondsTextBox($this, 'H4_Time_in_Zone'),
+            'h5time' => ViewUtils::secondsTextBox($this, 'H5_Time_in_Zone'),
+            'sts' => ViewUtils::tukosNumberBox($this, 'sts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
+            'lts' => ViewUtils::tukosNumberBox($this, 'lts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
+            'tsb' => ViewUtils::tukosNumberBox($this, 'tsb', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
+            'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['hidden' => true]],
+                'objToEdit' => ['stravaLink' => ['class' => $this]], 'objToStoreEdit' => ['stravaLink' => ['class' => $this]], 'objToOverview' => ['stravaLink' => ['class' => $this]]]),
         ],
         	$this->filterWidgets()
         );
@@ -69,7 +74,7 @@ class View extends AbstractView {
         
         $subObjects = $this->templatesSubObjects();
 
-        $this->customize($customDataWidgets, $subObjects, $this->filterWidgetsExceptionCols());
+        $this->customize($customDataWidgets, $subObjects, Utl::array_merge_recursive_replace(['edit' => $this->model->streamCols, 'grid' => $this->model->streamCols, 'get' => $this->model->streamCols, 'post' => [$this->model->streamCols]], $this->filterWidgetsExceptionCols()));
     }
     function adjustSessionIdLocalAction($changedWidgetName){
         return <<<EOT
@@ -77,7 +82,7 @@ var form = sWidget.form, parentid = form.valueOf('parentid'), startdate = form.v
 if (parentid && startdate){
     Pmg.serverDialog({action: 'Process', object: "sptsessions", view: 'edit', query: {id: form.valueOf('id'), parentid: parentid, startdate: startdate, mode: form.valueOf('mode'), sessionid: form.valueOf('sessionid'), params: {process: 'adjustSessionId', noget: true}}}, {data: {}}).then(
             function(response){
-                form.setValueOf('sessionid', response.data.sessionid);
+                form.setValueOf('sessionid', response.data.value.sessionid);
             },
             function(error){
                 console.log('error');
@@ -87,6 +92,45 @@ if (parentid && startdate){
 return true;
 EOT
         ;        
+    }
+    function updateTrimpAvgHr(){
+        return <<<EOT
+var form = sWidget.form, sportsman = form.valueOf('sportsman'), timemoving = form.valueOf('timemoving'), avghr = form.valueOf('avghr');
+if (sportsman && timemoving && avghr){
+    Pmg.serverDialog({action: 'Process', object: "sptsessions", view: 'edit', query: {id: form.valueOf('id'), sportsman: sportsman, timemoving: timemoving, avghr: avghr, params: {process: 'updateTrimpAvgHr', noget: true}}}, {data: {}}).then(
+            function(response){
+                response.data.value && form.setValueOf('trimpavghr', response.data.value.trimpavghr);
+            },
+            function(error){
+                console.log('error');
+            }
+    );
+}
+return true;
+EOT
+        ;
+    }
+    function updateTrimpAvgPw(){
+        return <<<EOT
+var form = sWidget.form, sportsman = form.valueOf('sportsman'), timemoving = form.valueOf('timemoving'), avgpw = form.valueOf('avgpw');
+if (sportsman && timemoving && avgpw){
+    Pmg.serverDialog({action: 'Process', object: "sptsessions", view: 'edit', query: {id: form.valueOf('id'), sportsman: sportsman, timemoving: timemoving, avgpw: avgpw, params: {process: 'updateTrimpAvgPw', noget: true}}}, {data: {}}).then(
+            function(response){
+                response.data.value && form.setValueOf('trimpavgpw', response.data.value.trimpavgpw);
+            },
+            function(error){
+                console.log('error');
+            }
+    );
+}
+return true;
+EOT
+        ;
+    }
+    function stravaLink($stravaId){
+        if (!empty($stravaId)){
+            return "<a href=\"https://www.strava.com/activities/$stravaId\" target=\"_blank\">$stravaId</a>";
+        }
     }
 }
 ?>

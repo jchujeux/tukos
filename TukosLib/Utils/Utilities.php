@@ -80,7 +80,7 @@ class Utilities{
             $array[$key] = $value;
         }
     }
-    public function incrementArray($array1, $array2){
+    public static function incrementArray($array1, $array2){
         foreach ($array2 as $key => $value){
             self::increment($array1, $key, $value);
         }
@@ -373,6 +373,37 @@ class Utilities{
         }
         return false;
     }
+    public static function missing_array_keys($keys, $theArray){
+        $missing = [];
+        foreach ($keys as $key){
+            if (!array_key_exists($key, $theArray)){
+                $missing[] = $key;
+            }
+        }
+        return $missing;
+    }
+    public static function present_array_keys($keys, $theArray){
+        $missing = [];
+        foreach ($keys as $key){
+            if (array_key_exists($key, $theArray)){
+                $missing[] = $key;
+            }
+        }
+        return $missing;
+    }
+    public static function reduce($theArray, $n){// returns an array with $n time less values, which are the averages over the $n values
+        $i = 1; $avg = 0; $reduced = [];
+        foreach($theArray as $value){
+            $avg += $value;
+            $i += 1;
+            if ($i === $n){
+                $reduced[] = intval($avg / $n);
+                $i = 0;
+                $avg = 0;
+            }
+        }
+        return $reduced;
+    }
     public static function removeAccents($string){
         $transliterator = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC');
         return $transliterator->transliterate($string);
@@ -612,25 +643,32 @@ class Utilities{
     public static function escapeSQuote($string){
         return str_replace("'", "\\\\'", $string);
     }
-    function hexToRgb($hexstr) {
+    public static function hexToRgb($hexstr) {
     	$int = hexdec($hexstr);
     	return array("red" => 0xFF & ($int >> 0x10), "green" => 0xFF & ($int >> 0x8), "blue" => 0xFF & $int);
     }
-    function is_integer($value){
+    public static function is_integer($value){
     	return ctype_digit(strval($value));
     }
-    function identityMapping($values){
+    public static function identityMapping($values){
     	foreach ($values as $value){
     		$mapping[$value] = $value;
     	}
     	return $mapping;
     }
-    function pad($number, $size){
+    public static function pad($number, $size){
        $result = strval(intval($number));
         while (strlen($result)< $size){
             $result = '0' . $result;
         }
         return $result;
+    }
+    public static function timer(){
+        return hrtime(true);
+    }
+    public static function duration(&$timer){
+        $prev = $timer;
+        return (($timer = hrtime(true)) - $prev) / 1000000000;
     }
 }
 ?>

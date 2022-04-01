@@ -13,7 +13,8 @@ class View extends AbstractView {
         parent::__construct($objectName, $translator, 'Parent', 'Description');
         $customDataWidgets = [
             'language'  => ViewUtils::storeSelect('language', $this, 'Language'),
-            ];
+            'published'   => ViewUtils::dateTimeBoxDataWidget($this, 'PublishedDate'),
+        ];
         $this->customize($customDataWidgets);
         $this->paneWidgets = [
             'rightPane' => [
@@ -62,10 +63,10 @@ class View extends AbstractView {
             return <<<EOT
 var form = this.pane.form, onBlur = this.onBlur;
 if (item.onClickGotoTab){
-    form.serverDialog({action: 'Reset', query: {object: 'blog', form: 'Show', name: item.name}}, {}, []).then(function(){
+    Pmg.tabs.gotoTab({action: 'Tab', mode: 'Tab', object: 'backoffice', view: 'edit', query: {form: 'Show', object: 'blog', name: item.name}}).then(function(){
         onBlur && onBlur();
         window.scrollTo(0,0);
-    }); 
+    });
 }
 EOT
             ;

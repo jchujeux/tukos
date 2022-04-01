@@ -15,7 +15,6 @@ class Show extends ObjectTranslator{
         $this->objectsStore     = Tfk::$registry->get('objectsStore');
         $this->blogModel = $this->objectsStore->objectModel('blog');
         $this->usersModel = $this->objectsStore->objectModel('users');
-        //$this->peopleModel = $this->objectsStore->objectModel('people');
         $this->view  = $this->objectsStore->objectView('blog');
         $this->dataWidgets = [
             'posttitle' => ViewUtils::htmlContent($this->view, 'postTitle', ['atts' => ['edit' => ['widgetCellStyle' => ['backgroundColor' => '#d0e9fc'], 'style' => ['color' => 'black']]]]),
@@ -56,7 +55,7 @@ class Show extends ObjectTranslator{
     }
     function get($query){
         Utl::extractItems(['object', 'form'], $query);
-        $values = $this->blogModel->getOne(['where' => $query, 'cols' => ['id', 'parentid', 'name', 'comments', 'updated', 'updator']]);
+        $values = $this->blogModel->getOne(['where' => $query, 'cols' => ['id', 'parentid', 'name', 'comments', 'updated', 'updator'], 'orderby' => ['tukos.updated DESC']]);
         $updator = $this->user->peoplefirstAndLastNameOrUserName($values['updator']);
         return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'postedbyandwhen' => "<i>{$this->view->tr('postedby')}</i>: $updator <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['updated']), 'comments' => $values['comments']];
     }

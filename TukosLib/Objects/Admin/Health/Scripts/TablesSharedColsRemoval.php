@@ -19,7 +19,7 @@ class TablesSharedColsRemoval {
                 'parentid-s'   => 'parent id (optional, default is user->id())',
                 'parentTable-s'=> 'parent script table (optional, required if parentid is not a users)',
             ]);
-            //$objectsToConsider = array_intersect(Directory::getObjs(), $store->hook->fetchTableList());
+            //$objectsToConsider = array_intersect(Directory::getObjs(), $store->tableList()());
             $objectsToConsider = ['tasks'];//no worksheet
                                     //'dashboards', //no optional at all
             foreach ($objectsToConsider as $objectName){

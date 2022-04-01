@@ -51,7 +51,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
 		                        this.watchContext = 'server';
 		                        return when(this.emptyWidgets(emptyBeforeSet), lang.hitch(this, function(){;
 		                            this.watchOnChange = true;
-		                            this.markIfChanged = (markResponseIfChanged  ? true : false);
+		                            this.markIfChanged = (markResponseIfChanged && response.data.value && !response.data.value.id) ? true : false;
 		                            return when(this.setWidgets(response['data']), lang.hitch(this, function(){
 		                                if (response['title'] && dcl.contains(this.domNode.parentNode, 'dijitTabPane')){
 		                                    Pmg.tabs.setCurrentTabTitle(response['title']);

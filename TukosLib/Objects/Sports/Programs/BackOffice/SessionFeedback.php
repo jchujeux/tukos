@@ -29,7 +29,9 @@ class SessionFeedback extends ObjectTranslator{
         foreach ($this->version->hideIfEmptyWidgets as $name){
             $this->dataWidgets[$name]['atts']['edit'] = array_merge($this->dataWidgets[$name]['atts']['edit'], ['hidden' => true, 'disabled' => true, 'onWatchLocalAction' => ['value' => [$name => ['hidden' => ['triggers' => ['server' => true, 'user' => false], 'action' => "return newValue ? false : true;"]]]]]);
         }
-        $this->onOpenAction = $this->getOnOpenAction(Utl::getItem('gcflag', $query, Utl::getItem('synchroflag', $query, false)));
+        $this->dataWidgets['startdate']['atts']['edit']['onChangeLocalAction']['startdate']['localActionStatus'] = $this->onDateOrSessionIdChangeLocalAction($query);
+        $this->dataWidgets['sessionid']['atts']['edit']['onChangeLocalAction']['sessionid']['localActionStatus'] = $this->onDateOrSessionIdChangeLocalAction($query);
+        $this->onOpenAction = $this->getOnOpenAction(Utl::getItem('gcflag', $query, Utl::getItem('synchroflag', $query, false)), 'this');
         if ($presentation = Utl::getItem('presentation', $query)){
             switch($presentation){
                 case 'MobileTextBox':
@@ -141,14 +143,33 @@ class SessionFeedback extends ObjectTranslator{
                 Feedback::reset();
                 Feedback::add($this->tr('sessionnotfounddeleted') . "(id = $id)");
                 return [];
+            }else if(empty($performedSession['starttime'])){
+                if (($synchroSource = $programInformation['synchrosource']) === 'strava'){
+                    Feedback::suspend();
+                    $this->programsModel->stravaProgramSynchronize([
+                        'id' => $programId, 'parentid' => $programInformation['parentid'], 'ignoresessionflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrosource' => $synchroSource, 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
+                        'updator' => $programInformation['updator'], 'googlecalid' => $programInformation['googlecalid']]);
+                    Feedback::resume();
+                    $performedSession = $this->sessionsModel->getOne(['where' => $this->user->filterPrivate(['id' => $id], 'sptsessions'), 'cols' => $this->version->formObjectWidgets()]);
+                }
             }
             Feedback::add($this->tr('Updatesessionfeedback'));
             $performedSession['sportsman'] = $programInformation['parentid'];
         }else{
-            $existingSessionsSessionId = array_column($this->sessionsModel->getAll(['where' => $this->user->filterPrivate(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'mode' => 'performed']), 'sptsessions'), 'cols' => ['sessionid']]), 'sessionid');
-            $sessionId = empty($existingSessionsSessionId) ?  Utl::getItem('sessionid', $query) : (max($existingSessionsSessionId) + 1);
-             
-            $performedSession = ['id' => '', 'sportsman' => $programInformation['parentid'], 'startdate' => $query['date'], 'sessionid' => $sessionId, 'name' => rawurldecode($query['name']), 'sport' => rawurldecode($query['sport']), 'duration' => '0', 'distance' => 0, 'elevationgain' => 0];
+            $performedSession = $this->sessionsModel->getOne(['where' => $this->user->filterPrivate(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'sessionid' => $query['sessionid'], 'mode' => 'performed']), 'sptsessions'), 'cols' => $this->version->formObjectWidgets()]);
+            if (empty($performedSession) || empty($performedSession['starttime'])){
+                if (($synchroSource = $programInformation['synchrosource']) === 'strava'){
+                    Feedback::suspend();
+                    $this->programsModel->stravaProgramSynchronize([
+                        'id' => $programId, 'parentid' => $programInformation['parentid'], 'ignoresessionflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrosource' => $synchroSource, 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
+                        'updator' => $programInformation['updator'], 'googlecalid' => $programInformation['googlecalid']]);
+                    Feedback::resume();
+                    $performedSession = $this->sessionsModel->getOne(['where' => $this->user->filterPrivate(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'sessionid' => $query['sessionid'],  'mode' => 'performed']), 'sptsessions'), 'cols' => $this->version->formObjectWidgets()]);
+                }
+                if (empty($performedSession)){
+                    $performedSession = ['id' => '', 'sportsman' => $programInformation['parentid'], 'startdate' => $query['date'], 'sessionid' => $query['sessionid'], 'name' => rawurldecode($query['name']), 'sport' => rawurldecode($query['sport']), 'duration' => '0', 'distance' => 0, 'elevationgain' => 0];
+                }
+            }
             Feedback::add($this->tr('Providesessionfeedback'));
         }
         $performedSession['sportsman'] = SUtl::translatedExtendedNames([$performedSession['sportsman']])[$performedSession['sportsman']];
@@ -182,7 +203,7 @@ class SessionFeedback extends ObjectTranslator{
                         $id = $this->sessionsModel->lastUpdateOneOldId();
                     }
             }else{
-                $newDate = Utl::getItem('startdate', $values); $newSessionId = Utl::getItem('sessionid', $values);
+                $newDate = Utl::getItem('startdate', $values); $newSessionId = Utl::getItem('sessionid', $values); $dateHasChanged = false; $sessionIdHasChanged = false;
                 if ($newDate || $newSessionId){
                     $existingSession = $this->sessionsModel->getOne(['where' => $this->user->filterPrivate(['id' => $id], 'sptsessions'), 'cols' => ['id', 'sessionid']]);
                     $existingSessionsAtNewDate = $this->sessionsModel->getAll(['where' => $this->user->filterPrivate(['parentid' => $programId, 'startdate' => $newDate, 'mode' => 'performed'], 'sptsessions'), 'cols' => ['id', 'sessionid']]);
@@ -236,7 +257,8 @@ class SessionFeedback extends ObjectTranslator{
             //}
         }
         if ($savedCount){
-            $this->programsModel->googleSynchronizeOne($programId, $programInformation['googlecalid'], $id, Utl::getItem('gcflag', $query, Utl::getItem('synchroflag', $query)), Utl::getItem('logo', $query), Utl::getItem('presentation', $query), Utl::getItem('version', $query));
+            $this->programsModel->googleSynchronizeOne($programId, $programInformation['googlecalid'], $id, Utl::getItem('gcflag', $query, Utl::getItem('synchroflag', $query)), Utl::getItem('synchrostreams', $query), Utl::getItem('logo', $query), Utl::getItem('presentation', $query),
+                Utl::getItem('version', $query));
             Feedback::add($this->tr('sessionsaved'));
         }else{
             Feedback::add($this->tr('nosessionchange'));
@@ -244,7 +266,7 @@ class SessionFeedback extends ObjectTranslator{
         return $id;
     }
     function getProgramInformation($programId){
-        $programInformation = $this->programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['parentid', 'googlecalid', 'weeklies', 'contextid', 'updator']], ['weeklies' => []]);
+        $programInformation = $this->programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['parentid', 'googlecalid', 'weeklies', 'synchrosource', 'contextid', 'updator']], ['weeklies' => []]);
         return $programInformation;
     }
     function showSynchroFieldsLocalAction(){
@@ -276,32 +298,51 @@ form.resize();
 EOT
         ;
     }
-    function getOnOpenAction($synchroflag){
+    function getOnOpenAction($synchroflag, $form){
         return <<<EOT
-var self = this, hasSomeValue;
+var form = $form, hasSomeValue;
 if ('$synchroflag'){
     hasSomeValue = {$this->synchroFields}.some(function(name){
-        var value = self.valueOf(name);
+        var value = form.valueOf(name);
         console.log('name = ' + name + ' - value = ', value);
         return name === 'duration' ? (value != 'T00:00:00') : (value ? true : false); 
     });
     console.log('hasSomeValue = ' + hasSomeValue);
     {$this->synchroFields}.forEach(function(name){
-        self.getWidget(name).set('hidden', !hasSomeValue);
+        form.getWidget(name).set('hidden', !hasSomeValue);
     });
-    this.getWidget('showsynchrofields').set('label', Pmg.message(hasSomeValue ? 'hidesynchrofields' : 'showsynchrofields', 'backoffice'));
-    this.synchroFieldsAreShown = hasSomeValue;
+    form.getWidget('showsynchrofields').set('label', Pmg.message(hasSomeValue ? 'hidesynchrofields' : 'showsynchrofields', 'backoffice'));
+    form.synchroFieldsAreShown = hasSomeValue;
 }
 hasSomeValue = {$this->weeklyFields}.some(function(name){
-    return self.valueOf(name) ? true : false;
+    return form.valueOf(name) ? true : false;
 });
 {$this->weeklyFields}.forEach(function(name){
-    self.getWidget(name).set('hidden', !hasSomeValue);
+    form.getWidget(name).set('hidden', !hasSomeValue);
 });
-this.getWidget('showweeklies').set('label', Pmg.message(hasSomeValue ? 'hideweeklies' : 'showweeklies', 'backoffice'));
+form.getWidget('showweeklies').set('label', Pmg.message(hasSomeValue ? 'hideweeklies' : 'showweeklies', 'backoffice'));
 console.log('label for showweeklies: ' + Pmg.message(hasSomeValue ? 'hideweeklies' : 'showweeklies', 'backoffice'));
-this.weekliesAreShown = hasSomeValue;
-this.resize();
+form.weekliesAreShown = hasSomeValue;
+form.resize();
+EOT
+        ;
+    }
+    function onDateOrSessionIdChangeLocalAction($query){
+        $urlArgs = json_encode($query);
+        return <<<EOT
+var urlArgs = {$urlArgs};
+if (urlArgs.id){
+    return true;
+}else{
+    urlArgs.sessionid = sWidget.form.valueOf('sessionid');
+    urlArgs.date = sWidget.form.valueOf('startdate');
+    sWidget.form.checkChangesDialog(function(){
+            sWidget.form.serverDialog({action: 'Reset', query: urlArgs}, {}, sWidget.form.get('dataElts'), null, true).then(function(){
+                {$this->getOnOpenAction($query['synchroflag'], 'sWidget.form')}
+            });
+        }, true, [sWidget.name]);
+    return true;
+} 
 EOT
         ;
     }

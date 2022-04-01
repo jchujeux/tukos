@@ -2,11 +2,14 @@
 	"require" : {
 		"google/apiclient" : "^2.0",
 		"zf1/zend-console-getopt" : "~1.12",
-		"phpoffice/phpspreadsheet" : "~1.5",
 		"google/apiclient-services" : "~0.74",
 		"mobiledetect/mobiledetectlib" : "~2.8",
-		"lukebaird/dropbox-v2-php-sdk" : "~1.1",
 		"basvandorst/stravaphp" : "~1.5",
-		"phpmailer/phpmailer" : "~6.5"
+		"phpmailer/phpmailer" : "~6.5",
+		"aura/view" : "~2.4",
+		"defuse/php-encryption" : "~2.3",
+		"aura/sql" : "~5.0",
+		"aura/sqlschema" : "~2.0",
+		"markrogoyski/math-php" : "~2.5"
 	}
 }

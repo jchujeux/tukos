@@ -24,7 +24,7 @@ class MobilePage extends Translator{
 
         $request['mode'] = 'Mobile';
         $request['action'] = 'Tab';
-        $isOkTab = (Utl::extractItem('notab', $query) !== 'no') || $pageView->addTab(array_merge($dialogueController->response($request, $query), ['selected' => true]));
+        $isOkTab = (Utl::extractItem('notab', $query) === 'yes') || $pageView->addTab(array_merge($dialogueController->response($request, $query), ['selected' => true]));
         
         if ($isOkTab){
             $pageView->render($this->user->modulesMenuLayout());

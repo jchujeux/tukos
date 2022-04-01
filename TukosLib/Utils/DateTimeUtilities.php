@@ -61,5 +61,9 @@ class DateTimeUtilities{
         $dateStamp = strtotime($ymdDate);
         return date('Y-m-d', strtotime(date('w', $dateStamp) == 1 ? 'this monday' : 'previous monday', $dateStamp));
     }
+    public static function dayAfter($ymdDate){
+        $dateStamp = strtotime($ymdDate);
+        return date('Y-m-d', strtotime('+1 day', $dateStamp));
+    }
 }
 ?>

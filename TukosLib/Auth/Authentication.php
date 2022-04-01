@@ -38,7 +38,15 @@ class Authentication{
                 return false;
             case 'backoffice':
                 if (isset($query['targetdb'])){
-                    Tfk::$registry->get('appConfig')->dataSource['dbname'] = Cipher::decrypt(rawurldecode($query['targetdb']), Tfk::$registry->get('appConfig')->ckey);
+                    try{
+                        if ($dbName = Cipher::decrypt(rawurldecode($query['targetdb']), Tfk::$registry->get('appConfig')->ckey, true)){
+                            Tfk::$registry->get('appConfig')->dataSource['dbname'] = $dbName;
+                        }else{
+                            Feedback::add(Tfk::tr('Usingdefaultdbfortukosapp'));
+                        }
+                    }catch (\Exception $e){//hack to attempt to handle change of cipher function from mbcrypt to Defuse\Crypto
+                       Feedback::add(Tfk::tr('Usingdefaultdbfortukosapp'));
+                    }
                 }
                 return 'tukosBackOffice';
             default:// receiving a tukos application request check if authorized

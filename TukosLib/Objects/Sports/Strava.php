@@ -5,6 +5,7 @@ use TukosLib\Strava\API\Client;
 use TukosLib\Strava\API\Service\REST;
 use League\OAuth2\Client\Token\AccessToken as AccessToken;
 use Strava\API\OAuth;
+use TukosLib\Objects\Sports\TrainingFormulaes as TF;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
@@ -22,8 +23,9 @@ class Strava {
             'timemoving' => ['stName' => 'moving_time', 'format' => ['type' => 'divide', 'args' => [60]]],
             'avgcadence' => ['stName' => 'average_cadence', 'format' => ['type' => 'round', 'args' => [0]]],
             'startdate' => ['stName' => 'start_date'],
-            'sport' => ['stName' => 'type', 'format' => ['type' => 'map', 'args' => ['Ride' => 'bicycle', 'VirtualRide' => 'bicycle', 'Run' => 'running', 'Swim' => 'swimming']]],
+            'sport' => ['stName' => 'type', 'format' => ['type' => 'map', 'args' => ['Ride' => 'bicycle', 'VirtualRide' => 'bicycle', 'Run' => 'running', 'Swim' => 'swimming', 'Crossfit' => 'bodybuilding']]],
             'name' => ['stName' => 'name'],
+            'stravaid' => ['stName' => 'id']
             //'notes' => [],
         ];
         self::$metricsCols = array_keys(self::$metrics);
@@ -57,7 +59,7 @@ class Strava {
             case 'divide':
                 return $value / $format['args'][0];
             case 'map':
-                return $format['args'][$value];
+                return Utl::getItem($value, $format['args'], 'other');
         }
     }
     public static function getAthleteClient($athleteId){
@@ -73,6 +75,60 @@ class Strava {
             $athletesModel->updateItems(['stravainfo' => json_encode(['access_token' => $token->getToken(), 'refresh_token' => $token->getRefreshToken(), 'expires' => $token->getExpires()])], ['table' => 'people', 'where' => ['id' => $athleteId]]);
         }
         return new Client(new REST($token, self::$adapter));
+    }
+    public static function stravaStreamsToTukosStreams($stravaStreams){
+        $tukosStreams = [];
+        foreach ($stravaStreams as $name => $stream){
+            $tukosStreams[$name. 'stream'] = $stream['data'];
+        }
+        return $tukosStreams;
+    }
+    public static function stravaStreamToElapsedValue($times, $stravaStreamData, $delta = 1){// transforms in [elapsedTime, value], eliminating consecutive pairs with same value
+        $tukosStreamData = []; $inactiveDuration = 0; $initialIntervalValue = 0;
+        foreach ($times as $activeTime => $elapsedTime){
+            if ($activeTime + $inactiveDuration < $elapsedTime){
+                $tukosStreamData[] = [$activeTime + $inactiveDuration, 0];
+                $tukosStreamData[] = [$elapsedTime - 1, 0];
+                $inactiveDuration = $elapsedTime - $activeTime;
+                $initialIntervalValue = 0;
+            }
+            if (abs($stravaStreamData[$activeTime] - $initialIntervalValue) >= $delta){
+                $tukosStreamData[] = [$elapsedTime, ($initialIntervalValue = $stravaStreamData[$activeTime])];
+            }
+        }
+        return $tukosStreamData;
+    }
+    public static function addStreamsAndMetrics($session, $athleteParams, $needsStreams, $streamCols, $client){
+        list('hrmin' => $hrMin, 'hrthreshold' => $hrThreshold, 'h4timethreshold' => $h4timeThreshold, 'h5timethreshold' => $h5timeThreshold, 'ftp' => $ftp, 'speedthreshold' => $speedThreshold, 'sex' => $sex) = $athleteParams;
+        if ($needsStreams){
+            $session = array_merge($session, self::stravaStreamsToTukosStreams($client->getActivityStreams($session['stravaid'], implode(',', array_map(function($tukosName){return substr($tukosName, 0, -6);}, $streamCols)))));
+        }
+        if (($hrMin != $hrThreshold) && !empty($hrThreshold) && !empty($sex)){
+            if (!empty($session['avghr']) && !empty($session['timemoving'])){
+                $session['trimpavghr'] = intval(TF::avgHrTrainingload($session['avghr'], $hrMin, $hrThreshold, $session['timemoving'], $sex));
+                if (!empty($session['heartratestream'])){
+                    $session['trimphr'] = TF::hrTrainingLoad($session['heartratestream'], $hrMin, $hrThreshold, $sex);
+                    list($lower, $session['h4time'], $session['h5time']) = TF::timeInZones($session['heartratestream'], [$h4timeThreshold, $h5timeThreshold], 3);
+                }
+            }
+        }
+        if (!empty($ftp) && !empty($sex)){
+            if ( !empty($session['avgpw'])){
+                $session['trimpavgpw'] = intval(TF::avgPwTrainingload($session['avgpw'], $ftp, $session['timemoving'], $sex));
+            }
+            if (!empty($session['wattsstream'])){
+                $session['trimppw'] = TF::pwTrainingLoad($session['wattsstream'], $ftp, $sex, 30);
+            }
+        }
+        if ($session['sport'] === 'running' && !empty($session['cadencestream']) && !empty($session['distancestream']) && !empty($speedThreshold)){
+            $session['mechload'] = TF::runningMechanicalLoad($session['distancestream'], $session['wattsstream'], $speedThreshold / 0.36);
+        }
+        foreach($streamCols as $col){
+            if (!empty($session[$col])){
+                $session[$col] = json_encode($session[$col]);
+            }
+        }
+        return $session;
     }
 }
 Strava::init();

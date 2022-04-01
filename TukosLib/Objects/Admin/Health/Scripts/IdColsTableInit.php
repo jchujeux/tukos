@@ -37,7 +37,7 @@ class IdColsTableInit {
             ]);
             $store->emptyTable('idcols');
             $idCols = [];
-            $objectsToConsider = array_intersect(Directory::getObjs(), $store->hook->fetchTableList());
+            $objectsToConsider = array_intersect(Directory::getObjs(), $store->tableList()());
             foreach ($objectsToConsider as $objectName){
                 try {
                     $objectModel = $objectsStore->objectModel($objectName);

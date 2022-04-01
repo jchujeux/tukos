@@ -49,14 +49,9 @@ class Main{
                 }
             	$dialogue->sendResponse();
             }
-            $storeProfiles = Tfk::$registry->get('store')->getProfiles();
+            $storeProfiles = Tfk::$registry->get('store')->profilerMessages();
             $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
             file_put_contents(Tfk::$tukosTmpDir . '/tukosstoreprofiles.html', $storeProfilesOutput);
-/*
-            $storeProfiles = Tfk::$registry->get('configStore')->getProfiles();
-            $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
-            file_put_contents(Tfk::$tukosTmpDir . '/tukosconfigstoreprofiles.html', $storeProfilesOutput);
-*/
         }else{
             $dialogue->sendResponse();
         }

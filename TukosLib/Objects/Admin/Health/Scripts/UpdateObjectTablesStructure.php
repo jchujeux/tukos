@@ -48,7 +48,7 @@ class UpdateObjectTablesStructure {
                     	echo "<br>table: $objectName: $col can be removed";
                     	if ($options->removecols === "true"){
                     	    try{
-                    	        $alterStmt = $store->hook->query("ALTER TABLE `$objectName` DROP ` $col`");
+                    	        $alterStmt = $store->pdo->query("ALTER TABLE `$objectName` DROP ` $col`");
                     	        echo " => done";
                     	        $changesWereMade = true;
                     	    } catch (\PDOException $e){
@@ -65,7 +65,7 @@ class UpdateObjectTablesStructure {
                             echo "<b>table: $objectName, col: $col, database definition: $dbColDescription, application definition: $appColDescription";
                             if ($options->modifycols === 'true'){
                                 try{
-                                    $alterStmt = $store->hook->query("ALTER TABLE `$objectName` MODIFY COLUMN `$col` $appColDescription");
+                                    $alterStmt = $store->pdo->query("ALTER TABLE `$objectName` MODIFY COLUMN `$col` $appColDescription");
                                     echo " => database column definition modified";
                                     $changesWereMade = true;
                                 } catch (\PDOException $e){

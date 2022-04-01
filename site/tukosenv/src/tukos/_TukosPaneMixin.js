@@ -157,10 +157,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
 		userChangesCount: function(){
 			return utils.count(this.userChangedWidgets);
 		},
-       userHasChanged: function(){
+       userHasChanged: function(ignoreWidgets){
     	   var hasChanged = {}, postElts = this.get('postElts');
     	   if (utils.some(this.userChangedWidgets, function(widget, widgetName){
-					return utils.in_array(widgetName, postElts);
+					return utils.in_array(widgetName, postElts) && utils.in_array(widgetName, ignoreWidgets);
 				})){
 				hasChanged.widgets = true;
     	   }
@@ -169,8 +169,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
     	   }
     	   return utils.empty(hasChanged) ? false : hasChanged;
        },
-       checkChangesDialog: function(action, ignoreCustom, timeout){
-           var changes = this.userHasChanged();
+       checkChangesDialog: function(action, ignoreCustom, ignoreWidgets, timeout){
+           var changes = this.userHasChanged(ignoreWidgets);
        	if (!changes || (ignoreCustom && !changes.widgets)){
                return action();
            }else{

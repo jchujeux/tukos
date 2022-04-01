@@ -19,14 +19,14 @@ class View extends EditView{
                         'col1' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'label' => $this->view->tr('Admininfo')],
                             'contents' => [
-                                'row1' => ['tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => ['id'/*, 'parentid'*/, 'name', 'firstname', 'email', 'telmobile', 'sex', 'socialsecuid', 'birthdate', 'age', 'profession', 'maritalstatus']],
-                                'row2' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => ['hobbies']],
+                                'row1' => ['tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => ['id', 'parentid', 'name', 'firstname', 'email', 'telmobile', 'sex', 'socialsecuid', 'birthdate', 'age', 'profession', 'maritalstatus']],
+                                'row2' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => ['hobbies', 'stravainfo']],
                             ],
                         ],
                         'col2' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'label' => $this->view->tr('Medicalbackground')],      
                             'contents' => [              
-                                'row1' => ['tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => ['laterality', 'height', 'weight', 'imc', 'corpulence', 'morphotype']],
+                                'row1' => ['tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => ['laterality', 'height', 'weight', 'imc', 'corpulence', 'morphotype', 'hrthreshold', 'ftp', 'speedthreshold', 'hrmin', 'h4timethreshold', 'h5timethreshold']],
                                 'row2' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => [ 'antecedents']],
                             ]
                         ],

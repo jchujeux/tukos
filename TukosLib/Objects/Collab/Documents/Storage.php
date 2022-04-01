@@ -43,10 +43,10 @@ trait Storage {
     
     public function nextFileId($increment = true){
         $this->constructStorage();
-        $stmt = $this->filesStore->hook->query('LOCK TABLES ' . $this->_nextFileIdTableName . ' WRITE');
+        $stmt = $this->filesStore->pdo->query('LOCK TABLES ' . $this->_nextFileIdTableName . ' WRITE');
         $nextId =  $this->filesStore->getValue(['table' => $this->_nextFileIdTableName, 'cols' => ['nextid']]);
         if($increment){ $this->filesStore->update(['nextid' => $nextId+1, 'updated' => date('Y-m-d H:i:s')], ['table' => $this->_nextFileIdTableName, 'where' => ['nextid' => $nextId]]);}
-        $stmt = $this->filesStore->hook->query('UNLOCK TABLES');
+        $stmt = $this->filesStore->pdo->query('UNLOCK TABLES');
     return $nextId;
     }
         
