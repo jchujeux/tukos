@@ -55,9 +55,14 @@ class Show extends ObjectTranslator{
     }
     function get($query){
         Utl::extractItems(['object', 'form'], $query);
-        $values = $this->blogModel->getOne(['where' => $query, 'cols' => ['id', 'parentid', 'name', 'comments', 'updated', 'updator'], 'orderby' => ['tukos.updated DESC']]);
-        $updator = $this->user->peoplefirstAndLastNameOrUserName($values['updator']);
-        return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'postedbyandwhen' => "<i>{$this->view->tr('postedby')}</i>: $updator <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['updated']), 'comments' => $values['comments']];
+        $values = $this->blogModel->getOne(['where' => $query, 'cols' => ['id', 'parentid', 'name', 'comments', 'published', 'updated', 'creator', 'updator'], 'orderby' => ['blog.published DESC']]);
+        $publisher = $this->user->peoplefirstAndLastNameOrUserName($values['creator']);
+        $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']);
+        if ($values['updated'] > $values['published']){
+            $updator = $this->user->peoplefirstAndLastNameOrUserName($values['updator']);
+            $postedByAndWhen .= "<br><i>{$this->view->tr('updatedon')}</i> " . DUtl::toUTC($values['updated']);
+        }
+        return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'postedbyandwhen' => $postedByAndWhen, 'comments' => $values['comments']];
     }
     function save($query, $valuesToSave){
         return false;

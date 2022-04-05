@@ -21,10 +21,9 @@ define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "di
                     return originalPut.call(myStore, obj, options);
                 }
             });
-            args.model = new ObjectStoreModel({store: myStore, query: utils.newObj([[myStore.idProperty, args.root]]), labelType: 'html', 
-                                               mayHaveChildren: function(object){
-                                                    return (object.hasChildren != undefined ? object.hasChildren : myStore.getChildren(object).length > 0);
-					                           }
+            args.model = new ObjectStoreModel({store: myStore, query: utils.newObj([[myStore.idProperty, args.root]]), labelType: 'html', mayHaveChildren: function(object){
+                    return (object.hasChildren != undefined ? object.hasChildren : myStore.getChildren(object).length > 0);
+               }
             });
             if (storeArgs.object && storeArgs.data){
             	var dataStore = this.dataStore = new Memory({data: storeArgs.data}), root = args.root, parentDataProperty = args.parentDataProperty ||parentProperty; 
@@ -60,7 +59,7 @@ define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "di
         	}
         },
         getLabel: function(item){
-            return  '<span style="display:inline-block;white-space:normal;margin-right:40px;">' + item.name + (this.colInLabel === false  ? '' :  '(' + item[this.colInLabel || 'id'] + ')') + '</span>';
+            return  '<span style="display:inline-block;white-space:normal;margin-right:40px;">' + item.name + ((this.colInLabel === false || !item[this.colInLabel]) ? '' :  '(' + item[this.colInLabel || 'id'] + ')') + '</span>';
         },
 	    update : function() {
 	      //this.model.store.clearOnClose = true;

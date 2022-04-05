@@ -5,31 +5,62 @@ use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Utils\Widgets;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Parent', 'Description');
+        $this->addToTranslate(['blogwelcome']);
         $customDataWidgets = [
             'language'  => ViewUtils::storeSelect('language', $this, 'Language'),
             'published'   => ViewUtils::dateTimeBoxDataWidget($this, 'PublishedDate'),
         ];
         $this->customize($customDataWidgets);
+        $children = Utl::toAssociative(SUtl::$store->getAll([
+            'cols'  => ['contextid', 'count(*) as children'],
+            'table' => SUtl::$tukosTableName,
+            'where' => $this->user->filterPrivate(['object' => 'blog']),
+            'groupBy' => ['contextid']
+        ]), 'contextid');
+        $contextTreeAtts = $this->user->contextTreeAtts($this->tr);
+        $categoriesData = Utl::toAssociative($contextTreeAtts['storeArgs']['data'], 'id');
+        foreach ($categoriesData as $id => &$item){
+            if ($numberOfChildren = Utl::getItem($id, $children)){
+                $numberOfChildren = $numberOfChildren['children'];
+                $item['name'] .= " ($numberOfChildren)";
+                $item['hasChildren'] = true;
+                $parentId = $item['parentid'];
+                while ($parentId){
+                    $categoriesData[$parentId]['hasChildren'] = true;
+                    $parentId = $categoriesData[$parentId]['parentid'];
+                }
+            }
+        }
+        unset($item);
+        $filteredCategoriesData = [];
+        foreach($categoriesData as $id => $item){
+            if (Utl::getItem('hasChildren', $item)){
+                $item['id'] = $id;
+                $filteredCategoriesData[] = $item;
+            }
+        }
+        $contextTreeAtts['storeArgs']['data'] = $filteredCategoriesData;
         $this->paneWidgets = [
             'rightPane' => [
                 //'title'   => $this->tr('User Context'),
                 'paneContent' => [
                     'widgetsDescription' => [
                         //'recentposts' => Widgets::htmlContent(['title' => $this->tr('recentposts'),  'widgetCellStyle' => ['backgroundColor' => '#d0e9fc'], 'value' => $this->model->getRecentPosts()]),
-                        'recentposts' => Widgets::storeTree(['title' => $this->tr('recentposts'), 'colInLabel' => 'updated', 'showRoot' => false,  'noDnd' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'parentid', 'parentDataProperty' => 'parentid',
+                        'recentposts' => Widgets::storeTree(['title' => $this->tr('recentposts'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'parentid', 'parentDataProperty' => 'parentid',
                             'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  'storeArgs' => ['data' => $this->model->getRecentPosts()], 'root' => $this->user->getRootId(), 'openOnClick' => true]),
-                        'categories' => Widgets::storeTree(Utl::array_merge_recursive_replace(['title' => $this->tr('categories'), 'colInLabel' => false, 'showRoot' => false,  'noDnd' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'contextid',
+                        'categories' => Widgets::storeTree(Utl::array_merge_recursive_replace(['title' => $this->tr('categories'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'contextid',
                             'parentDataProperty' => 'parentid', 'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  
                             'storeArgs' => ['object' => 'BackOffice', 'view' => 'NoView', 'mode' => 'Pane', 'action' => 'Get', 'params' => ['actionModel' => 'GetItems', 'object' => 'Blog', 'form' => 'GetItems']], 'openOnClick' => true],
-                            $this->user->contextTreeAtts($this->tr, true))),
+                            $contextTreeAtts)),
                         'searchbox' => ['type' => 'SearchTextBox', 'atts' => Widgets::complete(['title' => $this->tr('pattern'), 'style' => ['width' => '10em'], 'searchAction' => $this->searchAction('this.pane')])],
-                        'searchresults' => Widgets::storeTree(['title' => $this->tr('searchresults'), 'colInLabel' => 'updated', 'showRoot' => false,  'noDnd' => true, 'hidden' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'parentid',
+                        'searchresults' => Widgets::storeTree(['title' => $this->tr('searchresults'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'hidden' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'parentid',
                             'parentDataProperty' => 'parentid', 'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  'storeArgs' => ['data' => [['id' => 1, 'hasChildren' => true, 'name' => 'tukos']]], 'root' => $this->user->getRootId(), 'openOnClick' => true])
                     ],
                     'layout' => [

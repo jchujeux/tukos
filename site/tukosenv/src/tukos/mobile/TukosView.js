@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "tukos/TabOnClick", "tukos/PageManager"], 
-    function(declare, lang, ready, View, Heading, ToolBarButton, TabOnClick, Pmg){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojox/mobile/View", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "tukos/utils", "tukos/PageManager"], 
+    function(declare, lang, ready, View, Heading, ToolBarButton, utils, Pmg){
     var paneModules = {objectPane: "tukos/mobile/ObjectPane", tukosPane: "tukos/TukosPane", navigationPane: "tukos/mobile/NavigationPane"};
 	return declare(View, {
     	postCreate: function (){    
@@ -17,51 +17,48 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojox/mobile/Vi
             	this.heading.destroyRecursive();
             	this.actionsHeading && this.actionsHeading.destroyRecursive();
             }
-        	this.addChild(this.heading = new Heading({label: this.title}));
-			if (!(currentView = this.mobileViews.currentPane()) && !this.mobileViews.navigationView){
-				this.heading.set('style', {display: 'none'});
-			}else{
-				currentView.heading.set('style', {display: 'block'});
-			}
-        	if (this.paneModuleType === 'objectPane'){
-				if (this.formContent.actionLayout.length > 0){
-					this.addChild(this.actionsHeading = new Heading({style: {display: 'none'}}));
-	            	(this.actionsHeadingToggle = new ToolBarButton({icon: "mblDomButtonWhitePlus", style: "float: right", onClick: lang.hitch(this, function(){
-	            		var heading = this.actionsHeading, toggle = this.actionsHeadingToggle, displayStatus = heading.get('style').display;
-	            		if (displayStatus === 'none'){
-	            			heading.set('style', {display: 'block'});
-	            			toggle.set('icon', 'mblDomButtonWhiteMinus');
-	            		}else{
-	            			heading.set('style', {display: 'none'});
-	            			toggle.set('icon', 'mblDomButtonWhitePlus');
-	            			
-	            		}
-	            		this.resize();
-	            	})})).placeAt(this.heading, 'first');
-				}            	
-        	}else if(this.paneModuleType === 'navigationPane'){
-            	(this.logout = new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){
-            		location.replace(Pmg.get('pageUrl') + 'auth/logout',"_self");
-            	}})).placeAt(this.heading, 'first');
-        	}
-        	previousView = previousView || this.mobileViews.lastPane() || this;
-        	nextView = nextView || this.mobileViews.firstPane() || this;
-        	if (previousView !== this){
-        		previousView.heading.nextViewButton.set('targetView', this);
-        		nextView.heading.previousViewButton.set('targetView', this);
-        	}
-			this.heading.previousViewButton = new ToolBarButton({icon: "mblDomButtonWhiteLeftArrow", style: "float: left", targetView: previousView, onClick: function(evt){
-        		self.mobileViews.selectPane(this.targetView, -1);
-        	}}).placeAt(this.heading, 'first');
-        	if (this.paneModuleType !== 'navigationPane' && this.mobileViews.navigationView){
-            	this.heading.navigationViewButton = new ToolBarButton({icon: "mblDomButtonWhiteUpArrow", style: "float: left", onClick: lang.hitch(this, function(){
-            		self.mobileViews.navigationView();
-            	})}).placeAt(this.heading, 1);
-        	}
-        	this.heading.nextViewButton = new ToolBarButton({icon: "mblDomButtonWhiteRightArrow", style: "float: left", targetView: nextView, onClick: function(evt){
-        		self.mobileViews.selectPane(this.targetView);
-        	}}).placeAt(this.heading, 2);
-        	require([paneModules[this.paneModuleType]], function(PaneModule){
+			if (this.mobileViews.navigationView){
+	        	this.addChild(this.heading = new Heading({label: this.title}));
+	        	if (this.paneModuleType === 'objectPane'){
+					if (!utils.empty(this.formContent.actionLayout)){
+						this.addChild(this.actionsHeading = new Heading({style: {display: 'none'}}));
+		            	(this.actionsHeadingToggle = new ToolBarButton({icon: "mblDomButtonWhitePlus", style: "float: right", onClick: lang.hitch(this, function(){
+		            		var heading = this.actionsHeading, toggle = this.actionsHeadingToggle, displayStatus = heading.get('style').display;
+		            		if (displayStatus === 'none'){
+		            			heading.set('style', {display: 'block'});
+		            			toggle.set('icon', 'mblDomButtonWhiteMinus');
+		            		}else{
+		            			heading.set('style', {display: 'none'});
+		            			toggle.set('icon', 'mblDomButtonWhitePlus');
+		            			
+		            		}
+		            		this.resize();
+		            	})})).placeAt(this.heading, 'first');
+					}            	
+	        	}else if(this.paneModuleType === 'navigationPane'){
+	            	(this.logout = new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){
+	            		location.replace(Pmg.get('pageUrl') + 'auth/logout',"_self");
+	            	}})).placeAt(this.heading, 'first');
+	        	}
+	        	previousView = previousView || this.mobileViews.lastPane() || this;
+	        	nextView = nextView || this.mobileViews.firstPane() || this;
+	        	if (previousView !== this){
+	        		previousView.heading.nextViewButton.set('targetView', this);
+	        		nextView.heading.previousViewButton.set('targetView', this);
+	        	}
+				this.heading.previousViewButton = new ToolBarButton({icon: "mblDomButtonWhiteLeftArrow", style: "float: left", targetView: previousView, onClick: function(evt){
+	        		self.mobileViews.selectPane(this.targetView, -1);
+	        	}}).placeAt(this.heading, 'first');
+	        	if (this.paneModuleType !== 'navigationPane' && this.mobileViews.navigationView){
+	            	this.heading.navigationViewButton = new ToolBarButton({icon: "mblDomButtonWhiteUpArrow", style: "float: left", onClick: lang.hitch(this, function(){
+	            		self.mobileViews.navigationView();
+	            	})}).placeAt(this.heading, 1);
+	        	}
+	        	this.heading.nextViewButton = new ToolBarButton({icon: "mblDomButtonWhiteRightArrow", style: "float: left", targetView: nextView, onClick: function(evt){
+	        		self.mobileViews.selectPane(this.targetView);
+	        	}}).placeAt(this.heading, 2);
+			}        	
+			require([paneModules[this.paneModuleType]], function(PaneModule){
             	self.form = new PaneModule(viewPaneContent);
 				if (self.actionsHeading){
 					new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){

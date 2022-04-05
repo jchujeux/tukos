@@ -29,13 +29,13 @@ class Model extends AbstractModel {
         return ['data' => $this->getPosts([[['col' => 'name', 'opr' => 'RLIKE', 'values' => $atts['searchbox']], ['col' => 'comments', 'opr' => 'RLIKE', 'values' => $atts['searchbox'], 'or' => true]]])];
     }
     function getPosts($where, $limit = 1000){
-        $posts = $this->getAll(['where' => $this->user->filterPrivate($where), 'cols' => ['id', 'name', 'updated'], 'orderBy' => ['updated' => 'DESC'], 'limit' => $limit]);
+        $posts = $this->getAll(['where' => $this->user->filterPrivate($where), 'cols' => ['id', 'name', 'published'], 'orderBy' => ['published' => 'DESC'], 'limit' => $limit]);
         $rootId = $this->user->getRootId();
         foreach($posts as &$post){
             $post['parentid'] = $rootId;
             $post['hasChildren'] = false;
             $post['onClickGotoTab'] = 'edit';
-            $post['updated'] =  substr($post['updated'], 0, 10);
+            $post['published'] =  substr($post['published'], 0, 10);
         }
         $posts[] = ['id' => $rootId, 'name' => 'tukos', 'hasChildren' => true];
         return $posts;
