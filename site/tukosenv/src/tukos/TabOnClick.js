@@ -8,7 +8,7 @@ define (["dojo/_base/declare", "dojo/on", "tukos/PageManager", "dijit/_WidgetBas
             this.inherited(arguments);    
             var url = this.url;
             on(this.domNode, "click", function(evt){
-                PageManager.tabs.request(url);
+                PageManager.tabs.gotoTab(url);
             });
         }    
     }); 

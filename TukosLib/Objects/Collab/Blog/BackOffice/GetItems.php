@@ -16,10 +16,11 @@ class GetItems extends ObjectTranslator{
     }
     function get($query){
         $storeAtts = $query['storeatts'];
-        $items = $this->blogModel->getAll(['where' => $storeAtts['where'], 'cols' => ['id', 'parentid', 'name', 'comments'/*, 'updated', 'updator'*/]]);
+        $items = $this->blogModel->getAll(['where' => $storeAtts['where'], 'cols' => ['id', 'parentid', 'name', 'comments', 'published'/*, 'updated', 'updator'*/]]);
         foreach($items as &$item){
             $item['onClickGotoTab'] = 'edit';
             $item['hasChildren'] = false;
+            $item['published'] =  substr($item['published'], 0, 10);
         }
         if (! empty($storeAtts['range'])){
             return ['items' => $items, 'total' => $this->blogModel->foundRows()];

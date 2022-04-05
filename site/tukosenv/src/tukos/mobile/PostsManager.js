@@ -13,6 +13,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
         		}else{
         			Pmg.beep();
         		}
+				target.set('style', {height: 'auto'});
         	}
 			if (descriptions.length === 0){
 				//this.navigationView();
@@ -39,6 +40,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
                     if (response.focusOnOpen){
                     	self.container.selectChild(theNewView);
                     }
+					//dojo.ready(function(){
+						self.container.previousButton.set('style', {display: Pmg.mobileViews.isFirstPane() ? 'none' : 'block'});
+						self.container.nextButton.set('style', {display: Pmg.mobileViews.isLastPane() ? 'none' : 'block'});
+					//});
                     return response;
                 }
             );
@@ -55,6 +60,32 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
         selectPane: function(pane, transitionDir, transition){
         	this.container.selectChild(pane, transitionDir, transition);
         },
+		selectPreviousPane: function(){
+			var self = this, panes = this.container.getChildren(), currentPane = this.currentPane();
+			if (currentPane !== panes[0]){
+				panes.forEach(function(pane, i){
+					if (pane === currentPane){
+						self.selectPane(panes[i-1], -1);
+					}
+				});
+			}
+		},
+		selectNextPane: function(){
+			var self = this, panes = this.container.getChildren(), currentPane = this.currentPane();
+			if (currentPane !== panes.slice(-1)[0]){
+				panes.forEach(function(pane, i){
+					if (pane === currentPane){
+						self.selectPane(panes[i+1], 1);
+					}
+				});
+			}
+		},
+		isFirstPane: function(){
+			return this.currentPane() === this.firstPane();
+		},
+		isLastPane: function(){
+			return this.currentPane() === this.lastPane();
+		},
         currentPaneNode: function(){
         	return this.currentPane().heading.domNode;
         },

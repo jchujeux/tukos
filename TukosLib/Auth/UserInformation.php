@@ -143,16 +143,12 @@ class UserInformation{
         return in_array($module, $this->unallowedModules);
     }
 
-    public function contextTreeAtts($tr, $hasChildren=false){
+    public function contextTreeAtts($tr){
         $result = ['storeArgs' => ['data'  => $this->contextModel->storeData], 
                    'root'  => $this->contextModel->getRootId(),
-                   //'paths' => [$this->contextModel->ancestors]
         ];
         foreach ($result['storeArgs']['data'] as &$data){
-            $data['name'] = $tr($data['name']);// call_user_func($tr, $data['name']);
-            if ($hasChildren){
-                $data['hasChildren'] = true;
-            }
+            $data['name'] = $tr($data['name']);
         }
         return $result;
     }
