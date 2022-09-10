@@ -13,13 +13,13 @@ return declare(null, {
 					var chartAtts = chartWidget.get('chartAtts'), date = new Date(form.valueOf('displayeddate')), dayDate, chartItem, tableItem, chartData = [],
 					    tableData = [], grid = form.getWidget('sptsessions'), dayType = chartWidget.get('daytype'), filter = new grid.store.Filter(), presentCols = [], colsTLabel = {}, series = chartWidget.get('series'), 
 						sessionsFilter = chartAtts.filter, previousSession, stsDailyDecay = grid.tsbCalculator.get('stsDailyDecay'), ltsDailyDecay = grid.tsbCalculator.get('ltsDailyDecay'), 
-						stsRatio = grid.tsbCalculator.get('stsRatio'), daysDifference, hasSession, hasPMC;
+						stsRatio = grid.tsbCalculator.get('stsRatio'), hasSession, hasPMC;
 					utils.forEach(series, function(content, col){
 						presentCols.push(col);
 						colsTLabel[col] = content.options.label;
 					});
 					hasPMC = presentCols.indexOf('tsb') !== -1;
-					for (var i = 1; i <= 7; i++){
+					for (let i = 1; i <= 7; i++){
 						hasSession = false;	  	
 						dayDate = dutils.formatDate(dutils.getDayOfWeek(i, date));
 					  	chartItem = {day: dayType === 'dayofweek' ? dutils.dayName(i) : dayDate};
@@ -43,7 +43,7 @@ return declare(null, {
 										previousSession = self.sessionsIterator.previous();
 									}
 									if (!previousSession){
-										previousSession = {startdate: form.valueOf('fromdate'), sts: grid.tsbCalculator.get('initialSts'), lts: grid.tsbCalculator.get('initialLts')}
+										previousSession = {startdate: form.valueOf('fromdate'), sts: grid.tsbCalculator.get('initialSts'), lts: grid.tsbCalculator.get('initialLts')};
 									}
 								});
 							}
@@ -51,11 +51,11 @@ return declare(null, {
 								self.buildPmcCols(chartItem, previousSession, dayDate, stsDailyDecay, ltsDailyDecay, stsRatio);
 							}
 						}
-						self.finalizeChartItem(chartItem, tableItem, presentCols, chartAtts, colsTLabel, 'day');
+						self.finalizeChartItem(chartWidget, chartItem, tableItem, presentCols, chartAtts, colsTLabel, 'day');
 						chartData.push(chartItem);
 						tableData.push(tableItem);
 					}
-					chartWidget.set('value', {store: chartData, tableStore: tableData, axes: {x: {title: Pmg.message(dayType, 'sptprograms')}}});
+					chartWidget.set('value', {data: chartData, tableData: tableData, axes: {x: {title: Pmg.message(dayType, 'sptprograms')}}});
 				});
 			}		  
 		},
@@ -63,12 +63,12 @@ return declare(null, {
 			var self = this, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden');
 			if (!hidden){
 				dojo.ready(function(){
-					var chartWidget = form.getWidget(chartWidgetName), chartAtts = chartWidget.get('chartAtts'), fromDateS = form.valueOf('fromdate'), toDateS = form.valueOf('todate'), dayDate, chartItem, tableItem, 
+					var chartWidget = form.getWidget(chartWidgetName), chartAtts = chartWidget.get('chartAtts'), fromDateS = form.valueOf('fromdate'), toDateS = form.valueOf('todate'), chartItem, tableItem, 
 						chartData = [], tableData = [], grid = form.getWidget('sptsessions'), weekType = chartWidget.get('weektype'), filter = new grid.store.Filter(), presentCols = [], colsTLabel = {},
 						series = chartWidget.get('series'), sessionsFilter = chartAtts.filter, stsDailyDecay = grid.tsbCalculator.get('stsDailyDecay'), ltsDailyDecay = grid.tsbCalculator.get('ltsDailyDecay'), 
-						stsRatio = grid.tsbCalculator.get('stsRatio'), daysDifference, hasSession, fromDate = form.valueOf('fromdate'), weekNumber = 0,
+						stsRatio = grid.tsbCalculator.get('stsRatio'), fromDate = form.valueOf('fromdate'), weekNumber = 0,
 						previousSession = {startdate: fromDateS, sts: grid.tsbCalculator.get('initialSts'), lts: grid.tsbCalculator.get('initialLts')}, mondayDate, mondayDateS, 
-						sundayDate, sundayDateS, fromDate, hasPMC;
+						sundayDate, sundayDateS, hasPMC;
 					utils.forEach(series, function(content, col){
 						presentCols.push(col);
 						colsTLabel[col] = content.options.label;
@@ -79,7 +79,6 @@ return declare(null, {
 					mondayDateS = dutils.formatDate(mondayDate);
 					sundayDateS = dutils.formatDate(sundayDate);
 					while (sundayDateS <= toDateS){
-						hasSession = false;
 						weekNumber += 1;
 	                    chartItem = {id: weekNumber, week: Pmg.message('w', 'sptprograms') + (weekType == 'weekofprogram' ? weekNumber : dutils.getISOWeekOfYear(mondayDate))/*, weekof: mondayDate*/};
 						tableItem = lang.clone(chartItem);
@@ -88,7 +87,6 @@ return declare(null, {
 				      	});
 						self.collection.filter(filter.gte('startdate', mondayDateS).lte('startdate', sundayDateS)[sessionsFilter]('mode', 'performed')).forEach(function(session){
 							if (session.sport !== 'rest'){
-								hasSession = true;
 								self.buildChartItem(chartItem, session, presentCols, chartAtts);
 								previousSession = session;
 							}
@@ -96,7 +94,7 @@ return declare(null, {
 						if (hasPMC && (previousSession.startdate < sundayDateS)){
 							self.buildPmcCols(chartItem, previousSession, sundayDateS, stsDailyDecay, ltsDailyDecay, stsRatio);
 						}
-						self.finalizeChartItem(chartItem, tableItem, presentCols, chartAtts, colsTLabel, 'week', '<br><small>(' + Pmg.message('weekendingon', 'sptprograms') + ' ' + dutils.formatDate(sundayDate, 'd MMM') + ')</small>');
+						self.finalizeChartItem(chartWidget, chartItem, tableItem, presentCols, chartAtts, colsTLabel, 'week', '<br><small>(' + Pmg.message('weekendingon', 'sptprograms') + ' ' + dutils.formatDate(sundayDate, 'd MMM') + ')</small>');
 						chartData.push(chartItem);
 						tableData.push(tableItem);
 						mondayDate = dutils.dateAdd(mondayDate, 'week', 1);
@@ -104,7 +102,7 @@ return declare(null, {
 						mondayDateS = dutils.formatDate(mondayDate);
 						sundayDateS = dutils.formatDate(sundayDate);
 					}
-					chartWidget.set('value', {store: chartData, tableStore: tableData, axes: {x: {title: Pmg.message(weekType, 'sptprograms')}}});
+					chartWidget.set('value', {data: chartData, tableData: tableData, axes: {x: {title: Pmg.message(weekType, 'sptprograms')}}});
 				});
 			}
 		},
@@ -130,10 +128,13 @@ return declare(null, {
 						case 'tsb':
 							chartItem[col] = Number(session[col] || 0);
 							break;
+						case 'trimphr':
+							chartItem[col] += Number(session[col] || session.trimpavghr);
+							break;
 						case 'trimppw':
 							chartItem[col] += week ? Number(session[col]) : (Number(session[col]) || Number(session.trimphr));
 							break;
-						case 'equivalentdistance':
+						case 'equivalentDistance':
 							chartItem[col] += Number(session.distance || 0) * ((self.equivalentDistanceCoefficients && self.equivalentDistanceCoefficients[session.sport]) || 1.0);
 							break;
 						default:
@@ -148,7 +149,7 @@ return declare(null, {
 			chartItem.lts = previousSession.lts * Math.pow(ltsDailyDecay, daysDifference);
 			chartItem.tsb = chartItem.lts - chartItem.sts * stsRatio;
 		},
-		finalizeChartItem: function(chartItem, tableItem, presentCols, chartAtts, colsTLabel, dayOrWeek, tooltipComplement){
+		finalizeChartItem: function(chartWidget, chartItem, tableItem, presentCols, chartAtts, colsTLabel, dayOrWeek, tooltipComplement){
 			presentCols.forEach(function(col){
 		        var colAtts = chartAtts.cols[col], tooltipPrefix = colsTLabel[col] + ': ' ;
 				switch(col){
@@ -165,7 +166,7 @@ return declare(null, {
 						}
 						tableItem[col] = chartItem[col].toFixed(colAtts.decimals || 1);
 						chartItem[col + 'Tooltip'] = tooltipPrefix + tableItem[col] + (colAtts.tooltipUnit || '') + (tooltipComplement || '');
-						if (colAtts.scalingFactor){
+						if (colAtts.scalingFactor && chartWidget.get('applyscalingfactor') !== 'NO'){
 							chartItem[col] = chartItem[col] / colAtts.scalingFactor[dayOrWeek];
 						}
 				}

@@ -16,7 +16,7 @@ trait QuotesAndInvoices {
 	          'storeArgs' => ['cols' => ['vatfree']],
 	          'onWatchLocalAction' => ['value' => ['vatfree' => ['value' => ['triggers' => ['user' => true, 'server' => false], 'action' => "return sWidget.getItemProperty('vatfree') ? 'YES' : '';"]]]]
 	      ]]]),
-	    'vatfree' => ViewUtils::CheckBox($this, 'vatfree', ['atts' => [
+	    'vatfree' => ViewUtils::checkBox($this, 'vatfree', ['atts' => [
 	          'edit' => ['onWatchLocalAction' => [
 	              'checked' => ['vatfree' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => true], 'action' => VAS::vatfreeLocalAction()]]]]],
 	          'storeedit' => ['editorArgs' => ['onWatchLocalAction' => [

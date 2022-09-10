@@ -8,7 +8,6 @@ use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
 use TukosLib\Objects\Sports\Programs\SessionsTracking;
 use TukosLib\Objects\Sports\Programs\ProgramsConfig;
-use TukosLib\Objects\Sports\GoldenCheetah as GC;
 
 class View extends EditView{
 
@@ -42,6 +41,9 @@ class View extends EditView{
                                 'row3' => [
                                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                                     'widgets' => ['performedloadchart', 'weekperformedloadchart']],
+                                'spidersrow' => [
+                                    'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+                                    'widgets' => []],
                                 'row4' => [
                                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                                     'widgets' => ['weeklies']
@@ -196,7 +198,7 @@ EOT
 		                ['label' => $tr('accessrules')/*, 'storeType' => 'MemoryTreeObjects'*/, 'hidden' => true, 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => false, 'style' => ['width' => '400px'],
 		                    'colsDescription' => [
 		                        'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-		                        'email'  => Widgets::description(Widgets::TextBox(['edit' => ['label' => $tr('email')]]), false),
+		                        'email'  => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('email')]]), false),
 		                        'role' => Widgets::description(Widgets::storeSelect([
 		                            'edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['reader', 'writer', 'owner'], $tr)], 'label' => $tr('role')]
 		                        ]), false),
@@ -206,7 +208,7 @@ EOT
 		                ['label' => $tr('accessrules'), 'hidden' => true, 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => false, 'style' => ['width' => '400px'],
 		                    'colsDescription' => [
 		                        'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-		                        'email'  => Widgets::description(Widgets::TextBox(['edit' => ['label' => $tr('email')]]), false),
+		                        'email'  => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('email')]]), false),
 		                        'role' => Widgets::description(Widgets::storeSelect([
 		                            'edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['reader', 'writer', 'owner'], $tr)], 'label' => $tr('role')]
 		                        ]), false),

@@ -170,6 +170,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
         },
 
         addSubRow: function(item){
+            const idp = this.collection.idProperty;
             if (!this.clickedRow.data.id){
                 Pmg.alert({title: messages.attemptToAddSubRowtoNewRow, content: messages.saveFirst});
             }else{
@@ -178,7 +179,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
                 this.prepareInitSubRow(init);
                 item = utils.merge(init, item || {});
                 this.createNewRow(item, null, 'append');
-                this.expand(this.row(this.clickedRow.data.idg), true);
+                this.expand(this.row(this.clickedRow.data[idp]), true);
                 //setTimeout(function(){grid.layoutHandle.resize();}, 0);
             }
         },

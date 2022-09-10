@@ -37,16 +37,16 @@ abstract class AbstractView extends ObjectTranslator{
                 ]
             ), 
             'parentid'  => ViewUtils::objectSelectMulti($parentObjects, $this, $parentWidgetTitle),
-            'name'      => ViewUtils::textBox($this, $nameWidgetTitle, ['atts' => ['storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
+            'name'      => ViewUtils::textBox($this, $nameWidgetTitle, ['atts' => [/*'edit' => ['tukosTooltip' => ['label' => 'Hello world!', 'onClickLink' => ['label' => 'more...', 'name' => 'dailyavg']]], */'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
             'comments'  => ViewUtils::lazyEditor($this, 'CommentsDetails', ['atts' => ['edit' => ['height' => '400px']]]),
-            'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [true, 'ucfirst', false], ['atts' => 
+            'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [true, 'ucfirst', false, false], ['atts' => 
                 ['edit' => ['readonly' => true, /*'onWatchLocalAction' => ['value' => ['acl' => ['hidden' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return newValue === 'ACL' ? false : true"]]]]*/],
                  'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]
             ]),
             'acl' => ViewUtils::JsonGrid($this, 'Acl', [
                     'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                     'userid' => ViewUtils::objectSelect($this, 'User', 'users'),
-                'permission'  => ViewUtils::storeSelect('acl', $this, 'Permission', [true, 'ucfirst', true], ['atts' => ['edit' => ['onChangeLocalAction' => ['acl' => ['localActionStatus' => "if (!sWidget.valueOf('userid')){Pmg.alert({title: '$missingUser', content: '$needsUser'})}; return true;"]]]]])
+                'permission'  => ViewUtils::storeSelect('acl', $this, 'Permission', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['acl' => ['localActionStatus' => "if (!sWidget.valueOf('userid')){Pmg.alert({title: '$missingUser', content: '$needsUser'})}; return true;"]]]]])
                 ],
                 ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]
             ),
@@ -68,7 +68,6 @@ abstract class AbstractView extends ObjectTranslator{
             'updated'   => ViewUtils::timeStampDataWidget($this, 'Last edit date', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'WhiteSmoke'], 'readonly' => true]]]),
             'creator'   => ViewUtils::objectSelect($this, 'Created by', 'users', ['atts' => ['edit' => ['placeHolder' => '', 'style' => ['width' => '10em', 'backgroundColor' => 'WhiteSmoke'], 'readonly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             'created'   => ViewUtils::timeStampDataWidget($this, 'Creation date', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'WhiteSmoke'], 'readonly' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
-            
         ];
         if (Tfk::$registry->isMobile){
             foreach(['permission', 'acl', 'grade', 'contextid', 'updator', 'creator', 'created'] as $widget){
@@ -104,7 +103,6 @@ abstract class AbstractView extends ObjectTranslator{
             $this->_exceptionCols['post'][] = 'custom';
             $this->_exceptionCols['get'][] = 'custom';
         }
-
         if (in_array('worksheet', $this->model->allCols)){
             $this->dataWidgets['worksheet'] = [
                 'type' => 'sheetGrid', 
@@ -116,7 +114,6 @@ abstract class AbstractView extends ObjectTranslator{
             $this->_exceptionCols['grid'][] = 'worksheet';
             $this->jsonColsPathsView['worksheet'] = [];
         }
-
         if (in_array('history', $this->model->allCols)){
             $historyGridCols = array_diff($this->gridCols(), ['created', 'creator', 'history']);
             $this->dataWidgets['history'] = [
@@ -134,28 +131,22 @@ abstract class AbstractView extends ObjectTranslator{
             $this->_exceptionCols['post'][] = 'history';
         }
     }
-       
     public function dataElts($viewMode='edit'){
         return array_values(array_diff(array_keys($this->dataWidgets), $this->_exceptionCols[$viewMode]));
     }
     function allowedGetCols(){
         return array_values(array_diff($this->model->allCols, $this->_exceptionCols['get']));
     }
-    
     function sendOnSave(){
     	return $this->sendOnSave;
     }
-    
     function sendOnDelete(){
     	return $this->sendOnDelete;
     }
-    
     function doNotEmpty(){
     	return (empty($this->doNotEmpty) ? null : $this->doNotEmpty);
     }
-    
     function gridCols(){// cols which are rendered on the overview grid & on subobjects grids
-
         return array_values(array_diff(
             array_merge(['id', 'parentid', 'name'], $this->addedDataWidgetsElts, ['comments', 'permission', 'grade',  'contextid', 'updator', 'updated', 'creator', 'created'], (in_array('custom', $this->model->allCols) ? ['custom'] : []),
                 isset($this->dataWidgets['configstatus']) ? ['configstatus'] : []), 

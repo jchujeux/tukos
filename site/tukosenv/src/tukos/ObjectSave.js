@@ -19,10 +19,14 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dijit/
                     	Pmg.setFeedback(Pmg.message('itemislocked')); Pmg.beep();
                     }else{
                         Pmg.setFeedback(messages.actionDoing);
-                        self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Save'), query: self.urlArgs ? lang.mixin({id: form.valueOf('id')}, self.urlArgs.query) : {id: form.valueOf('id')}}, changedValues, form.get('dataElts'), messages.actionDone); 
+                        self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Save'), query: self.urlArgs ? lang.mixin({id: form.valueOf('id')}, self.urlArgs.query) : {id: form.valueOf('id')}}, changedValues, form.get('dataElts'), messages.actionDone).then(function(){
+							self.postAction();
+						}); 
                     }
                 }, 100);
            });
-        }
+        },
+		postAction: function(){
+		}
     });
 });

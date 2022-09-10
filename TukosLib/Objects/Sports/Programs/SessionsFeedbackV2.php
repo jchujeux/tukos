@@ -1,11 +1,6 @@
 <?php
 namespace TukosLib\Objects\Sports\Programs;
 
-use TukosLib\Utils\Utilities as Utl;
-use TukosLib\Utils\DateTimeUtilities as Dutl;
-use TukosLib\TukosFramework as Tfk;
-use TukosLib\Objects\Sports\Sports;
-
 class SessionsFeedbackV2 extends SessionsFeedbackVersion{
     function __construct(){
         parent::__construct();

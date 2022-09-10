@@ -66,7 +66,7 @@ EOT;
         rowContent.push({tag: 'th', atts: thAtts, content: sessionsWidget.columns[col] ? sessionsWidget.colDisplayedTitle(col) : Pmg.message(col, 'sptprograms')});
     });
     rows.push({tag: 'tr', content: rowContent});
-    sessionsWidget.store.filter(sessionsFilter.gte('startdate', firstDay).lte('startdate', lastDay)[mode === 'performed' ? 'eq' : 'ne']('mode', 'performed').gt('duration', 'T00:00:00')).sort('startdate').forEach(function(session){
+    sessionsWidget.store.filter(sessionsFilter.gte('startdate', firstDay).lte('startdate', lastDay)[mode === 'performed' ? 'eq' : 'ne']('mode', 'performed')).sort('startdate').forEach(function(session){
         var intensityColorAtt = 'style="background-color: ' + ((intensityColorFlag === 'on' && session.intensity) ? backgroundColor.map[session.intensity] : backgroundColor.defaultValue)  + ';"';
         rowContent = [];        
         selectedCols.forEach(function(col){

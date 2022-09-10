@@ -209,7 +209,6 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
     },
     
     removeCheckbox: function(node){
-        var parentNode = node.parentNode;
         node.removeChild(node.childNodes[0]);
         this.promoteChildNodes(node);
     },
@@ -250,8 +249,19 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         utils.forEach(panes, function(pane, paneKey){
         	var paneParams = (params[paneKey] = {}), paneProperties = properties[paneKey], paneItemsProperties = itemsProperties[paneKey];
             utils.forEach(paneProperties, function(property, widgetName){
-                var value = pane.displayedValueOf(widgetName, true), key = paneKey + widgetName;
-                result[key] = paneProperties[widgetName] = typeof value === 'undefined' ? key : value;
+                switch(widgetName[0]){
+					case '*':
+		                var value = pane.displayedHtmlOf(widgetName.substring(1), true), key = paneKey + widgetName;
+		                result[key] = paneProperties[widgetName] = value || key;
+		                break;
+					case '!':
+		                var value = pane.exportAction(widgetName.substring(1), true), key = paneKey + widgetName;
+		                result[key] = paneProperties[widgetName] = value || key;
+		                break;
+					default:
+		                var value = pane.displayedValueOf(widgetName, true), key = paneKey + widgetName;
+		                result[key] = paneProperties[widgetName] = typeof value === 'undefined' ? key : value;
+				}
             });
             utils.forEach(paneItemsProperties, function(paneItemProperties, widgetName){
                 var item = paneParams[widgetName] || (paneParams[widgetName] = pane.valueOf(widgetName, true));
@@ -316,7 +326,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
     
     translateParams: function(paramsString, widget, itemTranslator, serverAction, sourceCharFlag, translatedCharFlag){
         try{
-            var toRequest = {}, itemTranslator = itemTranslator || lang.hitch(Pmg, Pmg.widgetNameTranslator), //translate = translate || lang.hitch(Pmg, Pmg.translate), 
+            var toRequest = {}, itemTranslator = itemTranslator || this.itemTranslator, 
                   sourceCharFlag = sourceCharFlag || '$', translatedCharFlag = translatedCharFlag ||  '^', replaceRegExp = new RegExp('\\${\\' + sourceCharFlag + '([@§)])([^}]*)}', 'g'),
                   pane = widget.pane, form = pane.form || pane, objectName = form.object;
             var getObject = function(widgetName, item, matchType){
@@ -330,7 +340,9 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
             paramsString = paramsString.replace(replaceRegExp, function(match, matchType, matchedParam){
                 var paramArray = matchedParam.split(separator), item = paramArray[0], itemTranslation = itemTranslator(item, objectName, matchType === '@' ? form : pane), itemWidgetName = (sourceCharFlag === '^' ? itemTranslation : item);
                 if (!itemTranslation){
-                	Pmg.addFeedback(messages.couldnotfindtranslateditem + ' ' + item + ' ' + messages.couldnotfindin + ' ' + match);
+                	if (item[0] !== '!'){
+                		Pmg.addFeedback(messages.couldnotfindtranslateditem + ' ' + item + ' ' + messages.couldnotfindin + ' ' + match);
+                	}
                 	return match;
                 }else{
                     if (paramArray[1]){// here, if itemTranslation is undefined, we can conclude that there is an error in spelling of the template parameter, so we should skip - unless we accept an entry which is not a widget name has been made ?
@@ -349,7 +361,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
             if (utils.empty(toRequest)){
                 return paramsString;
             }else{
-                return when (/*lang.hitch(Pmg, */Pmg.serverTranslations(toRequest, serverAction || 'GetTranslations')/*)*/, function(translations){
+                return when (Pmg.serverTranslations(toRequest, serverAction || 'GetTranslations'), function(){
                     return paramsString.replace(replaceRegExp, function(match, matchType, matchedParam){
                         var paramArray = matchedParam.split(separator), item = paramArray[0], itemTranslation = itemTranslator(item, objectName), itemWidgetName = (sourceCharFlag === '^' ? itemTranslation : item);
                         if (!itemTranslation){
@@ -374,9 +386,14 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
             return messages.errortranslatingtemplate + ': ' + err + '<br >' + paramsString;
         }
     },
-
+	itemTranslator: function(item, objectName){
+			return utils.in_array(item[0], ['*', '!']) ? item[0] + Pmg.widgetNameTranslator(item.substring(1), objectName) : Pmg.widgetNameTranslator(item, objectName);
+	},
+	itemUntranslator: function(item, objectName){
+			return utils.in_array(item[0], ['*', '!']) ? item[0] + Pmg.widgetNameUntranslator(item.substring(1), objectName) : Pmg.widgetNameUntranslator(item, objectName);
+	},
     untranslateParams: function(paramsString, widget){
-        return this.translateParams(paramsString, widget, lang.hitch(Pmg, Pmg.widgetNameUntranslator), 'GetUntranslations', '^', '$');
+        return this.translateParams(paramsString, widget, this.itemUntranslator, 'GetUntranslations', '^', '$');
     },
 
     removeTranslatorFlag: function(paramsString){

@@ -55,7 +55,7 @@ class Show extends ObjectTranslator{
     }
     function get($query){
         Utl::extractItems(['object', 'form'], $query);
-        $values = $this->blogModel->getOne(['where' => $query, 'cols' => ['id', 'parentid', 'name', 'comments', 'published', 'updated', 'creator', 'updator'], 'orderby' => ['blog.published DESC']]);
+        $values = $this->blogModel->getOne(['where' => $this->user->filterPrivate($query), 'cols' => ['id', 'parentid', 'name', 'comments', 'published', 'updated', 'creator', 'updator'], 'orderby' => ['blog.published DESC']]);
         $publisher = $this->user->peoplefirstAndLastNameOrUserName($values['creator']);
         $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']);
         if ($values['updated'] > $values['published']){

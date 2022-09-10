@@ -32,8 +32,8 @@ define([
         // htmlTemplate: [protected] String
         //		String used for templating the HTML to insert at the desired point.
         htmlTemplate: "<a nohref class=\"dijitEditorPluginTukosLinkDialogStyle\" style=\"cursor:pointer;color:blue;text-decoration:underline\"" +
-                      " tukosId=\"${tukosIdInput}\" tukosTable=\"${tukosObjectInput}\" tukosView=\"${tukosViewInput}\"" +
-                      " onClick=\"event.stopImmediatePropagation();parent.tukos.Pmg.editorGotoTab({object: '${tukosObjectInput}', view: '${tukosViewInput}', query: {id: '${tukosIdInput}'}}, event)\">${textInput}</a>",
+                      " tukosId=\"${tukosIdInput}\" tukosObject=\"${tukosObjectInput}\" tukosView=\"${tukosViewInput}\"" +
+                      " onClick=\"event.stopImmediatePropagation();if (!getElementById('dijitEditorBody')){parent.tukos.Pmg.editorGotoTab({object: '${tukosObjectInput}', view: '${tukosViewInput}', query: {id: '${tukosIdInput}'}}, event);}\">${textInput}</a>",
     
         // tag: [protected] String
         //		Tag used for the link type.

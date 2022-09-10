@@ -88,7 +88,7 @@ class ViewUtils{
     static public function lazyEditor($view, $label, $custom=[]){
     	return Utl::array_merge_recursive_replace([
     			'type' => 'lazyEditor',
-    			'atts' => ['edit' =>  ['label' => $view->tr($label), 'height' => Utl::drillDown($custom, ['atts', 'edit', 'height'], '100px'), 'style' => "background-color: white; color: initial; min-height: 5em"/*['backgroundColor' => 'White', 'minHeight' => '5em']*/]],
+    			'atts' => ['edit' =>  ['label' => $view->tr($label), 'height' => Utl::drillDown($custom, ['atts', 'edit', 'height'], '100px'), 'style' => ['backgroundColor' => 'white', 'color' =>  'initial', 'minHeight' =>  '5em']]],
     			'objToEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
     			'objToStoreEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
     	],
@@ -116,15 +116,24 @@ class ViewUtils{
         }
     }
 
-    static public function storeSelect($optionsName, $view, $label, $storeOptions=[true, 'ucfirst', false], $custom=[]){
+    static public function storeSelect($optionsName, $view, $label, $storeOptions=[true, 'ucfirst', false, false], $custom=[]){
         return Utl::array_merge_recursive_replace([
-                'type' => 'storeSelect',   
-                'atts' => ['edit' =>  ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr, $storeOptions)], 'label' => $view->tr($label)]/*, 'style' => ['maxWith' => '10em']*/],
-            ],
+            'type' => 'storeSelect',
+            'atts' => ['edit' =>  ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr, $storeOptions)], 'label' => $view->tr($label)]/*, 'style' => ['maxWith' => '10em']*/],
+        ],
             $custom
-        );
+            );
     }
-
+    
+    static public function storeComboBox($optionsName, $view, $label, $storeOptions=[true, 'ucfirst', false, false], $custom=[]){
+        return Utl::array_merge_recursive_replace([
+            'type' => 'storeComboBox',
+            'atts' => ['edit' =>  ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr, $storeOptions)], 'label' => $view->tr($label)]/*, 'style' => ['maxWith' => '10em']*/],
+        ],
+            $custom
+            );
+    }
+    
     static public function numberUnitBox($optionsName, $view, $label, $custom=[], $trOptions = null){
         return Utl::array_merge_recursive_replace([
                 'type' => 'numberUnitBox', 

@@ -1,0 +1,46 @@
+{
+  "name": "expressionparser",
+  "version": "1.1.5",
+  "description": "Parse simple expressions, in a language of your own description",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepublish": "tsc",
+    "prepare": "tsc",
+    "docs": "ts-node src/docgen.ts",
+    "test": "mocha -r ts-node/register src/**/*.test.ts",
+    "coverage": "nyc -r lcov -e .ts -x \"*.test.ts\" npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dcollien/ExpressionParser"
+  },
+  "keywords": [
+    "parser",
+    "expression",
+    "condition",
+    "boolean",
+    "arithmetic",
+    "rpn",
+    "reverse",
+    "polish",
+    "shunting",
+    "yard"
+  ],
+  "author": "David Collien",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/dcollien/ExpressionParser/issues"
+  },
+  "homepage": "https://github.com/dcollien/ExpressionParser",
+  "devDependencies": {
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.5",
+    "chai": "^4.2.0",
+    "mocha": "^7.2.0",
+    "nyc": "^15.0.1",
+    "ts-node": "^8.10.1",
+    "typescript": "^3.9.3"
+  }
+}

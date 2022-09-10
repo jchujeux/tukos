@@ -50,45 +50,6 @@ class TranslatorsManager {
         }
         return $this->translatorsMessages[$languageCol][$setItem] = array_change_key_case(array_filter($this->getSetMessages($setItem, $languageCol)));
     }
-/*      
-    function translator($translatorName, $setsPath, $language = null){// returns a translator callback - usage: $translator->translate('myMessage'); 
-        if (! $language){
-            $language = $this->getLanguage();
-        }
-        $languageCol = str_replace('-', '_', strtolower($language));
-        if (!isset($this->translatorsMessages[$languageCol])){
-            $this->translatorsMessages[$languageCol] = [];
-        }
-        $setItemsPath = [];
-        foreach ($setsPath as $setName){
-            $setItemsPath[] = strtolower($setName);
-        }
-        $this->translatorPaths[$translatorName] = $setItemsPath;
-        return function($key, $mode = null) use ($setItemsPath, $languageCol){
-            $lckey = strtolower($key);
-            foreach ($setItemsPath as $setItem){
-                $messages = $this->translatorsMessages[$languageCol];
-                if (!isset($messages[$setItem])){
-                    $messages[$setItem] = $this->addSet($setItem, $languageCol);
-                }
-                $messages = $messages[$setItem];
-                if (isset($messages[$lckey])){
-                    $translation = $messages[$lckey];
-                    if (!empty($mode)){
-                        return $this->transform($translation, $mode);
-                    }else if (strtoupper($key) === $key){
-                        return mb_strtoupper($translation);
-                    }else if(ctype_upper($key[0])/* && ctype_lower($translation[0])*//*){
-                        return mb_strtoupper(mb_substr($translation, 0, 1)) . mb_substr($translation, 1);
-                    }else{
-                        return $translation;
-                    }
-                }
-            }
-            return $key;
-        };
-    }
-*/
     function translator($translatorName, $setsPath){
         $this->translatorPaths[$translatorName] = $setsPath;
         return function($key, $mode = null) use ($translatorName){
@@ -206,7 +167,6 @@ class TranslatorsManager {
             return $key;
         };
     } 
-        
     function transform($translation, $mode){
         switch ($mode){
             case 'escapeSQuote':
@@ -215,6 +175,8 @@ class TranslatorsManager {
                 return ucfirst(mb_strtolower($translation));
             case 'lowercase':
                 return mb_strtolower($translation);
+            case 'uppercase':
+                return mb_strtoupper($translation);
             case 'ucwords':
                 return ucwords(mb_strtolower($translation));
             case 'plural':
@@ -233,6 +195,9 @@ class TranslatorsManager {
                         
                 }
         }
+    }
+    function presentTukosTooltips(){
+        return Tfk::$registry->get('configStore')->query("SELECT name FROM translations WHERE name RLIKE 'TukosTooltip$'")->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
 }
 ?>

@@ -93,12 +93,22 @@ class StoreUtilities {
             }
             foreach ($values as $objectName => $idsExtendedNameCols){
                 foreach ($idsExtendedNameCols as $id => $extendedNameCols){
-                    foreach($extendedNameIdColsByObject[$objectName] as $col){
-                        $colId = $extendedNameCols[$col];
-                        $extendedNameCols[$col] = Utl::getItem($colId, self::$extendedNamesCache, $colId);
+                    if (empty($extendedNameIdColsByObject[$objectName])){
+                        $extendedNames[$id] = self::$extendedNamesCache[$id] = implode(' ', $extendedNameCols);
+                        self::$extendedNamesObjectCache[$id] = $objectName;
                     }
-                    $extendedNames[$id] = self::$extendedNamesCache[$id] = implode(' ', $extendedNameCols);
-                    self::$extendedNamesObjectCache[$id] = $objectName;
+                }
+            }
+            foreach ($values as $objectName => $idsExtendedNameCols){
+                foreach ($idsExtendedNameCols as $id => $extendedNameCols){
+                    if (!empty($extendedNameIdColsByObject[$objectName])){
+                        foreach($extendedNameIdColsByObject[$objectName] as $col){
+                            $colId = $extendedNameCols[$col];
+                            $extendedNameCols[$col] = Utl::getItem($colId, self::$extendedNamesCache, $colId);
+                        }
+                        $extendedNames[$id] = self::$extendedNamesCache[$id] = implode(' ', $extendedNameCols);
+                        self::$extendedNamesObjectCache[$id] = $objectName;
+                    }
                 }
             }
         }

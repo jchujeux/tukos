@@ -134,7 +134,6 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
 		if(!this._initialized){
 			return;
 		}
-
 		var children = this.getChildren();
 
 		var childIds = {};
@@ -179,9 +178,9 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
 
 		//var width = Math.floor(100 / this.cols) + "%";
 
-		var labelRow = domConstruct.create("tr", {}, tbody);
+		var labelRow = domConstruct.create("tr", null, tbody);
 		var childRow = (!this.showLabels || this.orientation == "horiz")
-						? labelRow : domConstruct.create("tr", {}, tbody);
+						? labelRow : domConstruct.create("tr", null, tbody);
 		var maxCols = this.cols * (this.showLabels ? 2 : 1);
 		var numCols = 0;
 
@@ -202,14 +201,14 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
                 // Create a new row if we need one
                 if(numCols + colspan - 1 + (this.showLabels ? 1 : 0)>= maxCols) {
                     numCols = 0;
-                    labelRow = domConstruct.create("tr", {}, tbody);
-                    childRow = this.orientation == "horiz" ? labelRow : domConstruct.create("tr", {}, tbody);
+                    labelRow = domConstruct.create("tr", null, tbody);
+                    childRow = this.orientation == "horiz" ? labelRow : domConstruct.create("tr", null, tbody);
                 }
                 var labelCell, widgetCellStyle = child.widgetCellStyle ? child.widgetCellStyle : this.widgetCellStyle;
                 
                 // If labels should be visible, add them
                 if(this.showLabels) {
-                    labelCell = domConstruct.create("td", {"class": "tableContainer-labelCell"}, labelRow);
+                    labelCell = domConstruct.create("td", lang.mixin({"class": "tableContainer-labelCell"}, {style: this.labelCellStyle}), labelRow);
     
                     // If the widget should take up both the label and value,
                     // then just set the class on it.
@@ -230,11 +229,11 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
                                 String(this.labelWidth).indexOf("%") < 0
                                     ? this.labelWidth + "px" : this.labelWidth);
                         }
-                        if (labelCellStyle){
+                        /*if (labelCellStyle){
                             utils.forEach(labelCellStyle, function(value, att){
                                 domStyle.set(labelCell, att, value);
                             });
-                        }
+                        }*/
     
                         label.innerHTML = child.get("label") || child.get("title");
                         //label.innerHTML = child.get("title") || child.get("label") || '';
@@ -290,7 +289,6 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
 		this.table = table;
 		//this.resize();
 	},
-	
 	destroyDescendants: function(/*Boolean*/ preserveDom){
 		// summary:
 		//		Destroys all the widgets inside this.containerNode,

@@ -8,7 +8,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojox/mobile/Vi
     		this.createPane();
         },
         refresh: function(viewPaneContent){
-        	var previousView, currentView, nextView, self = this;
+        	var previousView, nextView, self = this;
         	viewPaneContent.viewPane = this;
         	if (this.form){
             	this.form.destroyRecursive();

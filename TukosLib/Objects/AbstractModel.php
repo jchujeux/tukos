@@ -208,7 +208,7 @@ abstract class AbstractModel extends ObjectTranslator {
     }
     
     public function getAllExtended($atts){
-        $items = $this->getAll($atts, [], null, true, true);
+        $items = $this->getAll($atts, [], null, true);
         $this->addItemsIdCols($items);
         return $items;
     }
@@ -380,11 +380,11 @@ abstract class AbstractModel extends ObjectTranslator {
                 Feedback::addErrorCode($NoIdInUpdate);
                 return false;
             }
-            if (in_array('history', $this->allCols)){
-                $differences['history'] = $this->addHistory($oldHistory, Utl::getItems(array_keys($differences), $oldValues));
-            }
             if ($this->useItemsCache){
                 ItemsCache::updateOne($differences, $id);
+            }
+            if (in_array('history', $this->allCols)){
+                $differences['history'] = $this->addHistory($oldHistory, Utl::getItems(array_keys($differences), $oldValues));
             }
             if (!empty($differences['history'])){
                 $differences['history'] = $this->compressHistory($differences, $id);

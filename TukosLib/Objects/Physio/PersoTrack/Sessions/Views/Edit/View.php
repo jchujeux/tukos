@@ -24,6 +24,10 @@ class View extends EditView{
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
                 'widgets' => ['painduring', 'painafter'],
             ],
+            'row4' => [
+                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
+                'widgets' => ['mechload'],
+            ],
         ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowcomments', 'rowbottom', 'rowacl'], $this->dataLayout['contents']));
     }

@@ -15,12 +15,11 @@ class StravaSessionsTracking {
     public function update(&$dialogDescription, $isSportsProgram,  $sessionsWidget, $metricsToInclude){
         $tr = $this->editView->view->tr;
         $view = $this->editView;
-        $view->view->addToTranslate(['nomatch', 'newsession', 'synced', 'bicycle', 'swimming', 'running', 'other', 'noneedtosync', 'needsstravaauthorization', 'isstravaauthorized']);
+        $view->view->addToTranslate(['nomatch', 'newsession', 'synced', 'bicycle', 'swimming', 'running', 'other', 'noneedtosync', 'needsstravaauthorization', 'isstravaauthorized', 'cannotsynchronizestrava', 'needtodefinecoach', 'needtodefineathlete']);
         $stWidgets = [
             'synchrostreams' => Widgets::checkBox(Widgets::complete(['title' => $tr('synchrostreams'), 'onWatchLocalAction' => $this->editView->watchCheckboxLocalAction('synchrostreams')])),
             'stsynchrostart' => Widgets::tukosDateBox(['title' => $tr('synchrostart')]),
             'stsynchroend' => Widgets::tukosDateBox(['title' => $tr('synchroend')]),
-            //'stmetricstoinclude' => Widgets::multiSelect(Widgets::complete(['title' => $tr('metricstoinclude'), 'options' => ST::metricsOptions($tr, $metricsToInclude), 'style' => ['height' => '150px'], 'onWatchLocalAction' =>  $view->watchLocalAction('stmetricstoinclude')])),
             'stlink' => Widgets::htmlContent(['title' => $tr('gclink'), 'readonly' => true]),
             'stauthorize' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('stauthorize'), 'onClickAction' => 'this.pane.form.localActions.authorizeStrava(this.pane);']],
             'stsync' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('synchronize'), 'onClickAction' => 'this.pane.form.localActions.synchronizeWithStrava(this.pane);']]
@@ -42,7 +41,6 @@ class StravaSessionsTracking {
             'row3' => [
                 'tableAtts' =>['cols' => 2,  'customClass' => 'labelsAndValues', 'showLabels' => true/*, 'widgetWidths' => ['10%', '90%']*/],
                 'contents' => [
-                    //'col1' => ['tableAtts' =>['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => ['stmetricstoinclude']],
                     'col2' => [
                         'tableAtts' => ['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => false],
                         'contents' => [
@@ -64,15 +62,20 @@ class StravaSessionsTracking {
         return <<<EOT
 if (synchroSource === 'strava'){
 	var parentId = pane.form.valueOf('parentid');
-    Pmg.serverDialog({object: 'users', view: 'NoView', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'GetItems'}}}, {data: utils.newObj([[parentId, ['stravainfo']]])}).then(
-    	function (response){
-            var isStravaAuthorized = response.data[parentId].stravainfo;
-            pane.getWidget('stlink').set('value', Pmg.message(isStravaAuthorized ? 'isstravaauthorized' : 'needsstravaauthorization', "{$view->objectName}"));
-            pane.getWidget('stsync').set('hidden', !isStravaAuthorized);
-            pane.getWidget('stauthorize').set('hidden', isStravaAuthorized);
-            pane.resize();
-		}
-	);	
+    if (parentId){
+        Pmg.serverDialog({object: 'users', view: 'NoView', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'GetItems'}}}, {data: utils.newObj([[parentId, ['stravainfo']]])}).then(
+        	function (response){
+                var isStravaAuthorized = response.data[parentId].stravainfo;
+                pane.getWidget('stlink').set('value', Pmg.message(isStravaAuthorized ? 'isstravaauthorized' : 'needsstravaauthorization', "{$view->objectName}"));
+                pane.getWidget('stsync').set('hidden', !isStravaAuthorized);
+                pane.getWidget('stauthorize').set('hidden', isStravaAuthorized);
+                pane.resize();
+    		}
+	   );	
+    }else{
+		Pmg.alert({title: Pmg.message('cannotsynchronizestrava', 'sptprograms'), content: Pmg.message('needtodefineathlete', 'sptprograms')});
+        pane.close();
+    }
 }
 EOT
         ;

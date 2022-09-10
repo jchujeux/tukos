@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "amd",
+    "target": "es2016",
+    "jsx": "preserve",
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "outDir": "./dist",
+    "declaration": true
+  },
+  "exclude": [
+    "./dist",
+    "node_modules",
+    "**/node_modules/*"
+  ]
+}

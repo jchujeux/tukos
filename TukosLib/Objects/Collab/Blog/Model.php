@@ -23,7 +23,7 @@ class Model extends AbstractModel {
         return " onclick=\"{$this->gotoTabString($view, $queryString)}\"";
     }
     function getRecentPosts(){
-        return $this->getPosts([], 5);
+        return $this->getPosts([], 10);
     }
     function searchPosts($query, $atts){
         return ['data' => $this->getPosts([[['col' => 'name', 'opr' => 'RLIKE', 'values' => $atts['searchbox']], ['col' => 'comments', 'opr' => 'RLIKE', 'values' => $atts['searchbox'], 'or' => true]]])];

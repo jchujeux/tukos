@@ -11,6 +11,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all",  "dojo/has
 				commonAtts = utils.mergeRecursive(commonAtts, optionalCommonWidgetsAtts);
 			}
             if (layout.tableAtts){
+                if (layout.tableAtts.id){
+					layout.tableAtts.id = this.id + layout.tableAtts.id;
+				}
                 var parent  = new TableContainer(layout.tableAtts, dojo.doc.createElement('div'));
                 fromParent.addChild(parent);
             }else{

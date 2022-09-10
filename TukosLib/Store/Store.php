@@ -19,8 +19,8 @@ class Store {
         $this->pdo->getProfiler()->setActive(true);
         $this->pdo->getProfiler()->setLogFormat("{duration} </td><td>{statement}</td><td>{backtrace}");
     }
-    public function query($textQuery, $bind=[]){
-        $stmt = $this->pdo->query($textQuery, $bind);
+    public function query($textQuery){
+        $stmt = $this->pdo->query($textQuery);
         return $stmt;
     }
     public function profilerMessages(){
@@ -38,7 +38,7 @@ class Store {
             $tableDescription .= ", INDEX(" . implode("), INDEX(", array_map(function($colsIndex){return implode(",", array_map(function($col){return "`$col`";}, $colsIndex));}, $colsIndexes)) . ")";
         }
         $tableDescription .= ") ROW_FORMAT=COMPRESSED ENGINE=InnoDB DEFAULT CHARACTER SET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-        $this->pdo->query("CREATE TABLE `$tableName`" . $tableDescription, []);
+        $this->pdo->query("CREATE TABLE `$tableName`" . $tableDescription);
         if (isset($this->tableList)){
         	$this->tableList[] = $tableName;
         }
@@ -47,13 +47,13 @@ class Store {
         return in_array($tableName, $this->tableList());
     }
     public function deleteTable($tableName){
-        $this->pdo->query("DROP  TABLE `" . $tableName . "`", []);
+        $this->pdo->query("DROP  TABLE `" . $tableName . "`");
         if (isset($this->tableList)){
         	unset($this->tableList[$tableName]);
         }
     }
     public function emptyTable($tableName){
-        $this->pdo->query("TRUNCATE  TABLE `" . $tableName . "`", []);
+        $this->pdo->query("TRUNCATE  TABLE `" . $tableName . "`");
     }        
         
     public function tableStatus(){

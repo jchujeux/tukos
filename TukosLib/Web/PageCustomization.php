@@ -22,7 +22,7 @@ trait PageCustomization{
                     'defaultTukosUrls' => Widgets::simpleDgrid(Widgets::complete(['label' => $tr('defaultTukosUrls'), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => false, 'noDeleteRow' => true,
                         'style' => ['width' => '500px'], 'colsDescription' => [
                             //'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-                            'app'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['TukosApp', 'TukosBus', 'TukosSports', 'TukosMSQR'], $tr)], 'label' => $tr('tukosAppName'),
+                            'app'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['TukosApp', 'TukosBus', 'TukosSports', 'TukosMSQR', 'TukosWoundTrack'], $tr)], 'label' => $tr('tukosAppName'),
                                 'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
                             'object'  => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore($this->user->allowedModules(), $tr)], 'label' => $tr('module'),
                                 'onWatchLocalAction' => $this->gridWatchLocalAction('defaultTukosUrls')]]), false),
@@ -52,8 +52,10 @@ trait PageCustomization{
                             ]])),
                     'fieldsMaxSize' => Widgets::textBox(Widgets::complete(['label' => $tr('Fieldsmaxsize'), 'onWatchLocalAction' => $this->watchLocalAction('fieldsMaxSize')])),
                     'historyMaxItems' => Widgets::textBox(Widgets::complete(['label' => $tr('HistoryMaxItems'), 'onWatchLocalAction' => $this->watchLocalAction('historyMaxItems')])),
-                    'ignoreCustomOnClose' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $tr)], 'title' => $tr('ignoreCustomOnClose'), 
+                    'ignoreCustomOnClose' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $tr)], 'title' => $tr('ignoreCustomOnClose'),
                         'onWatchLocalAction' => $this->watchLocalAction('ignoreCustomOnClose')])),
+                    'showTooltips' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $tr)], 'title' => $tr('showTooltips'),
+                        'onWatchLocalAction' => $this->watchLocalAction('showTooltips')])),
                     'cancel' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('close'), 'onClickAction' => 'this.pane.close();']],
                     'saveuser' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('saveforcurrentuser'), 'disabled' => true, 'onClickAction' => $this->saveOnClickAction('user')]],
                     'saveall' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('saveforallusers'), 'disabled' => true, 'onClickAction' => $this->saveOnClickAction('tukos')]],
@@ -67,7 +69,7 @@ trait PageCustomization{
                         ],
                         'row2' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 250],
-                            'widgets' => ['pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose'],
+                            'widgets' => ['pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose', 'showTooltips'],
                         ],
                         'row3' => [
                             'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false],

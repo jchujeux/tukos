@@ -1,4 +1,4 @@
-define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], function(arrayUtil, lang, ready, utils, Pmg, messages){
+define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", "tukos/utils", "tukos/menuUtils",  "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], function(arrayUtil, lang, dst, ready, utils, mutils,  Pmg, messages){
 
         var   sizeUnits = [{id: 'auto', name: 'auto'}, {id: '%', name: '%'}, {id: 'em', name: 'em'}, {id: 'px', name: 'px'}],
                 sizeConstraintUnits =  [{id: '%', name: '%'}, {id: 'em', name: 'em'}, {id: 'px', name: 'px'}],
@@ -47,13 +47,14 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "tu
             			StoreSelect: {type: 'StoreSelect', atts: {placeHolder: messages.selectvalue, style: {width: 'auto'}, hidden: true, storeArgs: {data: []}}},
             			RestSelect: {type: 'RestSelect', atts: {placeHolder: messages.selectvalue, style: {width: 'auto'}, hidden: true}},
 						MultiSelect: {type: 'MultiSelect', atts: {widgetName: 'attValue', hidden: true, style: {width: '15em', height: '200px'}}},
+						SimpleDgridNoDnd: {type: 'SimpleDgridNoDnd', atts: {widgetName: 'attValue', hidden: true, dynamicColumns: true, adjustLastColumn: false, style: {maxWidth: '1000px'}}},
                         cancel: {type: 'TukosButton', atts: {label: messages.close, onClickAction:  'this.pane.close();'}},
                         apply: {type: 'TukosButton', atts: {label: messages.apply}}
                     },
                     layout:{
                         tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},
                         contents: {
-                           row1: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['att', 'NumberUnitBox', 'TextBox', 'StoreSelect', 'RestSelect', 'MultiSelect']},
+                           row1: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['att', 'NumberUnitBox', 'TextBox', 'StoreSelect', 'RestSelect', 'MultiSelect', 'SimpleDgridNoDnd']},
                            row2: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['cancel', 'apply']}
                         }
                     }
@@ -106,7 +107,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "tu
         attWatchCallback: function(attr, oldValue, newValue){
             var self = this, pane = widgetCustomDialog.pane, getWidget = lang.hitch(pane, pane.getWidget), customAtts = this.customAtts,
             	attValueWidgets = {NumberUnitBox: getWidget('NumberUnitBox'), TextBox: getWidget('TextBox'), StoreSelect: getWidget('StoreSelect'), RestSelect: getWidget('RestSelect'),
-					MultiSelect: getWidget('MultiSelect')};
+					MultiSelect: getWidget('MultiSelect'), SimpleDgridNoDnd: getWidget('SimpleDgridNoDnd')};
             if (newValue === ''){
             	var attValueType = 'NumberUnitBox', attValueWidget = this.attValueWidget = attValueWidgets.NumberUnitBox;
             }else{
@@ -130,14 +131,29 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "tu
 							break;
 						case 'MultiSelect':
 							widget.set('options', atts.options);
-
+							break;
+						case 'SimpleDgridNoDnd':
+							widget.set('columns', atts.atts.columns);
+							widget.set('store', atts.atts.storeArgs);
+							if (atts.atts.style){
+								dst.set(widget.domNode, atts.atts.style);
+							}
+							if (atts.atts.initialRowValue){
+								widget.set('initialRowValue', atts.atts.initialRowValue);
+							}
             		}
+            		if (atts && atts.atts && atts.atts.tukosTooltip){
+						widget.form = self.widget.form;
+						widget.set('tukosTooltip', atts.atts.tukosTooltip);
+					}else{
+						widget.set('tukosTooltip', {});
+					}
             		widget.set('value', self.currentAttValue());
             	}
             });
-            pane.resize();
+			pane.resize();
+			if (attValueType === 'SimpleDgridNoDnd'){setTimeout(function(){pane.resize();}, 0);}//for dgrid's noDataMessage not to overlap header
         },
-
         attValueUnitWatchCallback: function(attr, oldValue, newValue){
             var attValueWidget = this.attValueWidget;
             if (newValue === ''){
@@ -161,7 +177,6 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "tu
                 newAtt = attRoot === att ? newAttValue : utils.newObj([[att, newAttValue]]);//{[att]: newAttValue});
                 widget.set(attRoot, newAtt);
                 lang.setObject((widget.itemCustomization || 'customization') + (attRoot === 'value' ? ('.data.value.' + widget.widgetName) : ('.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot)), newAtt, widgetPane);
-                //lang.setObject((widget.itemCustomization || 'customization') + '.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot, newAtt, widgetPane);
             //}
         },
 
@@ -185,15 +200,17 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "tu
             if (attTarget){
             	var attValueWidget = this.attValueWidget, attInfo = this.customAtts[attTarget], att = attInfo.att,  attRoot = attInfo.root || att, oldAttObject = widget.get(attRoot),
             		oldAttValue = (attRoot === att ? oldAttObject : oldAttObject[att]);
-                if (attValueWidget.widgetType === 'NumberUnitBox'){
-    	            switch (typeof oldAttValue){
-    	                case 'string': return '[' + (/\d+/.exec(oldAttValue) || '""') + ',"' + /[a-z]+/i.exec(oldAttValue) + '"]';
-    	                case 'number': return '[' + oldAttValue + ', ""]';
-    	                default: return '';
-    	            }
-        		}else{
-        			return oldAttValue;
-
+				switch (attValueWidget.widgetType){
+					case 'NumberUnitBox': 
+	    	            switch (typeof oldAttValue){
+	    	                case 'string': return '[' + (/\d+/.exec(oldAttValue) || '""') + ',"' + /[a-z]+/i.exec(oldAttValue) + '"]';
+	    	                case 'number': return '[' + oldAttValue + ', ""]';
+	    	                default: return '';
+	    	            }
+					case 'SimpleDgridNoDnd':
+						return oldAttValue ? JSON.parse(oldAttValue) : oldAttValue;
+					default:
+						return oldAttValue;
         		}
            }else{
         	   	return '';
@@ -224,8 +241,6 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "tu
                 var pane = widgetCustomDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
                 self.widget = widget;
                 self.column = column;
-				//paneGetWidget('att').set('value', '');
-				//paneGetWidget('NumberUnitBox').set('value', '');
                 paneGetWidget('apply').onClickFunction = (column ? lang.hitch(self, self.applyGridEditorCustom) : lang.hitch(self, self.applyCustom));
                 lang.hitch(self, self.setWidgetTypeAtts)(widget);
                 widgetCustomDialog.open({parent: widget, x: evt.clientX, y: evt.clientY});
@@ -245,6 +260,15 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/ready", "tukos/utils", "tu
 		            return newValue;
 				case 'MultiSelect': 
 					return attValueWidget.get('serverValue');
+				case 'SimpleDgridNoDnd':
+					return JSON.stringify(attValueWidget.collection.fetchSync().filter(function(row){
+						utils.forEach(row, function(value, property){
+							if (value === undefined || value === null || Number.isNaN(value)){
+								delete row[property];
+							}
+						});
+						return row;
+					}));
 				default:
 					return attValueWidget.get('value');
 			}

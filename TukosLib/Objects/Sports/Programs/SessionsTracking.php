@@ -22,7 +22,7 @@ trait SessionsTracking {
                         'formlogo' => Widgets::textBox(Widgets::complete(['label' => $tr('trackingformlogo'), 'style' => ['width' => '15em'], 'onWatchLocalAction' => $this->watchLocalAction('formlogo')])),
                         'formpresentation' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['MobileTextBox', 'default'], $tr)], 'label' => $tr('formpresentation'),
                             'onWatchLocalAction' => $this->watchLocalAction('formpresentation')])),
-                        'version' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['V2'], $tr, [false, 'ucfirst', false])], 'label' => $tr('version'),
+                        'version' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['V2'], $tr, [false, 'ucfirst', false, false])], 'label' => $tr('version'),
                             'value' => $this->view->model->defaultSessionsTrackingVersion, 'hidden' => true, 'onWatchLocalAction' => $this->watchLocalAction('version')])),
                     ] : [], [
                         'ignoresessionflag' => Widgets::checkBox(Widgets::complete(['title' => $tr('ignoresessionflag'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('ignoresessionflag')])),

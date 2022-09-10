@@ -36,14 +36,17 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
 				});
 			}
 			require(["tukos/menuUtils", "tukos/widgets/widgetCustomUtils"], function(mutils, wcutils){
-                var menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
-                menuItemsArgs = (utils.in_array(widgetName, self.objectIdCols))
-                    ? menuItemsArgs.concat(lang.hitch(self, wcutils.idColsContextMenuItems)(widget))
-                    : menuItemsArgs;
+                let menuItemsArgs;
+                if (Pmg.get('userRights') !== 'RESTRICTEDUSER'){
+	                menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
+	                if(utils.in_array(widgetName, self.objectIdCols)){
+	                    menuItemsArgs.concat(lang.hitch(self, wcutils.idColsContextMenuItems)(widget));
+	                }
+				}
 				if (widget.customContextMenuItems){
-					menuItemsArgs = menuItemsArgs.concat(widget.customContextMenuItems());
+					menuItemsArgs = (menuItemsArgs || []).concat(widget.customContextMenuItems());
 				}                
-				mutils.buildContextMenu(widget,{type: 'DynamicMenu', atts: {targetNodeIds: [widget.domNode]}, items: menuItemsArgs});
+				mutils.buildContextMenu(widget,{type: 'DynamicMenu', atts: {targetNodeIds: [widget.domNode]}, items: menuItemsArgs || []});
             });
         },
         getWidget: function(widgetName){
@@ -72,6 +75,18 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
         	  	console.log('widget: ' + widgetName + ' not found');
         	  	return undefinedIfNotFound ? undefined :  '';
             }
+        },
+        displayedHtmlOf: function(widgetName){
+            var widget =  registry.byId(this.id + widgetName) || (this.form ? registry.byId(this.form.id + widgetName) : undefined);
+            if (widget){
+                return result =  widget.domNode.innerHTML;
+            }else{
+        	  	console.log('widget: ' + widgetName + ' not found');
+        	  	return undefinedIfNotFound ? undefined :  '';
+            }
+        },
+        exportAction: function(description){
+            return description ? eutils.actionFunction(this, 'export', this[description]) : ('exportfunctiondescriptionnofound' + ': ' + description);
         },
         setValueOf: function(widgetName, value){
             var widget = registry.byId(this.id + widgetName);
@@ -138,11 +153,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
             }
        },
 		setChangedWidget: function(widget){
-			var name = widget.widgetName;
-			this.changedWidgets[name] = widget;
-            if (this.watchContext === 'user'){
-            	this.userChangedWidgets[name] = widget;
-            }
+			if (!widget.ignoreChanges){
+				var name = widget.widgetName;
+				this.changedWidgets[name] = widget;
+	            if (this.watchContext === 'user'){
+	            	this.userChangedWidgets[name] = widget;
+	            }
+			}
 		},
 		setUnchangedWidget: function(widget){
 			delete(this.changedWidgets[widget.widgetName]); 
@@ -160,7 +177,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
        userHasChanged: function(ignoreWidgets){
     	   var hasChanged = {}, postElts = this.get('postElts');
     	   if (utils.some(this.userChangedWidgets, function(widget, widgetName){
-					return utils.in_array(widgetName, postElts) && utils.in_array(widgetName, ignoreWidgets);
+					return utils.in_array(widgetName, postElts) && !utils.in_array(widgetName, ignoreWidgets);
 				})){
 				hasChanged.widgets = true;
     	   }

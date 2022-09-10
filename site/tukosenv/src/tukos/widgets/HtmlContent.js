@@ -24,7 +24,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/has", "dojo/on", "dojo/d
 			evt.stopPropagation();
 			evt.preventDefault();
 			node.onClickHandler.remove();
-			Pmg.serverDialog({object: source[2], view: 'noview', mode: 'NoMode', action: 'RestSelect', query: {one: true, params: {getOne: 'getOne'}, storeatts: {cols: [targetCol], where: {id: source[1]}}}}).then(lang.hitch(this, function(response){
+			Pmg.serverDialog({object: source[2], view: 'NoView', mode: 'NoMode', action: 'RestSelect', query: {one: true, params: {getOne: 'getOne'}, storeatts: {cols: [targetCol], where: {id: source[1]}}}}).then(lang.hitch(this, function(response){
         		this.set('value', response.item[targetCol]);
         	}));
         },

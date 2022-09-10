@@ -70,6 +70,15 @@ define (["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/dom-
 			if (this.backgroundColors){
 				this.set('style', {backgroundColor: this.backgroundColors[value]});
 			}
+		},
+		_getValueAttr: function(){
+			switch(this.value){
+				case true:
+				case false:
+					return this.value;
+				default:
+					return this.inherited(arguments);
+			}
 		}
     }); 
 });

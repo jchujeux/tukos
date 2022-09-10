@@ -102,6 +102,7 @@ class PageView extends Translator{
         if (empty($layout['atts']) || !isset($layout['atts']['label'])){
             $layout['atts']['label'] = $this->tr($module);
             $layout['atts']['moduleName'] = $module;
+            $layout['atts']['tukosTooltip'] = ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => $module . 'TukosTooltip', 'object' => 'tukoslib']];
         }
         $theDescription[$module]['atts'] = $layout['atts'];
         $contexts = ['tukosContext' => $this->user->customContextId($module, 'tukos'), 'userContext' => $this->user->customContextId($module, 'user'), 'activeContext' => $this->user->getContextId($module)];
@@ -179,6 +180,7 @@ class PageView extends Translator{
             $this->pageManagerArgs['menuBarDescription'] = $this->menuBarDescription($modulesMenuLayout);
             $this->pageManagerArgs['objectsDomainAliases'] = Directory::objectsDomainAliases();
             $this->pageManagerArgs['userRights'] = $this->user->rights();
+            $this->pageManagerArgs['presentTukosTooltips'] = Tfk::$registry->get('translatorsStore')->presentTukosTooltips();
             
             if ($this->pageManagerArgs['isMobile'] = Tfk::$registry->isMobile){
                 $this->pageManagerArgs['headerContent'] = $this->tr(Tfk::$registry->appName . 'HeaderBanner');

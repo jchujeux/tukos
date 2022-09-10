@@ -26,7 +26,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             ['formatter', 'get', 'renderCell', 'canEdit', 'renderHeaderCell'].forEach(
                 function(col, index, array){
                     if (colArgs[col]){
-                        colArgs[col] = (typeof this[colArgs[col]] === 'function') ? this[colArgs[col]] : eutils.eval(colArgs[col]);
+                        colArgs[col] = (typeof colArgs[col] === 'string' && typeof this[colArgs[col]] === 'function') ? this[colArgs[col]] : eutils.eval(colArgs[col]);
                     }
                 },
                 this
@@ -55,7 +55,9 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             if (this.renderCallback){
             	this.renderCallbackFunction = eutils.eval(this.renderCallback, "node, rowData, column, tdCell")
             }
-            this.noDataMessage =  Pmg.isMobile() ? Pmg.message('noDataMessageMobile') : Pmg.message('noDataMessage');
+            if (!this.hasOwnProperty('noDataMessage')){
+            	this.noDataMessage =  Pmg.isMobile() ? Pmg.message('noDataMessageMobile') : Pmg.message('noDataMessage');
+			}
             this.keepScrollPosition = true;
         	if (!this.itemCustomization){
         		this.customizationPath = 'customization.widgetsDescription.' + (form.attachedWidget ? form.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription.' : '') + this.widgetName + '.atts.';
@@ -144,7 +146,8 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             return this.grid._renderContent(this, object, Pmg.namedExtra(value));
         },
 		_storeDisplayedValue: function(value, column){
-			return value ? utils.findReplace(column.editorArgs.storeArgs.data, 'id', value === '0' ? '' : value, 'name', column.storeCache || (column.storeCache = {})) : value;
+			//return value ? utils.findReplace(column.editorArgs.storeArgs.data, 'id', value === '0' ? '' : value, 'name', column.storeCache || (column.storeCache = {})) : value;
+			return value !== undefined ? utils.findReplace(column.editorArgs.storeArgs.data, 'id', value, 'name', column.storeCache || (column.storeCache = {})) : value;
 		},
         renderStoreValue: function(object, value, node){
 			var self = this, grid = this.grid;            
@@ -168,8 +171,13 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         renderColorPicker: function(object, value, node){
         	return this.grid._renderContent(this, object, node, '', {backgroundColor: value});
         },
+        renderGauge: function(object, value, node){
+			console.log('renderGauge: ' + value);
+			const pValue = value ? JSON.parse(value) : value;
+			return this.grid._renderContent(this, object, node, typeof pValue === 'object' ? (pValue.gauge ? pValue.gauge.toString() : '') : (pValue ? pValue.toString() : ''));
+		},
         renderContent: function(object, value, node, options, noCreate){
-            var grid = this.grid, row = grid.row(object), args = {object: object, value: sutils.evalFormula(grid, value, this.field, row.data.idg)}, result;
+            var grid = this.grid, row = grid.row(object), idp = grid.collection.idProperty, args = {object: object, value: sutils.evalFormula(grid, value, this.field, row.data[idp])}, result;
             eutils.actionFunction(this, 'renderContent', this.renderContentAction, 'args', args);
             result = utils.transform(args.value, this.formatType, this.formatOptions, Pmg);
             return grid._renderContent(this, object, node, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {}, noCreate);
@@ -204,6 +212,9 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             }
             return node;
         },
+        renderHeaderContent: function(node){
+			node.innerHTML = this.label;
+		},
         colDisplayedValue: function(value, colName){
         	var column = this.columns[colName];
         	switch (column.widgetType){
@@ -279,9 +290,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             }
         },
         viewInSeparateBrowserWindow: function(grid){
-            var newWindow = window.open('', grid.clickedCell.column.field+grid.clickedCell.row.id, 'toolbar=no,location=no,status=no,menubar=no,directories=no,copyhistory=no, scrollbars=yes');
-            newWindow.document.write(grid.clickedRowValues()[grid.clickedCell.column.field]);
-            newWindow.document.close();
+            utils.viewInBrowserWindow(grid.clickedCell.column.field+grid.clickedCell.row.id, grid.clickedRowValues()[grid.clickedCell.column.field]);
         },
         editInNewTab: function(grid){
             var field  = grid.clickedCell.column.field,
@@ -338,7 +347,14 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 			if (colItems !== 'header' && menuItems.canEdit && row.data.canEdit !== false){
             	menuItems[colItems] = menuItems[colItems].concat(menuItems.canEdit);
             }
-            mutils.setContextMenuItems(this, menuItems[colItems].concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this)));
+            let isRestricted = Pmg.get('userRights') === 'RESTRICTEDUSER', menuColItems = menuItems[colItems];
+			if (this.customContextMenuItems){
+				menuColItems = (menuColItems || []).concat(this.customContextMenuItems());
+			}                
+            if (menuColItems || !isRestricted){
+            	mutils.setContextMenuItems(this, menuColItems ? (isRestricted ? menuColItems : menuColItems.concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this))) : lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this));
+            	//mutils.setContextMenuItems(this, menuItems[colItems].concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this)));
+			}
         },
         cellValueOf: function(field, idPropertyValue){
 			var result;            

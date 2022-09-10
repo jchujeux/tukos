@@ -18,8 +18,8 @@ class View extends AbstractView {
                     'exercises' => $this->exercises(),
                     'name'      => ['atts' => ['edit' =>  ['style' => ['width' => '30em']], 'storeedit' => ['width' => 100]],],
                     'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
-                    'whenintheday' => ViewUtils::storeSelect('whenInTheDay', $this, 'Whenintheday', [true, 'lowercase', true], ['atts' => ['edit' => ['onChangeLocalAction' => ['wheninthe day' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]]),
-                    'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'lowercase', true]),
+                    'whenintheday' => ViewUtils::storeSelect('whenInTheDay', $this, 'Whenintheday', [true, 'lowercase', true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['wheninthe day' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]]),
+                    'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'lowercase', true, false]),
                     'exerciseid' => ['type' => 'storeSelect', 'atts' => ['edit' =>  ['storeArgs' => ['data' => []], 'label' => $this->tr('ExerciseId'),
                         'onChangeLocalAction' => ['exerciseid' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => $this->exerciseIdLocalAction()]]]]]],
                     'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => [
@@ -27,12 +27,18 @@ class View extends AbstractView {
                     ]]),
                     'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.']]]]),
                     'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#000.']]]]),
-                    'mechload' => ViewUtils::numberTextBox($this, 'Tukos_Mechanical_Load'),
+                    //'mechload' => ViewUtils::numberTextBox($this, 'Tukos_Mechanical_Load'),
+                    'mechload' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
+                        'label' => $this->tr('Tukos_Mechanical_Load'), 'style' => ['height' => '100px', 'width' => 'auto', 'maxWidth' => '800px'],
+                        'gaugeAtts' => ['indicatorColor' => 'black', 'height' => 30, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 10, 'showValue' => true, 'gradient' => [0, '#B22222', 0.5, '#FF8C00', 1, '#7FFFD4'],
+                                'style' => ['margin' => '0px 0px 0px 0px'/*, 'width' => 'auto', 'maxWidth' => '800px'*/, 'height' => '50px'], 'useTooltip' => false],
+                        //'checkboxes' => [['title' => $this->tr('fatigue'), 'id' => 'fatigue']]
+                    ]]]
         ], 
                 array_intersect_key($exercisesView->dataWidgets(), [/*'name' => true, */'stress' => true, 'series' => true, 'repeats' => true, 'extra' => true, 'extra1' => true]), [
-                    'stress'        => ViewUtils::storeSelect('stress', $this, 'Mechanical stress', [true, 'ucfirst', true]),
-                    'painduring' => ViewUtils::storeSelect('pain', $this, 'Painduring', [true, 'ucfirst', true], ['atts' => ['edit' => ['backgroundColors' => Physio::$painColors, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
-                    'painafter' => ViewUtils::storeSelect('pain', $this, 'Painafter', [true, 'ucfirst', true], ['atts' => ['edit' => ['backgroundColors' => Physio::$painColors, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+                    'stress'        => ViewUtils::storeSelect('stress', $this, 'Mechanical stress', [true, 'ucfirst', true, false]),
+                    'painduring' => ViewUtils::storeSelect('pain', $this, 'Painduring', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['backgroundColors' => Physio::$painColors, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+                    'painafter' => ViewUtils::storeSelect('pain', $this, 'Painafter', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['backgroundColors' => Physio::$painColors, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
                 ] 
             ), 
             [       'series' => ['atts' => ['edit' => ['onChangeLocalAction' => ['series' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]],

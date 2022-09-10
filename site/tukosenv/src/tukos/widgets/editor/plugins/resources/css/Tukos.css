@@ -13,6 +13,21 @@
 	width: 18px;
 	height: 18px;
 }
+.dijitAdditionalEditorIconTukosTooltipLinkDialog {
+	background-image: url(../icons/tukostooltiplinkdialog.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
+
+.dijitDisabled .dijitAdditionalEditorIconTukosTooltipLinkDialog {
+	background-image: url(../icons/tukostooltiplinkdialogDisabled.gif);
+	background-repeat: no-repeat;
+	background-position: center center;
+	width: 18px;
+	height: 18px;
+}
 
 .dijitAdditionalEditorIconInsertCheckbox {
 	background-image: url(../icons/insertCheckbox.gif);

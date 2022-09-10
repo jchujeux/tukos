@@ -10,6 +10,8 @@ use TukosLib\TukosFramework as TFK;
 
 class Model extends AbstractModel {
 
+    use Kpis;
+    
     function __construct($objectName, $translator=null){
         $colsDefinition = [
             'startdate'  => 'VARCHAR(30)  DEFAULT NULL',
@@ -59,11 +61,12 @@ class Model extends AbstractModel {
             'cadencestream' => 'longtext',
             'wattsstream' => 'longtext',
             'grade_smoothstream' => 'longtext',
-            'velocity_smoothstream' => 'longtext'
+            'velocity_smoothstream' => 'longtext',
+            'kpiscache' => 'longtext'
         ];
         $this->streamCols = ['timestream', 'distancestream', 'altitudestream', 'heartratestream', 'cadencestream', 'wattsstream', 'grade_smoothstream', 'velocity_smoothstream'];
         parent::__construct(
-            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], [], $colsDefinition);
+            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], ['kpiscache'], $colsDefinition);
     }   
     function initialize($init=[]){
         return parent::initialize(array_merge(['warmup' => '', 'mainactivity' => '', 'warmdown' => '', 'sessionid' => 1], $init));
@@ -104,6 +107,22 @@ class Model extends AbstractModel {
                 $item['trimpavgpw'] = intval(TF::avgPwTrainingload($avgPw, $ftp, $timemoving, $sex));
             }
         }
+    }
+    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
+        $atts['cols'][] = 'kpiscache';
+        $results = parent::getAll($atts, $jsonColsPaths, $jsonNotFoundValues, $processLargeCols);
+        foreach ($results as &$session){
+            if (!empty($kpisCache = Utl::extractItem('kpiscache', $session))){
+                $session = array_merge($session, json_decode($kpisCache, true));
+            }
+        }
+        return $results;
+    }
+    public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
+        if (!$jsonFilter && (!empty($kpisCacheCols = array_diff(array_keys($newValues), $this->allCols)))){
+            $newValues['kpiscache'] = json_encode(Utl::extractItems($kpisCacheCols, $newValues));
+        }
+        return parent::updateOne($newValues, $atts, $insertIfNoOld, true, $init);
     }
 }
 ?>

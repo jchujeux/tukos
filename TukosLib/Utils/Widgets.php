@@ -187,9 +187,22 @@ class Widgets{
             'storeedit' => ['width' => 110, 'editOn' => 'click', 'renderCell' => 'renderStoreValue'],
             'overview'  => ['width' => 110, 'renderCell' => 'renderStoreValue'],
         ];
-
+        
         return ['type' => 'StoreSelect', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
-
+        
+    }
+    public static function storeComboBox($atts, $editOnly = true){
+        $defAtts = [
+            'edit' => [
+                'title' => '', /*'labelProperty' => 'name', 'labelAttr' => 'name', */'placeHolder' => 'Enter Value', 'required' => false, 'style' => ['width' => "auto", 'minWidth' => '5em', 'maxWidth' => '15em'],
+                'storeArgs' => ['data' => null]
+            ],
+            'storeedit' => ['width' => 110, 'editOn' => 'click'/*, 'renderCell' => 'renderStoreValue'*/],
+            'overview'  => ['width' => 110, 'renderCell' => 'renderStoreValue'],
+        ];
+        
+        return ['type' => 'StoreComboBox', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
+        
     }
     public static function numberUnitBox($atts, $editOnly = true){
         $defAtts = ['edit' => ['title' => '', 
@@ -263,33 +276,57 @@ class Widgets{
     }
     public static function pieChart($atts, $editOnly = true){
         $defAtts = ['edit' => [
-        	'chartStyle' => ['width' => "400px"],
-        	'title' => '', 'showValuesTable' => 'true',
-        	'plots' => ['thePlot' => ['plotType' => 'Pie', 'radius' => 130, 'fontColor' => 'black', 'labelOffset' => 0]],
-        	'series' => ['thePlot' => ['value' => [], 'options' => ['plot' => 'thePlot']]]
+            'chartStyle' => ['width' => "400px"],
+            'title' => '', 'showValuesTable' => 'true',
+            'plots' => ['thePlot' => ['type' => 'Pie', 'radius' => 130, 'fontColor' => 'black', 'labelOffset' => 0]],
+            'series' => ['thePlot' => ['value' => [], 'options' => ['plot' => 'thePlot']]]
         ]];
         return ['type' => 'Chart', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
-
+    
+    public static function spiderChart($atts, $editOnly = true){
+        $defAtts = ['edit' => [
+            'chartStyle' => ['width' => "400px"],
+            'title' => '', 'showValuesTable' => 'true',
+            'plots' => ['thePlot' => ['type' => 'Spider']],
+            'series' => ['thePlot' => ['value' => [], 'options' => ['plot' => 'thePlot']]]
+        ]];
+        return ['type' => 'Chart', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
+    }
+    
     public static function columnsChart($atts, $editOnly = true){
         $defAtts = ['edit' => [
         	'title' => '', 'showValuesTable' => 'true',
-        	'plots' => ['thePlot' => ['plotType' => 'Columns', 'hAxis' => "x", 'vAxis' =>  "y", 'labels' => true, 'labelStyle' => 'outside', 'gap' => 5, 'minBarSize' => 3, 'maxBarSize' =>  40]],
+        	'plots' => ['thePlot' => ['type' => 'Columns', 'hAxis' => "x", 'vAxis' =>  "y", 'labels' => true, 'labelStyle' => 'outside', 'gap' => 5, 'minBarSize' => 3, 'maxBarSize' =>  40]],
         	'series' => ['thePlot' => ['value' => [], 'options' => ['plot' => 'thePlot']]]
         ]];
         return ['type' => 'Chart', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
     public static function chart($atts, $editOnly = true){
-        $defAtts = ['edit' => ['title' => '', 'idProperty' => 'id', 'kwArgs' => [],]];
+        $defAtts = ['edit' => ['title' => '', 'idProperty' => 'id']];
         return ['type' => 'Chart', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
+    }
+    public static function dynamicChart($atts, $editOnly = true){
+        $defAtts = ['edit' => ['title' => '', 'idProperty' => 'id']];
+        return ['type' => 'DynamicChart', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
     public static function horizontalSlider($atts, $editOnly = true){
         $defAtts = ['edit' => []];
         return ['type' => 'HorizontalSlider', 'atts' =>($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
     public static function horizontalLinearGauge($atts, $editOnly = true){
-        $defAtts = ['edit' => []];
+        $defAtts = ['edit' => [],
+            'storeedit' => ['renderCell' => 'renderGauge', 'editOn' => 'click'],
+            'overview'  => ['renderCell' => 'renderGauge'],
+        ];
         return ['type' => 'HorizontalLinearGauge', 'atts' =>($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
+    }
+    public static function abcTriangle($atts, $editOnly = true){
+        $defAtts = ['edit' => [],
+            //'storeedit' => ['renderCell' => 'renderGauge', 'editOn' => 'click'],
+            //'overview'  => ['renderCell' => 'renderGauge'],
+        ];
+        return ['type' => 'ABCTriangle', 'atts' =>($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
     public static function StoreCalendar($atts, $editOnly = true){
         $defAtts = ['edit' => ['dateInterval' => 'day',  'createOnGridClick' => true, 'style' => ['position' => 'relative',  'width' => '1000px', 'height' => '1000px',  'storeArgs' => ['data' => null]]]];

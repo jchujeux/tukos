@@ -7,7 +7,7 @@ define (["dojo/_base/declare", "dijit/form/MultiSelect", "dijit/Tooltip", "tukos
             this.set('value', valueToRestore);
         },
         _getServerValueAttr: function(){
-			return JSON.stringify(this.get('value'));;
+			return JSON.stringify(this.get('value'));
 		},
 		_getDisplayedValueAttr: function(){
 			var values = this.get('value'), options = this.options, displayedValue = [];

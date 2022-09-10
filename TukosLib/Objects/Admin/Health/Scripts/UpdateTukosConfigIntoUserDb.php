@@ -19,7 +19,7 @@ class UpdateTukosConfigIntoUserDb {
                 'forgetuserchanges-s'      => 'override changes to items made in the user database'
             ]);
         $configStore  = new Store(array_merge($appConfig->dataSource, ['dbname' => 'tukosconfig']));
-        if ($options->forgetuserchanges && $options->forgetuserchanges = 'yes'){
+        if ($options->forgetuserchanges && $options->forgetuserchanges === 'YES'){
             $keepUserChanges = false;
         }else{
             $keepUserChanges = true;
@@ -28,8 +28,10 @@ class UpdateTukosConfigIntoUserDb {
         $user = Tfk::$registry->get('user');
         $user->setLockedMode(false);
         try{
-            $changedConfigs = $store->query("SELECT t1.object, t1.id FROM tukosconfig.tukos as t1 LEFT JOIN tukosconfigold.tukos as t2 on (t1.id = t2.id) WHERE (t1.updated > t2.updated OR t2.id IS NULL) and t1.id > 0 and t1.id < 10000")
-                ->fetchAll(\PDO::FETCH_COLUMN|\PDO::FETCH_GROUP);
+            $changedConfigs = $keepUserChanges
+                ? $store->query("SELECT t1.object, t1.id FROM tukosconfig.tukos as t1 LEFT JOIN tukosconfigold.tukos as t2 on (t1.id = t2.id) WHERE (t1.updated > t2.updated OR t2.id IS NULL) and t1.id > 0 and t1.id < 10000")
+                : $store->query("SELECT t1.object, t1.id FROM tukosconfig.tukos as t1 WHERE t1.id > 0 and t1.id < 10000")
+            ->fetchAll(\PDO::FETCH_COLUMN|\PDO::FETCH_GROUP);
             $incompatibleObjects = []; 
             $updatedIds = [];
             foreach ($changedConfigs as $object => $ids){

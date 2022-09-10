@@ -75,18 +75,27 @@ function(declare, lang, utils, Pmg){
 			}
 		},
 		programsConfigApplyAction: function(pane){
-			var form = this.form, sessionsWidget = form.getWidget('sptsessions');
-			form.programsConfig = {equivalentDistance: JSON.stringify(pane.valueOf('equivalentdistance'))};
-			lang.setObject('customization.programsConfig', form.programsConfig, form);
-			sessionsWidget.loadChartUtils.updateCharts(sessionsWidget, true);
+			const form = this.form, changedValues = pane.changedValues();
+			if (!utils.empty(changedValues)){				
+				const sessionsWidget = form.getWidget('sptsessions');
+				if (changedValues.equivalentDistance){
+					form.programsConfig.equivalentDistance = JSON.stringify(pane.getWidget('equivalentDistance').get('collection').fetchSync());
+					sessionsWidget.loadChartUtils.updateCharts(sessionsWidget, true);
+					lang.setObject('customization.programsConfig.equivalentDistance', form.programsConfig.equivalentDistance, form);
+				}
+				if (changedValues.spiders){
+					form.programsConfig.spiders = JSON.stringify(pane.getWidget('spiders').get('collection').fetchSync());
+					Pmg.setFeedback(Pmg.message('savecustomtoupdatespiders'), null, null, true);
+					lang.setObject('customization.programsConfig.spiders', form.programsConfig.spiders, form);
+				}
+			}
 		},
 		authorizeStrava: function(pane){
-			var form = pane.form, programId = form.valueOf('id'), athleteId = form.valueOf('parentid');
-			var contentMessage = (!utils.empty(form.changedWidgets) || !programId) ?  Pmg.message('saveOrReloadFirst') : '';
-			contentMessage += !athleteId ?  ' & <br> '  + Pmg.message('needtodefineathlete') : '';
+			var form = pane.form, programId = form.valueOf('id'), athleteId = form.valueOf('parentid'), coachId = form.valueOf('coach'), contentMessage = athleteId ? '' : Pmg.message('needtodefineathlete', 'sptprograms');
+			contentMessage = coachId ? '' : ((contentMessage ? ' & ' : '') + Pmg.message('needtodefinecoach', 'sptprograms'));
 			pane.close();
 			if (contentMessage){
-				Pmg.alert({title: Pmg.message('cannotsynchronizestrava'), content: contentMessage});
+				Pmg.alert({title: Pmg.message('cannotsynchronizestrava', 'sptprograms'), content: contentMessage});
 			}else{
             	Pmg.setFeedback(Pmg.message('actionDoing'));
             	this.form.serverDialog({action:'Process', query: {id: programId, athleteid: athleteId, athleteemail: form.valueOf('sportsmanemail'), coachid: form.valueOf('coach'), coachemail: form.valueOf('coachemail'),
