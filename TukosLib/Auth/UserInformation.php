@@ -425,5 +425,8 @@ class UserInformation{
         }
         return [$request, $query];
     }
+    public function showTooltips(){
+        return Utl::getItem('showTooltips', $this->pageCustomization(), 'YES', 'YES');
+    }
 }
 ?>

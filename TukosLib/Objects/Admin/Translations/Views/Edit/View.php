@@ -28,8 +28,17 @@ class View {
         ];
 
         $this->dataLayout = [
-            'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-            'widgets' => ['id', 'name', 'setname', 'en_us', 'fr_fr', 'es_es']
+            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
+            'contents' => [
+                'row1' => [
+                    'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true],
+                    'widgets' => ['id', 'name', 'setname']
+                ],
+                'row2' => [
+                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetCellStyle' => ['verticalAlign' => 'top']],
+                    'widgets' => ['en_us', 'fr_fr', 'es_es']
+                ]
+                ]
         ];
             
         $this->actionLayout = [

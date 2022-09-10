@@ -760,12 +760,9 @@ define([
 					if (on.emit(cellElement, 'dgrid-datachange', eventObject)) {
 						if (this.updateDirty) {
 							// for OnDemandGrid: update dirty data, and save if autoSave is true
-							//var noRefresh = this.noRefreshOnUpdateDirty;
-		                    //this.noRefreshOnUpdateDirty = true;
 							this.updateDirty(row.id, column.field, value);
 							// perform auto-save (if applicable) in next tick to avoid
 							// unintentional mishaps due to order of handler execution
-		                    //this.noRefreshOnUpdateDirty = noRefresh;
 		                    //var deselect = this.deselectOnRefresh;
 		                    //this.deselectOnRefresh = false;
 		                    //this.refreshCell();
@@ -824,7 +821,7 @@ define([
 			//		_updatePropertyFromEditor.
 
 			if (typeof cmp.get === 'function') { // widget
-				return this._convertEditorValue(cmp.get('value'));
+				return this._convertEditorValue(cmp.get('serverValue') || cmp.get('value'));
 			}
 			else { // HTML input
 				return this._convertEditorValue(

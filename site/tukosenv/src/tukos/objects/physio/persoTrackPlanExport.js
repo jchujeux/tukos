@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "tukos/PageManager"], 
-function(declare, Pmg){
+define(["tukos/PageManager"], 
+function(Pmg){
     return {
 		paneDescription: {
 			widgetsDescription:{

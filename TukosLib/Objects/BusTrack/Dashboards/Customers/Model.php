@@ -177,7 +177,7 @@ EOT
             foreach($totalWotPerCategory as $id => $item){
                 $namedPerCategory[$this->categoriesModel->tName($organization, $id)] = $item;
             }
-            $result['totalwotpercategory'] = ['store' => Utl::toStoreData($namedPerCategory, 'category', 'amount')];
+            $result['totalwotpercategory'] = ['data' => Utl::toStoreData($namedPerCategory, 'category', 'amount')];
         }
         if (!empty($result['paymentsdetailslog'])){
             $result['paymentsdetailslog'] = json_decode($result['paymentsdetailslog'], true);

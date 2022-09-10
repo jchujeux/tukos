@@ -76,7 +76,6 @@ EOT
                '@physiopersotreatments' => ['type' => 'MenuBarItem', 'atts' => ['onClickArgs' => ['object' => 'physiopersotreatments', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['id' => $queryId]]]]
               ]
             : ['$physiopersoplans' => [], '$physiopersotreatments' => []],
-//            ['#physiopersodailies' => isset($queryId) ? ['customAtts' => ['new' => ['popup' => ['items' => [0 => ['atts' => ['onClickArgs' => ['query' => ['storeatts' => ['init' => ['startdate' => date('Y-m-d'), 'parentid' => $queryId]]]]]]]]]]] : [],
             ['@physiopersodailies' => [[
                 'new' => ['type' => 'PopupMenuItem', 'atts' => ['label' => Tfk::tr('new')], 'popup' => ['type' => $isMobile ? 'MobileTukosPane' : 'TukosTooltipDialog', 'atts' => $isMobile ? $newDailyPaneDescription :  ['paneDescription' => $newDailyPaneDescription]]],
                 'edit' => ['type' => 'PopupMenuItem', 'atts' => ['label' => Tfk::tr('edit')],

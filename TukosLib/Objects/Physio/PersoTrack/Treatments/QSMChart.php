@@ -8,7 +8,7 @@ trait QSMChart {
     function qsmChartDescription(){
         $tr = $this->tr;
         $seriesDescription = function($col, $plot) use ($tr) {
-            return ['value' => ['y' => $col, 'text' => 'day', 'tooltip' => $col.'Tooltip'], 'options' => ['plot' => $plot, 'label' => $tr($col), 'legend' => $tr($col)]];
+            return ['value' => ['y' => $col/*, 'text' => 'day'*/, 'tooltip' => $col.'Tooltip'], 'options' => ['plot' => $plot, 'label' => $tr($col), 'legend' => $tr($col)]];
         };
         return [
             'type' => 'Chart',
@@ -26,15 +26,15 @@ trait QSMChart {
                     'y2' => ['title' => $tr('load'), 'vertical' => true, 'leftBottom' => false, /*'min' => 0, 'max' => 10, */'titleFont' => 'normal normal normal 11pt Arial', 'majorLabels' => false, 'minorLabels' => false],
                 ],
                 'plots' => [
-                    'lines' => ['plotType' => 'Lines', 'hAxis' => 'x', 'vAxis' => 'y2', 'lines' => true, 'markers' => true, 'tension' => 'X', 'shadow' => ['dx' => 1, 'dy' => 1, 'width' => 2]],
-                    'cluster' => ['plotType' => 'ClusteredColumns', 'vAxis' => 'y1', 'gap' => 3, 'styleFunc' => <<< EOT
+                    'lines' => ['type' => 'Lines', 'hAxis' => 'x', 'vAxis' => 'y2', 'lines' => true, 'markers' => true, 'tension' => 'X', 'shadow' => ['dx' => 1, 'dy' => 1, 'width' => 2]],
+                    'cluster' => ['type' => 'ClusteredColumns', 'vAxis' => 'y1', 'gap' => 3, 'styleFunc' => <<< EOT
 (function(item){
     var colors = {0: 'blank', 1: 'lightgreen', 2: 'orange', 3: 'red', 4: 'red'};
     return  {fill: colors[item.y]};
 })
 EOT
                     ],
-                    'day' => ['plotType' => 'Indicator', 'hAxis' => 'x', 'vAxis' => 'y2', 'stroke' => null, 'outline' => null, 'fill' => null, 'labels' => false, 'lineStroke' => ['color' => 'red', 'style' => 'shortDash', 'width' => 2]]
+                    'day' => ['type' => 'Indicator', 'hAxis' => 'x', 'vAxis' => 'y2', 'stroke' => null, 'outline' => null, 'fill' => null, 'labels' => false, 'lineStroke' => ['color' => 'red', 'style' => 'shortDash', 'width' => 2]]
                 ],
                 'legend' => ['type' => 'SelectableLegend', 'options' => []],
                 'series' => [

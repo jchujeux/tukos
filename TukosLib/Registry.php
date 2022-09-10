@@ -85,7 +85,7 @@ class Registry{
         $this->headerBanner = ['tukos' => 'headerBanner', 'tds' => 'tdsHeaderBanner'][$this->organization];
     }        
     public function setAppName($appName){
-        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus', 'tukosblog' => 'TukosBlog', 'tukosmsqr' => 'TukosMSQR'][strtolower($appName)];
+        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus', 'tukosblog' => 'TukosBlog', 'tukosmsqr' => 'TukosMSQR', 'tukoswoundtrack' => 'TukosWoundTrack'][strtolower($appName)];
     }
     public function set($service, $serviceObject){
         return $this->container->set($service, $serviceObject);

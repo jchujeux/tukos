@@ -56,16 +56,14 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
         watchCallback: function(widget, attr, oldValue, value){
             var form = widget.form, Pmg = form.Pmg;
             if (oldValue !== value && form){
-                if (attr === 'value' && form.markIfChanged && arrayUtil.indexOf(form.postElts, widget.widgetName)!= -1){
-                   	/*if (widget.widgetName === 'permission'){
-                    		Pmg.setFeedback(Pmg.message('permissionchanged'));
-                	}else */if (!form.changedWidgets.permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL'])){
+                if (attr === 'value' && form.markIfChanged && (form.markAllChanges || arrayUtil.indexOf(form.postElts, widget.widgetName)!= -1)){
+                   	if (!form.changedWidgets.permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL'])){
                 		Pmg.setFeedback(Pmg.message('itemislocked')); Pmg.beep();
                    	}
                    	this.markAsChanged(widget);
                 }
                 if (form.watchOnChange){
-                    form.mayNeedResize = false;
+                    form.mayNeedResize = form.mayNeedResize || false;
                     if (attr === 'value' && form.watchContext === 'user'){
                         if (widget.onChangeServerAction && !widget.inOnChangeServerAction){
                             form.widgetChangeServerDialog(widget);
@@ -106,7 +104,7 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                     var newWidgetValue = widget.get(attr);
                     widget.set(attr, newWidgetValue);
                     var form = widget.form || widget.getParent().form;
-                    if (attr == 'value' && form.markIfChanged && arrayUtil.indexOf(form.postElts, widget.widgetName) != -1){
+                    if (attr == 'value' && form.markIfChanged && (form.markChangedPostElts || (arrayUtil.indexOf(form.postElts, widget.widgetName)!= -1))){
                         this.setStyleToChanged(subWidget);
                     }
                     widget.inSubWidgetWatchCallback = false;

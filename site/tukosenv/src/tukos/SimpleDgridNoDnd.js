@@ -29,7 +29,12 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/on",
                 }
             }
             this.revert();//Necessary for the children rows expansion / collapse to work (!)
-        }
+        },
+		_setStore: function(storeArgs){
+			delete this.store;
+			this.store = new MemoryTreeObjects(storeArgs);
+			this.collection = this.store.getRootCollection();
+		}
 
     }); 
     return widget;

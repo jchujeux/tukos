@@ -31,6 +31,9 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
                 return duration;
             }
         },
+        durationDays: function(fromDate, toDate){
+			return ((typeof toDate === 'string' ? this.parseDate(toDate) : toDate).getTime() - (typeof fromDate === 'string' ? this.parseDate(fromDate) : fromDate).getTime()) / (1000 * 3600 * 24);
+		},
         dateTimeString: function(fromDateString, durationString, toDateString, correction){// format: ISO
             if (fromDateString && durationString){
                 var durationArray = JSON.parse(durationString),
@@ -122,8 +125,12 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
             case 'year'   :  ret.setFullYear(ret.getFullYear() + units);  break;
             case 'quarter':  ret.setMonth(ret.getMonth() + 3*units);  break;
             case 'month'  :  ret.setMonth(ret.getMonth() + units);  break;
-            case 'week'   :  ret.setDate(ret.getDate() + 7*units);  break;
-            case 'day'    :  ret.setDate(ret.getDate() + units);  break;
+            case 'week'   :  
+            	ret.setDate(ret.getDate() + 7*units);  
+            	break;
+            case 'day'    :  
+            	ret.setDate(ret.getDate() + units);  
+            	break;
             case 'hour'   :  ret.setTime(ret.getTime() + units*3600000);  break;
             case 'minute' :  ret.setTime(ret.getTime() + units*60000);  break;
             case 'second' :  ret.setTime(ret.getTime() + units*1000);  break;
@@ -140,6 +147,29 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
            }
            return (date1 && date2 ? dojo.date.difference(date1, date2, unit) : '');
         },
+		yearsDaysMonthsDifference: function(startingDate, endingDate) {
+		  let startDate = typeof startingDate === 'string' ? new Date(startingDate) : startingDate, endDate = typeof endingDate === 'string' ? new Date(endingDate) : endingDate;
+		  const startYear = startDate.getFullYear(), february = (startYear % 4 === 0 && startYear % 100 !== 0) || startYear % 400 === 0 ? 29 : 28, daysInMonth = [31, february, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];	
+		  let yearDiff = endDate.getFullYear() - startYear;
+		  let monthDiff = endDate.getMonth() - startDate.getMonth();
+		  if (monthDiff < 0) {
+		    yearDiff--;
+		    monthDiff += 12;
+		  }
+		  let dayDiff = endDate.getDate() - startDate.getDate();
+		  if (dayDiff < 0) {
+		    if (monthDiff > 0) {
+		      monthDiff--;
+		    } else {
+		      yearDiff--;
+		      monthDiff = 11;
+		    }
+		    dayDiff += daysInMonth[startDate.getMonth()];
+		  }		
+		  return (yearDiff ? (yearDiff + ' ' + Pmg.message(yearDiff === 1 ? 'year' : 'years')) : '') + (yearDiff && !monthDiff && dayDiff ? ' ' + Pmg.message('and') + ' ' : (yearDiff && monthDiff ? ' ' : '')) +
+		  		 (monthDiff ? (monthDiff + ' ' + Pmg.message(monthDiff === 1 ? 'month' : 'months')) : '') + (monthDiff && dayDiff ? ' ' + Pmg.message('and') + ' ' : '') + 
+		  		 (dayDiff ? (dayDiff + ' ' + Pmg.message(dayDiff === 1 ? 'day' : 'days')) : (yearDiff || monthDiff ? '' : Pmg.message('thisday')));
+		},
         age: function(birthDateString){
             if (birthDateString){
                 var birthDate = new Date(birthDateString), today= new Date(), age = today.getFullYear() - birthDate.getFullYear(), month = today.getMonth() - birthDate.getMonth();

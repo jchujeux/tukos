@@ -16,11 +16,12 @@ class View extends AbstractView {
         $this->user  = Tfk::$registry->get('user');
         $this->sendOnSave = $this->sendOnDelete = [];
         $this->mustGetCols = ['id'];
-
+        $tr = $this->tr;
+        $customizableAtts = [$tr('editorType') => ['att' => 'editorType', 'type' => 'StoreSelect', 'name' => $tr('editorType'), 'storeArgs' => ['data' => [['id' => 'normal', 'name' => $tr('normal')], ['id' =>  'simple', 'name' =>  $tr('simple')], ['id' =>  'basic', 'name' =>  $tr('basic')]]]]];
         $this->dataWidgets = [
             'id' => ViewUtils::textBox($this, 'Id', [
                     'atts' => [
-                        'edit' =>  ['disabled' => true, 'style' => ['width' => ['9em']]],
+                        'edit' =>  ['disabled' => true, 'style' => ['width' => ['3em']]],
                         'storeedit' => ['width' => 110, 'onClickFilter' => ['id'], 'renderExpando' => true, 'formatter' => '', 'renderCell' => ''],
                         'overview'  => ['width' => 110, 'onClickFilter' => ['id']],
                     ]
@@ -28,9 +29,20 @@ class View extends AbstractView {
             ), 
             'name'      => ViewUtils::textArea($this, 'Translation key', ['atts' => ['storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
         	'setname'  => ViewUtils::storeSelect('setName', $this, 'Translation set'),
-            'en_us'    => ViewUtils::textArea($this, 'English'),
-            'fr_fr'    => ViewUtils::textArea($this, 'French'),
-            'es_es'    => ViewUtils::textArea($this, 'Spanish'),
+            'en_us'    => ViewUtils::lazyEditor($this, 'English', ['atts' => ['edit' => [
+                'height' => '12em',
+                'height' => '12em', 'editorType' => 'basic',
+                'customizableAtts' => $customizableAtts
+            ]]]),
+            'fr_fr'    => ViewUtils::lazyEditor($this, 'French', ['atts' => ['edit' => [
+                'height' => '12em', 'editorType' => 'basic',
+                'customizableAtts' => $customizableAtts
+            ]]]),
+            'es_es'    => ViewUtils::lazyEditor($this, 'Spanish', ['atts' => ['edit' => [
+                'height' => '12em',
+                'height' => '12em', 'editorType' => 'basic',
+                'customizableAtts' => $customizableAtts
+            ]]])
         ];
         $this->defaultDataWidgetsElts = array_keys($this->dataWidgets);
         $this->responseContent = null;

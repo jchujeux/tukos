@@ -44,7 +44,7 @@ return declare(null, {
 						dayDateObject.setDate(dayDateObject.getDate() + 1);
 						dayDate = dutils.formatDate(dayDateObject);
 					}
-					chartWidget.set('value', {store: chartData, axes: {x: {title: Pmg.message(dayType, 'physiopersotreatments')}}});
+					chartWidget.set('value', {data: chartData, axes: {x: {title: Pmg.message(dayType, 'physiopersotreatments')}}});
 				});
 			}
 		}

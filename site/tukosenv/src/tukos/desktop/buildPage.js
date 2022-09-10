@@ -18,10 +18,10 @@ function (lang, dom, domStyle, ready, when, registry, BorderContainer, TabContai
 			var contentTabs = new TabContainer({id: "centerPanel", region: "center", tabPosition: "top", 'class': "centerPanel", style: "width: 100%; height: 100%; padding: 0px"});
 			appLayout.addChild( contentTabs );
 
-			Pmg.tabs = new TabsManager({container: contentTabs, tabsDescription: obj.tabsDescription});
+			//Pmg.tabs = new TabsManager({container: contentTabs, tabsDescription: obj.tabsDescription});
 			Pmg.resizeTab = function(){
 				var container = Pmg.tabs.container;
-				container.selectedChildWidget.resize(container._containerContentBox, container._contentBox);
+				container.selectedChildWidget && container.selectedChildWidget.resize(container._containerContentBox, container._contentBox);
 			}
 			var userTabLink = new TabOnClick({url: obj.userEditUrl}, "pageusername");
 			      
@@ -80,17 +80,17 @@ function (lang, dom, domStyle, ready, when, registry, BorderContainer, TabContai
 			               	self.resizeLayoutPanes(true)
 			           	});
 			           }else{
-			           	if (isMaximized){
-			               	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || leftPaneWidth);                   		
-			               	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
-			               	isMaximized = false;
-			           	}else{
-			               	domStyle.set('leftPanel', 'width', '80%');                       		
-			               	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-superarrow");
-			               	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
-			               	isMaximized = true;
-			           	}
-			           	self.resizeLayoutPanes(true)
+				           	if (isMaximized){
+				               	domStyle.set('leftPanel', 'width', newPageCustomization.leftPaneWidth || leftPaneWidth);                   		
+				               	leftPaneMaxButton.set("iconClass", "ui-icon tukos-right-superarrow");
+				               	isMaximized = false;
+				           	}else{
+				               	domStyle.set('leftPanel', 'width', '80%');                       		
+				               	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-superarrow");
+				               	leftPaneMaxButton.set("iconClass", "ui-icon tukos-left-arrow");
+				               	isMaximized = true;
+				           	}
+				           	Pmg.resizeLayoutPanes(true);
 			           }
 			       });
 			   }
@@ -108,15 +108,12 @@ function (lang, dom, domStyle, ready, when, registry, BorderContainer, TabContai
 				       });
 				   	Pmg.setFeedback(obj.feedback);
 			   });
-/*		       when(WidgetsLoader.instantiationCompleted(), function(){
-			       		appLayout.resize();
-			       });*/
 			});
 	        Pmg.mayHaveNavigator = function(){
 	        	return registry.byId('showHideLeftPane');
 	        };
 			Pmg.showInNavigator = lang.hitch(this, this.showInNavigator);
-			//Pmg.alert = lang.hitch(this, this.alert);
+			Pmg.tabs = new TabsManager({container: contentTabs, tabsDescription: obj.tabsDescription});
 		},
         resizeLayoutPanes: function(leftPanelDisplay){
         	var appLayout = registry.byId('appLayout');

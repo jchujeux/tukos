@@ -6,6 +6,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
             var self = this, descriptions = this.tabsDescription, created, selected;
             var unloadAction = function(){
                 var openedTabs = self.container.getChildren(), changedTabs = {widgets: [], customization: []}, tabChange, theMessage;
+                Pmg.closeDependingWindows();
                 for (var i in openedTabs){
                     var theTab = openedTabs[i];
                     if (theTab.form && (tabChange = theTab.form.userHasChanged())){
@@ -54,7 +55,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
             ready(lang.hitch(this, function(){
                 this.container.addChild(theNewTab);
                 Pmg.setFeedback(args.feedback, Pmg.message('tabCreated'));
-                //theNewTab.resize();
+				//theNewTab.resize();
             }));
             return theNewTab;
         },

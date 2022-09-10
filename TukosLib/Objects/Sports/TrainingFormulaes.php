@@ -17,9 +17,9 @@ class TrainingFormulaes {
     public static function intensity($rate, $b){
         return $rate * exp($b * ($rate - 1));
     }
-    public static function hrRatio($hr, $hrMin, $hrMax){
+/*    public static function hrRatio($hr, $hrMin, $hrMax){
         return ($hr - $hrMin) / ($hrMax - $hrMin);
-    }
+    }*/
     public static function hrThresholdRatio($hr, $hrMin, $hrThreshold){
         return ($hr - $hrMin) / ($hrThreshold - $hrMin);
     }
@@ -78,10 +78,10 @@ class TrainingFormulaes {
         for ($i = 0; $i <= count($thresholds); $i++){
             $timeInZones[$i] = 0;
         }
-        $fuzzyDomain = FZ::fuzzyDomainAbsolute($thresholds, $uncertainty);
+        $fuzzyDomain = FZ::absoluteFuzzyDomain($thresholds, $uncertainty);
         $distinctValues = array_count_values($values);
         foreach ($distinctValues as $value => $secondsActive){
-            $fuzzyValue = FZ::fuzzyValueAbsolute($value, $fuzzyDomain);
+            $fuzzyValue = FZ::absoluteFuzzyValue($value, $fuzzyDomain);
             foreach($fuzzyValue as $key => $value){
                 $timeInZones[$key] += $secondsActive * $value;
             }

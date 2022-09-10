@@ -43,7 +43,7 @@ function(declare, lang, when, Dnd, utils){
             grid.refresh({keepScrollPosition: true});
         },
         onDropExternal: function (sourceSource, nodes, copy, targetItem) {
-            var tGrid = this.grid, sGrid = sourceSource.grid, noRefresh = this.noRefreshOnUpdateDirty;
+            var tGrid = this.grid, sGrid = sourceSource.grid, noRefresh = this.noRefreshOnUpdateDirty, idp = this.collection.idProperty;
             this.noRefreshOnUpdateDirty = true;
         	if (tGrid.onDropCondition){
             	if (!tGrid.onDropConditionFunction){
@@ -64,7 +64,7 @@ function(declare, lang, when, Dnd, utils){
                             var sourceField = fieldsMapping[field];
                             if (object[sourceField]){
                                 targetItem[field] = object[sourceField];
-                                tGrid.updateDirty(targetItem.idg, field, targetItem[field]);
+                                tGrid.updateDirty(targetItem[idp], field, targetItem[field]);
                             }
                         }
                         tGrid.collection.putSync(targetItem, {overwrite: true});

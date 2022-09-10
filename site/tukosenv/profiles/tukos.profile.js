@@ -22,6 +22,10 @@ var profile = {
 	// This defaults to "shrinksafe" if not provided.
 	layerOptimize: 'closure',
 
+	optimizeOptions: {
+		languageIn: "ECMASCRIPT6",
+		languageOut: "NO_TRANSPILE"
+	},
 	// A list of packages that will be built. The same packages defined in the loader should be defined here in the
 	// build profile.
 	packages: [

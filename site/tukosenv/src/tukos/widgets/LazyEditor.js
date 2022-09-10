@@ -1,7 +1,7 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dojo/dom-style", "dijit/layout/ContentPane", "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
         "tukos/widgets/HtmlContent", "tukos/widgets/DnDWidget", "tukos/widgets/widgetCustomUtils"], 
   function(declare, lang, ready, when, domStyle, ContentPane, Pmg, WidgetsLoader, HtmlContent, DnD, wcutils){
-	var editors = {}, isPlaced = false, editorTypes = {normal: 'Editor', simple: 'MobileEditor'};
+	var editors = {}, isPlaced = false, editorTypes = {normal: 'Editor', simple: 'MobileEditor', basic: 'TukosTextarea'};
 	return declare([ContentPane, DnD], {
 		postCreate: function(){
 			this.inherited(arguments);
@@ -15,7 +15,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			this.addChild(this.htmlContent);
 			this.onClickHandle = this.on('click', this.onClickCallback);
 			this.viewSource = false;
-			this.editorType = this.editorType || Pmg.isMobile() ? 'simple' : 'normal';
+			this.editorType = this.editorType || (Pmg.isMobile() ? 'simple' : 'normal');
 		},
 		onClickCallback: function(){
 			if (!this.disabled && !this.readonly){
@@ -101,7 +101,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 		},
 		_setValueAttr: function(value){
 			if (this.htmlContent){
-				this.htmlContent.set('value', value);
+				this.htmlContent.set('value', value || '');
 			}
 			this._set('value', value);
 		},

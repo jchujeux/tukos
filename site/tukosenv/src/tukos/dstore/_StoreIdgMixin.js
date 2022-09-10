@@ -5,18 +5,18 @@ define([
 ], function (declare, arrayUtil, lang) {
 	return declare(null, {
         constructor: function(){
-            this.idgLast = 0;
+            this.idpLast = 0;
         },
         setData : function(value){
-            this.idgLast = 0, self = this;
+            this.idpLast = 0, self = this, idp = this.idProperty;
             value.forEach(function(row){
-                row.idg = self.idgLast +=1;
+                row[idp] = self.idpLast +=1;
             });
             this.inherited(arguments); 
         },
         addSync: function(object, options){
-            this.idgLast += 1;
-            object.idg = this.idgLast;
+            this.idpLast += 1;
+            object[idp] = this.idpLast;
             return this.inherited(arguments);
         }
     });

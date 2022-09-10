@@ -29,14 +29,14 @@ define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferre
                 	)))))) + p1 + p2 +  p3;
             });
         },
-        actionFunction: function(widget, action, body, evalArgs, args){
+        actionFunction: function(object, action, body, evalArgs, args){
             if (body){
                 var functionName = action + 'ActionFunction';
-            	if (!widget[functionName]){
-                    var myEval = widget.myEval || (widget.myEval = lang.hitch(widget, this.eval));
-                    widget[functionName] = myEval(body, evalArgs || '');
+            	if (!object[functionName]){
+                    var myEval = object.myEval || (object.myEval = lang.hitch(object, this.eval));
+                    object[functionName] = myEval(body, evalArgs || '');
                 }
-                return widget[functionName](args);
+                return object[functionName](args);
             }
             return true;
         }

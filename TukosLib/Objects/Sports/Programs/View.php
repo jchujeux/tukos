@@ -11,7 +11,7 @@ use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
 
-	use CalendarsViewUtils, ViewActionStrings;
+	use CalendarsViewUtils, ViewActionStrings, SpiderView;
 	
 	function __construct($objectName, $translator=null){
 	    parent::__construct($objectName, $translator, 'Sportsman', 'Title');
@@ -21,16 +21,16 @@ class View extends AbstractView {
 		$this->allowedNestedWatchActions = 0;
 		$this->allowedNestedRowWatchActions = 0;
 		$chartsCols = [];
-		foreach(['duration', 'distance', 'equivalentdistance', 'elevationgain', 'sts', 'lts', 'tsb'] as $col){
+		foreach(['duration', 'distance', 'equivalentDistance', 'elevationgain', 'sts', 'lts', 'tsb'] as $col){
 		    $chartsCols[$col] = ['plot' => 'lines', 'tCol' => $tr($col)];
 		}
 		foreach(['load', 'intensity', 'stress', 'trimphr', 'trimppw', 'mechload', 'perceivedload', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
 		    $chartsCols[$col] = ['plot' => 'cluster', 'tCol' => $tr(substr($col, 0, 2) === 'gc' ? GC::gcName($col) : $col)];
 		}
-		foreach(['duration' => '(mn)', 'distance' => '(km)', 'equivalentdistance' => '(km)', 'elevationgain' => '(dam)'] as $col => $legendUnit){
+		foreach(['duration' => '(mn)', 'distance' => '(km)', 'equivalentDistance' => '(km)', 'elevationgain' => '(dam)'] as $col => $legendUnit){
 		    $chartsCols[$col]['legendUnit'] = $legendUnit;
 		}
-		foreach(['distance' => ' km', 'equivalentdistance' => 'km', 'elevationgain' => ' m'] as $col => $tooltipUnit){
+		foreach(['distance' => ' km', 'equivalentDistance' => 'km', 'elevationgain' => ' m'] as $col => $tooltipUnit){
 		    $chartsCols[$col]['tooltipUnit'] = $tooltipUnit;
 		}
 		$chartsCols['elevationgain']['tooltipUnit'] = ' (m)';
@@ -38,7 +38,7 @@ class View extends AbstractView {
 		    'tsb' => ['day' => 1, 'week' => 0.1]] as $col => $scalingFactor){
 		    $chartsCols[$col]['scalingFactor'] = $scalingFactor;
 		}
-		foreach(['load' => ['day' => 120, 'week' => 600], 'perceivedload' => ['day' => 120, 'week' => 600]] as $col => $normalizationFactor){
+		foreach(['load' => ['day' => 120, 'week' => 600], 'perceivedload' => ['day' => 120, 'week' => 600], 'trimphr' => ['day' => 1, 'week' => 7], 'trimppw' => ['day' => 1, 'week' => 7]] as $col => $normalizationFactor){
 		    $chartsCols[$col]['normalizationFactor'] = $normalizationFactor;
 		}
 		foreach(['intensity', 'stress', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
@@ -53,14 +53,14 @@ class View extends AbstractView {
 		];
 		$chartFilter = ['planned' => 'ne', 'performed' => 'eq'];
 		$chartCols = [
-		    'planned' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentdistance', 'elevationgain', 'intensity', 'load', 'stress'])),
-		    'performed' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentdistance',  'elevationgain', 'trimphr', 'trimppw', 'mechload', 'sts', 'lts', 'tsb', 'perceivedeffort', 'perceivedload', 'sensations', 'mood', 'fatigue']))
+		    'planned' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentDistance', 'elevationgain', 'intensity', 'load', 'stress'])),
+		    'performed' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentDistance',  'elevationgain', 'trimphr', 'trimppw', 'mechload', 'sts', 'lts', 'tsb', 'perceivedeffort', 'perceivedload', 'sensations', 'mood', 'fatigue']))
 		];
 		$summaryRow = ['cols' => [
 		    'day' => ['content' =>  ['Total']],
 		    'duration' => ['atts' => ['formatType' => 'minutesToHHMM'], 'content' => [['rhs' => "var duration = #duration#.split(':'); return res + duration[0]*60 + Number(duration[1]);"]]],
 		    'distance' => ['content' => [['rhs' => "return res + Number(#distance#);"]]],
-		    'equivalentdistance' => ['content' => [['rhs' => "return res + Number(#equivalentdistance#);"]]],
+		    'equivalentDistance' => ['content' => [['rhs' => "return res + Number(#equivalentDistance#);"]]],
 		    'elevationgain' => ['content' => [['rhs' => "return res + Number(#elevationgain#);"]]],
 		    'trimphr' => ['content' => [['rhs' => "return res + Number(#trimphr#);"]]],
 		    'trimppw' => ['content' => [['rhs' => "return res + (Number(#trimppw#) || Number(#trimphr#));"]]],
@@ -80,15 +80,20 @@ class View extends AbstractView {
                 'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekloadchart')]],
                 'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekperformedloadchart')]],
                 'synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $this->synchroStartLocalAction('newValue', '#synchnextmonday'),]],
-                'weeklies' => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter')
+                'weeklies' => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter'),
+                'displayeddate' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => "sWidget.form.kpiChartUtils.setDisplayedDateChartsValue();"]]
             ];
         };
         $loadChartCustomization = function($idProperty, $idPropertyStoreData, $colsToExcludeOptions) use ($tr) {
 		    $idPropertyType = $idProperty.'type'; $options = [];
 		    return [
 		      $idPropertyType => ['att' =>  $idPropertyType, 'type' => 'StoreSelect', 'name' => $this->tr($idPropertyType), 'storeArgs' => ['data' => $idPropertyStoreData]],
-		        'colsToExclude' => ['att' => 'colsToExclude', 'type' => 'MultiSelect', 'name' => $this->tr('colsToExclude'), 'options' => $colsToExcludeOptions
-		      ]
+		        'colsToExclude' => ['att' => 'colsToExclude', 'type' => 'MultiSelect', 'name' => $this->tr('colsToExclude'), 'options' => $colsToExcludeOptions],
+		        'y1custommin' => ['att' => 'y1custommin', 'type' => 'TextBox', 'name' => $this->tr('y1custommin')],
+		        'y1custommax' => ['att' => 'y1custommax', 'type' => 'TextBox', 'name' => $this->tr('y1custommax')],
+		        'y2custommin' => ['att' => 'y2custommin', 'type' => 'TextBox', 'name' => $this->tr('y2custommin')],
+		        'y2custommax' => ['att' => 'y2custommax', 'type' => 'TextBox', 'name' => $this->tr('y2custommax')],
+		        'applyscalingfactor' => ['att' => 'applyscalingfactor', 'type' => 'StoreSelect', 'name' => $this->tr('applyscalingfactor'), 'storeArgs' => ['data' => Utl::idsNamesStore(['YES', 'NO'], $tr)]]
 		    ];
         };
 		$loadChartDescription = function($chartAtts, $idpTypeLocalActionString) use ($loadChartCustomization, $tr, $summaryRow) {
@@ -99,7 +104,6 @@ class View extends AbstractView {
 		    foreach($chartAtts['cols'] as $col => $atts){
 		        $plot = $atts['plot'];
 		        $colLabel = $atts['tCol'];
-		        $legendLabel = Utl::getItem('legendUnit', $atts, '');
 		        $tableAttsColumns[$col] = ['label' => $colLabel . ' ' . Utl::getItem('tooltipUnit', $atts, '') , 'field' => $col, 'width' => 60];
 		        $series[$col] = ['value' => ['y' => $col, 'text' => $idProperty, 'tooltip' => $col . 'Tooltip'], 'options' => ['plot' => $plot, 'label' => $colLabel, 'legend' => $colLabel]];
 		        if ($plot === 'lines'){
@@ -124,20 +128,24 @@ class View extends AbstractView {
 		            'y2' => ['title' => $linesAxisLabel, 'vertical' => true, 'leftBottom' => false/*, 'min' => 0*/, 'titleFont' => 'normal normal normal 8pt Arial'],
 		        ],
 		        'plots' =>  [
-		            'lines' => ['plotType' => 'Lines', 'hAxis' => 'x', 'vAxis' => 'y2', 'lines' => true, 'markers' => true, 'tension' => 'X', 'shadow' => ['dx' => 1, 'dy' => 1, 'width' => 2]],
-		            'cluster' => ['plotType' => 'ClusteredColumns', 'vAxis' => 'y1', 'gap' => 3],
-		            $idProperty	  => ['plotType' => 'Indicator', 'hAxis' => 'x', 'vAxis' => 'y2', 'stroke' => null, 'outline' => null, 'fill' => null, 'labels' => false, 
+		            'lines' => ['type' => 'Lines', 'hAxis' => 'x', 'vAxis' => 'y2', 'lines' => true, 'markers' => true, 'tension' => 'X', 'shadow' => ['dx' => 1, 'dy' => 1, 'width' => 2]],
+		            'cluster' => ['type' => 'ClusteredColumns', 'vAxis' => 'y1', 'gap' => 3],
+		            $idProperty	  => ['type' => 'Indicator', 'hAxis' => 'x', 'vAxis' => 'y2', 'stroke' => null, 'outline' => null, 'fill' => null, 'labels' => false, 
 		                'lineStroke' => ['color' => 'red', 'style' => 'shortDash', 'width' => 2]],
 		        ],
 		        'legend' => ['type' => 'SelectableLegend', 'options' => []],
 		        'series' => $series,
 		        'tooltip' => true,
 		        'mouseZoomAndPan' => true,
-		        //'mouseIndicator' => ['plot' => 'lines', 'kwArgs' => ['series' => 'tsb', 'mouseOver' => true, 'lineStroke' => ['width' => 2, 'color' => 'blue']]],
 		        'onWatchLocalAction' => [
 		            $idProperty.'type' => [$chartName => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $idpTypeLocalActionString]]],
 		            'colsToExclude' => [$chartName => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => "sWidget.set('value', sWidget.get('value')); return true;"]]],
-		            'hidden' => [$chartName => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->hiddenLoadChartAction($chartName)]]]
+		            'y1custommin' => [$chartName => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => "sWidget.set('value', sWidget.get('value')); return true;"]]],
+		            'y1custommax' => [$chartName => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => "sWidget.set('value', sWidget.get('value')); return true;"]]],
+		            'y2custommin' => [$chartName => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => "sWidget.set('value', sWidget.get('value')); return true;"]]],
+		            'y2custommax' => [$chartName => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => "sWidget.set('value', sWidget.get('value')); return true;"]]],
+		            'applyscalingfactor' => [$chartName => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->loadChartChangeAction($chartName, 'applyscalingfactor')]]],
+		            'hidden' => [$chartName => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->loadChartChangeAction($chartName, 'hidden')]]]
 		        ],
 		        'customizableAtts' => $loadChartCustomization($idProperty, $chartAtts['type']['idptypes'], $colsToExcludeOptions)
 		    ]]];
@@ -288,8 +296,8 @@ class View extends AbstractView {
 					    'collection' => [
 					        'sptsessions' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->sptSessionsTsbAction()]],
 					        'calendar' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => 'tWidget.currentView.invalidateLayout();return true;']],
-					        'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekloadchart'),]],
-					        'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekperformedloadchart')]],
+					        //'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekloadchart'),]],
+					        //'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekperformedloadchart')]],
 					    ]],
 				    'renderCallback' => "if (rowData.mode === 'performed'){domstyle.set(node, 'fontStyle', 'italic');}",
 				    //'sendOnHidden' => ['athleteweeklyfeeling', 'coachweeklycomments']
@@ -331,7 +339,7 @@ class View extends AbstractView {
 				],
 				'filters' => ['grade' => 'TEMPLATE'],
 			    'removeCols' => ['sportsman', 'sessionid', 'googleid', 'mode', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time', 'grade', 'configstatus', 'acl'],
-			    'hiddenCols' => ['parentid', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'distance', 'equivalentdistance', 'elevationgain', 'comments', 'contextid', 'updated'],
+			    'hiddenCols' => ['parentid', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'distance', 'equivalentDistance', 'elevationgain', 'comments', 'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'], // temporary: these were suppressed but maybe present in some customization items
 			    'allDescendants' => true, // 'hasChildrenOnly',
 			],
@@ -374,6 +382,15 @@ require (["tukos/objects/sports/TsbCalculator", "tukos/objects/sports/LoadChart"
     sWidget.tsbCalculator.updateRowAction(sWidget, false, true);
     grid.loadChartUtils = new LoadChart({sessionsStore: grid.store});
     grid.loadChartUtils.updateCharts(grid, 'changed');
+    if (form.programsConfig.spiders){
+        require(["tukos/objects/sports/KpiChart"], function(KpiChart){
+            form.kpiChartUtils = new KpiChart({form: form, sessionsStore: grid.store});
+            let spiders = JSON.parse(form.programsConfig.spiders);
+            for (const spider of spiders){
+                form.kpiChartUtils.setChartValue('spider' + spider.id);
+            }
+        });
+    }
 });
 return true;
 EOT
@@ -530,8 +547,6 @@ if (tWidget.column){
         grid.tsbCalculator.updateRowAction(grid, (col === 'trimphr' || (col === 'mode' && newValue === 'performed')) ? row : false, true);
     }
     grid.loadChartUtils.updateCharts(grid, true);
-/*    grid.loadChartUtils.setProgramLoadChartValue(form, 'performedloadchart');
-    grid.loadChartUtils.setWeekLoadChartValue(form, 'weekperformedloadchart');*/
 }
 return true;
 EOT
@@ -568,11 +583,11 @@ return true;
 EOT
 	    ;
 	}
-	function hiddenLoadChartAction($chartName){
+	function loadChartChangeAction($chartName, $changedAtt){
 	    return <<<EOT
 var form = sWidget.form, grid = form.getWidget('sptsessions');
 form.resize();
-if (!newValue){
+if (!newValue || '$changedAtt' !== 'hidden'){
     if ('$chartName' === 'loadchart' || '$chartName' === 'performedloadchart'){
         grid.loadChartUtils.setProgramLoadChartValue(form, '$chartName');
     }else{

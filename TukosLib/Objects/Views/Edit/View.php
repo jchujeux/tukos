@@ -37,8 +37,10 @@ class View {
         	'export'  => ['type' => 'ObjectExport', 'atts' => ['label' => $this->view->tr('export')]],
             'process'  => ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Process')]],
             'clearFeedback'  => ['type' => 'ObjectFieldClear', 'atts' => ['label' => $this->view->tr('Clear Feedback'), 'fieldToClear' => 'feedback']],
-            'feedback'  => Widgets::tukosTextArea(
-                    ['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 100, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),
+            /*'feedback'  => Widgets::tukosTextArea(
+                ['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 100, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),*/
+            'feedback'  => Widgets::htmlContent(
+                ['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'disabled' => true, 'ignoreChanges' => true, 'style' => ['minHeight' => '30px', 'maxHeight' => '50px', 'minWidth' => '30em', 'overflow' => 'auto', 'backgroundColor' => '#F0F0F0']]),
         ];
         if (Tfk::$registry->isMobile){
             foreach(['edit', 'new', 'duplicate', 'export', 'process', 'clearFeedback', 'feedback'] as $action){
@@ -113,7 +115,7 @@ class View {
             'subObjects'    => array_keys($this->view->subObjects),
             'dataLayout'    => $this->dataLayout,
             'actionLayout'  => $this->actionLayout,
-            'style' => ['padding' => '0px']
+            'style' => ['padding' => '0px'],
         ];
         if (isset($this->view->allowedNestedWatchActions)){
             $defAtts['allowedNestedWatchActions'] = $this->view->allowedNestedWatchActions;

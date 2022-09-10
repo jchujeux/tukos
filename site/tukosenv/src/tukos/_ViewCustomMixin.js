@@ -14,7 +14,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 				require(["tukos/TukosTooltipDialog"], function(TukosTooltipDialog){
 					customDialog = targetPane.customDialog = new TukosTooltipDialog({paneDescription: {form: form, 
 	                    widgetsDescription: {
-	                        newCustomContent: {type: 'ObjectEditor', atts: {label: messages.newCustomContent, keyToHtml: 'capitalToBlank', style: {maxWidth: '600px', maxHeight: '600px', overflow: 'auto'}}},
+	                        newCustomContent: {type: 'ObjectEditor', atts: {label: messages.newCustomContent, keyToHtml: 'capitalToBlank', style: {maxWidth: '700px', maxHeight: '600px', overflow: 'auto'}}},
 	                        tukosCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'tukosCustomView', hidden: true}}, 
 	                        tukosCustomViewLabel: {type: 'HtmlContent', atts: {value: Pmg.message('tukosCustomView'), hidden: true, disabled: true}},
 	                        tukosCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, hidden: true,
@@ -49,7 +49,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 	                                contents: {
 	                                    row1: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, labelWidth: 100, orientation: 'vert'},  widgets: ['newCustomContent']},
 	                                    row2: {
-	                                        tableAtts: {cols: 3, customClass: 'labelsAndValues', id: targetPane.id + 'viewsSettings', showLabels: false},
+	                                        tableAtts: {cols: 3, customClass: 'labelsAndValues', id: 'viewsSettings', showLabels: false},
 	                                        widgets: ['tukosCustomViewButton', 'tukosCustomViewLabel', 'tukosCustomView', 'defaultCustomViewButton', 'defaultCustomViewLabel', 'defaultCustomView', 
 	                                        		  'itemCustomViewButton', 'itemCustomViewLabel',  'itemCustomView', 'itemCustomButton', 'itemCustomLabel']
 	                                    },
@@ -117,7 +117,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                 ['itemCustomViewButton', 'itemCustomButton'].forEach(function(widgetName){
                     paneGetWidget(widgetName).set('hidden', hideNewCustom || isNewItem || isOverview);                        
                 });
-                var viewsSettingsWidget = registry.byId(targetPane.id + 'viewsSettings'), itemCustomLabelWidget = paneGetWidget('itemCustomLabel');
+                var viewsSettingsWidget = /*registry.byId(targetPane.id + 'viewsSettings')*/pane.getWidget('viewsSettings'), itemCustomLabelWidget = paneGetWidget('itemCustomLabel');
                 viewsSettingsWidget.set('label',  (hideNewCustom ? messages.customViewsSettings : messages.selectSaveOption));
                 viewsSettingsWidget.set('cols',  (hideNewCustom ? 2 : 3));
                 paneGetWidget('tukosCustomViewButton').set('disabled', (form.tukosviewid ? false : true));

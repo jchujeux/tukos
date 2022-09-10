@@ -7,6 +7,7 @@ define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "diji
           on(this, "click", function(evt){
                     var fieldToClear = registry.byId(self.form.id + self.fieldToClear);
                     fieldToClear.set('value','');
+                    fieldToClear.set('style', {backgroundColor: '#F0F0F0'});
                     setTimeout(function(){self.form.resize();}, 0);
             });
         }

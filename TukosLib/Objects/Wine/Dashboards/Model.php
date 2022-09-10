@@ -144,7 +144,7 @@ class Model extends AbstractModel {
                     		$row[$trAtt] = $wTr(ucfirst(mb_strtolower(Utl::extractItem($att, $row))));
                         }
                     }
-                    $result[$kpiCol] = ['store' => $values];
+                    $result[$kpiCol] = ['data' => $values];
                 }
             }
         }

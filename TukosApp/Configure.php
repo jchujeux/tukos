@@ -74,8 +74,9 @@ class Configure{
                        '#hosts' => [['#macaddresses' => [], '#hostsdetails' => [], '#servicesdetails' => []]], '#connexions' => [],
             ]],
             'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [['#sptsessionsstages' => []]], '#sptexercises' => [['#sptexerciseslevels' => []]]]],
-            'physio' => [['#physiopatients' => [], 'physiopersotrack' => [['#physiopersoquotes' => [], '#physiopersoplans' => [], '#physiopersotreatments' => [], '#physiopersodailies' => [['#physiopersosessions' => []]], '#physiopersoexercises' => []]], '#physioprescriptions' => [], 
-                '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
+            'physio' => [['#physiopatients' => [], 'physiopersotrack' => [['#physiopersoquotes' => [], '#physiopersoplans' => [], '#physiopersotreatments' => [], '#physiopersodailies' => [['#physiopersosessions' => []]], '#physiopersoexercises' => []]],
+                'physiowoundtrack' => [['#physiogameplans' => [], '#physiogametracks' => []]],
+                '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
             '#help' => [[
                 'guidedtour' => ['type' => 'MenuItem', 'atts' => [
                     'onClickArgs' => ['object' => 'Help', 'view' => 'Edit', 'mode' => 'Tab', 'action' => 'Tab', 'query' => ['storeatts' => json_encode(['where' => ['name' => ['RLIKE', Tfk::tr('Guidedtourtukosapp')]]])]]]],

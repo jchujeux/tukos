@@ -43,7 +43,7 @@ class BlogView extends Translator{
     function render(){
         $view = (new ViewFactory)->newInstance();
         if (Tfk::$registry->isCrawler){
-            $blogTemplate = "CrawlerBlogTemplate";
+            $blogTemplate = "CrawlerBlogTemplate.php";
             $view->title = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['name'];
             $view->content = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['comments'];
         }else{

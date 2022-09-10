@@ -3,8 +3,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "tukos/dgrid/Edit
 function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mutils, wcutils, Pmg, TukosTooltipDialog, messages){
 	var copyDialogTooltip, 
 		applyCallback = function(){
-	        var grid = copyDialogTooltip.grid, numberOfCopies = parseInt(copyDialogTooltip.pane.valueOf('copies') || '1'), incrementFrom = copyDialogTooltip.pane.valueOf('incrementfrom') , noRefresh = grid.noRefreshOnUpdateDirty;
-	        grid.noRefreshOnUpdateDirty = true;
+	        var grid = copyDialogTooltip.grid, numberOfCopies = parseInt(copyDialogTooltip.pane.valueOf('copies') || '1'), incrementFrom = copyDialogTooltip.pane.valueOf('incrementfrom');
 	        copyDialogTooltip.pane.close();
 	        var data = grid.clickedRowValues(), name = data.name || '', re = /(^.*)([0-9]+$)/g, match = re.exec(name), item = grid.copyItem(data);
 			if (match){
@@ -27,10 +26,6 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
 	            	}
 	            });
 	        	grid.addRow(undefined, item);
-	        }
-	        grid.noRefreshOnUpdateDirty = noRefresh;
-	        if (!noRefresh){
-	            grid.refresh({keepScrollPosition: true});
 	        }
     	},
 		copyDialog = function(grid){
@@ -67,8 +62,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         
         postCreate: function(){
             this.inherited(arguments);
-            //this.noCopyCols = this.noCopyCols || ['id', 'idg',  'rowId', 'connectedIds'];
-            this.noCopyCols = ['id', 'idg',  'rowId', 'connectedIds'].concat(this.noCopyCols || []);
+            this.noCopyCols = ['id', this.store.idProperty,  'rowId', 'connectedIds'].concat(this.noCopyCols || []);
             var pasteCellCallback = function(evt){
                 var copiedCell = Pmg.getCopiedCell();
                 if (evt.ctrlKey && copiedCell){
@@ -142,10 +136,10 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 }
             }
 
-            var filter = {}, idProperty;
+            var filter = {}, idp = this.collection.idProperty, idProperty;
             filter[field] = value;
             this.collection.filter(filter).forEach(function(item){
-                idProperty = item.idg;
+                idProperty = item[idp];
             });
             return idProperty;
         },
@@ -163,17 +157,18 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         	return this.newRowPrefix ? this.newRowPrefixId : '';
         },
         updateDirty: function(idPropertyValue, field, value, isNewRow, isUserEdit){
-            var collection = this.collection, grid = this, collectionRow = this.collection.getSync(idPropertyValue), oldValue;
+            var collection = this.collection, grid = this, idp = collection.idProperty, collectionRow = collection.getSync(idPropertyValue), oldValue;
             //if (isNewRow || ((oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field]) !== value)){
             if (isNewRow || !utils.isEquivalent(oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field], value)){
                 this.inherited(arguments);
                 collectionRow[field] = value;
                 if (!grid.noRefreshOnUpdateDirty){
                 	sutils.refreshFormulaCells(grid);
+					this.collection.putSync(collectionRow, {overwrite: true});
                 }
                 if (isUserEdit || this.isUserEdit){
                 	if (this.onChangeNotify){
-                		var item = lang.mixin(lang.clone(this.dirty[idPropertyValue]), {idg: idPropertyValue, connectedIds: this.collection.getSync(idPropertyValue).connectedIds});
+                		var item = lang.mixin(lang.clone(this.dirty[idPropertyValue]), utils.newObj([[idp, idPropertyValue], connectedIds, collection.getSync(idPropertyValue).connectedIds]));
                     	this.notifyWidgets({action: 'update',  item: item, sourceWidget: this});            		
                 	}
                     if (this.columns[field]){
@@ -210,8 +205,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             var localActionFunctions = column.localDataChangeActionFunctions;
             if (!utils.empty(localActionFunctions)){
             	var sourceCell = this.cell(idPropertyValue, column.field), idPropertyValue, sourceWidget = this.getEditorInstance(column.field) || sourceCell.element.widget || sourceCell.element.input,
-            		allowedNestedRowWatchActions = this.allowedNestedRowWatchActions, needsRefresh = false;;
-            	this.noRefreshOnUpdateDirty = true;
+            		allowedNestedRowWatchActions = this.allowedNestedRowWatchActions/*, needsRefresh = false*/;
                 this.nestedRowWatchActions = this.nestedRowWatchActions || 0;
                 column.nestedWatchActions = column.nestedWatchActions || 0;
 				when(sourceWidget, lang.hitch(this, function(sourceWidget){
@@ -239,8 +233,6 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
 	                        }
 	                    }
 	                }
-	            	this.noRefreshOnUpdateDirty = false;
-	                setTimeout(lang.hitch(this, this.refresh, {keepScrollPosition: true}), 0);
 				}));
             }
         },
@@ -252,19 +244,19 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         },
 
         offsetRowsId: function(fromRowId, increment){
-            var self = this, newRows = {}, noRefresh = this.noRefreshOnUpdateDirty;
-            this.collection.forEach(function(object){
+            var self = this, newRows = {}, noRefresh = this.noRefreshOnUpdateDirty, collection = this.collection, idp = collection.idProperty;
+            collection.forEach(function(object){
                 if (object.rowId >= fromRowId){
                     newRows[object.rowId] = object.rowId + increment;
                 }
             });
             this.noRefreshOnUpdateDirty = true;
             sutils.updateRowReferences(this, newRows);
-            this.collection.forEach(function(object){
+            collection.forEach(function(object){
                 if (object.rowId >= fromRowId){
                     object.rowId +=increment;
-                    self.collection.putSync(object, {overwrite: true});//can be removed ?
-                    self.updateDirty(object.idg, 'rowId', object.rowId);
+                    collection.putSync(object, {overwrite: true});//can be removed ?
+                    self.updateDirty(object[idp], 'rowId', object.rowId);
                 }
             });
             this.noRefreshOnUpdateDirty = noRefresh;
@@ -279,8 +271,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             return maxRowId;
         },
         createNewRow: function(item, currentRowData, where){
-            var noRefresh = this.noRefreshOnUpdateDirty;
-        	this.noRefreshOnUpdateDirty = true;
+			const idp = this.collection.idProperty;
 			eutils.actionFunction(this, 'createRow', this.createRowAction, 'row', item);
             if ('rowId' in this.columns && where !== undefined){
                 if (where === 'before'){
@@ -295,40 +286,25 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             }else{
                 //delete item.id;
             }
-            this.store.addSync(item, (where === 'before' ? {beforeId: currentRowData.idg} : {}));
+            this.store.addSync(item, (where === 'before' ? {beforeId: currentRowData[idp]} : {}));
             if (this.onChangeNotify){
                 this.notifyWidgets({action: 'add', item: item});
             }
-            //this.isNotUserEdit += 1;
            for (var j in item){
-                if (j != 'idg' && 'j' !== 'connectedIds'){
-                    this.updateDirty(item.idg, j, item[j], true);
+                if (j != idp && 'j' !== 'connectedIds'){
+                    this.updateDirty(item[idp], j, item[j], true);
                 }
             }
-            //this.isNotUserEdit += -1;
-            this.noRefreshOnUpdateDirty = noRefresh;
         },
         addRow: function(where, item){
             var init={};
             this.prepareInitRow(init);
             item = utils.merge(init, item||{});
             this.createNewRow(item, (where === 'before' ? this.clickedRow.data : {}), where);
-            //if (!this.noRefreshOnUpdateDirty){
-            	//this.refresh({keepScrollPosition: true});
-            //}
             return item;
         },
-        updateRow: function(item, replace){
-        	var idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {}, noRefresh = this.noRefreshOnUpdateDirty;
-        	//this.isNotUserEdit += 1;
-        	this.noRefreshOnUpdateDirty = true;
-        	/*if(replace){
-            	utils.forEach(storeItem, lang.hitch(this, function(value, col){
-            		if (!utils.in_array(col, ['connectedIds', 'idg', 'rowId', 'id'])){
-            			this.updateDirty(idPropertyValue, col, item[col] || '');
-            		}
-            	}));        		
-        	}*/
+        updateRow: function(item){
+        	var idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {};
 			eutils.actionFunction(this, 'updateRow', this.updateRowAction, 'row', item);
         	utils.forEach(item, lang.hitch(this, function(value, col){
         		if (value !== storeItem[col] && col !== 'connectedIds'){
@@ -341,11 +317,6 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         		}
         		this.notifyWidgets({action: 'update', item: item});
         	}
-            this.noRefreshOnUpdateDirty = noRefresh;
-        	if (!noRefresh){
-                this.refresh({keepScrollPosition: true});
-        	}
-        	//this.isNotUserEdit += -1;
         },
         copyItem: function(item){
             var newItem = lang.clone(item), noCopyCols = this.noCopyCols;
@@ -365,8 +336,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         },
 
         deleteRowItem: function(item, skipDeleteAction, isUserRowEdit){
-            var noRefresh = this.noRefreshOnUpdateDirty;
-            this.noRefreshOnUpdateDirty = true;
+			const idp = this.collection.idProperty;
 			if (!skipDeleteAction){
 				eutils.actionFunction(this, 'deleteRow', this.deleteRowAction, 'row', item);
 			}
@@ -383,22 +353,21 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 this.deleted.push(toSendOnDelete);
                 wutils.markAsChanged(this, 'noStyle');
             }
-            var idgToDelete = item.idg;
+            var idpToDelete = item[idp];
+            this.deleteDirty(idpToDelete, isUserRowEdit);
+            this.collection.removeSync(idpToDelete);
             if ('rowId' in this.columns){
                 this.offsetRowsId(item.rowId, -1);
             }
-            this.deleteDirty(idgToDelete, isUserRowEdit);
-            this.collection.removeSync(idgToDelete);
 			this.setSummary();
-            this.noRefreshOnUpdateDirty = noRefresh;
         },
         deleteRows: function(rows, skipDeleteAction, isUserRowEdit){
-        	var self = this;
         	rows.forEach(lang.hitch(this, function(row){
         		this.deleteRowItem(row, skipDeleteAction, isUserRowEdit);
         	}));
         },
         moveRow: function(itemToMove, currentRowData, where){
+            const idp = this.collection.idProperty;
             if ('rowId' in this.columns){
                 var noRefresh = this.noRefreshOnUpdateDirty;
             	this.noRefreshOnUpdateDirty = true;
@@ -410,9 +379,9 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 }else{
                     itemToMove.rowId = this.lastRowId()+1;
                 }
-                this.collection.putSync(itemToMove, (where === 'before' ? {beforeId: currentRowData.idg, overwrite: true}: {}));
+                this.collection.putSync(itemToMove, (where === 'before' ? {beforeId: currentRowData[idp], overwrite: true}: {}));
                 this.noRefreshOnUpdateDirty = noRefresh;
-                this.updateDirty(itemToMove.idg, 'rowId', itemToMove.rowId);
+                this.updateDirty(itemToMove[idp], 'rowId', itemToMove.rowId);
             } 
         },
 
@@ -480,7 +449,8 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             return true;
         },
         _setValue: function(value){
-        	var noRefresh = this.noRefreshOnUpdateDirty, resetCounters = true, idp = this.collection.idProperty;
+        	const idp = this.store.idProperty;
+        	var noRefresh = this.noRefreshOnUpdateDirty, resetCounters = true;
         	this.noRefreshOnUpdateDirty = true;
         	this.formulaCache = {};
             if (value == ''){//the Memory store needs to be emptied
@@ -516,8 +486,8 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                         this.store.forEach(lang.hitch(this, function(row){
                             if (!this.isSubObject ||!row['id']){
                                 for (var i in row){
-                                    if (i != 'idg' && i !== 'updator' && i !== 'updated' && i !== 'canEdit' && i !== 'connectedIds'){// warging: there may be other read-only fields to exclude from dirty here
-                                        this.updateDirty(row['idg'], i, row[i]);
+                                    if (i != idp && i !== 'updator' && i !== 'updated' && i !== 'canEdit' && i !== 'connectedIds'){// warging: there may be other read-only fields to exclude from dirty here
+                                        this.updateDirty(row[idp], i, row[i]);
                                     }
                                 }
                             }
@@ -560,16 +530,17 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         },
 
         _setDuplicate: function(value){
+            const idp = this.collection.idProperty;
             var data = this.collection.fetchSync({}), noRefresh = this.noRefreshOnUpdateDirty;
             this.noRefreshOnUpdateDirty = true;
             data.forEach(function(item){
                 item['id'] = null;
                 for (var col in item){
-                    if (col != 'canEdit' && col != 'idg' && col != 'updator' && col != 'updated'){
+                    if (col != 'canEdit' && col != idp && col != 'updator' && col != 'updated'){
                         this.updateDirty(item[idProperty], col, item[col]);
                     }
                 }
-                this.collection.putSync({idg: item.idg});
+                this.collection.putSync(utils.newObj([[idp, item[idp]]]));
             });
             this.noRefreshOnUpdateDirty = noRefresh;
         },
@@ -584,6 +555,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             return row;
         }, 
         notifyWidgets: function(args){
+            const idp = this.collection.idProperty;
             this.form.notifyWidgetsDepth = this.form.notifyWidgetsDepth || 0;
         	if (!(this.inNotifyWidgets || this.noNotifyWidgets)){
                 this.form.notifyWidgetsDepth += 1;
@@ -598,13 +570,13 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                         var filter = directive.targetFilter ? lang.hitch(widget, widget.itemFilter)() : {};// here if mapping on a filter colomn between this ans widget is not identity, filter should be converted accordingly
                         if (action === 'create'){
                         	this.store.filter(filter).fetchSync().forEach(function(item){
-                                lang.setObject('connectedIds.' + self.widgetName, item.idg, item);
+                                lang.setObject('connectedIds.' + self.widgetName, item[idp], item);
                                 widget.set('notify', {action: 'create', item: item, sourceWidget: self});
                             });
                         }else if(action === 'add'){
                             var item = args.item;
                             if (this.matchesFilter(item, filter)){
-                            	lang.setObject('connectedIds.' + this.widgetName, item.idg, item);
+                            	lang.setObject('connectedIds.' + this.widgetName, item[idp], item);
                             	widget.set('notify', args);
                             }
                         }else if(typeof (args.item.connectedIds || {})[widgetName] === "undefined"){

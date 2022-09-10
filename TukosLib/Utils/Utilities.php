@@ -289,8 +289,9 @@ class Utilities{
     */
     public static function array_merge_recursive_replace($paArray1, $paArray2, $replaceNumeric = true, $subOnly = false, $replace = '~replace', $delete = '~delete'){
     	if (!(is_array($paArray1) or is_object($paArray1))){
-        	return is_array($paArray2) ? Self::bypass_recursive($paArray2, $replace) :$paArray2;
-        }
+    	    //return empty($paArray2) ? $paArray1 : (is_array($paArray2) ? Self::bypass_recursive($paArray2, $replace) : $paArray2);
+    	    return is_array($paArray2) ? (empty($paArray2) ? $paArray1 : Self::bypass_recursive($paArray2, $replace)) : $paArray2;
+    	}
         if (!(is_array($paArray2) or is_object($paArray2))) {
         	return $paArray2; 
         }
@@ -503,17 +504,37 @@ class Utilities{
    /*
     * Transforms array [value1, value2, , ...], into array [['id' => value1, 'name' => $translator(value1), ...], ready to be consumed by dojo/store (Intended for tukos/storeSelect)
     */
-    public static function idsNamesStore($idsStore, $translator, $options = null){
-        list($allowEmpty, $translationMode, $useKeyAsId) = empty($options) ? [true, 'ucfirst', false] : $options;
+    public static function idsNamesStore($idsStore, $translator = null, $options = null){
+        list($allowEmpty, $translationMode, $useKeyAsId, $hasTooltip) = empty($options) ? [true, 'ucfirst', false, false] : $options;
         $theStore = $allowEmpty ? [['id' => '', 'name' => '']] : [];
         foreach ($idsStore as $key => $value){
             if (is_array($value)){
-            	$theStore[] = array_merge(['id' => $key, 'name' => $translator($key, $translationMode)], $value);// at least used for sports::levelOptions1, etc.
+                $theStore[] = array_merge(['id' => $key, 'name' => $translator ? $translator($key, $translationMode) : $key], $hasTooltip ? ['tooltip' => $translator($key . 'tooltip', 'none')] : [], $value);// at least used for sports::levelOptions1, etc.
             }else{
-                 $theStore[] = ['id' => $useKeyAsId ? $key : $value, 'name' => $translator($value, $translationMode)];
+                 $theStore[] = array_merge(['id' => $useKeyAsId ? $key : $value, 'name' => $translator ? $translator($value, $translationMode) : $value], $hasTooltip ? ['tooltip' => $value . 'tooltip'] : []);
             }
         }
         return $theStore;
+    }
+/*    public static function idsToIdsNamesStore($ids, $translator = null, $translationMode = 'ucfirst'){ // intended for use with StoreComboBox
+        $theStore = [];
+        if (is_null($translator)){
+        foreach ($ids as $id){
+            $theStore[] = ['id' => $id, 'name' => $id]; 
+        }
+        }else{
+            foreach ($ids as $id){
+                $theStore[] = ['id' => $id, 'name' => $translator($id, $translationMode)];
+            }
+        }
+        return $theStore;
+    }*/
+    public static function translations($ids, $translator = null, $translationMode = 'ucfirst'){
+        $result = [];
+        foreach ($ids as $id){
+            $result[$id] = $translator ? $translator($id, $translationMode) : $id;
+        }
+        return $result;
     }
 
    /*

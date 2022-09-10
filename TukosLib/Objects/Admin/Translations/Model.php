@@ -23,7 +23,7 @@ class Model extends ObjectTranslator {
         $this->user  = Tfk::$registry->get('user');
         $this->allCols = ['id', 'name', 'setname', 'en_us', 'fr_fr', 'es_es'];        
         $this->aliasExtendedNameCols = $this->extendedNameCols = ['name'];        
-        $this->setNameOptions = array_merge(['TukosApp', 'TukosSports', 'TukosBus', 'TukosBlog', 'TukosMSQR', 'tukosLib', 'countrycodes'], Directory::getDomains(), ['page', 'common']);
+        $this->setNameOptions = array_merge(['TukosApp', 'TukosSports', 'TukosBus', 'TukosBlog', 'TukosMSQR', 'TukosWoundTrack', 'tukosLib', 'countrycodes'], Directory::getDomains(), ['page', 'common']);
 		$this->store = Tfk::$registry->get('configStore');
 		$this->idCols = $this->idColsObjects = [];
 		$this->user->forceContextId($objectName, $this->user->contextModel->getRootId());

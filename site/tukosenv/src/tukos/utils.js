@@ -52,9 +52,11 @@ define(["dojo", "dojo/_base/lang", "dojo/date/stamp", "dojo/number", "dojo/curre
 				}
 			},
 			isEquivalent: function(value1, value2) {
-				if (typeof value1 === "number" && typeof value2 === "number") {
+				if (typeof value1 === "number" || typeof value2 === "number") {
 					return value1 === value2;
-				} else {
+				}else if (typeof value1 === "boolean" || typeof value2 === "boolean") {
+					return value1 === value2;
+				}else{
 					return String(value1 || '') == String(value2 || '');
 				}
 			},
@@ -217,7 +219,7 @@ define(["dojo", "dojo/_base/lang", "dojo/date/stamp", "dojo/number", "dojo/curre
 					}
 					return target;
 				}
-				if (source === target) {
+				if (source === target || source === undefined) {
 					return target;
 				} else {
 					this.wasModified = true;
@@ -243,7 +245,7 @@ define(["dojo", "dojo/_base/lang", "dojo/date/stamp", "dojo/number", "dojo/curre
 					mergeRecursive(target, source);
 					return target;
 				}
-				if (source === target) {
+				if (source === target || source === undefined) {
 					return target;
 				} else {
 					this.wasModified = true;
@@ -342,7 +344,15 @@ define(["dojo", "dojo/_base/lang", "dojo/date/stamp", "dojo/number", "dojo/curre
 							value = number.format(value, formatOptions);
 							break;
 						case 'translate':
-							value = Pmg.message(value, (formatOptions || {}).object);
+							if (formatOptions.translations){
+								this.forEach(formatOptions.translations, function(translated, untranslated){
+									if (value.includes(untranslated)){
+										value = value.replaceAll(untranslated, translated);
+									}
+								});
+							}else{
+								value = Pmg.message(value, (formatOptions || {}).object);
+							}
 							break;
 						default:
 							if (!isNaN(value)) {
@@ -402,25 +412,26 @@ define(["dojo", "dojo/_base/lang", "dojo/date/stamp", "dojo/number", "dojo/curre
 					return '';
 				}
 			},
-			/*sum: function(arrayOrObject) {
-				var value;
-				if (typeof arrayOrObject === 'object') {
-					var result = 0;
-					for (var i in arrayOrObject) {
-						value = arrayOrObject[i];
-						if (typeof value === "object") {
-							result += this.sum(value);
-						} else {
-							value = parseFloat(value);
-							result += isNaN(value) ? 0 : value;
+			sum: function() {
+				var value, result = 0;
+				for (let item of arguments){
+					if (typeof item === 'object') {
+						for (let value of item) {
+							if (typeof value === "object") {
+								result += this.sum(value);
+							} else {
+								value = parseFloat(value);
+								result += isNaN(value) ? 0 : value;
+							}
 						}
-					}
-					return result;
-				} else {
-					value = parseFloat(arrayOrObject);
-					result += isNaN(value) ? 0 : value;
+						return result;
+					} else {
+						value = parseFloat(item);
+						result += isNaN(value) ? 0 : value;
+					}					
 				}
-			},*/
+				return result;
+			},
 			hashId: function() { // see https://gist.github.com/fiznool/73ee9c7a11d1ff80b81c#file-hashid-js-L11
 				var alphabet = '23456789abdegjkmnpqrvwxyz',
 					alphabet_length = alphabet.length,
@@ -485,6 +496,22 @@ define(["dojo", "dojo/_base/lang", "dojo/date/stamp", "dojo/number", "dojo/curre
 						};
 					waiter = setInterval(wait, delay);
 				}
+			},
+	        viewInBrowserWindow: function(windowName, htmlContent){
+	            const newWindow = window.open('', windowName, 'left=100,right=100, width=600,height=800');
+	            newWindow.document.write(htmlContent);
+	            newWindow.document.close();
+	            return newWindow;
+	            //newWindow.focus();// in case the window already existed
+	        },
+	       putInCache: function(property, id, cache){//cache should be initialized as an object
+				if (!cache[id]){
+					cache[id] = [];
+					cache[id].push(property);
+				}else if(!cache[id].includes(property)){
+					cache[id].push(property);
+				}
+				return 0;
 			}
 		};
 	});

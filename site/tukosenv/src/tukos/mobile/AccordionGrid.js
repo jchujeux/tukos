@@ -62,10 +62,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			}
 		},
 		rowWidgetsLocalAction: function(sWidget, tWidget, newValue, oldValue){
-			var pane = sWidget.pane, grid = pane.grid, collection = grid.collection, idP = collection.idProperty, item = pane.item;
+			var pane = sWidget.pane, grid = pane.grid, collection = grid.collection, idp = collection.idProperty, item = pane.item;
 			console.log('here I should do something'); 
 			if (newValue !== oldValue){
-				grid.updateDirty(item[idP], sWidget.widgetName, newValue, false, true);
+				grid.updateDirty(item[idp], sWidget.widgetName, newValue, false, true);
 				registry.byNode(pane.domNode.parentNode)._at.labelNode.innerHTML = grid.getRowLabel(item);
 			}
 			return true;
@@ -100,18 +100,18 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
             return result;
         },
 		addRow: function(){
-			var item = lang.mixin(lang.clone(this.initialRowValue), this.itemFilter());
+			var item = lang.mixin(lang.clone(this.initialRowValue), this.itemFilter()), idp = this.collection.idProperty;
 			this.collection.addSync(item);
 			for (var j in item){
-				 if (j != 'idg'){
-				     this.updateDirty(item.idg, j, item[j], true);
+				 if (j != idp){
+				     this.updateDirty(item[idp], j, item[j], true);
 				 }
 			}
 			this.setSummary();
 			this.accordion.addChild(new ContentPane({iconPos1: newIcon, label: this.accordionAtts.newRowLabel, selected: true, editor: {type: 'MobileTukosPane', atts: {form: this.form, data: {value: item}, grid: this, item: item, commonWidgetsAtts: this.commonWidgetsAtts()}}}));
 		},
 		deleteRow: function(evt){
-			var button = registry.getEnclosingWidget(evt.originalTarget), editorPane = button.pane, rowPane = button.rowPane, item = editorPane.item, idP = this.collection.idProperty, idV = item[idP];
+			var button = registry.getEnclosingWidget(evt.originalTarget), editorPane = button.pane, rowPane = button.rowPane, item = editorPane.item, idp = this.collection.idProperty, idV = item[idp];
         	if (item.id != undefined){
                 this.deleted.push({id: item.id, '~delete': true});
 				wutils.markAsChanged(this, 'noStyle');

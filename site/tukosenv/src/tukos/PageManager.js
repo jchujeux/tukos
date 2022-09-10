@@ -1,12 +1,13 @@
-define(["dojo/ready", "dojo/has", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/registry", 
-		"dojo/json", "dojo/date/locale", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/utils"],
-function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, registry, JSON, dojoDateLocale, _WidgetsExtend, _WidgetsFormExtend, utils){
-    var stores, tabs, openedBrowserTabs = {},
+define(["dojo/ready", "dojo/has", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/form/_ComboBoxMenuMixin", "dijit/registry", 
+		"dojo/json", "dojo/date/locale", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/_ComboBoxMenuMixinExtend", "tukos/utils"],
+function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, _ComboBoxMenuMixin, registry, JSON, dojoDateLocale, _WidgetsExtend, _WidgetsFormExtend, _ComboBoxMenuMixinExtend, utils){
+    var stores, openedBrowserTabs = {}, windows = {},
         objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
 		lang.extend(_WidgetBase, _WidgetsExtend);//for this to work in all cases, no require for a widget should be made before this statement executes, above in PageManager, and in modules required in evalUtils (which _WidgetsExtend depends on)
 		lang.extend(_FormValueMixin, _WidgetsFormExtend);
 		lang.extend(_CheckboxMixin, _WidgetsFormExtend);
+		lang.extend(_ComboBoxMenuMixin, _ComboBoxMenuMixinExtend);
 	return {
 		initializeTukosForm: function(obj){
 			tukos = {Pmg: this};
@@ -63,7 +64,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 			});
 	   },
 	   initialize: function(obj) {
-            tukos = {Pmg: this}; // to make editorGotoUrl and editorGotoTab visible in LinkDialog and TukosLinkDialog
+            tukos = {Pmg: this}; // tukos is a global variable
             this.cache = obj;
             this.cache.extras = this.cache.extras || {};
             this.cache.messages = this.cache.messages || {};
@@ -82,8 +83,8 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 		            event.stopPropagation();
 		        	self.tabs.gotoTab(target);
 		        };
-                self.serverTranslations = function(expressions, actionModel){
-                    var results = {}, actionModel = actionModel || 'GetTranslations';
+                self.serverTranslations = function(expressions, actModel){
+                    var results = {}, actionModel = actModel || 'GetTranslations';
                     return self.serverDialog({object: 'users', view: 'NoView', action: 'Get', query:{params: {actionModel: actionModel}}}, {data: expressions}, self.message('actionDone')).then(function (response){
                             utils.forEach(response.data, function(translations, objectName){
                                 var objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {});
@@ -141,16 +142,38 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 			promise.then(
 				function(response){
 					if (dfd){dfd.resolve(true);}
-					if (eventHandle){eventHandle.resume()};
+					if (eventHandle){eventHandle.resume();}
 					return response;
 				},
 				function(response){
 					if(dfd){dfd.cancel(true);}
-					if (eventHandle){eventHandle.resume()};
+					if (eventHandle){eventHandle.resume();}
 					return response;
 				}
 			);
 			return promise;			
+		},
+		tukosTooltipExists: function(name){
+			return this.cache.presentTukosTooltips.includes(name);
+		},
+		viewTranslatedInBrowserWindow: function(toTranslate, object){
+			const name = 'tukosItem' + toTranslate;
+			if (windows[name] && !windows[name].closed){
+				//tukos.windows[name].close();
+				window.blur();
+				windows[name].focus();
+			}//else{
+				this.serverTranslations({[object]: [toTranslate]}).then(function(translation){
+	        		windows[name] = utils.viewInBrowserWindow(name, translation[object][toTranslate]);
+				});
+			//}
+		},
+		closeDependingWindows: function(){
+			utils.forEach(windows, function(win){
+				if (win && !win.closed){
+					win.close();
+				}
+			});
 		},
 		setObjectsMessages: function(descriptionType){
 			var self = this;
@@ -221,7 +244,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
                     self.addMessagesToCache(response.messages, urlArgs.object);
                     self.addExtrasToCache(response.extras);
                     if (defaultFeedback !== false){
-                        self.setFeedback(response['feedback'], defaultFeedback);
+                        self.setFeedback(response.feedback, defaultFeedback);
                     }
                     if (isObjectFeedback){
                     	set(att, attValue);
@@ -233,20 +256,20 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
                     if (isObjectFeedback){
                     	set(att, attValue);
                     }
-					headerRows = function(rowsDescription){
-						returnedString = '';
+					const headerRows = function(rowsDescription){
+						let returnedString = '';
 						rowsDescription.forEach(function(description){
 							returnedString +=  '<p><b>' + self.message(description[0]) +  ':</b> ' + description[1];
 						});
 						return returnedString;
-					}
+					};
 					request(self.requestUrl({action: 'Process', mode: 'Tab', object: 'tukos',  query: {params: {noget: true, process: 'sendContent'}}, view: 'Edit'}), {handleAs: 'json', method: 'POST', timeout: 32000, 
 						data: JSON.stringify({fromwhere: {name: 'tukosBackOffice'}, to: 'tukosbackoffice@gmail.com', subject: 'tukos bug - ' + window.location, header: headerRows([['ClientErrormessage', error.message],['PageUrl', window.location], ['userid', self.cache.userid], ['UrlSent', error.response.url], ['Datasent', options.data || self.message('noDataSent')]]),
 							   content: '<p><b>' + self.message('Servererrormessage') + '</b><br>' + error.response.text, sendas: 'appendtobody'})}).then(
-							function(response){
+							function(){
 								self.addFeedback(self.message('Supportinformed'));
 							},
-							function (error){
+							function (){
 								self.addFeedback(self.message('Contactsupport'));
 							}
 						);
@@ -262,7 +285,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
             if (beep){
                 this.beep();
             }
-            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || '' /*|| this.message('Ok')*/), widget, form,
+            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || '' /*|| this.message('Ok')*/), widget,
                   currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;
 			if (this.focusedPanel === "leftPanel"){
 				console.log('focus is on left panel');
@@ -278,6 +301,9 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 				}
 			}
             if (widget){
+                if (beep){
+					newFeedback = '<div style="color: red; font-weight: 500;">' + newFeedback + '</div>';
+				}
                 widget.set('value', separator ? widget.get('value') + separator + newFeedback : newFeedback);
             }
             if (this.logWidget){
@@ -338,7 +364,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
         	return (id ? (this.cache.extras[id] && this.cache.extras[id].name ? this.cache.extras[id].name : id) : '');
         },
         message: function(key, object){
-        	return object ? this.cache.objectsMessages[object][key] || this.cache.messages[key] || key : this.cache.messages[key] || key;
+        	return object ? ((this.cache.objectsMessages || {})[object] || {})[key] || this.cache.messages[key] || key : this.cache.messages[key] || key;
         },
         messages: function(keys){
         	var result = {}, messages = this.cache.messages;
@@ -376,13 +402,14 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
         },
 
         _getWidgetNameTranslation: function(widgetName, objectName, form){
-            var form = form || this.tabs.objectPane(objectName, 'Edit'), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}),
-                   translation = undefined;
+            var form = form || this.tabs.objectPane(objectName, 'Edit'), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}), translation;
             if (form){
                 var widget = form.getWidget(widgetName);
                 if (widget){
-                	var translation = widget.label || widget.title || undefined;
-                }
+                	translation = widget.label || widget.title || undefined;
+                }else{
+					translation = this.message(widgetName, objectName);
+				}
                 if (translation){
                     objectUntranslations[translation] = widgetName;
                 }
@@ -393,8 +420,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
         },
 
         _getWidgetNameUntranslation: function(translatedWidgetName, objectName, form){
-            var form = form || this.tabs.objectPane(objectName, 'Edit'), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}),
-                  untranslation = undefined;
+            var form = form || this.tabs.objectPane(objectName, 'Edit'), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}), untranslation;
             if (form){
                 form.widgetsName.some(function(widgetName){
                     var widget = form.getWidget(widgetName), translation = undefined;
@@ -437,5 +463,5 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 				}
 			}
         }
-    }
+    };
 });

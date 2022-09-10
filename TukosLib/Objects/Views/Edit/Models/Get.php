@@ -112,6 +112,9 @@ class Get extends ViewsGetModel {
         		$response['itemCustomization'] = $itemCustomization;
         	}
         }
+        if (method_exists($this->view, 'preMergeCustomizationAction')){
+            $response = $this->view->preMergeCustomizationAction($response, $customMode);
+        }
         $response = $this->mergeCustomization($response, $customMode, $allowCustomValue);
     }
     

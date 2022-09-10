@@ -67,7 +67,7 @@ function(declare, lang, dct, dst, popup, TooltipDialog, focus, Pmg){
 					widget.layoutHandle.unfreezeWidth = false;
 					//widget.layoutHandle.resize();
                 }
-                if (widget.layoutHandle.unfrozenWidths){
+                if (widget.column && widget.store.data.length === 0){
                 	setTimeout(function(){// for dgrid's noDataMessage not to overlap header
 						widget.layoutHandle.needsToFreezeWidth = true;
 						widget.layoutHandle.resize();
