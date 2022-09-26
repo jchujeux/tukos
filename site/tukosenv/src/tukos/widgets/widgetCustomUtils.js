@@ -140,10 +140,17 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 							}
 							if (atts.atts.initialRowValue){
 								widget.set('initialRowValue', atts.atts.initialRowValue);
+							}else{
+								delete widget.initialRowValue;
+							}
+							if (atts.atts.onCellClickAction){
+								widget.set('onCellClickAction', atts.atts.onCellClickAction);
+							}else{
+								delete widget.onCellClickAction;
 							}
             		}
             		if (atts && atts.atts && atts.atts.tukosTooltip){
-						widget.form = self.widget.form;
+						//widget.form = self.widget.form;
 						widget.set('tukosTooltip', atts.atts.tukosTooltip);
 					}else{
 						widget.set('tukosTooltip', {});

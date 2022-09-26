@@ -36,35 +36,12 @@ class Model extends AbstractModel {
         }
         if (!empty($item['records'])){
             foreach($item['records'] as &$record){
-                $indicatorsCache = Utl::getItem('indicatorscache', $record);
-                $record = array_merge($record, json_decode($indicatorsCache, true));
+                if ($indicatorsCache = Utl::getItem('indicatorscache', $record)){
+                    $record = array_merge($record, json_decode($indicatorsCache, true));
+                }
             }
         }
         return $item;
     }
-    /*public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
-        if (!$jsonFilter && !empty($newValues['records'])){
-            $parentId = !empty($newValues['parentid']) ? $newValues['parentid'] : $this->getOne(['where' =>['id' => $newValues['id']], 'cols' => ['parentid']])['parentid'];
-        }
-        if (!empty($parentId)){
-            $gamePlanModel = Tfk::$registry->get('objectsStore')->objectModel('physiogameplans');
-            foreach($newValues['records'] as &$record){
-                if (!empty($indicatorsCacheCols = array_diff(array_keys($record), $gamePlanModel->allCols))){
-                    Utl::extractItems($indicatorsCacheCols, $record);
-                }
-            }
-        }
-        return parent::updateOneExtended($newValues, $atts, $insertIfNoOld, $jsonFilter, $init);
-    }
-    public function insertExtended($values, $init=false, $jsonFilter = false){
-        if (!$jsonFilter && !empty($values['records']) && !empty($values['parentid'])){
-            $gamePlanModel = Tfk::$registry->get('objectsStore')->objectModel('physiogameplans');
-            foreach($values['records'] as &$record){
-                if (!empty($indicatorsCacheCols = array_diff(array_keys($record), $gamePlanModel->allCols))){
-                    Utl::extractItems($indicatorsCacheCols, $record);
-                }
-            }
-        }
-    }*/
 }
 ?>

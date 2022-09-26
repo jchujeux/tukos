@@ -159,102 +159,103 @@ define([
 			function stopPropagation(event) {
 				event.stopPropagation();
 			}
-
-			this.inherited(arguments);
-
-			if (!hiderMenuNode) {
-				// First run
-				// Assume that if this plugin is used, then columns are hidable.
-				// Create the toggle node.
-				hiderToggleNode = this.hiderToggleNode = domConstruct.create('div', {
-					'aria-label': this.i18nColumnHider.popupTriggerLabel,
-					className: 'ui-icon dgrid-hider-toggle',
-					role: 'button',
-					tabindex: 0,
-					style: Pmg.isMobile() ? "transform:scale(2);right:4px;top:4px;" : ""
-				}, this.domNode);
-				
-				// The ColumnHider icon is 16 x 16 pixels. Presumably, when it was created that size worked in all
-				// browsers. Hopefully any browsers (or updates) introduced since then that reduce the scrollbar width
-				// also include support for scaling with CSS transforms.
-				scrollbarWidth = this.bodyNode.offsetWidth - this.bodyNode.clientWidth;
-				if (scrollbarWidth < 16 && scrollbarWidth > 0) {
-					hiderNodeScale = scrollbarWidth / 16;
-					hiderNodeTranslate = (16 - scrollbarWidth) / 2;
-					hiderToggleNode.style.transform = 'scale(' + (hiderNodeScale) + ') translate(' +
-						hiderNodeTranslate + 'px)';
-				}
-				this._listeners.push(listen(hiderToggleNode, 'click', function (e) {
-					grid._toggleColumnHiderMenu(e);
-				}));
-
-				this._listeners.push(listen(hiderToggleNode, 'keydown', function (event) {
-					var charOrCode = event.charCode || event.keyCode;
-					if (charOrCode === /*ENTER*/ 13 || charOrCode === /*SPACE*/ 32) {
-						grid._toggleColumnHiderMenu(event);
+				this.inherited(arguments);
+			//if (Pmg.get('userRights') !== 'RESTRICTEDUSER'){
+	
+				if (!hiderMenuNode) {
+					// First run
+					// Assume that if this plugin is used, then columns are hidable.
+					// Create the toggle node.
+					hiderToggleNode = this.hiderToggleNode = domConstruct.create('div', {
+						'aria-label': this.i18nColumnHider.popupTriggerLabel,
+						className: 'ui-icon dgrid-hider-toggle',
+						role: 'button',
+						tabindex: 0,
+						style: Pmg.isMobile() ? "transform:scale(2);right:4px;top:4px;" : ""
+					}, this.domNode);
+					
+					// The ColumnHider icon is 16 x 16 pixels. Presumably, when it was created that size worked in all
+					// browsers. Hopefully any browsers (or updates) introduced since then that reduce the scrollbar width
+					// also include support for scaling with CSS transforms.
+					scrollbarWidth = this.bodyNode.offsetWidth - this.bodyNode.clientWidth;
+					if (scrollbarWidth < 16 && scrollbarWidth > 0) {
+						hiderNodeScale = scrollbarWidth / 16;
+						hiderNodeTranslate = (16 - scrollbarWidth) / 2;
+						hiderToggleNode.style.transform = 'scale(' + (hiderNodeScale) + ') translate(' +
+							hiderNodeTranslate + 'px)';
 					}
-				}));
-
-				// Create the column list, with checkboxes.
-				hiderMenuNode = this.hiderMenuNode = domConstruct.create('div', {
-					'aria-label': this.i18nColumnHider.popupLabel,
-					className: 'dgrid-hider-menu',
-					id: this.id + '-hider-menu',
-					role: 'dialog'
-				});
-
-				this._listeners.push(listen(hiderMenuNode, 'keyup', function (e) {
-					var charOrCode = e.charCode || e.keyCode;
-					if (charOrCode === /*ESCAPE*/ 27) {
+					this._listeners.push(listen(hiderToggleNode, 'click', function (e) {
 						grid._toggleColumnHiderMenu(e);
-						hiderToggleNode.focus();
-					}
-				}));
-
-				// Make sure our menu is initially hidden, then attach to the document.
-				hiderMenuNode.style.display = 'none';
-				this.domNode.appendChild(hiderMenuNode);
-
-				// Hook up delegated listener for modifications to checkboxes.
-				this._listeners.push(listen(hiderMenuNode,
-						'.dgrid-hider-menu-check:' + (has('ie') < 9 ? 'click' : 'change'),
-					function (e) {
-						grid._updateColumnHiddenState(
-							getColumnIdFromCheckbox(e.target, grid), !e.target.checked);
-					}
-				));
-
-				// Stop click events from propagating from menu or trigger nodes,
-				// so that we can simply track body clicks for hide without
-				// having to drill-up to check.
-				this._listeners.push(
-					listen(hiderMenuNode, 'mousedown', stopPropagation),
-					listen(hiderToggleNode, 'mousedown', stopPropagation)
-				);
-
-				// Hook up top-level mousedown listener if it hasn't been yet.
-				if (!bodyListener) {
-					bodyListener = listen.pausable(document, 'mousedown', function (e) {
-						// If an event reaches this listener, the menu is open,
-						// but a click occurred outside, so close the dropdown.
-						activeGrid && activeGrid._toggleColumnHiderMenu(e);
+					}));
+	
+					this._listeners.push(listen(hiderToggleNode, 'keydown', function (event) {
+						var charOrCode = event.charCode || event.keyCode;
+						if (charOrCode === /*ENTER*/ 13 || charOrCode === /*SPACE*/ 32) {
+							grid._toggleColumnHiderMenu(event);
+						}
+					}));
+	
+					// Create the column list, with checkboxes.
+					hiderMenuNode = this.hiderMenuNode = domConstruct.create('div', {
+						'aria-label': this.i18nColumnHider.popupLabel,
+						className: 'dgrid-hider-menu',
+						id: this.id + '-hider-menu',
+						role: 'dialog'
 					});
-					bodyListener.pause(); // pause initially; will resume when menu opens
+	
+					this._listeners.push(listen(hiderMenuNode, 'keyup', function (e) {
+						var charOrCode = e.charCode || e.keyCode;
+						if (charOrCode === /*ESCAPE*/ 27) {
+							grid._toggleColumnHiderMenu(e);
+							hiderToggleNode.focus();
+						}
+					}));
+	
+					// Make sure our menu is initially hidden, then attach to the document.
+					hiderMenuNode.style.display = 'none';
+					this.domNode.appendChild(hiderMenuNode);
+	
+					// Hook up delegated listener for modifications to checkboxes.
+					this._listeners.push(listen(hiderMenuNode,
+							'.dgrid-hider-menu-check:' + (has('ie') < 9 ? 'click' : 'change'),
+						function (e) {
+							grid._updateColumnHiddenState(
+								getColumnIdFromCheckbox(e.target, grid), !e.target.checked);
+						}
+					));
+	
+					// Stop click events from propagating from menu or trigger nodes,
+					// so that we can simply track body clicks for hide without
+					// having to drill-up to check.
+					this._listeners.push(
+						listen(hiderMenuNode, 'mousedown', stopPropagation),
+						listen(hiderToggleNode, 'mousedown', stopPropagation)
+					);
+	
+					// Hook up top-level mousedown listener if it hasn't been yet.
+					if (!bodyListener) {
+						bodyListener = listen.pausable(document, 'mousedown', function (e) {
+							// If an event reaches this listener, the menu is open,
+							// but a click occurred outside, so close the dropdown.
+							activeGrid && activeGrid._toggleColumnHiderMenu(e);
+						});
+						bodyListener.pause(); // pause initially; will resume when menu opens
+					}
 				}
-			}
-			else { // subsequent run
-				// Remove active rules, and clear out the menu (to be repopulated).
-				for (id in this._columnHiderRules) {
-					this._columnHiderRules[id].remove();
+				else { // subsequent run
+					// Remove active rules, and clear out the menu (to be repopulated).
+					for (id in this._columnHiderRules) {
+						this._columnHiderRules[id].remove();
+					}
+					hiderMenuNode.innerHTML = '';
 				}
-				hiderMenuNode.innerHTML = '';
-			}
-
-			this._columnHiderCheckboxes = {};
-			this._columnHiderRules = {};
-
-			// Populate menu with checkboxes/labels based on current columns.
-			this._renderHiderMenuEntries();
+	
+				this._columnHiderCheckboxes = {};
+				this._columnHiderRules = {};
+	
+				// Populate menu with checkboxes/labels based on current columns.
+				this._renderHiderMenuEntries();
+			//}
 		},
 
 		destroy: function () {

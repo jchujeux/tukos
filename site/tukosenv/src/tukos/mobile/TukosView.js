@@ -21,7 +21,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojox/mobile/Vi
 	        	this.addChild(this.heading = new Heading({label: this.title}));
 	        	if (this.paneModuleType === 'objectPane'){
 					if (!utils.empty(this.formContent.actionLayout)){
-						this.addChild(this.actionsHeading = new Heading({style: {display: 'none'}}));
+						this.addChild(this.actionsHeading = new Heading({style: {display: 'block'}}));
 		            	(this.actionsHeadingToggle = new ToolBarButton({icon: "mblDomButtonWhitePlus", style: "float: right", onClick: lang.hitch(this, function(){
 		            		var heading = this.actionsHeading, toggle = this.actionsHeadingToggle, displayStatus = heading.get('style').display;
 		            		if (displayStatus === 'none'){

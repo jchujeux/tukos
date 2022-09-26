@@ -11,7 +11,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", 
             this.customization = {};
             this.widgets = [];
             this.instantiatingWidgets = {};
-            this.tableLayout(this.dataLayout, this, lang.hitch(wutils, wutils.setWatchers));
+            this.tableLayout(this.dataLayout, this, lang.hitch(wutils, wutils.setWatchers), this.commonWidgetsAtts);
             this.layoutAction(this.actionLayout);
             this.changedWidgets = {};
             this.userChangedWidgets = {};
@@ -24,7 +24,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", 
             this.watchOnChange = true;
             this.watchContext = 'server';
             this.onInstantiated(lang.hitch(this, function(){
-            	if (this.widgetsHider !== false){
+            	if (this.widgetsHider !== false && Pmg.get('userRights') !== 'RESTRICTEDUSER'){
                 	this.widgetsHiderButton = new ToolBarButton({icon: "mblDomButtonBlueCirclePlus", style: "float: right", form: this}).placeAt(this.viewPane.actionsHeading, 'first');
                 	this.widgetsHiderButton.on('click', function(evt){
                 		var widgetsHiderButton = self.widgetsHiderButton, hider = widgetsHiderButton.hider;

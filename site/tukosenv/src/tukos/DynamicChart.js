@@ -1,7 +1,7 @@
 "use strict";
 define(["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom-construct",  "dojo/dom-style", "dojo/Deferred",  "dijit/_WidgetBase", "dojox/charting/Chart",
-        "dojox/charting/themes/ThreeD", "dojox/charting/StoreSeries", "dojo/store/Observable", "dojo/store/Memory"/*, "dstore/Memory"*/, "dojo/ready", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/widgets/widgetCustomUtils"], 
-function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, Observable, Memory/*, DMemory*/, ready, utils, dutils, evalutils, wcutils){
+        "dojox/charting/themes/ThreeD", "dojox/charting/StoreSeries", "dojo/store/Observable", "dojo/store/Memory"/*, "dstore/Memory"*/, "dojo/ready", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager"], 
+function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, Observable, Memory/*, DMemory*/, ready, utils, dutils, evalutils, wcutils, Pmg){
     var classesPath = {
         Curves:  "*dojoFixes/dojox/charting/plot2d/Default", Columns: "dojox/charting/plot2d/", ClusteredColumns: "dojox/charting/plot2d/", Lines: "dojox/charting/plot2d/", Areas: "dojox/charting/plot2d/", Pie: "dojox/charting/plot2d/", Spider: "tukos/charting/plot2d/",
         Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "tukos/widgets/", axis2dDefault:  "*dojox/charting/axis2d/Default", axis2dBase: "*dojox/charting/axis2d/Base", Tooltip: "dojox/charting/action2d/", BasicGrid: "tukos/",
@@ -72,12 +72,14 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
         },
         resize: function resize(){
 			this.inherited(resize, arguments);
-			if (this.tableWidget && this.showTable === 'yes'){
-				this.tableWidget.resize();
-			}
-			const width = dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height");
-            if (this.chart){
-            	this.chart.resize(this.showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
+			if (this.tableWidget){
+ 				if(this.showTable === 'yes'){
+					this.tableWidget.resize();
+				}
+            	if (this.chart){
+					const width = dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height");
+            		this.chart.resize(this.showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
+				}
 			}
 		},
         _setValueAttr: function(value){
@@ -175,6 +177,9 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 						if (!this.legendWidget){
 							this.legendWidget = new chartClasses[this.legend.type](lang.mixin({chart: chart, 
 								chartWidgetName: this.widgetName, form: this.form, tukosChartWidget: this}, this.legend.options || {}), this.legendNode);
+							if (Pmg.isMobile()){
+								this.legendWidget.set('style', {color: 'white'});
+							}
 						}else{
 							this.legendWidget.refresh();
 						}

@@ -39,7 +39,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
 	                    row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'},  widgets: editorWidgets}
 	    			}
     			},
-    			widgetsHider: true,
+    			widgetsHider: Pmg.get('userRights') !== 'RESTRICTEDUSER',
     			widgetsHiderArgs: {dialogPath: this.widgetName + '.atts.editDialogAtts.paneDescription.widgetsDescription.'},
                 style: {minWidth: (dojo.window.getBox().w*0.8) + 'px',overflow: 'auto'}
         	}};

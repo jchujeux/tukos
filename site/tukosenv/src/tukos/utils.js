@@ -1,5 +1,5 @@
-define(["dojo", "dojo/_base/lang", "dojo/date/stamp", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nls/messages"],
-	function(dojo, lang, stamp, number, currency, JSON, messages) {
+define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/number", "dojo/currency", "dojo/json", "dojo/i18n!tukos/nls/messages"],
+	function(dojo, lang, Color, stamp, number, currency, JSON, messages) {
 		return {
 			wasModified: false,
 			previousUniqueIds: [],
@@ -512,6 +512,21 @@ define(["dojo", "dojo/_base/lang", "dojo/date/stamp", "dojo/number", "dojo/curre
 					cache[id].push(property);
 				}
 				return 0;
+			},
+			valueToGradientColor: function(value, gradient){
+				if (value >= 1){
+					return gradient[1];
+				}else{
+					let length = gradient.length, i = 0, pValue = 1 - value;
+					while (i < length){
+						const right = gradient[i], rightColor = gradient[i+1], left = gradient[i+2], leftColor = gradient[i+3];
+						if (pValue <= left){
+							return Color.blendColors(Color.fromHex(leftColor), Color.fromHex(rightColor), (pValue - left) / (right - left)).toHex();
+						}
+						 i += 2;
+					}
+					return gradient[length-1];
+				}
 			}
 		};
 	});

@@ -63,11 +63,16 @@ trait IndicatorsView {
                     $indicatorId = 'trackindicator' . $indicator['id'];
                     $response['widgetsDescription'][$indicatorId] = Widgets::description(Utl::array_merge_recursive_replace($this->indicatorDescription($indicatorId, ...$description), ['atts' => ['edit' => ['onChangeLocalAction' => ['actualize' => ['hidden' => 'return false;']]]]]));
                     $trIndicatorId = $this->tr('trackingindicator') . " " . $indicator['id'];
-                    $response['widgetsDescription']['records']['atts']['columns'][$indicatorId] = ['rowsFilters' => true, 'editOn' => 'click', 'field' => $indicatorId, 'label' => $trIndicatorId, 'title' => $trIndicatorId];
+                    $response['widgetsDescription']['records']['atts']['columns'][$indicatorId] = ['rowsFilters' => true, 'editOn' => 'click', 'field' => $indicatorId, 'label' => $trIndicatorId, 'title' => $trIndicatorId, 'editorArgs' => $response['widgetsDescription'][$indicatorId]['atts'],
+                        'editor' => $response['widgetsDescription'][$indicatorId]['type'], 'widgetType' => $response['widgetsDescription'][$indicatorId]['type']
+                    ];
                     $response['widgetsDescription']['records']['atts']['nosendOnSave'][] = [$indicatorId];
                     //$response['widgetsDescription']['records']['atts']['columns']['indicatorscache']['indicatorLabels'][$indicatorId] = $this->tr('trackingindicator') . " " . $indicator['id'];
                     $response['widgetsDescription']['records']['atts']['renderCallback'] = $this->indicatorsCacheRenderCallback();
                     $response['dataLayout']['contents']['row1']['contents']['col2']['contents']['row3']['contents']['indicators']['widgets'][] = $indicatorId;
+                    if (!empty(Utl::getItem('desktopRowLayout', $response['widgetsDescription']['records']['atts']['accordionAtts']))){
+                        $response['widgetsDescription']['records']['atts']['accordionAtts']['desktopRowLayout']['contents']['row3']['contents']['indicators']['widgets'][] = $indicatorId;
+                    }
                 }
             }
             return $response;

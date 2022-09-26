@@ -8,7 +8,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             if (defaultTabMenu){
             	defaultTabMenu.destroyRecursive();
             }
-    		mutils.buildContextMenu(this.container, {type: 'DynamicMenu', atts: {targetNodeIds: [this.container.domNode]}, items: []});
+    		if (Pmg.get('userRights') !== 'RESTRICTEDUSER'){
+    			mutils.buildContextMenu(this.container, {type: 'DynamicMenu', atts: {targetNodeIds: [this.container.domNode]}, items: []});
+			}
     	},
     	contextMenuCallback: function(evt){
 			evt.preventDefault();            

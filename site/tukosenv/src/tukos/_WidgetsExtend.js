@@ -36,7 +36,7 @@ define (["dojo/_base/lang", "dijit/Tooltip", "tukos/widgetUtils"],
 					const self = this;
 					self.customContextMenuItems = function(){
 						return [{atts: {label: tukos.Pmg.message('help')  , onClick: function(){
-							tukos.Pmg.viewTranslatedInBrowserWindow(atts.onClickLink.name, atts.onClickLinkObject || self.form.object)
+							tukos.Pmg.viewTranslatedInBrowserWindow(atts.onClickLink.name, atts.onClickLinkObject || self.getRootForm().object)
 						}}}];
 					};
 				}
@@ -45,7 +45,7 @@ define (["dojo/_base/lang", "dijit/Tooltip", "tukos/widgetUtils"],
 						this.tooltipInstance.destroy();
 					}
 					if (tukos.Pmg.tukosTooltipExists(atts.onClickLink.name)){
-						this.tooltipInstance = new Tooltip({connectId: [this.domNode], label: atts.label +  '<span style="text-decoration: underline; color: blue; cursor: pointer;" onclick="tukos.Pmg.viewTranslatedInBrowserWindow(\''+ atts.onClickLink.name + '\', \'' + (atts.onClickLink.object || this.form.object) + '\')">' + 
+						this.tooltipInstance = new Tooltip({connectId: [this.domNode], label: atts.label +  '<span style="text-decoration: underline; color: blue; cursor: pointer;" onclick="tukos.Pmg.viewTranslatedInBrowserWindow(\''+ atts.onClickLink.name + '\', \'' + (atts.onClickLink.object || self.getRootForm().object) + '\')">' + 
 								(atts.onClickLink.label || '(' + tukos.Pmg.message("more") + ' ...)') + ' </span>'});
 					}else if (atts.label){
 						this.tooltipInstance = new Tooltip({connectId: [this.domNode], label: atts.label});

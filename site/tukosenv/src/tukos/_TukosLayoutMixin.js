@@ -11,16 +11,17 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all",  "dojo/has
 				commonAtts = utils.mergeRecursive(commonAtts, optionalCommonWidgetsAtts);
 			}
             if (layout.tableAtts){
-                if (layout.tableAtts.id){
-					layout.tableAtts.id = this.id + layout.tableAtts.id;
+                const tableAtts = lang.clone(layout.tableAtts);
+                if (tableAtts.id){
+					tableAtts.id = this.id + tableAtts.id;
 				}
-                var parent  = new TableContainer(layout.tableAtts, dojo.doc.createElement('div'));
+                var parent  = new TableContainer(tableAtts, dojo.doc.createElement('div'));
                 fromParent.addChild(parent);
             }else{
                 var parent = fromParent;
             }
             for (var item in layout.contents){
-                parent.addChild(this.tableLayout(layout.contents[item], parent, optionalWidgetInstantiationCallback));
+                parent.addChild(this.tableLayout(layout.contents[item], parent, optionalWidgetInstantiationCallback, optionalCommonWidgetsAtts));
             }
             for (var i in layout.widgets){
                 var widgetName = layout.widgets[i], widgetDescription = this.widgetsDescription[widgetName];
@@ -28,7 +29,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all",  "dojo/has
 	                var theDijitType = widgetDescription.type;
 	                var theDijitAtts  = widgetDescription.atts;
 	                this.widgetsName.push(widgetName);
-					theDijitAtts = lang.mixin(theDijitAtts, lang.mixin({id: this.id + widgetName, widgetType: theDijitType, widgetName: widgetName}, commonAtts));
+					theDijitAtts = utils.mergeRecursive(theDijitAtts, utils.mergeRecursive({id: this.id + widgetName, widgetType: theDijitType, widgetName: widgetName}, commonAtts));
 	                var instantiatingWidget = widgetsLoader.instantiate(theDijitType, theDijitAtts, optionalWidgetInstantiationCallback);
 	                if (typeof instantiatingWidget.then === "function"){
 	                    this.instantiatingWidgets[widgetName] = instantiatingWidgets[i] = widgets[i] = instantiatingWidget;

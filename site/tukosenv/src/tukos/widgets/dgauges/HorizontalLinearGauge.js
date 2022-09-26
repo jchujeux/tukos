@@ -10,9 +10,9 @@ define([
 		"dojox/dgauges/RectangularValueIndicator", 
 		"dojox/dgauges/TextIndicator",
 		"dojox/dgauges/components/DefaultPropertiesMixin",
-		"dijit/registry", "tukos/utils", "tukos/widgetUtils",  "tukos/widgets/CheckBox"
+		"dijit/registry", "tukos/utils", "tukos/widgetUtils",  "tukos/widgets/CheckBox", "tukos/PageManager"
 	], 
-	function(lang, declare, Color, dct, _WidgetBase, dgutils, RectangularGauge, LinearScaler, RectangularScale, RectangularValueIndicator, TextIndicator, DefaultPropertiesMixin, registry, utils, wutils, TukosCheckbox){
+	function(lang, declare, Color, dct, _WidgetBase, dgutils, RectangularGauge, LinearScaler, RectangularScale, RectangularValueIndicator, TextIndicator, DefaultPropertiesMixin, registry, utils, wutils, TukosCheckbox, Pmg){
 	const TheGauge =  declare([_WidgetBase, RectangularGauge, DefaultPropertiesMixin], {
 		// summary:
 		//		A horizontal gauge widget.
@@ -128,14 +128,33 @@ define([
 		},
 	});
 	return  declare(_WidgetBase, {
+/*
+        $leftRightTdStyle = ['verticalAlign' => 'top', 'paddingTop' => '7px', 'fontSize' => 'smaller', 'fontFamily' => 'Arial, Helvetica, sans-serif', 'width' => '70px', 'wordWrap' => 'break-word'];
+        $gaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 10, 'showValue' => true, 'tickLabel' => '',
+            'gradient' => [0, '#B22222', 0.5, '#FF8C00', 1, '#7FFFD4'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
+        $gaugeStyle = ['height' => '100px'];
+        $gaugeTableStyle = ['tableLayout' => 'fixed', 'width' => '650px'];
+
+                'label' => $tr('Recovery'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Totally'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Notatall'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle,
+                'gaugeAtts' => $gaugeAtts, 'onChangeLocalAction' => ['actualize' => ['hidden' => 'return false;']],
+*/
         postCreate: function postCreate(){
             const self = this;
             this.inherited(postCreate, arguments);
             this.set('style', {height: this.checkboxes ? '100px' : '60px'});
-            const gaugeTable = dct.create('table', {align: 'center', style: this.gaugeTableStyle}), tr = dct.create('tr', null, gaugeTable), leftTd = dct.create('td', this.leftTd, tr), gaugeTd = dct.create('td', {style: {width: '100%'}}, tr), rightTd = dct.create('td', this.rightTd, tr);
+            if (Pmg.isMobile()){
+				if (this.leftTd && !(this.leftTd.style || {}).color){
+					this.leftTd.style = lang.mixin({color: 'white'}, this.leftTd.style);
+				}
+				if (this.rightTd && !(this.rightTd.style || {}).color){
+					this.rightTd.style = lang.mixin({color: 'white'}, this.rightTd.style);
+				}
+			}
+            const gaugeDiv = dct.create('div', {style: this.gaugeDivStyle});
+            const gaugeTable = dct.create('table', {align: 'center', style: this.gaugeTableStyle}, gaugeDiv), tr = dct.create('tr', null, gaugeTable), leftTd = dct.create('td', this.leftTd, tr), gaugeTd = dct.create('td', {style: {width: '100%'}}, tr), rightTd = dct.create('td', this.rightTd, tr);
             
             const gauge = this.gauge = new TheGauge(lang.mixin(this.gaugeAtts, {id: this.id + "_gauge"}), dct.create('div', null, gaugeTd));
-            this.domNode.appendChild(gaugeTable); 
+            this.domNode.appendChild(gaugeDiv); 
 			this.gauge.on("endEditing", function(event){
 				//self.set('value', self.checkboxes ? {gauge: event.indicator.value} : event.indicator.value);
 				                    		self.gauge.set('value', event.indicator.value);
@@ -145,7 +164,7 @@ define([
             if (this.checkboxes){
             	const id = this.id, table = this.table = dct.create('table', {align: 'center', style: this.gaugeTableStyle}, this.domNode);
             	const tr = dct.create('tr', {}, table);
-            	const checkboxWidgets = this.checkboxWidgets = [];
+            	const checkboxWidgets = this.checkboxWidgets = [], checkBoxAtts = Pmg.isMobile() ? {style: {color: 'white'}} : {};
             	utils.forEach(this.checkboxes, function(atts){
 					atts.name = atts.id;
 					atts.id = id + '_' + atts.id;
@@ -159,7 +178,7 @@ define([
 					});
 					dct.place(checkbox.domNode, td);
 					checkboxWidgets.push(checkbox);
-					dct.create('span', {innerHTML: atts.title}, td);
+					dct.create('span', lang.mixin({innerHTML: atts.title}, checkBoxAtts), td);
 				})
             }
         },

@@ -24,8 +24,8 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 			form.getWidget('intensityPane').set('hidden', true);
 			form.getWidget('noteIndicatorsPane').set('hidden', true);
 			form.getWidget('recordFiltersInfoPane').set('hidden', true);
-			form.getWidget('existingrecord').set('hidden', false);
-			form.getWidget('newrecord').set('hidden', false);
+			form.getWidget('existingrecord').set('hidden', Pmg.isMobile());
+			form.getWidget('newrecord').set('hidden', Pmg.isMobile());
 			form.getWidget('existingrecord').set('disabled', false);
 			form.getWidget('newrecord').set('disabled', false);
 			form.getWidget('actualize').set('hidden', true);
@@ -111,39 +111,124 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 				form.resize();
 			}
 		},
-		recordTypeChangeAction: function(newValue){
+		recordTypeChangeAction: function(newValue, pane){
 			const form = this.form;
-			if (form.getWidget('visualize').get('hidden')){
+			pane = pane || form;
+			if (pane !== form || form.getWidget('visualize').get('hidden')){
 				switch (Number(newValue)){
 					case 1: /* running*/
-						form.getWidget('activityPane').set('hidden', false);
-						form.getWidget('activitydetails').set('hidden', true);
-						form.getWidget('runningPane').set('hidden', false);
-						form.getWidget('intensityPane').set('hidden', false);
-						form.getWidget('noteIndicatorsPane').set('hidden', false);
+						pane.getWidget('activityPane').set('hidden', false);
+						pane.getWidget('activitydetails').set('hidden', true);
+						pane.getWidget('runningPane').set('hidden', false);
+						pane.getWidget('intensityPane').set('hidden', false);
+						pane.getWidget('noteIndicatorsPane').set('hidden', false);
 						break;
 					case 2: /* other activity*/
-						form.getWidget('activityPane').set('hidden', false);
-						form.getWidget('activitydetails').set('hidden', false);
-						form.getWidget('runningPane').set('hidden', true);
-						form.getWidget('noteIndicatorsPane').set('hidden', false);
-						form.getWidget('intensityPane').set('hidden', true);
+						pane.getWidget('activityPane').set('hidden', false);
+						pane.getWidget('activitydetails').set('hidden', false);
+						pane.getWidget('runningPane').set('hidden', true);
+						pane.getWidget('noteIndicatorsPane').set('hidden', false);
+						pane.getWidget('intensityPane').set('hidden', true);
 						break;
 					case 3: /* note / comment*/
 					default:
-						form.getWidget('noteIndicatorsPane').set('hidden', false);
-						form.getWidget('activityPane').set('hidden', true);
-						form.getWidget('runningPane').set('hidden', true);
-						form.getWidget('intensityPane').set('hidden', true);
+						pane.getWidget('noteIndicatorsPane').set('hidden', false);
+						pane.getWidget('activityPane').set('hidden', true);
+						pane.getWidget('runningPane').set('hidden', true);
+						pane.getWidget('intensityPane').set('hidden', true);
 						break;
 				}
-				if (form.markIfChanged){
+				if (pane === form && form.markIfChanged){
 					form.getWidget('actualize').set('hidden', false);
 					form.getWidget('cancelmode').set('hidden', false);
 				}
-				this.form.resize();
-				this.form.resize();
+				if (pane !== form){
+					this.accordionRecordTypeChangeAction(newValue, pane);
+				}
+				//if (pane === form){
+					pane.resize();
+					pane.resize();
+				//}
 			}
+		},
+		accordionRecordTypeChangeAction(newValue, pane){
+			let i, indicatorWidget;
+			switch(Number(newValue)){
+				case 1: /*running*/
+					runningWidgets.forEach(function(widgetName){
+						pane.getWidget(widgetName).set('hidden', false);
+					});
+					activityWidgets.forEach(function(widgetName){
+						pane.getWidget(widgetName).set('hidden', false);
+					});
+					pane.getWidget('activitydetails').set('hidden', true);
+					pane.getWidget('notecomments').set('hidden', false);
+					i = 1;
+					while (indicatorWidget = pane.getWidget('trackindicator' + i)){
+						indicatorWidget.set('hidden', false);
+						i += 1;
+					}
+					break;
+				case 2: /* other activity*/
+					runningWidgets.forEach(function(widgetName){
+						pane.getWidget(widgetName).set('hidden', true);
+					});
+					activityWidgets.forEach(function(widgetName){
+						pane.getWidget(widgetName).set('hidden', false);
+					});
+					pane.getWidget('activitydetails').set('hidden', false);
+					pane.getWidget('notecomments').set('hidden', false);
+					i = 1;
+					while (indicatorWidget = pane.getWidget('trackindicator' + i)){
+						indicatorWidget.set('hidden', false);
+						i += 1;
+					}
+					break;
+				case 3: /* Notes / comments*/
+					runningWidgets.forEach(function(widgetName){
+						pane.getWidget(widgetName).set('hidden', true);
+					});
+					activityWidgets.forEach(function(widgetName){
+						pane.getWidget(widgetName).set('hidden', true);
+					});
+					pane.getWidget('activitydetails').set('hidden', true);
+					pane.getWidget('notecomments').set('hidden', false);
+					i = 1;
+					while (indicatorWidget = pane.getWidget('trackindicator' + i)){
+						indicatorWidget.set('hidden', false);
+						i += 1;
+					}
+					break;
+				default:
+					runningWidgets.forEach(function(widgetName){
+						pane.getWidget(widgetName).set('hidden', true);
+					});
+					activityWidgets.forEach(function(widgetName){
+						pane.getWidget(widgetName).set('hidden', true);
+					});
+					pane.getWidget('activitydetails').set('hidden', true);
+					pane.getWidget('notecomments').set('hidden', true);
+					i = 1;
+					while (indicatorWidget = pane.getWidget('trackindicator' + i)){
+						indicatorWidget.set('hidden', true);
+						i += 1;
+					}
+			}
+			setTimeout(function(){
+				pane.resize();
+			}, 100);
+		},
+		accordionExpandAction(newValue, pane){
+			pane.watchContext = 'server';
+			this.accordionRecordTypeChangeAction(newValue, pane);
+			pane.setWidgets(pane.data);
+			pane.watchContext = 'user';
+		},
+		desktopAccordionExpandAction(newValue, pane){
+			pane.watchContext = 'server';
+			this.recordTypeChangeAction(newValue, pane);
+			pane.setWidgets(pane.data);
+			pane.watchContext = 'user';
 		},
 		actualize: function(){
 			const form = this.form, recordType = Number(form.valueOf('recordtype')), row = {}, recordsWidget = form.getWidget('records');
@@ -267,6 +352,18 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 				}
 				Pmg.setFeedback(Pmg.message('savecustomtoupdatetrendcharts'), null, null, true);
 			}
+		},
+		showHideGamePlan: function(){
+			const form = this.form, gamePlanPane = form.getWidget('gamePlanPane'), newHiddenValue = !gamePlanPane.get('hidden');
+			gamePlanPane.set('hidden', newHiddenValue);
+			form.getWidget('id').set('hidden', newHiddenValue);
+			form.getWidget('parentid').set('hidden', newHiddenValue);
+			form.resize();
+		},
+		showHideAnalysis: function(){
+			const form = this.form, analysisPane = form.getWidget('roadTrackAnalysis');
+			analysisPane.set('hidden', !analysisPane.get('hidden'));
+			form.resize();
 		},
 	});
 });
