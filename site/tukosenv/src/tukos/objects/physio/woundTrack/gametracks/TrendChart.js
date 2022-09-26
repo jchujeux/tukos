@@ -1,6 +1,6 @@
 "use strict";
-define(["dojo/_base/declare", "tukos/ArrayIterator", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/objects/physio/woundTrack/gametracks/expressionTrend", "tukos/PageManager"], 
-function(declare, ArrayIterator, utils, dutils, expressionFilter, expressionTrend, Pmg){
+define(["dojo/_base/declare", "dojo/_base/lang",  "tukos/ArrayIterator", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/objects/physio/woundTrack/gametracks/expressionTrend", "tukos/PageManager"], 
+function(declare,lang,   ArrayIterator, utils, dutils, expressionFilter, expressionTrend, Pmg){
 	return declare(null, {
         constructor: function(args){
 			this.grid = args.grid;
@@ -24,6 +24,13 @@ function(declare, ArrayIterator, utils, dutils, expressionFilter, expressionTren
 					});
 					plotsDescription.forEach(function(plotDescription){
 						plots[plotDescription.name] = plotDescription;
+						if (plotDescription.type === 'Indicator' && !plotDescription.lineStroke){
+							//plotDescription.lineStroke = {color: 'red', style: 'ShortDash', width: 2};
+							plotDescription = lang.mixin(plotDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: 'red', style: 'shortDash', width: 2}, labelFunc: function(){
+								return plotDescription.label || this.values;
+							}});
+							//plots[plotDescription.name] = {type: 'Indicator', stroke: null, outline: null, fill: null, lineStroke: {color: 'red', style: 'ShortDash', width: 2}};
+						}
 					});
 					tableColumns.day = {field: 'day', label: 'Jour'}
 					kpisDescription.forEach(function(kpiDescription, index){

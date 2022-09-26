@@ -10,7 +10,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
             this.widgetsName = [];
             this.customization = {};
             var dataPane = new ContentPane({region: "center", 'class': "centerPanel", style: "padding: 0px;  overflow: auto; width: 100%; height: 100%; "}, dojo.doc.createElement("div"));
-            var dataTable = this.tableLayout(this.dataLayout, dataPane, lang.hitch(wutils, wutils.setWatchers));
+            var dataTable = this.tableLayout(this.dataLayout, dataPane, lang.hitch(wutils, wutils.setWatchers), this.commonWidgetsAtts);
             this.addChild(dataPane);
             if (!utils.empty(this.actionLayout)){
 	            var actionPane = new ContentPane({region: "top", 'class': "edgePanel", style: "padding: 0px; overflow: auto;"},  dojo.doc.createElement("div"));
@@ -33,7 +33,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
             this.watchOnChange = true;
             this.watchContext = 'server';
             this.onInstantiated(lang.hitch(this, function(){
-                if (actionPane && this.widgetsHider !== false){
+                if (actionPane && this.widgetsHider !== false && Pmg.get('userRights') !== 'RESTRICTEDUSER'){
             		this.widgetsHiderButton = dct.create('button', {'class': 'ui-icon dgrid-hider-toggle', type: 'button'}, actionPane.domNode);
                 	this.widgetsHiderButton.onclick = function(){
                 		var widgetsHiderButton = self.widgetsHiderButton, hider = widgetsHiderButton.hider;

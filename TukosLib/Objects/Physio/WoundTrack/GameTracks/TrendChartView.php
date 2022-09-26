@@ -2,6 +2,7 @@
 namespace TukosLib\Objects\Physio\WoundTrack\GameTracks;
 use TukosLib\Utils\Widgets;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\TukosFramework as Tfk;
 
 trait TrendChartView {
 
@@ -11,6 +12,7 @@ trait TrendChartView {
         $kpiParameters = ['recordtype', 'recorddate', 'globalsensation', 'environment', 'recovery', 'duration', 'distance', 'elevationgain', 'perceivedload', 'perceivedintensity', 'perceivedstress', 'mentaldifficulty'];
         return ['type' => 'dynamicChart', 'atts' => ['edit' => [
             'title' => $title, 
+            'ignoreChanges' => true,
             'style' => ['width' => 'auto'],
             'chartHeight' => '300px',
             'showTable' => 'no',
@@ -18,6 +20,7 @@ trait TrendChartView {
             'legend' => ['type' => 'SelectableLegend', 'options' => []],
             'tooltip' => true,
             'mouseZoomAndPan' => true,
+            'noMarkAsChanged' => true,
             'onWatchLocalAction' => [
                 'hidden' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->trendChartChangeAction($chartId, 'hidden')]]],
                 'axesToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->trendChartChangeAction($chartId, 'axes')]]],
@@ -49,13 +52,13 @@ trait TrendChartView {
                         'adjustmax' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Adjustmax')], 'storeedit' => ['width' => 80]]), false),              
                 ]])), ['att' => 'axesToInclude', 'type' => 'SimpleDgridNoDnd', 'name' => $this->tr('AxesToInclude'), 'atts' => ['initialRowValue' => ['vertical' => true, 'minorTicks' => false], 
                     'columns' => ['titleOrientation' => ['hidden' => true], 'titleGap' => ['hidden' => true], 'majorTicks' => ['hidden' => true], 'minorTicks' => ['hidden' => true]]]]),
-                //'daytype' => ['att' => 'daytype', 'type' => 'StoreSelect', 'name' => $tr('daytype'), 'storeArgs' => ['data' => [['id' => 'dayoftreatment', 'name' => $tr('dayoftreatment')], ['id' =>  'dateofday', 'name' =>  $tr('dateofday')]]]],
                 'plots' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete([/*'label' => $this->tr('Axes'), */'style' => ['width' => '800px'], 'storeArgs' => ['idProperty' => 'idg'],
                     'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'GameTracksTrendChartDiagramsTukosTooltip', 'object' => 'physiogametracks']],
                     'colsDescription' => [
                         'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col'],
-                        'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name'), 'style' => ['width' => '5em']], 'storeedit' => ['minWidth' => 100]]), false),
-                        'type' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['Curves', 'ClusteredColumns'], $tr)], 'label' => $tr('plottype')], 'storeedit' => ['minWidth' => 60]]), false),
+                        'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
+                        'type' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['Curves', 'ClusteredColumns', 'Indicator'], $tr)], 'label' => $tr('plottype'), 
+                            'onChangeLocalAction' => ['type' => ['localActionStatus' => $this->onPlotTypeChangeLocalAction()]]], 'storeedit' => ['minWidth' => 60]]), false),
                         'hAxis' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('hAxis'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 60]]), false),
                         'vAxis' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('vAxis'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 60]]), false),
                         'lines' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('ShowLines')], 'storeedit' => ['width' => 60]]), false),
@@ -64,7 +67,10 @@ trait TrendChartView {
                         'tension' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => '', 'name' => $tr('Brokenline')], ['id' => 'X', 'name' => $tr('Curved')]]], 'label' => $tr('Linetype')], 'storeedit' => ['width' => 60]]), false),
                         'interpolate' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Interpolate')], 'storeedit' => ['minWidth' => 60]]), false),
                         'gap' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Barsgap'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
-                ]])), ['att' => 'plotsToInclude', 'type' => 'SimpleDgridNoDnd', 'name' => $this->tr('plotsToInclude'), 'atts' => ['initialRowValue' => ['lines' => true, 'markers' => true]]]),
+                        'vertical' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('vertical')], ['id' => false, 'name' => $tr('horizontal')]]], 'label' => $tr('indicatororientation')],  'storeedit' => ['width' => 80]]), false),
+                        'values' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Indicatorvalue'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
+                        'label' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Label'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
+                    ]])), ['att' => 'plotsToInclude', 'type' => 'SimpleDgridNoDnd', 'name' => $this->tr('plotsToInclude'), 'atts' => ['initialRowValue' => ['lines' => true, 'markers' => true], 'onCellClickAction' => $this->onPlotRowIdClickAction()]]),
                 //'gridFilter' => ['att' => 'gridFilter', 'type' => 'TextBox', 'name' => $tr('gridFilter')],
                 'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('seriesToInclude'), 'style' => ['width' => '800px'], 'storeArgs' => ['idProperty' => 'idg'], 
                     'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'GameTracksTrendChartKpisTukosTooltip', 'object' => 'physiogametracks']],
@@ -109,6 +115,7 @@ trait TrendChartView {
                     'updateRow' => $this->recordsRowWatchAction(),
                     'deleteRow' => $this->recordsRowWatchAction(),
                     'deleteRows' => $this->recordsRowWatchAction(),
+                    'expandRow' => Tfk::$registry->isMobile ? "this.form.localActions.accordionExpandAction(arguments[1][0].item.recordtype, arguments[1][0]);" : "this.form.localActions.desktopAccordionExpandAction(arguments[1][0].item.recordtype, arguments[1][0]);"
                 ];
             }
         }
@@ -137,15 +144,15 @@ if (form.editConfig && form.editConfig.trendcharts){
     }else{    
         require(["tukos/objects/physio/woundTrack/gametracks/TrendChart"], function(TrendChart){
             form.trendChartUtils = new TrendChart({form: form, grid: sWidget, dateCol: 'recorddate'});
-            /*let trendCharts = JSON.parse(form.editConfig.trendcharts);
+            let trendCharts = JSON.parse(form.editConfig.trendcharts);//seems this is only needed in case of tab refresh on desktop (!)
             dojo.ready(function(){
                 form.markIfChanged = form.watchOnChange = false;
                     for (const trendChart of trendCharts){
                         form.trendChartUtils.setChartValue('trendchart' + trendChart.id);
                     }
-                wutils.markAsUnchanged(form.getWidget('trendchart' + trendChart.id));
+                //wutils.markAsUnchanged(form.getWidget('trendchart' + trendChart.id));
                 form.markIfChanged = form.watchOnChange = true;
-            });*/
+            });
         });
     }
 }
@@ -155,6 +162,7 @@ EOT
     }
     public function recordsRowWatchAction(){
         return <<<EOT
+console.log('in recordsRowWatchAction');
 const form = this.form;
 if (form.editConfig && form.editConfig.trendcharts){
     let trendCharts = JSON.parse(form.editConfig.trendcharts);
@@ -165,6 +173,56 @@ if (form.editConfig && form.editConfig.trendcharts){
 return true;
 EOT
         ;
+    }
+    public function plotColsToHide(){
+        return <<<EOT
+             {Curves: ['gap', 'vertical', 'values', 'label'], ClusteredColumns: ['lines', 'areas', 'markers', 'tension', 'interpolate', 'vertical', 'values', 'label'], Indicator: ['areas', 'markers', 'tension', 'interpolate', 'gap']}
+EOT
+        ;
+    }
+    public function plotColsToUnhide(){
+        return <<<EOT
+             ['lines', 'areas', 'markers', 'tension', 'interpolate', 'gap', 'vertical', 'values', 'label']
+EOT
+        ;
+    }
+    public function onPlotTypeChangeLocalAction(){
+        return <<<EOT
+const grid = sWidget.parent, newColumns = grid.columns;
+{$this->plotColsToUnhide()}.forEach(function(colName){
+    newColumns[colName].hidden = false;
+});
+if (newValue){
+    const colsToHide = {$this->plotColsToHide()};
+    colsToHide[newValue].forEach(function(colName){
+        newColumns[colName].hidden = true;
+    });
+}
+setTimeout(function(){
+    grid.set('columns', newColumns);
+    }, 100);
+EOT
+;
+    }
+    public function onPlotRowIdClickAction(){
+        return <<<EOT
+if (grid.clickedCell.column.field === 'rowId'){
+    const newColumns = grid.columns, plotType = grid.clickedCell.row.data.type;
+    {$this->plotColsToUnhide()}.forEach(function(colName){
+        newColumns[colName].hidden = false;
+    });
+    if (plotType){
+        const colsToHide = {$this->plotColsToHide()};
+        colsToHide[plotType].forEach(function(colName){
+            newColumns[colName].hidden = true;
+        });
+    }
+    setTimeout(function(){
+        grid.set('columns', newColumns);
+        }, 100);
+}
+EOT
+;
     }
 }
 ?>

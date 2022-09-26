@@ -12,6 +12,9 @@ trait ItemCustomization {
     public function getItemCustomization($where, $viewPaneMode, $keys = []){
         if (in_array('custom', $this->allCols)){
             $itemCustomization = $this->getOne(['where' => $where, 'cols' => ['custom']], ['custom' => $viewPaneMode]);
+            if (empty($itemCustomization['custom']) && $viewPaneMode === ['edit', 'mobile']){
+                $itemCustomization = $this->getOne(['where' => $where, 'cols' => ['custom']], ['custom' => ['edit', 'tab']]);
+            }
             if (!empty($itemCustomization['custom'])){
                 $itemCustom = Utl::drillDown($itemCustomization['custom'], $keys, []);
                 if (!empty($itemCustomization['custom']['itemcustomviewid'])){

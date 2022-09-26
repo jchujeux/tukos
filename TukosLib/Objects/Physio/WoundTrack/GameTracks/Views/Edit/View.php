@@ -7,6 +7,7 @@ use TukosLib\Objects\Views\LocalActions;
 use TukosLib\Objects\Physio\WoundTrack\IndicatorsConfig;
 use TukosLib\Objects\Physio\WoundTrack\GameTracks\EditConfig;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\TukosFramework as Tfk;
 
 class View extends EditView{
 
@@ -27,7 +28,7 @@ class View extends EditView{
                                 'widgets' => ['id', 'parentid', 'name']
                             ],
                             'row2' => [
-                                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'labelCellStyle' => ['border' => '1px solid grey'], 'id' => 'gamePlanPane'],
+                                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'labelCellStyle' => ['border' => '1px solid grey'], 'id' => 'gamePlanPane', 'hidden' => Tfk::$registry->isMobile],
                                 'contents' => [
                                     'row1' => [
                                         'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'label' => $tr('GamePlaninformation'), 'style' => ['border' => '1px solid grey']],
@@ -59,7 +60,7 @@ class View extends EditView{
                         'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'orientation' => 'vert'],
                         'contents' => [
                             'rowtrendcharts' => [
-                                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+                                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'id' => 'roadTrackAnalysis'],
                                 'widgets' => [],
                             ],
                             'row4' => [
@@ -67,7 +68,7 @@ class View extends EditView{
                                 'widgets' => ['records'],
                             ],
                             'row1' => [
-                                'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'style' => ['border' => '1px solid grey'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
+                                'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'style' => ['border' => '1px solid grey'], 'widgetCellStyle' => ['verticalAlign' => 'top'], 'hidden' => true /*Tfk::$registry->isMobile*/],
                                 'contents' => [
                                     'col1' => [
                                         'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
@@ -89,7 +90,7 @@ class View extends EditView{
                                 ]
 	                        ],
                             'row2' => [
-                                'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'widgetCellStyle' => ['verticalAlign' => 'top', 'padding' => '0px'], 'style' => ['padding' => '0px'], 'id' => 'activityPane'],
+                                'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'widgetWidths' => ['50%', '50%'], 'widgetCellStyle' => ['verticalAlign' => 'top', 'padding' => '0px'], 'style' => ['padding' => '0px'], 'id' => 'activityPane'],
                                 'contents' => [
                                     'col1' => [
                                         'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'style' => ['padding' => '0px'], 'labelCellStyle' => ['border' => '1px solid grey', 'padding' => '0px']],
@@ -98,7 +99,7 @@ class View extends EditView{
                                                 'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'label' => $tr('Mechanicalload'), 'style' => ['border' => '1px solid grey', 'padding' => '0px'], 'widgetCellStyle' => ['verticalAlign' => 'top', 'padding' => '0px']],
                                                 'contents' => [
                                                     'row1' => [
-                                                        'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'style' => ['padding' => '0px'], 'widgetCellStyle' => ['padding' => '0px'], 'id' => 'runningPane', 'labelWidth' => '100'],
+                                                        'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'style' => ['padding' => '0px'], 'widgetCellStyle' => ['padding' => '0px'], 'id' => 'runningPane', 'labelWidth' => '80'],
                                                         'widgets' => ['duration', 'distance', 'elevationgain'/*, 'elevationloss'*/, 'perceivedload']
                                                     ],
                                                     'row2' => [
@@ -162,6 +163,10 @@ class View extends EditView{
             ]
         ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowhistory', 'rowacl'], $this->dataLayout['contents']));
+        $this->actionWidgets['showhidegameplan'] = ['type' => 'TukosButton', 'atts' => ['label' => $tr('ShowHideAnalysis'), 'onClickAction' => "this.form.localActions.showHideAnalysis();"]];
+        $this->actionWidgets['showhideanalysis'] = ['type' => 'TukosButton', 'atts' => ['label' => $tr('ShowHideGamePlan'), 'onClickAction' => "this.form.localActions.showHideGamePlan();"]];
+        $this->actionLayout['contents']['actions']['widgets'][] = 'showhidegameplan';
+        $this->actionLayout['contents']['actions']['widgets'][] = 'showhideanalysis';
         $this->actionWidgets['newrecord'] = ['type' => 'TukosButton', 'atts' => ['label' => $tr('newrecord'), 'onClickAction' => "this.form.localActions.newRecordOnClickAction();"]];
         $this->actionWidgets['existingrecord'] = ['type' => 'TukosButton', 'atts' => ['label' => $tr('existingrecord'), 'onClickAction' => "this.form.localActions.existingRecordOnClickAction();"]];
         $this->actionWidgets['actualize'] = ['type' => 'TukosButton', 'atts' => ['label' => $tr('actualizerecord'), 'hidden' => true, 'onClickAction' => 'this.form.localActions.actualize();']];

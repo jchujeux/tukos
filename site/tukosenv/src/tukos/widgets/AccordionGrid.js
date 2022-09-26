@@ -1,28 +1,30 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "dojo/ready", "dijit/registry", "dojox/mobile/Container", "dojox/mobile/Heading",  "dojox/mobile/Accordion", 
-		"dojox/mobile/ContentPane", "tukos/dstore/MemoryTreeObjects", "tukos/widgets/WidgetsLoader", "tukos/utils", "tukos/evalutils", "tukos/widgetUtils", "tukos/PageManager"], 
-    function(declare, lang, when, aspect, ready, registry, Container, Heading, Accordion, ContentPane, MemoryObjects, WidgetsLoader, utils, eutils, wutils, Pmg){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "dojo/ready", "dijit/registry", "dijit/TitlePane", 
+		"dijit/layout/ContentPane", "tukos/dstore/MemoryTreeObjects", "tukos/widgets/WidgetsLoader", "tukos/utils", "tukos/evalutils", "tukos/widgetUtils", "tukos/PageManager"], 
+    function(declare, lang, when, aspect, ready, registry, TitlePane, ContentPane, MemoryObjects, WidgetsLoader, utils, eutils, wutils, Pmg){
     var iconBase = require.toUrl("tukos/mobile/resources/images/icons16.png"), domainIcon = "16,48,16,16", newIcon = "0,16,16,16", editIcon = "0,0,16,16", menuItemIcon = "0,32,16,16", objectSelectIcon = "0,0,16,16";
-	return declare([Container], {
+	return declare([ContentPane], {
         constructor: function(args){
         	args = lang.mixin(args, {style: {backgroundColor: 'DarkGrey'}, store: new MemoryObjects(args.storeArgs)});
             //args.collection = args.store.getRootCollection();
         },
 		postCreate: function(){
-			var actionsHeading;
+			const self = this;
+			let actionsHeading;
 			this.inherited(arguments); 
 			this.set('collection', this.store.getRootCollection());
 			this.dirty = {};
 			this.hasChangedSinceLastCollapse = false;
 			this.deleted = [];
-            this.addChild(this.actionsHeading = actionsHeading = new Heading({}));
+            //this.addChild(this.actionsHeading = actionsHeading = new TitlePane({}));
 			dojo.when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.addRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, pane: this.form,
                 			form: this.form, onClick: lang.hitch(this, this.addRow)}, {})), function(theWidget){
-                				actionsHeading.addChild(theWidget);
+                				//theWidget.placeAt(actionsHeading.focusNode);
+                				self.addChild(theWidget);
                 				theWidget.layoutContainer = theWidget.domNode;
             });
 			//this.setAccordion();
         },
-        setAutoHeight: function(){
+        /*setAutoHeight: function(){
     		var accordion = this.accordion;
     		ready(function(){
         		var nodes = Array.apply(null, accordion.domNode.getElementsByClassName("mblAccordionPane"));
@@ -30,7 +32,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
         			node.style.height = "";
         		});
     		});
-    	},
+    	},*/
 		getRowLabel: function(item){
 			return eutils.actionFunction(this, 'getRowLabel', this.accordionAtts.getRowLabelAction, 'kwArgs', {grid: this, item: item});
 		},
@@ -44,7 +46,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 				}
         		widgets.push(col);
             });
-			return {widgetsDescription: widgetsDescription, layout: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: this.accordionAtts.orientation}, widgets: widgets}};
+			return {widgetsDescription: widgetsDescription, layout: this.accordionAtts.desktopRowLayout};
 		},
 		updateDirty: function(idPropertyValue, field, value, isNewRow, propagateChange){
 			var collection = this.collection, grid = this, collectionRow = collection.getSync(idPropertyValue), oldValue;
@@ -70,7 +72,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			console.log('here I should do something'); 
 			if (newValue !== oldValue){
 				grid.updateDirty(item[idp], sWidget.widgetName, sWidget.get('value'), false, true);
-				registry.byNode(pane.domNode.parentNode)._at.labelNode.innerHTML = grid.getRowLabel(item);
+				//registry.byNode(pane.domNode.parentNode)._at.labelNode.innerHTML = grid.getRowLabel(item);
+				pane.titlePane.set('title', grid.getRowLabel(item));
 			}
 			return true;
 		},
@@ -112,10 +115,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 				 }
 			}
 			this.setSummary();
-			this.accordion.addChild(new ContentPane({iconPos1: newIcon, label: this.accordionAtts.newRowLabel, selected: true, editor: {type: 'MobileTukosPane', atts: {form: this.form, data: {value: item}, grid: this, item: item, commonWidgetsAtts: this.commonWidgetsAtts()}}}), 0);
+			const rowTitlePane = new TitlePane({iconPos1: newIcon, title: this.accordionAtts.newRowLabel, open: false, editor: {type: 'TukosPane', atts: {form: this.form, data: {value: item}, grid: this, item: item, commonWidgetsAtts: this.commonWidgetsAtts()}}});
+			aspect.before(rowTitlePane, "_onShow", lang.hitch(this, this.instantiateRow, rowTitlePane));
+			aspect.before(rowTitlePane, "onHide", lang.hitch(this, this.collapseRow));
+			this.accordion.addChild(rowTitlePane, 0);
 		},
 		deleteRow: function(evt){
-			var button = registry.getEnclosingWidget(evt.originalTarget), rowPane = button.rowPane, editorPane = rowPane.editorPane, item = editorPane.item, idp = this.collection.idProperty, idV = item[idp];
+			var button = registry.getEnclosingWidget(evt.originalTarget), rowTitlePane = button.rowTitlePane, editorPane = rowTitlePane.editorPane, item = editorPane.item, idp = this.collection.idProperty, idV = item[idp];
         	if (item.id != undefined){
                 this.deleted.push({id: item.id, '~delete': true});
 				wutils.markAsChanged(this, 'noStyle');
@@ -123,42 +129,39 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
             this.deleteDirty(idV);
             this.collection.removeSync(idV);
 			this.setSummary();
-            this.accordion.removeChild(rowPane);
-			rowPane.destroyRecursive();
+            this.accordion.removeChild(rowTitlePane);
+			rowTitlePane.destroyRecursive();
 			console.log('in deleterow');
 		},
-		instantiateRow: function(rowPane){
-			if (!rowPane.editorActionsHeading){
-	           let editorActionsHeading, self = this;
-	            rowPane.addChild(rowPane.editorActionsHeading = editorActionsHeading = new Heading({}));
-				dojo.when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.deleteRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, rowPane: rowPane,
+		instantiateRow: function(rowTitlePane){
+			if (!rowTitlePane.editorPane){
+	           let /*editorActionsHeading, */self = this;
+				when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.deleteRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, rowTitlePane: rowTitlePane,
         			form: this.form, onClick: lang.hitch(this, this.deleteRow)}, {})), function(theWidget){
-        				editorActionsHeading.addChild(theWidget);
-        				//theWidget.layoutContainer = theWidget.domNode;
+        				rowTitlePane.addChild(theWidget);
 	            });
-				dojo.when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.actualizeRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, rowPane: rowPane,
+				when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.actualizeRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, rowTitlePane: rowTitlePane,
         			form: this.form, onClick: lang.hitch(this, this.collapseRow)}, {})), function(theWidget){
-        				editorActionsHeading.addChild(theWidget);
-        				//theWidget.layoutContainer = theWidget.domNode;
+        				rowTitlePane.addChild(theWidget);
 	            });
-				when(WidgetsLoader.instantiate(rowPane.editor.type, lang.mixin(this.rowPaneAtts(), rowPane.editor.atts)), function(editorPane){
-					rowPane.editorPane = editorPane;
+				when(WidgetsLoader.instantiate(rowTitlePane.editor.type, lang.mixin(this.rowPaneAtts(), rowTitlePane.editor.atts)), function(editorPane){
+					rowTitlePane.editorPane = editorPane;
+					editorPane.titlePane = rowTitlePane;
 					ready(function(){
-						rowPane.addChild(editorPane);
+						rowTitlePane.addChild(editorPane);
 						self.expandRow(editorPane);
 						//rowPane.resize();
 					});
 				});
 			}else{
-				//this.setPaneWidgetsValue();
-				this.expandRow(rowPane.editorPane);
+				this.expandRow(rowTitlePane.editorPane);
 			}
 		},
 		setAccordion: function(){
-			(this.accordion = new Accordion({iconBase: iconBase, "class":"mblAccordionRoundRect"})).placeAt(this.domNode);
-			aspect.after(this.accordion, "expand", lang.hitch(this, this.setAutoHeight));
-			aspect.before(this.accordion, "expand", lang.hitch(this, this.instantiateRow));
-			aspect.after(this.accordion, 'collapse', lang.hitch(this, this.collapseRow));
+			(this.accordion = new ContentPane({})).placeAt(this.domNode);
+			/*aspect.after(this.accordion, "expand", lang.hitch(this, this.setAutoHeight));
+			aspect.before(this.accordion, "_onShow", lang.hitch(this, this.instantiateRow));
+			aspect.after(this.accordion, 'collapse', lang.hitch(this, this.collapseRow));*/
 		},
 		expandRow: function(){
 			
@@ -176,7 +179,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 		buildAccordion: function(){
 			var self = this, form = this.form, accordion = this.accordion;
 			this.collection.sort(this.get('sort')).fetchSync().forEach(function(item){
-				accordion.addChild(new ContentPane({iconPos1: editIcon, label: self.getRowLabel(item), editor: {type: 'MobileTukosPane', atts: {form: form, data: {value: item}, grid: self, item: item, commonWidgetsAtts: self.commonWidgetsAtts()}}}));
+				const rowTitlePane = new TitlePane({iconPos1: editIcon, title: self.getRowLabel(item), open: false, editor: {type: 'TukosPane', atts: {form: form, data: {value: item}, grid: self, item: item, commonWidgetsAtts: self.commonWidgetsAtts()}}});
+				//rowTitlePane.onHide = function(){"console.log('in custom onHide');"};
+				aspect.before(rowTitlePane, "_onShow", lang.hitch(self, self.instantiateRow, rowTitlePane));
+				aspect.before(rowTitlePane, "onHide", lang.hitch(self, self.collapseRow));
+				accordion.addChild(rowTitlePane);
 			});
 		},
 		_setValueAttr: function(value){

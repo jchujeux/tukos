@@ -66,6 +66,9 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
                 this.clickedRow = this.row(evt);
             	this.clickedCell = this.cell(evt);
             }));
+            this.on(".dgrid-cell:click", lang.hitch(this, function(evt){
+            	eutils.actionFunction(this, 'onCellClick', this.onCellClickAction, 'grid', this);
+			}));
             this.on("dgrid-columnstatechange", function(evt){
                 var grid = evt.grid;
                 if (grid.customizationPath){

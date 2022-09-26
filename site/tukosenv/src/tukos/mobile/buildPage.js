@@ -5,7 +5,6 @@ function (lang, dct, dom, domStyle, ready, Container, ViewsManager, Pmg) {
 		initialize: function(){
 		    var appLayout = new Container();
 		    Pmg.set('newPageCustomization', {ignoreCustomOnClose: 'YES'});
-		    //document.body.appendChild(dct.create('div', {style: {color: 'white'}, innerHTML: 'Hello world'}));
 			document.body.appendChild(appLayout.domNode);
 			Pmg.tabs = Pmg.mobileViews = new ViewsManager({container: appLayout, viewsDescription: Pmg.cache.tabsDescription});
 		    domStyle.set(dom.byId('loadingOverlay'), 'display', 'none');

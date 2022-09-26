@@ -24,12 +24,18 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dijit/l
         
         loadPane: function(){
         	var self = this;
-			this.tableLayout(this.layout, this, lang.hitch(wutils, wutils.setWatchers)); 
+            this.watchOnChange = true;
+			this.tableLayout(this.layout, this, lang.hitch(wutils, wutils.setWatchers), this.commonWidgetsAtts); 
             this.onInstantiated(lang.hitch(this, function(){
+               /* setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
+                		this.markIfChanged = true;
+						this.watchOnChange = true;
+                        this.watchContext = 'user';
+                        //this.setUserContextPaths(); 
+                	}), 0);*/
                 this.markIfChanged = true;
-                this.watchOnChange = true;
                 this.watchContext = 'user';
-                if (this.widgetsHider){
+                if (this.widgetsHider && Pmg.get('userRights') !== 'RESTRICTEDUSER'){
 					require(["tukos/WidgetsHiderButton"], function(WidgetsHiderButton){
 						self.widgetsHiderButton = new WidgetsHiderButton({form: self, 'class': 'ui-icon dgrid-hider-toggle'});
 						self.widgetsHiderButton.set('iconClass', 'ui-icon dgrid-hider-toggle');

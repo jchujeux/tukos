@@ -38,14 +38,14 @@ trait  GridWidgets{
         }
         return ['type' =>'BasicGrid', 'atts' => $atts];
     }
-    public static function simpleDgrid($atts, $editOnly = true){
+    public static function simpleDgrid($atts, $editOnly = true, $lazyEditor = null){
         if ($editOnly){
             $defAtts = ['title' => '', 'colspan' => 1, 'columns' => [], 'initialId'  => true, 'adjustLastColumn' => false];
             $gridMode = Utl::extractItem('gridMode', $atts);
             if (isset($atts['colsDescription'])){
                 foreach ($atts['colsDescription'] as $col => $element){
                     if (isset($element['type'])){
-                        $defAtts['columns'][$col] = self::colGridAtts($element, $col, !empty($gridMode) ? $gridMode : 'storeedit');
+                        $defAtts['columns'][$col] = self::colGridAtts($element, $col, !empty($gridMode) ? $gridMode : 'storeedit', $lazyEditor);
                     }else{
                         $defAtts['columns'][$col] = $element;
                     }
@@ -62,6 +62,9 @@ trait  GridWidgets{
             ];
             return ['type' => 'TextArea', 'atts' => Utl::array_merge_recursive_replace($defAtts, $atts)];
         }
+    }
+    public static function accordionGrid($atts, $editOnly = true){
+        return array_merge(self::simpleDgrid($atts, $editOnly, true), ['type' => 'AccordionGrid']);
     }
     public static function sheetGrid($atts, $editOnly = true){
          $colDescription = self::description(['type' => 'tukosTextArea', 'atts' => ['storeedit' => ['width' => 50, 'editOn' => 'click, keypress', 'editorArgs' => ['rows' => 1, 'style' => ['height' => '15px']]]]], false);
@@ -124,7 +127,7 @@ trait  GridWidgets{
                  ];
     }
     
-    public static function colGridAtts($element, $col, $mode='storeedit'){
+    public static function colGridAtts($element, $col, $mode='storeedit', $lazyEditor = null){
         $defColAtts = [
             'overflow' => 'auto', 'renderHeaderCell' => 'renderHeaderContent',
             'renderCell' => 'renderContent', 'minHeightFormatter' => '5em', 'maxHeightFormatter' => '30em',
@@ -161,7 +164,7 @@ trait  GridWidgets{
                 if (isset($atts['placeHolder'])){
                 		$atts['editorArgs']['placeHolder'] = Utl::extractItem('placeHolder', $atts);
                 }
-                $atts['editor'] = ($type === 'LazyEditor') ? (Tfk::$registry->isMobile ? 'MobileEditor' : 'Editor') : $type;
+                $atts['editor'] = ($type === 'LazyEditor') ? (Tfk::$registry->isMobile ? 'MobileEditor' : ($lazyEditor ? 'LazyEditor' : 'Editor')) : $type;
                 $atts['widgetType'] = $atts['editor'];
                 $atts['canEdit'] = (!empty($element['atts'][$mode]['canEdit']) ? $element['atts'][$mode]['canEdit'] : 'canEditRow');
             }

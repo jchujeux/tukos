@@ -56,7 +56,7 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
         watchCallback: function(widget, attr, oldValue, value){
             var form = widget.form, Pmg = form.Pmg;
             if (oldValue !== value && form){
-                if (attr === 'value' && form.markIfChanged && (form.markAllChanges || arrayUtil.indexOf(form.postElts, widget.widgetName)!= -1)){
+                if (attr === 'value' && form.markIfChanged && !widget.noMarkAsChanged && (form.markAllChanges || arrayUtil.indexOf(form.postElts, widget.widgetName)!= -1)){
                    	if (!form.changedWidgets.permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL'])){
                 		Pmg.setFeedback(Pmg.message('itemislocked')); Pmg.beep();
                    	}
