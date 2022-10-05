@@ -1,8 +1,8 @@
 /*
  *    Provides a tab  object and associated methods
  */
- define (["dojo/_base/declare", "dijit/layout/ContentPane", "dijit/registry", "tukos/ObjectPane", "dojo/domReady!"], 
-    function(declare, ContentPane, registry, ObjectPane){
+ define (["dojo/_base/declare", "dijit/layout/ContentPane", "tukos/ObjectPane", "dojo/domReady!"], 
+    function(declare, ContentPane, ObjectPane){
     return declare(ContentPane, {
         postCreate: function (){    
             if (this.formContent != undefined){

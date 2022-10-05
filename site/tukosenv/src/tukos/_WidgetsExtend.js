@@ -32,8 +32,8 @@ define (["dojo/_base/lang", "dijit/Tooltip", "tukos/widgetUtils"],
         },
         _setTukosTooltipAttr: function(atts){
 			if (atts.onClickLink){
+				const self = this;
 				if (tukos.Pmg.tukosTooltipExists(atts.onClickLink.name)){
-					const self = this;
 					self.customContextMenuItems = function(){
 						return [{atts: {label: tukos.Pmg.message('help')  , onClick: function(){
 							tukos.Pmg.viewTranslatedInBrowserWindow(atts.onClickLink.name, atts.onClickLinkObject || self.getRootForm().object)

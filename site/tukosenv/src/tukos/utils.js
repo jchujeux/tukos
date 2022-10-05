@@ -527,6 +527,15 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					}
 					return gradient[length-1];
 				}
-			}
+			},
+	        widgetNumericValue: function(widgetType, value){
+				switch(widgetType){
+					case 'HorizontalLinearGauge': 
+						const pValue = value ? JSON.parse(value) : value;
+						return typeof pValue === 'object' ? (pValue.gauge || 0) : (pValue  || 0);
+					default:
+						return value;
+				}
+			},
 		};
 	});

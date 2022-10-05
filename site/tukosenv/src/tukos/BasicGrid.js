@@ -215,6 +215,14 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             }
             return node;
         },
+        toNumeric: function(data){
+			for (const row in data){
+				for (const column in data[row]){
+					data[row][column] = utils.widgetNumericValue((this.columns[column] || {}).editor, data[row][column]);
+				}
+			}
+			return data;
+		},
         renderHeaderContent: function(node){
 			node.innerHTML = this.label;
 		},

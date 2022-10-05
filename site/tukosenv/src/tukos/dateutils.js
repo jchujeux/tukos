@@ -76,13 +76,16 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
 			return Pmg.message(daysName[dayNumber]);
 		},
 		getDayOfWeek: function (number, date) {// returns a date
-          var day = date.getDay(),
-              diff = date.getDate() - day + number + (day == 0 ? -7:0); // adjust when day is sunday
-          return new Date(date.setDate(diff));
+          const newDate = new Date(date), day = date.getDay(), diff = date.getDate() - day + number + (day == 0 ? -7:0); // adjust when day is sunday
+          newDate.setDate(diff);
+          return newDate;
         },
         dateToDayName: function(date){
         	return daysName[date.getDay()];
         },
+        getDayOfYear(date){
+    		return (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;	
+		},
         getISOWeekOfYear: function(date){
 			return this.getWeekOfYear(date, 1);
 		},

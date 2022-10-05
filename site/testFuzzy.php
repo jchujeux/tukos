@@ -8,14 +8,14 @@ use TukosLib\Utils\Utilities as Utl;
 
 $timer = Utl::timer();
 try {
-    $fuzzyDomain = FZ::fuzzyDomainAbsolute([103, 126, 142, 159], 3);
-    $fuzzyDomainRelative = FZ::fuzzyDomainRelative([103, 126, 142, 159], 0);
+    $fuzzyDomain = FZ::absoluteFuzzyDomain([103, 126, 142, 159], 3);
+    $fuzzyDomainRelative = FZ::relativeFuzzyDomain([103, 126, 142, 159], 0);
     foreach([101, 103, 141, 103, 142, 143, 141, 150, 151, 170, 190, 70] as $value){
         echo "value: $value\n";
-        /*$fValue = FZ::fuzzyValueAbsolute($value, $fuzzyDomain);
+        /*$fValue = FZ::absoluteFuzzyValue($value, $fuzzyDomain);
         echo "value: $value\n";
         var_dump($fValue);*/
-        $fValue = FZ::fuzzyValueRelative($value, $fuzzyDomainRelative);
+        $fValue = FZ::relativeFuzzyValue($value, $fuzzyDomainRelative);
         echo "\nRelative:\n";
         var_dump($fValue);
     }

@@ -128,16 +128,6 @@ define([
 		},
 	});
 	return  declare(_WidgetBase, {
-/*
-        $leftRightTdStyle = ['verticalAlign' => 'top', 'paddingTop' => '7px', 'fontSize' => 'smaller', 'fontFamily' => 'Arial, Helvetica, sans-serif', 'width' => '70px', 'wordWrap' => 'break-word'];
-        $gaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 10, 'showValue' => true, 'tickLabel' => '',
-            'gradient' => [0, '#B22222', 0.5, '#FF8C00', 1, '#7FFFD4'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
-        $gaugeStyle = ['height' => '100px'];
-        $gaugeTableStyle = ['tableLayout' => 'fixed', 'width' => '650px'];
-
-                'label' => $tr('Recovery'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Totally'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Notatall'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle,
-                'gaugeAtts' => $gaugeAtts, 'onChangeLocalAction' => ['actualize' => ['hidden' => 'return false;']],
-*/
         postCreate: function postCreate(){
             const self = this;
             this.inherited(postCreate, arguments);
@@ -223,7 +213,7 @@ define([
 			return JSON.stringify(value);
 		},
 		_getNumericValueAttr: function(){
-			return this.gaude.value || 0;
+			return this.gauge.value || 0;
 		}
 	});
 });

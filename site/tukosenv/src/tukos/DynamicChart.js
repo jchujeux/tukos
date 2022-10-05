@@ -33,7 +33,6 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 	            this.watch('tableWidth', lang.hitch(this, function(){
 	            	this.set('value', this.value);
 	            }));
-            	requiredClasses['BasicGrid'] = this.classLocation('BasicGrid');
             }else{
                 this.chartNode = dct.create('div', {style: chartStyle}, this.domNode);  
             }
@@ -106,13 +105,16 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 	            	const requiredType = axis.type || 'Default';
 	            	requiredClasses[requiredType] = self.classLocation('axis2d' + requiredType);
 	            });
+				if (this.hasOwnProperty('showTable') && this.showTable === 'yes' && !this.hasOwnProperty('tableWidget')){
+                    requiredClasses['BasicGrid'] = this.classLocation('BasicGrid');
+				}
 	            const requiredTypes = Object.keys(requiredClasses);
 	            require(requiredTypes.map(function(i){return requiredClasses[i];}), lang.hitch(this, function(){
 		        	const chartClasses = {};
 		            for (let i in requiredTypes){
 		                chartClasses[requiredTypes[i]] = arguments[i];
 		            }
-					if (this.hasOwnProperty('showTable') && this.showTable && !this.hasOwnProperty('tableWidget')){
+					if (this.hasOwnProperty('showTable') && this.showTable === 'yes' && !this.hasOwnProperty('tableWidget')){
 						lang.hitch(this, this.createTableWidget)(chartClasses['BasicGrid']);
 					}            		
                     for (let axisName in axes){
@@ -191,7 +193,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
         },
         
         getLabel: function(options, formattedValue, rawValue){
-            if (options.tickslabel === 'dateofday' && options.firstDate){
+            if (utils.in_array(['dateofday', 'dateofweek'], options.tickslabel) && options.firstDate){
 				return dutils.formatDate(dutils.dateAdd(options.firstDate, 'day', rawValue - 1));
 			}else{
 				return formattedValue;

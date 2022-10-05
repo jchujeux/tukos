@@ -144,6 +144,9 @@ class Widgets{
     	];
     	return ['type' =>'LazyEditor', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
+    public static function lazyWidget($atts, $editOnly = true){
+        return array_merge(call_user_func([__NAMESPACE__ .'\Widgets', $editOnly ? $atts['unhideWidget'] : $atts['edit']['unhideWidget']], $atts, $editOnly, true), ['type' => 'LazyWidget']);
+    }
     public static function objectSelect($atts, $editOnly = true){
         $defAtts = [
             'edit' => [

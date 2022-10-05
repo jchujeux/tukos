@@ -1,11 +1,9 @@
 "use strict";
-define(["dojo/_base/declare", "dojo/_base/lang",  "tukos/ArrayIterator", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/objects/physio/woundTrack/gametracks/expressionTrend", "tukos/PageManager"], 
-function(declare,lang,   ArrayIterator, utils, dutils, expressionFilter, expressionTrend, Pmg){
+define(["dojo/_base/declare", "dojo/_base/lang",  "tukos/ArrayIterator", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/PageManager"], 
+function(declare,lang,   ArrayIterator, utils, dutils, expressionFilter, expressionEngine, Pmg){
 	return declare(null, {
         constructor: function(args){
-			this.grid = args.grid;
-			this.dateCol = args.dateCol;
-			this.form = args.form;
+			lang.mixin(this, args);
         },
 		setChartValue: function(chartWidgetName){
 			var self = this, form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), kpiCache = {};
@@ -47,7 +45,7 @@ function(declare,lang,   ArrayIterator, utils, dutils, expressionFilter, express
 					}else{
 						collection = grid.collection.sort([{property: dateCol}, {property: 'rowId'}]);
 					}
-					const data = collection.fetchSync(), toDate = data[data.length - 1][dateCol], kpiCache = {}, filter = collection.Filter(), xLabels = [];
+					const data = grid.toNumeric(collection.fetchSync()), toDate = data[data.length - 1][dateCol], kpiCache = {}, filter = collection.Filter(), xLabels = [];
 					let firstDate = (horizontalAxisDescription.dateoforigin && form.valueOf(horizontalAxisDescription.dateoforigin)) || data[0][dateCol], firstDateObject = new Date(firstDate), lastDate, lastDateObject;
 					if (isWeek){
 						firstDateObject = dutils.getDayOfWeek(1, firstDateObject);
@@ -65,7 +63,7 @@ function(declare,lang,   ArrayIterator, utils, dutils, expressionFilter, express
 						let chartItem = {id: xLabels[i]}, tableItem = {id: xLabels[i]};
 						const periodData = collection.filter(filter.gte(dateCol, firstDate).lte(dateCol, lastDate)).fetchSync();
 						if (periodData.length > 0){
-							const expression = expressionTrend.expression(periodData, kpiCache, collection.idProperty);
+							const expression = expressionEngine.expression(periodData, kpiCache, collection.idProperty);
 							kpisDescription.forEach(function(kpiDescription, index){
 								tableItem[index] = chartItem[index] = expression.expressionToValue(kpiDescription.kpi);
 								if (isNaN(chartItem[index]) && kpiDescription.absentiszero){
