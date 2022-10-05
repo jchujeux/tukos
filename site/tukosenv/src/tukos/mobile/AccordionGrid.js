@@ -31,6 +31,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
         		});
     		});
     	},
+        getNewId: function(){
+        	this.maxId += 1;
+            return this.maxId;
+        },
 		getRowLabel: function(item){
 			return eutils.actionFunction(this, 'getRowLabel', this.accordionAtts.getRowLabelAction, 'kwArgs', {grid: this, item: item});
 		},
@@ -105,6 +109,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
         },
 		addRow: function(){
 			var item = lang.mixin(lang.clone(this.initialRowValue), this.itemFilter()), idp = this.collection.idProperty;
+            if (this.initialId){
+                item.id = item.id || this.getNewId();
+            }
 			this.collection.addSync(item);
 			for (var j in item){
 				 if (j != idp){
@@ -128,17 +135,17 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			console.log('in deleterow');
 		},
 		instantiateRow: function(rowPane){
-			if (!rowPane.editorActionsHeading){
-	           let editorActionsHeading, self = this;
-	            rowPane.addChild(rowPane.editorActionsHeading = editorActionsHeading = new Heading({}));
+			if (!rowPane.editorPane){
+	           let /*editorActionsHeading, */self = this;
+	            //rowPane.addChild(rowPane.editorActionsHeading = editorActionsHeading = new Heading({}));
 				dojo.when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.deleteRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, rowPane: rowPane,
         			form: this.form, onClick: lang.hitch(this, this.deleteRow)}, {})), function(theWidget){
-        				editorActionsHeading.addChild(theWidget);
+        				rowPane.addChild(theWidget);
         				//theWidget.layoutContainer = theWidget.domNode;
 	            });
 				dojo.when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.actualizeRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, rowPane: rowPane,
         			form: this.form, onClick: lang.hitch(this, this.collapseRow)}, {})), function(theWidget){
-        				editorActionsHeading.addChild(theWidget);
+        				rowPane.addChild(theWidget);
         				//theWidget.layoutContainer = theWidget.domNode;
 	            });
 				when(WidgetsLoader.instantiate(rowPane.editor.type, lang.mixin(this.rowPaneAtts(), rowPane.editor.atts)), function(editorPane){
@@ -189,6 +196,16 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			this.setAccordion();
 			this.buildAccordion();
 			this.deleted = [];
+            var maxId = this.maxId = 0;
+            this.store.forEach(function(row){
+                if (row.id > maxId){
+                    maxId = row.id;
+                }
+            });
+            this.maxId = maxId;
+            if (!this.form.markIfChanged && maxId > this.maxServerId){
+            	this.maxServerId = maxId;
+            }
 			this.set('collection', store.getRootCollection());
 			this.setSummary();
 		},
@@ -251,9 +268,17 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
         _setCollectionAttr: function(newValue){
 			var self = this;        	
 			this.collection = newValue;
-			ready(function(){
+			setTimeout(function(){
 				wutils.watchCallback(self, 'collection', null, newValue);
-			});	
+			}, 100);	
         },
+        toNumeric: function(data){
+			for (const row in data){
+				for (const column in data[row]){
+					data[row][column] = utils.widgetNumericValue((this.columns[column] || {}).editor, data[row][column]);
+				}
+			}
+			return data;
+		}
     }); 
 });

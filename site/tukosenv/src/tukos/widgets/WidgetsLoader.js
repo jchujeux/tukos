@@ -5,7 +5,7 @@ define (["dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "tukos/PageManag
             widgetsPath: {
                 TextBox: "dijit/form/", NumberTextBox: "dijit/form/", CurrencyTextBox: "dijit/form/", CheckBox: "tukos/widgets/", TimeTextBox: "tukos/widgets/", Textarea: "dijit/form/", Select: "dijit/form/", Button: "dijit/form/",
                 DropDownButton: "dijit/form/", RadioButton: "dijit/form/", Menu: "dijit/", MenuItem: "dijit/", MenuBarItem: "dijit/", PopupMenuItem: "dijit/", PopupMenuBarItem: "dijit/", DropDownMenu: "dijit/", ContentPane: "dijit/layout/",
-                TukosDateBox: "tukos/", Editor: "tukos/widgets/", LazyEditor: "tukos/widgets/",
+                TukosDateBox: "tukos/", Editor: "tukos/widgets/", LazyEditor: "tukos/widgets/", LazyWidget: "tukos/widgets/", 
                 FormattedTextBox: "tukos/widgets/", SearchTextBox: "tukos/widgets/", MultiSelect: "tukos/", StoreSelect: "tukos/", ObjectSelect: "tukos/", ObjectSelectMulti: "tukos/", ObjectSelectDropDown: "tukos/",
                 TukosNumberBox: "tukos/", TukosCurrencyBox: "tukos/", NumberUnitBox: "tukos/", DateTimeBox: "tukos/", TukosButton: "tukos/widgets/", TukosRadioButton: "tukos/widgets/", DropDownTextBox: "tukos/widgets/", 
                 ColorPickerTextBox: "tukos/widgets/", RestSelect: "tukos/", ObjectExport: "tukos/", ObjectSave: "tukos/", ObjectReset: "tukos/", ObjectProcess: "tukos/", ObjectNew: "tukos/", ObjectEdit: "tukos/", ObjectDelete: "tukos/", 

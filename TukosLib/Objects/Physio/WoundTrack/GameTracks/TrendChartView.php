@@ -8,7 +8,8 @@ trait TrendChartView {
 
     public function trendChartDescription($chartId, $title){
         $tr = $this->tr;
-        $kpiFunctions = [/*'SUM', 'EXPAVG', 'DAILYAVG', 'AVG', 'MIN', 'MAX', 'LAST', 'SESSION'*/];
+        $kpiFunctions = ['SUM', 'EXPAVG', 'DAILYAVG', 'AVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM'];
+        $kpiTranslations = Utl::translations($kpiFunctions, $this->tr, 'uppercase');
         $kpiParameters = ['recordtype', 'recorddate', 'globalsensation', 'environment', 'recovery', 'duration', 'distance', 'elevationgain', 'perceivedload', 'perceivedintensity', 'perceivedstress', 'mentaldifficulty'];
         return ['type' => 'dynamicChart', 'atts' => ['edit' => [
             'title' => $title, 
@@ -45,7 +46,7 @@ trait TrendChartView {
                         'majorTicks' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Majorticks')], 'storeedit' => ['width' => 60]]), false),
                         'majorTickStep' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('MajorTickStep'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                         'minorTicks' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Minorticks')], 'storeedit' => ['width' => 60]]), false),
-                        'tickslabel' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['day', 'dateofday'], $tr)], 'label' => $tr('tickslabel')], 'storeedit' => ['width' => 80]]), false),
+                        'tickslabel' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['daysinceorigin', 'dateofday', 'dayoftheyear', 'weeksinceorigin', 'dateofweek', 'weekoftheyear'], $tr)], 'label' => $tr('tickslabel')], 'storeedit' => ['width' => 80]]), false),
                         'dateoforigin' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['woundstartdate', 'treatmentstartdate', 'firstrecorddate'], $tr)], 'label' => $tr('dateoforigin')], 'storeedit' => ['width' => 80]]), false),
                         'min' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('axisMin'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                         'max' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('axisMax'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
@@ -81,7 +82,8 @@ trait TrendChartView {
                             'edit' => ['label' => $this->tr('kpiformula'), 'style' => ['maxWidth' => '25em', 'width' => '25em'], 'translations' => $kpiTranslations, 'storeArgs' => ['data' => $kpiOptionsStore]],
                             'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 300]]), false),*/
     
-                        'kpi' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('Kpiformula'), 'style' => ['width' => '15em']], 'storeedit' => ['width' => 200]]), false),
+                        'kpi' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('Kpiformula'), 'style' => ['width' => '15em'], 'translations' => $kpiTranslations],
+                            'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false),
                         'plot' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Plot'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                         'tooltipunit' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Tooltipunit'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                         'scalingfactor' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Scalingfactor'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
@@ -150,7 +152,6 @@ if (form.editConfig && form.editConfig.trendcharts){
                     for (const trendChart of trendCharts){
                         form.trendChartUtils.setChartValue('trendchart' + trendChart.id);
                     }
-                //wutils.markAsUnchanged(form.getWidget('trendchart' + trendChart.id));
                 form.markIfChanged = form.watchOnChange = true;
             });
         });

@@ -1,30 +1,31 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "dojo/ready", "dijit/registry", "dijit/TitlePane", 
-		"dijit/layout/ContentPane", "tukos/dstore/MemoryTreeObjects", "tukos/widgets/WidgetsLoader", "tukos/utils", "tukos/evalutils", "tukos/widgetUtils", "tukos/PageManager"], 
-    function(declare, lang, when, aspect, ready, registry, TitlePane, ContentPane, MemoryObjects, WidgetsLoader, utils, eutils, wutils, Pmg){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",  "dojo/aspect", "dojo/ready", "dijit/registry", "dojo/has!mobileTukos?dojox/mobile/Container", "dojo/has!mobileTukos?dojox/mobile/ContentPane:dijit/layout/ContentPane", 
+		 "dojo/has!mobileTukos?dojox/mobile/Heading", "dojo/has!mobileTukos?dojox/mobile/Accordion", "dojo/has!tukosMobile?:dijit/TitlePane", 
+		"tukos/dstore/MemoryTreeObjects", "tukos/widgets/WidgetsLoader", "tukos/utils", "tukos/evalutils", "tukos/widgetUtils", "tukos/PageManager"], 
+    function(declare, lang, domstyle, when, aspect, ready, registry, MobileContainer, ContentPane, MobileHeading, MobileAccordion, TitlePane, MemoryObjects, WidgetsLoader, utils, eutils, wutils, Pmg){
     var iconBase = require.toUrl("tukos/mobile/resources/images/icons16.png"), domainIcon = "16,48,16,16", newIcon = "0,16,16,16", editIcon = "0,0,16,16", menuItemIcon = "0,32,16,16", objectSelectIcon = "0,0,16,16";
-	return declare([ContentPane], {
+	return declare([Pmg.isMobile() ? MobileContainer : ContentPane], {
         constructor: function(args){
         	args = lang.mixin(args, {style: {backgroundColor: 'DarkGrey'}, store: new MemoryObjects(args.storeArgs)});
-            //args.collection = args.store.getRootCollection();
         },
 		postCreate: function(){
 			const self = this;
-			let actionsHeading;
 			this.inherited(arguments); 
 			this.set('collection', this.store.getRootCollection());
 			this.dirty = {};
 			this.hasChangedSinceLastCollapse = false;
+            this.maxId = this.maxServerId = this.newRowPrefixId = 0;
 			this.deleted = [];
-            //this.addChild(this.actionsHeading = actionsHeading = new TitlePane({}));
+            if (Pmg.isMobile()){
+				this.addChild(this.actionsHeading = new MobileHeading({}));
+			}
 			dojo.when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.addRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, pane: this.form,
                 			form: this.form, onClick: lang.hitch(this, this.addRow)}, {})), function(theWidget){
-                				//theWidget.placeAt(actionsHeading.focusNode);
-                				self.addChild(theWidget);
+                				(Pmg.isMobile() ? self.actionsHeading : self).addChild(theWidget);
                 				theWidget.layoutContainer = theWidget.domNode;
             });
 			//this.setAccordion();
         },
-        /*setAutoHeight: function(){
+        setAutoHeight: function(){
     		var accordion = this.accordion;
     		ready(function(){
         		var nodes = Array.apply(null, accordion.domNode.getElementsByClassName("mblAccordionPane"));
@@ -32,7 +33,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
         			node.style.height = "";
         		});
     		});
-    	},*/
+    	},
+        getNewId: function(){
+        	this.maxId += 1;
+            return this.maxId;
+        },
 		getRowLabel: function(item){
 			return eutils.actionFunction(this, 'getRowLabel', this.accordionAtts.getRowLabelAction, 'kwArgs', {grid: this, item: item});
 		},
@@ -46,7 +51,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 				}
         		widgets.push(col);
             });
-			return {widgetsDescription: widgetsDescription, layout: this.accordionAtts.desktopRowLayout};
+			return {widgetsDescription: widgetsDescription, layout: Pmg.isMobile() ? {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: this.accordionAtts.orientation}, widgets: widgets} : this.accordionAtts.desktopRowLayout};
 		},
 		updateDirty: function(idPropertyValue, field, value, isNewRow, propagateChange){
 			var collection = this.collection, grid = this, collectionRow = collection.getSync(idPropertyValue), oldValue;
@@ -72,8 +77,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			console.log('here I should do something'); 
 			if (newValue !== oldValue){
 				grid.updateDirty(item[idp], sWidget.widgetName, sWidget.get('value'), false, true);
-				//registry.byNode(pane.domNode.parentNode)._at.labelNode.innerHTML = grid.getRowLabel(item);
-				pane.titlePane.set('title', grid.getRowLabel(item));
+				Pmg.isMobile() ? registry.byNode(pane.domNode.parentNode)._at.labelNode.innerHTML = grid.getRowLabel(item) : pane.titlePane.set('title', grid.getRowLabel(item));
 			}
 			return true;
 		},
@@ -106,8 +110,22 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
             }
             return result;
         },
+		buildRowTitlePane: function(item, isNew){
+			const rowTitlePane = new TitlePane({iconPos1: newIcon, title: isNew ? this.accordionAtts.newRowLabel : this.getRowLabel(item), open: false, 
+				editor: {type: 'TukosPane', atts: {form: this.form, data: {value: item}, grid: this, item: item, commonWidgetsAtts: this.commonWidgetsAtts()}}});
+			rowTitlePane.setStyleToChanged = function(){
+				domstyle.set(rowTitlePane.titleNode, 'backgroundColor', wutils.changeColor);
+			}
+			aspect.before(rowTitlePane, "_onShow", lang.hitch(this, this.instantiateRow, rowTitlePane));
+			aspect.before(rowTitlePane, "onHide", lang.hitch(this, this.collapseRow, rowTitlePane));
+			this.accordion.addChild(rowTitlePane, isNew ? 0 : undefined);
+			return rowTitlePane;
+		},
 		addRow: function(){
 			var item = lang.mixin(lang.clone(this.initialRowValue), this.itemFilter()), idp = this.collection.idProperty;
+            if (this.initialId){
+                item.id = item.id || this.getNewId();
+            }
 			this.collection.addSync(item);
 			for (var j in item){
 				 if (j != idp){
@@ -115,10 +133,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 				 }
 			}
 			this.setSummary();
-			const rowTitlePane = new TitlePane({iconPos1: newIcon, title: this.accordionAtts.newRowLabel, open: false, editor: {type: 'TukosPane', atts: {form: this.form, data: {value: item}, grid: this, item: item, commonWidgetsAtts: this.commonWidgetsAtts()}}});
-			aspect.before(rowTitlePane, "_onShow", lang.hitch(this, this.instantiateRow, rowTitlePane));
-			aspect.before(rowTitlePane, "onHide", lang.hitch(this, this.collapseRow));
-			this.accordion.addChild(rowTitlePane, 0);
+			if (Pmg.isMobile()){
+				this.accordion.addChild(new ContentPane({iconPos1: newIcon, label: this.accordionAtts.newRowLabel, selected: true, editor: {type: 'MobileTukosPane', atts: {form: this.form, data: {value: item}, grid: this, item: item, commonWidgetsAtts: this.commonWidgetsAtts()}}}), 0);
+			}else{
+				this.buildRowTitlePane(item, true).set('open', true);
+			}
 		},
 		deleteRow: function(evt){
 			var button = registry.getEnclosingWidget(evt.originalTarget), rowTitlePane = button.rowTitlePane, editorPane = rowTitlePane.editorPane, item = editorPane.item, idp = this.collection.idProperty, idV = item[idp];
@@ -135,7 +154,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 		},
 		instantiateRow: function(rowTitlePane){
 			if (!rowTitlePane.editorPane){
-	           let /*editorActionsHeading, */self = this;
+	            const self = this;
 				when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.deleteRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, rowTitlePane: rowTitlePane,
         			form: this.form, onClick: lang.hitch(this, this.deleteRow)}, {})), function(theWidget){
         				rowTitlePane.addChild(theWidget);
@@ -150,7 +169,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 					ready(function(){
 						rowTitlePane.addChild(editorPane);
 						self.expandRow(editorPane);
-						//rowPane.resize();
 					});
 				});
 			}else{
@@ -158,18 +176,23 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			}
 		},
 		setAccordion: function(){
-			(this.accordion = new ContentPane({})).placeAt(this.domNode);
-			/*aspect.after(this.accordion, "expand", lang.hitch(this, this.setAutoHeight));
-			aspect.before(this.accordion, "_onShow", lang.hitch(this, this.instantiateRow));
-			aspect.after(this.accordion, 'collapse', lang.hitch(this, this.collapseRow));*/
+			if (Pmg.isMobile()){
+				(this.accordion = new MobileAccordion({iconBase: iconBase, "class":"mblAccordionRoundRect"})).placeAt(this.domNode);
+				aspect.after(this.accordion, "expand", lang.hitch(this, this.setAutoHeight));
+				aspect.before(this.accordion, "expand", lang.hitch(this, this.instantiateRow));
+				aspect.after(this.accordion, 'collapse', lang.hitch(this, this.collapseRow));
+			}else{
+				(this.accordion = new ContentPane({})).placeAt(this.domNode);
+			}
 		},
 		expandRow: function(){
 			
 		},
-		collapseRow: function(){
-			console.log('AccordionGrid: collapseRow');
+		collapseRow: function(rowTitlePane){
 			if (this.hasChangedSinceLastCollapse){
 				this.set('collection', this.collection);
+				//wutils.setStyleToChanged(Pmg/isMobile() ? argumrnet[1][0]._at.labelNode : rowTitlePane);
+				domstyle.set(Pmg.isMobile() ? arguments[1][0]._at.labelNode : rowTitlePane.titleNode, 'backgroundColor', Pmg.isMobile() ? 'grey' : wutils.changeColor);
 				this.hasChangedSinceLastCollapse = false;
 			}
 		},
@@ -179,11 +202,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 		buildAccordion: function(){
 			var self = this, form = this.form, accordion = this.accordion;
 			this.collection.sort(this.get('sort')).fetchSync().forEach(function(item){
-				const rowTitlePane = new TitlePane({iconPos1: editIcon, title: self.getRowLabel(item), open: false, editor: {type: 'TukosPane', atts: {form: form, data: {value: item}, grid: self, item: item, commonWidgetsAtts: self.commonWidgetsAtts()}}});
-				//rowTitlePane.onHide = function(){"console.log('in custom onHide');"};
-				aspect.before(rowTitlePane, "_onShow", lang.hitch(self, self.instantiateRow, rowTitlePane));
-				aspect.before(rowTitlePane, "onHide", lang.hitch(self, self.collapseRow));
-				accordion.addChild(rowTitlePane);
+				if (Pmg.isMobile()){
+					accordion.addChild(new ContentPane({iconPos1: editIcon, label: self.getRowLabel(item), editor: {type: 'MobileTukosPane', atts: {form: form, data: {value: item}, grid: self, item: item, commonWidgetsAtts: self.commonWidgetsAtts()}}}));
+				}else{
+					self.buildRowTitlePane(item);
+				}
 			});
 		},
 		_setValueAttr: function(value){
@@ -196,6 +219,16 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			this.setAccordion();
 			this.buildAccordion();
 			this.deleted = [];
+            var maxId = this.maxId = 0;
+            this.store.forEach(function(row){
+                if (row.id > maxId){
+                    maxId = row.id;
+                }
+            });
+            this.maxId = maxId;
+            if (!this.form.markIfChanged && maxId > this.maxServerId){
+            	this.maxServerId = maxId;
+            }
 			this.set('collection', store.getRootCollection());
 			this.setSummary();
 		},
@@ -258,9 +291,17 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
         _setCollectionAttr: function(newValue){
 			var self = this;        	
 			this.collection = newValue;
-			ready(function(){
+			setTimeout(function(){//if dojo.ready does not work on tab refresh
 				wutils.watchCallback(self, 'collection', null, newValue);
-			});	
+			}, 100);	
         },
+        toNumeric: function(data){
+			for (const row in data){
+				for (const column in data[row]){
+					data[row][column] = utils.widgetNumericValue((this.columns[column] || {}).editor, data[row][column]);
+				}
+			}
+			return data;
+		}
     }); 
 });

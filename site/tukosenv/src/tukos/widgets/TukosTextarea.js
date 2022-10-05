@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dijit/form/SimpleTextarea"], 
-    function(declare, TextArea){
+define(["dojo/_base/declare", "dijit/form/SimpleTextarea", "tukos/utils"], 
+    function(declare, TextArea, utils){
     return declare([TextArea], {
 
         autoExpand: function(node){
@@ -26,6 +26,27 @@ define(["dojo/_base/declare", "dijit/form/SimpleTextarea"],
         	if (!this.disabled){
         		this.autoExpand(this.domNode);
         	}
-        }
+        },
+        _setValueAttr: function _setValueAttr (value){
+			if (this.translations){
+				utils.forEach(this.translations, function(translated, untranslated){
+					if (value.includes(untranslated)){
+						value = value.replaceAll(untranslated, translated);
+					}
+				});
+			}
+			this.inherited(_setValueAttr, arguments);
+		},
+        _getServerValueAttr: function(){
+			let value = this.get('value');
+			if (value && this.translations){
+				utils.forEach(this.translations, function(translated, untranslated){
+					if (value.includes(translated)){
+						value = value.replaceAll(translated, untranslated);
+					}
+				});
+			}
+			return value;
+		}
     });
 });
