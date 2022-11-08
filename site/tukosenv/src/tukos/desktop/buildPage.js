@@ -23,8 +23,9 @@ function (lang, dom, domStyle, ready, when, registry, BorderContainer, TabContai
 				var container = Pmg.tabs.container;
 				container.selectedChildWidget && container.selectedChildWidget.resize(container._containerContentBox, container._contentBox);
 			}
-			var userTabLink = new TabOnClick({url: obj.userEditUrl}, "pageusername");
-			      
+			if (Pmg.get('userRights') !== 'RESTRICTEDUSER'){
+				new TabOnClick({url: obj.userEditUrl}, "pageusername");
+			}
 			focusUtil.on('widget-focus', function(widget){
 				var panel = focusUtil.get('activeStack')[1];
 				switch (panel){

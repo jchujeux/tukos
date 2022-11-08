@@ -15,6 +15,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
 			this.hasChangedSinceLastCollapse = false;
             this.maxId = this.maxServerId = this.newRowPrefixId = 0;
 			this.deleted = [];
+			this.rowTitlePanes = {};
             if (Pmg.isMobile()){
 				this.addChild(this.actionsHeading = new MobileHeading({}));
 			}
@@ -24,6 +25,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
                 				theWidget.layoutContainer = theWidget.domNode;
             });
 			//this.setAccordion();
+			this.set('value', []);
         },
         setAutoHeight: function(){
     		var accordion = this.accordion;
@@ -110,19 +112,20 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
             }
             return result;
         },
-		buildRowTitlePane: function(item, isNew){
+		buildRowTitlePane: function(item, isNew, where){
 			const rowTitlePane = new TitlePane({iconPos1: newIcon, title: isNew ? this.accordionAtts.newRowLabel : this.getRowLabel(item), open: false, 
-				editor: {type: 'TukosPane', atts: {form: this.form, data: {value: item}, grid: this, item: item, commonWidgetsAtts: this.commonWidgetsAtts()}}});
+				editor: {type: 'TukosPane', atts: {form: this.form, data: {value: item}, grid: this, item: item, style: {width: 'auto', height: 'auto'}, commonWidgetsAtts: this.commonWidgetsAtts()}}});
 			rowTitlePane.setStyleToChanged = function(){
 				domstyle.set(rowTitlePane.titleNode, 'backgroundColor', wutils.changeColor);
 			}
 			aspect.before(rowTitlePane, "_onShow", lang.hitch(this, this.instantiateRow, rowTitlePane));
 			aspect.before(rowTitlePane, "onHide", lang.hitch(this, this.collapseRow, rowTitlePane));
-			this.accordion.addChild(rowTitlePane, isNew ? 0 : undefined);
+			this.accordion.addChild(rowTitlePane, where);
 			return rowTitlePane;
 		},
-		addRow: function(){
-			var item = lang.mixin(lang.clone(this.initialRowValue), this.itemFilter()), idp = this.collection.idProperty;
+		addRow: function(event, newItem){
+			const item = lang.mixin(lang.clone(this.initialRowValue), this.itemFilter()), idp = this.collection.idProperty;
+			lang.mixin(item, newItem);
             if (this.initialId){
                 item.id = item.id || this.getNewId();
             }
@@ -134,11 +137,22 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
 			}
 			this.setSummary();
 			if (Pmg.isMobile()){
-				this.accordion.addChild(new ContentPane({iconPos1: newIcon, label: this.accordionAtts.newRowLabel, selected: true, editor: {type: 'MobileTukosPane', atts: {form: this.form, data: {value: item}, grid: this, item: item, commonWidgetsAtts: this.commonWidgetsAtts()}}}), 0);
+				this.accordion.addChild(this.rowTitlePanes[item[this.collection.idProperty]] = new ContentPane({iconPos1: newIcon, label: newItem ? this.accordionAtts.newRowLabel: this.getRowLabel(item), selected: true, 
+					editor: {type: 'MobileTukosPane', atts: {form: this.form, data: {value: item}, grid: this, item: item, commonWidgetsAtts: this.commonWidgetsAtts()}}}), 0);
 			}else{
-				this.buildRowTitlePane(item, true).set('open', true);
+				this.rowTitlePanes[item[this.collection.idProperty]] = this.buildRowTitlePane(item, newItem ? false : true, 0).set('open', true);
 			}
 		},
+        updateRow: function(item){
+        	const idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {}, titlePane = this.titlePanes[idPropertyValue];
+			eutils.actionFunction(this, 'updateRow', this.updateRowAction, 'row', item);
+        	utils.forEach(item, lang.hitch(this, function(value, col){
+        		if (value !== storeItem[col] && col !== 'connectedIds'){
+        			this.updateDirty(idPropertyValue, col, value);
+        		}
+        	}));       		
+			Pmg.isMobile() ? titlePane._at.labelNode.innerHTML = grid.getRowLabel(item) : titlePane.set('title', grid.getRowLabel(item));
+        },
 		deleteRow: function(evt){
 			var button = registry.getEnclosingWidget(evt.originalTarget), rowTitlePane = button.rowTitlePane, editorPane = rowTitlePane.editorPane, item = editorPane.item, idp = this.collection.idProperty, idV = item[idp];
         	if (item.id != undefined){
@@ -157,10 +171,12 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
 	            const self = this;
 				when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.deleteRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, rowTitlePane: rowTitlePane,
         			form: this.form, onClick: lang.hitch(this, this.deleteRow)}, {})), function(theWidget){
+        				rowTitlePane.deleteButton = theWidget;
         				rowTitlePane.addChild(theWidget);
 	            });
 				when(WidgetsLoader.instantiate('TukosButton', utils.mergeRecursive({label: this.accordionAtts.actualizeRowLabel, style: {backgroundColor: 'DarkGrey', paddingLeft: 0, paddingRight: 0, fontSize: '12px'}, rowTitlePane: rowTitlePane,
         			form: this.form, onClick: lang.hitch(this, this.collapseRow)}, {})), function(theWidget){
+        				rowTitlePane.actualizeButton = theWidget;
         				rowTitlePane.addChild(theWidget);
 	            });
 				when(WidgetsLoader.instantiate(rowTitlePane.editor.type, lang.mixin(this.rowPaneAtts(), rowTitlePane.editor.atts)), function(editorPane){
@@ -168,11 +184,27 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
 					editorPane.titlePane = rowTitlePane;
 					ready(function(){
 						rowTitlePane.addChild(editorPane);
-						self.expandRow(editorPane);
+						self.expandRow(rowTitlePane);
 					});
 				});
 			}else{
-				this.expandRow(rowTitlePane.editorPane);
+				this.expandRow(rowTitlePane);
+			}
+		},
+		deleteDesktopRowTitlePanesChildren: function(){
+			const self = this;
+			if (!Pmg.isMobile()){
+				utils.forEach(this.rowTitlePanes, function(rowTitlePane){
+					if (rowTitlePane.editorPane){
+						rowTitlePane.set('open', false);
+						rowTitlePane.editorPane.destroyRecursive();
+						delete rowTitlePane.editorPane;
+						rowTitlePane.deleteButton.destroyRecursive();
+						delete rowTitlePane.deleteButton;
+						rowTitlePane.actualizeButton.destroyRecursive();
+						delete rowTitlePane.actualizeButton;
+					}
+				});
 			}
 		},
 		setAccordion: function(){
@@ -191,7 +223,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
 		collapseRow: function(rowTitlePane){
 			if (this.hasChangedSinceLastCollapse){
 				this.set('collection', this.collection);
-				//wutils.setStyleToChanged(Pmg/isMobile() ? argumrnet[1][0]._at.labelNode : rowTitlePane);
 				domstyle.set(Pmg.isMobile() ? arguments[1][0]._at.labelNode : rowTitlePane.titleNode, 'backgroundColor', Pmg.isMobile() ? 'grey' : wutils.changeColor);
 				this.hasChangedSinceLastCollapse = false;
 			}
@@ -203,9 +234,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
 			var self = this, form = this.form, accordion = this.accordion;
 			this.collection.sort(this.get('sort')).fetchSync().forEach(function(item){
 				if (Pmg.isMobile()){
-					accordion.addChild(new ContentPane({iconPos1: editIcon, label: self.getRowLabel(item), editor: {type: 'MobileTukosPane', atts: {form: form, data: {value: item}, grid: self, item: item, commonWidgetsAtts: self.commonWidgetsAtts()}}}));
+					accordion.addChild(self.rowTitlePanes[item[self.collection.idProperty]] = new ContentPane({iconPos1: editIcon, label: self.getRowLabel(item), editor: {type: 'MobileTukosPane', atts: {form: form, data: {value: item}, grid: self, item: item, commonWidgetsAtts: self.commonWidgetsAtts()}}}));
 				}else{
-					self.buildRowTitlePane(item);
+					self.rowTitlePanes[item[self.collection.idProperty]] = self.buildRowTitlePane(item);
 				}
 			});
 		},
@@ -295,13 +326,5 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
 				wutils.watchCallback(self, 'collection', null, newValue);
 			}, 100);	
         },
-        toNumeric: function(data){
-			for (const row in data){
-				for (const column in data[row]){
-					data[row][column] = utils.widgetNumericValue((this.columns[column] || {}).editor, data[row][column]);
-				}
-			}
-			return data;
-		}
     }); 
 });

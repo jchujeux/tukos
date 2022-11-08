@@ -16,7 +16,7 @@ define([
         },
         addSync: function(object, options){
             this.idpLast += 1;
-            object[idp] = this.idpLast;
+            object[this.idProperty] = this.idpLast;
             return this.inherited(arguments);
         }
     });

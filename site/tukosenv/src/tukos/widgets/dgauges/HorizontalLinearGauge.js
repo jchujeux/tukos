@@ -181,6 +181,7 @@ define([
         }, 
        _setValueAttr: function(value){
 			this._set('value', value);
+			//this.value = value;
 			const pValue = value === '' ? (this.checkboxes ? {gauge: 0} : 0) : JSON.parse(value);
 			if (this.checkboxes){
 				this.gauge.set('value', pValue.gauge);
@@ -207,10 +208,10 @@ define([
 						value.checkboxes[widget.name] = checked;
 					}
 				});
+				return JSON.stringify(value);
 			}else{
-				value = this.gauge.value;
+				return this.gauge.value;
 			}
-			return JSON.stringify(value);
 		},
 		_getNumericValueAttr: function(){
 			return this.gauge.value || 0;

@@ -58,6 +58,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 	   },
 	   initializeNoPage: function(obj){
 	   		this.cache= obj;
+		   	this.cache.messages = this.cache.messages || {};
 			var self = this;
 			has.add("mobileTukos", function(){
 				return self.isMobile();
@@ -264,7 +265,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 						return returnedString;
 					};
 					request(self.requestUrl({action: 'Process', mode: 'Tab', object: 'tukos',  query: {params: {noget: true, process: 'sendContent'}}, view: 'Edit'}), {handleAs: 'json', method: 'POST', timeout: 32000, 
-						data: JSON.stringify({fromwhere: {name: 'tukosBackOffice'}, to: 'tukosbackoffice@gmail.com', subject: 'tukos bug - ' + window.location, header: headerRows([['ClientErrormessage', error.message],['PageUrl', window.location], ['userid', self.cache.userid], ['UrlSent', error.response.url], ['Datasent', options.data || self.message('noDataSent')]]),
+						data: JSON.stringify({fromwhere: {name: 'tukosbackoffice'}, to: 'tukosbackoffice@gmail.com', subject: 'tukos bug - ' + window.location, header: headerRows([['ClientErrormessage', error.message],['PageUrl', window.location], ['userid', self.cache.userid], ['UrlSent', error.response.url], ['Datasent', options.data || self.message('noDataSent')]]),
 							   content: '<p><b>' + self.message('Servererrormessage') + '</b><br>' + error.response.text, sendas: 'appendtobody'})}).then(
 							function(){
 								self.addFeedback(self.message('Supportinformed'));

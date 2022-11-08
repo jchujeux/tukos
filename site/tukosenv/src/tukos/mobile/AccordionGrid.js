@@ -271,14 +271,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			setTimeout(function(){
 				wutils.watchCallback(self, 'collection', null, newValue);
 			}, 100);	
-        },
-        toNumeric: function(data){
-			for (const row in data){
-				for (const column in data[row]){
-					data[row][column] = utils.widgetNumericValue((this.columns[column] || {}).editor, data[row][column]);
-				}
-			}
-			return data;
-		}
+        }
     }); 
 });

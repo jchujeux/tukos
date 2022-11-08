@@ -61,6 +61,7 @@ class Directory{
         'sptsessionsstages' => 'Sports\Sessions\Stages',
     	'sptexercises'		=> 'Sports\Exercises',
         'sptexerciseslevels' => 'Sports\Exercises\Levels',
+        'stravaactivities' => 'Sports\Strava\Activities',
         'physiopatients'    => 'Physio\Patients',
         'physiopersoquotes' => 'Physio\PersoTrack\Quotes',
         'physiopersoexercises' => 'Physio\PersoTrack\Exercises',
@@ -92,7 +93,7 @@ class Directory{
         'bustrackdashboardssuppliers' => 'BusTrack\Dashboards\Suppliers',
         'bustrackreconciliationscustomers' => 'BusTrack\Reconciliations\Customers',
         'bustrackreconciliationssuppliers' => 'BusTrack\Reconciliations\Suppliers',
-        'help'              => 'Help',
+        'help'              => 'Help'
         ];
     private static $objectsDomainAliases = ['people' => ['bustrack' => 'bustrackpeople', 'sports' => 'sptathletes', 'physio' => 'physiopatients'], 'organizations' => ['bustrack' => 'bustrackorganizations', 'wine' => 'winegrowers'], 'bustrackquotes' => ['physio' => 'physiopersoquotes']];
     private static $configStatusRange = ['tukos' => 16, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'users' => 10001];

@@ -8,7 +8,9 @@ namespace TukosLib\Auth;
 
 use TukosLib\Auth\LoginPage;
 use TukosLib\Utils\Cipher;
+use TukosLib\Google\Client as GoogleClient;
 use TukosLib\Utils\Feedback;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class Authentication{
@@ -21,18 +23,22 @@ class Authentication{
         }
         $this->session = $session;
     }
-    public function isAuthenticated($dialogue, $request, $query){
+    public function isAuthenticated($dialogue, $request, &$query){
+        $showLogin = Utl::extractItem('showlogin', $query);
         switch ($request['object']){
             case 'auth':
                 switch ($request['view']){
                     case 'LoginValidation':
                         $this->checkUserCredentials($dialogue);
                         break;
+                    case 'LoginGoogleValidation':
+                        $this->checkGoogleUserCredentials($dialogue);
+                        break;
                     case 'Logout':
                         $this->session->destroy();
                         $dialogue->response->headers->set("Location",  $_SERVER['HTTP_REFERER']);
                         $dialogue->response->setStatusCode(302);
-                        new LoginPage(Tfk::$registry->pageUrl);
+                        new LoginPage(Tfk::$registry->pageUrl, $showLogin);
                         break;
                 }
                 return false;
@@ -42,10 +48,10 @@ class Authentication{
                         if ($dbName = Cipher::decrypt(rawurldecode($query['targetdb']), Tfk::$registry->get('appConfig')->ckey, true)){
                             Tfk::$registry->get('appConfig')->dataSource['dbname'] = $dbName;
                         }else{
-                            Feedback::add(Tfk::tr('Usingdefaultdbfortukosapp'));
+                            //Feedback::add(Tfk::tr('Usingdefaultdbfortukosapp'));
                         }
                     }catch (\Exception $e){//hack to attempt to handle change of cipher function from mbcrypt to Defuse\Crypto
-                       Feedback::add(Tfk::tr('Usingdefaultdbfortukosapp'));
+                       //Feedback::add(Tfk::tr('Usingdefaultdbfortukosapp'));
                     }
                 }
                 return 'tukosBackOffice';
@@ -53,7 +59,7 @@ class Authentication{
                 $segment = $this->session->getSegment(Tfk::$registry->appName);
                 if ($segment->status !== 'VALID'){
                     if (in_array($request['controller'], ['Page', 'MobilePage'])){
-                        new LoginPage(Tfk::$registry->pageUrl);
+                        new LoginPage(Tfk::$registry->pageUrl,$showLogin);
                     }else{
                         Feedback::add(Tfk::tr('invalidsessionreloadpage'));
                         $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(['feedback' => Feedback::get()])));
@@ -68,22 +74,32 @@ class Authentication{
                 }
         }
     }
-    public function logoutUser($dialogue, $message=''){
-        $this->session->start();
-        $this->session->destroy();
-        $dialogue->response->setStatusCode(302);
-        new LoginPage(Tfk::$registry->pageUrl, $message);
-    }
     public function checkUserCredentials ($dialogue){
     	$username = $dialogue->context->getPost('username');
         $targetDb = Tfk::$registry->get('verifyUser')->targetDb($username, MD5($dialogue->context->getPost('password')));
-        if ($targetDb === false){/* Authentication failed: notify user via http response */
+        $this->setSession($dialogue, $username, $targetDb);
+    }
+    public function checkGoogleUserCredentials($dialogue, $message = ''){
+        $client = GoogleClient::get();
+        $payload = $client->verifyIdToken($dialogue->getValues()['credential']);
+        if ($payload) {
+            $username = $payload['email'];
+            $targetDb = Tfk::$registry->get('verifyUser')->googleUserTargetDb($username);
+            $this->setSession($dialogue, $username, $targetDb);
+        } else {
+            // Invalid ID token
             $dialogue->response->setStatusCode(401);
-        }else{/* Authentication succeeded: update session information, prepare $user global variable and redirect to the url initially requested */            
+        }
+    }
+    public function setSession($dialogue, $username, $targetDb){
+        if ($targetDb === false){/* Authentication failed: notify user via http response */
+            $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
+            $dialogue->response->setStatusCode(401);
+        }else{/* Authentication succeeded: update session information, prepare $user global variable and redirect to the url initially requested */
             $segment = $this->session->getSegment(Tfk::$registry->appName/*'TukosAuth'*/);
             $segment->username = $username;
             $segment->targetDb = $targetDb;
-            $segment->status = 'VALID'; 
+            $segment->status = 'VALID';
             $this->session->regenerateId();
             $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(Tfk::tr('SUCCESSFULAUTHENTICATION')));
         }

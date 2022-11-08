@@ -16,7 +16,7 @@ class Duplicate extends AbstractAction{
         if (method_exists($this->model, 'bulkPreProcess')){
             $this->model->bulkPreProcess();
         }
-        $result = $this->model->duplicate($selectedIds, array_filter($this->view->allowedGetCols(), function($col){return $col !== 'history';}));
+        $result = $this->model->duplicate($selectedIds, array_merge(array_filter($this->view->allowedGetCols(), function($col){return $col !== 'history';}), ['custom']));
         if (method_exists($this->model, 'bulkPostProcess')){
             $this->model->bulkPostProcess();
         }

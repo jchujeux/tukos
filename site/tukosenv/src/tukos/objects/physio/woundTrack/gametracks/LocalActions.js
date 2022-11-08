@@ -12,20 +12,21 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 		recordTypeChangeAction: function(newValue, pane){
 			switch (Number(newValue)){
 				case 1: /* running*/
+				case 2: /*bicycle*/
 					pane.getWidget('activityPane').set('hidden', false);
 					pane.getWidget('activitydetails').set('hidden', true);
 					pane.getWidget('runningPane').set('hidden', false);
 					pane.getWidget('intensityPane').set('hidden', false);
 					pane.getWidget('noteIndicatorsPane').set('hidden', false);
 					break;
-				case 2: /* other activity*/
+				case 3: /* other activity*/
 					pane.getWidget('activityPane').set('hidden', false);
 					pane.getWidget('activitydetails').set('hidden', false);
 					pane.getWidget('runningPane').set('hidden', true);
 					pane.getWidget('noteIndicatorsPane').set('hidden', false);
 					pane.getWidget('intensityPane').set('hidden', true);
 					break;
-				case 3: /* note / comment*/
+				case 4: /* note / comment*/
 				default:
 					pane.getWidget('noteIndicatorsPane').set('hidden', false);
 					pane.getWidget('activityPane').set('hidden', true);
@@ -37,10 +38,11 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 			pane.resize();
 			pane.resize();
 		},
-		accordionRecordTypeChangeAction(newValue, pane){
+		accordionRecordTypeChangeAction: function(newValue, pane){
 			let i, indicatorWidget;
 			switch(Number(newValue)){
 				case 1: /*running*/
+				case 2: /*bicycle*/
 					runningWidgets.forEach(function(widgetName){
 						pane.getWidget(widgetName).set('hidden', false);
 					});
@@ -55,7 +57,7 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 						i += 1;
 					}
 					break;
-				case 2: /* other activity*/
+				case 3: /* other activity*/
 					runningWidgets.forEach(function(widgetName){
 						pane.getWidget(widgetName).set('hidden', true);
 					});
@@ -70,7 +72,7 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 						i += 1;
 					}
 					break;
-				case 3: /* Notes / comments*/
+				case 4: /* Notes / comments*/
 					runningWidgets.forEach(function(widgetName){
 						pane.getWidget(widgetName).set('hidden', true);
 					});
@@ -104,7 +106,8 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 				pane.resize();
 			}, 100);
 		},
-		accordionExpandAction(newValue, pane){
+		accordionExpandAction: function(newValue, rowTitlePane){
+			const pane = rowTitlePane.editorPane;
 			pane.watchContext = 'server';
 			this.accordionRecordTypeChangeAction(newValue, pane);
 			pane.markAllChanges = false;
@@ -112,31 +115,26 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 			pane.watchContext = 'user';
 			pane.markAllChanges = true;
 		},
-		desktopAccordionExpandAction(newValue, pane){
+		desktopAccordionExpandAction: function(newValue, rowTitlePane){
+			const pane = rowTitlePane.editorPane;
 			pane.watchContext = 'server';
 			this.recordTypeChangeAction(newValue, pane);
 			pane.markAllChanges = false;
 			pane.setWidgets(pane.data);
 			pane.watchContext = 'user';
 			pane.markAllChanges = true;
-		},
-		editConfigApplyAction: function(pane){
-			const form = this.form, changedValues = pane.changedValues();
-			if (!utils.empty(changedValues)){				
-				form.editConfig = form.editConfig || {};
-				if (changedValues.trendchartsperrow){
-					form.editConfig.trendchartsperrow = pane.valueOf('trendchartsperrow');
-					lang.setObject('customization.editConfig.trendchartsperrow', form.editConfig.trendchartsperrow, form);
+			setTimeout(function(){
+				if (rowTitlePane.domNode.style.height){//when there is only one row width and height get set to unwanted value
+					rowTitlePane.domNode.style.height = '';
+					rowTitlePane.domNode.style.width = '';
 				}
-				if (changedValues.trendcharts){
-					form.editConfig.trendcharts = JSON.stringify(pane.getWidget('trendcharts').get('collection').fetchSync());
-					lang.setObject('customization.editConfig.trendcharts', form.editConfig.trendcharts, form);
-				}
-				Pmg.setFeedback(Pmg.message('savecustomtoupdatetrendcharts'), null, null, true);
-			}
+			}, 100);
 		},
 		showHideGamePlan: function(){
 			const form = this.form, gamePlanPane = form.getWidget('gamePlanPane'), newHiddenValue = !gamePlanPane.get('hidden');
+			if (!newHiddenValue){
+				form.getWidget('records').deleteDesktopRowTitlePanesChildren();
+			}
 			gamePlanPane.set('hidden', newHiddenValue);
 			form.getWidget('id').set('hidden', newHiddenValue);
 			form.getWidget('parentid').set('hidden', newHiddenValue);

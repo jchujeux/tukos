@@ -10,7 +10,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dijit/
                 setTimeout(function(){
                     var changedValues = form.changedValues();
                     if (form.itemCustomization){
-                        lang.setObject('custom.' + form.viewMode + '.' + form.paneMode, form.itemCustomization, changedValues);
+                        lang.setObject('custom.' + form.viewMode.toLowerCase() + '.' + form.paneMode.toLowerCase(), form.itemCustomization, changedValues);
                         delete form.itemCustomization;
                 	}
                     if (utils.empty(changedValues)){

@@ -17,12 +17,12 @@ trait EditConfig {
                 'widgetsDescription' => [
                     'chartsperrow' => Widgets::numberTextBox(Widgets::complete( ['label' => $tr('Chartsperrow'), 'constraints' => ['pattern' =>  "0.######"]])),
                     'charts' =>  Widgets::simpleDgrid(Widgets::complete(
-                        ['label' => $tr('Charts'), 'storeArgs' => ['idProperty' => 'idg'],
+                        ['label' => $tr('Tabcharts'), 'storeArgs' => ['idProperty' => 'idg'],
                             'colsDescription' => [
                                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                                 'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('Name')]]), false),
-                                'chartType' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['trend', 'spider'], $tr)], 'label' => $tr('Charttype')], 'storeedit' => ['width' => 80]]), false),
-                                'colspan' => Widgets::numberTextBox(Widgets::complete( ['label' => $tr('Chartcolspan'), 'constraints' => ['pattern' =>  "0.######"]]), false),
+                                'chartType' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['trend', 'spider'], $tr)], 'label' => $tr('Charttype')], 'storeedit' => ['width' => 150]]), false),
+                                'colspan' => Widgets::numberTextBox(Widgets::complete( ['edit' => ['label' => $tr('Colspan'), 'constraints' => ['pattern' =>  "0.######"]]]), false),
                             ]])),
                     'apply' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('apply'), 'onClickAction' => $this->editConfigApplyAction()
                     ]],

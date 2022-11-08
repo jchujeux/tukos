@@ -73,8 +73,9 @@ function(declare, lang, ArrayIterator, utils, dutils, expressionFilter, expressi
 						}
 					}
 					for (const set of sessionsSets){
-						const setName = set.setName, kpiDate = getDate(set.kpiDate, form).dateString, filterString = setFilterString(set, form), setFilter = expFilter.expressionToValue(filterString.filter), setCollection = grid.collection.filter(setFilter), setData = setCollection.fetchSync(), 
-							  setExp = expressionKpi.expression(kpiDate, filterString.days, setData, filterString.lastSessionOffset, kpiCache, setCollection.idProperty);
+						const setName = set.setName, kpiDate = getDate(set.kpiDate, form).dateString, filterString = setFilterString(set, form), setFilter = expFilter.expressionToValue(filterString.filter),
+							  setCollection = grid.collection.filter(setFilter), setData = setCollection.fetchSync(), setExp = expressionKpi.expression(kpiDate, filterString.days, setData, filterString.lastSessionOffset,
+							  kpiCache, setCollection.idProperty);
 						series[setName] = {value: {key: 'kpi', value: setName}, options: {plot: 'theSpider', fill: set.fillColor}};
 						tableColumns[setName] = {label: setName, field: setName, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}};
 						let setKpiData = (kpiData[setName] = {}), setExpKpi = (expKpi[setName] = {});

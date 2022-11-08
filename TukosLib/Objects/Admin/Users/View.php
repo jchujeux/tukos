@@ -22,7 +22,8 @@ class View extends AbstractView {
             $moduleOptions[$module] = $this->tr($module);
         }
         $customDataWidgets = [
-            'password'   => ViewUtils::textBox($this, 'Password', ['atts' => ['edit' =>  ['type' => 'password']], 'editToObj' => ['md5' => []]]),
+            'parentid' => ['atts' => ['edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['name' => ['value' => "return sWidget.getItemProperty('email');"]]]]],
+            'password'   => ViewUtils::textBox($this, 'Password', ['atts' => ['edit' =>  ['type' => 'password', 'hidden' => true]], 'editToObj' => ['md5' => []]]),
             'rights'     => ViewUtils::storeSelect('rights', $this, 'Rights'),
             'modules'    => ['type' => 'multiSelect',
                 'atts' => ['edit' =>  ['title' => $this->tr('UnallowedModules'), 'options' => $moduleOptions, 'style' => ['height' => '500px']], 'storeedit' => ['style' => ['height' => '5em']]]
@@ -54,7 +55,7 @@ class View extends AbstractView {
             ]],
         ];
 
-        $this->customize($customDataWidgets, []/*$subObjects*/, ['get' => ['password'], 'grid' => ['password', 'targetdb']]);
+        $this->customize($customDataWidgets, []/*$subObjects*/, ['get' => ['password'], 'grid' => ['password']]);
         
         $this->paneWidgets = [
             'log' => [

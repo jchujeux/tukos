@@ -229,8 +229,8 @@ class ViewUtils{
                     'label' => $view->tr($label), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => true,
                     'colsDescription' => self::widgetsArrayDescription($colsDescription, false),
                 ]],
-                'objToEdit' => ['toNumeric' => ['class' => 'TukosLib\Utils\Utilities', 'id']],
-                'editToObj' => ['toAssociative' => ['class' => 'TukosLib\Utils\Utilities', 'id']],
+                'objToEdit' => ['toNumeric' => ['class' => 'TukosLib\Utils\Utilities', 'id'], 'objToEdit' => ['class' => 'TukosLib\Utils\Utilities', $colsDescription]],
+                'editToObj' => ['editToObj' => ['class' => 'TukosLib\Utils\Utilities', $colsDescription], 'toAssociative' => ['class' => 'TukosLib\Utils\Utilities', 'id']],
             ],
             $custom
         );
