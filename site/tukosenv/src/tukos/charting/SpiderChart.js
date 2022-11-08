@@ -77,14 +77,13 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 						if (filterDescription.lastItemOffset){
 							setData = [setData[setData.length - 1 - filterDescription.lastItemOffset]];
 						}
-						grid.toNumeric(setData);
-						let setExp = expressionEngine.expression(setData, kpiCache, setCollection.idProperty);
+						let setExp = expressionEngine.expression(utils.toNumeric(setData, grid), kpiCache, setCollection.idProperty);
 						series[setName] = {value: {key: 'kpi', value: setName}, options: {plot: 'theSpider', fill: set.fillColor || 'black'}};
 						tableColumns[setName] = {label: setName, field: setName, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}};
 						let setKpiData = (kpiData[setName] = {}), setExpKpi = (expKpi[setName] = {});
 						for (const kpiDescription of kpisDescription){
 							if (kpiDescription.kpiFilter){
-								setKpiData[kpiDescription.kpiName] = grid.toNumeric(setCollection.filter(kpiFilters[kpiDescription.kpiName]).fetchSync());
+								setKpiData[kpiDescription.kpiName] = utils.toNumeric(setCollection.filter(kpiFilters[kpiDescription.kpiName], grid).fetchSync());
 								setExpKpi[kpiDescription.kpiName] = expressionEngine.expression(setKpiData[kpiDescription.kpiName], kpiCache, setCollection.idProperty);
 							}else{
 								setKpiData[kpiDescription.kpiName] = setData;

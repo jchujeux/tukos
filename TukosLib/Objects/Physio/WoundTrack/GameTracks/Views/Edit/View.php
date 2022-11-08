@@ -3,15 +3,15 @@ namespace TukosLib\Objects\Physio\WoundTrack\GameTracks\Views\Edit;
 
 use TukosLib\Objects\Views\Edit\View as EditView;
 use TukosLib\Objects\Views\Edit\EditConfig;
-use TukosLib\Objects\ViewUtils;
 use TukosLib\Objects\Views\LocalActions;
 use TukosLib\Objects\Physio\WoundTrack\IndicatorsConfig;
+use TukosLib\Strava\Views\Edit\SynchronizationAction as StravaSyncAction;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class View extends EditView{
 
-	use LocalActions, IndicatorsConfig, EditConfig;
+	use LocalActions, IndicatorsConfig, EditConfig, StravaSyncAction;
 	
 	function __construct($actionController){
        parent::__construct($actionController);
@@ -21,14 +21,14 @@ class View extends EditView{
                 'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'widgetWidths' => ['30%', '70%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
                 'contents' => [
                     'col1' => [
-                        'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
+                        'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'id' => 'gamePlanPane', 'hidden' => Tfk::$registry->isMobile],
                         'contents' => [
                             'row1' => [
-                                'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => '50'],
-                                'widgets' => ['id', 'parentid', 'name']
+                                'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => '50'],
+                                'widgets' => ['id', 'parentid', 'name', 'patientid', 'physiotherapist']
                             ],
                             'row2' => [
-                                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'labelCellStyle' => ['border' => '1px solid grey'], 'id' => 'gamePlanPane', 'hidden' => Tfk::$registry->isMobile],
+                                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'labelCellStyle' => ['border' => '1px solid grey']],
                                 'contents' => [
                                     'row1' => [
                                         'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'label' => $tr('GamePlaninformation'), 'style' => ['border' => '1px solid grey']],
@@ -78,6 +78,8 @@ class View extends EditView{
         $this->actionLayout['contents']['actions']['widgets'][] = 'showhidegameplan';
         $this->actionLayout['contents']['actions']['widgets'][] = 'showhideanalysis';
         $this->setEditConfigActionWidget();
+        $this->setStravaActionButton(grid: 'records', athlete: 'patientid', coach: 'physiotherapist', synchrostart: null, synchroend: null, daySortCol: 'rowId', dayDateCol: 'recorddate', 
+            sportsMapping: ['col' => 'recordtype', 'map' => ['running' => 1, 'bicycle' => 2]]);
         
         $this->onOpenAction =  $this->openAction();
 	}

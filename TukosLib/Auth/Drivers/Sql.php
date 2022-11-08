@@ -17,10 +17,19 @@ class Sql{
 	    if (is_array($result)){
 	        return empty($targetDb = $result['targetdb']) ? Tfk::$registry->get('appConfig')->dataSource['dbname'] : $targetDb;
 	    }else{
-	        Feedback::add('Wrong username and/or password - Please re-enter or contact your administrator');
+	        Feedback::add(Tfk::tr('Wrongusernamepassword'));
 	        return false;
 	    }
     }
-
+    public function googleUserTargetDb($username){
+        $configStore = Tfk::$registry->get('configStore');
+        $result = $configStore->getOne(['where' => [$this->config['username_col'] => $username], 'cols' => ['targetdb'], 'table' => 'usersauth']);
+        if (is_array($result)){
+            return empty($targetDb = $result['targetdb']) ? Tfk::$registry->get('appConfig')->dataSource['dbname'] : $targetDb;
+        }else{
+            Feedback::add(Tfk::tr('googletukosnamemismatch') . ': ' . $username);
+            return false;
+        }
+    }
 }
 ?>

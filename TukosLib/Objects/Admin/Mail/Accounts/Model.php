@@ -21,6 +21,7 @@ class Model extends AbstractModel {
                          'smtpserverid'  => 'INT(11) DEFAULT NULL',
                          'mailserverid'  => 'INT(11) DEFAULT NULL',
                          'draftsfolder'  => 'VARCHAR(255)  DEFAULT NULL ',
+    	                 'gmailtoken'    => 'VARCHAR(1023)  DEFAULT NULL ',
         ];
         parent::__construct($objectName, $translator, 'mailaccounts', ['parentid' => ['users'], 'smtpserverid' => ['mailsmtps'], 'mailserverid' => ['mailservers']], [], $colsDefinition);
         $this->openedAccounts = [];

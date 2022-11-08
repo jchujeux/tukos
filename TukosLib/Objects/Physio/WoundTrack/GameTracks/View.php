@@ -12,21 +12,24 @@ use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
     
-    use IndicatorsView, ChartView;//trendChartView;
+    use IndicatorsView, ChartView;
     
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'PhysioGamePlan', 'Description');
         $tr = $this->tr;
         $isMobile = Tfk::$registry->isMobile;
         $leftRightTdStyle = [/*'whiteSpace' => 'nowrap', */'verticalAlign' => 'top', 'paddingTop' => '7px', 'fontSize' => 'smaller', 'fontFamily' => 'Arial, Helvetica, sans-serif', 'width' => '70px', 'wordWrap' => 'break-word'];
-        $gaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 10, 'showValue' => true, 'tickLabel' => '',
+        $gaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '',
             'gradient' => [0, '#B22222', 0.5, '#FF8C00', 1, '#7FFFD4'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
+        $reversedGaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '',
+            'gradient' => [0, '#7FFFD4', 0.5, '#FF8C00', 1, '#B22222'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
         $gaugeStyle = ['height' => '100px'];
         $gaugeTableStyle = ['tableLayout' => 'fixed', 'width' => 'auto'];
         $gaugeDivStyle = ['width' => 'auto'];
         $detailsAtts = ['atts' => ['edit' => ['height' => '2.5em', 'editorType' => 'simple', 'style' => ['minHeight' => '2em']]]];
         $planDataWidgets = [
-            'patientid' => ViewUtils::objectSelect($this, 'Patient', 'physiopatients', ['atts' => ['edit' => ['placeHolder' => '', 'disabled' => true]]]),
+            'patientid' => ViewUtils::objectSelect($this, 'Patient', 'physiopatients', ['atts' => ['edit' => ['placeHolder' => '', 'disabled' => true, 'hidden' => true]]]),
+            'physiotherapist' => ViewUtils::objectSelect($this, 'Physiotherapist', 'people', ['atts' => ['edit' => ['placeHolder' => '', 'disabled' => true, 'hidden' => true]]]),
             'dateupdated' => ViewUtils::tukosDateBox($this, 'Dateupdated', ['atts' => ['edit' => ['disabled' => true], 'overview' => ['hidden' => true]]]),
             'diagnostic' => ViewUtils::htmlContent($this, 'ClinicalDiagnostic', ['atts' => ['edit' => ['height' => '50px'], 'overview' => ['hidden' => true]]]),
             'pathologyof' => ViewUtils::storeSelect('pathologyOf', $this, 'Pathologyof', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['disabled' => 'true'], 'overview' => ['hidden' => true]]]),
@@ -50,7 +53,8 @@ class View extends AbstractView {
                 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.#']]]]),
             'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevation', ['atts' => ['edit' => ['label' => $this->tr('Elevation') . ' (m)', 'constraints' => $isMobile ? ['pattern' => '#0000.'] : ['pattern' => '#.#'], 'style' => ['width' => '2.5em']],
                 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.#']]]]),
-            'perceivedload' => ViewUtils::tukosNumberBox($this, 'Perceivedphysioload', ['atts' => ['edit' => ['label' => $this->tr('Perceivedload'), 'disabled' => true, 'constraints' => $isMobile ? ['pattern' => '#0000.'] : ['pattern' => '#.#'], 'style' => ['width' => '2em']],
+            'perceivedload' => ViewUtils::textBox($this, 'Perceivedphysioload', ['atts' => [
+                'edit' => [/*'label' => $this->tr('Perceivedload'), */'disabled' => true, 'constraints' => $isMobile ? ['pattern' => '#0000.'] : ['pattern' => '#.#'], 'style' => ['width' => '2em']],
                 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.#']]]]),
             'perceivedintensity' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
                 'label' => $tr('Perceivedintensity'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Extremelylow'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Extremelyhigh'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle,
@@ -60,32 +64,37 @@ class View extends AbstractView {
             'activitydetails' => ViewUtils::lazyEditor($this, 'Activitydetails', Utl::array_merge_recursive_replace($detailsAtts, ['atts' => ['edit' => ['height' => '5em']]])),
             'perceivedstress' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
                 'label' => $tr('Perceivedstress'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Insufficient'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('excessive'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle,
-                'gaugeAtts' => ['indicatorColor' => 'black', 'height' => 30, 'minimum' => -5, 'maximum' => 20, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '', 
-                    'gradient' => [0, '#B22222', 0.15, '#B22222', 0.25, '#FF8C00', 0.37, '#7FFFD4', 0.5, '#7FFFD4', 0.7, '#FFFFFF', 1, '#FFFFFF'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false],
+                'gaugeAtts' => ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '', 
+                    'gradient' => [0, '#B22222', 0.15, '#B22222', 0.25, '#FF8C00', 0.37, '#7FFFD4', 0.5, '#7FFFD4', 0.7, '#FFFFFF', 1, '#FFFFFF'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 
+                    'useTooltip' => false],
+                //'gaugeAtts' => $gaugeAtts, 
                 'checkboxes' => [['title' => $this->tr('Painduring'), 'id' => 'painduring'], ['title' => $this->tr('Painafter'), 'id' => 'painafter'], ['title' => $this->tr('Symptomsincrease'), 'id' => 'symptomsincrease'], ['title' => $this->tr('Other'), 'id' => 'other']]
             ]]],
             'stressdetails' => ViewUtils::lazyEditor($this, 'detailssmall', $detailsAtts),
             'mentaldifficulty' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
                 'label' => $tr('Mentaldifficulty'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('none'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('maximal'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle,
-                'gaugeAtts' => $gaugeAtts
+                'gaugeAtts' => ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '',
+                    'gradient' => [0, '#B22222', 0.15, '#B22222', 0.25, '#FF8C00', 0.37, '#7FFFD4', 0.5, '#7FFFD4', 0.7, '#FFFFFF', 1, '#FFFFFF'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'],
+                    'useTooltip' => false],
+                //'gaugeAtts' => $gaugeAtts
             ]]],
             'mentaldifficultydetails' => ViewUtils::lazyEditor($this, 'detailssmall', $detailsAtts),
             'globalsensation' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
-                'label' => $tr('Globalsensation'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Verygoode'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Verybade'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle, 
-                'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $gaugeAtts,
+                'label' => $tr('Globalsensation'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Verybade'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Verygoode'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle, 
+                'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $reversedGaugeAtts,
                 'checkboxes' => [['title' => $this->tr('Sleep'), 'id' => 'sleep'], ['title' => $this->tr('Welfare'), 'id' => 'welfare'], ['title' => $this->tr('Stress'), 'id' => 'stress'], ['title' => $this->tr('Healthillness'), 'id' => 'healthillness'],
                     ['title' => $this->tr('Energylevel'), 'id' => 'energylevel'], ['title' => $this->tr('Other'), 'id' => 'other']]
             ]]],
             'globalsensationdetails' => ViewUtils::lazyEditor($this, 'detailssmall', $detailsAtts),
             'environment' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
-                'label' => $tr('Environment'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Favorable'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Unfavorable'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle,
-                'gaugeAtts' => $gaugeAtts,
+                'label' => $tr('Environment'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Unfavorable'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Favorable'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle,
+                'gaugeAtts' => $reversedGaugeAtts,
                 'checkboxes' => [['title' => $this->tr('Professional'), 'id' => 'professional'], ['title' => $this->tr('Personal'), 'id' => 'personal'], ['title' => $this->tr('Family'), 'id' => 'family'], ['title' => $this->tr('Sports'), 'id' => 'sports'], ['title' => $this->tr('other'), 'id' => 'other']]
             ]]],
             'environmentdetails' => ViewUtils::lazyEditor($this, 'detailssmall', $detailsAtts),
             'recovery' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
-                'label' => $tr('Recovery'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Totally'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Notatall'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 
-                'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $gaugeAtts,
+                'label' => $tr('Recovery'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Notatall'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Totally'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 
+                'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $reversedGaugeAtts,
                 'checkboxes' => [['title' => $this->tr('Aches'), 'id' => 'aches'], ['title' => $this->tr('Pain'), 'id' => 'pain'], ['title' => $this->tr('Energy'), 'id' => 'energy'], ['title' => $this->tr('Psychofatigue'), 'id' => 'psychofatigue'], ['title' => $this->tr('Other'), 'id' => 'other']]
             ]]],
             'recoverydetails' => ViewUtils::lazyEditor($this, 'detailssmall', $detailsAtts),
@@ -98,10 +107,15 @@ class View extends AbstractView {
             : ['atts' => ['edit' => ['style' => ['width' => '25em', 'maxWidth' => '25em'], 'onChangeLocalAction' => ['parentid' => ['localActionStatus' =>$this->relatedPlanAction()]]]]],
             'name' => ['atts' => ['edit' => ['hidden' => true], 'overview' => ['hidden' => true]]],
             'comments' => ['atts' => ['edit' => ['height' => '100px', 'editorType' => 'simple', 'hidden' => true], 'overview' => ['hidden' => true]]],
-            'records' => ViewUtils::JsonGrid($this, 'Records', array_merge(['rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true]], $recordsDataWidgets), ['type' => 'accordionGrid', 'atts' => ['edit' => [
-                'disabled' => true, 'noDataMessage' => '', 'storeArgs' => ['idProperty' => 'rowId'], 'noSendOnSave' => [], 'onWatchLocalAction' => [], 'initialRowValue' => ['recorddate' => date('Y-m-d')],
-                /*'mobileWidgetType' => 'MobileAccordionGrid',*/
-                'accordionAtts' => ['orientation' => 'vert', 'getRowLabelAction' => $this->getRowLabelAction(), 'addRowLabel' => $this->tr('Addrecord'), 'newRowLabel' => $this->tr('Newrecord') . ' <span style="font-size: 12px;">' . $this->tr('clickheretocloseopensessioneditor') . '</span>',
+            'records' => ViewUtils::JsonGrid($this, 'Records', array_merge(['rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true]], $recordsDataWidgets), 
+                ['type' => 'accordionGrid', 'atts' => ['edit' => ['disabled' => true, 'noDataMessage' => '', 'storeArgs' => ['idProperty' => 'rowId'], 'noSendOnSave' => [], 'onWatchLocalAction' => [], 'initialRowValue' => ['recorddate' => date('Y-m-d')],
+                    'afterActions' => [
+                        'expandRow' => Tfk::$registry->isMobile 
+                            ? "this.form.localActions.accordionExpandAction(arguments[1][0].editorPane.item.recordtype, arguments[1][0]);" 
+                            : "this.form.localActions.desktopAccordionExpandAction(arguments[1][0].editorPane.item.recordtype, arguments[1][0]);"
+                    ],
+                    'accordionAtts' => ['orientation' => 'vert', 'getRowLabelAction' => $this->getRowLabelAction(), 'addRowLabel' => $this->tr('Addrecord'), 
+                    'newRowLabel' => $this->tr('Newrecord') . ' <span style="font-size: 12px;">' . $this->tr('clickheretocloseopensessioneditor') . '</span>',
                     'deleteRowLabel' => $this->tr('deleterecord'), 'actualizeRowLabel' => $this->tr('actualizerecord'), 'desktopRowLayout' => $isMobile ? null : Agu::desktopRowLayout($tr)],
                     'title' => $this->tr('Records'), 'allDescendants' => true/*, 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'startdate',*/
                 ]]])
@@ -158,12 +172,13 @@ switch (Number(item.recordtype)){
     case 1: 
 	    atts = columns.perceivedstress.editorArgs.gaugeAtts;//item.perceivedstress ? JSON.parse(item.perceivedstress).gauge || item.perceivedstress : 0
         indicatorsHtml +=  '<span style="background-color: ' + utils.valueToGradientColor(((item.perceivedstress ? JSON.parse(item.perceivedstress).gauge || item.perceivedstress : 0) - atts.minimum) / (atts.maximum - atts.minimum), atts.gradient) + ';">{$this->tr("stress")} ' + '</span> ';
+    case 2:
 	    atts = columns.perceivedintensity.editorArgs.gaugeAtts;
         indicatorsHtml +=  '<span style="background-color: ' + utils.valueToGradientColor(((item.perceivedintensity ? JSON.parse(item.perceivedintensity).gauge || item.perceivedintensity : 0) - atts.minimum) / (atts.maximum - atts.minimum), atts.gradient) + ';">{$this->tr("intensity")} ' + '</span> ';
-        additionalHtml += ' dist: ' + item.distance + 'kms ' + ' Deniv: ' + item.elevationgain + 'm ';
+        additionalHtml += ' dist: ' + Number(item.distance).toFixed(0) + 'kms ' + ' Deniv: ' + Number(item.elevationgain).toFixed(0) + 'm ';
         break;
-    case 2:
-	    atts = columns.perceivedstress.editorArgs.gaugeAtts;
+    case 3:
+	    atts = columns.perceivedintensity.editorArgs.gaugeAtts;
         indicatorsHtml +=  '<span style="background-color: ' + utils.valueToGradientColor(((item.perceivedintensity ? JSON.parse(item.perceivedintensity).gauge || item.perceivedintensity : 0) - atts.minimum) / (atts.maximum - atts.minimum), atts.gradient) + ';">{$this->tr("intensity")} ' + '</span> ';
         break;
     default:

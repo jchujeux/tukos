@@ -31,6 +31,7 @@ trait Kpis {
         $kpiName = explode('_', $name);
         if (empty($kpiName[2])){
             return [
+                'heartrate_avgload' => ['formula' => 'avgLoad', 'arguments' => ['metrics' => 'avghr', 'threshold' => $athlete['hrthreshold'], 'minutesActive' => 'timemoving', 'sex' => $athlete['sex'], 'min' => $athlete['hrmin']]],
                 'heartrate_load' => ['formula' => 'load', 'arguments' => ['metrics' => 'heartratestream', 'threshold' => $athlete['hrthreshold'], 'sex' => $athlete['sex'], 'min' => $athlete['hrmin']]],
                 'power_load' => ['formula' => 'load', 'arguments' => ['metrics' => 'wattsstream', 'threshold' => $athlete['ftp'], 'sex' => $athlete['sex'], 'smoothSeconds' => 30]],
                 'mechanical_load' => ['formula' => 'load', 'arguments' => ['metrics' => 'velocity_smoothstream', 'threshold' => $athlete['speedthreshold'], 'sex' => $athlete['sex'], 'b' => ['cadenceCorrection']]],

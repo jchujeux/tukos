@@ -83,8 +83,9 @@ class Get extends ViewsGetModel {
                 $value['grade'] = $query['grade'];
             }
             $response['forceMarkIfChanged'] = true;
-            $customMode = 'object';
+            $customMode = 'item';
             $allowCustomValue = false;
+            $value['id'] = $dupId;
             Feedback::add([$this->view->tr('doneduplicateditem') => $dupId]);
         }else{
             $storeAtts = Utl::extractItem('storeatts', $query, []);
@@ -108,7 +109,7 @@ class Get extends ViewsGetModel {
 
         $response['readonly'] = $this->setProtection($response['data']);
         if ($dupId){
-        	if (!empty($itemCustomization = $this->view->model->getItemCustomization(['id' => $dupId], ['edit', $this->paneMode]))){
+        	if (!empty($itemCustomization = $this->view->model->getItemCustomization(['id' => $dupId], ['edit', strtolower($this->paneMode)]))){
         		$response['itemCustomization'] = $itemCustomization;
         	}
         }
@@ -116,6 +117,9 @@ class Get extends ViewsGetModel {
             $response = $this->view->preMergeCustomizationAction($response, $customMode);
         }
         $response = $this->mergeCustomization($response, $customMode, $allowCustomValue);
+        if ($dupId){
+            unset($response['data']['value']['id']);
+        }
     }
     
     protected function mergeCustomization($response, $customMode, $allowCustomValue){

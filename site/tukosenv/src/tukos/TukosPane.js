@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dijit/layout/ContentPane", "tukos/widgetUtils", "tukos/_TukosLayoutMixin", "tukos/_TukosPaneMixin"], 
-    function(declare, lang, dct, ContentPane, wutils, _TukosLayoutMixin, _TukosPaneMixin){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dijit/layout/ContentPane", "tukos/widgetUtils", "tukos/_TukosLayoutMixin", "tukos/_TukosPaneMixin", "tukos/PageManager"], 
+    function(declare, lang, dct, ContentPane, wutils, _TukosLayoutMixin, _TukosPaneMixin, Pmg){
     return declare([ContentPane, _TukosLayoutMixin, _TukosPaneMixin], {
         postCreate: function(){
             this.inherited(arguments);

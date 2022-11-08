@@ -20,6 +20,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
 		},            
 		decorate: function(widget){
             var self = this;
+            let menuItemsArgs = [];
             if (widget.afterActions){
 				utils.forEach(widget.afterActions, function(action, methodName){
 					aspect.after(widget, methodName, lang.hitch(widget, eutils.eval(action, 'args'))/*, true*/);
@@ -36,11 +37,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
 				});
 			}
 			require(["tukos/menuUtils", "tukos/widgets/widgetCustomUtils"], function(mutils, wcutils){
-                let menuItemsArgs;
                 if (Pmg.get('userRights') !== 'RESTRICTEDUSER'){
 	                menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
 	                if(utils.in_array(widgetName, self.objectIdCols)){
-	                    menuItemsArgs.concat(lang.hitch(self, wcutils.idColsContextMenuItems)(widget));
+	                    menuItemsArgs = menuItemsArgs.concat(lang.hitch(self, wcutils.idColsContextMenuItems)(widget));
 	                }
 				}
 				if (widget.customContextMenuItems){

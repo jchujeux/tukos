@@ -6,51 +6,49 @@
 		<title>Login into the system</title>
 	</head>
 	<body style="text-align: center;">
+		<table style="margin-left: auto; margin-right: auto;">
+			<tr><td>
+            		<form id="formNode">
+                		<h1><?= $this->authentication?></h1>
+                		<div id="svrFeedback"><i><?= $this->serverFeedback ?></i></div>
+            			<table style="margin-left: auto; margin-right: auto;">
+            				<tr><th></th><td><div id="buttonDiv"></div></td></tr>
+            				<?= $this->loginPwd ?>
+            			</table>
+            		</form>
+			</td></tr>
+			<tr><td><img alt="logo" src="<?= $this->logo?>"><br><?= $this->headerBanner ?></td></tr>
+			<tr><td><br><?= $this->confidentialityPolicy ?></td></tr>
+			
+		</table>
+		<!-- load dojo and provide config via data attribute -->
+        <script src="<?= $this->dojoBaseLocation ?>dojo/dojo.js" daja-dojo-config="async: true"></script>
+      <script src="https://accounts.google.com/gsi/client" async defer></script>
+     
 		<script>
 			function hideSvrFeedback(){
 				var svrFeedback = document.getElementById('svrFeedback');
 				svrFeedback.style.display = "none";
 			}
 		</script>
-		<table style="margin-left: auto; margin-right: auto;">
-			<tr>
-				<td><img alt="logo" src="<?= $this->logo?>"><br><?= $this->headerBanner ?></td>
-				<td>
-            		<form id="formNode">
-                		<h1><?= $this->authentication?></h1>
-                		<div id="svrFeedback"><i><?= $this->serverFeedback ?></i></div>
-            			<table style="margin-left: auto; margin-right: auto;">
-            				<tr><th><?= $this->username?>: </th><td><input type="text" name="username" oninput="hideSvrFeedback()" /></td></tr>
-            				<tr><th><?= $this->password?>: </th><td><input type="password" name="password" oninput="hideSvrFeedback()" /></td></tr>
-            				<tr><th></th><td><button type="submit"><?= $this->login?></button></td></tr>
-            			</table>
-            		</form>
-				</td>
-			</tr>
-		</table>
-		<!-- load dojo and provide config via data attribute -->
-            <script src="<?= $this->dojoBaseLocation ?>dojo/dojo.js" daja-dojo-config="async: true"></script>
 		    <script>
-			require(["dojo/dom", "dojo/on", "dojo/request", "dojo/dom-form", "dojo/domReady!"],
-				function(dom, on, request, domForm){
-					var form = dom.byId('formNode');
+			require(["dojo/dom", "dojo/on", "dojo/request", "dojo/dom-form", "tukos/login", "tukos/google/clientOAuth", "tukos/PageManager"],
+				function(dom, on, request, domForm, login, clientOAuth, Pmg){
+        			Pmg.initializeNoPage(<?= $this->pageManagerArgs ?>);
+					clientOAuth.windowOnLoad("<?= $this->requestGoogleValidationUrl ?>");
+					const form = dom.byId('formNode');
 					// Attach the onsubmit event handler of the form
 					on(form, "submit", function(evt){
 						evt.stopPropagation();
 						evt.preventDefault();
 						request.post("<?= $this->requestUrl ?>",	{data: domForm.toObject("formNode"), timeout: 2000}).then(
-                                                function(response){
-													var serverFeedback = dom.byId('svrFeedback');
-                                                    serverFeedback.innerHTML = '<i>' + response + '</i>';
-                                                    serverFeedback.style.display = "block";
-                                                    document.location.reload();
-                                                },
-                                                function(error){
-													var serverFeedback = dom.byId('svrFeedback');
-                                                    serverFeedback.innerHTML = "<i><?= $this->error; ?></i>";
-                                                    serverFeedback.style.display = "block";
-                                                }
-                                          );
+                            function(response){
+                            	login.onSuccess(response);
+                            },
+                            function(error){
+								login.onError(error);
+                            }
+                      );
 					});
 				}
 			);

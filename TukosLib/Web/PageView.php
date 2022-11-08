@@ -159,7 +159,7 @@ class PageView extends Translator{
         return ['items' => $theDescription];
     }
     function welcomeConnect($logoutUrl){
-        return $this->tr('Welcome') . ', <span id="pageusername" style="text-decoration:underline; color:blue; cursor:pointer">' .
+        return $this->tr('Welcome') . ', <span id="pageusername" ' . ($this->user->rights() === 'RESTRICTEDUSER' ? '>' : 'style="text-decoration:underline; color:blue; cursor:pointer">') .
                $this->user->username() . '</span> <a href="' . $logoutUrl . '" />' . $this->tr('logout') . '</a>';
     }
     function addToPageManager($args){

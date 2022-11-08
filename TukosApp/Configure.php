@@ -73,7 +73,7 @@ class Configure{
             'itm' => [['itsm' => [['#itsvcdescs' => [['#itslatargets' => []]], '#itincidents' => []]], '#itsystems' => [], '#networks' => [], 
                        '#hosts' => [['#macaddresses' => [], '#hostsdetails' => [], '#servicesdetails' => []]], '#connexions' => [],
             ]],
-            'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [['#sptsessionsstages' => []]], '#sptexercises' => [['#sptexerciseslevels' => []]]]],
+            'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [['#sptsessionsstages' => []]], '#sptexercises' => [['#sptexerciseslevels' => []]], '#stravaactivities' => [],]],
             'physio' => [['#physiopatients' => [], 'physiopersotrack' => [['#physiopersoquotes' => [], '#physiopersoplans' => [], '#physiopersotreatments' => [], '#physiopersodailies' => [['#physiopersosessions' => []]], '#physiopersoexercises' => []]],
                 'physiowoundtrack' => [['#physiogameplans' => [], '#physiogametracks' => []]],
                 '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],

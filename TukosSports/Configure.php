@@ -64,7 +64,7 @@ class Configure{
                     'bustrackreconciliations' => [['#bustrackreconciliationscustomers' => [], '#bustrackreconciliationssuppliers' => []]],
                 'bustrackdashboards' => [['#bustrackdashboardscustomers' => [], '#bustrackdashboardssuppliers' => []]]]
             ],
-            'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [], '#sptsessionsstages' => [], '#sptexercises' => [['#sptexerciseslevels' => []]]]],
+            'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [], '#sptsessionsstages' => [], '#sptexercises' => [['#sptexerciseslevels' => []]], '#stravaactivities' => []]],
             'physio' => [['#physiopatients' => [], 'physiopersotrack' => [['#physiopersoquotes' => [], '#physiopersoplans' => [], '#physiopersotreatments' => [], '#physiopersodailies' => [['#physiopersosessions' => []]], '#physiopersoexercises' => []]], '#physioprescriptions' => [],
                 'physiowoundtrack' => [['#physiogameplans' => [], '#physiogametracks' => []]],
                 '#physioassesments' => [], '#physiocdcs' => []/*, '#physiotemplates' => []*/]],

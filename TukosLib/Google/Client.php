@@ -3,20 +3,22 @@ namespace TukosLib\Google;
 
 class Client {
     private static $client = null;
-	public static function get(){
+	public static function get($jsonCredentials = null){
 		if (is_null(self::$client)){
 		    putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/tukos-f090e7fe437e.json');
 		    self::$client = new \Google_Client();
 			self::$client->setApplicationName('tukos');
-			self::$client->useApplicationDefaultCredentials();
-			//self::$client->setAssertionCredentials($credentials);
-			//$credentials = self::$client->loadServiceAccountJson('tukos-f090e7fe437e.json', 'https://www.googleapis.com/auth/calendar');
-			//self::$client->setAuthConfig(__DIR__ . '\tukos-f090e7fe437e.json');
+			if (is_null($jsonCredentials)){
+			    self::$client->useApplicationDefaultCredentials();
+			}else{
+			    self::$client->setAuthConfig($jsonCredentials);
+			}
 			self::$client->setScopes([
 				'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.readonly', 
 				'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.readonly', 
 			    'https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/spreadsheets.readonly',
-			    'https://www.googleapis.com/auth/script.projects', 'https://www.googleapis.com/auth/script.projects.readonly'
+			    'https://www.googleapis.com/auth/script.projects', 'https://www.googleapis.com/auth/script.projects.readonly',
+			    'https://www.googleapis.com/auth/gmail', 'https://www.googleapis.com/auth/gmail.send'
 			]);
 		}
 		return self::$client;

@@ -537,5 +537,15 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 						return value;
 				}
 			},
+	        toNumeric: function(data, grid){
+				const transformedData = [];
+				for (const row in data){
+					transformedData[row] = {};
+					for (const column in data[row]){
+						transformedData[row][column] = this.widgetNumericValue((grid.columns[column] || {}).editor, data[row][column]);
+					}
+				}
+				return transformedData;
+			}
 		};
 	});

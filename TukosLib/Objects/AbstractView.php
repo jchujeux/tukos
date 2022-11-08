@@ -22,7 +22,7 @@ abstract class AbstractView extends ObjectTranslator{
         $objectsStore = $this->objectsStore = Tfk::$registry->get('objectsStore');
         $this->model = $objectsStore->objectModel($this->objectName, $this->tr);
         $this->user  = Tfk::$registry->get('user');
-        $this->sendOnSave = $this->sendOnDelete = ['updated'];
+        $this->sendOnSave = $this->sendOnDelete = ['updated', 'grade'];
         $this->mustGetCols = ['id', 'name', 'parentid', 'updated', 'permission', 'updator', 'creator'];
         $missingUser = $this->tr('missinguser', 'escapeSQuote');
         $needsUser = $this->tr('aclneedsuser', 'escapeSQuote');

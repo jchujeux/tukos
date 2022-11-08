@@ -13,7 +13,7 @@ class Model extends AbstractModel{
     //protected $protocolOptions = ['25/smtp', '465/smtp/ssl', '465/smtp/pwd'];
     protected $portOptions     = ['25', '465', '587'];
     protected $securityOptions = ['none', 'ssl', 'tls'];
-    protected $authOptions     = ['none', 'emailuser', 'specific'];
+    protected $authOptions     = ['none', 'emailuser', 'oauth', 'specific'];
     protected $sender;
 
     function __construct($objectName, $translator=null){

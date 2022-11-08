@@ -181,7 +181,7 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
 		var labelRow = domConstruct.create("tr", null, tbody);
 		var childRow = (!this.showLabels || this.orientation == "horiz")
 						? labelRow : domConstruct.create("tr", null, tbody);
-		var maxCols = this.cols * (this.showLabels ? 2 : 1);
+		var maxCols = this.cols * (this.showLabels && this.orientation === 'horiz' ? 2 : 1);// JCH should only be when orientation is horizontal
 		var numCols = 0;
 
 		// Iterate over the children, adding them to the table.
@@ -193,13 +193,14 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
             	child.domNode.style.display = 'block';
                 var colspan = child.colspan || 1;
                 
-                if(colspan > 1) {
-                    colspan = this.showLabels ?
-                        Math.min(maxCols - 1, colspan * 2 -1): Math.min(maxCols, colspan);
-                }
+                /*if(colspan > 1) {
+                    colspan = this.showLabels && this.orientation === 'horiz' 
+                    ? Math.min(maxCols - 1, colspan -1)
+                    : Math.min(maxCols, colspan);
+                }*/
     
                 // Create a new row if we need one
-                if(numCols + colspan - 1 + (this.showLabels ? 1 : 0)>= maxCols) {
+                if(numCols + colspan + (this.showLabels && this.orientation === 'horiz' ? 1 : 0)> maxCols) {// a widget needs colspan cols + 1 if showLabel and oriantation is horizontal
                     numCols = 0;
                     labelRow = domConstruct.create("tr", null, tbody);
                     childRow = this.orientation == "horiz" ? labelRow : domConstruct.create("tr", null, tbody);
@@ -208,7 +209,7 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
                 
                 // If labels should be visible, add them
                 if(this.showLabels) {
-                    labelCell = domConstruct.create("td", lang.mixin({"class": "tableContainer-labelCell"}, {style: this.labelCellStyle}), labelRow);
+                    labelCell = domConstruct.create("td", lang.mixin({"class": "tableContainer-labelCell", colspan: this.orientation === 'vert' ? colspan : 1}, {style: this.labelCellStyle}), labelRow);
     
                     // If the widget should take up both the label and value,
                     // then just set the class on it.
@@ -271,7 +272,7 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
                     });
                 }
                 childCell.appendChild(child.domNode);
-                numCols += colspan + (this.showLabels ? 1 : 0);
+                numCols += colspan + (this.showLabels  && this.orientation === 'horiz' ? 1 : 0);
                 widgetColumn += 1;
             }
 		}));

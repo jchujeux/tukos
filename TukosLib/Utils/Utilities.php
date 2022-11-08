@@ -691,5 +691,42 @@ class Utilities{
         $prev = $timer;
         return (($timer = hrtime(true)) - $prev) / 1000000000;
     }
+    public static function objToEdit($items, $colsDescription){
+        if (isset($items)){
+            foreach ($colsDescription as $col => $description){
+                if (!empty($description['objToStoreEdit'])){
+                    foreach($description['objToStoreEdit'] as $func => $params){
+                        foreach($items as &$item){
+                            if (isset($item[$col])){
+                                $item[$col] = call_user_func_array([$params['class'], $func], [$item[$col]]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $items;
+    }
+    public static function editToObj($items, $colsDescription){
+        if (isset($items)){
+            foreach ($colsDescription as $col => $description){
+                if (!empty($description['storeEditToObj'])){
+                    foreach($description['storeEditToObj'] as $func => $params){
+                        foreach($items as &$item){
+                            if (isset($item[$col])){
+                                $item[$col] = call_user_func_array([$params['class'], $func], [$item[$col]]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $items;
+    }
+    public static function random_password( $length = 8 ) {// found at: https://hughlashbrooke.com/2012/04/23/simple-way-to-generate-a-random-password-in-php/
+        $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_-=+;:,.?";
+        $password = substr( str_shuffle( $chars ), 0, $length );
+        return $password;
+    }
 }
 ?>

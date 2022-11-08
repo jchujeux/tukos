@@ -75,10 +75,12 @@ EOT
 			}
 			$mailArgs['body'] = (empty($atts['header']) ? '' : $atts['header']);
 			$objectsStore =  Tfk::$registry->get('objectsStore');
-			$accountInfo = $objectsStore->objectModel('mailaccounts')->getAccountInfo(['where' => empty($where) ? (empty($atts['fromwhere']) ? ['id' => $atts['from']] : $atts['fromwhere']) : $where, 'cols' => ['name', 'eaddress', 'username', 'password', 'smtpserverid']]);
+			$accountInfo = $objectsStore->objectModel('mailaccounts')->getAccountInfo(['where' => empty($where) ? (empty($atts['fromwhere']) ? ['id' => $atts['from']] : $atts['fromwhere']) : $where, 'cols' => ['name', 'eaddress', 'username', 'password', 'smtpserverid', 'gmailtoken']]);
 			$mailArgs['from'] = $accountInfo['name'] . ' <' . $accountInfo['eaddress'] . '>';
 			$mailArgs['username'] = $accountInfo['username'];
 			$mailArgs['password'] = $accountInfo['password'];
+			$mailArgs['gmailtoken'] = json_decode($accountInfo['gmailtoken'], true);
+			$mailArgs['googlecredentials'] = Tfk::$registry->get('tukosModel')->getOption('googlewebappcredentials');
 			$smtpModel  = $objectsStore->objectModel('mailsmtps');
 	
 			if ($atts['sendas'] === 'appendtobody' || $atts['sendas'] === 'bodyandattachment'){

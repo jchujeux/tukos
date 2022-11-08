@@ -22,6 +22,7 @@ class Model extends AbstractModel{
         'restrictedmodules'       =>  'VARCHAR(2048) DEFAULT NULL',
         'language'      =>  "VARCHAR(80) DEFAULT NULL",
             'environment'   =>  "VARCHAR(80) DEFAULT NULL",
+        "targetdb" => "VARCHAR(50) DEFAULT NULL",
             'tukosorganization' =>  "VARCHAR(80) DEFAULT NULL",
             'dropboxaccesstoken'      =>  'VARCHAR(255)  DEFAULT NULL',
             'dropboxbackofficeaccess' => 'VARCHAR(10) DEFAULT NULL',
@@ -52,57 +53,63 @@ class Model extends AbstractModel{
         
     	return parent::initialize(array_merge(['rights' => 'ENDUSER', 'targetdb' => Tfk::$registry->get('appConfig')->dataSource['dbname'], 'tukosorganization' => $this->user->tukosOrganization()], $init));
     }    
-    
     public function getOneExtended ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
     	$result = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
-    	$result['targetdb'] = Tfk::$registry->get('configStore')->getOne(['where' => ['username' => $result['name']], 'table' => 'usersauth', 'cols' => ['targetdb']])['targetdb'];
-    	if (isset($result['customviewids'])){
-        	$result['customviewids'] = json_decode($result['customviewids'], true);
-        	if (!empty($result['customviewids'])){
-        	    ksort($result['customviewids']);
-        	    $ids = [];
-        	    $callback = function($id)use (&$ids){
-        	        $ids[] = $id;
-        	    };
-        	    array_walk_recursive($result['customviewids'], $callback);
-        	    $customviewsname = array_column(Tfk::$registry->get('objectsStore')->objectModel('customviews')->getAll(['where' => [['col' => 'id', 'opr' => 'in', 'values' => $ids]], 'cols' => ['id', 'name']]), 'name',  'id');
-        	    array_walk_recursive($result['customviewids'], function (&$id) use ($customviewsname){
-        	        $id = [$id => Utl::getItem($id, $customviewsname, 'customviewnotfound')];
-        	    });
-        	    $result['customviewids'] = Utl::map_array_recursive($result['customviewids'], $this->tr);
-        	}
+    	if ($result['grade'] === 'TEMPLATE'){
+    	    return $result;
+    	}else{
+    	    $result['targetdb'] = Tfk::$registry->get('configStore')->getOne(['where' => ['username' => $result['name']], 'table' => 'usersauth', 'cols' => ['targetdb']])['targetdb'];
+    	    if (isset($result['customviewids'])){
+    	        if (is_string($result['customviewids'])){
+    	            $result['customviewids'] = json_decode($result['customviewids'], true);
+    	        }
+    	        if (!empty($result['customviewids'])){
+    	            ksort($result['customviewids']);
+    	            $ids = [];
+    	            $callback = function($id)use (&$ids){
+    	                $ids[] = $id;
+    	            };
+    	            array_walk_recursive($result['customviewids'], $callback);
+    	            $customviewsname = array_column(Tfk::$registry->get('objectsStore')->objectModel('customviews')->getAll(['where' => [['col' => 'id', 'opr' => 'in', 'values' => $ids]], 'cols' => ['id', 'name']]), 'name',  'id');
+    	            array_walk_recursive($result['customviewids'], function (&$id) use ($customviewsname){
+    	                $id = [$id => Utl::getItem($id, $customviewsname, 'customviewnotfound')];
+    	            });
+    	                $result['customviewids'] = Utl::map_array_recursive($result['customviewids'], $this->tr);
+    	        }
+    	    }
+    	    return $result;
     	}
-    	return $result;
     }
-
     public function insertExtended($values, $init=false, $jsonFilter = false){
-        if (empty($values['name'])){
-        	Feedback::add($this->tr('needname'));
-        	return false;
-        }else if (!empty($this->getOne(['where' => ['name' => $values['name']], 'cols' => ['name']]))){
-        	Feedback::add($this->tr('useralreadyexists'));
-        	return false;
+        if ($values['grade'] === 'TEMPLATE'){
+            return parent::insertExtended($values, $init, $jsonFilter);
         }else{
-        	if (empty($values['targetdb'])){
-        		$values['targetdb'] = Tfk::$registry->get('appConfig')->dataSource['dbname'];
-        	}
-        	$authenticationInfo = Utl::getItems(['name', 'password', 'targetdb'], $values);
-        	$authenticationInfo['username'] = $userName = Utl::extractItem('name', $authenticationInfo);
-        	$configStore = Tfk::$registry->get('configStore');
-        	if (empty($configStore->getOne(['where' => ['username' => $userName], 'table' => 'usersauth', 'cols' => ['username']]))){
-        	    if (empty($authenticationInfo['password'])){
-        	        Feedback::add($this->tr('newuserneedpassword'));
-        	        return false;
-        	    }else{
-        	        $configStore->insert($authenticationInfo, ['table' => 'usersauth']);
-        	    }
-        	}else{
-        	    if (!empty($authenticationInfo['password'])){
-        	        Feedback::add($this->tr('userexistsnopassword'));
-        	        return false;
-        	    }
-        	}
-        	Utl::extractItem('targetdb', $values);
+            if (empty($values['name'])){
+            	Feedback::add($this->tr('needname'));
+            	return false;
+            }else if (!empty($this->getOne(['where' => ['name' => $values['name']], 'cols' => ['name']]))){
+            	Feedback::add($this->tr('useralreadyexists'));
+            	return false;
+            }else{
+                if (empty($values['targetdb'])){
+            		$values['targetdb'] = Tfk::$registry->get('appConfig')->dataSource['dbname'];
+            	}
+            	$authenticationInfo = Utl::getItems(['name', 'password', 'targetdb'], $values);
+            	$authenticationInfo['username'] = $userName = Utl::extractItem('name', $authenticationInfo);
+            	$configStore = Tfk::$registry->get('configStore');
+            	if (empty($configStore->getOne(['where' => ['username' => $userName], 'table' => 'usersauth', 'cols' => ['username']]))){
+            	    if (empty($authenticationInfo['password'])){
+            	        $authenticationInfo['password'] = MD5(Utl::random_password());//so that private encrytion for the user can take place
+            	    }
+            	    $configStore->insert($authenticationInfo, ['table' => 'usersauth']);
+            	}else{
+            	    if (!empty($authenticationInfo['password'])){
+            	        Feedback::add($this->tr('userexistsnopassword'));
+            	        return false;
+            	    }
+            	}
+            	Utl::extractItem('targetdb', $values);
+            }
         	if (empty(Utl::getItem('tukosorganization', $values))){
         	    $values['tukosorganization'] = $this->user->tukosOrganization();
         	}
@@ -113,65 +120,71 @@ class Model extends AbstractModel{
         	return $item;
         }
     }
-
     public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
-    	$authInfo = Utl::getItems(['name', 'password', 'targetdb'], $newValues);
-    	$authUpdate = false;
-    	if (!empty($authInfo)){
-    		$existingAuthInfo = $this->getOne(['where' => ['id' => $newValues['id']], 'cols' => ['name', 'password']]);
-    		if (isset($authInfo['name'])){
-    			$newName = Utl::getItem('name', $authInfo);
-    		    if (empty($newName)){
-    				Feedback::add($this->tr('blanknamenotallowed'));
-    				return false;
-    			}else if ($newName !== $existingAuthInfo['name']){
-    				$authInfo['username'] = $newName;
-    			}
-    		}else{
-    			$newName = $existingAuthInfo['name'];
-    		}
-    	    if (isset($authInfo['password'])&& empty($authInfo['password'])){
-    			Feedback::add($this->tr('emptypasswordnotallowed'));
-    			return false;
-    		}
-    		if (isset($authInfo['targetdb'])){
-    			$targetDb = Utl::getItem('targetdb', $authInfo);
-    			if(empty($targetDb)){
-    			    $targetDb = Tfk::$registry->get('appConfig')->dataSource['dbname'];
-    			}
-    			$targetStore = new Store(array_merge(Tfk::$registry->get('appConfig')->dataSource, ['dbname' => $targetDb]));
-				if (empty($targetStore->getOne(['table' => SUtl::$tukosTableName, 'where' => ['name' => $newName, 'object' => 'users'], 'cols' => ['name']]))){
-					Feedback::add($this->tr('targetdbdoesnothaveusersitemforusername'));
-					return false;
-				}
-    		}
-    	    $configStore = Tfk::$registry->get('configStore');
-        	if (empty($configStore->getOne(['where' => ['username' => $newName], 'table' => 'usersauth', 'cols' => ['username']]))){
-        		if (empty($authInfo['username'])){
-        			$authInfo['username'] = $existingAuthInfo['name'];
+        if ($newValues['grade'] === 'TEMPLATE'){
+            return parent::updateOneExtended($newValues, $atts, $insertIfNoOld, $jsonFilter, $init);
+        }else{
+            $authInfo = Utl::getItems(['name', 'password', 'targetdb'], $newValues);
+        	$authUpdate = false;
+        	if (!empty($authInfo)){
+        		$existingAuthInfo = $this->getOne(['where' => ['id' => $newValues['id']], 'cols' => ['name', 'password']]);
+        		if (isset($authInfo['name'])){
+        			$newName = Utl::getItem('name', $authInfo);
+        		    if (empty($newName)){
+        				Feedback::add($this->tr('blanknamenotallowed'));
+        				return false;
+        			}else if ($newName !== $existingAuthInfo['name']){
+        				$authInfo['username'] = $newName;
+        				unset($authInfo['name']);
+        			}
+        		}else{
+        			$newName = $existingAuthInfo['name'];
         		}
-        		if (empty($authInfo['password'])){
-        			$authInfo['password'] = $existingAuthInfo['password'];
+        	    if (isset($authInfo['password'])&& empty($authInfo['password'])){
+        			Feedback::add($this->tr('emptypasswordnotallowed'));
+        			return false;
         		}
-        		$configStore->insert($authInfo, ['table' => 'usersauth']);
-        	}else{
-        		$configStore->update($authInfo, ['table' => 'usersauth', 'where' => ['username' => $newName]]);
+        		if (isset($authInfo['targetdb'])){
+        			$targetDb = Utl::getItem('targetdb', $authInfo);
+        			if(empty($targetDb)){
+        			    $targetDb = Tfk::$registry->get('appConfig')->dataSource['dbname'];
+        			}
+        			$targetStore = new Store(array_merge(Tfk::$registry->get('appConfig')->dataSource, ['dbname' => $targetDb]));
+    				if (empty($targetStore->getOne(['table' => SUtl::$tukosTableName, 'where' => ['name' => $newName, 'object' => 'users'], 'cols' => ['name']]))){
+    					Feedback::add($this->tr('targetdbdoesnothaveusersitemforusername'));
+    					return false;
+    				}
+        		}
+        	    $configStore = Tfk::$registry->get('configStore');
+            	if (empty($configStore->getOne(['where' => ['username' => $existingAuthInfo['name']], 'table' => 'usersauth', 'cols' => ['username']]))){
+            		/*if (empty($authInfo['username'])){
+            			$authInfo['username'] = $existingAuthInfo['name'];
+            		}
+            		if (empty($authInfo['password'])){
+            			$authInfo['password'] = $existingAuthInfo['password'];
+            		}
+            		$configStore->insert($authInfo, ['table' => 'usersauth']);*/
+            	    Feedback::add($this->tr('existingusernotfoundintukosconfig.usersauth'));
+            	    return [];
+            	}else{
+            	    $configStore->update($authInfo, ['table' => 'usersauth', 'where' => ['username' => $existingAuthInfo['name']]]);
+            	}
+        		if (Utl::extractItem('password', $newValues, false)){
+        			Feedback::add($this->tr('passwordupdated'));
+        		}
+        		if (Utl::extractItem('targetdb', $newValues, false) !== false && $newValues['id'] === $this->user->id()){
+        			Feedback::add($this->tr('reauthenticatefornewtargetdb'));
+        		}
+        		$authUpdate = true;
         	}
-    		if (Utl::extractItem('password', $newValues, false)){
-    			Feedback::add($this->tr('passwordupdated'));
-    		}
-    		if (Utl::extractItem('targetdb', $newValues, false) !== false && $newValues['id'] === $this->user->id()){
-    			Feedback::add($this->tr('reauthenticatefornewtargetdb'));
-    		}
-    		$authUpdate = true;
-    	}
-    	$result = parent::updateOneExtended($newValues, $atts, $insertIfNoOld, $jsonFilter);
-    	if (!$result && $authUpdate){
-    		$result = ['id' => $newValues['id']];
-    	}else{
-    	    $this->processDropbox($newValues);
-    	}
-    	return $result;
+        	$result = parent::updateOneExtended($newValues, $atts, $insertIfNoOld, $jsonFilter);
+        	if (!$result && $authUpdate){
+        		$result = ['id' => $newValues['id']];
+        	}else{
+        	    $this->processDropbox($newValues);
+        	}
+        	return $result;
+        }
     }
     private function processDropbox($newValues){
         switch (Utl::getItem('dropboxbackofficeaccess', $newValues)){
