@@ -109,15 +109,15 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
             	var widget = self.getWidget(widgetName);
                 if (widget && widget.get('value')!== ''){
                     if (widget.onLoadDeferred){
-                        onLoadDeferredWidgets.push(widget.onLoadDeferred);
+                        onLoadDeferredWidgets.push(widget.onLoadDeferred.promise);
                     }
                     widget.set('value', '', false, '');// 4th argument is displayedValue, needed for ObjectSelect (or else a query to the server is made) & ObjectSelectMulti (or else previous displayedValue gets restored)
                 }
             });
             if (!utils.empty(onLoadDeferredWidgets)){
-                return all(onLoadDeferredWidgets, function(){
+                return all(onLoadDeferredWidgets);/*.then(function(){
                     return true;
-                });
+                });*/
             }else{
                 return true;
             }
@@ -130,7 +130,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
                     var widget = this.getWidget(widgetName);
                     if (widget){
                         if (widget.onLoadDeferred){
-                            onLoadDeferredWidgets.push(widget.onLoadDeferred);
+                            onLoadDeferredWidgets.push(widget.onLoadDeferred.promise);
                         }
                         var newAtt = data[att][widgetName] === null ? '' : data[att][widgetName],
                               oldAtt = widget.get(att),
@@ -145,9 +145,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
                 }
             }
             if (!utils.empty(onLoadDeferredWidgets)){
-                return all(onLoadDeferredWidgets, function(){
+                return all(onLoadDeferredWidgets);/*.then(function(){
                     return true;
-                });
+                });*/
             }else{
                 return true;
             }

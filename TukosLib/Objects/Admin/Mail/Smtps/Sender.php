@@ -24,7 +24,7 @@ class Sender{
         $strRawMessage = 
               "To: {$mailArgs['tos'][0]}\r\n"
             . "From: toto\r\n"
-            . "Subject:=?uft-8?B?" . base64_encode($mailArgs['subject']) . "?=\r\n"
+            . "Subject:=?utf-8?B?" . base64_encode($mailArgs['subject']) . "?=\r\n"
             //. "Subject:{$mailArgs['subject']}\r\n"
             . (isset($mailArgs['ccs']) ? "Cc: {$mailArgs['ccs'][0]}\r\n" : "")
             . "MIME-Version: 1.0\r\n";
@@ -47,7 +47,7 @@ class Sender{
         $strRawMessage .=
               "Content-Type: text/html; charset=utf-8\r\n"
             . "Content-Transfer-Encoding: quoted-printable\r\n\r\n"
-            . $mailArgs['body'] . "\r\n";
+            . quoted_printable_encode($mailArgs['body']) . "\r\n";
         try {
             $mime = rtrim(strtr(base64_encode($strRawMessage), '+/', '-_'), '=');
             $msg = new \Google_Service_Gmail_Message();

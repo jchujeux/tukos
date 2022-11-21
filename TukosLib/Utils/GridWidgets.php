@@ -164,7 +164,7 @@ trait  GridWidgets{
                 if (isset($atts['placeHolder'])){
                 		$atts['editorArgs']['placeHolder'] = Utl::extractItem('placeHolder', $atts);
                 }
-                $atts['editor'] = ($type === 'LazyEditor') ? (Tfk::$registry->isMobile ? 'MobileEditor' : ($lazyEditor ? 'LazyEditor' : 'Editor')) : $type;
+                $atts['editor'] = $type;
                 $atts['widgetType'] = $atts['editor'];
                 $atts['canEdit'] = (!empty($element['atts'][$mode]['canEdit']) ? $element['atts'][$mode]['canEdit'] : 'canEditRow');
             }

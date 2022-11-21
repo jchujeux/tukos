@@ -187,6 +187,9 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 		get: function(item){
             return this.cache[item];
         },
+        isRestrictedUser: function(){
+			return this.cache['userRights'] === 'RESTRICTEDUSER';
+		},
         set: function(item, value){
         	this.cache[item] = value;
         },

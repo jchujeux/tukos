@@ -133,7 +133,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
         _setValueAttr: function(value){
             var value = value || '', store = this.store, kwArgs = this.kwArgs || {query: {}}, colsToExclude = this.colsToExclude ? JSON.parse(this.colsToExclude) : [], series = value.resetSeries ? value.series : utils.mergeRecursive(this.series, value.series);
             this._set("value", value);
-            if (value != ''){
+            if (value && value.data){
                 store.setData(value.data);
                 this.sortedData = store.query(kwArgs.query, kwArgs);
                 this.onLoadDeferred.then(lang.hitch(this, function(){

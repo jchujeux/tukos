@@ -3,6 +3,7 @@ namespace TukosLib\Objects\Sports\Sessions;
 
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
+use TukosLib\Objects\Sports\Sports;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
@@ -12,7 +13,16 @@ class View extends AbstractView {
     
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Parent', 'Description');
+        $tr = $this->tr;
         $isMobile = Tfk::$registry->isMobile;
+        $leftRightTdStyle = [/*'whiteSpace' => 'nowrap', */'verticalAlign' => 'top', 'paddingTop' => '7px', 'fontSize' => 'smaller', 'fontFamily' => 'Arial, Helvetica, sans-serif', 'width' => '200px', 'wordWrap' => 'break-word'];
+        $gaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '',
+            'gradient' => [0, '#B22222', 0.5, '#FF8C00', 1, '#7FFFD4'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
+        $reversedGaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '',
+            'gradient' => [0, '#7FFFD4', 0.5, '#FF8C00', 1, '#B22222'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
+        $gaugeStyle = ['height' => '150px', 'width' => 'auto'];
+        $gaugeTableStyle = ['tableLayout' => 'fixed', 'width' => '100%'];
+        $gaugeDivStyle = ['width' => '100%'];
         $customDataWidgets = array_merge([
             'name'      => ['atts' => ['edit' =>  ['label' =>$this->tr('Theme'), 'style' => ['width' => '30em']]],],
             'parentid' => ['atts' => ['edit' =>  ['onChangeLocalAction' => ['sessionid' => ['localActionStatus' => $this->adjustSessionIdLocalAction('parentid')]]]]],
@@ -38,16 +48,30 @@ class View extends AbstractView {
             'warmup'    => ViewUtils::lazyEditor($this, 'warmup', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
             'mainactivity'    => ViewUtils::lazyEditor($this, 'mainactivity', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
             'warmdown'    => ViewUtils::lazyEditor($this, 'warmdown', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
-            'difficulty'     => ViewUtils::storeSelect('intensity', $this, 'Difficulty', [true, 'ucfirst', true, false]),
             'warmupdetails'    => ViewUtils::lazyEditor($this, 'warmupdetails', ['atts' => ['edit' => ['onDropMap' => ['column' => 'details']]]]),
             'mainactivitydetails'    => ViewUtils::lazyEditor($this, 'mainactivitydetails', ['atts' => ['edit' => ['onDropMap' => ['column' => 'details']]]]),
             'warmdowndetails'    => ViewUtils::lazyEditor($this, 'warmdowndetails', ['atts' => ['edit' => ['onDropMap' => ['column' => 'details']]]]),
             'googleid' => ViewUtils::textBox($this, 'Googleid'),
-            'mode' => ViewUtils::storeSelect('mode', $this, 'Mode', [true, 'ucfirst', false, false], ['atts' => ['edit' =>  ['onChangeLocalAction' => ['sessionid' => ['localActionStatus' => $this->adjustSessionIdLocalAction('mode')]]]]]),
-            'sensations' => ViewUtils::storeSelect('sensations', $this, 'sensations', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
-            'perceivedeffort' => ViewUtils::storeSelect('perceivedEffort', $this, 'Perceivedeffort', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
-            'mood' => ViewUtils::storeSelect('mood', $this, 'Mood', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
-            'athletecomments' => ViewUtils::textArea($this, 'AthleteComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
+            'mode' => ViewUtils::storeSelect('mode', $this, 'Mode', [true, 'ucfirst', false, false], ['atts' => ['edit' =>  ['onChangeLocalAction' => [
+                'sessionid' => ['localActionStatus' => $this->adjustSessionIdLocalAction('mode')],
+                'id' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => true], 'action' => $this->modeChangeLocalAction()]]/* if 'mode' rather than 'id' is replaced with cellChartChangeLocalAction in sptprograms*/
+            ]]]]),
+            'sensations' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
+                'label' => $tr('sensations'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr(Sports::$sensationsOptions[1]), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr(Sports::$sensationsOptions[10]),
+                    'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $gaugeAtts
+            ]]],
+            //'sensations' => ViewUtils::storeSelect('sensations', $this, 'sensations', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+            'perceivedeffort' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
+                'label' => $tr('Perceivedeffort'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr(Sports::$perceivedEffortOptions[1]), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr(Sports::$perceivedEffortOptions[10]),
+                    'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $gaugeAtts
+            ]]],
+            //'perceivedeffort' => ViewUtils::storeSelect('perceivedEffort', $this, 'Perceivedeffort', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+            'mood' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
+                'label' => $tr('Mood'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr(Sports::$moodOptions[1]), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr(Sports::$moodOptions[10]),
+                    'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $gaugeAtts
+            ]]],
+            //'mood' => ViewUtils::storeSelect('mood', $this, 'Mood', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+            'athletecomments' => ViewUtils::lazyEditor($this, 'AthleteComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
             'coachcomments' => ViewUtils::lazyEditor($this, 'CoachSessionComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
             'timemoving' => ViewUtils::minutesTextBox($this, 'Time Riding'),
             'avghr' => ViewUtils::numberTextBox($this,'Average Heart Rate', ['atts' => ['edit' => ['onChangeLocalAction' => ['trimpavghr' => ['localActionStatus' => $this->updatetrimpAvgHr()]]]]]),
@@ -92,6 +116,42 @@ if (parentid && startdate){
 return true;
 EOT
         ;        
+    }
+    function modeChangeLocalAction(){
+        $plannedCols = json_encode($this->model->plannedCols);
+        $performedCols = json_encode($this->model->performedCols);
+        return <<<EOT
+const form = sWidget.form;
+let plannedHiddenState, performedHiddenState;
+switch(newValue){
+    case 'planned': 
+        plannedHiddenState = false;
+        performedHiddenState = true;
+        break;
+    case 'performed':
+        plannedHiddenState = true;
+        performedHiddenState = false;
+        break;
+    default:
+        plannedHiddenState = false;
+        performedHiddenState = false;
+        break;
+};
+$plannedCols.forEach(function(col){
+    const widget = form.getWidget(col), userHidden = widget && wutils.customizedAttOf(widget, 'hidden');
+    if (userHidden === undefined){
+        widget && widget.set('hidden', plannedHiddenState);
+    }
+});
+$performedCols.forEach(function(col){
+    const widget = form.getWidget(col), userHidden = widget && wutils.customizedAttOf(widget, 'hidden');
+    if (userHidden === undefined){
+        widget && widget.set('hidden', performedHiddenState);
+    }
+});
+form.resize();
+EOT
+        ;
     }
     function updateTrimpAvgHr(){
         return <<<EOT

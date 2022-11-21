@@ -27,22 +27,37 @@ class Main{
             $user = Tfk::$registry->get('user');
             if ($user->setUser(['name' => $username])){/* so as $user has the proper rights and other initialization information*/
                 if ($request['controller'] === 'Page'){
-                    list($request, $query) = $user->getCustomTukosUrl($request, $query);
+                    if (!$user->isPageAllowed($request['object'])){
+                        $authentication->session->destroy();
+                        Feedback::add(Tfk::tr('accessdeniedtomodule') . ': ' . Tfk::tr($request['object']));
+                        $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
+                        $dialogue->sendResponse();
+                        return;
+                    }else{
+                        list($request, $query) = $user->getCustomTukosUrl($request, $query);
+                    }
+                }else{
+                    if ($request['controller'] === 'Dialogue' && !isset($_SERVER['HTTP_REFERER'])){
+                        Feedback::add(Tfk::tr('urlerror') . ': ' . $request['controller']);
+                        $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
+                        $dialogue->sendResponse();
+                        return;
+                    }
                 }
                 try{
-	                $controllerClass = 'TukosLib\\Controllers\\' . $request['controller'];
-	                $controller = new $controllerClass();
-	                if($controller->respond($request, $query)){
-	                    $dialogue->sendResponse();
-	                }
-	            }catch(\Exception $e){
-	                Feedback::add(Tfk::tr('errorrespondingrequest') . ': ' . $e->getMessage());
-	                $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
-	                $dialogue->sendResponse();
-	            }            
-	            if (Tfk::$registry->isInstantiated('streamsStore')){
-	                Tfk::$registry->get('streamsStore')->waitOnStreams();
-	            }
+                    $controllerClass = 'TukosLib\\Controllers\\' . $request['controller'];
+                    $controller = new $controllerClass();
+                    if($controller->respond($request, $query)){
+                        $dialogue->sendResponse();
+                    }
+                }catch(\Exception $e){
+                    Feedback::add(Tfk::tr('errorrespondingrequest') . ': ' . $e->getMessage());
+                    $dialogue->response->setContent(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(Feedback::get())));
+                    $dialogue->sendResponse();
+                }
+                if (Tfk::$registry->isInstantiated('streamsStore')){
+                    Tfk::$registry->get('streamsStore')->waitOnStreams();
+                }
             }else{
                 if (isset($authentication)){
                     $authentication->logoutUser($dialogue, 'usersitemdoesnotexistforusername');

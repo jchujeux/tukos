@@ -134,8 +134,8 @@ abstract class AbstractView extends ObjectTranslator{
     public function dataElts($viewMode='edit'){
         return array_values(array_diff(array_keys($this->dataWidgets), $this->_exceptionCols[$viewMode]));
     }
-    function allowedGetCols(){
-        return array_values(array_diff($this->model->allCols, $this->_exceptionCols['get']));
+    function allowedGetCols($ignoreExceptions = []){
+        return array_values(array_diff($this->model->allCols, array_diff($this->_exceptionCols['get'], $ignoreExceptions)));
     }
     function sendOnSave(){
     	return $this->sendOnSave;
@@ -148,7 +148,7 @@ abstract class AbstractView extends ObjectTranslator{
     }
     function gridCols(){// cols which are rendered on the overview grid & on subobjects grids
         return array_values(array_diff(
-            array_merge(['id', 'parentid', 'name'], $this->addedDataWidgetsElts, ['comments', 'permission', 'grade',  'contextid', 'updator', 'updated', 'creator', 'created'], (in_array('custom', $this->model->allCols) ? ['custom'] : []),
+            array_merge(['id', 'parentid', 'name'], $this->addedDataWidgetsElts, ['comments', 'permission', 'grade',  'contextid', 'updator', 'updated', 'creator', 'created', 'acl'], (in_array('custom', $this->model->allCols) ? ['custom'] : []),
                 isset($this->dataWidgets['configstatus']) ? ['configstatus'] : []), 
             $this->_exceptionCols['grid']
         ));

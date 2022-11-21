@@ -23,7 +23,7 @@ trait AuthorizeAndSynchronize {
             $logo = ($logo = Utl::getItem('logo', $organization)) ? HUtl::imageUrl($logo) : Tfk::$registry->logo;
             $name = Utl::getItem('name', $organization, 'tukos', 'tukos');
             $authUrlTag = '<a href=\"' .  Tfk::$registry->rootUrl . Tfk::$registry->appUrl . "Form/backoffice/Edit?object=sptathletes&form=StravaAuthorize&organization={$name}&peopleid={$query['athleteid']}&logo=$logo" .
-                "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared')) . '\">' .
+                "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared', true)) . '\">' .
                 '<center><div style=\"background-color: gainsboro; color: dodgerblue; font-size:32px; padding-bottom:10px; padding-top:10px; text-align:center; width: 300px;\">' . $this->tr("Gotoaccessauthorizationpage") . '</div></center></a>';
             $translatorsStore = Tfk::$registry->get('translatorsStore');
             $authUrlTag = json_decode($translatorsStore->substituteTranslations(json_encode($authUrlTag)));

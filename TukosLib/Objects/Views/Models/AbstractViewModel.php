@@ -34,7 +34,7 @@ abstract class AbstractViewModel/* extends ModelsAndViews*/{
         return $this->modelToView($this->model->initializeExtended($init), $modelToView, false);
     }
     public function duplicate($id, $modelToView){
-        return $this->modelToView($this->model->duplicateOneExtended($id, array_merge($this->view->allowedGetCols(), ['custom']), $this->view->jsonColsPathsView), $modelToView, false);
+        return $this->modelToView($this->model->duplicateOneExtended($id, $this->view->allowedGetCols(['custom']), $this->view->jsonColsPathsView), $modelToView, false);
     }
 
     public function adjustedCols($colsRequired){

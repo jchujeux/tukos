@@ -10,16 +10,18 @@ class Client {
 			self::$client->setApplicationName('tukos');
 			if (is_null($jsonCredentials)){
 			    self::$client->useApplicationDefaultCredentials();
+			    self::$client->setScopes([
+			        'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.readonly',
+			        'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.readonly',
+			        'https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/spreadsheets.readonly',
+			        'https://www.googleapis.com/auth/script.projects', 'https://www.googleapis.com/auth/script.projects.readonly'
+			    ]);
 			}else{
 			    self::$client->setAuthConfig($jsonCredentials);
+			    self::$client->setScopes([
+			        'https://www.googleapis.com/auth/gmail', 'https://www.googleapis.com/auth/gmail.send'
+			    ]);
 			}
-			self::$client->setScopes([
-				'https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.readonly', 
-				'https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/drive.readonly', 
-			    'https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/spreadsheets.readonly',
-			    'https://www.googleapis.com/auth/script.projects', 'https://www.googleapis.com/auth/script.projects.readonly',
-			    'https://www.googleapis.com/auth/gmail', 'https://www.googleapis.com/auth/gmail.send'
-			]);
 		}
 		return self::$client;
     }

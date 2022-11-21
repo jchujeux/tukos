@@ -168,7 +168,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 }
                 if (isUserEdit || this.isUserEdit){
                 	if (this.onChangeNotify){
-                		var item = lang.mixin(lang.clone(this.dirty[idPropertyValue]), utils.newObj([[idp, idPropertyValue], [connectedIds, collection.getSync(idPropertyValue).connectedIds]]));
+                		var item = lang.mixin(lang.clone(this.dirty[idPropertyValue]), utils.newObj([[idp, idPropertyValue], ['connectedIds', collection.getSync(idPropertyValue).connectedIds]]));
                     	this.notifyWidgets({action: 'update',  item: item, sourceWidget: this});            		
                 	}
                     if (this.columns[field]){

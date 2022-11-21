@@ -1,5 +1,5 @@
 <?php 
-namespace TukosWoundTrack; 
+namespace TukosTrainingPlans; 
 
 use Aura\Session\Manager as SessionManager;
 use Aura\Session\SegmentFactory;
@@ -56,11 +56,11 @@ class Configure{
         $isMobile = Tfk::$registry->isMobile;
         $notMobile = $isMobile ? 'no' : 'yes';
         $queryId = Utl::getItem('id', $query, '""');
-        $this->modulesMenuLayout = ['$physiogametracks' => []];
+        $this->modulesMenuLayout = ['$sptprograms' => []];
         $this->transverseModules = [];
         $this->objectModulesDefaultContextName = ['tukos' => 'tukos', 'customviews' => 'tukos'];
         $this->setobjectModulesDefaultContextName($this->modulesMenuLayout);
-        $this->objectModules = array_merge(array_keys($this->objectModulesDefaultContextName), ['users', 'people', 'organizations', 'physiopatients']);
+        $this->objectModules = array_merge(array_keys($this->objectModulesDefaultContextName), ['users', 'people', 'organizations', 'sptathletes']);
         
         $this->mailConfig = ['host' => 'localhost', 'software' => 'Mercury'];
         
