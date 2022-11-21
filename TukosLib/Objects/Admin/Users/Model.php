@@ -55,7 +55,7 @@ class Model extends AbstractModel{
     }    
     public function getOneExtended ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
     	$result = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
-    	if ($result['grade'] === 'TEMPLATE'){
+    	if (Utl::getItem('grade', $result) === 'TEMPLATE'){
     	    return $result;
     	}else{
     	    $result['targetdb'] = Tfk::$registry->get('configStore')->getOne(['where' => ['username' => $result['name']], 'table' => 'usersauth', 'cols' => ['targetdb']])['targetdb'];

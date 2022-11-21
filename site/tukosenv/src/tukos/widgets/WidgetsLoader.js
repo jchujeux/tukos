@@ -15,7 +15,7 @@ define (["dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "tukos/PageManag
                 widgetsHider: "tukos/widgets/", HorizontalLinearGauge: "tukos/widgets/dgauges/", ABCTriangle: "tukos/widgets/",
                 ObjectEditor: "tukos/widgets/", HtmlContent: "tukos/widgets/", StoreComboBox: "tukos/", TukosTextarea: "tukos/widgets/", ColorButton: "tukos/widgets/", ComboBox: "dijit/form/", TukosTooltipDialog: "tukos/", TukosPane: "tukos/",
                 MobileTextBox: "tukos/mobile/TukosTextarea*", MobileButton: "dojox/mobile/Button*",
-                MobileFormattedTextBox: "tukos/mobile/FormattedTextBox*", MobileEditor: "tukos/mobile/Editor*", MobileLazyEditor: "tukos/mobile/LazyEditor*", MobileObjectReset: "tukos/mobile/ObjectAction*",
+                MobileFormattedTextBox: "tukos/mobile/FormattedTextBox*", SimpleEditor: "tukos/mobile/Editor*", MobileEditor: "tukos/mobile/Editor*", MobileLazyEditor: "tukos/mobile/LazyEditor*", MobileObjectReset: "tukos/mobile/ObjectAction*",
                 MobileObjectAction: "tukos/mobile/ObjectAction*", MobileOverviewGrid: "tukos/mobile/OverviewGrid*", MobileOverviewAction: "tukos/mobile/OverviewAction*", MobileStoreSelect: "tukos/mobile/StoreSelect*",
                 MobileSliderSelect: "tukos/mobile/SliderSelect*", MobileTimePicker: "tukos/mobile/TimePicker*", MobileNumberBox: "tukos/mobile/DecimalNumberPicker*", MobileStoreCalendar: "tukos/mobile/StoreCalendar,*"/*, TukosCheckBox: "tukos/Widgets/Checkbox*"*/,
 				MobileTukosPane: "tukos/mobile/TukosPane*", MobileAccordionGrid: "tukos/mobile/AccordionGrid*", DecimalNumberPicker: "tukos/mobile/DecimalNumberPicker*"

@@ -33,7 +33,7 @@ class Page extends Translator{
         $pageCustom = $this->user->pageCustomization();
         $panesCustomization = isset($pageCustom['panesConfig']) ? Utl::toAssociative($pageCustom['panesConfig'], 'name') : [];
         foreach ($appConfig->accordion as $configRequest){
-            if ($this->user->isAllowed($configRequest['object'], [])){
+            if ($this->user->isAllowed($configRequest['object'], [], $request)){
                 if (($view = $configRequest['view']) === 'Edit' || $view === 'Overview'){
                     $description = ['formContent' => ['object' => $configRequest['object'], 'viewMode' => $view, 'paneMode' => 'accordion', 'action' => 'Tab']];
                 }else{

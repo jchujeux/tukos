@@ -25,7 +25,6 @@ class Model extends AbstractModel {
             'warmdown'     =>  'longtext',
         	'sessionid' => 'VARCHAR(10) DEFAULT NULL',
         	'sportsman' => 'INT(11) DEFAULT NULL', 
-        	'difficulty' => 'VARCHAR(10) DEFAULT NULL',
         	'warmupdetails' =>  'longtext DEFAULT NULL',
             'mainactivitydetails' =>  'longtext DEFAULT NULL',
             'warmdowndetails'     =>  'longtext DEFAULT NULL',
@@ -64,6 +63,9 @@ class Model extends AbstractModel {
             'velocity_smoothstream' => 'longtext',
             'kpiscache' => 'longtext'
         ];
+        $this->performedCols = ['sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'mechload', 'h4time', 'h5time'];
+        $this->plannedCols = ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'warmupdetails', 'mainactivitydetails'];
+        
         $this->streamCols = ['timestream', 'distancestream', 'altitudestream', 'heartratestream', 'cadencestream', 'wattsstream', 'grade_smoothstream', 'velocity_smoothstream'];
         parent::__construct(
             $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], ['kpiscache'], $colsDefinition);

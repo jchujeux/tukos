@@ -42,6 +42,7 @@ class Registry{
         $this->loader->add('ManuelLemos\\', Tfk::$phpVendorDir);
         $this->loader->add('Html2Text\\'  , Tfk::$phpVendorDir);        
         $this->loader->add('Dropbox\\', Tfk::$vendorDir['Dropbox']);
+        $this->isRestrictedUser = false;
     }
 
     protected function setHttpServices(){
@@ -85,7 +86,8 @@ class Registry{
         $this->headerBanner = ['tukos' => 'headerBanner', 'tds' => 'tdsHeaderBanner'][$this->organization];
     }        
     public function setAppName($appName){
-        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus', 'tukosblog' => 'TukosBlog', 'tukosmsqr' => 'TukosMSQR', 'tukoswoundtrack' => 'TukosWoundTrack'][strtolower($appName)];
+        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus', 'tukosblog' => 'TukosBlog', 'tukosmsqr' => 'TukosMSQR', 'tukoswoundtrack' => 'TukosWoundTrack',
+            'tukostrainingplans' => 'TukosTrainingPlans'][strtolower($appName)];
     }
     public function set($service, $serviceObject){
         return $this->container->set($service, $serviceObject);

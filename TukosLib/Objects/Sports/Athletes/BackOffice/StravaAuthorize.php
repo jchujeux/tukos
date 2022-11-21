@@ -69,7 +69,10 @@ class StravaAuthorize extends ObjectTranslator{
         }
         else if ($code = Utl::getItem('code', $query)){
             $token = $oauth->getAccessToken('authorization_code', ['code' => $code]);
-            $this->athletesModel->updateItems(['stravainfo' => json_encode(['access_token' => $token->getToken(), 'refresh_token' => $token->getRefreshToken(), 'expires' => $token->getExpires()])], ['table' => 'people', 'where' => ['id' => $query['peopleid']]]);
+            $count = $this->athletesModel->updateItems(['stravainfo' => json_encode(['access_token' => $token->getToken(), 'refresh_token' => $token->getRefreshToken(), 'expires' => $token->getExpires()])], ['table' => 'people', 'where' => ['id' => $query['peopleid']]]);
+            if ($count === 0){
+                return ['authenticationmessage' => $this->tr('StravaAuthenticationproblem')];
+            }
             return ['authenticationmessage' => $this->tr('StravaAuthenticationthankyou', [['substitute', ['organization' => $query['organization']]]]) .'<center><img alt="logo" src="' . $query['logo'] . '" style="width: 300px; height: auto;"></center>'];
         }else{
             return ['authenticationmessage' => $this->tr('stravaauthenticationask', [['substitute', ['organization' => "<b>{$query['organization']}</b>"]]]) . '<center><a href="'. ($oauth->getAuthorizationUrl(['scope' => ['read', 'activity:read', 'activity:read_all']])) .

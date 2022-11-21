@@ -65,6 +65,7 @@ class UserInformation{
             Tfk::setEnvironment($this->userInfo['environment']);
             Tfk::setTranslator($this->language);
             $this->contextModel = $this->objectsStore->objectModel('contexts', null);/* here and not in __construct  as else creates infinite loop recursion */
+            Tfk::$registry->isRestrictedUser = $this->userInfo['rights'] === 'RESTRICTEDUSER';
             return true;
         }catch(\Exception $e){
             //Tfk::debug_mode('log', Tfk::tr('errorgettinguserinformation'), $e->getMessage());
@@ -120,17 +121,23 @@ class UserInformation{
     public function isSuperAdmin(){
         return $this->rights() === 'SUPERADMIN';
     }
+    public function isRestrictedUser(){
+        return $this->rights() === 'RESTRICTEDUSER';
+    }
     public function allowedModules(){
         return $this->allowedModules;
     }
     public function allowedNativeObjects(){
         return array_intersect($this->allowedModules, directory::getNativeObjs());
     }
+    public function isPageAllowed($module){
+        return in_array($module, $this->allowedModules);
+    }
     public function isAllowed($module, $query){
         if ($module === 'users' && isset($query['id']) && $query['id'] === $this->id()){
             return true;
         }else{
-            return in_array($module, $this->allowedModules);
+            return in_array($module, $this->allowedModules) || $this->isRestricted($module);
         }
     }
     public function isRestricted($module){
@@ -186,9 +193,21 @@ class UserInformation{
             case 'RESTRICTEDUSER':
                 $permissions = empty($objectName) || !$this->isRestricted($objectName) ?  ['RL', 'RO', 'PU'] : ['PU'];
                 $where[] = [
-                     [
-                         [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => $permissions], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
-                         [['col' => $this->fullColName('updator'), 'opr' => 'LIKE', 'values' => $this->id()],[['col' => $this->fullColName('creator'), 'opr' => 'LIKE', 'values' => $this->id()],['col' => $aclName, 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']], 'or' => true], 'or' => true
+                    [
+                        [
+                            [
+                                ['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => $permissions],
+                                [['col' => $this->fullColName('grade'), 'opr' => 'LIKE', 'values' => 'TEMPLATE'], ['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RL','RO','PU']]],
+                                'or' => true
+                            ],
+                            ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']
+                            
+                        ],
+                        [
+                            ['col' => $this->fullColName('updator'), 'opr' => 'LIKE', 'values' => $this->id()],
+                            [['col' => $this->fullColName('creator'), 'opr' => 'LIKE', 'values' => $this->id()],['col' => $aclName, 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
+                            'or' => true
+                        ], 'or' => true
                     ],
                     ['col' => $aclName, 'opr' => 'RLIKE', 'values' => $this->id() . '","permission":"[123]"', 'or' => true]
                 ];
@@ -197,7 +216,7 @@ class UserInformation{
         return $where;  
     }
     function filterReadonly($where, $objectName = ''){
-        switch($rights = $this->rights()){
+        switch($this->rights()){
             case "SUPERADMIN":
                 break;
             case 'RESTRICTEDUSER':
@@ -242,9 +261,12 @@ class UserInformation{
     public function aclRights ($userId, $acl){
         if (!empty($acl)){
             $rights = false;
+            if (is_string($acl)){
+                $acl = json_decode($acl, true);
+            }
             foreach ($acl as $rule){
-                if ($rule['userid'] == $userId){
-                    $rights = $rights = Utl::getItem('permission', $rule, false);
+                if (Utl::getItem('userid', $rule) == $userId){
+                    $rights = Utl::getItem('permission', $rule, false);
                     break;
                 }
             }

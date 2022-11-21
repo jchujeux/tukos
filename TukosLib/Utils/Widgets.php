@@ -142,6 +142,9 @@ class Widgets{
     		'storeedit' => ['editOn'  => 'click', 'minWidth' => 200],
     	    'overview' => ['minWidth' => 150]
     	];
+    	if (Tfk::$registry->isRestrictedUser){
+    	    $defAtts['edit']['editorType'] = 'simple';
+    	}
     	return ['type' =>'LazyEditor', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
     public static function lazyWidget($atts, $editOnly = true){

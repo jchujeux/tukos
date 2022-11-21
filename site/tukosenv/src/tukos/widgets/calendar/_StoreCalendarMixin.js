@@ -1,6 +1,6 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/store/Memory",  "dojo/store/Observable", "tukos/widgets/calendar/DnD", 
-         "tukos/utils", "tukos/dateutils", "tukos/menuUtils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-    function(declare, lang, Memory, Observable, DnD, utils, dutils, mutils, Pmg, messages){
+         "tukos/utils", "tukos/dateutils", "tukos/menuUtils", "tukos/PageManager"], 
+    function(declare, lang, Memory, Observable, DnD, utils, dutils, mutils, Pmg){
     return declare([DnD], {
         constructor: function(args){
             args.store=  Observable(new Memory({}));
@@ -24,15 +24,14 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/store/Memory",  "dojo/st
                 grid.selectRow(e.item.connectedIds ? e.item.connectedIds[this.gridWidget] : e.item[grid.store.idProperty]);//idProperty to support legacy
             });
         	this.on('itemContextMenu', function(evt){
-                var self = this;
-        		mutils.setContextMenuItems(this, [
-                	{atts: {label: messages.editinnewtab, onClick: lang.hitch(this, this.editInTab)}},
-                    {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editSelectedItem)}},
-                    {atts: {label: messages.duplicateitem, onClick: lang.hitch(this, this.duplicateSelectedItem)}},
-                    {atts: {label: messages.deleteitem, onClick: lang.hitch(this, this.deleteSelectedItem)}},
-                    {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [
-                        {atts: {label: messages.deleteitems,   onClick: lang.hitch(this, this.deleteSelectedItems)}}
-                ]}}]);
+                const self = this, isRestricted = Pmg.isRestrictedUser();
+        		mutils.setContextMenuItems(this, (isRestricted ? [] : [{atts: {label: Pmg.message('editinnewtab'), onClick: lang.hitch(this, this.editInTab)}}]).concat([
+                    {atts: {label: isRestricted ? Pmg.message('edit') : Pmg.message('editinpopup'), onClick: lang.hitch(this, this.editSelectedItem)}},
+                    {atts: {label: isRestricted ? Pmg.message('duplicate') : Pmg.message('duplicateitem'), onClick: lang.hitch(this, this.duplicateSelectedItem)}},
+                    {atts: {label: isRestricted ? Pmg.message('delete') : Pmg.message('deleteitem'), onClick: lang.hitch(this, this.deleteSelectedItem)}}],
+                    isRestricted ? [] : [{type: 'PopupMenuItem', atts: {label: Pmg.message('forselection')}, popup: {type: 'DropDownMenu', items: [
+                        {atts: {label: Pmg.message('deleteitems'),   onClick: lang.hitch(this, this.deleteSelectedItems)}}
+                ]}}]));
         		setTimeout(function(){self.contextMenu.menu.items = self.contextMenu.description.items;}, 100);
         	});
             this.nextItemId = 0;

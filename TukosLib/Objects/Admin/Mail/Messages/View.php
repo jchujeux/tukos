@@ -107,7 +107,7 @@ class View extends AbstractView {
         $this->customize([], $subObjects);
     }    
 
-    function allowedGetCols(){
+    function allowedGetCols($ignoreExceptions=[]){
         return ['id', 'parentid', 'mailboxname', 'name', 'from', 'to', 'date', 'size', 'uid', 'msgno', 'recent', 'flagged', 'answered', 'deleted', 'seen', 'draft', 'udate', 'body'];
     }                            
 

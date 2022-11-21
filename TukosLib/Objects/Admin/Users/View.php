@@ -7,16 +7,15 @@ namespace TukosLib\Objects\Admin\Users;
 
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
-use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Objects\Directory;
 use TukosLib\Utils\Widgets;
-use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
         $utl = 'TukosLib\Utils\Utilities';
         parent::__construct($objectName, $translator, 'Associated People', 'Username');
-        $modules = Tfk::$registry->get('appConfig')->objectModules;
+        $modules = Directory::getObjs();
         $moduleOptions = [];
         foreach ($modules as $module){
             $moduleOptions[$module] = $this->tr($module);

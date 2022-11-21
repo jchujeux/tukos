@@ -64,7 +64,7 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                 }
                 if (form.watchOnChange){
                     form.mayNeedResize = form.mayNeedResize || false;
-                    if (attr === 'value' && form.watchContext === 'user'){
+                    if (attr === 'value'/* && form.watchContext === 'user'*/){
                         if (widget.onChangeServerAction && !widget.inOnChangeServerAction){
                             form.widgetChangeServerDialog(widget);
                         }
@@ -169,7 +169,11 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
         	utils.forEach(data, lang.hitch(this, function(value, name){
         		this.setValueOf(name, value);
         	}));
-        }
+        },
+        customizedAttOf: function(widget, attName){
+			 const customizedAtt = lang.getObject('customization.widgetsDescription.' + (widget.form.widgetsHiderArgs && widget.form.widgetsHiderArgs.dialogPath || '') + widget.widgetName + '.atts.' + attName, false, widget.form.form || widget.form)
+			 return customizedAtt === undefined ? widget.form.widgetsDescription[widget.widgetName].atts.hidden : customizedAtt;
+		}
     }
 
 });

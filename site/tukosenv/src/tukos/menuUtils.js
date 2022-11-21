@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "dijit/Menu", "tukos/widgets/WidgetsLoader", "tukos/utils", "tukos/PageManager"], 
-function(declare, lang, Deferred, when, Menu, widgetsLoader, utils, Pmg){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "dijit/Menu", "dijit/PopupMenuItem", "tukos/widgets/WidgetsLoader", "tukos/utils", "tukos/PageManager"], 
+function(declare, lang, Deferred, when, Menu, PopupMenuItem, widgetsLoader, utils, Pmg){
 	var buildMenu = function(description, mode, theMenu, addTriggers, addContext){
 	    	var type = description.type || 'Menu', atts = description.atts, items = description.items,
 				setTriggers = function(widget){

@@ -9,7 +9,9 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         	for (var i in args.columns){
                 this.setColArgsFunctions(args.columns[i]);
             }
-            this.contextMenuItems = {
+            this.contextMenuItems = Pmg.isRestrictedUser() 
+            ? {row: [], idCol: [], header: []}
+            : {
                     row: [
                         {atts: {label: Pmg.message('togglerowheight'), onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}, 
                         {atts: {label: Pmg.message('viewcellindialog'), onClick: lang.hitch(this, function(evt){this.viewCellInPopUpDialog(this);})}},
@@ -177,7 +179,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         renderGauge: function(object, value, node){
 			console.log('renderGauge: ' + value);
 			const pValue = value ? JSON.parse(value) : value;
-			return this.grid._renderContent(this, object, node, typeof pValue === 'object' ? (pValue.gauge ? pValue.gauge.toString() : '') : (pValue ? pValue.toString() : ''));
+			return this.grid._renderContent(this, object, node, (pValue && typeof pValue === 'object') ? (pValue.gauge ? pValue.gauge.toString() : '') : (pValue ? pValue.toString() : ''));
 		},
         renderContent: function(object, value, node, options, noCreate){
             var grid = this.grid, row = grid.row(object), idp = grid.collection.idProperty, args = {object: object, value: sutils.evalFormula(grid, value, this.field, row.data[idp])}, result;
@@ -350,7 +352,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 			if (colItems !== 'header' && menuItems.canEdit && row.data.canEdit !== false){
             	menuItems[colItems] = menuItems[colItems].concat(menuItems.canEdit);
             }
-            let isRestricted = Pmg.get('userRights') === 'RESTRICTEDUSER', menuColItems = menuItems[colItems];
+            let isRestricted = Pmg.isRestrictedUser(), menuColItems = menuItems[colItems];
 			if (this.customContextMenuItems){
 				menuColItems = (menuColItems || []).concat(this.customContextMenuItems());
 			}                

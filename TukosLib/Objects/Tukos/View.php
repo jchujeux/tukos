@@ -23,8 +23,8 @@ class View extends AbstractView {
     function gridCols(){
     	return array_merge(parent::gridCols(), ['object']);
     }
-    function allowedGetCols(){
-    	return array_merge(parent::allowedGetCols(), ['object']);
+    function allowedGetCols($ignoreExceptions = []){
+    	return array_merge(parent::allowedGetCols($ignoreExceptions), ['object']);
     }
 }
 ?>

@@ -46,14 +46,18 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
             return fromDateString;
         },
         dateString: function(fromDate, duration, toDate, correction){
-            var fromDateObject = (typeof fromDate === 'string' ? this.parseDate(fromDate) : fromDate);
-            var durationArray = (typeof duration === 'string' ? JSON.parse(duration) : duration);
-            if (fromDateObject && durationArray && durationArray[0] && durationArray[1]){
-                var newToDateObject = (correction ? new Date(dojo.date.add(fromDateObject, durationArray[1], durationArray[0]).getTime() - 1) : dojo.date.add(fromDateObject, durationArray[1], durationArray[0]));
-                return this.formatDate(newToDateObject);
-            }else{
-                return toDate || fromDate;
-            }
+            if (duration){
+	            var fromDateObject = (typeof fromDate === 'string' ? this.parseDate(fromDate) : fromDate);
+	            var durationArray = (typeof duration === 'string' ? JSON.parse(duration) : duration);
+	            if (fromDateObject && durationArray && durationArray[0] && durationArray[1]){
+	                var newToDateObject = (correction ? new Date(dojo.date.add(fromDateObject, durationArray[1], parseInt(durationArray[0])).getTime() - 1) : dojo.date.add(fromDateObject, durationArray[1], durationArray[0]));
+	                return this.formatDate(newToDateObject);
+	            }else{
+	                return toDate || fromDate;
+	            }
+			}else{
+				return fromDate;
+			}
         },
         addDurationString: function(durationString, toDate, format){
             if (durationString){

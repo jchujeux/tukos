@@ -174,7 +174,8 @@ define([
         },
         resize: function resize(){
 			this.inherited(resize, arguments);
-			this.gauge.resize();
+			const gauge = this.gauge;
+			setTimeout(function(){gauge.resize()}, 0);//setTimeout or else when used in a TukosTooltipDialog, closed then open again, has the wrong size
 		},
          setStyleToUnchanged: function(){
             this.set('style', {backgroundColor: ''});

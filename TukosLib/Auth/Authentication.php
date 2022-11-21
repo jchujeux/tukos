@@ -66,7 +66,6 @@ class Authentication{
                     }
                     return false;
                 }else{
-                    $this->session->commit();
                     if (isset($segment->targetDb)){
                         Tfk::$registry->get('appConfig')->dataSource['dbname'] = $segment->targetDb;
                     }

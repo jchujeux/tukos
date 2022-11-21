@@ -260,11 +260,11 @@ EOT
             $this->actionLayout['contents']);
 	}
 	public function viewModeOptionOpenAction(){
-	    $performedColumns = json_encode(['sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'mechload', 'h4time', 'h5time']);
+	    $performedColumns = json_encode(['sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'mechload', 'h4time', 'h5time','stravaid']);
 	    return <<<EOT
 var form = this;
 require (["tukos/objects/sports/programs/LocalActions"], function(LocalActions){
-    form.localActions = new LocalActions({form: form, plannedColumns: ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails'], performedColumns: {$performedColumns}});
+    form.localActions = new LocalActions({form: form, plannedColumns: ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'warmupdetails', 'mainactivitydetails'], performedColumns: {$performedColumns}});
     if (form.viewModeOption){
         form.getWidget(form.viewModeOption).set('checked', true);
         form.localActions.viewModeOption(form.viewModeOption);

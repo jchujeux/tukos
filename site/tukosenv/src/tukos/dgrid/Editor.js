@@ -47,7 +47,7 @@ define([
 			return this._editorInstances;
 		},
 		_loadAndCreateSharedEditor: function(col, editor){
-			return when(WidgetsLoader.loadWidget(editor), lang.hitch(this, function(editor){
+			return when(WidgetsLoader.loadWidget(editor === 'LazyEditor' ? 'SimpleEditor' : editor), lang.hitch(this, function(editor){
 				col.column.editor = editor;
 				return this._createSharedEditor(col.column, col.originalRenderCell);
 			}));

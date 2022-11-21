@@ -42,7 +42,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all",  "dojo/has
 	                    self.decorate(widget);
 	                 });
                 }else{
-                	Pmg.addFeedback('no widgetDescription for widget: ' + widgetName);
+                	//Pmg.addFeedback('no widgetDescription for widget: ' + widgetName);
                 }
             }
             if (! utils.empty(instantiatingWidgets)){

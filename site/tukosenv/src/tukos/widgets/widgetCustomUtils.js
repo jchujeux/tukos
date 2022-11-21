@@ -74,7 +74,9 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
     	},
     	idColsContextMenuItems: function(widget){
     		var self = this;
-    		if (Pmg.mayHaveNavigator()){
+    		if (Pmg.isRestrictedUser()){
+				return {};
+    		}else if (Pmg.mayHaveNavigator()){
     			return [{atts: {label: messages.editinnewtab  , onClick: function(evt){self.editInNewTab(widget)}}}, {atts: {label: messages.showinnavigator, onClick: function(evt){self.showInNavigator(widget)}}}];
     		}else{
     			return [{atts: {label: messages.editinnewtab  , onClick: function(evt){self.editInNewTab(widget)}}}];

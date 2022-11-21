@@ -2,6 +2,7 @@
 namespace TukosLib\Objects\Sports\Programs;
 
 use TukosLib\Objects\AbstractView;
+use TukosLib\Objects\Sports\Sessions\Views\Edit\View as SessionsEditView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Objects\Sports\Sports;
 use TukosLib\Objects\Sports\GoldenCheetah as GC;
@@ -81,7 +82,7 @@ class View extends AbstractView {
                 'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekperformedloadchart')]],
                 'synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $this->synchroStartLocalAction('newValue', '#synchnextmonday'),]],
                 'weeklies' => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter'),
-                'displayeddate' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => "sWidget.form.kpiChartUtils.setDisplayedDateChartsValue();"]]
+                'displayeddate' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => "sWidget.form.kpiChartUtils && sWidget.form.kpiChartUtils.setDisplayedDateChartsValue();"]]
             ];
         };
         $loadChartCustomization = function($idProperty, $idPropertyStoreData, $colsToExcludeOptions) use ($tr) {
@@ -151,7 +152,7 @@ class View extends AbstractView {
 		    ]]];
 		};
 		$customDataWidgets = [
-		    'parentid' => ['atts' => ['edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['sportsmanemail' => ['value' => "return sWidget.getItemProperty('email');"]]]]],
+		    'parentid' => ['atts' => ['edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['sportsmanemail' => ['value' => "return sWidget.getItemProperty('email');"], 'parentid' => ['localActionStatus' => $this->relatedSportsmanAction()]]]]],
 		    'comments' => ['atts' => ['edit' => ['height' => 'auto']]],
 		    'coach' => ViewUtils::objectSelect($this, 'Coach', 'people', ['atts' => [
 		        'edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['coachemail' => ['value' => "return sWidget.getItemProperty('email');"]]],
@@ -221,7 +222,7 @@ class View extends AbstractView {
 			    'atts' => ['edit' => [
 			        //'date' => date('Y-m-d', strtotime('next monday')),
 			        'columnViewProps' => ['minHours' => 0, 'maxHours' => 4],
-					'style' => ['height' => '350px', 'width' => '700px'], 
+					'style' => ['height' => '300px', 'width' => '700px'], 
 					'timeMode' => 'duration', 'durationFormat' => 'time', 'moveEnabled' => true,
 					'customization' => ['items' => [
 						 'style' => ['backgroundColor' => ['field' => 'intensity', 'map' => Sports::$intensityColorsMap, 'defaultValue' => 'Peru'], 
@@ -274,7 +275,7 @@ class View extends AbstractView {
 			'sptsessions' => [
 				'atts' => [
 				    'title' => $this->tr('Sessions'), 'allDescendants' => true, 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'startdate',
-				        'endDateTimeCol' => 'startdate', 'freezeWidth' => true, 'minWidth' => '60',
+				        'endDateTimeCol' => 'startdate'/*, 'freezeWidth' => true*/, 'minWidth' => '50',
 					'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
 					'onChangeNotify' => [
 						'calendar' => [
@@ -322,26 +323,27 @@ class View extends AbstractView {
 				        //'deleteRow' => $this->beforeRowChange('delete')
 	               ],
 				    'noCopyCols' => ['googleid'],
+				    'editActionLayout' => SessionsEditView::editDialogLayout(),
 				],
 				'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], 
 				    [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
-                 'removeCols' => ['sportsman','grade', 'configstatus', 'acl'],
-			    'hiddenCols' => ['parentid', 'stress', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
+			    'removeCols' => $this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] : ['sportsman','grade', 'configstatus'],
+			    'hiddenCols' => ['parentid', 'stress', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
 			        'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
 			],
 
 			'templates' => [
-				'object' => 'sptsessions',
+			    'object' => 'sptsessions',
 				'atts' => [
-					'title' => $this->tr('sessionstemplates'),/* 'storeType' => 'LazyMemoryTreeObjects', */
-					'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], 'freezeWidth' => true, 'minGridWidth' => '300'
+					'title' => $this->tr('sessionstemplates'),
+					'dndParams' => [ 'copyOnly' => true, 'selfAccept' => false], /*'freezeWidth' => true, 'minGridWidth' => '600', 'width' => 600,*/
 				],
 				'filters' => ['grade' => 'TEMPLATE'],
 			    'removeCols' => ['sportsman', 'sessionid', 'googleid', 'mode', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time', 'grade', 'configstatus', 'acl'],
-			    'hiddenCols' => ['parentid', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'warmdown', 'difficulty', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'distance', 'equivalentDistance', 'elevationgain', 'comments', 'contextid', 'updated'],
+			    'hiddenCols' => ['parentid', 'startdate', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'warmdown', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'distance', 'equivalentDistance', 'elevationgain', 'comments', 'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'], // temporary: these were suppressed but maybe present in some customization items
-			    'allDescendants' => true, // 'hasChildrenOnly',
+			    'allDescendants' => true// 'hasChildrenOnly',
 			],
 
 			'warmup' => [
@@ -370,6 +372,27 @@ class View extends AbstractView {
 		    'get' => ['displayeddate', 'loadchart', 'performedloachart', 'weekloadchart', 'weekperformedloadchart'],
 		    'post' => ['displayeddate', 'loadchart', 'performedloadchart', 'weekloadchart', 'weekperformedloadchart', 'synchrostart', 'synchroend']], ['weeklies' => []]);
 	}
+	public static function relatedSportsmanAction(){
+	    return <<<EOT
+const form = sWidget.form, acl = form.getWidget('acl');
+;
+if (newValue){
+    Pmg.serverDialog({object: 'sptathletes', view: 'Edit', action: 'GetItem', query: {id: newValue, storeatts: JSON.stringify({cols: ['id']})}}).then(
+        function(response){
+        	return Pmg.serverDialog({object: 'users', view: 'Edit', action: 'GetItem', query: {parentid: response.data.value.id, storeatts: JSON.stringify({cols: []})}}).then(
+            	function (response){
+                    acl.set('value', '');
+                    acl.addRow(null, {rowId:1,userid: response.data.value.id,permission:"2"});
+    			}
+    		);
+        }
+    );
+}else{
+    acl.deleteRows(acl.store.fetchSync(), true);
+}
+return true;
+EOT;
+	}
 	function sptSessionsTsbAction(){
 	    return <<<EOT
 require (["tukos/objects/sports/TsbCalculator", "tukos/objects/sports/LoadChart"], function(TsbCalculator, LoadChart){
@@ -382,7 +405,7 @@ require (["tukos/objects/sports/TsbCalculator", "tukos/objects/sports/LoadChart"
     sWidget.tsbCalculator.updateRowAction(sWidget, false, true);
     grid.loadChartUtils = new LoadChart({sessionsStore: grid.store});
     grid.loadChartUtils.updateCharts(grid, 'changed');
-    if (form.programsConfig.spiders){
+    if (form.programsConfig && form.programsConfig.spiders){
         require(["tukos/objects/sports/KpiChart"], function(KpiChart){
             form.kpiChartUtils = new KpiChart({form: form, sessionsStore: grid.store});
             let spiders = JSON.parse(form.programsConfig.spiders);
@@ -399,11 +422,13 @@ EOT
 	function OpenEditAction(){
 	    $currentDate = date('Y-m-d');
 	    return <<<EOT
-var fromDate, toDate;
-if ('$currentDate' < (fromDate = this.valueOf('fromdate'))){
-    this.setValueOf('displayeddate', fromDate);
-}else if('$currentDate' > (toDate = this.valueOf('todate'))){
-    this.setValueOf('displayeddate', toDate);
+const fromDate = this.valueOf('fromdate'), toDate = this.valueOf('todate');
+if (fromDate && toDate){
+    if ('$currentDate' < fromDate){
+        this.setValueOf('displayeddate', fromDate);
+    }else if('$currentDate' > toDate){
+        this.setValueOf('displayeddate', toDate);
+    }
 }
 EOT
         ;
