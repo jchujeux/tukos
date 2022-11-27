@@ -148,7 +148,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 							if (value.tableColumns){
 								this.tableWidget.set('columns', value.tableColumns);
 							}
-	                		this.tableWidget.set('value', value.tableDate || value.data);
+	                		this.tableWidget.set('value', value.tableData || value.data);
 	                	}else{
 	                		if (tableNode){
 	                    		dst.set(tableNode, {display: "none"});   

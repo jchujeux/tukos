@@ -33,7 +33,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
             this.watchOnChange = true;
             this.watchContext = 'server';
             this.onInstantiated(lang.hitch(this, function(){
-                if (actionPane && this.widgetsHider !== false && Pmg.get('userRights') !== 'RESTRICTEDUSER'){
+                if (actionPane && this.widgetsHider !== false && !Pmg.isRestrictedUser()){
             		this.widgetsHiderButton = dct.create('button', {'class': 'ui-icon dgrid-hider-toggle', type: 'button'}, actionPane.domNode);
                 	this.widgetsHiderButton.onclick = function(){
                 		var widgetsHiderButton = self.widgetsHiderButton, hider = widgetsHiderButton.hider;

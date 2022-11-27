@@ -36,7 +36,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
 	    			contents: lang.mixin({row0: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false},  widgets: ['apply', 'close']}}, this.editActionLayout || 
 	    				{row1: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: true},  widgets: otherWidgets}, row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'},  widgets: editorWidgets}})
     			},
-    			widgetsHider: Pmg.get('userRights') !== 'RESTRICTEDUSER',
+    			widgetsHider: !Pmg.isRestrictedUser(),
     			widgetsHiderArgs: {dialogPath: this.widgetName + '.atts.editDialogAtts.paneDescription.widgetsDescription.'},
                 style: {minWidth: (dojo.window.getBox().w*0.8) + 'px',overflow: 'auto'}
         	}};
@@ -53,21 +53,12 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
 			pane.watchContext = 'server';
 			pane.markIfChanged = false;
             when(editDialog.open(openArgs), lang.hitch(this, function(){
-              //setTimeout(function(){
                 when (pane.setWidgets({value: item}), function(){
                 	pane.watchOnChange = pane.markIfChanged = true;
 					pane.watchContext = 'user';
                 	pane.resize();
                 });
-              //}, 1000);
             }));
-            /*when(pane.setWidgets({value: item}), function(){
-                when (editDialog.open(openArgs), function(){
-                	pane.watchOnChange = pane.markIfChanged = true;
-					pane.watchContext = 'user';
-                	pane.resize();
-                });
-            });*/
         },
         
         applyEditDialog: function(){

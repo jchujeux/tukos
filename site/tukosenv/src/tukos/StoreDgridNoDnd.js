@@ -21,21 +21,34 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
         postCreate: function(){
             this.inherited(arguments);
             this.noCopyCols = this.noCopyCols.concat(['parentid', 'permission', 'updator', 'updated', 'creator' , 'created']);
-            var self = this;
+            const self = this,
+            	 duplicateRow = function(evt){
+            	 	self.addRow(undefined, self.copyItem(self.clickedRow.data));
+            	 };
             if (!this.disabled){
-            	var addedItems = [
-            	                    mutils.newObjectPopupMenuItemDescription(this.object, messages.addrow, lang.hitch(this, this.addRow), lang.hitch(this, this.getTemplate, 'addRow')),
-            	                    mutils.newObjectPopupMenuItemDescription(this.object, messages.addsubrow, lang.hitch(this, this.addSubRow, false), lang.hitch(this, this.getTemplate, 'addSubRow')),
-            	                    {atts: {label: messages.copyrow,   onClick: function(evt){self.copyRow(evt)}}}
-            	                ];
-            	this.contextMenuItems.canEdit = [
-            	            	    {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editInPopup)}},
-            	                    {atts: {label: messages.deleterow,   onClick: function(evt){self.deleteRow(false, false, true)}}},
-            	                    {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [{atts: {label: messages.deleteselection,   onClick: function(evt){self.deleteSelection(false, true)}}}]}}
-            	                ];
-                this.contextMenuItems.row = this.contextMenuItems.row.concat(addedItems);
-                this.contextMenuItems.idCol = this.contextMenuItems.idCol.concat(addedItems);
-                this.contextMenuItems.header.push(mutils.newObjectPopupMenuItemDescription(this.object, messages.addrow, lang.hitch(this, this.addRow), lang.hitch(this, this.getTemplate, 'appendRow')));
+            	if (Pmg.isRestrictedUser()){
+            		this.contextMenuItems.canEdit = this.contextMenuItems.row.concat([
+	            	    {atts: {label: Pmg.message('add'), onClick: lang.hitch(this, this.addRow)}},
+            			{atts: {label: Pmg.message('edit'), onClick: lang.hitch(this, this.editInPopup)}},
+            			{atts: {label: Pmg.message('duplicate'), onClick: duplicateRow}},
+            			{atts: {label: Pmg.message('delete'), onClick: function(evt){self.deleteRow(false, false, true)}}},
+            		]);
+            		this.contextMenuItems.header = [{atts: {label: Pmg.message('add'), onClick: lang.hitch(this, this.addRow)}}];
+            	}else{
+	            	var addedItems = [
+	            	                    mutils.newObjectPopupMenuItemDescription(this.object, messages.addrow, lang.hitch(this, this.addRow), lang.hitch(this, this.getTemplate, 'addRow')),
+	            	                    mutils.newObjectPopupMenuItemDescription(this.object, messages.addsubrow, lang.hitch(this, this.addSubRow, false), lang.hitch(this, this.getTemplate, 'addSubRow')),
+	            	                    {atts: {label: messages.copyrow,   onClick: function(evt){self.copyRow(evt)}}}
+	            	                ];
+	            	this.contextMenuItems.canEdit = [
+	            	            	    {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editInPopup)}},
+	            	                    {atts: {label: messages.deleterow,   onClick: function(evt){self.deleteRow(false, false, true)}}},
+	            	                    {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [{atts: {label: messages.deleteselection,   onClick: function(evt){self.deleteSelection(false, true)}}}]}}
+	            	                ];
+	                this.contextMenuItems.row = this.contextMenuItems.row.concat(addedItems);
+	                this.contextMenuItems.idCol = this.contextMenuItems.idCol.concat(addedItems);
+	                this.contextMenuItems.header.push(mutils.newObjectPopupMenuItemDescription(this.object, messages.addrow, lang.hitch(this, this.addRow), lang.hitch(this, this.getTemplate, 'appendRow')));
+                }
             }
             this.revert();//Necessary for the children rows expansion / collapse to work (!)
         },

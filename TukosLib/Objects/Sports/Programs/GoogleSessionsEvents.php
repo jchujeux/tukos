@@ -176,7 +176,7 @@ trait GoogleSessionsEvents {
     }
     public function googleDescription($session, $sessionView, $programId, $includeTrackingFormUrl = false, $synchroFlag,  $synchrostreams, $logoFile = '', $presentation = '', $version = ''){
         if ($session['mode'] === 'performed'){
-            $attCols = ['duration' => 'minutesToHHMM',  'sport' => 'string', 'sensations' => 'StoreSelect'];
+            $attCols = ['duration' => 'minutesToHHMM',  'sport' => 'string', 'sensations' => 'String'];
             $contentCols = ['athletecomments', 'coachcomments'];
         }else{
             $attCols = ['duration' => 'minutesToHHMM',  'intensity' => 'StoreSelect', 'sport' => 'string', 'stress' => 'string'];

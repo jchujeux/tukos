@@ -57,10 +57,10 @@ class Show extends ObjectTranslator{
         Utl::extractItems(['object', 'form'], $query);
         $values = $this->blogModel->getOne(['where' => $this->user->filterPrivate($query), 'cols' => ['id', 'parentid', 'name', 'comments', 'published', 'updated', 'creator', 'updator'], 'orderby' => ['blog.published DESC']]);
         $publisher = $this->user->peoplefirstAndLastNameOrUserName($values['creator']);
-        $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']);
+        $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']) . '<br><a href="' . $_SERVER['SCRIPT_URI'] . '?id=' . $values['id'] . '" target="_blank">direct link</a>';
         if ($values['updated'] > $values['published']){
             $updator = $this->user->peoplefirstAndLastNameOrUserName($values['updator']);
-            $postedByAndWhen .= "<br><i>{$this->view->tr('updatedon')}</i> " . DUtl::toUTC($values['updated']);
+            $postedByAndWhen .= "&nbsp;&nbsp;&nbsp;&nbsp;<i>{$this->view->tr('updatedon')}</i> " . DUtl::toUTC($values['updated']);
         }
         return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'postedbyandwhen' => $postedByAndWhen, 'comments' => $values['comments']];
     }

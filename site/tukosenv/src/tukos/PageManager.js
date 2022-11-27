@@ -154,8 +154,21 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 			);
 			return promise;			
 		},
-		tukosTooltipExists: function(name){
-			return this.cache.presentTukosTooltips.includes(name);
+		tukosTooltipName: function(name){
+			const tooltips = this.cache.presentTukosTooltips;
+			let index;
+			if (this.isRestrictedUser()){
+				index = tooltips.indexOf('Restricted' + name);
+				if (index === -1){
+					index = tooltips.indexOf(name);
+				}
+			}else{
+				index = tooltips.indexOf(name);
+				if (index === -1){
+					index = tooltips.indexOf('Restricted' + name);
+				}
+			}
+			return index === -1 ? false : tooltips[index];
 		},
 		viewTranslatedInBrowserWindow: function(toTranslate, object){
 			const name = 'tukosItem' + toTranslate;

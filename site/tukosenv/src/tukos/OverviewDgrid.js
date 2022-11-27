@@ -18,9 +18,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
             args.collection = args.store.filter({contextpathid: args.form.tabContextId()});
         },
         postCreate: function(){
+			const self = this;
 			this.inherited(arguments);
             this.modify = {values: {}, displayedValues: {}};
             this.contextMenuItems.header.push({atts: {label: messages.showhidetargetvalues  , onClick: lang.hitch(this, function(evt){this.showColValues();})}});
+            this.on('dgrid-refresh-complete', function(){
+            	self.resize();
+            });
         },
         resize: function(){
 			var self = this, previousScrollPosition = this.getScrollPosition(), customizationPath = this.customizationPath;// so that personnalization is not changed if a column has a width change during resize

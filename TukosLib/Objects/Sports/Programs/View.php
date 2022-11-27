@@ -25,8 +25,9 @@ class View extends AbstractView {
 		foreach(['duration', 'distance', 'equivalentDistance', 'elevationgain', 'sts', 'lts', 'tsb'] as $col){
 		    $chartsCols[$col] = ['plot' => 'lines', 'tCol' => $tr($col)];
 		}
-		foreach(['load', 'intensity', 'stress', 'trimphr', 'trimppw', 'mechload', 'perceivedload', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
-		    $chartsCols[$col] = ['plot' => 'cluster', 'tCol' => $tr(substr($col, 0, 2) === 'gc' ? GC::gcName($col) : $col)];
+		foreach(['intensity' => 'plannedintensity', 'load' => 'plannedphysioload', 'stress' => 'plannedqsm', 'trimphr' => 'trimphr', 'trimppw' => 'trimppw', 'mechload' => 'computedmechload', 'perceivedeffort' => 'perceivedintensity', 'perceivedload' => 'perceivedphysioload',
+		    'sensations' => 'sensations', 'mood' => 'mood', 'fatigue' => 'fatigue'] as $col => $colLabel){
+		    $chartsCols[$col] = ['plot' => 'cluster', 'tCol' => $tr($colLabel)];
 		}
 		foreach(['duration' => '(mn)', 'distance' => '(km)', 'equivalentDistance' => '(km)', 'elevationgain' => '(dam)'] as $col => $legendUnit){
 		    $chartsCols[$col]['legendUnit'] = $legendUnit;
@@ -35,11 +36,11 @@ class View extends AbstractView {
 		    $chartsCols[$col]['tooltipUnit'] = $tooltipUnit;
 		}
 		$chartsCols['elevationgain']['tooltipUnit'] = ' (m)';
-		foreach(['elevationgain' => ['day' => 10, 'week' => 10], 'trimphr' => ['day' => 25, 'week' => 100], 'trimppw' => ['day' => 25, 'week' => 100], 'mechload' => ['day' => 10, 'week' => 50], 'sts' => ['day' => 1, 'week' => 0.1], 'lts' => ['day' => 1, 'week' => 0.1],
-		    'tsb' => ['day' => 1, 'week' => 0.1]] as $col => $scalingFactor){
+		foreach(['elevationgain' => ['day' => 10, 'week' => 10], 'load' => ['week' => 10, 'day' => 10], 'perceivedload' => ['week' => 10, 'day' => 10], 'trimphr' => ['day' => 25, 'week' => 100], 'trimppw' => ['day' => 25, 'week' => 100], 'mechload' => ['day' => 10, 'week' => 50], 
+		         'sts' => ['day' => 1, 'week' => 0.1], 'lts' => ['day' => 1, 'week' => 0.1], 'tsb' => ['day' => 1, 'week' => 0.1]] as $col => $scalingFactor){
 		    $chartsCols[$col]['scalingFactor'] = $scalingFactor;
 		}
-		foreach(['load' => ['day' => 120, 'week' => 600], 'perceivedload' => ['day' => 120, 'week' => 600], 'trimphr' => ['day' => 1, 'week' => 7], 'trimppw' => ['day' => 1, 'week' => 7]] as $col => $normalizationFactor){
+		foreach(['load' => ['day' => 1, 'week' => 7], 'perceivedload' => ['day' => 120, 'week' => 600], 'trimphr' => ['day' => 1, 'week' => 7], 'trimppw' => ['day' => 1, 'week' => 7]] as $col => $normalizationFactor){
 		    $chartsCols[$col]['normalizationFactor'] = $normalizationFactor;
 		}
 		foreach(['intensity', 'stress', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
@@ -322,13 +323,13 @@ class View extends AbstractView {
 				        'updateRow' => $this->beforeRowChange(),
 				        //'deleteRow' => $this->beforeRowChange('delete')
 	               ],
-				    'noCopyCols' => ['googleid'],
+				    'noCopyCols' => ['googleid', 'stravaid'],
 				    'editActionLayout' => SessionsEditView::editDialogLayout(),
 				],
 				'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], 
 				    [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
 			    'removeCols' => $this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] : ['sportsman','grade', 'configstatus'],
-			    'hiddenCols' => ['parentid', 'stress', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
+			    'hiddenCols' => ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
 			        'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
 			],

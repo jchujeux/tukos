@@ -345,20 +345,22 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         contextMenuCallback: function(evt){
         	evt.preventDefault();
 			evt.stopPropagation();
-			var row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column,
-                menuItems = lang.clone(this.contextMenuItems),
-                colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';
-			this.clickedColumn = this.column(evt);
-			if (colItems !== 'header' && menuItems.canEdit && row.data.canEdit !== false){
-            	menuItems[colItems] = menuItems[colItems].concat(menuItems.canEdit);
-            }
-            let isRestricted = Pmg.isRestrictedUser(), menuColItems = menuItems[colItems];
-			if (this.customContextMenuItems){
-				menuColItems = (menuColItems || []).concat(this.customContextMenuItems());
-			}                
-            if (menuColItems || !isRestricted){
-            	mutils.setContextMenuItems(this, menuColItems ? (isRestricted ? menuColItems : menuColItems.concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this))) : lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this));
-            	//mutils.setContextMenuItems(this, menuItems[colItems].concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this)));
+			const row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column;
+			if (Pmg.isRestrictedUser()){
+	            mutils.setContextMenuItems(this, row ? this.contextMenuItems.canEdit : this.contextMenuItems.header);
+			}else{
+				let menuItems = lang.clone(this.contextMenuItems), colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';
+				this.clickedColumn = this.column(evt);
+				if (colItems !== 'header' && menuItems.canEdit && row.data.canEdit !== false){
+	            	menuItems[colItems] = menuItems[colItems].concat(menuItems.canEdit);
+	            }
+	            let menuColItems = menuItems[colItems];
+				if (this.customContextMenuItems){
+					menuColItems = (menuColItems || []).concat(this.customContextMenuItems());
+				}                
+	            if (menuColItems){
+	            	mutils.setContextMenuItems(this, menuColItems ? menuColItems.concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this)) : lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this));
+				}
 			}
         },
         cellValueOf: function(field, idPropertyValue){

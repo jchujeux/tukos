@@ -114,11 +114,12 @@ return declare(null, {
 					switch	(col){
 						case 'duration':
 							chartItem.duration += duration;
+							break;
 						case 'load': 
-	                        chartItem.load += Number(session.intensity || 0) * duration;
+	                        chartItem.load += Number(session.intensity || 0) * duration / 8 * 100 / 60;
 							break;
 						case 'perceivedload':
-							chartItem.perceivedload += Number(session.perceivedeffort || 0) * duration;
+							chartItem.perceivedload += Number(session.perceivedeffort || 0) * duration / 8 * 100 / 60;
 							break;
 						case 'fatigue':
 							chartItem.fatigue += ((session.sensations && session.mood) ? 11 - (Number(session.sensations) + session.mood) / 2 : 0) * duration;
@@ -194,6 +195,7 @@ return declare(null, {
 			        }
 			    }
 			});
+			form.resize();
 		}
 		
     });

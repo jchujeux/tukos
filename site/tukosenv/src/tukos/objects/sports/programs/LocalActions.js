@@ -18,6 +18,7 @@ function(declare, lang, utils, Pmg){
 			form.optionHiddenWidgets.forEach(function(widgetName){
 				form.getWidget(widgetName).set('hidden', false);
 			});
+			form.getWidget('templatesPane').set('hidden', false);
 			form.optionHiddenWidgets = [];
 			switch (optionName){
 			    case 'viewplanned':
@@ -39,7 +40,8 @@ function(declare, lang, utils, Pmg){
 			                sessionsWidget.optionHiddenCols.push(col);
 			            }
 			        });
-					['loadchart', 'weekloadchart', 'templates', 'warmup', 'mainactivity', 'warmdown'].forEach(lang.hitch(this, this.widgetOptionalHide));
+					form.getWidget('templatesPane').set('hidden', true);
+					['loadchart', 'weekloadchart'/*, 'templates', 'warmup', 'mainactivity', 'warmdown'*/].forEach(lang.hitch(this, this.widgetOptionalHide));
 					//sessionsWidget.set('collection', sessionsWidget.get('collection').filter(this.sessionsFilter.eq('mode', 'performed')));
 					sessionsWidget.extraUserFilters = {mode: ['RLIKE', 'performed']};
 					sessionsWidget.set('collection', sessionsWidget.store.getRootCollection());
@@ -64,7 +66,9 @@ function(declare, lang, utils, Pmg){
 					form.resize();
 					form.needsToFreezeWidth = false;
 				}
-				lang.setObject('customization.viewModeOption', optionName, form);
+				if (!Pmg.isRestrictedUser()){
+					lang.setObject('customization.viewModeOption', optionName, form);
+				}
 			}
 		},
 		widgetOptionalHide: function(widgetName){

@@ -54,10 +54,10 @@ class View extends AbstractView {
             'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevation', ['atts' => ['edit' => ['label' => $this->tr('Elevation') . ' (m)', 'constraints' => $isMobile ? ['pattern' => '#0000.'] : ['pattern' => '#.#'], 'style' => ['width' => '2.5em']],
                 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.#']]]]),
             'perceivedload' => ViewUtils::textBox($this, 'Perceivedphysioload', ['atts' => [
-                'edit' => [/*'label' => $this->tr('Perceivedload'), */'disabled' => true, 'constraints' => $isMobile ? ['pattern' => '#0000.'] : ['pattern' => '#.#'], 'style' => ['width' => '2em']],
+                'edit' => ['disabled' => true, 'constraints' => $isMobile ? ['pattern' => '#0000.'] : ['pattern' => '#.#'], 'style' => ['width' => '2em']],
                 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.#']]]]),
             'perceivedintensity' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
-                'label' => $tr('Perceivedintensity'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Extremelylow'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Extremelyhigh'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle,
+                'label' => $tr('PerceivedIntensity'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Extremelylow'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Extremelyhigh'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle,
                 'gaugeAtts' => $gaugeAtts, 'onChangeLocalAction' => ['perceivedload' => ['value' => "return (dutils.timeToSeconds(sWidget.valueOf('duration')) || 0) * newValue / 36 / 8;"]]
             ]]],
             'intensitydetails' => ViewUtils::lazyEditor($this, 'detailssmall', $detailsAtts),

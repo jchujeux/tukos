@@ -24,7 +24,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", 
             this.watchOnChange = true;
             this.watchContext = 'server';
             this.onInstantiated(lang.hitch(this, function(){
-            	if (this.widgetsHider !== false && Pmg.get('userRights') !== 'RESTRICTEDUSER'){
+            	if (this.widgetsHider !== false && !Pmg.isRestrictedUser()){
                 	this.widgetsHiderButton = new ToolBarButton({icon: "mblDomButtonBlueCirclePlus", style: "float: right", form: this}).placeAt(this.viewPane.actionsHeading, 'first');
                 	this.widgetsHiderButton.on('click', function(evt){
                 		var widgetsHiderButton = self.widgetsHiderButton, hider = widgetsHiderButton.hider;

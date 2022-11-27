@@ -27,7 +27,7 @@ class View extends EditView{
                         'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'stsratio', 'initialsts', 'initiallts', 'synchrosource']
                 ],
             	'row2' => [
-            	    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['66%', '33%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
+            	    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['80%', '20%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
                     'contents' => [              
                         'col1' => [
                             'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 
@@ -50,7 +50,7 @@ class View extends EditView{
                                 ]
                             ]],
                         'col2' => [
-                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 
+                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'id' => 'templatesPane'], 
                             'widgets' => ['templates',  'warmup', 'mainactivity', 'warmdown'],
                        ],
                     ]
@@ -253,7 +253,7 @@ EOT
         $this->setSessionsTrackingActionWidget();
         $this->actionWidgets['viewplanned'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewplanned'), 'value' => 'viewplanned', 'onClickAction' => $this->viewModeOptionOnClick('viewplanned')]];
         $this->actionWidgets['viewperformed'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewperformed'), 'value' => 'viewperformed', 'onClickAction' => $this->viewModeOptionOnClick('viewperformed')]];
-        $this->actionWidgets['viewall'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewall'), 'value' => 'viewall', 'onClickAction' => $this->viewModeOptionOnClick('viewall')]];
+        $this->actionWidgets['viewall'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewall'), 'value' => 'viewall', 'checked' => true, 'onClickAction' => $this->viewModeOptionOnClick('viewall')]];
         $this->actionLayout['tableAtts']['cols'] = 3;
         $this->actionLayout['contents'] = array_merge(array_splice($this->actionLayout['contents'], 0, 1), 
             ['sessionViewOptions' => ['tableAtts' => ['cols' => 1, 'customClass' => 'actionTable', 'showLabels' => true,  'label' => '<b>' . $this->view->tr('SessionsMode') . ':</b>'], 'widgets' => [ 'viewplanned',  'viewperformed', 'viewall']]],
