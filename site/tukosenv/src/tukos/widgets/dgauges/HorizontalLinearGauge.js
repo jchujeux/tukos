@@ -32,22 +32,13 @@ define([
 			// Draw background
 			this.addElement("background", lang.hitch(this, this.drawBackground));
 			
-			// Scaler			
-			var scaler = new LinearScaler();
-			
-			// Scale
-			var scale = new RectangularScale();
-			scale.set("scaler", scaler);
-			scale.set("labelPosition", "trailing");
-			scale.set("paddingTop", 15);
-			scale.set("paddingRight", 23);
-			scale.tickLabelFunc =  function(tickItem){
+			var scale = new RectangularScale({scaler: new LinearScaler(), labelPosition: "trailing", paddingTop: 15, paddingRight: 23, font: Pmg.isMobile() ? {color: '#B2BEB5'} : {}, tickLabelFunc: function(tickItem){
 				if(tickItem.isMinor){
 					return null;
 				}else{
 					return String(tickItem.value) + this._gauge.tickLabel || '';
 				}
-			};
+			}});
 			this.addElement("scale", scale);
 			
 			// Value indicator
@@ -71,7 +62,7 @@ define([
 				this.addElement("indicatorTextBorder", lang.hitch(this, this.drawTextBorder), "leading");
 				const indicatorText = new TextIndicator();
 				indicatorText.set("indicator", indicator);
-				indicatorText.set("x", 32.5);
+				indicatorText.set("x", 25);
 				indicatorText.set("y", 20);
 				this.addElement("indicatorText", indicatorText);
 			}
@@ -92,8 +83,8 @@ define([
 			let gap = 5, cr = 0;
 			let gradient = this.gradient;
 			if (this.showValue){
-				gradient[ gradient.length - 2] = 1 - 63/w;
-				gradient = gradient.concat([1-62/w, 'white', 1, 'white']);
+				gradient[ gradient.length - 2] = 1 - 40/w;
+				gradient = gradient.concat([1-40/w, 'white', 1, 'white']);
 			}
 			let entries = dgutils.createGradient(gradient);
 			g.createRect({
@@ -118,9 +109,9 @@ define([
 			//		private
 			return g.createRect({
 				x: 5,
-				y: 5,
-				width: 60,
-				height: 20
+				y: 6,
+				width: 40,
+				height: 18
 			}).setStroke({
 				color: "#CECECE",
 				width: 1
@@ -134,10 +125,10 @@ define([
             this.set('style', {height: this.checkboxes ? '100px' : '60px'});
             if (Pmg.isMobile()){
 				if (this.leftTd && !(this.leftTd.style || {}).color){
-					this.leftTd.style = lang.mixin({color: 'white'}, this.leftTd.style);
+					this.leftTd.style = lang.mixin({color: 'grey'}, this.leftTd.style);
 				}
 				if (this.rightTd && !(this.rightTd.style || {}).color){
-					this.rightTd.style = lang.mixin({color: 'white'}, this.rightTd.style);
+					this.rightTd.style = lang.mixin({color: 'grey'}, this.rightTd.style);
 				}
 			}
             const gaugeDiv = dct.create('div', {style: this.gaugeDivStyle});
@@ -154,7 +145,7 @@ define([
             if (this.checkboxes){
             	const id = this.id, table = this.table = dct.create('table', {align: 'center', style: this.gaugeTableStyle}, this.domNode);
             	const tr = dct.create('tr', {}, table);
-            	const checkboxWidgets = this.checkboxWidgets = [], checkBoxAtts = Pmg.isMobile() ? {style: {color: 'white'}} : {};
+            	const checkboxWidgets = this.checkboxWidgets = [], checkBoxAtts = Pmg.isMobile() ? {style: {color: 'grey'}} : {};
             	utils.forEach(this.checkboxes, function(atts){
 					atts.name = atts.id;
 					atts.id = id + '_' + atts.id;

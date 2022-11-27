@@ -323,6 +323,13 @@ define([
 				footerHeight = this.showFooter ? footerNode.offsetHeight : 0;
 
 			this.headerScrollNode.style.height = bodyNode.style.marginTop = headerHeight + 'px';
+			if (this.bodyNode.clientHeight > 0 && this.bodyNode.scrollHeight === this.bodyNode.clientHeight){
+				this.headerScrollNode.style.width = '0px';
+				this.headerNode.style.right = '0px';
+			}else{
+				this.headerScrollNode.style.width = '19px';
+				this.headerNode.style.right = '19px';
+			}
 			bodyNode.style.marginBottom = footerHeight + 'px';
 
 			if (!scrollbarWidth) {

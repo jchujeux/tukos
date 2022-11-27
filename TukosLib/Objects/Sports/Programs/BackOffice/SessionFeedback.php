@@ -64,11 +64,11 @@ class SessionFeedback extends ObjectTranslator{
                     'widgets' => $this->version->row2LayoutWidgets()
                 ],
                 'row3' =>[
-                    'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true],
+                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                     'widgets' => $this->version->row3LayoutWidgets()
                 ],
                 'row4' => [
-                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true],
+                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                     'widgets' => ['athletecomments', 'coachcomments']
                 ],
                 'row5' => [

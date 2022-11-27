@@ -13,7 +13,7 @@ function(declare, lang, utils, Pmg){
 				Pmg.alert({title: Pmg.message('cannotsynchronizestrava', form.objectName), content: contentMessage});
 			}else{
             	Pmg.setFeedback(Pmg.message('actionDoing'));
-            	form.serverDialog({action:'Process', query: {athleteid: athleteId, coachid: form.valueOf('coach'),
+            	form.serverDialog({action:'Process', query: {id: form.valueOf('id'), athleteid: athleteId, coachid: coachId,
 					params:  JSON.stringify({process: 'stravaEmailAuthorize', save: true})}}, form.changedValues(), form.get('postElts'), Pmg.message('actionDone')); 
 			}
 		},

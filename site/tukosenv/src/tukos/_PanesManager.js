@@ -8,7 +8,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             if (defaultTabMenu){
             	defaultTabMenu.destroyRecursive();
             }
-    		if (Pmg.get('userRights') !== 'RESTRICTEDUSER'){
+    		if (!Pmg.isRestrictedUser()){
     			mutils.buildContextMenu(this.container, {type: 'DynamicMenu', atts: {targetNodeIds: [this.container.domNode]}, items: []});
 			}
     	},

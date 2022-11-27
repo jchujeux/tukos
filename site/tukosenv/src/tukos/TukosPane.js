@@ -35,7 +35,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dijit/l
                 	}), 0);*/
                 this.markIfChanged = true;
                 this.watchContext = 'user';
-                if (this.widgetsHider && Pmg.get('userRights') !== 'RESTRICTEDUSER'){
+                if (this.widgetsHider && !Pmg.isRestrictedUser()){
 					require(["tukos/WidgetsHiderButton"], function(WidgetsHiderButton){
 						self.widgetsHiderButton = new WidgetsHiderButton({form: self, 'class': 'ui-icon dgrid-hider-toggle'});
 						self.widgetsHiderButton.set('iconClass', 'ui-icon dgrid-hider-toggle');

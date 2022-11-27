@@ -30,7 +30,7 @@ class View extends AbstractView {
                     'mechload' => ViewUtils::numberTextBox($this, 'Tukos_Mechanical_Load'),
         ], 
                 array_intersect_key($exercisesView->dataWidgets(), [/*'name' => true, */'stress' => true, 'series' => true, 'repeats' => true, 'extra' => true, 'extra1' => true]), [
-                    'stress'        => ViewUtils::storeSelect('stress', $this, 'Mechanical stress', [true, 'ucfirst', true, false]),
+                    'stress'        => ViewUtils::storeSelect('stress', $this, 'Plannedqsm', [true, 'ucfirst', true, false]),
                     'painduring' => ViewUtils::storeSelect('pain', $this, 'Painduring', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['backgroundColors' => Physio::$painColors, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
                     'painafter' => ViewUtils::storeSelect('pain', $this, 'Painafter', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['backgroundColors' => Physio::$painColors, 'style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
                 ] 

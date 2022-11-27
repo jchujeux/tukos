@@ -28,7 +28,7 @@ class AccordionGridUtilities {
                                 'labelCellStyle' => ['border' => '1px solid grey', 'padding' => '0px']],
                             'contents' => [
                                 'row1' => [
-                                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'label' => $tr('Mechanicalload'),
+                                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'label' => $tr('Physiomechload'),
                                         'style' => ['border' => '1px solid grey', 'padding' => '0px'], 'widgetCellStyle' => ['verticalAlign' => 'top', 'padding' => '0px']],
                                     'contents' => [
                                         'row1' => [

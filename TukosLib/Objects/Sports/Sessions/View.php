@@ -15,7 +15,7 @@ class View extends AbstractView {
         parent::__construct($objectName, $translator, 'Parent', 'Description');
         $tr = $this->tr;
         $isMobile = Tfk::$registry->isMobile;
-        $leftRightTdStyle = [/*'whiteSpace' => 'nowrap', */'verticalAlign' => 'top', 'paddingTop' => '7px', 'fontSize' => 'smaller', 'fontFamily' => 'Arial, Helvetica, sans-serif', 'width' => '200px', 'wordWrap' => 'break-word'];
+        $leftRightTdStyle = [/*'whiteSpace' => 'nowrap', */'verticalAlign' => 'top', 'paddingTop' => '7px', 'fontSize' => '12px', 'fontFamily' => 'Arial, Helvetica, sans-serif', 'width' => $isMobile ? '80px' : '200px', 'wordWrap' => 'break-word'];
         $gaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '',
             'gradient' => [0, '#B22222', 0.5, '#FF8C00', 1, '#7FFFD4'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
         $reversedGaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '',
@@ -37,14 +37,14 @@ class View extends AbstractView {
             ]]),
             'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'constraints' => $isMobile ? ['pattern' => '#000.0'] : ['pattern' => '#.##']], 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.#']]]]),
             'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'constraints' => $isMobile ? ['pattern' => '#0000.'] : ['pattern' => '#.#']], 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.#']]]]),
-            'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Intensity', [true, 'ucfirst', true, false]),
+            'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Plannedintensity', [true, 'ucfirst', true, false]),
             'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', null, ['atts' => ['edit' => [
                     'onWatchLocalAction' => ['value' => [
                         'intensity' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "if (newValue === 'rest'){return '';}else{return undefined;}"]],
                         'stress' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "if (newValue === 'rest'){return '';}else{return undefined;}"]],
                     ]],
             ]]]),
-            'stress'        => ViewUtils::storeSelect('stress', $this, 'Mechanical stress', [true, 'ucfirst', true, false]),
+            'stress'        => ViewUtils::storeSelect('stress', $this, 'Plannedqsm', [true, 'ucfirst', true, false]),
             'warmup'    => ViewUtils::lazyEditor($this, 'warmup', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
             'mainactivity'    => ViewUtils::lazyEditor($this, 'mainactivity', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
             'warmdown'    => ViewUtils::lazyEditor($this, 'warmdown', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
@@ -62,7 +62,7 @@ class View extends AbstractView {
             ]]],
             //'sensations' => ViewUtils::storeSelect('sensations', $this, 'sensations', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
             'perceivedeffort' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
-                'label' => $tr('Perceivedeffort'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr(Sports::$perceivedEffortOptions[1]), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr(Sports::$perceivedEffortOptions[10]),
+                'label' => $tr('Perceivedintensity'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr(Sports::$perceivedEffortOptions[1]), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr(Sports::$perceivedEffortOptions[10]),
                     'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $gaugeAtts
             ]]],
             //'perceivedeffort' => ViewUtils::storeSelect('perceivedEffort', $this, 'Perceivedeffort', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
