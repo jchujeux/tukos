@@ -33,7 +33,7 @@ trait StravaSynchronize {
         $atts = json_decode($atts, true);
         $this->sendContent([], array_merge($atts, ['to' => $query['athleteemail'], 'cc' => $query['coachemail'], 'sendas' => 'appendtobody']), /*['parentid' => $this->user->id()]*/['name' => 'tukosBackOffice']);
     }
-    public function stravaProgramSynchronize($query, $atts = []){
+    public function stravaProgramSynchronize($query){
         $programId = $query['id'];
         $athleteId = $query['parentid'];
         $ignoreSessionValues = $query['ignoresessionflag'] === 'false' ? false : $query['ignoresessionflag'];
@@ -54,7 +54,7 @@ trait StravaSynchronize {
             return;
         }
         if(empty($stravaActivitiesToSync)){
-            Feedback::add($this->tr('Noactivitytosync'));
+            //Feedback::add($this->tr('Nostravaactivitytosync'));
             return;
         }
         $athleteParams = Tfk::$registry->get('objectsStore')->objectModel('sptathletes')->getOne(['where' => ['id' => $athleteId], 'cols' => ['hrmin', 'hrthreshold', 'h4timethreshold', 'h5timethreshold', 'ftp', 'speedthreshold', 'sex']]);
@@ -68,6 +68,7 @@ trait StravaSynchronize {
         $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
         $sessionsToSync = $sessionsModel->getAll(['where' => ['mode' => 'performed', 'parentid' => $programId, ['col' => 'startdate', 'opr' => 'in', 'values' => $datesToSync]], 'cols' => array_merge($metricsToExtract, ['id', 'sessionid', 'starttime'])]);
         $sessionsActivitiesToSync = Utl::toAssociativeGrouped($sessionsActivitiesToSync, 'startdate');
+        ksort($sessionsActivitiesToSync);
         $sessionsToSync = Utl::toAssociativeGrouped($sessionsToSync, 'startdate');
         $acl = ['1' => ['rowId' => 1, 'userid' => $updator, 'permission' => '3'], '2' => ['rowId' => 2, 'userid' => Tfk::tukosBackOfficeUserId, 'permission' => '3']];
         $createdSessions = $updatedSessions = [];

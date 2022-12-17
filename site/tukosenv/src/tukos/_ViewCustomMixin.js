@@ -12,9 +12,10 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                customDialog.pane.resize();
             }else{
 				require(["tukos/TukosTooltipDialog"], function(TukosTooltipDialog){
+					const maxCustomContentWidth = (dojo.window.getBox().w*0.6) + 'px';
 					customDialog = targetPane.customDialog = new TukosTooltipDialog({paneDescription: {form: form, 
 	                    widgetsDescription: {
-	                        newCustomContent: {type: 'ObjectEditor', atts: {label: messages.newCustomContent, keyToHtml: 'capitalToBlank', style: {maxWidth: '700px', maxHeight: '600px', overflow: 'auto'}}},
+	                        newCustomContent: {type: 'ObjectEditor', atts: {label: messages.newCustomContent, keyToHtml: 'capitalToBlank', style: {maxWidth: maxCustomContentWidth, maxHeight: '600px', overflow: 'auto'}}},
 	                        tukosCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'tukosCustomView', hidden: true}}, 
 	                        tukosCustomViewLabel: {type: 'HtmlContent', atts: {value: Pmg.message('tukosCustomView'), hidden: true, disabled: true}},
 	                        tukosCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, hidden: true,
@@ -34,11 +35,11 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 	                        more: {type: 'TukosButton', atts: {label: messages.more, onClick:lang.hitch(self, self.moreCallback)}},
 	                        less: {type: 'TukosButton', atts: {label: messages.less, hidden: true, onClick:lang.hitch(self, self.lessCallback)}},
 	                        tukosCustomViewContent: {type: 'ObjectEditor', 
-	                        	atts: {title: Pmg.message('tukosCustomViewContent'), hasCheckboxes: true, hidden: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto', paddingRight: '25px'}, keyToHtml: 'capitalToBlank'}},
+	                        	atts: {title: Pmg.message('tukosCustomViewContent'), hasCheckboxes: true, hidden: true, style: {maxHeight: '400px', maxWidth: maxCustomContentWidth, overflow: 'auto', paddingRight: '25px'}, keyToHtml: 'capitalToBlank'}},
 	                        defaultCustomViewContent: {type: 'ObjectEditor', 
-	                        	atts: {title: messages.defaultCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto', paddingRight: '25px'}, keyToHtml: 'capitalToBlank'}},
-	                        itemCustomViewContent: {type: 'ObjectEditor', atts: {title: messages.itemCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto'}, keyToHtml: 'capitalToBlank'}},
-	                        itemCustomContent: {type: 'ObjectEditor', atts: {title: messages.itemCustomContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: '600px', overflow: 'auto'}, keyToHtml: 'capitalToBlank'}},
+	                        	atts: {title: messages.defaultCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: maxCustomContentWidth, overflow: 'auto', paddingRight: '25px'}, keyToHtml: 'capitalToBlank'}},
+	                        itemCustomViewContent: {type: 'ObjectEditor', atts: {title: messages.itemCustomViewContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: maxCustomContentWidth, overflow: 'auto'}, keyToHtml: 'capitalToBlank'}},
+	                        itemCustomContent: {type: 'ObjectEditor', atts: {title: messages.itemCustomContent, hasCheckboxes: true, style: {maxHeight: '400px', maxWidth: maxCustomContentWidth, overflow: 'auto'}, keyToHtml: 'capitalToBlank'}},
 	                        customContentDelete: {type: 'TukosButton', atts: {title: messages.forselectedcustom, label: messages.customContentDelete,  onClick: lang.hitch(self, self.deleteCallback)}}
 	                    },
 	                    layout:{

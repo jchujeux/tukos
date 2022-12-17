@@ -55,7 +55,7 @@ class Model extends AbstractModel{
     }    
     public function getOneExtended ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null){
     	$result = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
-    	if (Utl::getItem('grade', $result) === 'TEMPLATE'){
+    	if (empty($result) || Utl::getItem('grade', $result) === 'TEMPLATE'){
     	    return $result;
     	}else{
     	    $result['targetdb'] = Tfk::$registry->get('configStore')->getOne(['where' => ['username' => $result['name']], 'table' => 'usersauth', 'cols' => ['targetdb']])['targetdb'];
@@ -199,12 +199,5 @@ class Model extends AbstractModel{
                 }
         }
     }
-/*    
-    public function delete ($where, $item = []){
-    	$username = $this->getOne(['where' => $where, 'cols' => ['name']])['name'];
-    	Tfk::$registry->get('configStore')->delete(['table' => 'usersauth', 'where' => ['username' => $username]]);
-    	parent::delete($where, $item);
-    }
-*/
 }
 ?>

@@ -1,15 +1,31 @@
-define(["dojo/_base/declare", "dojo/when", "tukos/ArrayIterator", "tukos/utils", "tukos/dateutils"], 
-function(declare, when, ArrayIterator, utils, dutils){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "tukos/ArrayIterator", "tukos/utils", "tukos/dateutils"], 
+function(declare, lang, when, ArrayIterator, utils, dutils){
     return declare(null, {
         constructor: function(args){
-			var filter = new args.sessionsStore.Filter();
-			this.sessionsStore = args.sessionsStore;
-			this.tsbFilter = filter.eq('mode', 'performed').ne('sts', NaN).ne('lts', NaN).gt('startdate', '');
+			lang.mixin(this, args);
+			this.filter = new this.sessionsStore.Filter();
 			this.sessionsIterator = new ArrayIterator();
-			this.stsDailyDecay = this.ltsDailyDecay = this.initialSts = this.initialLts = 0;
-			this.stsRatio = 1;
+			this.stsDailyDecay = this.ltsDailyDecay = 0.0;
         },
-		initialize: function(params){
+        initialize: function(){
+        	const self = this, form = this.form, isDisplayMode = form.valueOf('displayfromdate');
+        	utils.forEach({fromDate: isDisplayMode ? 'displayfromdate' : 'fromdate', stsDailyDecay: 'stsdays', ltsDailyDecay: 'ltsdays', stsRatio: 'stsratio', initialSts: isDisplayMode ? 'displayfromsts': 'initialsts', initialLts: isDisplayMode ? 'displayfromlts': 'initiallts'}, function(source, target){
+				const value = form.valueOf(source);
+				switch(target){
+					case 'stsDailyDecay':
+					case 'ltsDailyDecay':
+						self[target] = value ? Math.exp(-1/value) : 0.0;
+						break;
+					case 'stsRatio':
+						self[target] = value || 1;
+						break;
+					default:
+						self[target] = value || 0;
+				}
+        	});
+			this.tsbFilter = this.filter.eq('mode', 'performed').ne('sts', NaN).ne('lts', NaN).gte('startdate', this.fromDate);
+        },
+		/*_initialize: function(params){
 			var self = this, mapping = {stsdays: 'stsDailyDecay', ltsdays: 'ltsDailyDecay', stsratio: 'stsRatio', initialsts: 'initialSts', initiallts: 'initialLts'};
 			utils.forEach(params, function(value, name){
 				var property = mapping[name];
@@ -22,7 +38,7 @@ function(declare, when, ArrayIterator, utils, dutils){
 						self[property] = value || 0;
 				}
 			})
-		},
+		},*/
 		get: function(property){
 			return this[property];
 		},
@@ -40,6 +56,24 @@ function(declare, when, ArrayIterator, utils, dutils){
 		},
 		getCollection: function(){
 			return this.sessionsStore.filter(this.tsbFilter).sort([{property: 'startdate'}, {property: 'sessionid'}]);
+		},
+		setDisplayFromStsAndLts: function(displayFromDate){
+			const form = this.form, fromDate = form.valueOf('fromdate');
+			if (displayFromDate <= fromDate){
+				form.setValuesOf({displayfromdate: fromDate, displayfromsts: form.valueOf('initialsts'), displayfromlts: form.valueOf('initiallts')});
+			}else{
+				const truncatedSessions = this.sessionsStore.filter(this.filter.eq('mode', 'performed').ne('sts', NaN).ne('lts', NaN).lt('startdate', displayFromDate)).sort([{property: 'startdate', descending: true}, {property: 'sessionid', descending: true}]).fetchSync();
+				let fromDate, initialSts, initialLts;
+				if (truncatedSessions.length){
+					const lastTruncatedSession = truncatedSessions[0];
+					fromDate = lastTruncatedSession['startdate']; initialSts = lastTruncatedSession['sts']; initialLts = lastTruncatedSession['lts'];					
+				}else{
+					fromDate = form.valueOf('fromdate'); initialSts = form.valueOf('initialsts'); initialLts = form.valueOf('initiallts');
+				}
+				daysDifference = dutils.difference(fromDate, displayFromDate);
+				form.setValueOf('displayfromsts', this.exponentialAvg(0, initialSts, daysDifference, this.stsDailyDecay));
+				form.setValueOf('displayfromlts', this.exponentialAvg(0, initialLts, daysDifference, this.ltsDailyDecay));
+			}
 		},
 		rowAction: function(grid, row, cudMode, isUserEdit){
 			var self = this, collection = this.getCollection();
@@ -94,9 +128,9 @@ function(declare, when, ArrayIterator, utils, dutils){
 								previousSts = previousItem.sts;
 								previousLts = previousItem.lts;
 							}else{
-								daysDifference = dutils.difference(grid.valueOf('@fromdate'), currentRow.startdate);
-								previousSts = grid.valueOf('@initialsts');
-								previousLts = grid.valueOf('@initiallts');
+								daysDifference = dutils.difference(self.fromDate, currentRow.startdate);
+								previousSts = self.initialSts;
+								previousLts = self.initialLts;
 							}
 							sts = self.stsDailyDecay && (sessionStress || previousSts) ? self.exponentialAvg(sessionStress, previousSts, daysDifference, self.stsDailyDecay) : 0;
 							stsHasChanged = updateRowOrDirty('sts', sts);
@@ -107,7 +141,7 @@ function(declare, when, ArrayIterator, utils, dutils){
 						}
 						if (row === false || (stsHasChanged || ltsHasChanged || tsbHasChanged)){
 							if (cudMode === 'delete'){
-								previousItem = previousItem || {startdate: grid.valueOf('@fromdate'), sts: previousSts, lts: previousLts, tsb: previousLts - previousSts * self.stsRatio};
+								previousItem = previousItem || {startdate: self.fromDate, sts: previousSts, lts: previousLts, tsb: previousLts - previousSts * self.stsRatio};
 								iterator.previous();
 							}else{
 								previousItem = item;

@@ -73,7 +73,7 @@ class View extends AbstractView {
             //'mood' => ViewUtils::storeSelect('mood', $this, 'Mood', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
             'athletecomments' => ViewUtils::lazyEditor($this, 'AthleteComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
             'coachcomments' => ViewUtils::lazyEditor($this, 'CoachSessionComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
-            'timemoving' => ViewUtils::minutesTextBox($this, 'Time Riding'),
+            'timemoving' => ViewUtils::minutesTextBox($this, 'Timemoving'),
             'avghr' => ViewUtils::numberTextBox($this,'Average Heart Rate', ['atts' => ['edit' => ['onChangeLocalAction' => ['trimpavghr' => ['localActionStatus' => $this->updatetrimpAvgHr()]]]]]),
             'avgpw' => ViewUtils::numberTextBox($this, 'Average Power', ['atts' => ['edit' => ['onChangeLocalAction' => ['trimpavghr' => ['localActionStatus' => $this->updatetrimpAvgPw()]]]]]),
             'hr95' => ViewUtils::numberTextBox($this, '95%_Heartrate'),

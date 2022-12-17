@@ -13,8 +13,8 @@ class Model extends AbstractModel {
     function __construct($objectName, $translator=null){
         $colsDefinition = [
             'vobject'       =>  'VARCHAR(50)  DEFAULT NULL',
-            'view'          =>  "ENUM ('" . implode("','", $this->viewOptions) . "')",
-            'panemode'      =>  "ENUM ('" . implode("','", $this->panemodeOptions) . "')",
+            'view'          =>  "ENUM ('" . implode("','", $this->viewOptions) . "') DEFAULT NULL",
+            'panemode'      =>  "ENUM ('" . implode("','", $this->panemodeOptions) . "') DEFAULT NULL",
         	'customization' =>  'longtext DEFAULT NULL'
         ];
         parent::__construct($objectName, $translator, 'customviews', ['parentid' => ['users']], ['customization'], $colsDefinition, [], ['vobject', 'view', 'panemode'], [], ['name', 'vobject', 'view', 'panemode']);

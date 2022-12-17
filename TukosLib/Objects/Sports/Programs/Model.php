@@ -6,6 +6,8 @@ use TukosLib\Objects\Sports\Programs\Questionnaire;
 use TukosLib\Objects\Sports\Programs\GoogleSessionsEvents;
 use TukosLib\Objects\Sports\Programs\StravaSynchronize;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
+use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
 use TukosLib\Google\Sheets;
 
@@ -38,8 +40,9 @@ class Model extends AbstractModel {
             'initialsts' => 'FLOAT DEFAULT NULL',
             'initiallts' => 'FLOAT DEFAULT NULL',
             'synchrosource' => 'VARCHAR(30) DEFAULT NULL',
+            'displayfrom' => 'longtext'
         ];
-        parent::__construct($objectName, $translator, 'sptprograms', ['parentid' => ['sptathletes'], 'coach' => ['people']], ['weeklies'], $colsDefinition, [], []);
+        parent::__construct($objectName, $translator, 'sptprograms', ['parentid' => ['sptathletes'], 'coach' => ['people']], ['weeklies', 'displayfrom'], $colsDefinition, [], []);
         $this->afterGoogleSync = false;
         $this->setDeleteChildren();
     }
@@ -47,8 +50,9 @@ class Model extends AbstractModel {
     function initialize($init=[]){
         $coach = $this->user->peopleId();
         $coachEmail = empty($coach) ? '' : Tfk::$registry->get('objectsStore')->objectModel('people')->getOne(['where' => ['id' => $coach], 'cols' => ['email']])['email'];
+        $today = date('Y-m-d', $nextMondayStamp = strtotime('next monday'));
         return parent::initialize(array_merge(
-            ['coach' => $coach, 'coachemail' => $coachEmail, 'fromdate' => $fromDate = date('Y-m-d', $nextMondayStamp = strtotime('next monday')), 'duration' =>'[1,"week"]', 'todate' => date('Y-m-d', strtotime('next sunday', $nextMondayStamp)), 'displayeddate' => $fromDate,
+            ['coach' => $coach, 'coachemail' => $coachEmail, 'fromdate' => $fromDate = $today, 'displayfromdate' => $today, 'duration' =>'[1,"week"]', 'todate' => date('Y-m-d', strtotime('next sunday', $nextMondayStamp)), 'displayeddate' => $fromDate,
                 'loadchart' => $this->defaultLoadChart(), 'performedloadchart' =>  $this->defaultPerformedLoadChart(), 'synchroweeksbefore' => 0, 'synchroweeksafter' => 0, 'synchnextmonday' => 'YES', 'synchrosource' => 'strava', 'acl'=> ['1' => ['rowId' => 1, 'userid' => Tfk::tukosBackOfficeUserId, 'permission' => '2']]
             ], $init));
     }
@@ -61,8 +65,22 @@ class Model extends AbstractModel {
         	array_push($atts['cols'], 'synchroweeksafter');
         }
         $item = parent::getOneExtended($atts, $jsonColsPaths, $jsonNotFoundValue);
+        if (empty($item)){
+            Feedback::add($this->tr('programnotfound'));
+            throw new \Exception($this->tr('programnotfound') . ' - ' . Utl::getItem('id', $atts['where']));
+        }
         $item['calendar'] = '';
+        if (!empty($displayfrom = Utl::extractItem('displayfrom', $item))){
+            $item = array_merge($item, $displayfrom);
+        }
         return $item;
+    }
+    public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
+        $this->processLargeCols($newValues);
+        if (!$jsonFilter && (!empty($displayfromCols = array_diff(array_keys($newValues), $this->allCols)))){
+            $newValues['displayfrom'] = Utl::extractItems($displayfromCols, $newValues);
+        }
+        return $this->updateOne($newValues, $atts, $insertIfNoOld, true, $init);
     }
     public function defaultLoadChart(){
         $paneMode = isset($this->paneMode) ? $this->paneMode : 'Tab';
@@ -85,6 +103,12 @@ class Model extends AbstractModel {
             'store' => [['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? 1 : date('W', time())),  'distance' => 0, 'elevationgain' => 0, 'duration' => 0, 'perceivedeffort' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0]],
             'axes' => ['x' => ['title' => $this->tr($weekType)]]
         ];
+    }
+    public function insertExtended($values, $init=false, $jsonFilter = false){
+        if (!$jsonFilter && (!empty($displayfromCols = array_diff(array_keys($values), $this->allCols)))){
+            $values['displayfrom'] = Utl::extractItems($displayfromCols, $values);
+        }
+        return parent::insertExtended($values, $init, $jsonFilter);
     }
     public function insert($values, $init = false, $jsonFilter = false, $reference = null){
     	if(!empty($values['fromdate']) && !empty($values['todate']) && empty($values['duration'])){

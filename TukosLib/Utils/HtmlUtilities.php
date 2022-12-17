@@ -139,9 +139,13 @@ class HtmlUtilities{
         return self::$domDocument;
     }
     public static function imageUrl($imageTag){
-        $doc = self::getDomDocument();
-        $doc->loadHTML("<html><body>$imageTag</body></html>");
-        return $doc->getElementsByTagName('img')[0]->getAttribute('src');
+        if (strpos($imageTag, '<img') !== false){
+            $doc = self::getDomDocument();
+            $doc->loadHTML("<html><body>$imageTag</body></html>");
+            return $doc->getElementsByTagName('img')[0]->getAttribute('src');
+        }else{
+            return $imageTag;
+        }
     }
 }
 ?>

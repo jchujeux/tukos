@@ -57,7 +57,7 @@ class Show extends ObjectTranslator{
         Utl::extractItems(['object', 'form'], $query);
         $values = $this->blogModel->getOne(['where' => $this->user->filterPrivate($query), 'cols' => ['id', 'parentid', 'name', 'comments', 'published', 'updated', 'creator', 'updator'], 'orderby' => ['blog.published DESC']]);
         $publisher = $this->user->peoplefirstAndLastNameOrUserName($values['creator']);
-        $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']) . '<br><a href="' . $_SERVER['SCRIPT_URI'] . '?id=' . $values['id'] . '" target="_blank">direct link</a>';
+        $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']) . '<br><a href="https://tukos.site/blog/post?id=' . $values['id'] . '" target="_blank">direct link</a>';
         if ($values['updated'] > $values['published']){
             $updator = $this->user->peoplefirstAndLastNameOrUserName($values['updator']);
             $postedByAndWhen .= "&nbsp;&nbsp;&nbsp;&nbsp;<i>{$this->view->tr('updatedon')}</i> " . DUtl::toUTC($values['updated']);

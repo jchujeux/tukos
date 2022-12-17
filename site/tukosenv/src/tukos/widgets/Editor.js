@@ -1,28 +1,14 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/has", "dojo/dom-style", "dojo/dom-class", "dojo/when", "dojo/aspect", "dijit/Editor",
-         "tukos/widgets/editor/ShortCutKeys", "tukos/expressions",
-         "dijit/_editor/plugins/FontChoice", "dijit/_editor/plugins/TextColor", "tukos/widgets/editor/plugins/LinkDialog",  "dojoFixes/dijit/_editor/plugins/FullScreen",
-         "dijit/_editor/plugins/Print", "dojoFixes/dijit/_editor/plugins/ViewSource",
-         "dojox/editor/plugins/StatusBar", "dojox/editor/plugins/FindReplace", "tukos/widgets/editor/plugins/Smiley",
-         "tukos/widgets/editor/plugins/TablePlugins", "tukos/utils", "tukos/hiutils", "tukos/widgets/editor/plugins/TukosLinkDialog", "tukos/widgets/editor/plugins/TukosTooltipLinkDialog",
-         "tukos/widgets/editor/plugins/TemplateProcess","tukos/widgets/editor/plugins/Inserter","tukos/widgets/editor/plugins/MathMLEdit","tukos/widgets/editor/plugins/SelectionEditor","tukos/widgets/editor/plugins/FitImage",
-         "tukos/StoreComboBox", "dojo/domReady!"], 
-    function(declare, lang, Deferred, has, domStyle, dcl, when, aspect, Editor, ShortCutKeys, expressions, FontChoice, TextColor, LinkDialog, FullScreen, print/*, AlwaysShowToolbar*/, ViewSource, StatusBar, FindReplace, Smiley,
-    		 TablePlugins, utils, hiutils, TukosLinkDialog, TukosTooltipLinkDialog, TemplateProcess, Inserter, MathMLEdit, SelectionEditor, FitImage, StoreComboBox){
-	return declare([Editor, ShortCutKeys], {
-
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/has", "dojo/dom-style", "dojo/dom-class", "dojo/when", "dojo/aspect", "tukos/widgets/SimpleEditor", "tukos/widgets/editor/ShortCutKeys", "tukos/expressions", "dijit/_editor/plugins/FontChoice",
+		 "dijit/_editor/plugins/TextColor", "tukos/widgets/editor/plugins/LinkDialog", "dijit/_editor/plugins/Print", "dojoFixes/dijit/_editor/plugins/ViewSource", "tukos/widgets/editor/plugins/TablePlugins", "tukos/utils", "tukos/hiutils",
+		 "tukos/widgets/editor/plugins/TukosLinkDialog", "tukos/widgets/editor/plugins/TukosTooltipLinkDialog"/*, "tukos/widgets/editor/plugins/TemplateProcess"*/,"tukos/widgets/editor/plugins/Inserter","tukos/widgets/editor/plugins/MathMLEdit",
+		 "tukos/widgets/editor/plugins/SelectionEditor", "tukos/widgets/editor/plugins/FitImage"], 
+    function(declare, lang, Deferred, has, domStyle, dcl, when, aspect, SimpleEditor, ShortCutKeys, expressions, FontChoice, TextColor, LinkDialog, print, ViewSource, TablePlugins, utils, hiutils, TukosLinkDialog, TukosTooltipLinkDialog,// TemplateProcess,
+    		 Inserter, MathMLEdit, SelectionEditor, FitImage){
+	return declare([SimpleEditor, ShortCutKeys], {
     	constructor: function(args){
-            args.plugins = ['undo', 'redo','|','bold','italic','underline','strikethrough','subscript','superscript','removeFormat','|', 'insertOrderedList', 'insertUnorderedList', 'indent', 'outdent',
-                            'justifyLeft', 'justifyCenter', 'justifyRight','justifyFull', 'insertHorizontalRule'/*, 'EnterKeyHandling'*/];
-            args.extraPlugins = args.extraPlugins ||  
-                ['fontName', 'fontSize', 'formatBlock', 'foreColor', 'hiliteColor', 'createLink', 'unlink', 'insertImage', 'fullScreen', {name: 'viewSource', stripScripts: false}, 'TukosLinkDialog', 'TukosTooltipLinkDialog'/*, 'ChoiceList', 'TemplateProcess'*/, 
+            args.extraPlugins = //args.extraPlugins ||  
+                ['fontName', 'fontSize', 'formatBlock', 'foreColor', 'hiliteColor', 'createLink', 'unlink', 'insertImage', 'fullScreen', {name: 'viewSource', stripScripts: false}, 'TukosLinkDialog', 'TukosTooltipLinkDialog',
                  'statusBar', 'insertTable', 'modifyTable', 'modifyTableSelection', 'Inserter', 'MathMLEdit', 'print', 'FindReplace', 'Smiley', 'SelectionEditor', 'FitImage'];
-            if (args.optionalPlugins){
-                args.extraPlugins = args.extraPlugins.concat(args.optionalPlugins);
-            }
-            args.styleSheets = require.toUrl('dijit/themes/claro/claro.css');
-        },
-        changeStyle: function(property, value){
-            this.document.body.style[property] = value;
         },
         postCreate: function(){
             this.inherited(arguments);
@@ -118,9 +104,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/h
 					// put focus back in the iframe, unless focus has somehow been shifted out of the editor completely
 					//this.focus();
 				//}
-	
 				command = this._normalizeCommand(command, argument);
-	
 				if(argument !== undefined){
 					if(command === "heading"){
 						throw new Error("unimplemented");
@@ -130,7 +114,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/h
 						argument = '<' + argument + '>';
 					}
 				}
-	
 				//Check to see if we have any over-rides for commands, they will be functions on this
 				//widget of the form _commandImpl.  If we don't, fall through to the basic native
 				//exec command of the browser.
@@ -143,7 +126,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/h
 						returnValue = this.document.execCommand(command, false, argument);
 					}
 				}
-	
 				if(editorFocused){
 					// put focus back in the iframe, unless focus has somehow been shifted out of the editor completely
 					this.focus();
@@ -161,84 +143,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/h
             this.endEditing();
             this.onDisplayChanged();
         },
-		setValue: function(value){
-			if(!this.isLoaded){
-				// try again after the editor is finished loading
-				this.onLoadDeferred.then(lang.hitch(this, function(){
-					this.setValue(value);
-				}));
-				return;
-			}
-            if (hiutils.hasTranslation(value)){
-                this.serverValue = value;
-                var _arguments = arguments;
-                when(hiutils.translateParams(value, this), lang.hitch(this, function(newValue){
-                    value = newValue;
-                    this.inherited(_arguments);
-                }));
-            }else{
-                if (!hiutils.hasUntranslation(value)){
-                    delete this.serverValue;
-                    delete this.serverValueDeferred;
-                }
-                this.inherited(arguments);
-            }
-        },
-
-        _getValueAttr: function(){
-               var value = this.inherited(arguments), forceSpace = '';//this.isInViewSource && this.isInViewSource() ? '' : '&nbsp;';
-               return value ? forceSpace + value.replace(/<span><\/span>|colspan="1"|rowspan="1"/g, '').replace(/[\n\t ]+/g, ' ').trim() + forceSpace : value;
-        },
-
         _getServerValueAttr: function(){
             var deferred = this.serverValueDeferred;
             return (deferred ? (deferred.isResolved() ? this.serverValue : deferred) : this.serverValue);
         },
-        startup: function(){
-        	if (utils.isObject(this.style)){// richtext only supports string notation
-                var style = this.style, changeStyle = lang.hitch(this, this.changeStyle);
-                delete this.style;
-            }
-            this.inherited(arguments);
-            this.onLoadDeferred.then(lang.hitch(this, function(){
-            	if (style){
-                    utils.forEach(style, function(value, property){
-                        changeStyle(property, value);
-                    });
-            	}
-            	this._plugins.forEach(function(plugin){//JCH so that the toolbar does not disappear below the browser toolbar when the editor is in full screen mode, and triggered from a TooltipDialog
-            		if (plugin.button){
-            			plugin.button.scrollOnFocus = false;
-	            	}
-            	});
-            }));
-            this.statusBar.resizeHandle.on ('resize', lang.hitch(this, function(evt){
-                var newHeight = this.height = domStyle.get(this.editingArea, 'height') + "px";
-            	lang.setObject((this.itemCustomization || 'customization') + '.widgetsDescription.' + this.widgetName + '.atts.height', newHeight, this.pane);
-            }));
-        },
-        onLoad: function(html){
-        	this.inherited(arguments);
-            this.onLoadDeferred.then(lang.hitch(this, function(){
-            	this.editNode.className = 'claro';
-            }));
-        },
-/*
-        destroy: function(){
-			array.forEach(this._plugins, function(p){
-				if(p && p.destroy){
-					p.destroy();
-				}
-			});
-			this._plugins = [];
-			if (this.toolbar){
-                this.toolbar.destroyRecursive();
-                delete this.toolbar;
-            }else{
-            }
-            RichText.prototype.destroy.apply(this, arguments);
-        },
-*/
 		pasteHtmlAtCaret: function(html, selectPastedContent) {// found here: http://stackoverflow.com/questions/6690752/insert-html-at-caret-in-a-contenteditable-div/6691294#6691294
             var sel = dijit.range.getSelection(this.window), range = sel.getRangeAt(0);
             this.endEdit();

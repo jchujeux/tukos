@@ -8,6 +8,7 @@ use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Widgets;
 use TukosLib\Objects\Sports\Programs\SessionsTracking;
 use TukosLib\Objects\Sports\Programs\ProgramsConfig;
+use TukosLib\TukosFramework as Tfk;
 
 class View extends EditView{
 
@@ -23,8 +24,8 @@ class View extends EditView{
         $customContents = [
             	'row1' => [
                     'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => '130'],
-                    'widgets' => ['id', 'parentid', 'coach', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'coachemail', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter',
-                        'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'stsratio', 'initialsts', 'initiallts', 'synchrosource']
+                    'widgets' => ['id', 'parentid', 'coach', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'coachemail', 'coachorganization', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter',
+                        'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'stsratio', 'initialsts', 'initiallts', 'displayfromdate', 'displayfromsts', 'displayfromlts', 'synchrosource']
                 ],
             	'row2' => [
             	    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['80%', '20%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
@@ -66,10 +67,10 @@ class View extends EditView{
         $performedOptionalCols = ['name', 'duration', 'sport', 'sportimage', 'distance', 'elevationgain', 'perceivedeffort', 'sensations', 'mood', 'athletecomments', 'coachcomments']; $plannedColOptions = [];
         $optionalWeeks = ['performedthisweek', 'plannedthisweek', 'performedlastweek', 'plannedlastweek'];
         foreach($plannedOptionalCols as $col){
-            $plannedColOptions[$col] = $this->view->tr($col);
+            $plannedColOptions[$col] = isset($this->view->chartsCols[$col]) ? $this->view->chartsCols[$col]['tCol'] : $this->view->tr($col);
         }
         foreach($performedOptionalCols as $col){
-            $performedColOptions[$col] = $this->view->tr($col);
+            $performedColOptions[$col] = isset($this->view->chartsCols[$col]) ? $this->view->chartsCols[$col]['tCol'] : $this->view->tr($col);
         }
         foreach($optionalWeeks as $week){
            $weekOptions[$week] = $tr($week);
@@ -260,11 +261,13 @@ EOT
             $this->actionLayout['contents']);
 	}
 	public function viewModeOptionOpenAction(){
-	    $performedColumns = json_encode(['sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'mechload', 'h4time', 'h5time','stravaid']);
+	    $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
+	    $plannedCols = json_Encode($sessionsModel->plannedCols);
+	    $performedCols = json_Encode($sessionsModel->performedCols);
 	    return <<<EOT
 var form = this;
 require (["tukos/objects/sports/programs/LocalActions"], function(LocalActions){
-    form.localActions = new LocalActions({form: form, plannedColumns: ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'warmupdetails', 'mainactivitydetails'], performedColumns: {$performedColumns}});
+    form.localActions = new LocalActions({form: form, plannedColumns: {$plannedCols}, performedColumns: {$performedCols}});
     if (form.viewModeOption){
         form.getWidget(form.viewModeOption).set('checked', true);
         form.localActions.viewModeOption(form.viewModeOption);

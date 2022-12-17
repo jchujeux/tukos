@@ -43,7 +43,7 @@ function(declare, lang, when, Dnd, utils){
             grid.refresh({keepScrollPosition: true});
         },
         onDropExternal: function (sourceSource, nodes, copy, targetItem) {
-            var tGrid = this.grid, sGrid = sourceSource.grid, noRefresh = this.noRefreshOnUpdateDirty, idp = this.collection.idProperty;
+            var tGrid = this.grid, sGrid = sourceSource.grid, noRefresh = this.noRefreshOnUpdateDirty, idp = tGrid.collection.idProperty;
             this.noRefreshOnUpdateDirty = true;
         	if (tGrid.onDropCondition){
             	if (!tGrid.onDropConditionFunction){

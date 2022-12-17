@@ -4,8 +4,10 @@ namespace TukosLib\Objects\Sports\Sessions;
 use TukosLib\Objects\Sports\Sports;
 use TukosLib\Objects\AbstractModel;
 use TukosLib\Objects\Sports\TrainingFormulaes as TF;
+use TukosLib\Google\Calendar;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Utils\HtmlUtilities as HUtl;
 use TukosLib\TukosFramework as TFK;
 
 class Model extends AbstractModel {
@@ -63,12 +65,12 @@ class Model extends AbstractModel {
             'velocity_smoothstream' => 'longtext',
             'kpiscache' => 'longtext'
         ];
-        $this->performedCols = ['sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'mechload', 'h4time', 'h5time'];
+        $this->performedCols = ['timemoving', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'mechload', 'h4time', 'h5time', 'stravaid'];
         $this->plannedCols = ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'warmupdetails', 'mainactivitydetails'];
         
         $this->streamCols = ['timestream', 'distancestream', 'altitudestream', 'heartratestream', 'cadencestream', 'wattsstream', 'grade_smoothstream', 'velocity_smoothstream'];
-        parent::__construct(
-            $objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], ['kpiscache'], $colsDefinition);
+        parent::__construct($objectName, $translator, 'sptsessions',  ['parentid' => ['sptprograms', 'sptsessions'], 'sportsman' => ['people']], ['kpiscache'], $colsDefinition);
+        $this->programCache = [];
     }   
     function initialize($init=[]){
         return parent::initialize(array_merge(['warmup' => '', 'mainactivity' => '', 'warmdown' => '', 'sessionid' => 1], $init));
@@ -120,11 +122,80 @@ class Model extends AbstractModel {
         }
         return $results;
     }
+    public function getAllExtended($atts){
+        if ($this->user->isRestrictedUser() && $programId = Utl::getItem('parentid', $atts['where'])){
+            $mostRecentPerformed = $this->getOne(['where' => ['parentid' => $programId, 'mode' => 'performed'], 'cols' => ['startdate'], 'orderBy' => ['startdate' => 'DESC']]);
+            $programModel = Tfk::$registry->get('objectsStore')->objectModel('sptprograms');
+            $programInfo = $programModel->getOne(['where' => ['id' => $programId], 'cols' => ['id', 'parentid', 'fromdate']]);
+            $programModel->stravaProgramSynchronize(array_merge($programInfo, ['ignoresessionflag' => false, 'synchrostart' => empty($mostRecentPerformed) ? $programInfo['fromdate'] : DUtl::dayAfter($mostRecentPerformed['startdate']), 'synchroend' => date('Y-m-d'), 'synchrostreams' => true]));
+        }
+        return parent::getAllExtended($atts);
+    }
     public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
         if (!$jsonFilter && (!empty($kpisCacheCols = array_diff(array_keys($newValues), $this->allCols)))){
             $newValues['kpiscache'] = json_encode(Utl::extractItems($kpisCacheCols, $newValues));
         }
         return parent::updateOne($newValues, $atts, $insertIfNoOld, true, $init);
+
+    }
+    public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
+        $updated =  parent::updateOneExtended($newValues, $atts, $insertIfNoOld, $jsonFilter, $init);
+        if ($updated && Utl::getItem('grade', $newValues) !== 'TEMPLATE'){
+            $this->sessionGoogleSynchronize($updated);
+        }
+        return $updated;
+    }
+    public function insertExtended($values, $init=false, $jsonFilter = false){
+        $session = parent::insertExtended($values, $init, $jsonFilter);
+        if (Utl::getItem('grade', $session) !== 'TEMPLATE'){
+            $this->sessionGoogleSynchronize($session);
+        }
+        return $session;
+    }
+    public function delete ($where){
+        if ($sessionId = Utl::getItem('id', $where)){
+            list('parentid' => $programId, 'googleid' => $googleId) = $this->getOne(['where' => ['id' => $sessionId], 'cols' => ['parentid', 'googleid']]);
+            if ($googleId && ($calId = Utl::getItem('googlecalid', $this->getProgram($programId)))){
+                Calendar::deleteEvent($calId, $googleId);
+            }
+        }
+        return parent::delete($where);
+    }
+    public function sessionGoogleSynchronize($session){
+        if (!($programId = Utl::getItem('parentid', $session))){
+            $programId = $this->getOne(['where' => ['id' => $session['id']], 'cols' => ['parentid']])['parentid'];
+        }
+        if ($programId && ! ($programId === Utl::getItem('id', $this->programCache))){
+            $programsModel = Tfk::$registry->get('objectsStore')->objectModel('sptprograms');
+            $this->programCache = $programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['id', 'parentid', 'googlecalid']]);
+            $programId = $this->programCache['id'];
+        }
+        if ($programId && ($calId = Utl::getItem('googlecalid', $this->getProgram($programId)))){
+            $programsModel->googleSynchronizeOne($programId, $calId, $session['id'], true, true, $this->getLogoUrl($programId), '', 'V2');
+        }
+    }
+    public function getProgram($programId){
+        if (!($programId === Utl::getItem('id', $this->programCache))){
+            $programsModel = Tfk::$registry->get('objectsStore')->objectModel('sptprograms');
+            $this->programCache = $programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['id', 'parentid', 'googlecalid']]);
+        }
+        return $this->programCache;
+    }
+    public function getOrganization($programId){
+        if (!$organization = Utl::getItem('organization', $this->programCache)){
+            if ($organizationId = Utl::getItem('parentid', $this->getProgram($programId))){
+                $organizationsModel = Tfk::$registry->get('objectsStore')->objectModel('organizations');
+                $organization = $organizationsModel->getOne(['where' => ['id' => $organizationId], 'cols' => ['id', 'logo']]);
+                $this->programCache['organization'] = empty($organization) ? [] : $organization;
+            }
+        }
+        return $this->programCache['organization'];
+    }
+    public function getLogoImage($programId){
+        return Utl::getItem('logo', $this->getOrganization($programId), Tfk::$registry->logo, Tfk::$registry->logo);
+    }
+    public function getLogoUrl($programId){
+        return HUtl::imageUrl($this->getLogoImage($programId));
     }
 }
 ?>

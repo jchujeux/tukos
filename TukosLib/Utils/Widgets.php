@@ -139,7 +139,7 @@ class Widgets{
     public static function lazyEditor($atts, $editOnly = true){
     	$defAtts = [
             'edit' => [],
-    		'storeedit' => ['editOn'  => 'click', 'minWidth' => 200],
+    		'storeedit' => ['editOn'  => 'click', 'minWidth' => 200/*, 'editorArgs' => ['extraPlugins' => ['statusBar']]*/],
     	    'overview' => ['minWidth' => 150]
     	];
     	if (Tfk::$registry->isRestrictedUser){

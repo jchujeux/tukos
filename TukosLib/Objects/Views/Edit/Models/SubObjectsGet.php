@@ -23,7 +23,7 @@ class SubObjectsGet extends SubObjects{
                     (isset($subObject['allDescendants']) ? $subObject['allDescendants'] : false), 
                     'objToStoreEdit'
                 )['items'];
-                $response['data']['value'][$widgetName] = $subObjectValue;
+                $response['data']['value'][$widgetName] = empty($subObjectValue) ? '' : $subObjectValue;// if we return [] on creating a new parent item, _TukosPaneMixin does not call _GridEditMixin.set('value', ...), as get('value') retuns [], and the subObject watch action for value does not get executed
             }
         }
     }

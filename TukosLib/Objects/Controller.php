@@ -22,7 +22,7 @@ class Controller extends ObjectTranslator{
     protected function exceptionFeedback($request, $title, $eMessage){
         if ($request['action'] === 'Tab'){
             return    ['title'   => $title, 
-                          'content' => '<center><h2>Exception raized during action <i>' . $request['view'] . '</i></h2>' . $eMessage];
+                          'content' => '<center><h2>' . $this->tr('Exceptionduringaction') . ' <i>' . $request['view'] . '</i></h2>' . $eMessage];
         }else{
             Feedback::add([$title => $eMessage]);
             return ['feedback' => Feedback::get()];
@@ -59,7 +59,7 @@ class Controller extends ObjectTranslator{
                 return $this->exceptionFeedback($request, 'tukos 2.0 - Exception (developer error)', $e->getMessage());
             }
             catch(\Exception $e){
-                return $this->exceptionFeedback($request, 'tukos 2.0 - Exception (unknown error)', $e->getMessage());
+                return $this->exceptionFeedback($request, $this->tr('TukosUserError'), $e->getMessage());
             }            
         }else{
             if ($ignoreUnallowed){

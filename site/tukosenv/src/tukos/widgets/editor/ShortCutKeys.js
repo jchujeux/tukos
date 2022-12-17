@@ -25,7 +25,7 @@ function(declare, lang, keys, has, domStyle, expressions, utils){
     				}
     			})
     		}
-    		if (modifyTableSelection.available){
+    		if (modifyTableSelection && modifyTableSelection.available){
     			modifyTableSelection.prepareTable();
     			this.begEdit();
     			lang.hitch(modifyTableSelection, typeof callbackOrString === 'string' ? modifyTableSelection[callbackOrString] : callbackOrString)();

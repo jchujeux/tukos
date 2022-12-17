@@ -109,12 +109,15 @@ function(declare, lang, ArrayIterator, utils, dutils, expressionFilter, expressi
 					    Pmg.serverDialog({action: 'Process', object: "sptsessions", view: 'edit', query: {programId: form.valueOf('id'), athlete: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
 					            function(response){
 					           		const kpis = response.data.kpis;
+									const noMarkAsChanged = grid.noMarkAsChanged;
+									grid.noMarkAsChanged = true;
 									utils.forEach(kpis, function(kpi, id){
 										let idp = idToIdg[id], sessionKpis = kpis[id];
 										utils.forEach(sessionKpis, function(kpi, j){
 											grid.updateDirty(idp, j, kpi);
 										});
 									});
+									grid.noMarkAsChanged = noMarkAsChanged;
 									computeKpis();
 									chartWidget.set('value', {data: chartData, tableColumns: tableColumns, resetAxes: true, axes: axes, resetSeries: true, series: series});
 					            },

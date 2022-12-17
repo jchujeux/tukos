@@ -21,7 +21,7 @@ class View extends AbstractView {
             'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'constraints' => $isMobile ? ['pattern' => '#0000.'] : ['pattern' => '#.#']],
                 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.#']]]]),
             'sport'         => ViewUtils::textBox($this, 'Sport'),
-            'timemoving' => ViewUtils::minutesTextBox($this, 'Time Riding'),
+            'timemoving' => ViewUtils::minutesTextBox($this, 'Timemoving'),
             'avghr' => ViewUtils::numberTextBox($this,'Average Heart Rate', ['atts' => ['edit' => []]]),
             'avgpw' => ViewUtils::numberTextBox($this, 'Average Power', ['atts' => []]),
             'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['hidden' => true]],
