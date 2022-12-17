@@ -192,9 +192,9 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 						}else{
 							var serie = series[seriesName];
 	                        chart.addSeries(seriesName, new StoreSeries(store, kwArgs, serie.value), serie.options);
-							if (!utils.empty(colsToExclude)){
+							/*if (!utils.empty(colsToExclude)){
 								this.chart.axes[this.plots[serie.options.plot].vAxis].opt.title += serie.options.legend + ' ';
-							}
+							}*/
 
 						}
                     }

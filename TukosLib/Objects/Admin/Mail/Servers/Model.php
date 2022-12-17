@@ -10,7 +10,7 @@ class Model extends AbstractModel{
     protected $protocolOptions = ['imap', 'pop3'];
     protected $portOptions     = ['143', '465', '993', '995'];
     protected $securityOptions = ['none', 'ssl', 'ssl/novalidate-cert'];
-    protected $authOptions     = ['normalpwd'];
+    protected $authOptions     = ['normalpwd', 'oauth'];
     protected $softwareOptions = ['Mercury', 'unknown'];
 
     function __construct($objectName, $translator=null){

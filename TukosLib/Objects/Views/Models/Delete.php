@@ -9,7 +9,7 @@ use TukosLib\TukosFramework as Tfk;
 class Delete extends AbstractViewModel {
 
     function deleteOne($values){
-        return $this->model->delete(['id' => $values['id']], $values);
+        return $this->model->delete(['id' => $values['id']]);
     }
 
     function deleteMultiple($valuesArray){

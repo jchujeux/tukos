@@ -63,10 +63,10 @@ return declare(null, {
 			var self = this, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden');
 			if (!hidden){
 				dojo.ready(function(){
-					var chartWidget = form.getWidget(chartWidgetName), chartAtts = chartWidget.get('chartAtts'), fromDateS = form.valueOf('fromdate'), toDateS = form.valueOf('todate'), chartItem, tableItem, 
+					var chartWidget = form.getWidget(chartWidgetName), chartAtts = chartWidget.get('chartAtts'), fromDateS = form.valueOf('displayfromdate') || form.valueOf('fromdate'), toDateS = form.valueOf('todate'), chartItem, tableItem, 
 						chartData = [], tableData = [], grid = form.getWidget('sptsessions'), weekType = chartWidget.get('weektype'), filter = new grid.store.Filter(), presentCols = [], colsTLabel = {},
 						series = chartWidget.get('series'), sessionsFilter = chartAtts.filter, stsDailyDecay = grid.tsbCalculator.get('stsDailyDecay'), ltsDailyDecay = grid.tsbCalculator.get('ltsDailyDecay'), 
-						stsRatio = grid.tsbCalculator.get('stsRatio'), fromDate = form.valueOf('fromdate'), weekNumber = 0,
+						stsRatio = grid.tsbCalculator.get('stsRatio'), fromDate, weekNumber = 0,
 						previousSession = {startdate: fromDateS, sts: grid.tsbCalculator.get('initialSts'), lts: grid.tsbCalculator.get('initialLts')}, mondayDate, mondayDateS, 
 						sundayDate, sundayDateS, hasPMC;
 					utils.forEach(series, function(content, col){

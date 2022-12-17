@@ -66,6 +66,7 @@ function(declare, lang, utils, Pmg){
 					form.resize();
 					form.needsToFreezeWidth = false;
 				}
+				form.viewModeOption = optionName;
 				if (!Pmg.isRestrictedUser()){
 					lang.setObject('customization.viewModeOption', optionName, form);
 				}

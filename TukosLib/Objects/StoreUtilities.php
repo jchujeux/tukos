@@ -130,6 +130,9 @@ class StoreUtilities {
             self::$idColsCache[] = $id;
         }
     }
+    public static function addIdCols($idCols){
+        self::$idColsCache = array_unique(array_merge(self::$idColsCache, $idCols));
+    }
     public static function resetIdColsCache(){
         self::$idColsCache = [];
     }

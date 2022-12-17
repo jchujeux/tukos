@@ -77,7 +77,7 @@ class UpdateTukosConfigIntoUserDb {
                 }
             }
             if (!empty($incompatibleObjects)){
-                echo 'incompatible objects (not copied): ' . var_dump($incompatibleObjects) . '<br>';
+                echo 'incompatible objects or missing id in object table(not copied): ' . var_dump($incompatibleObjects) . '<br>';
             }
             if (!empty($colsToKeepIds)){
                 echo 'the following ids had modified columns that were not updated: ' . implode(',', $colsToKeepIds) . '<br>';

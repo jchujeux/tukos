@@ -302,7 +302,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
             if (beep){
                 this.beep();
             }
-            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("\n") : (serverFeedback  || clientFeedback || '' /*|| this.message('Ok')*/), widget,
+            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("<br>") : (serverFeedback  || clientFeedback || '' /*|| this.message('Ok')*/), widget,
                   currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;
 			if (this.focusedPanel === "leftPanel"){
 				console.log('focus is on left panel');

@@ -6,13 +6,14 @@ use TukosLib\Objects\Directory;
 use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Objects\ItemsExporter;
 use TukosLib\Objects\ItemsImporter;
+use TukosLib\Objects\ContentExporter;
 
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends ObjectTranslator {
-    use itemsExporter, itemsImporter;
+    use itemsExporter, itemsImporter, ContentExporter;
 	public static function translationSets(){
         return [];
     }

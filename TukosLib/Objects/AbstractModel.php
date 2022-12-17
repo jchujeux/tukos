@@ -516,7 +516,7 @@ abstract class AbstractModel extends ObjectTranslator {
         $this->addItemIdCols($duplicate);
         return $duplicate;
     }
-    public function delete ($where, $item = []){
+    public function delete ($where){
         $cols = $cols =['id', 'updator', 'permission', 'updated', 'creator'];
         $oldItems = $this->getAll(['where' => $where, 'cols' => property_exists($this, 'additionalColsForBulkDelete') ? array_merge($cols, $this->additionalColsForBulkDelete) : $cols], [], null, true, false);
         if ($restoreIsBulkProcessing = !$this->isBulkProcessing){

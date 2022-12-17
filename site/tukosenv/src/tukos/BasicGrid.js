@@ -347,7 +347,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 			evt.stopPropagation();
 			const row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column;
 			if (Pmg.isRestrictedUser()){
-	            mutils.setContextMenuItems(this, row ? this.contextMenuItems.canEdit : this.contextMenuItems.header);
+	            mutils.setContextMenuItems(this, row ? (!row.data.id ||  (row.data.updator && row.data.updator === Pmg.get('userid')) ? this.contextMenuItems.canEdit : this.contextMenuItems.noEdit) : this.contextMenuItems.header);
 			}else{
 				let menuItems = lang.clone(this.contextMenuItems), colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';
 				this.clickedColumn = this.column(evt);

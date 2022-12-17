@@ -183,9 +183,9 @@ class Model extends AbstractModel {
     	}
     }
 
-    public function delete ($where, $item = []){
+    public function delete ($where){
     	if ($this->isTukosEvent($where['id'])){
-    		return parent::delete($where, $item);
+    		return parent::delete($where);
     	}else{
     		Calendar::deleteEvent($item['rogooglecalid'], $where['id']);
     		return $where['id'];

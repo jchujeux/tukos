@@ -177,7 +177,9 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                     this.setSummary();
                     this.isUserEdit = false;
                 }
-                wutils.markAsChanged(this, 'noStyle');            	
+                if (!this.noMarkAsChanged){
+                	wutils.markAsChanged(this, 'noStyle');    
+                }        	
             }
         },
                 
@@ -295,13 +297,13 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                     this.updateDirty(item[idp], j, item[j], true);
                 }
             }
+            return item;
         },
         addRow: function(where, item){
             var init={};
             this.prepareInitRow(init);
             item = utils.merge(init, item||{});
-            this.createNewRow(item, (where === 'before' ? this.clickedRow.data : {}), where);
-            return item;
+            return this.createNewRow(item, (where === 'before' ? this.clickedRow.data : {}), where);
         },
         updateRow: function(item){
         	var idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {};
@@ -449,7 +451,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             return true;
         },
         _setValue: function(value){
-        	const idp = this.store.idProperty;
+        	const self = this, idp = this.store.idProperty;
         	var noRefresh = this.noRefreshOnUpdateDirty, resetCounters = true;
         	this.noRefreshOnUpdateDirty = true;
         	this.formulaCache = {};
@@ -527,6 +529,12 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             this.noRefreshOnUpdateDirty = noRefresh;
 			this.set('collection', this.store.getRootCollection());
             this.setSummary();
+    		setTimeout(function(){
+	                const noMarkAsChanged = self.noMarkAsChanged;
+	                self.noMarkAsChanged = true;
+    				wutils.watchCallback(self, 'value', null, value);
+    				self.noMarkAsChanged = noMarkAsChanged;
+    			}, 0);
         },
 
         _setDuplicate: function(value){

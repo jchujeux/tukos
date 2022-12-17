@@ -58,7 +58,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 	                    	this.markIfChanged = true;
 	                        this.watchContext = 'user';
 	                        this.setUserContextPaths(); 
-	                    }));
+	                    }), 0);
 						this.needsToFreezeWidth = true;
 						this.resize();
 						this.needsToFreezeWidth = false;

@@ -19,7 +19,7 @@ function(declare, lang, dst, Widget, _FocusMixin, TextBox, StoreSelect, wutils, 
             		//self.numberField.set('disabled', true);
             		dst.set(self.numberField.domNode, 'display', 'none');
             	}else{
-            		self.numberField.set('disabled', false);
+            		//self.numberField.set('disabled', false);
             		dst.set(self.numberField.domNode, 'display', '');
             	}
             });

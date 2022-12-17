@@ -21,6 +21,7 @@ class CleanTukosConfig {
             if ($countDeleted){
                 echo "\r\nCleanTukosConfig - $countDeleted removed ids in table tukos: " . implode(', ', array_column($idsToDelete, 'id'));
             }
+            $stmt = $configStore->query("UPDATE tukos SET permission = 'RL'");
             foreach ($objectsToConsider as $objectName){
                 if ($nonEmpty = $configStore->query("SELECT 1 as NON_EMPTY from $objectName LIMIT 1")->fetch()){
                     $idsToDelete = [];
@@ -31,7 +32,7 @@ class CleanTukosConfig {
             		    echo "\r\nCleanTukosConfig - $countDeleted removed ids in table $objectName : they were not found in tukos: ". implode(', ', $idsToDelete);
             		    $nonEmpty = $configStore->query("SELECT 1 as NON_EMPTY from $objectName LIMIT 1")->fetch();            		}
                 }
-                if (!$nonEmpty){
+                if (!$nonEmpty && $objectName !== 'scriptsoutputs'){
                     $configStore->query("drop table $objectName");
                     $droppedTables[] = $objectName;
                 }

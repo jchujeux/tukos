@@ -126,10 +126,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/store/Memory",  "dojo/st
             
               var item = {
                 id: calendar.nextItemId,
-                summary: "New event " + calendar.nextItemId,
+                summary: Pmg.message("newevent", calendar.form.object),// + ' ' + calendar.nextItemId,
                 startTime: start,
                 endTime: end,
-                //duration: end - start,
                 allDay: view.viewKind == "matrix"
               };
             

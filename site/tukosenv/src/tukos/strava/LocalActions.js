@@ -6,11 +6,11 @@ function(declare, lang, utils, Pmg){
 			lang.mixin(this, args);
 		},
 		authorizeStrava: function(pane){
-			var form = pane.form, athleteId = form.valueOf(this.athlete), coachId = form.valueOf(this.coach), contentMessage = athleteId ? '' : Pmg.message('needtodefineathlete', form.objectName);
-			contentMessage = coachId ? '' : ((contentMessage ? ' & ' : '') + Pmg.message('needtodefinecoach', form.objectName));
+			var form = pane.form, athleteId = form.valueOf(this.athlete), coachId = form.valueOf(this.coach), contentMessage = athleteId ? '' : Pmg.message('needtodefineathlete', form.object);
+			contentMessage = coachId ? '' : ((contentMessage ? ' & ' : '') + Pmg.message('needtodefinecoach', form.object);
 			pane.close();
 			if (contentMessage){
-				Pmg.alert({title: Pmg.message('cannotsynchronizestrava', form.objectName), content: contentMessage});
+				Pmg.alert({title: Pmg.message('cannotsynchronizestrava', form.object), content: contentMessage});
 			}else{
             	Pmg.setFeedback(Pmg.message('actionDoing'));
             	form.serverDialog({action:'Process', query: {id: form.valueOf('id'), athleteid: athleteId, coachid: coachId,

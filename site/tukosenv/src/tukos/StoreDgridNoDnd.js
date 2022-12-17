@@ -33,6 +33,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
             			{atts: {label: Pmg.message('duplicate'), onClick: duplicateRow}},
             			{atts: {label: Pmg.message('delete'), onClick: function(evt){self.deleteRow(false, false, true)}}},
             		]);
+            		this.contextMenuItems.noEdit = this.contextMenuItems.row.concat([
+	            	    {atts: {label: Pmg.message('add'), onClick: lang.hitch(this, this.addRow)}},
+            			{atts: {label: Pmg.message('duplicate'), onClick: duplicateRow}},
+            		]);
             		this.contextMenuItems.header = [{atts: {label: Pmg.message('add'), onClick: lang.hitch(this, this.addRow)}}];
             	}else{
 	            	var addedItems = [

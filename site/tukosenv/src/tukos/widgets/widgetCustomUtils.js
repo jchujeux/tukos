@@ -46,7 +46,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
             			TextBox: {type: 'TextBox', atts: {widgetName: 'attValue', style: {width: '20em'}, hidden: true}},
             			StoreSelect: {type: 'StoreSelect', atts: {placeHolder: messages.selectvalue, style: {width: 'auto'}, hidden: true, storeArgs: {data: []}}},
             			RestSelect: {type: 'RestSelect', atts: {placeHolder: messages.selectvalue, style: {width: 'auto'}, hidden: true}},
-						MultiSelect: {type: 'MultiSelect', atts: {widgetName: 'attValue', hidden: true, style: {width: '15em', height: '200px'}}},
+						MultiSelect: {type: 'MultiSelect', atts: {widgetName: 'attValue', hidden: true, style: {width: 'auto', height: '200px'}}},
 						SimpleDgridNoDnd: {type: 'SimpleDgridNoDnd', atts: {widgetName: 'attValue', hidden: true, dynamicColumns: true, adjustLastColumn: false, style: {maxWidth: '1000px'}}},
                         cancel: {type: 'TukosButton', atts: {label: messages.close, onClickAction:  'this.pane.close();'}},
                         apply: {type: 'TukosButton', atts: {label: messages.apply}}

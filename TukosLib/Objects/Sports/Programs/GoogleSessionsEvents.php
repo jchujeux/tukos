@@ -121,7 +121,7 @@ trait GoogleSessionsEvents {
                     $deleted +=1;
                 }
             }
-            Feedback::add($this->tr('synchronizationoutcome') . ' - ' . $this->tr('created') . ': ' .  $created . ' - ' . $this->tr('updated') . ': ' . $updated . ' - ' .$this->tr('deleted') . ': ' . $deleted);
+            Feedback::add($this->tr('Googlesynchronizationoutcome') . ' - ' . $this->tr('created') . ': ' .  $created . ' - ' . $this->tr('updated') . ': ' . $updated . ' - ' .$this->tr('deleted') . ': ' . $deleted);
             if (!$performedOnly){
                 $this->updateOne(['id' => $id, 'lastsynctime' => date('Y-m-d H:i:s')]);
             }
@@ -148,16 +148,19 @@ trait GoogleSessionsEvents {
         };
         $session = $sessionsModel->getOne(['where' => ['id' => $sessionIdToSync],  'cols' => ['id', 'name', 'startdate', 'sessionid', 'duration', 'intensity', 'sport', 'stress', 'warmup', 'mainactivity', 'warmdown', 'comments', 'googleid', 'mode', 'sensations', 'athletecomments', 'coachcomments']]);
         $description = $this->googleDescription($session, $sessionView, $id, $includeTrackingFormUrl, $synchroFlag, $synchrostreams, $logoFile, $formPresentation, $formVersion);
+        $isPerformed = $session['mode'] === 'performed';
+        $summary = ($isPerformed ? $this->tr('performedprefix') : '') .  $session['name'];
         $eventDescription = json_decode(Tfk::$registry->get('translatorsStore')->substituteTranslations(json_encode(
-            ['start' => ['date' => $session['startdate']], 'end' => ['date' => date('Y-m-d', strtotime($session['startdate'] . ' +1 day'))], 'summary' => "({$this->tr('performedprefix')}){$session['name']}", 'description' => $description])), true);
+            ['start' => ['date' => $session['startdate']], 'end' => ['date' => date('Y-m-d', strtotime($session['startdate'] . ' +1 day'))], 'summary' => $summary, 'description' => $description])), true);
         if (!empty($intensity = $session['intensity'])){
             $eventDescription['colorId'] = Calendar::getEventColorId(Sports::$colorNameToHex[Sports::$intensityColorsMap[$intensity]]);
         }
-        if ($session['mode'] === 'performed'){
+        if ($isPerformed){
             $eventDescription['extendedProperties'] = ['private' => ['performed' => 'yes'], 'shared' => 'null'];
         }
         if ((!$googleEventId = Utl::getItem('googleid', $session)) || empty($event = Calendar::getEvent($calId, $session['googleid'])) || $event->getStatus() === 'cancelled'){
             $event = Calendar::createEvent($calId, $completeTrackingFormUrl($eventDescription));
+            //Feedback::add($this->tr('Createdcalendarevent') . ': ' . $session['id']);
             $sessionsModel->updateOne(['id' => $session['id'], 'googleid' => $event->getId()]);
         }else{
             try {
@@ -166,6 +169,7 @@ trait GoogleSessionsEvents {
                 }
                 if ($eventDescription != $event){
                     Calendar::updateEvent($calId, $googleEventId, $completeTrackingFormUrl($eventDescription));
+                    //Feedback::add($this->tr('Updatedcalendarevent') . ': ' . $session['id']);
                 }
             } catch (\Exception $e) {
                 $event = Calendar::createEvent($calId, $completeTrackingFormUrl($eventDescription));
