@@ -154,7 +154,7 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 								}
 								lts = self.exponentialAvg(item.trimphr || item.trimpavghr || 0, previousItem.lts, daysDifference, self.ltsDailyDecay);
 								if (Math.abs(lts - Number(item.lts || 0)) > 0.01){
-									grid.updateDirty(item[idp], 'lts', lts);
+									grid.updateDirty(item[idp], 'lts', lts, isUserEdit);
 								}
 								tsb = lts - sts * self.stsRatio;
 								if (Math.abs(tsb - Number(item.tsb || 0)) > 0.01){

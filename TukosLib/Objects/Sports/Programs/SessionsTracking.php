@@ -17,9 +17,8 @@ trait SessionsTracking {
                     $isSportsProgram ? [
                         'eventformurl' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showeventtrackingformurl'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('eventformurl')])),
                         'synchroflag' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('synchroflag'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('synchroflag')])),
-                        'synchrosource' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['strava', 'goldencheetah'], $tr)], 'label' => $tr('synchrosource'), 
+                        'synchrosource' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['strava'], $tr)], 'label' => $tr('synchrosource'), 
                             'onWatchLocalAction' => ['value' => ['synchrosource' => ['localActionStatus' => ['action' => 'sWidget.pane.form.setValueOf("synchrosource", newValue);']]]]])),
-                        'formlogo' => Widgets::textBox(Widgets::complete(['label' => $tr('trackingformlogo'), 'style' => ['width' => '15em'], 'onWatchLocalAction' => $this->watchLocalAction('formlogo')])),
                         'formpresentation' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['MobileTextBox', 'default'], $tr)], 'label' => $tr('formpresentation'),
                             'onWatchLocalAction' => $this->watchLocalAction('formpresentation')])),
                         'version' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['V2'], $tr, [false, 'ucfirst', false, false])], 'label' => $tr('version'),
@@ -34,7 +33,7 @@ trait SessionsTracking {
                         $isSportsProgram ? [
                             'row1' => [
                                 'tableAtts' =>['cols' => 6,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
-                                'widgets' => ['eventformurl', 'synchroflag', 'synchrosource', 'formlogo', 'formpresentation', 'version'],
+                                'widgets' => ['eventformurl', 'synchroflag', 'synchrosource', 'formpresentation', 'version'],
                             ]] : [], [
                                 'headerRow' => [],
                                 'row2' => [
@@ -51,8 +50,6 @@ trait SessionsTracking {
                 ],
                 'onOpenAction' => $this->onOpenAction(),
         ]];
-        $GCTracking = new GCSessionsTracking($this);
-        $GCTracking->update($this->actionWidgets['sessionstracking']['atts']['dialogDescription']['paneDescription'], $isSportsProgram, $sessionsWidget, $metricsToInclude);
         $STTracking = new StravaSessionsTracking($this);
         $STTracking->update($this->actionWidgets['sessionstracking']['atts']['dialogDescription']['paneDescription'], $isSportsProgram, $sessionsWidget, $metricsToInclude);
         $this->actionWidgets['sessionstracking']['atts']['dialogDescription']['paneDescription']['onOpenAction'] .= 'pane.resize();';

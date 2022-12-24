@@ -73,7 +73,7 @@ trait Kpis {
                     $kpis[$sessionId][$kpiName] = KF::$funcName(...$description['arguments']);
                 }
             }
-            $this->updateOne(newValues: ['id' => $sessionId, 'kpiscache' => Utl::getItem('sessionId', $kpis, 0, 0)], jsonFilter: true);
+            $this->updateOne(newValues: ['id' => $sessionId, 'kpiscache' => Utl::getItem($sessionId, $kpis, 0, 0)], jsonFilter: true);
         }
         return ['data' => ['kpis' => $kpis]];
     }

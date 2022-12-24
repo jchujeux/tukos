@@ -52,22 +52,6 @@ EOT;
   protected function exportCustomContent($tr){
       $this->view->addToTranslate(['session', 'sportimage', 'content']);
       return <<<EOT
-/*
-    Pmg.serverDialog({object: 'sptathletes', view: 'Edit', action: 'GetItem', query: {id: newValue, storeatts: JSON.stringify({cols: ['id']})}}).then(
-        function(response){
-        	return Pmg.serverDialog({object: 'users', view: 'Edit', action: 'GetItem', query: {parentid: response.data.value.id, storeatts: JSON.stringify({cols: []})}}).then(
-            	function (response){
-                    acl.set('value', '');
-                    if (response.data.value.id){
-                        acl.addRow(null, {rowId:1,userid: response.data.value.id,permission:"2"});
-                    }else{
-                        Pmg.setFeedback(Pmg.message('sportsmanhasnouserassociatednoacl', 'sptprograms'));
-                    }
-    			}
-    		);
-        }
-    );
-*/
 var self = this, form = this.form, coachOrganization = form.valueOf('coachorganization');
 return Pmg.serverDialog({object: 'organizations', view: 'Edit', action: 'GetItem', query: {id: coachOrganization, storeatts: JSON.stringify({cols: ['logo']})}}).then(function(response){
      var logo = response.data.value.logo, html = '', selectedWeeks = self.getWidget('optionalweeks').get('value'), 

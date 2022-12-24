@@ -4,8 +4,6 @@ namespace TukosLib\Objects\Sports\Sessions\Views\Edit;
 
 use TukosLib\Objects\Views\Edit\View as EditView;
 use TukosLib\Utils\Utilities as Utl;
-use TukosLib\Objects\Sports\GoldenCheetah as GC;
-
 
 class View extends EditView{
 

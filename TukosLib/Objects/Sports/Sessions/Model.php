@@ -5,6 +5,7 @@ use TukosLib\Objects\Sports\Sports;
 use TukosLib\Objects\AbstractModel;
 use TukosLib\Objects\Sports\TrainingFormulaes as TF;
 use TukosLib\Google\Calendar;
+use TukosLib\Utils\Feedback;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\HtmlUtilities as HUtl;
@@ -126,8 +127,9 @@ class Model extends AbstractModel {
         if ($this->user->isRestrictedUser() && $programId = Utl::getItem('parentid', $atts['where'])){
             $mostRecentPerformed = $this->getOne(['where' => ['parentid' => $programId, 'mode' => 'performed'], 'cols' => ['startdate'], 'orderBy' => ['startdate' => 'DESC']]);
             $programModel = Tfk::$registry->get('objectsStore')->objectModel('sptprograms');
-            $programInfo = $programModel->getOne(['where' => ['id' => $programId], 'cols' => ['id', 'parentid', 'fromdate']]);
-            $programModel->stravaProgramSynchronize(array_merge($programInfo, ['ignoresessionflag' => false, 'synchrostart' => empty($mostRecentPerformed) ? $programInfo['fromdate'] : DUtl::dayAfter($mostRecentPerformed['startdate']), 'synchroend' => date('Y-m-d'), 'synchrostreams' => true]));
+            $programInfo = $programModel->getOne(['where' => ['id' => $programId], 'cols' => ['id', 'parentid', 'fromdate', 'googlecalid']]);
+            $programModel->stravaProgramSynchronize(array_merge($programInfo, ['ignoresessionflag' => false, 'synchrostart' => empty($mostRecentPerformed) ? $programInfo['fromdate'] : DUtl::dayAfter($mostRecentPerformed['startdate']), 'synchroend' => date('Y-m-d'),
+                'synchrostreams' => true]));
         }
         return parent::getAllExtended($atts);
     }
@@ -140,7 +142,7 @@ class Model extends AbstractModel {
     }
     public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
         $updated =  parent::updateOneExtended($newValues, $atts, $insertIfNoOld, $jsonFilter, $init);
-        if ($updated && Utl::getItem('grade', $newValues) !== 'TEMPLATE'){
+        if ($updated){
             $this->sessionGoogleSynchronize($updated);
         }
         return $updated;
@@ -165,34 +167,33 @@ class Model extends AbstractModel {
         if (!($programId = Utl::getItem('parentid', $session))){
             $programId = $this->getOne(['where' => ['id' => $session['id']], 'cols' => ['parentid']])['parentid'];
         }
-        if ($programId && ! ($programId === Utl::getItem('id', $this->programCache))){
-            $programsModel = Tfk::$registry->get('objectsStore')->objectModel('sptprograms');
-            $this->programCache = $programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['id', 'parentid', 'googlecalid']]);
-            $programId = $this->programCache['id'];
-        }
-        if ($programId && ($calId = Utl::getItem('googlecalid', $this->getProgram($programId)))){
-            $programsModel->googleSynchronizeOne($programId, $calId, $session['id'], true, true, $this->getLogoUrl($programId), '', 'V2');
+        $programId = Utl::getItem('id', $this->getProgram($programId));
+        if (($programId = Utl::getItem('id', $this->getProgram($programId))) && ($calId = Utl::getItem('googlecalid', $this->programCache))){
+            $this->programsModel->googleSynchronizeOne($programId, $calId, $session['id'], true, true, '', 'V2');
         }
     }
     public function getProgram($programId){
         if (!($programId === Utl::getItem('id', $this->programCache))){
-            $programsModel = Tfk::$registry->get('objectsStore')->objectModel('sptprograms');
-            $this->programCache = $programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['id', 'parentid', 'googlecalid']]);
+            $this->programsModel = Tfk::$registry->get('objectsStore')->objectModel('sptprograms');
+            $this->programCache = $this->programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['id', 'parentid', 'googlecalid', 'coachorganization']]);
         }
         return $this->programCache;
     }
-    public function getOrganization($programId){
-        if (!$organization = Utl::getItem('organization', $this->programCache)){
-            if ($organizationId = Utl::getItem('parentid', $this->getProgram($programId))){
+    public function getCoachOrganization($programId){
+        if (!$organization = Utl::getItem('organization', $this->getProgram($programId))){
+            if ($organizationId = Utl::getItem('coachorganization', $this->programCache)){
                 $organizationsModel = Tfk::$registry->get('objectsStore')->objectModel('organizations');
                 $organization = $organizationsModel->getOne(['where' => ['id' => $organizationId], 'cols' => ['id', 'logo']]);
                 $this->programCache['organization'] = empty($organization) ? [] : $organization;
+            }else{
+                Feedback::add('Nocoachorganization');
+                $this->programCache['organization'] = [];
             }
         }
         return $this->programCache['organization'];
     }
     public function getLogoImage($programId){
-        return Utl::getItem('logo', $this->getOrganization($programId), Tfk::$registry->logo, Tfk::$registry->logo);
+        return Utl::getItem('logo', $this->getCoachOrganization($programId), Tfk::$registry->logo, Tfk::$registry->logo);
     }
     public function getLogoUrl($programId){
         return HUtl::imageUrl($this->getLogoImage($programId));

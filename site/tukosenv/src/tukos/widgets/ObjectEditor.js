@@ -11,17 +11,18 @@ function(declare, lang, dct, Widget, utils, hiutils, wutils){
         	if (this.valueNode){
                     dct.empty(this.valueNode);
                 }else{
-                    if (!this.objectNode){
+                    /*if (!this.objectNode){
                         if (this.divAtts){
-                            this.objectNode = dct.create('div', args.divAtts, this.domNode);
+                            this.objectNode = dct.create('div', this.divAtts, this.domNode);
                         }else{
                             this.objectNode = this.domNode;
                         }
-                    }
+                    }*/
                 }
                 this.selectedLeaves = {};
                 this.valueNode =hiutils.objectTable(value, this.hasCheckboxes, this.selectedLeaves, this);
-                this.objectNode.appendChild(this.valueNode);
+                //this.objectNode.appendChild(this.valueNode);
+                this.domNode.appendChild(this.valueNode);
         },
         _getValueAttr: function(){
         	var value = this._get('value');
