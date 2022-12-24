@@ -55,7 +55,7 @@ function(declare, lang, dct, dst, popup, TooltipDialog, focus, Pmg){
             	dst.set(widget.layoutContainer, 'display', checked ? '' : 'none');
             	widget.set('hidden', !checked);
             }else{
-                if (widget.disabled){
+                if (widget.disabled && widget.widgetType === 'Textarea'){
                     widget.hidden = !checked;//JCH see below
                 }else{
                     widget.set('hidden', !checked);//JCH: for disabled textarea, this generates NS_ERROR_UNEXPECTED under firefox(!)

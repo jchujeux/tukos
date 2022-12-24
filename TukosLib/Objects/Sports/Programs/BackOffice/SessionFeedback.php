@@ -31,7 +31,7 @@ class SessionFeedback extends ObjectTranslator{
         }
         $this->dataWidgets['startdate']['atts']['edit']['onChangeLocalAction']['startdate']['localActionStatus'] = $this->onDateOrSessionIdChangeLocalAction($query);
         $this->dataWidgets['sessionid']['atts']['edit']['onChangeLocalAction']['sessionid']['localActionStatus'] = $this->onDateOrSessionIdChangeLocalAction($query);
-        $this->onOpenAction = $this->getOnOpenAction(Utl::getItem('gcflag', $query, Utl::getItem('synchroflag', $query, false)), 'this');
+        $this->onOpenAction = $this->getOnOpenAction(Utl::getItem('synchroflag', $query, false), 'this');
         if ($presentation = Utl::getItem('presentation', $query)){
             switch($presentation){
                 case 'MobileTextBox':
@@ -104,14 +104,14 @@ class SessionFeedback extends ObjectTranslator{
         $isMobile = $this->isMobile;
         $title = $this->tr('sessiontrackingformtitle');
         $actionWidgets['title'] = ['type' => 'HtmlContent', 'atts' => ['value' => $this->isMobile ?  $title : '<h1>' . $title . '</h1>']];
-        if ($logo = Utl::getItem('logo', $query)){
-            $actionWidgets['logo'] = ['type' => 'HtmlContent', 'atts' => ['value' => 
-                '<img alt="logo" src="' . Tfk::$publicDir . 'images/' . $logo . '" style="height: ' . ($isMobile ? '40' : '80') . 'px; width: ' . ($isMobile ? '100' : '200') . 'px;' . ($isMobile ? 'float: right;' : '') . '">']];
-        }
+        Feedback::suspend();
+        $actionWidgets['logo'] = ['type' => 'HtmlContent', 'atts' => ['value' => 
+            '<img alt="logo" src="' . $this->sessionsModel->getLogoUrl($query['parentid']) . '" style="height: ' . ($isMobile ? '40' : '80') . 'px; maxWidth: ' . ($isMobile ? '100' : '200') . 'px;' . ($isMobile ? 'float: right;' : '') . '">']];
+        Feedback::resume();
         $query['targetdb'] = rawurlencode($query['targetdb']);
         $actionWidgets['send'] = ['atts' => ['urlArgs' => ['query' => $query]]];
         $actionWidgets['reset'] = ['atts' => ['urlArgs' => ['query' => $query]]];
-        $actionWidgets['showsynchrofields'] = ['type' => 'TukosButton', 'atts' => [/*'label' => $this->view->tr('showsynchrofields'), */'hidden' => (empty($query['gcflag']) && empty($query['synchroflag'])) ? true : false, 'onClickAction' => $this->showSynchroFieldsOnClickAction()]];
+        $actionWidgets['showsynchrofields'] = ['type' => 'TukosButton', 'atts' => ['hidden' => (empty($query['synchroflag'])) ? true : false, 'onClickAction' => $this->showSynchroFieldsOnClickAction()]];
         $actionWidgets['showweeklies'] = ['type' => 'TukosButton', 'atts' => ['onClickAction' => $this->showWeekliesOnClickAction()]];
         $this->view->addToTranslate(['showsynchrofields', 'hidesynchrofields', 'showweeklies', 'hideweeklies']);
         return $actionWidgets;
@@ -149,8 +149,8 @@ class SessionFeedback extends ObjectTranslator{
                     $this->programsModel->stravaProgramSynchronize([
                         'id' => $programId, 'parentid' => $programInformation['parentid'], 'ignoresessionflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrosource' => $synchroSource, 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
                         'updator' => $programInformation['updator'], 'googlecalid' => $programInformation['googlecalid']]);
-                    Feedback::resume();
                     $performedSession = $this->sessionsModel->getOne(['where' => $this->user->filterPrivate(['id' => $id], 'sptsessions'), 'cols' => $this->version->formObjectWidgets()]);
+                    Feedback::resume();
                 }
             }
             Feedback::add($this->tr('Updatesessionfeedback'));
@@ -163,8 +163,8 @@ class SessionFeedback extends ObjectTranslator{
                     $this->programsModel->stravaProgramSynchronize([
                         'id' => $programId, 'parentid' => $programInformation['parentid'], 'ignoresessionflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrosource' => $synchroSource, 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
                         'updator' => $programInformation['updator'], 'googlecalid' => $programInformation['googlecalid']]);
-                    Feedback::resume();
                     $performedSession = $this->sessionsModel->getOne(['where' => $this->user->filterPrivate(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'sessionid' => $query['sessionid'],  'mode' => 'performed']), 'sptsessions'), 'cols' => $this->version->formObjectWidgets()]);
+                    Feedback::resume();
                 }
                 if (empty($performedSession)){
                     $performedSession = ['id' => '', 'sportsman' => $programInformation['parentid'], 'startdate' => $query['date'], 'sessionid' => $query['sessionid'], 'name' => rawurldecode($query['name']), 'sport' => rawurldecode($query['sport']), 'duration' => '0', 'distance' => 0, 'elevationgain' => 0];
@@ -257,7 +257,7 @@ class SessionFeedback extends ObjectTranslator{
             //}
         }
         if ($savedCount){
-            $this->programsModel->googleSynchronizeOne($programId, $programInformation['googlecalid'], $id, Utl::getItem('gcflag', $query, Utl::getItem('synchroflag', $query)), Utl::getItem('synchrostreams', $query), Utl::getItem('logo', $query), Utl::getItem('presentation', $query),
+            $this->programsModel->googleSynchronizeOne($programId, $programInformation['googlecalid'], $id, Utl::getItem('synchroflag', $query), Utl::getItem('synchrostreams', $query), Utl::getItem('logo', $query), Utl::getItem('presentation', $query),
                 Utl::getItem('version', $query));
             Feedback::add($this->tr('sessionsaved'));
         }else{

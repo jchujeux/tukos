@@ -186,21 +186,20 @@ class Utilities{
             unset($subArray);
         }
     }
-    public static function array_filter_recursive($array, $callback = null){
-        foreach ($array as $key => &$value){
-            if (is_array($value)){
-                $value = Self::array_filter_recursive($value, $callback);
-            }
-        }
-        if ($callback === null){
-            return array_filter($array, function($value){
-                return (!empty($value)) || $value === 0;
-            });
+    public static function array_filter_recursive($array){
+        if (empty($array)){
+            return $array;
         }else{
-            return array_filter($array, $callback);
+            foreach ($array as $key => &$value){
+                if (is_array($value)){
+                    $value = Self::array_filter_recursive($value);
+                }
+            }
+            return array_filter($array, function($value){
+                return !is_array($value) || !empty($value);
+            });
         }
     }
-
     public static function array_contains(&$array, &$subArray){
         foreach ($subArray as $key => &$value){
             if (isset($array[$key])){

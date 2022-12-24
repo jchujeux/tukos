@@ -24,6 +24,7 @@ class Model extends AbstractModel {
             'coach' => 'MEDIUMINT DEFAULT NULL',
             'sportsmanemail' => 'VARCHAR(50) DEFAULT NULL',
             'coachemail' => 'VARCHAR(50) DEFAULT NULL',
+            'coachorganization' => 'VARCHAR(50) DEFAULT NULL',
             'fromdate' => 'VARCHAR(30)  DEFAULT NULL',
             'duration'  => 'VARCHAR(30)  DEFAULT NULL',
             'todate'     => 'VARCHAR(30)  DEFAULT NULL',
@@ -78,7 +79,7 @@ class Model extends AbstractModel {
     public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
         $this->processLargeCols($newValues);
         if (!$jsonFilter && (!empty($displayfromCols = array_diff(array_keys($newValues), $this->allCols)))){
-            $newValues['displayfrom'] = Utl::extractItems($displayfromCols, $newValues);
+            $newValues['displayfrom'] = array_intersect_key(Utl::extractItems($displayfromCols, $newValues), ['displayfromdate' => true, 'displayfromsts' => true, 'displayfromlts' => true]);
         }
         return $this->updateOne($newValues, $atts, $insertIfNoOld, true, $init);
     }

@@ -5,7 +5,6 @@ use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\Sports\Sessions\Views\Edit\View as SessionsEditView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Objects\Sports\Sports;
-use TukosLib\Objects\Sports\GoldenCheetah as GC;
 use TukosLib\Objects\Collab\Calendars\CalendarsViewUtils;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
@@ -284,7 +283,7 @@ class View extends AbstractView {
 		        ]]]]),
 		    'displayfromsts' => ViewUtils::tukosNumberBox($this, 'Displayinitialsts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##']], 'overview' => ['hidden' => true]]]),
 		    'displayfromlts' => ViewUtils::tukosNumberBox($this, 'Displayinitiallts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##']],  'overview' => ['hidden' => true]]]),
-		    'displayfrom' => ViewUtils::textBox($this, 'indicators')
+		    //'displayfrom' => ViewUtils::textBox($this, 'indicators')
 		];
 	
 		$subObjects = [
@@ -332,7 +331,7 @@ class View extends AbstractView {
 				    'noCopyCols' => ['googleid', 'stravaid'],
 				    'editActionLayout' => SessionsEditView::editDialogLayout(),
 				],
-				'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@displayfromdate'], 
+			    'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@displayfromdate'], ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], 
 				    [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
 			    'removeCols' => $this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] : ['sportsman','grade', 'configstatus'],
 			    'hiddenCols' => ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',

@@ -4,7 +4,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
     return {
       
     objectTable: function(object, hasCheckboxes, selectedLeaves, atts){
-        var checkboxPath = [],
+        var checkboxPath = [], maxWidth = atts.maxColWidth || '';
                 keyToHtml = lang.hitch(this, function(key){
                     return (atts.keyToHtml) ?  this[atts.keyToHtml](key) : key;
                 });
@@ -15,14 +15,16 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
                 if (typeof object[key] === 'object'){
                     var row = addTableRows(object[key]), rowCount = row.count;
                     if (rowCount > 0){
-                        var keyTd = dct.create('td', {innerHTML: keyToHtml(key), style: "border: 1px solid black; padding: 5px; vertical-align:top;", rowspan: rowCount});
+                        var keyTd = dct.create('td', {style: "border: 1px solid black; padding: 5px; vertical-align:top;", rowspan: rowCount});
+                    	dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: keyToHtml(key)}, keyTd);
                         row.tr.insertBefore(keyTd, row.tr.firstChild);
                         rowToReturn.count += rowCount;
                     }
                 }else{
                     var row = {tr:dct.create('tr', null, table)};
-                    var keyTd   = dct.create('td', {innerHTML: keyToHtml(key), style: "border: 1px solid black;padding: 5px; vertical-align:top;"} , row.tr);
-                    var valueTd = dct.create('td', {innerHTML: object[key], style: "border: 1px solid black;padding: 5px; vertical-align:top;font-style: italic"}, row.tr);
+                    dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: keyToHtml(key)}, dct.create('td', {style: "border: 1px solid black;padding: 5px; vertical-align:top;"} , row.tr));
+                    dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: object[key]}, dct.create('td', {style: "border: 1px solid black;padding: 5px; vertical-align:top;font-style: italic"} , row.tr));
+                    //var valueTd = dct.create('td', {innerHTML: object[key], style: "border: 1px solid black;padding: 5px; vertical-align:top;font-style: italic" + maxWidth}, row.tr);
                     if (hasCheckboxes){
                         var stringPath = checkboxPath.join('.');
                         var checkboxTd = dct.create('td', {style: "border: 1px solid black;padding: 5px;"}, row.tr);
@@ -52,7 +54,7 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
             return rowToReturn;
         }
         var table = dct.create('table', {style: "border: 1px solid black; border-collapse: collapse; background-color: lightblue;"});
-        addTableRows(object, selectedLeaves);
+        addTableRows(object);
         return table;  
     },
     buildHtml: function (htmlElements){

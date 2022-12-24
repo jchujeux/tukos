@@ -60,8 +60,12 @@ class View {
                 'reset' => ['type' => 'ObjectReset', 'atts' => ['serverAction' => 'Reset', 'label' => $this->view->tr('Reset'),
                     'urlArgs' => ['query' => ['form' => 'BackOfficeForm', 'object' => 'backOfficeObject']]]],
                 'clearFeedback'  => ['type' => 'ObjectFieldClear', 'atts' => ['label' => $this->view->tr('Clear Feedback'), 'fieldToClear' => 'feedback']],
+                'feedback'  => Widgets::htmlContent(
+                    ['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'disabled' => true, 'style' => ['minHeight' => '30px', 'maxHeight' => '50px', 'minWidth' => '30em', 'overflow' => 'auto', 'backgroundColor' => '#F0F0F0']]),
+/*
                 'feedback'  => Widgets::tukosTextArea(
                     ['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 100, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),
+*/
             ];
             $this->actionWidgets = Utl::array_merge_recursive_replace($this->actionWidgets, $this->view->getActionWidgets($query));
         }
