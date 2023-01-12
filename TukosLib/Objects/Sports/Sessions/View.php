@@ -30,21 +30,21 @@ class View extends AbstractView {
             'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => [
                 'edit' => ['onChangeLocalAction' => ['sessionid' => ['localActionStatus' => $this->adjustSessionIdLocalAction('startdate')]]],
                 'storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
-            'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'ucfirst', true, false]),
+            'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'ucfirst', false, true, false]),
             'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => [
                 'edit' => ['label' => $this->tr('Duration') . ' (hh:mn)', 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:10', 'visibleRange' => 'T01:00']/*, 'style' => ['width' => '6em']*/,
                 'onChangeLocalAction' => ['trimpavghr' => ['localActionStatus' => $this->updatetrimpAvgHr()]]],
             ]]),
             'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'constraints' => $isMobile ? ['pattern' => '#000.0'] : ['pattern' => '#.##']], 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.#']]]]),
             'elevationgain' => ViewUtils::tukosNumberBox($this, 'Elevationgain', ['atts' => ['edit' => ['label' => $this->tr('Elevationgain') . ' (m)', 'constraints' => $isMobile ? ['pattern' => '#0000.'] : ['pattern' => '#.#']], 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.#']]]]),
-            'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Plannedintensity', [true, 'ucfirst', true, false]),
+            'intensity'     => ViewUtils::storeSelect('intensity', $this, 'Plannedintensity', [true, 'ucfirst', true, true, false]),
             'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport', null, ['atts' => ['edit' => [
                     'onWatchLocalAction' => ['value' => [
                         'intensity' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "if (newValue === 'rest'){return '';}else{return undefined;}"]],
                         'stress' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "if (newValue === 'rest'){return '';}else{return undefined;}"]],
                     ]],
             ]]]),
-            'stress'        => ViewUtils::storeSelect('stress', $this, 'Plannedqsm', [true, 'ucfirst', true, false]),
+            'stress'        => ViewUtils::storeSelect('stress', $this, 'Plannedqsm', [true, 'ucfirst', true, true, false]),
             'warmup'    => ViewUtils::lazyEditor($this, 'warmup', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
             'mainactivity'    => ViewUtils::lazyEditor($this, 'mainactivity', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
             'warmdown'    => ViewUtils::lazyEditor($this, 'warmdown', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
@@ -52,7 +52,7 @@ class View extends AbstractView {
             'mainactivitydetails'    => ViewUtils::lazyEditor($this, 'mainactivitydetails', ['atts' => ['edit' => ['onDropMap' => ['column' => 'details']]]]),
             'warmdowndetails'    => ViewUtils::lazyEditor($this, 'warmdowndetails', ['atts' => ['edit' => ['onDropMap' => ['column' => 'details']]]]),
             'googleid' => ViewUtils::textBox($this, 'Googleid'),
-            'mode' => ViewUtils::storeSelect('mode', $this, 'Mode', [true, 'ucfirst', false, false], ['atts' => ['edit' =>  ['onChangeLocalAction' => [
+            'mode' => ViewUtils::storeSelect('mode', $this, 'Mode', [true, 'ucfirst', false, false, false], ['atts' => ['edit' =>  ['onChangeLocalAction' => [
                 'sessionid' => ['localActionStatus' => $this->adjustSessionIdLocalAction('mode')],
                 'id' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => true], 'action' => $this->modeChangeLocalAction()]]/* if 'mode' rather than 'id' is replaced with cellChartChangeLocalAction in sptprograms*/
             ]]]]),
@@ -60,17 +60,21 @@ class View extends AbstractView {
                 'label' => $tr('sensations'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr(Sports::$sensationsOptions[1]), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr(Sports::$sensationsOptions[10]),
                     'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $gaugeAtts
             ]]],
-            //'sensations' => ViewUtils::storeSelect('sensations', $this, 'sensations', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+            //'sensations' => ViewUtils::storeSelect('sensations', $this, 'sensations', [true, 'ucfirst', true, true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
             'perceivedeffort' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
                 'label' => $tr('Perceivedintensity'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr(Sports::$perceivedEffortOptions[1]), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr(Sports::$perceivedEffortOptions[10]),
                     'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $gaugeAtts
             ]]],
-            //'perceivedeffort' => ViewUtils::storeSelect('perceivedEffort', $this, 'Perceivedeffort', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+            'perceivedmechload' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
+                'label' => $tr('Perceivedstress'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr(Sports::$perceivedMechLoadOptions[1]), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr(Sports::$perceivedMechLoadOptions[10]),
+                    'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $gaugeAtts
+            ]]],
+            //'perceivedeffort' => ViewUtils::storeSelect('perceivedEffort', $this, 'Perceivedeffort', [true, 'ucfirst', true, true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
             'mood' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
                 'label' => $tr('Mood'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr(Sports::$moodOptions[1]), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr(Sports::$moodOptions[10]),
                     'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle, 'gaugeAtts' => $gaugeAtts
             ]]],
-            //'mood' => ViewUtils::storeSelect('mood', $this, 'Mood', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
+            //'mood' => ViewUtils::storeSelect('mood', $this, 'Mood', [true, 'ucfirst', false, true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
             'athletecomments' => ViewUtils::lazyEditor($this, 'AthleteComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
             'coachcomments' => ViewUtils::lazyEditor($this, 'CoachSessionComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
             'timemoving' => ViewUtils::minutesTextBox($this, 'Timemoving'),

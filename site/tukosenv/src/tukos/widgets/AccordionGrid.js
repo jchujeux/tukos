@@ -144,7 +144,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
 			}
 		},
         updateRow: function(item){
-        	const idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {}, titlePane = this.titlePanes[idPropertyValue];
+        	const idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {}, titlePane = this.rowTitlePanes[idPropertyValue];
 			eutils.actionFunction(this, 'updateRow', this.updateRowAction, 'row', item);
         	utils.forEach(item, lang.hitch(this, function(value, col){
         		if (value !== storeItem[col] && col !== 'connectedIds'){

@@ -116,7 +116,7 @@ class ViewUtils{
         }
     }
 
-    static public function storeSelect($optionsName, $view, $label, $storeOptions=[true, 'ucfirst', false, false], $custom=[]){
+    static public function storeSelect($optionsName, $view, $label, $storeOptions=[true, 'ucfirst', false, false, false], $custom=[]){
         return Utl::array_merge_recursive_replace([
             'type' => 'storeSelect',
             'atts' => ['edit' =>  ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr, $storeOptions)], 'label' => $view->tr($label)]/*, 'style' => ['maxWith' => '10em']*/],
@@ -125,7 +125,7 @@ class ViewUtils{
             );
     }
     
-    static public function storeComboBox($optionsName, $view, $label, $storeOptions=[true, 'ucfirst', false, false], $custom=[]){
+    static public function storeComboBox($optionsName, $view, $label, $storeOptions=[true, 'ucfirst', false, false, false], $custom=[]){
         return Utl::array_merge_recursive_replace([
             'type' => 'storeComboBox',
             'atts' => ['edit' =>  ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr, $storeOptions)], 'label' => $view->tr($label)]/*, 'style' => ['maxWith' => '10em']*/],

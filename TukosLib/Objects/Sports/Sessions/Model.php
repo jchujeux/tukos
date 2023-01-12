@@ -37,6 +37,7 @@ class Model extends AbstractModel {
             'elevationgain' => 'VARCHAR(10) DEFAULT NULL',
             'sensations' => 'INT DEFAULT NULL',
             'perceivedeffort' => 'INT DEFAULT NULL',
+            'perceivedmechload' => 'INT DEFAULT NULL',
             'mood' => 'INT DEFAULT NULL',
             'athletecomments' => 'longtext DEFAULT NULL',
             'coachcomments' => 'longtext DEFAULT NULL',

@@ -40,6 +40,8 @@ class Sports {
         '4' => 'ratherbadsensations', '3' => 'badsensations', '2' => 'verybadsensations', '1' => 'extremelybadsensations'];
     public static $perceivedEffortOptions = ['1' => 'extremelyeasy', '2' => 'veryeasy',  '3' => 'easy', '4' => 'comfortable', '5' => 'rathercomfortable', '6' => 'slightlydifficult', '7' => 'ratherdifficult',
         '8' => 'difficult', '9' => 'verydifficult', '10' => 'extremelydifficult'];
+    public static $perceivedMechLoadOptions = ['1' => 'extremelylow', '2' => 'verylow',  '3' => 'low', '4' => 'comfortable', '5' => 'medium', '6' => 'slightlydifficult', '7' => 'ratherdifficult',
+        '8' => 'high', '9' => 'veryhigh', '10' => 'excessive'];
     public static $moodOptions = ['10' => 'supermood', '9' => 'verygoodmood',  '8' => 'goodmood', '7' => 'aboveaveragemood', '6' => 'averagemood', '5' => 'belowaveragemood', '4' => 'ratherbadmood',
         '3' => 'badmood', '2' => 'verybadmood', '1' => 'extremelybadmood'];
     public static $sessionidOptions = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5'];

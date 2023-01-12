@@ -37,13 +37,18 @@ class Model extends AbstractModel {
             $gamePlan['notes'] = Utl::extractItem('comments', $gamePlan);
             $item = array_merge($item, $gamePlan);
         }
+        $mostRecentStravaDate = '';
         if (!empty($item['records'])){
             foreach($item['records'] as &$record){
                 if ($indicatorsCache = Utl::getItem('indicatorscache', $record)){
                     $record = array_merge($record, json_decode($indicatorsCache, true));
                 }
+                if (!empty($record['stravainfo'])){
+                    $mostRecentStravaDate = max($mostRecentStravaDate, $record['recorddate']);
+                }
             }
         }
+        //$item['stravaActivities'] = $this->stravaSynchronize(['athleteid' => $item['patientid'], 'synchrostreams' => true, 'synchrostart' => empty($mostRecentPerformed) ? $item['treatmentstartdate'] : DUtl::dayAfter($mostRecentStravaDate), 'synchroend' => date('Y-m-d')])['stravaActivities'];
         return $item;
     }
     public function stravaCols(){
