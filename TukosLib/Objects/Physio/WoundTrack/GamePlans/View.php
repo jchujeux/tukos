@@ -20,7 +20,7 @@ class View extends AbstractView {
             ]]]]]),
                // ]['dateupdated' => ['localActionStatus' => $this->dateUpdatedChangeAction()]]]]]),
             'diagnostic' => ViewUtils::lazyEditor($this, 'ClinicalDiagnostic', ['atts' => ['edit' => ['height' => '50px', 'editorType' => 'simple']]]),
-            'pathologyof' => ViewUtils::storeSelect('pathologyOf', $this, 'Pathologyof', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['pathologyoftriangle' => ['value' => 'return newValue;']]]]]),
+            'pathologyof' => ViewUtils::storeSelect('pathologyOf', $this, 'Pathologyof', [true, 'ucfirst', false, true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['pathologyoftriangle' => ['value' => 'return newValue;']]]]]),
             'pathologyoftriangle' => ['type' => 'abcTriangle', 'atts' => ['edit' => ['value' => '', 'title' => $this->tr('CRATriangle'), 'xTriangle' => 116, 'yTriangle' => 100, 'rCircle' => 15, 'tLabel' => $this->tr('LAR', 'uppercase')]]],
             'woundstartdate' => ViewUtils::tukosDateBox($this, 'Woundstartdate', ['atts' => ['edit' => ['onChangeLocalAction' => ['wounddatedifference' => ['value' => "return sWidget.setValueOf('wounddatedifference', dutils.yearsDaysMonthsDifference(newValue, sWidget.valueOf('dateupdated')));"]]]]]),
             'wounddatedifference' => ViewUtils::textBox($this, 'Wounddatedifference', ['atts' => ['edit' => ['disabled' => true]]]),

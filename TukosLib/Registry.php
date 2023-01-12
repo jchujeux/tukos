@@ -82,6 +82,7 @@ class Registry{
             $this->urlQuery[preg_replace('/^(amp;)*/', '', $key)] = $value;
         }
         $this->organization = Utl::extractItem('org', $this->urlQuery, 'tukos');
+        $this->noOffline = Utl::extractItem('noOffline', $this->urlQuery, false, false);
         $this->logo = ['tukos' => /*$this->rootUrl*/'https://tukos.site' . Tfk::$publicDir . 'images/tukosswissknife.png', 'tds' => Tfk::$publicDir . 'images/tdspetit.jpg'][$this->organization];
         $this->headerBanner = ['tukos' => 'headerBanner', 'tds' => 'tdsHeaderBanner'][$this->organization];
     }        

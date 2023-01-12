@@ -32,7 +32,7 @@ class View extends AbstractView {
             'physiotherapist' => ViewUtils::objectSelect($this, 'Physiotherapist', 'people', ['atts' => ['edit' => ['placeHolder' => '', 'disabled' => true, 'hidden' => true]]]),
             'dateupdated' => ViewUtils::tukosDateBox($this, 'Dateupdated', ['atts' => ['edit' => ['disabled' => true], 'overview' => ['hidden' => true]]]),
             'diagnostic' => ViewUtils::htmlContent($this, 'ClinicalDiagnostic', ['atts' => ['edit' => ['height' => '50px'], 'overview' => ['hidden' => true]]]),
-            'pathologyof' => ViewUtils::storeSelect('pathologyOf', $this, 'Pathologyof', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['disabled' => 'true'], 'overview' => ['hidden' => true]]]),
+            'pathologyof' => ViewUtils::storeSelect('pathologyOf', $this, 'Pathologyof', [true, 'ucfirst', false, true, false], ['atts' => ['edit' => ['disabled' => 'true'], 'overview' => ['hidden' => true]]]),
             'woundstartdate' => ViewUtils::tukosDateBox($this, 'Woundstartdate', ['atts' => ['edit' => ['disabled' => true], 'overview' => ['hidden' => true]]]),
             'treatmentstartdate' => ViewUtils::tukosDateBox($this, 'Treatmentstartdate', ['atts' => ['edit' => ['disabled' => true], 'overview' => ['hidden' => true]]]),
             'training' => ViewUtils::htmlContent($this, 'Training', ['atts' => ['edit' => ['height' => '150px'], 'overview' => ['hidden' => true]]]),
@@ -44,7 +44,7 @@ class View extends AbstractView {
         ];
         $recordsDataWidgets = [
             'rowId' => ViewUtils::textBox($this, 'rowId', ['atts' => ['edit' => ['hidden' => true, 'disabled' => true, 'style' => ['width' => '3em']]]]),
-            'recordtype' => ViewUtils::storeSelect('recordtype', $this, 'Recordtype', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['recordtype' => ['localActionStatus' => 
+            'recordtype' => ViewUtils::storeSelect('recordtype', $this, 'Recordtype', [true, 'ucfirst', false, true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['recordtype' => ['localActionStatus' => 
                 'Pmg.isMobile() ? sWidget.form.form.localActions.accordionRecordTypeChangeAction(newValue, sWidget.form) : sWidget.form.form.localActions.recordTypeChangeAction(newValue, sWidget.form);']]]]]),
             'recorddate' => ViewUtils::tukosDateBox($this, 'Recorddate'),
             'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => ['edit' => ['label' => $this->tr('Duration') . ' (hh:mn)', 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:10', 'visibleRange' => 'T01:00'], 'style' => $isMobile ? [] : ['width' => '4em'],
@@ -108,7 +108,8 @@ class View extends AbstractView {
             'name' => ['atts' => ['edit' => ['hidden' => true], 'overview' => ['hidden' => true]]],
             'comments' => ['atts' => ['edit' => ['height' => '100px', 'editorType' => 'simple', 'hidden' => true], 'overview' => ['hidden' => true]]],
             'records' => ViewUtils::JsonGrid($this, 'Records', array_merge(['rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true]], $recordsDataWidgets), 
-                ['type' => 'accordionGrid', 'atts' => ['edit' => ['disabled' => true, 'noDataMessage' => '', 'storeArgs' => ['idProperty' => 'rowId'], 'noSendOnSave' => [], 'onWatchLocalAction' => [], 'initialRowValue' => ['recorddate' => date('Y-m-d')],
+                ['type' => 'accordionGrid', 'atts' => ['edit' => ['disabled' => true, 'noDataMessage' => '', 'storeArgs' => ['idProperty' => 'rowId'], 'noSendOnSave' => [], 'initialRowValue' => ['recorddate' => date('Y-m-d')],
+                    'onWatchLocalAction' => ['value' => ['records' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => false], 'action' => $this->stravaInitialSynchronizeLocalAction()]]]], 
                     'afterActions' => [
                         'expandRow' => Tfk::$registry->isMobile 
                             ? "this.form.localActions.accordionExpandAction(arguments[1][0].editorPane.item.recordtype, arguments[1][0]);" 
@@ -123,6 +124,14 @@ class View extends AbstractView {
         $customDataWidgets = array_merge($customDataWidgets, $planDataWidgets);        
         $planDataWidgetsName = array_keys($planDataWidgets);
         $this->customize($customDataWidgets, [], ['grid' => $planDataWidgetsName, 'get' => $planDataWidgetsName, 'post' => $planDataWidgetsName], ['records' => []]);
+    }
+    public static function stravaInitialSynchronizeLocalAction(){
+        return <<<EOT
+const grid = sWidget, form = sWidget.form, stravaActivities = form.data.value.stravaActivities;
+if (stravaActivities){
+}
+return true;
+EOT;
     }
      public static function relatedPlanAction(){
          return <<<EOT

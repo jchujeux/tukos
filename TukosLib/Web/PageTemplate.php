@@ -31,6 +31,35 @@
                 };
         </script>
         <script src="<?= $this->dojoBaseLocation ?>dojo/dojo.js"></script>
+/*
+        <script>
+        	if (<?= $this->noOffline ? 'true' : 'false' ?>){
+        		if ("serviceWorker" in navigator){
+        			navigator.serviceWorker.getRegistrations().then( function(registrations) { for(let registration of registrations) { registration.unregister(); } }); 
+        		}
+        	}else{
+        	  	const registerServiceWorker = async () => {
+            	  if ("serviceWorker" in navigator) {
+            	    try {
+            	      const registration = await navigator.serviceWorker.register("/tukos/tukosServiceWorker.js", {
+            	        scope: "/tukos/",
+            	      });
+            	      if (registration.installing) {
+            	        console.log("Service worker installing");
+            	      } else if (registration.waiting) {
+            	        console.log("Service worker installed");
+            	      } else if (registration.active) {
+            	        console.log("Service worker active");
+            	      }
+            	    } catch (error) {
+            	      console.error(`Registration failed with ${error}`);
+            	    }
+            	  }
+            	};
+            	registerServiceWorker();
+        	}
+        </script>
+*/
         <script>
             <!-- Page layout -->
 			require(["tukos/PageManager"], 

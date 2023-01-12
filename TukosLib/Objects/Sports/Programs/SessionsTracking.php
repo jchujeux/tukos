@@ -21,7 +21,7 @@ trait SessionsTracking {
                             'onWatchLocalAction' => ['value' => ['synchrosource' => ['localActionStatus' => ['action' => 'sWidget.pane.form.setValueOf("synchrosource", newValue);']]]]])),
                         'formpresentation' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['MobileTextBox', 'default'], $tr)], 'label' => $tr('formpresentation'),
                             'onWatchLocalAction' => $this->watchLocalAction('formpresentation')])),
-                        'version' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['V2'], $tr, [false, 'ucfirst', false, false])], 'label' => $tr('version'),
+                        'version' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['V2'], $tr, [false, 'ucfirst', false, false, false])], 'label' => $tr('version'),
                             'value' => $this->view->model->defaultSessionsTrackingVersion, 'hidden' => true, 'onWatchLocalAction' => $this->watchLocalAction('version')])),
                     ] : [], [
                         'ignoresessionflag' => Widgets::checkBox(Widgets::complete(['title' => $tr('ignoresessionflag'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('ignoresessionflag')])),
@@ -41,7 +41,6 @@ trait SessionsTracking {
                                     'widgets' => ['ignoresessionflag']
                                 ],
                                 'row3' => [],
-                                'row4' => [],
                                 'row5' => [
                                     'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => false],
                                     'widgets' => ['close'],

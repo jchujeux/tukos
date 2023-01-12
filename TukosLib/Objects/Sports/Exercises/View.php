@@ -19,7 +19,7 @@ class View extends AbstractView {
             'level1' => ViewUtils::objectSelect($this, 'Level1', 'sptexerciseslevels', ['atts' => ['edit' => ['dropdownFilters' => ['level' => 1, 'parentid' => '@parentid']]]]),
             'level2' => ViewUtils::objectSelect($this, 'Level2', 'sptexerciseslevels', ['atts' => ['edit' => ['dropdownFilters' => ['level' => 2, 'parentid' => '@level1']]]]),
             'level3' => ViewUtils::objectSelect($this, 'Level3', 'sptexerciseslevels', ['atts' => ['edit' => ['dropdownFilters' => ['level' => 3]]]]),
-            'stress' => ViewUtils::storeSelect('stress', $this, 'Plannedqsm', [true, 'ucfirst', true, false]),
+            'stress' => ViewUtils::storeSelect('stress', $this, 'Plannedqsm', [true, 'ucfirst', false, true, false]),
             'series' => ViewUtils::numberTextBox($this, 'Series', ['atts' => ['edit' => ['style' => ['width' => '5em']]]]),
             'repeats'=>ViewUtils::numberUnitBox('repeats', $this, 'Repeatsorduration', ['atts' => [
                 'edit' => ['unit' => ['placeHolder' => $this->tr('Select') . ' ...']],

@@ -504,30 +504,17 @@ class Utilities{
     * Transforms array [value1, value2, , ...], into array [['id' => value1, 'name' => $translator(value1), ...], ready to be consumed by dojo/store (Intended for tukos/storeSelect)
     */
     public static function idsNamesStore($idsStore, $translator = null, $options = null){
-        list($allowEmpty, $translationMode, $useKeyAsId, $hasTooltip) = empty($options) ? [true, 'ucfirst', false, false] : $options;
+        list($allowEmpty, $translationMode, $prependKeyToName, $useKeyAsId, $hasTooltip) = empty($options) ? [true, 'ucfirst', false, false, false, false] : $options;
         $theStore = $allowEmpty ? [['id' => '', 'name' => '']] : [];
         foreach ($idsStore as $key => $value){
             if (is_array($value)){
                 $theStore[] = array_merge(['id' => $key, 'name' => $translator ? $translator($key, $translationMode) : $key], $hasTooltip ? ['tooltip' => $translator($key . 'tooltip', 'none')] : [], $value);// at least used for sports::levelOptions1, etc.
             }else{
-                 $theStore[] = array_merge(['id' => $useKeyAsId ? $key : $value, 'name' => $translator ? $translator($value, $translationMode) : $value], $hasTooltip ? ['tooltip' => $value . 'tooltip'] : []);
+                 $theStore[] = array_merge(['id' => $useKeyAsId ? $key : $value, 'name' => ($prependKeyToName ? $key . ': ' : '') . ($translator ? $translator($value, $translationMode) : $value)], $hasTooltip ? ['tooltip' => $value . 'tooltip'] : []);
             }
         }
         return $theStore;
     }
-/*    public static function idsToIdsNamesStore($ids, $translator = null, $translationMode = 'ucfirst'){ // intended for use with StoreComboBox
-        $theStore = [];
-        if (is_null($translator)){
-        foreach ($ids as $id){
-            $theStore[] = ['id' => $id, 'name' => $id]; 
-        }
-        }else{
-            foreach ($ids as $id){
-                $theStore[] = ['id' => $id, 'name' => $translator($id, $translationMode)];
-            }
-        }
-        return $theStore;
-    }*/
     public static function translations($ids, $translator = null, $translationMode = 'ucfirst'){
         $result = [];
         foreach ($ids as $id){

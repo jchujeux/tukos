@@ -101,7 +101,7 @@ class Model extends AbstractModel {
             $weekType = 'weekoftheyear';
         }
         return [
-            'store' => [['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? 1 : date('W', time())),  'distance' => 0, 'elevationgain' => 0, 'duration' => 0, 'perceivedeffort' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0]],
+            'store' => [['week' => $this->tr('W') . ($weekType == 'weekofprogram' ? 1 : date('W', time())),  'distance' => 0, 'elevationgain' => 0, 'duration' => 0, 'perceivedeffort' => 0, 'perceivedmechload' => 0, 'sensations' => 0, 'mood' => 0, 'fatigue' => 0]],
             'axes' => ['x' => ['title' => $this->tr($weekType)]]
         ];
     }

@@ -8,18 +8,6 @@ trait IndicatorsView {
     public function functionLabel ($funcName, $dayOrWeekOrMonth){
         return $this->tr($funcName) . '(' . $this->tr($dayOrWeekOrMonth) . ', 1)';
     }
-    public function idsNamesStore($ids, $options = null){
-        list($allowEmpty, $translationMode, $useKeyAsId, $hasTooltip) = empty($options) ? [false, 'ucfirst', false, false] : $options;
-        $theStore = $allowEmpty ? [['id' => '', 'name' => '']] : [];
-        foreach ($ids as $key => $value){
-            if (is_array($value)){
-                $theStore[] = array_merge(['id' => $key, 'name' => $this->functionLabel($value[0], $value[1])], $hasTooltip ? ['tooltip' => $this->tr($value[0] . $value[1] . 'tooltip')] : []);
-            }else{
-                $theStore[] = array_merge(['id' => $key, 'name' => $this->tr($value, $translationMode)], $hasTooltip ? ['tooltip' => $this->tr($value . 'tooltip')] : []);
-            }
-        }
-        return $theStore;
-    }
     public function indicatorDescription($indicatorId, $id, $description, $minimum = 0, $maximum = 10, $tickinterval = 10, $ticklabel = '', $snapinterval = 1, $showvalue = 'yes'){
         return ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
             'label' => $this->tr('TrackingIndicator') . " $id : " . $this->tr($description), 'style' => ['width' => 'auto', 'maxWidth' => '800px', 'margin' => '0 auto'], 

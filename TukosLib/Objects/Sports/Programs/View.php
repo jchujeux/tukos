@@ -21,11 +21,11 @@ class View extends AbstractView {
 		$this->allowedNestedWatchActions = 1;
 		$this->allowedNestedRowWatchActions = 0;
 		$chartsCols = [];
-		foreach(['duration', 'distance', 'equivalentDistance', 'elevationgain', 'sts', 'lts', 'tsb'] as $col){
+		foreach(['duration', 'distance', 'equivalentDistance', 'elevationgain', 'sts', 'lts', 'tsb', 'hracwr'] as $col){
 		    $chartsCols[$col] = ['plot' => 'lines', 'tCol' => $tr($col)];
 		}
 		foreach(['intensity' => 'plannedintensity', 'load' => 'plannedload', 'stress' => 'plannedqsm', 'trimphr' => 'trimphr', 'trimppw' => 'trimppw', 'mechload' => 'computedmechload', 'perceivedeffort' => 'perceivedintensity', 'perceivedload' => 'perceivedload',
-		    'sensations' => 'sensations', 'mood' => 'mood', 'fatigue' => 'fatigue'] as $col => $colLabel){
+		    'perceivedmechload' => 'perceivedstress', 'sensations' => 'sensations', 'mood' => 'mood', 'fatigue' => 'fatigue'] as $col => $colLabel){
 		    $chartsCols[$col] = ['plot' => 'cluster', 'tCol' => $tr($colLabel)];
 		}
 		foreach(['duration' => '(mn)', 'distance' => '(km)', 'equivalentDistance' => '(km)', 'elevationgain' => '(dam)'] as $col => $legendUnit){
@@ -36,13 +36,13 @@ class View extends AbstractView {
 		}
 		$chartsCols['elevationgain']['tooltipUnit'] = ' (m)';
 		foreach(['elevationgain' => ['day' => 10, 'week' => 10], 'load' => ['week' => 10, 'day' => 10], 'perceivedload' => ['week' => 10, 'day' => 10], 'trimphr' => ['day' => 25, 'week' => 10], 'trimppw' => ['day' => 25, 'week' => 10], 'mechload' => ['day' => 10, 'week' => 50], 
-		         'sts' => ['day' => 1, 'week' => 0.1], 'lts' => ['day' => 1, 'week' => 0.1], 'tsb' => ['day' => 1, 'week' => 0.1]] as $col => $scalingFactor){
+		    'sts' => ['day' => 1, 'week' => 0.1], 'lts' => ['day' => 1, 'week' => 0.1], 'tsb' => ['day' => 1, 'week' => 0.1], 'hracwr' => ['day' => 0.1, 'week' => 0.01]] as $col => $scalingFactor){
 		    $chartsCols[$col]['scalingFactor'] = $scalingFactor;
 		}
 		foreach(['load' => ['day' => 1, 'week' => 7], 'perceivedload' => ['day' => 120, 'week' => 600], 'trimphr' => ['day' => 1, 'week' => 7], 'trimppw' => ['day' => 1, 'week' => 7]] as $col => $normalizationFactor){
 		    $chartsCols[$col]['normalizationFactor'] = $normalizationFactor;
 		}
-		foreach(['intensity', 'stress', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
+		foreach(['intensity', 'stress', 'perceivedeffort', 'perceivedmechload', 'sensations', 'mood', 'fatigue'] as $col){
 		    $chartsCols[$col]['isDurationAverage'] = true;
 		}
 		$this->chartsCols = $chartsCols;
@@ -56,7 +56,7 @@ class View extends AbstractView {
 		$chartFilter = ['planned' => 'ne', 'performed' => 'eq'];
 		$chartCols = [
 		    'planned' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentDistance', 'elevationgain', 'intensity', 'load', 'stress'])),
-		    'performed' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentDistance',  'elevationgain', 'trimphr', 'trimppw', 'mechload', 'sts', 'lts', 'tsb', 'perceivedeffort', 'perceivedload', 'sensations', 'mood', 'fatigue']))
+		    'performed' => array_intersect_key($chartsCols, array_flip(['duration', 'distance', 'equivalentDistance',  'elevationgain', 'trimphr', 'trimppw', 'mechload', 'sts', 'lts', 'tsb', 'hracwr', 'perceivedeffort', 'perceivedload', 'perceivedmechload', 'sensations', 'mood', 'fatigue']))
 		];
 		$summaryRow = ['cols' => [
 		    'day' => ['content' =>  ['Total']],

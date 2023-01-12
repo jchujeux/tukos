@@ -158,6 +158,8 @@ return declare(null, {
 			            tableItem.duration = utils.transform(chartItem.duration, 'minutesToHHMM');
 						chartItem.durationTooltip = tooltipPrefix + tableItem.duration  + (tooltipComplement || '');
 						break;
+					case 'hracwr':
+						chartItem[col] = (chartItem.sts && chartItem.lts) ? chartItem.sts / chartItem.lts : 0;
 					default:
 						if (colAtts.isDurationAverage){
 							chartItem[col] = chartItem[col] / chartItem.duration;

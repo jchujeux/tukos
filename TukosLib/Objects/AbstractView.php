@@ -39,14 +39,14 @@ abstract class AbstractView extends ObjectTranslator{
             'parentid'  => ViewUtils::objectSelectMulti($parentObjects, $this, $parentWidgetTitle),
             'name'      => ViewUtils::textBox($this, $nameWidgetTitle, ['atts' => [/*'edit' => ['tukosTooltip' => ['label' => 'Hello world!', 'onClickLink' => ['label' => 'more...', 'name' => 'dailyavg']]], */'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
             'comments'  => ViewUtils::lazyEditor($this, 'CommentsDetails', ['atts' => ['edit' => ['height' => '400px']]]),
-            'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [true, 'ucfirst', false, false], ['atts' => 
+            'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [true, 'ucfirst', false, false, false], ['atts' => 
                 ['edit' => ['readonly' => true, /*'onWatchLocalAction' => ['value' => ['acl' => ['hidden' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return newValue === 'ACL' ? false : true"]]]]*/],
                  'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]
             ]),
             'acl' => ViewUtils::JsonGrid($this, 'Acl', [
                     'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                     'userid' => ViewUtils::objectSelect($this, 'User', 'users'),
-                'permission'  => ViewUtils::storeSelect('acl', $this, 'Permission', [true, 'ucfirst', true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['acl' => ['localActionStatus' => "if (!sWidget.valueOf('userid')){Pmg.alert({title: '$missingUser', content: '$needsUser'})}; return true;"]]]]])
+                'permission'  => ViewUtils::storeSelect('acl', $this, 'Permission', [true, 'ucfirst', false, true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['acl' => ['localActionStatus' => "if (!sWidget.valueOf('userid')){Pmg.alert({title: '$missingUser', content: '$needsUser'})}; return true;"]]]]])
                 ],
                 ['type' => 'simpleDgrid', 'atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]
             ),

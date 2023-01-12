@@ -178,6 +178,7 @@ class PageView extends Translator{
             $view->dgridLocation = Tfk::moduleLocation('dgrid');
             $view->dojoBaseLocation = Tfk::dojoBaseLocation();
             $view->language = Tfk::$registry->get('translatorsStore')->getLanguage();
+            $view->noOffline = Tfk::$registry->noOffline;
             $view->loadingMessage = $this->tr('Loading') . '...';
             $this->pageManagerArgs['menuBarDescription'] = $this->menuBarDescription($modulesMenuLayout);
             $this->pageManagerArgs['objectsDomainAliases'] = Directory::objectsDomainAliases();

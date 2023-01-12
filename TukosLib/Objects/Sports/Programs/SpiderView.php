@@ -7,22 +7,10 @@ trait SpiderView {
     public function functionLabel ($funcName, $dayOrWeekOrMonth){
         return $this->tr($funcName) . '(' . $this->tr($dayOrWeekOrMonth) . ', 1)';
     }
-    public function idsNamesStore($ids, $options = null){
-        list($allowEmpty, $translationMode, $useKeyAsId, $hasTooltip) = empty($options) ? [false, 'ucfirst', false, false] : $options;
-        $theStore = $allowEmpty ? [['id' => '', 'name' => '']] : [];
-        foreach ($ids as $key => $value){
-            if (is_array($value)){
-                $theStore[] = array_merge(['id' => $key, 'name' => $this->functionLabel($value[0], $value[1])], $hasTooltip ? ['tooltip' => $this->tr($value[0] . $value[1] . 'tooltip')] : []);
-            }else{
-                $theStore[] = array_merge(['id' => $key, 'name' => $this->tr($value, $translationMode)], $hasTooltip ? ['tooltip' => $this->tr($value . 'tooltip')] : []);
-            }
-        }
-        return $theStore;
-    }
     public function spiderDescription($chartId, $title){
         $kpiFunctions = ['SUM', 'EXPAVG', 'DAILYAVG', 'AVG', 'MIN', 'MAX', 'LAST', 'SESSION'];
-        $kpiParameters = ['duration', 'intensity', 'stress', 'sport', 'mode', 'distance', 'elevationgain', 'sensations', 'perceivedeffort', 'mood', 'timemoving', 'trimpavghr', 'trimpavgpw', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'avgcadence', 'mechload', 'h4time', 'h5time', 'sts', 'lts', 'tsb'];
-        $kpiOptionsStore = array_merge(Utl::idsNamesStore($kpiFunctions, $this->tr, [false, 'uppercase', false, true]), Utl::idsNamesStore($kpiParameters, $this->tr, [true, 'ucfirst', false, false]));
+        $kpiParameters = ['duration', 'intensity', 'stress', 'sport', 'mode', 'distance', 'elevationgain', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'timemoving', 'trimpavghr', 'trimpavgpw', 'avghr', 'avgpw', 'hr95', 'trimphr', 'trimppw', 'avgcadence', 'mechload', 'h4time', 'h5time', 'sts', 'lts', 'tsb'];
+        $kpiOptionsStore = array_merge(Utl::idsNamesStore($kpiFunctions, $this->tr, [false, 'uppercase', false, false, true]), Utl::idsNamesStore($kpiParameters, $this->tr, [true, 'ucfirst', false, false, false]));
         $kpiTranslations = array_merge(Utl::translations($kpiFunctions, $this->tr, 'uppercase'), Utl::translations($kpiParameters, $this->tr));
         return ['type' => 'chart', 'atts' => ['edit' => [
             'title' => $title, 'idProperty' => 'kpi',

@@ -100,7 +100,6 @@ class View extends EditView{
             'paneDescription' => [
                 'widgetsDescription' => [
                     'organization' => Widgets::ObjectSelect(Widgets::complete(['title' => $tr('Organization'), 'object' => 'bustrackorganizations', 'hidden' => true])),
-                    //'customer' => Widgets::description(ViewUtils::objectSelectMulti(['bustrackpeople', 'bustrackorganizations'], $this->view, 'Customer')),
                     'customer' => Widgets::objectSelect(Widgets::complete(['title' => $tr('Customer'), 'object' => 'bustrackpeople'])),
                     'date' => Widgets::tukosDateBox(Widgets::complete(['title' => $tr('Date'), 'value' => date('Y-m-d')])),
                     'name' => Widgets::textBox(Widgets::complete(['title' => $tr('Description'), 'style' => ['width' => '15em']])),

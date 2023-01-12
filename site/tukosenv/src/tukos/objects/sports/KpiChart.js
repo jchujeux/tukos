@@ -54,11 +54,11 @@ function(declare, lang, ArrayIterator, utils, dutils, expressionFilter, expressi
         constructor: function(args){
 			this.sessionsStore = args.sessionsStore;
 			this.form = args.form;
-			this.collection = this.sessionsStore.sort([{property: 'startdate'}, {property: 'sessionid'}]);
+			//this.collection = this.sessionsStore.sort([{property: 'startdate'}, {property: 'sessionid'}]);
 			this.sessionsIterator = new ArrayIterator();
         },
 		setChartValue: function(chartWidgetName){
-			var form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), kpiCache = {};
+			var form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), kpiCache = {}, collection = this.sessionsStore.sort([{property: 'startdate'}, {property: 'sessionid'}]);
 			if (!hidden && chartWidget.sessionsSetsToInclude && chartWidget.kpisToInclude){
 				dojo.ready(function(){
 					var grid = form.getWidget('sptsessions'), filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter);
@@ -74,7 +74,7 @@ function(declare, lang, ArrayIterator, utils, dutils, expressionFilter, expressi
 					}
 					for (const set of sessionsSets){
 						const setName = set.setName, kpiDate = getDate(set.kpiDate, form).dateString, filterString = setFilterString(set, form), setFilter = expFilter.expressionToValue(filterString.filter),
-							  setCollection = grid.collection.filter(setFilter), setData = setCollection.fetchSync(), setExp = expressionKpi.expression(kpiDate, filterString.days, setData, filterString.lastSessionOffset,
+							  setCollection = collection.filter(setFilter), setData = setCollection.fetchSync(), setExp = expressionKpi.expression(kpiDate, filterString.days, setData, filterString.lastSessionOffset,
 							  kpiCache, setCollection.idProperty);
 						series[setName] = {value: {key: 'kpi', value: setName}, options: {plot: 'theSpider', fill: set.fillColor}};
 						tableColumns[setName] = {label: setName, field: setName, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}};

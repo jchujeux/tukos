@@ -29,7 +29,7 @@ class View extends EditView{
                         'contents' => [
                             'row' => [
                                 'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0'],
-                                'widgets' => ['sensations', 'perceivedeffort', 'mood']
+                                'widgets' => ['sensations', 'perceivedeffort', 'perceivedmechload', 'mood']
                             ]
                         ]
                     ],

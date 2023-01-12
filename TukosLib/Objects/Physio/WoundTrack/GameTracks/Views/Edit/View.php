@@ -60,7 +60,7 @@ class View extends EditView{
                         'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'orientation' => 'vert'],
                         'contents' => [
                             'rowcharts' => [
-                                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'id' => 'roadTrackAnalysis'],
+                                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'id' => 'roadTrackAnalysis', 'widgetCellStyle' => ['verticalAlign' => 'top']],
                                 'widgets' => [],
                             ],
                             'row4' => [

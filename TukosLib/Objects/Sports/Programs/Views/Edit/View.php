@@ -64,7 +64,7 @@ class View extends EditView{
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
         $this->onOpenAction =  $this->view->OpenEditAction() . $this->onViewOpenAction() .  $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies') . $this->viewModeOptionOpenAction();
         $plannedOptionalCols = ['name', 'duration', 'intensity', 'sport', 'sportimage', 'stress', 'distance', 'elevationgain', 'content']; $plannedColOptions = [];
-        $performedOptionalCols = ['name', 'duration', 'sport', 'sportimage', 'distance', 'elevationgain', 'perceivedeffort', 'sensations', 'mood', 'athletecomments', 'coachcomments']; $plannedColOptions = [];
+        $performedOptionalCols = ['name', 'duration', 'sport', 'sportimage', 'distance', 'elevationgain', 'perceivedeffort', 'perceivedmechload', 'sensations', 'mood', 'athletecomments', 'coachcomments']; $plannedColOptions = [];
         $optionalWeeks = ['performedthisweek', 'plannedthisweek', 'performedlastweek', 'plannedlastweek'];
         foreach($plannedOptionalCols as $col){
             $plannedColOptions[$col] = isset($this->view->chartsCols[$col]) ? $this->view->chartsCols[$col]['tCol'] : $this->view->tr($col);
