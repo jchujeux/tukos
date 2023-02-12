@@ -1,6 +1,6 @@
-define(["dojo/_base/lang", "dojo/_base/window", "dojo/_base/config", "dojo/ready", "dojo/dom", "dojo/dom-style", "dojo/dom-construct", "dojo/when",  "dojo/topic", "dijit/focus", "dojox/mobile/Container", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "dojox/mobile/Tooltip", "tukos/mobile/ObjectPane", 
+define(["dojo/_base/lang", "dojo/_base/window", "dojo/_base/config", "dojo/ready", "dojo/dom", "dojo/dom-style", "dojo/dom-construct", "dojo/when",  "dojo/topic", "dijit/focus", "dojox/mobile/Container", "dojox/mobile/Heading", "dojox/mobile/ToolBarButton", "dojox/mobile/Tooltip",
 	"tukos/mobile/TukosPane", "tukos/mobile/PostsManager", "tukos/widgets/WidgetsLoader", "tukos/TabOnClick",  "tukos/PageManager"], 
-function (lang, win, config, ready, dom, dst, dct, when, topic, focusUtil, Container, Heading, Button, Opener, ObjectPane, TukosPane, PostsManager, widgetsLoader, TabOnClick, Pmg) {
+function (lang, win, config, ready, dom, dst, dct, when, topic, focusUtil, Container, Heading, Button, Opener, TukosPane, PostsManager, widgetsLoader, TabOnClick, Pmg) {
 	return {
 		initialize: function(){
 			var self = this, homeButton, buttonsContainer = new Container({style: {maxWidth: '150px'}}), postsContainer = new Container({style: {backgroundColor: '#d0e9fc'}}), 

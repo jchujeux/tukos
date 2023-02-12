@@ -43,6 +43,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
 					//dojo.ready(function(){
 						self.container.previousButton.set('style', {display: Pmg.mobileViews.isFirstPane() ? 'none' : 'block'});
 						self.container.nextButton.set('style', {display: Pmg.mobileViews.isLastPane() ? 'none' : 'block'});
+	                    window.scrollTo(0,0);;
 					//});
                     return response;
                 }
@@ -100,6 +101,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
 	                var tab = openedTabs[i];
 					if ((target.view === "Overview" && (tab.formContent || {}).viewMode === "Overview" && tab.formContent.object === target.object) || (id && tab.contentId == id) || (name && tab.contentName === name) || (id && (tab.get('title').match(/(\d+)\)$/) || {} )[1] === id)){
 	                    this.container.selectChild(tab);
+	                    window.scrollTo(0,0);
 	                    return;
 	                }
 	            }

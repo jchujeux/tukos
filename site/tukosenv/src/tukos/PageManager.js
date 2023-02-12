@@ -69,8 +69,13 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
             this.cache = obj;
             this.cache.extras = this.cache.extras || {};
             this.cache.messages = this.cache.messages || {};
-		   this.setObjectsMessages('tabsDescription');
+		    this.setObjectsMessages('tabsDescription');
             var self = this;
+            if ('serviceWorker' in navigator){
+	            navigator.serviceWorker.ready.then(registration => {
+					navigator.serviceWorker.controller && navigator.serviceWorker.controller.postMessage({type: 'translations', content: self.messages(self.cache.swToTranslate)});
+				});
+			}
             Date.prototype.toJSON = function(){
                 return dojoDateLocale.format(this, {formatLength: "long", selector: "date", datePattern: 'yyyy-MM-dd HH:mm:ss'});
             };
@@ -155,7 +160,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 			return promise;			
 		},
 		tukosTooltipName: function(name){
-			const tooltips = this.cache.presentTukosTooltips;
+			const tooltips = this.cache.presentTukosTooltips || [];
 			let index;
 			if (this.isRestrictedUser()){
 				index = tooltips.indexOf('Restricted' + name);

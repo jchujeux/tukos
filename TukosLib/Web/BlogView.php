@@ -57,13 +57,14 @@ class BlogView extends Translator{
                 $view->dojoBaseLocation = Tfk::dojoBaseLocation();
                 $view->language = Tfk::$registry->get('translatorsStore')->getLanguage();
                 $view->loadingMessage = $this->tr('Loading') . '...';
+                $blogTitle = $this->tr(Tfk::$registry->blogTitle);
                 if ($this->pageManagerArgs['isMobile'] = Tfk::$registry->isMobile){
                     $blogTemplate = "MobileBlogTemplate.php";
-                    $this->pageManagerArgs['headerTitle'] = $this->tr('tukosBlogTitle');
+                    $this->pageManagerArgs['headerTitle'] = $blogTitle;
                 }else{
                     $blogTemplate = "BlogTemplate.php";
                     $this->pageManagerArgs['headerContent'] = <<<EOT
-<table width="100%"><tr><td style="text-align:left;"><span id="tukosHeaderLoading"></span></td><td style="text-align:center;"><H1>{$this->tr('tukosBlogTitle')}</H1></td><td style="text-align:right;"><b><i>The Ultimate Knowledge Organizational System</i></b></td></table>
+<table width="100%"><tr><td style="text-align:left;"><span id="tukosHeaderLoading"></span></td><td style="text-align:center;"><H1>{$blogTitle}</H1></td><td style="text-align:right;"><b><i>The Ultimate Knowledge Organizational System</i></b></td></table>
 EOT
                     ;
                     $blogModel = Tfk::$registry->get('objectsStore')->objectModel('blog');

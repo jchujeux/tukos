@@ -39,10 +39,11 @@ class View extends AbstractView {
 		    'sts' => ['day' => 1, 'week' => 0.1], 'lts' => ['day' => 1, 'week' => 0.1], 'tsb' => ['day' => 1, 'week' => 0.1], 'hracwr' => ['day' => 0.1, 'week' => 0.01]] as $col => $scalingFactor){
 		    $chartsCols[$col]['scalingFactor'] = $scalingFactor;
 		}
-		foreach(['load' => ['day' => 1, 'week' => 7], 'perceivedload' => ['day' => 120, 'week' => 600], 'trimphr' => ['day' => 1, 'week' => 7], 'trimppw' => ['day' => 1, 'week' => 7]] as $col => $normalizationFactor){
+		foreach(['load' => ['day' => 1, 'week' => 7], 'perceivedload' => ['day' => 120, 'week' => 600], 'trimphr' => ['day' => 1, 'week' => 7], 'trimppw' => ['day' => 1, 'week' => 7], 'mechload' => ['day' => 1, 'week' => 7],
+		    'perceivedmechload' => ['day' => 1, 'week' => 7]] as $col => $normalizationFactor){
 		    $chartsCols[$col]['normalizationFactor'] = $normalizationFactor;
 		}
-		foreach(['intensity', 'stress', 'perceivedeffort', 'perceivedmechload', 'sensations', 'mood', 'fatigue'] as $col){
+		foreach(['intensity', 'perceivedeffort', 'sensations', 'mood', 'fatigue'] as $col){
 		    $chartsCols[$col]['isDurationAverage'] = true;
 		}
 		$this->chartsCols = $chartsCols;
@@ -510,10 +511,12 @@ EOT
 	function beforeCreateRow(){
 	    return <<<EOT
 var row = args || this.clickedRow.data;
-if (!this.isBulkRowAction && row.startdate){
-    this.store.filter((new this.store.Filter()).eq('startdate', row.startdate)[row.mode === 'performed' ? 'eq' : 'ne']('mode', 'performed')).sort('sessionid', 'descending').fetchRangeSync({start: 0, end: 1}).forEach(function(largestSessionIdRow){
-        row.sessionid = Number(largestSessionIdRow.sessionid) + 1;
-    });
+if (!this.isBulkRowAction){
+    if(row.startdate){
+        this.store.filter((new this.store.Filter()).eq('startdate', row.startdate)[row.mode === 'performed' ? 'eq' : 'ne']('mode', 'performed')).sort('sessionid', 'descending').fetchRangeSync({start: 0, end: 1}).forEach(function(largestSessionIdRow){
+            row.sessionid = Number(largestSessionIdRow.sessionid) + 1;
+        });
+    }
     row.sportsman = this.valueOf('parentid');
     if (!row.mode){
         row.mode = (this.form.viewModeOption === 'viewperformed') ? 'performed' : 'planned';

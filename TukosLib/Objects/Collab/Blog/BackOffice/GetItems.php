@@ -16,7 +16,7 @@ class GetItems extends ObjectTranslator{
     }
     function get($query){
         $storeAtts = $query['storeatts'];
-        $items = $this->blogModel->getAll(['where' => $storeAtts['where'], 'cols' => ['id', 'parentid', 'name', 'comments', 'published'/*, 'updated', 'updator'*/]]);
+        $items = $this->blogModel->getAll(['where' => $this->user->filterPrivate($storeAtts['where']), 'cols' => ['id', 'parentid', 'name', 'comments', 'published'/*, 'updated', 'updator'*/]]);
         foreach($items as &$item){
             $item['onClickGotoTab'] = 'edit';
             $item['hasChildren'] = false;

@@ -178,12 +178,13 @@ class PageView extends Translator{
             $view->dgridLocation = Tfk::moduleLocation('dgrid');
             $view->dojoBaseLocation = Tfk::dojoBaseLocation();
             $view->language = Tfk::$registry->get('translatorsStore')->getLanguage();
-            $view->noOffline = Tfk::$registry->noOffline;
+            $view->enableOffline = $this->user->isOfflineEnabled();
             $view->loadingMessage = $this->tr('Loading') . '...';
             $this->pageManagerArgs['menuBarDescription'] = $this->menuBarDescription($modulesMenuLayout);
             $this->pageManagerArgs['objectsDomainAliases'] = Directory::objectsDomainAliases();
             $this->pageManagerArgs['userRights'] = $this->user->rights();
             $this->pageManagerArgs['presentTukosTooltips'] = Tfk::$registry->get('translatorsStore')->presentTukosTooltips();
+            $this->pageManagerArgs['swToTranslate'] = ['savedoffline', 'resettoofflineinitialvalues'];
             
             if ($this->pageManagerArgs['isMobile'] = Tfk::$registry->isMobile){
                 $this->pageManagerArgs['headerContent'] = $this->tr(Tfk::$registry->appName . 'HeaderBanner');

@@ -504,7 +504,10 @@ class Utilities{
     * Transforms array [value1, value2, , ...], into array [['id' => value1, 'name' => $translator(value1), ...], ready to be consumed by dojo/store (Intended for tukos/storeSelect)
     */
     public static function idsNamesStore($idsStore, $translator = null, $options = null){
-        list($allowEmpty, $translationMode, $prependKeyToName, $useKeyAsId, $hasTooltip) = empty($options) ? [true, 'ucfirst', false, false, false, false] : $options;
+        if ($options && count($options) <= 4){
+            var_dump($idsStore);
+        }
+        list($allowEmpty, $translationMode, $prependKeyToName, $useKeyAsId, $hasTooltip) = empty($options) ? [true, 'ucfirst', false, false, false] : $options;
         $theStore = $allowEmpty ? [['id' => '', 'name' => '']] : [];
         foreach ($idsStore as $key => $value){
             if (is_array($value)){

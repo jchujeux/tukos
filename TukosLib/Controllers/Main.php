@@ -60,7 +60,7 @@ class Main{
                 }
             }else{
                 if (isset($authentication)){
-                    $authentication->logoutUser($dialogue, 'usersitemdoesnotexistforusername');
+                    //$authentication->logoutUser($dialogue, 'usersitemdoesnotexistforusername');
                 }
             	$dialogue->sendResponse();
             }

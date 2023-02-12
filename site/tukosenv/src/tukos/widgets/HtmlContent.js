@@ -1,6 +1,6 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/has", "dojo/on", "dojo/dom-construct", "dijit/_WidgetBase",  "tukos/PageManager"], 
-    function(declare, lang, has, on, dct, Widget, Pmg){
-    return declare([Widget], {
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/has", "dojo/on", "dojo/dom-construct", "dijit/layout/ContentPane",  "tukos/PageManager"], 
+    function(declare, lang, has, on, dct, ContentPane, Pmg){
+    return declare([ContentPane], {
         postCreate: function(){
             this.inherited(arguments);
         },
@@ -18,6 +18,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/has", "dojo/on", "dojo/d
 					this.processMathTags();
 				}
             }
+            this.resize();
         },
         loadContentOnClick: function(evt){
         	var source = RegExp("#tukos{id:([^,]*),object:([^,]*),col:([^}]*)}", "g").exec(this.get('value')), targetCol = source[3], node = evt.currentTarget;
@@ -48,6 +49,27 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/has", "dojo/on", "dojo/d
 				script.src = "https://cdn.jsdelivr.net/npm/mathjax@3/es5/mml-chtml.js";
 		        document.head.appendChild(script);
 			}
-		}
-    }); 
+		},
+		resize: function (){
+			this.inherited(arguments);
+    		const self = this, imgWithMaps = Array.apply(null, this.domNode.querySelectorAll('img[useMap]'));
+    		if (imgWithMaps.length > 0){
+        		imgWithMaps.forEach(function(imgNode){
+					const map = self.domNode.querySelector('map[name="' + imgNode.useMap.substring(1) + '"]'), currentMapWidth = map.getAttribute('data-currentmapwidth');
+					if (imgNode.clientWidth > 0 && currentMapWidth != imgNode.clientWidth){
+						const coefficient = imgNode.clientWidth / currentMapWidth, areas = Array.apply(null, map.getElementsByTagName('area'));
+						areas.forEach(function(area){
+							const coords = area.coords.split(',');
+							coords.forEach(function(coord, index, coords){
+								coords[index] = (coord * coefficient).toFixed(0);
+							});
+							area.coords = coords.join(',');
+						});
+						map.setAttribute('data-currentmapwidth', imgNode.clientWidth);
+					}
+				});
+				//this.inherited(arguments);
+    		}
+    	}
+    });
 });

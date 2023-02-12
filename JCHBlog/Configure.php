@@ -1,5 +1,5 @@
 <?php 
-namespace TukosBlog; 
+namespace JCHBlog; 
 
 use TukosLib\TukosFramework as Tfk; 
 use TukosLib\Auth\UserInformation;
@@ -16,12 +16,12 @@ class Configure{
 
         $key =  'XZK@w0kw' . getenv('MYSQL_ENV_VAR');
         $this->ckey = MD5($key);
-        $this->dataSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname'   => 'tukosblog'];
+        $this->dataSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname'   => 'jchblog'];
         $this->configSource = ['datastore' => 'mysql', 'host'   => 'localhost', 'admin'   => 'tukosAppAdmin', 'pass'   => $this->ckey, 'dbname' => 'tukosconfig', 'authstore'    => 'sql',	'table' => 'users', 'username_col' => 'username', 'password_col' => 'password'];
         $this->languages = ['default' => 'en-us', 'supported' => ['en-us', 'fr-fr', 'es-es']];
         $this->userName = 'tukosBackOffice';
-        Tfk::$registry->blogUrl = 'https://tukos.site/blog';
-        Tfk::$registry->blogTitle = 'tukosblogtitle';
+        Tfk::$registry->blogUrl = 'https://tukos.site/jch/blog';
+        Tfk::$registry->blogTitle = 'jchblogtitle';
         Tfk::$registry->set('configStore', function(){
             return new Store($this->configSource);
         });

@@ -29,6 +29,33 @@
     </script>
     <!-- dojo bootstrap -->
     <script type="text/javascript" src="<?= $this->dojoBaseLocation ?>dojo/dojo.js"></script>
+        <script>
+        	if (<?= $this->enableOffline ? 'false' : 'true' ?>){
+        		if ("serviceWorker" in navigator){
+        			navigator.serviceWorker.getRegistrations().then( function(registrations) { for(let registration of registrations) { registration.unregister(); } }); 
+        		}
+        	}else{
+        	  	const registerServiceWorker = async () => {
+            	  if ("serviceWorker" in navigator) {
+            	    try {
+            	      const registration = await navigator.serviceWorker.register("/tukos/tukosServiceWorker.js", {
+            	        scope: "/tukos/",
+            	      });
+            	      if (registration.installing) {
+            	        console.log("Service worker installing");
+            	      } else if (registration.waiting) {
+            	        console.log("Service worker installed");
+            	      } else if (registration.active) {
+            	        console.log("Service worker active");
+            	      }
+            	    } catch (error) {
+            	      console.error(`Registration failed with ${error}`);
+            	    }
+            	  }
+            	};
+            	registerServiceWorker();
+        	}
+        </script>
     <!-- dojo application code -->
         <script>
             <!-- Page layout -->

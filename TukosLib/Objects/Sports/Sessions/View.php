@@ -85,6 +85,7 @@ class View extends AbstractView {
             'trimpavghr' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Avg_Heart_rate', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
             'trimppw' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Power'),
             'trimpavgpw' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Avg_Power', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
+            'avgcadence' => ViewUtils::numberTextBox($this, 'Avgcadence', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
             'mechload' => ViewUtils::numberTextBox($this, 'Tukos_Mechanical_Load'),
             'h4time' => ViewUtils::secondsTextBox($this, 'H4_Time_in_Zone'),
             'h5time' => ViewUtils::secondsTextBox($this, 'H5_Time_in_Zone'),

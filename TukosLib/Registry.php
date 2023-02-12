@@ -81,13 +81,13 @@ class Registry{
         foreach($_GET as $key => $value){// due to Strava authentication redirect changing '&' into '&amp;' (and in cases of a new authorization does it even twice!!
             $this->urlQuery[preg_replace('/^(amp;)*/', '', $key)] = $value;
         }
+        /* Used for login page: at that time, we don't know who the user will be, then to which organization he belongs (in particular in redirects)*/
         $this->organization = Utl::extractItem('org', $this->urlQuery, 'tukos');
-        $this->noOffline = Utl::extractItem('noOffline', $this->urlQuery, false, false);
-        $this->logo = ['tukos' => /*$this->rootUrl*/'https://tukos.site' . Tfk::$publicDir . 'images/tukosswissknife.png', 'tds' => Tfk::$publicDir . 'images/tdspetit.jpg'][$this->organization];
-        $this->headerBanner = ['tukos' => 'headerBanner', 'tds' => 'tdsHeaderBanner'][$this->organization];
+        $this->logo = ['tukos' => 'https://tukos.site' . Tfk::$publicDir . 'images/tukosswissknife.png', 'tds' => Tfk::$publicDir . 'images/tdspetit.jpg', 'uca' => 'http://v-assets.cdnsw.com/Root/doe5d/logo_uca_fb.gif?s=YqFEmnE='][$this->organization];
+        $this->headerBanner = ['tukos' => 'headerBanner', 'tds' => 'tdsHeaderBanner', 'uca' => 'ucaHeaderBanner'][$this->organization];
     }        
     public function setAppName($appName){
-        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus', 'tukosblog' => 'TukosBlog', 'tukosmsqr' => 'TukosMSQR', 'tukoswoundtrack' => 'TukosWoundTrack',
+        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus', 'tukosblog' => 'TukosBlog', 'jchblog' => 'JCHBlog', 'tukosmsqr' => 'TukosMSQR', 'tukoswoundtrack' => 'TukosWoundTrack',
             'tukostrainingplans' => 'TukosTrainingPlans'][strtolower($appName)];
     }
     public function set($service, $serviceObject){
