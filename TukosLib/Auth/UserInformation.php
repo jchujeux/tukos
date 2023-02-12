@@ -28,7 +28,7 @@ class UserInformation{
             $usersInfo = SUtl::$store->$getFunc([/*can't use Users\Model here as AbstractModel relies on $this->userInfo */
                 'table' => $tu, 'join' => [['inner', $tk,  $tk . '.id = ' . $tu . '.id']],
                 'where' => SUtl::transformWhere($where, $tu),
-                'cols' => ['tukos.id', 'password', 'rights', 'modules', 'restrictedmodules',  'language', 'environment', 'tukosorganization', 'customviewids', 'customcontexts', 'pagecustom', 'dropboxaccesstoken', 'dropboxbackofficeaccess', 'parentid', 'name', 
+                'cols' => ['tukos.id', 'password', 'rights', 'modules', 'restrictedmodules',  'language', 'environment', 'tukosorganization', 'customviewids', 'customcontexts', 'pagecustom', 'dropboxaccesstoken', 'dropboxbackofficeaccess', 'enableoffline', 'parentid', 'name', 
                            'contextid', 'custom'],
                 'union' => Tfk::$registry->get('tukosModel')->parameters['union']
             ]);
@@ -90,7 +90,7 @@ class UserInformation{
     public function peoplefirstAndLastNameOrUserName($userId){
         $peopleId = $this->getModel('users')->getOne(['where' => ['id' => $userId], 'cols' => ['parentid']])['parentid'];
         if(empty($peopleId)){
-            return $this->user->userName();
+            return $this->username();
         }else{
             $people = $this->getModel('people')->getOne(['where' => ['id' => $peopleId], 'cols' => ['name', 'firstname']]);
             return "{$people['firstname']} {$people['name']}";
@@ -126,6 +126,9 @@ class UserInformation{
     }
     public function allowedModules(){
         return $this->allowedModules;
+    }
+    public function isOfflineEnabled(){
+        return $this->userInfo['enableoffline'] === 'yes';
     }
     public function allowedNativeObjects(){
         return array_intersect($this->allowedModules, directory::getNativeObjs());

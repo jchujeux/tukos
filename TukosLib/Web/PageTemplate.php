@@ -31,9 +31,8 @@
                 };
         </script>
         <script src="<?= $this->dojoBaseLocation ?>dojo/dojo.js"></script>
-/*
         <script>
-        	if (<?= $this->noOffline ? 'true' : 'false' ?>){
+        	if (<?= $this->enableOffline ? 'false' : 'true' ?>){
         		if ("serviceWorker" in navigator){
         			navigator.serviceWorker.getRegistrations().then( function(registrations) { for(let registration of registrations) { registration.unregister(); } }); 
         		}
@@ -59,7 +58,6 @@
             	registerServiceWorker();
         	}
         </script>
-*/
         <script>
             <!-- Page layout -->
 			require(["tukos/PageManager"], 

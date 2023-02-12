@@ -13,7 +13,6 @@ use TukosLib\TukosFramework as Tfk;
 class Model extends AbstractModel{
     protected $rightsOptions = ['SUPERADMIN', 'ADMIN', 'ENDUSER','RESTRICTEDUSER'];
     protected $environmentOptions = ['production', 'development'];
-    protected $dropboxbackofficeaccessOptions = ['yes', 'no'];
     
     public static $_colsDefinition = [
             'password'      =>  'VARCHAR(255)  DEFAULT NULL',
@@ -26,6 +25,7 @@ class Model extends AbstractModel{
             'tukosorganization' =>  "VARCHAR(80) DEFAULT NULL",
             'dropboxaccesstoken'      =>  'VARCHAR(255)  DEFAULT NULL',
             'dropboxbackofficeaccess' => 'VARCHAR(10) DEFAULT NULL',
+            'enableoffline'  => 'VARCHAR(10) DEFAULT NULL',
             'customviewids' =>  'longtext DEFAULT NULL',
             'customcontexts'=>  'longtext DEFAULT NULL',
             'pagecustom'=>  'longtext DEFAULT NULL',

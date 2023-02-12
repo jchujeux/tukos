@@ -19,7 +19,7 @@ class View extends AbstractView {
                     'name'      => ['atts' => ['edit' =>  ['style' => ['width' => '30em']], 'storeedit' => ['width' => 100]],],
                     'startdate' => ViewUtils::tukosDateBox($this, 'date', ['atts' => ['storeedit' => ['formatType' => 'date'], 'overview' => ['formatType' => 'date']]]),
                     'whenintheday' => ViewUtils::storeSelect('whenInTheDay', $this, 'Whenintheday', [true, 'lowercase', true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['wheninthe day' => ['localActionStatus' => $this->exerciseChangeLocalAction()]]]]]),
-                    'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'lowercase', true, false]),
+                    'sessionid' => ViewUtils::storeSelect('sessionid', $this, 'Sessionid', [true, 'lowercase', true, false, false]),
                     'exerciseid' => ['type' => 'storeSelect', 'atts' => ['edit' =>  ['storeArgs' => ['data' => []], 'label' => $this->tr('ExerciseId'),
                         'onChangeLocalAction' => ['exerciseid' => ['localActionStatus' => ['triggers' => ['user' => true, 'server' => false], 'action' => $this->exerciseIdLocalAction()]]]]]],
                     'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => [

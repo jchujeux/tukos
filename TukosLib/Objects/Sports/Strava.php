@@ -68,13 +68,17 @@ class Strava {
         }
         $athletesModel = Tfk::$registry->get('objectsStore')->objectModel('sptathletes');
         $options = json_decode($athletesModel->getOne(['where' => ['id' => $athleteId], 'cols' => ['stravainfo']])['stravainfo'], true);
-        $token = new AccessToken($options);
-        if ($token->hasExpired()){
-            $oauth = new OAuth(array_merge(Tfk::$registry->get('tukosModel')->getOption('strava'), ['redirectUri' => '']));
-            $token = $oauth->getAccessToken('refresh_token', ['refresh_token' => $token->getRefreshToken()]);
-            $athletesModel->updateItems(['stravainfo' => json_encode(['access_token' => $token->getToken(), 'refresh_token' => $token->getRefreshToken(), 'expires' => $token->getExpires()])], ['table' => 'people', 'where' => ['id' => $athleteId]]);
+        if (is_array($options)){
+            $token = new AccessToken($options);
+            if ($token->hasExpired()){
+                $oauth = new OAuth(array_merge(Tfk::$registry->get('tukosModel')->getOption('strava'), ['redirectUri' => '']));
+                $token = $oauth->getAccessToken('refresh_token', ['refresh_token' => $token->getRefreshToken()]);
+                $athletesModel->updateItems(['stravainfo' => json_encode(['access_token' => $token->getToken(), 'refresh_token' => $token->getRefreshToken(), 'expires' => $token->getExpires()])], ['table' => 'people', 'where' => ['id' => $athleteId]]);
+            }
+            return new Client(new REST($token, self::$adapter));
+        }else{
+            return false;
         }
-        return new Client(new REST($token, self::$adapter));
     }
     public static function stravaStreamsToTukosStreams($stravaStreams){
         $tukosStreams = [];
@@ -121,7 +125,7 @@ class Strava {
             }
         }
         if ($session['sport'] === 'running' && !empty($session['cadencestream']) && !empty($session['distancestream']) && !empty($speedThreshold)){
-            $session['mechload'] = TF::runningMechanicalLoad($session['distancestream'], $session['wattsstream'], $speedThreshold / 0.36);
+            $session['mechload'] = TF::runningMechanicalLoad($session['distancestream'], $session['cadencestream'], $speedThreshold / 0.36);
         }
         foreach($streamCols as $col){
             if (!empty($session[$col])){

@@ -23,7 +23,7 @@ class View extends AbstractView {
             'series' => ViewUtils::numberTextBox($this, 'Series', ['atts' => ['edit' => ['style' => ['width' => '5em']]]]),
             'repeats'=>ViewUtils::numberUnitBox('repeats', $this, 'Repeatsorduration', ['atts' => [
                 'edit' => ['unit' => ['placeHolder' => $this->tr('Select') . ' ...']],
-            ]], [true, 'plural', false, false]),
+            ]], [true, 'plural', false, false, false]),
             'extra'=>ViewUtils::numberUnitBox('extra', $this, 'Options1', ['atts' => [
                 'edit' => ['noNumberUnit' => Sports::$noNumberUnitExtra, 'unit' => ['placeHolder' => $this->tr('Select') . ' ...']]
                 //'storeedit' => ['formatType' => 'numberunit'],

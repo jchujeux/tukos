@@ -41,8 +41,14 @@ trait StravaSynchronize {
         $updator = Utl::getItem('updator', $query, $this->user->id());
         try{
             $client = ST::getAthleteClient($athleteId);
-            $sessionsActivitiesToSync = [];
-            $stravaActivitiesToSync = $client->getAthleteActivities(strtotime(DUtl::dayAfter($query['synchroend'])), strtotime($query['synchrostart']));
+            if ($client === false){
+                if (!$this->user->isRestrictedUser()){
+                    Feedback::add(($this->tr('UserdidnotauthorizeStrava')));
+                }
+            }else{
+                $sessionsActivitiesToSync = [];
+                $stravaActivitiesToSync = $client->getAthleteActivities(strtotime(DUtl::dayAfter($query['synchroend'])), strtotime($query['synchrostart']));
+            }
         } catch(\Exception $e){
             $message = $e->getMessage();
             if (strpos($message, "Authorization Error") > 0){
@@ -54,7 +60,9 @@ trait StravaSynchronize {
             return;
         }
         if(empty($stravaActivitiesToSync)){
-            //Feedback::add($this->tr('Nostravaactivitytosync'));
+            if (!$this->user->isRestrictedUser()){
+                Feedback::add($this->tr('Nostravaactivitytosync'));
+            }
             return;
         }
         $athleteParams = Tfk::$registry->get('objectsStore')->objectModel('sptathletes')->getOne(['where' => ['id' => $athleteId], 'cols' => ['hrmin', 'hrthreshold', 'h4timethreshold', 'h5timethreshold', 'ftp', 'speedthreshold', 'sex']]);

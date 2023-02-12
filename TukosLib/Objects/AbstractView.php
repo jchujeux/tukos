@@ -19,6 +19,7 @@ abstract class AbstractView extends ObjectTranslator{
     function __construct($objectName, $translator, $parentWidgetTitle='Parent', $nameWidgetTitle='Name', $parentObjects = 'parentid'){
         parent::__construct($objectName, $translator);
         $this->objectName = $objectName;
+        $tr = $this->tr;
         $objectsStore = $this->objectsStore = Tfk::$registry->get('objectsStore');
         $this->model = $objectsStore->objectModel($this->objectName, $this->tr);
         $this->user  = Tfk::$registry->get('user');
@@ -27,6 +28,7 @@ abstract class AbstractView extends ObjectTranslator{
         $missingUser = $this->tr('missinguser', 'escapeSQuote');
         $needsUser = $this->tr('aclneedsuser', 'escapeSQuote');
 
+        $customizableAtts = [$tr('editorType') => ['att' => 'editorType', 'type' => 'StoreSelect', 'name' => $tr('editorType'), 'storeArgs' => ['data' => [['id' => 'normal', 'name' => $tr('normal')], ['id' =>  'simple', 'name' =>  $tr('simple')]]]]];
         $this->dataWidgets = [
             'id' => ViewUtils::textBox($this, 'Id', [
                     'atts' => [
@@ -38,7 +40,7 @@ abstract class AbstractView extends ObjectTranslator{
             ), 
             'parentid'  => ViewUtils::objectSelectMulti($parentObjects, $this, $parentWidgetTitle),
             'name'      => ViewUtils::textBox($this, $nameWidgetTitle, ['atts' => [/*'edit' => ['tukosTooltip' => ['label' => 'Hello world!', 'onClickLink' => ['label' => 'more...', 'name' => 'dailyavg']]], */'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
-            'comments'  => ViewUtils::lazyEditor($this, 'CommentsDetails', ['atts' => ['edit' => ['height' => '400px']]]),
+            'comments'  => ViewUtils::lazyEditor($this, 'CommentsDetails', ['atts' => ['edit' => ['height' => '400px', 'customizableAtts' => $customizableAtts]]]),
             'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [true, 'ucfirst', false, false, false], ['atts' => 
                 ['edit' => ['readonly' => true, /*'onWatchLocalAction' => ['value' => ['acl' => ['hidden' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return newValue === 'ACL' ? false : true"]]]]*/],
                  'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]

@@ -46,25 +46,33 @@ const cacheFirst = async ({ request, preloadResponsePromise, fallbackUrl }) => {
     });
   }
 };
-
 const enableNavigationPreload = async () => {
   if (self.registration.navigationPreload) {
     // Enable navigation preloads!
     await self.registration.navigationPreload.enable();
   }
 };
-
+self.addEventListener('install', (event) => {
+	self.skipWaiting();
+});
 self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
   event.waitUntil(enableNavigationPreload());
 });
-
 self.addEventListener('install', (event) => {
   event.waitUntil(
     addResourcesToCache([
     ])
   );
 });
-
+self.addEventListener('message', event => {
+	if (event.data && event.data.type){
+		switch (event.data.type){
+			case 'translations':
+				self.translations = event.data.content;
+		}
+	}
+});
 self.addEventListener('fetch', (event) => {
   console.log('it is a fetch');
   if (event.request.method === "POST"){
@@ -82,14 +90,8 @@ self.addEventListener('fetch', (event) => {
 		  })
 	  );
   }else{
-	  event.respondWith(
-	    cacheFirst({
-	      request: event.request,
-	      preloadResponsePromise: event.preloadResponse,
-	      fallbackUrl: '/images/tukosswissknife.jpg',
-	    })
-  	);
- }
+	  event.respondWith(cacheFirst({request: event.request, preloadResponsePromise: event.preloadResponse, fallbackUrl: '/images/tukosswissknife.jpg'}));
+  }
 });
 function serializeRequest(request) {
 	  var serialized = {
@@ -181,8 +183,7 @@ function cachePut(request, response, store) {
 					store.add(entry).catch(error => {store.update(entry.key, entry)});
 					return store.get(reqInfo.id + '/changes').then(changedData => {
 						if (changedData){
-							const bodyObject = JSON.parse(serializedResponse.body);
-							bodyObject.formContent.changedData = changedData;
+							bodyObject.formContent.offlineChangedValues = changedData.response;
 							serializedResponse.body = JSON.stringify(bodyObject);
 							return deserializeResponse(serializedResponse);
 						}else{
@@ -193,7 +194,7 @@ function cachePut(request, response, store) {
 	        case 'Edit/Tab/Save':
 	        case 'Edit/Tab/Reset':
 			case 'Edit/Tab/Edit' :
-				entry = {key: reqInfo.id + reqInfo.object + '/initial', response: {data: bodyObject.data, extendedIds: bodyObject.extendedIds, extrax: bodyObject.extras}, timestamp: Date.now()};
+				entry = {key: reqInfo.id + reqInfo.object + '/initial', response: {title: bodyObject.title, data: bodyObject.data, extendedIds: bodyObject.extendedIds, extras: bodyObject.extras}, timestamp: Date.now()};
 				store.add(entry).catch(error => {store.update(entry.key, entry)});
 				store.delete(reqInfo.id + '/changes');
 				return response.clone();
@@ -223,26 +224,43 @@ function cacheMatch(request, store) {
 			return store.get(reqInfo.object + '/Edit/Tab/Tab').then(tabData => {
 				if (tabData){
 					return store.get(reqInfo.id + reqInfo.object + '/initial').then(initialData => {
-						const response = tabData.response, tabBodyObject = JSON.parse(response.body), initialBodyObject = initialData.response;
-						tabBodyObject.formContent.data = initialBodyObject.data;
-						tabBodyObject.extendedIds = initialBodyObject.extendedIds;
-						tabBodyObject.extras = initialBodyObject.extras;
-						return store.get(reqInfo.id + '/changes').then(changedData => {
-							if (changedData){
-								tabBodyObject.changedValues = changedData.body;
+						const response = tabData.response;
+						if (initialData){
+							const tabBodyObject = JSON.parse(response.body), initialBodyObject = initialData.response;
+							tabBodyObject.title = initialBodyObject.title;
+							tabBodyObject.formContent.data = initialBodyObject.data;
+							tabBodyObject.extendedIds = initialBodyObject.extendedIds;
+							tabBodyObject.extras = initialBodyObject.extras;
+							return store.get(reqInfo.id + '/changes').then(changedData => {
+								if (changedData){
+									tabBodyObject.formContent.offlineChangedValues = changedData.response;
+								}
+								response.body = JSON.stringify(tabBodyObject);
+								return deserializeResponse(response);
+							});
+						}else{
+							if (reqInfo.id !== 'new'){
+								return new Response('', {status: 503, statusText: 'Service Unavailable'});
+							}else{
+								return deserializeResponse(response);
 							}
-							response.body = JSON.stringify(tabBodyObject);
-							return deserializeResponse(response);
-						});
+						}
 					});
 				}else{
 					return new Response('', {status: 503, statusText: 'Service Unavailable'});
 				}
 			});
         case 'Edit/Tab/Save':
+			return request.clone().json().then(bodyObject => {
+				store.add({key: reqInfo.id + '/changes', response: bodyObject, timestamp: Date.now()});
+				return new Response(JSON.stringify({feedback: [self.translations['savedoffline']]}), {status: 200, statusText: 'savedoffline'});
+			});
         case 'Edit/Tab/Reset':
+			return store.get(reqInfo.id + reqInfo.object + '/initial').then(initialData => {
+				initialData.response.feedback = [self.translations['resettoofflineinitialvalues']];
+				return new Response(JSON.stringify(initialData.response), {status: 200, statusText: 'resettoofflineinitialvalues'});
+			});
 		case 'Edit/Tab/Edit' :
-			return new Response('', {status: 503, statusText: 'Service Unavailable'});
 		default:
 			return getPostId(request.clone()).then(function(id) {return store.get(id);}).then(function(data){
 				if (data) {
@@ -263,3 +281,7 @@ function requestInfo(request){
 	const req = request.clone(), urlObject = new URL(req.url), match = urlObject.pathname.match(/\/dialogue\/([^\/]+)\/(.*)/i);
 	return {object: match[1], action: match[2], id: urlObject.searchParams.get('id') || 'new'};
 }
+/*function isPageRequest(request){
+	const req = request.clone(), urlObject = new URL(req.url), match = urlObject.pathName.match(/\/page\//i);
+	return match ? true : false;
+}*/

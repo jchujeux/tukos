@@ -33,6 +33,7 @@ abstract class AbstractModel extends ObjectTranslator {
     protected $permissionOptions = ['NOTDEFINED', 'PL', 'PR', 'RL', 'RO', 'PU', 'ACL'];
     protected $aclOptions = ['0' => 'none', '1' => 'RO', '2' => 'RW', '3' => 'RWD'];
     protected $gradeOptions = ['TEMPLATE', 'NORMAL', 'GOOD', 'BEST'];
+    protected $yesOrNoOptions = ['yes', 'no'];
     protected $timeIntervalOptions =  ['year', 'quarter', 'month', 'week', 'weekday', 'day', 'hour', 'minute', 'second'];// corresponds to intersection of php strToTime & dojo.date supported intervals
     protected $useItemsCache = true;
     const optionalCols = ['worksheet', 'custom', 'history'];
