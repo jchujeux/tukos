@@ -26,7 +26,7 @@ class FullBackup {
             $source = $appConfig->dataSource;
             $dateBackup = date('Y-m-d H:i:s');
             $backupFileName = $source['dbname'] . str_replace(':', '-', str_replace(' ', '_', $dateBackup)) . '.sql.bz2';
-            $dump = new Mysqldump("mysql:host={$source['host']};dbname={$source['dbname']}", $source['admin'], $source['pass'], ['compress' => 'Bzip2']);
+            $dump = new Mysqldump("mysql:host={$source['host']};dbname={$source['dbname']}", $source['admin'], $source['pass'], ['compress' => 'Bzip2', 'default-character-set' => 'utf8mb4']);
             $dump->start(Tfk::$tukosTmpDir . $backupFileName);
             echo "Backed-up database: {$source['dbname']} into file $backupFileName";
         }catch(\Zend_Console_Getopt_Exception $e){

@@ -227,8 +227,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
         },
         keepChanges: function(options){
             if (options){
-                if (options.values){
-                    var widgetChanges = {};
+                let widgetChanges = false;
+                if (options.values && !utils.empty(this.changedWidgets)){
+                    widgetChanges = {};
                     for (var widgetName in this.changedWidgets){
                             var widget = this.changedWidgets[widgetName];
                             widgetChanges[widgetName] =  typeof widget.keepChanges === 'function' ? widget.keepChanges() : widget.get('value');
@@ -270,9 +271,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
                 for (var att in widgetActionFunctions){
                     if (allowedNestedWatchActions === undefined || (this.nestedWatchActions <= allowedNestedWatchActions) && nestedWidgetWatchActions[watchedAtt] < 1){
                         var actionFunction = widgetActionFunctions[att];
-                    	this.nestedWatchActions += 1;
-                        nestedWidgetWatchActions[watchedAtt] += 1;
                         if (actionFunction.triggers[this.watchContext]){
+                    		this.nestedWatchActions += 1;
+                        	nestedWidgetWatchActions[watchedAtt] += 1;
                             var newAtt = actionFunction.action(widget, targetWidget, newValue, oldValue);
                             if (newAtt != undefined && widget){
                                 if (targetWidget && newAtt !== targetWidget.get(att)){
@@ -282,9 +283,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
                                     }
                                 }
                             }
+                    		this.nestedWatchActions += -1;
+                        	nestedWidgetWatchActions[watchedAtt]  += -1;
                         }
-                    	this.nestedWatchActions += -1;
-                        nestedWidgetWatchActions[watchedAtt]  += -1;
                     }
                 }
             }

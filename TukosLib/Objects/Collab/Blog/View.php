@@ -52,12 +52,11 @@ class View extends AbstractView {
                 //'title'   => $this->tr('User Context'),
                 'paneContent' => [
                     'widgetsDescription' => [
-                        //'recentposts' => Widgets::htmlContent(['title' => $this->tr('recentposts'),  'widgetCellStyle' => ['backgroundColor' => '#d0e9fc'], 'value' => $this->model->getRecentPosts()]),
                         'recentposts' => Widgets::storeTree(['title' => $this->tr('recentposts'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'parentid', 'parentDataProperty' => 'parentid',
                             'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  'storeArgs' => ['data' => $this->model->getRecentPosts()], 'root' => $this->user->getRootId(), 'openOnClick' => true]),
                         'categories' => Widgets::storeTree(Utl::array_merge_recursive_replace(['title' => $this->tr('categories'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'contextid',
                             'parentDataProperty' => 'parentid', 'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  
-                            'storeArgs' => ['object' => 'BackOffice', 'view' => 'NoView', 'mode' => 'Pane', 'action' => 'Get', 'params' => ['actionModel' => 'GetItems', 'object' => 'Blog', 'form' => 'GetItems']], 'openOnClick' => true],
+                            'storeArgs' => ['object' => 'BackOffice', 'view' => 'NoView', 'mode' => 'Pane', 'action' => 'Get', 'params' => ['actionModel' => 'GetItems', 'object' => 'Blog', 'form' => 'GetItems']], 'openOnClick' => false],
                             $contextTreeAtts)),
                         'searchbox' => ['type' => 'SearchTextBox', 'atts' => Widgets::complete(['title' => $this->tr('pattern'), 'style' => ['width' => '10em'], 'searchAction' => $this->searchAction('this.pane')])],
                         'searchresults' => Widgets::storeTree(['title' => $this->tr('searchresults'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'hidden' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'parentid',
@@ -94,10 +93,16 @@ class View extends AbstractView {
             return <<<EOT
 var form = this.pane.form, onBlur = this.onBlur;
 if (item.onClickGotoTab){
-    Pmg.tabs.gotoTab({action: 'Tab', mode: 'Tab', object: 'backoffice', view: 'edit', query: {form: 'Show', object: 'blog', name: item.name}}).then(function(){
-        onBlur && onBlur();
-        window.scrollTo(0,0);
-    });
+    tabOrPromise = Pmg.tabs.gotoTab({action: 'Tab', mode: 'Tab', object: 'backoffice', view: 'edit', query: {form: 'Show', object: 'blog', name: item.name}}, true);
+    if (tabOrPromise && tabOrPromise.then){
+        tabOrPromise.then(function(){
+            onBlur && onBlur();
+            window.scrollTo(0,0);
+        });
+    }
+}
+if (item.hasChildren){
+    this.__click(arguments[1], arguments[2], true, 'onClick');
 }
 EOT
             ;
@@ -105,6 +110,9 @@ EOT
             return <<<EOT
 if (item.onClickGotoTab){
     Pmg.tabs.gotoTab({object: 'backoffice', view:item.onClickGotoTab, mode: 'Tab', action: 'Tab', query:{object: 'blog', form: 'Show', name: item.name}});
+}
+if (item.hasChildren){
+    this.__click(arguments[1], arguments[2], true, 'onClick');
 }
 EOT
             ;

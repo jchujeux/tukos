@@ -67,7 +67,7 @@ class Model extends AbstractModel {
             'velocity_smoothstream' => 'longtext',
             'kpiscache' => 'longtext'
         ];
-        $this->performedCols = ['timemoving', 'sensations', 'perceivedeffort', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr', 'avgpw', 'avgcadence', 'hr95', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'mechload', 'h4time', 'h5time', 'stravaid'];
+        $this->performedCols = ['timemoving', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr', 'avgpw', 'avgcadence', 'hr95', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'mechload', 'h4time', 'h5time', 'stravaid'];
         $this->plannedCols = ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'warmupdetails', 'mainactivitydetails'];
         
         $this->streamCols = ['timestream', 'distancestream', 'altitudestream', 'heartratestream', 'cadencestream', 'wattsstream', 'grade_smoothstream', 'velocity_smoothstream'];

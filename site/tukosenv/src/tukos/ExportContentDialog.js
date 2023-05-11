@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all", "dojo/ready", "dojo/when", "tukos/utils", "tukos/hiutils", "tukos/TukosTooltipDialog", "tukos/Download",  "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, on, all, ready, when, utils, hiutils, TukosTooltipDialog, download, Pmg, messages){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all", "dojo/ready", "dojo/when", "dijit/focus", "tukos/utils", "tukos/hiutils", "tukos/TukosTooltipDialog", "tukos/Download",  "tukos/PageManager", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
+    function(declare, lang, on, all, ready, when, focus, utils, hiutils, TukosTooltipDialog, download, Pmg, messages){
     return declare(TukosTooltipDialog, {
         postCreate: function(){
             var form = this.form;
@@ -12,8 +12,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
                     Pmg.alert({title: Pmg.message('newOrFieldsModified'), content: Pmg.message('saveOrReloadFirst')});
                     this.close();
         		}else{
-            		setTimeout(lang.hitch(this, function(){
+            		ready(lang.hitch(this, function(){
                 		when(this.onOpenAction(), lang.hitch(this, function(){
+            				focus.focus(this.domNode);//required by Chrome, or else dialog tooltip closes except on first open(?)
         	        		this.setVisibility();
         	        		when(this.previewContent(), lang.hitch(this, function(){
         	            		pane.watchOnChange = true;
@@ -22,11 +23,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
         	            			pane.resize();
         	            		});
         	            	}));
-                		}), 100);        			
+                		}));        			
             		}));
         		}
         	});
-        	this.blurCallback = on.pausable(this, 'blur', this.pane.close);
+        	//this.blurCallback = on.pausable(this, 'blur', this.pane.close);Unnecessary ? (JCH 2023-05-11)
         },
         _dialogAtts: function(form){
             var onWatch = lang.hitch(this, this.onWatchLocalAction), onWatchCheckBox =  lang.hitch(this, this.onWatchCheckBoxLocalAction);

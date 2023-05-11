@@ -105,7 +105,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             if ('hideEmptyNewCustom' in args){
                 var hideNewCustom = utils.empty(form.customization) ? true : false,
                       isNewItem = (form.valueOf('id') === '');
-                paneGetWidget('newCustomContent').set('value', form.customization);
+                paneGetWidget('newCustomContent').set('value', this.translatedContent(lang.clone(form.customization), form));
                 ['newCustomContent', 'tukosCustomViewButton', 'defaultCustomViewButton', 'save'].forEach(function(widgetName){
                     paneGetWidget(widgetName).set('hidden', hideNewCustom);
                 });
@@ -203,14 +203,14 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             }
         },
         moreCallback: function(){
-            var targetPane = this.currentPane(), targetNode = this.currentPaneNode(), form = targetPane.form || targetPane, id = form.valueOf('id'),  customDialog = targetPane.customDialog, pane = customDialog.pane, 
+            var self = this, targetPane = this.currentPane(), targetNode = this.currentPaneNode(), form = targetPane.form || targetPane, id = form.valueOf('id'),  customDialog = targetPane.customDialog, pane = customDialog.pane, 
             	getWidget = lang.hitch(pane, pane.getWidget);
             this.setVisibility({hideMore: false, hideEmptyNewCustom: true});
             Pmg.serverDialog({object: form.object, view: form.viewMode, mode: form.paneMode, action: 'CustomViewMore', query: id ? {id: id} : {}}).then(
                 function(response){
                     ['tukosCustomView', 'defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
-                        var contentName = customSet + 'Content'
-                        getWidget(contentName).set('value', response[contentName] || {});
+                        const contentName = customSet + 'Content', contentWidget = getWidget(contentName), customContent = response[contentName];
+                        contentWidget.set('value', self.translatedContent(customContent, form) || {});
                     });
                     pane.resize();
                     customDialog.close();
@@ -252,6 +252,49 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                     }
                 );
             }
-        }
+        },
+        translatedContent: function(customContent, form){
+			let columnsDescription;
+			const translateContent = function(customContent, description){
+				utils.forEach(customContent, function(subContent, key){
+					const subDescription = typeof description === 'object' ? description[key] : {};
+					if (typeof subContent === 'object'){
+						switch (key){
+							case 'widgetsDescription':
+								utils.forEach(subContent, function(widgetContent, widgetName){
+									translateContent(widgetContent, subDescription[widgetName]);
+									widgetContent["#tKey"] = columnsDescription ? columnsDescription[widgetName].label : subDescription[widgetName].atts.label;
+								});
+								break;
+							case 'columns':
+								utils.forEach(subContent, function(widgetContent, widgetName){
+									translateContent(widgetContent, subDescription[widgetName]);
+									widgetContent["#tKey"] = subDescription[widgetName].label;
+								});
+								break;
+							case 'series':
+								utils.forEach(subContent, function(widgetContent, widgetName){
+									translateContent(widgetContent, subDescription[widgetName]);
+									widgetContent["#tKey"] = subDescription[widgetName].options.label;
+								});
+								break;
+							case 'editDialogAtts':
+								columnsDescription = description.columns;
+								translateContent(subContent, subDescription);
+								columnsDescription = false;
+								break;
+							default:
+								translateContent(subContent, subDescription);
+						}
+						subContent["#tKey"] = Pmg.message(key, form.object);
+					}else{
+						customContent[key] = {"#tKey": Pmg.message(key, form.object), "#leafValue": subContent};
+					}
+				});
+				return customContent;			
+			}
+			translateContent(customContent, form);
+			return customContent;
+		}
     });
 });

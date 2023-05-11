@@ -10,6 +10,7 @@
     <script type="text/javascript" src="<?= $this->tukosLocation ?>/mobile/deviceTheme.js"></script>
     <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dijit/themes/claro/claro.css" media="screen">
     <link rel="stylesheet" href="<?= $this->dgridLocation ?>/css/dgrid.css" media="screen">
+        <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/editorPlugins.css" media="screen">
     <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/css/StatusBar.css" media="screen">
 		<link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/calendar/themes/claro/Calendar.css" media="screen">
     <link rel="stylesheet" href="<?= $this->tukosLocation ?>/resources/tukos.css" media="screen">

@@ -25,20 +25,6 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
         	});
 			this.tsbFilter = this.filter.eq('mode', 'performed').ne('sts', NaN).ne('lts', NaN).gte('startdate', this.fromDate);
         },
-		/*_initialize: function(params){
-			var self = this, mapping = {stsdays: 'stsDailyDecay', ltsdays: 'ltsDailyDecay', stsratio: 'stsRatio', initialsts: 'initialSts', initiallts: 'initialLts'};
-			utils.forEach(params, function(value, name){
-				var property = mapping[name];
-				switch(name){
-					case 'stsdays':
-					case 'ltsdays':
-						self[property] = value ? Math.exp(-1/value) : 0.0;
-						break;
-					default:
-						self[property] = value || 0;
-				}
-			})
-		},*/
 		get: function(property){
 			return this[property];
 		},

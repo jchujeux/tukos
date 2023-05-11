@@ -165,8 +165,13 @@ EOT;
   }
   protected function googleSyncConditionDescription($needGoogleCalId, $youNeedToSelectAGoogleCalId){
     return <<<EOT
-    var form = this.form, googlecalid = form.valueOf('googlecalid');
-    if (typeof googlecalid === 'string' && googlecalid.length > 0){
+var form = this.form, googlecalid = form.valueOf('googlecalid');
+//this.customToSend = ((form.customization || {}).widgetsDescription || {}).sessionstracking || '';
+this.customToSend = lang.getObject('customization.widgetsDescription.sessionstracking.atts.dialogDescription.paneDescription.widgetsDescription', false, form);
+/*if (((form.customization || {}).widgetsDescription || {}).sessionstracking){
+    Pmg.alert({title: 'sessionstracingcustommodified', content: 'youneedtosave customizationfirst'});
+    return false;
+}else */if (typeof googlecalid === 'string' && googlecalid.length > 0){
         return true;
     }else{
         Pmg.alert({title: '$needGoogleCalId', content: '$youNeedToSelectAGoogleCalId'});

@@ -7,7 +7,7 @@ function (ready, dom, dst, BorderContainer, ContentPane, TabContainer, ObjectPan
 				 contentHeader = new ContentPane({id: 'tukosHeader', region:'top', 'class': 'edgePanel', style: "padding: 0px;border: 1px;", content: obj.headerContent}), 
 				 //contentCenter = new ContentPane({id: 'tukosCenter', region:'center', 'class': 'centerPanel', style: "padding: 0px;"}),
 			     contentCenter = new TabContainer({id: "centerPanel", region: "center", tabPosition: "top", 'class': "centerPanel", style: "width: 100%; height: 100%; padding: 0px"});
-				 contentRight = new ContentPane({id: 'tukosRightPane', region: 'right', 'class': 'right', splitter: true, style: {width: '25%', padding: '0px'}, content: obj.rightPaneContent}),
+				 contentRight = new ContentPane({id: 'tukosRightPane', region: 'right', 'class': 'right', splitter: true, style: {width: obj.rightPanelWidth || '15%', padding: '0px'}, content: obj.rightPaneContent}),
 				 //centerPane= new ObjectPane(obj.blogDescription[0].formContent);
 				 rightPane = new TukosPane(obj.rightPaneDescription.paneContent);
 			Pmg.tabs = new TabsManager({container: contentCenter, tabsDescription: obj.tabsDescription});

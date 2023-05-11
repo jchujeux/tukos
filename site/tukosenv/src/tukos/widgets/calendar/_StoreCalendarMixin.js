@@ -53,6 +53,13 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/store/Memory",  "dojo/st
 			}
 		},
 		
+        keepChanges: function(){
+            return {date: this.date};
+        },
+        restoreChanges: function (changes){
+            this.set('date', changes.date);
+            return true;
+        },
 		deleteSelectedItem: function(){
 			this.store.remove(this.selectedItem.id);
 		},

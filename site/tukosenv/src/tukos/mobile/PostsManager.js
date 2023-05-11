@@ -5,11 +5,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
     		declare.safeMixin(this, args);
         	var created, selected, descriptions = this.viewsDescription;
         	this.container.selectChild = function(target, transitionDir, transition){
-        		if (!this.selectedChildWidget){
-            		this.selectedChildWidget = target;        			
-				}else if (this.selectedChildWidget !== target){
+        		if (this.selectedChildWidget !== target){
             		this.selectedChildWidget.performTransition(target.id, transitionDir || 1, transition || "slide");
-            		this.selectedChildWidget = target;        			
+            		this.selectedChildWidget = target;
         		}else{
         			Pmg.beep();
         		}
@@ -33,16 +31,16 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
         	return theNewTab;
         },
         request: function(urlArgs){
-            var self = this;
+            var self = this, container = this.container;
         	return Pmg.serverDialog(urlArgs, {}, false).then(
                 function(response){
                     var theNewView = self.create(response);
-                    if (response.focusOnOpen){
-                    	self.container.selectChild(theNewView);
-                    }
+                    //if (response.focusOnOpen){
+                    	container.selectChild(theNewView);
+                    //}
 					//dojo.ready(function(){
-						self.container.previousButton.set('style', {display: Pmg.mobileViews.isFirstPane() ? 'none' : 'block'});
-						self.container.nextButton.set('style', {display: Pmg.mobileViews.isLastPane() ? 'none' : 'block'});
+						container.previousButton.set('style', {display: Pmg.mobileViews.isFirstPane() ? 'none' : 'block'});
+						container.nextButton.set('style', {display: Pmg.mobileViews.isLastPane() ? 'none' : 'block'});
 	                    window.scrollTo(0,0);;
 					//});
                     return response;
@@ -90,7 +88,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
         currentPaneNode: function(){
         	return this.currentPane().heading.domNode;
         },
-        gotoTab: function(target){
+        gotoTab: function(target, silent){
             var id, name, storeAtts;
 			if (target.view === "Overview" || (id = (target.query || {}).id) || (name = (target.query || {}).name) || (storeAtts = (target.query || {}).storeatts)){
 				var openedTabs = this.container.getChildren();
@@ -100,8 +98,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
 				for (var i in openedTabs){
 	                var tab = openedTabs[i];
 					if ((target.view === "Overview" && (tab.formContent || {}).viewMode === "Overview" && tab.formContent.object === target.object) || (id && tab.contentId == id) || (name && tab.contentName === name) || (id && (tab.get('title').match(/(\d+)\)$/) || {} )[1] === id)){
-	                    this.container.selectChild(tab);
-	                    window.scrollTo(0,0);
+	                    if (!silent || tab !== this.container.selectedChildWidget){
+							this.container.selectChild(tab);
+						}
+	                    //window.scrollTo(0,0);
 	                    return;
 	                }
 	            }

@@ -187,6 +187,14 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 				});
 			//}
 		},
+		viewUrlInBrowserWindow: function(url, name, options){
+			if (windows[name] && !windows[name].closed){
+				window.blur();
+				windows[name].focus();
+			}else{
+	        	windows[name] = window.open(url, name, options);
+			}
+		},
 		closeDependingWindows: function(){
 			utils.forEach(windows, function(win){
 				if (win && !win.closed){

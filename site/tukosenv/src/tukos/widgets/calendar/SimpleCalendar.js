@@ -1,7 +1,7 @@
 define(["dojo/_base/declare",
 		"dojo/_base/lang",
 		"dojox/calendar/CalendarBase",
-		"dojox/calendar/SimpleColumnView",
+		"tukos/widgets/calendar/SimpleColumnView",
 		"tukos/widgets/calendar/VerticalRenderer",
 		"dojox/calendar/DecorationRenderer",
 		"dojox/calendar/MatrixView",

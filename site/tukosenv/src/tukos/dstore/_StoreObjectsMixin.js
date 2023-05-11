@@ -36,7 +36,7 @@ define([
     			return required === '' ? true : (new RegExp(required, 'i')).test(value, object);
     		},
     		notrlike: function(value, required, object){
-            	console.log('notrlike to be implemented');
+//            	console.log('notrlike to be implemented');
             	return (new RegExp(required === '' ? '([^\s]*)' : ('^((?!(' + required + ')).)*$'))).test(value,object);
     		}, 
     		between: function(col, value){

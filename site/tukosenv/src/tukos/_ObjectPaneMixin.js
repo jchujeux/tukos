@@ -29,7 +29,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
             return changedValues;
         },
 
-        serverDialog: function(urlArgs, data, emptyBeforeSet, defaultDoneMessage, markResponseIfChanged){
+        serverDialog: function(urlArgs, data, emptyBeforeSet, defaultDoneMessage, markResponseIfChanged, clientTimeout){
             var noLoadingIcon = this.noLoadingIcon;
             //Pmg.setFeedback(''/*messages.actionDoing*/);
             if (this.inServerDialog){
@@ -42,7 +42,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
                 urlArgs.mode = urlArgs.mode || this.paneMode;
                 urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: this.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
                 return all(data).then(lang.hitch(this, function(data){
-                    return Pmg.serverDialog(urlArgs, {data: data}, noLoadingIcon ? defaultDoneMessage : {widget: this.parent, att: 'title', defaultMessage: defaultDoneMessage}).then(lang.hitch(this, function(response){
+                    return Pmg.serverDialog(urlArgs, {data: data, timeout: clientTimeout ? clientTimeout : 32000}, noLoadingIcon ? defaultDoneMessage : {widget: this.parent, att: 'title', defaultMessage: defaultDoneMessage}).then(lang.hitch(this, function(response){
 	                    	if (response['data'] === false){
 	    	                        this.inServerDialog = false;
 	    	                		return response;
