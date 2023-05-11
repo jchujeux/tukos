@@ -19,7 +19,10 @@ trait GoogleSessionsEvents {
         $translator = Tfk::$registry->get('translatorsStore');
         $performedPrefix = ' (' . $translator->substituteTranslations( $this->tr('performedprefix')) .  ')';
         $trackingConfiguration = $this->getCombinedCustomization(['id' => $id], 'edit', null, ['widgetsDescription', 'sessionstracking', 'atts', 'dialogDescription', 'paneDescription', 'widgetsDescription']);
-        $includeTrackingFormUrl = ($eventFormUrl = Utl::getItem('eventformurl', $trackingConfiguration)) ? $eventFormUrl['atts']['checked'] : false;
+        if ($custom = Utl::getItem('custom', $query)){
+            $trackingConfiguration = Utl::array_merge_recursive_replace($trackingConfiguration, json_decode($custom, true));
+        }
+        $includeTrackingFormUrl = ($eventFormUrl = Utl::getItem('eventformurl', $trackingConfiguration)) ? $eventFormUrl['atts']['checked'] : true;
         $targetDbString = $sessionFeedback = null;
         $completeTrackingFormUrl = function ($eventDescription) use ($includeTrackingFormUrl, &$targetDbString, &$sessionFeedback){
             if ($includeTrackingFormUrl){
@@ -32,12 +35,15 @@ trait GoogleSessionsEvents {
             return $eventDescription;
         };
         if ($includeTrackingFormUrl){
-            $synchroFlag = ($synchroFlag = Utl::getItem('synchroflag', $trackingConfiguration)) ? $synchroFlag['atts']['checked'] : false;
+            $synchroFlag = ($synchroFlag = Utl::getItem('synchroflag', $trackingConfiguration)) ? $synchroFlag['atts']['checked'] : true;
             $synchrostreams = ($synchrostreams = Utl::getItem('synchrostreams', $trackingConfiguration)) ? $synchrostreams['atts']['checked'] : false;
             $formPresentation = ($presentation = Utl::getItem('formpresentation', $trackingConfiguration)) ? $presentation['atts']['value'] : '';
             $formVersion = ($version = Utl::getItem('version', $trackingConfiguration)) ? $version['atts']['value'] : $this->defaultSessionsTrackingVersion;
         }else{
             $synchroFlag = $synchrostreams = false;
+            $synchrostreams = false;
+            $formPresentation = '';
+            $formVersion = $this->defaultSessionsTrackingVersion;
         }
         $where = ['parentid' => $id/*, [['col' => 'duration', 'opr' => '<>', 'values' => '0'], ['col' => 'mode', 'opr' => '<>', 'values' => 'performed']]*/];
         if ($performedOnly){

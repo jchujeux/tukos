@@ -16,13 +16,15 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
 			evt.preventDefault();            
 			var self = this, pane = this.currentPane();
             if (evt.target.checked || (evt.target.checked !== false && pane.isObjectPane() && pane.title === registry.getEnclosingWidget(evt.target).label)){
-                mutils.setContextMenuItems(this.container, [{atts: {label: Pmg.message('refresh'), onClick: function(evt){self.refresh('Tab', []);}}}, {atts: {label: Pmg.message('customization'), onClick: lang.hitch(this, this.openCustomDialog)}}]);
+                mutils.setContextMenuItems(this.container, [
+					{atts: {label: Pmg.message('refresh'), onClick: function(evt){self.refresh('Tab', []);}}}, 
+					{atts: {label: Pmg.message('customization'), onClick: lang.hitch(this, this.openCustomDialog), tukosTooltip:{label: '', onClickLink: {label: Pmg.message('help'), name: 'customization' + pane.formContent.viewMode + 'TukosTooltip', object: 'tukoslib'}}}}]);
             }else{
                 mutils.setContextMenuItems(this.container, []);
             }
         },
         refresh: function(action, data, keepOptions, currentPane){
-            var currentPane = currentPane || this.currentPane(), theForm = currentPane.form, theFormContent = currentPane.formContent, changesToRestore = (keepOptions ? theForm.keepChanges(keepOptions) : {});
+            var currentPane = currentPane || this.currentPane(), theForm = currentPane.form, theFormContent = currentPane.formContent, changesToRestore = (keepOptions ? theForm.keepChanges(keepOptions) : null);
             var refreshAction = function(){
                 var query = {};
                 if (!theForm){
@@ -44,12 +46,29 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             	return Pmg.serverDialog({object: theFormContent.object, view: theFormContent.viewMode, mode: theFormContent.paneMode, action: action, query: query}, {data: data}, {widget: currentPane, att: 'title', defaultFeedback: false}).then(
                     function(response){
 						currentPane.set('title', response.title);
+						currentPane.serverFormContent = lang.clone(response.formContent);
+						if (changesToRestore && changesToRestore.customization){
+							response.formContent = utils.mergeRecursive(response.formContent, changesToRestore.customization);
+						}
 						currentPane.refresh(response.formContent);
-                        ready(function(){
-                            setTimeout(function(){(currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);}, 0);// due to similar setTimeout in ObjectPane affecting markIfChanged
-                            Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
-                            currentPane.resize();
-                        });
+	                    ready(function(){
+	                        currentPane.resize();
+							if (changesToRestore){
+								utils.waitUntil(
+									function(){
+										return currentPane.form && currentPane.form.markIfChanged;
+									}, 
+									function(){
+										(currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);
+	                            		Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
+	                            		//currentPane.resize();
+									}, 
+									100);
+	                            //setTimeout(function(){(currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);}, 1000);// due to similar setTimeout in ObjectPane affecting markIfChanged
+							}else{
+	                        	Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
+							}
+	                    });
                         return response;
                     }
                 );
@@ -59,6 +78,50 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             }else{
                 return theForm.checkChangesDialog(refreshAction);
             }
+        },
+        localRefresh: function(keepOptions, currentPane){
+            var currentPane = currentPane || this.currentPane(), theForm = currentPane.form, theFormContent = lang.clone(currentPane.serverFormContent), changesToRestore = (keepOptions ? theForm.keepChanges(keepOptions) : null);
+			if (currentPane.inLocalRefresh){
+				Pmg.addFeedback(Pmg.message('actionnotcompletedwait'));
+				return false;
+			}
+			currentPane.inLocalRefresh = true;
+			if (changesToRestore && changesToRestore.customization){
+				theFormContent = utils.mergeRecursive(theFormContent, changesToRestore.customization);
+			}
+			currentPane.refresh(theFormContent);
+            ready(function(){
+            	const title = currentPane.get('title');
+				currentPane.resize();
+            	currentPane.set('title', Pmg.loading(title));
+				Pmg.setFeedback(Pmg.message('refreshing'));
+				if (changesToRestore.widgets){
+					utils.waitUntil(
+						function(){
+							return currentPane.form && currentPane.form.markIfChanged;
+						}, 
+						function(){
+							//currentPane.resize();
+							(currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);
+                			currentPane.set('title', title);
+							currentPane.inLocalRefresh = false;
+							ready(function(){
+								currentPane.resize();
+                				ready(function(){
+									Pmg.setFeedback(Pmg.message('refreshed'));
+								});
+							});
+						}, 
+						100);
+				}else{
+					setTimeout(function(){
+                		currentPane.set('title', title);
+						currentPane.inLocalRefresh = false;
+                		Pmg.setFeedback(Pmg.message('refreshed'));
+					}, 0);
+				}
+            });
+            return true;
         },
         currentPane: function(){
             return this.container.selectedChildWidget;

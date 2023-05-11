@@ -539,6 +539,10 @@ define([
 			// tags:
 			//		protected
 			if(args && args.urlInput){
+				if (args.urlInput.indexOf("https://drive.google.com/file/d/") === 0){
+					args.urlInput = args.urlInput.replace(/(file\/d\/)([^/]*)\/.*/, function (match, p1, p2){
+						return "uc?id=" + p2;
+					});				}
 				args.urlInput = args.urlInput.replace(/"/g, "&quot;");
 			}
 			if(args && args.textInput){

@@ -77,9 +77,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
 				}
 				this.inherited(arguments);
 		    	if (viewNode = this.form.domNode.parentNode){
-			    	var style = this.bodyNode.style, bodyHeight = parseInt(window.getComputedStyle(document.body).getPropertyValue('height')), viewHeight = parseInt(window.getComputedStyle(viewNode).getPropertyValue('height')), oldMaxWidth = style.maxWidth, oldMaxHeight = style.maxHeight,
-			    		maxHeight, newMaxHeight;
-					style.maxWidth = parseInt(window.getComputedStyle(viewNode).getPropertyValue('width'));
+			    	var style = this.bodyNode.style, bodyHeight = parseInt(window.getComputedStyle(document.body).getPropertyValue('height')), viewHeight = parseInt(window.getComputedStyle(viewNode).getPropertyValue('height')), oldMaxHeight = style.maxHeight,
+			    		maxHeight, newMaxHeight, maxWidth = parseInt(window.getComputedStyle(viewNode).getPropertyValue('width')), oldMaxWidth = style.maxWidth;
+					style.maxWidth = maxWidth + 'px';
 					if (!style.maxHeight && viewHeight !== this.previousViewHeight){
 				    	maxHeight = style.maxHeight === '' ? 0 : parseInt(style.maxHeight);
 				    	style.maxHeight = (maxHeight + bodyHeight - viewHeight) + 'px';

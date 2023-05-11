@@ -111,12 +111,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
 			if (item._item.connectedIds){
 				var grid = this.owner.owner.getGrid(), collection = grid.collection, idProperty = collection.idProperty, overallItem = this.overallItem,
 					gridItem = collection.filter((new collection.Filter()).eq(idProperty, item._item.connectedIds[grid.widgetName])).fetchSync();
-				if (!gridItem.length){
-					setTimeout(function(){domStyle.set(overallItem.parentNode, "display", "none");}, 10);
-					return;
-				}
-			}         },
-
+				domStyle.set(overallItem.parentNode, "display", gridItem.length ? 'block' : 'none');
+			}else{
+				//domStyle.set(overallItem.parentNode, "display", 'block');//if present, when creating calendar item via ctrl-mousedown, overallItem is undefined (jch 2023-05-11)
+			}
+         },
          customize: function(item, w, h){
             var calendar = this.owner.owner, itemsCustom = (calendar.customization ||{}).items;
             var defaultStyleValue = function(styleDefaultAttValue, attr){

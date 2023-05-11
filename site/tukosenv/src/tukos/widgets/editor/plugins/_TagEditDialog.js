@@ -5,9 +5,10 @@ define (
     var colorIconClass = "dijitEditorIcon dijitEditorIconHiliteColor",
         sizeUnits = utils.storeData(['auto', 'cm', '%', 'em', 'px']), thicknessUnits = utils.storeData(['cm', 'em', 'px']), hAlignStoreData = Pmg.messageStoreData(['default', 'left', 'center', 'right']),
         vAlignStoreData = Pmg.messageStoreData(['top', 'middle', 'bottom']), displayStoreData = Pmg.messageStoreData(['block', 'inline', 'inline-table', 'none']), pageBreakInsideStoreData = Pmg.messageStoreData(['auto', 'avoid']), 
+        objectFitStoreData = Pmg.messageStoreData(['fill', 'contain', 'cover', 'none', 'scale-down']), objectPositionStoreData = Pmg.messageStoreData(['50% 50%', 'right top', 'left bottom', '0px 0px']),
     	description = {backgroundColor: 'colorDescription', borderColor: 'colorDescription', color: 'colorDescription', pageBreakInside: 'pageBreakInsideDescription', textAlign: 'hAlignDescription', verticalAlign: 'vAlignDescription', width: 'sizeDescription',
-    				   	height: 'sizeDescription', minWidth: 'sizeDescription', maxWidth: 'sizeDescription', minHeight: 'sizeDescription', maxHeight: 'sizeDescription', margin: 'sizeDescription', display: 'displayDescription',
-						paddingLeft: 'sizeDescription', paddingRight: 'sizeDescription', paddingBottom: 'sizeDescription', paddingTop: 'sizeDescription',
+    				   	height: 'sizeDescription', minWidth: 'sizeDescription', maxWidth: 'sizeDescription', minHeight: 'sizeDescription', maxHeight: 'sizeDescription', objectFit: 'objectFitDescription', objectPosition: 'objectPositionDescription',
+    				   	margin: 'sizeDescription', display: 'displayDescription', paddingLeft: 'sizeDescription', paddingRight: 'sizeDescription', paddingBottom: 'sizeDescription', paddingTop: 'sizeDescription',
     				   	placeHolder: 'domAttDescription', border: 'domAttDescription', cellPadding: 'domAttDescription', cellSpacing: 'domAttDescription'},
 	    domAttValue = {
 	        get: function(node, att){
@@ -116,6 +117,9 @@ define (
         storeSelectDescription: function(attName, storeData){
         	return {type: 'StoreSelect', atts: {label: Pmg.message(attName), style: {width: '10em'}, storeArgs: {data: storeData}, attValueModule: styleAttValue}};
         },
+        storeComboBoxDescription: function(attName, storeData){
+        	return {type: 'StoreComboBox', atts: {label: Pmg.message(attName), style: {width: '10em'}, storeArgs: {data: storeData}, attValueModule: styleAttValue}};
+        },
         pageBreakInsideDescription: function(attName){
         	return this.storeSelectDescription(attName, pageBreakInsideStoreData);
         },
@@ -128,6 +132,12 @@ define (
         displayDescription: function(attName){
         	return this.storeSelectDescription(attName, displayStoreData);
         },
+        objectFitDescription: function(attName){
+        	return this.storeSelectDescription(attName, objectFitStoreData);
+		},
+        objectPositionDescription: function(attName){
+        	return this.storeComboBoxDescription(attName, objectPositionStoreData);
+		},
         sizeDescription: function(attName){
         	var unitAttValue = lang.hitch(this, this.unitAttValue);
         	return {type: 'NumberUnitBox', atts: {label: Pmg.message(attName), concat: 'true', number: {style: {width: '3em'}}, unit: {style: {width: '5em'}, storeArgs: {data:sizeUnits}}, attValueModule: unitAttValue(attName)}};

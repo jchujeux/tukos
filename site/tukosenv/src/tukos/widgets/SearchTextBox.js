@@ -3,7 +3,6 @@ define(["dojo/_base/declare", "dojo/_base/config", "dojo/dom-construct", "dijit/
     return declare([TextBox], {
 		templateString: template,
         buildRendering: function(){
-			console.log('toto');
 			this._onClick = eutils.eval(this.searchAction, 'evt');
 			this._onKeyDown = function(event){
 				if (event.key === "Enter"){

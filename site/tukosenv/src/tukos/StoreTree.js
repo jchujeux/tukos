@@ -40,8 +40,8 @@ define (["dojo/_base/declare", "dojo/aspect", "dijit/tree/ObjectStoreModel", "di
             this.inherited(arguments);
             if (this.onClickAction){
 	            this.onClickFunction = eutils.eval(this.onClickAction, 'item');
-	            this.on('click', function(item){
-	                this.onClickFunction(item);
+	            this.on('click', function(item, treeNode, event){
+	                this.onClickFunction(item, treeNode, event);
 	            });
             }
         },

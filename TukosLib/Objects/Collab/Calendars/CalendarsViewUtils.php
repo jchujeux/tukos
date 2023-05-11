@@ -48,7 +48,7 @@ EOT
 	protected function  displayedDateDescription($custom = []){
 		return Utl::array_merge_recursive_replace(
 			ViewUtils::tukosDateBox($this, 'displayeddate', ['atts' => ['edit' => [
-				'value' => date('Y-m-d'),
+				'value' => date('Y-m-d'), 'forceMarkIfChanged' => true,
 				'onWatchLocalAction' => ['value' => [
 							'calendar' => ['date' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return newValue;" ]],
 						    $this->gridWidgetName => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter'),

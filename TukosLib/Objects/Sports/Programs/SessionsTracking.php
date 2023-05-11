@@ -15,8 +15,8 @@ trait SessionsTracking {
             'paneDescription' => [
                 'widgetsDescription' => array_merge(
                     $isSportsProgram ? [
-                        'eventformurl' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showeventtrackingformurl'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('eventformurl')])),
-                        'synchroflag' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('synchroflag'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('synchroflag')])),
+                        'eventformurl' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showeventtrackingformurl'), 'checked' => true, 'onWatchLocalAction' => $this->watchCheckboxLocalAction('eventformurl')])),
+                        'synchroflag' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('synchroflag'), 'checked' => true, 'onWatchLocalAction' => $this->watchCheckboxLocalAction('synchroflag')])),
                         'synchrosource' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['strava'], $tr)], 'label' => $tr('synchrosource'), 
                             'onWatchLocalAction' => ['value' => ['synchrosource' => ['localActionStatus' => ['action' => 'sWidget.pane.form.setValueOf("synchrosource", newValue);']]]]])),
                         'formpresentation' => Widgets::storeSelect(Widgets::complete(['storeArgs' => ['data' => Utl::idsNamesStore(['MobileTextBox', 'default'], $tr)], 'label' => $tr('formpresentation'),

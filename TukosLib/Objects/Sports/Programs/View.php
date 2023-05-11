@@ -229,7 +229,7 @@ class View extends AbstractView {
 			    'atts' => ['edit' => [
 			        //'date' => date('Y-m-d', strtotime('next monday')),
 			        'columnViewProps' => ['minHours' => 0, 'maxHours' => 4],
-					'style' => ['height' => '300px', 'width' => '700px'], 
+					'style' => ['height' => '300px', 'minWidth' => '600px'], 
 					'timeMode' => 'duration', 'durationFormat' => 'time', 'moveEnabled' => true,
 					'customization' => ['items' => [
 						 'style' => ['backgroundColor' => ['field' => 'intensity', 'map' => Sports::$intensityColorsMap, 'defaultValue' => 'Peru'], 
@@ -313,7 +313,7 @@ class View extends AbstractView {
 					    'value' => ['sptsessions' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->sptSessionsTsbAction()]]],
 					    'collection' => [
 					        //'sptsessions' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->sptSessionsTsbAction()]],
-					        'calendar' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => 'tWidget.currentView.invalidateLayout();return true;']],
+					        'calendar' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => 'tWidget.currentView && tWidget.currentView.invalidateLayout();return true;']],
 					        //'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekloadchart'),]],
 					        //'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekperformedloadchart')]],
 					    ]],
@@ -334,9 +334,12 @@ class View extends AbstractView {
 				],
 			    'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@displayfromdate'], ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], 
 				    [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
-			    'removeCols' => $this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] : ['sportsman','grade', 'configstatus'],
-			    'hiddenCols' => ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
-			        'contextid', 'updated'],
+			    'removeCols' => /*$this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] :*/ ['sportsman','grade', 'configstatus'],
+			    'hiddenCols' => /*$this->user->isRestrictedUser() 
+			         ? ['parentid', 'sessionid', 'googleid', 'mode', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
+			            'contextid', 'updated'] 
+			         :*/ ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
+			            'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
 			],
 
@@ -352,11 +355,11 @@ class View extends AbstractView {
 				],
 				'filters' => ['grade' => 'TEMPLATE'],
 			    'initialRowValue' => ['mode' => 'planned'],
-			    'removeCols' => $this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] : ['sportsman','grade', 'configstatus'],
+			    'removeCols' => /*$this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] : */['sportsman','grade', 'configstatus'],
 			    'hiddenCols' => ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
 			        'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'], // temporary: these were suppressed but maybe present in some customization items
-			    'allDescendants' => true,
+			    'allDescendants' => true, 'width' => '400'
 			],
 
 			'warmup' => [
@@ -378,7 +381,7 @@ class View extends AbstractView {
 				 'allDescendants' => true, 
 			],
 		];
-		foreach (array_diff_key($chartsCols, array_flip(['trimphr'/*, 'trimppw'*/, 'load', 'perceivedload', 'fatigue'])) as $col => $description){
+		foreach (array_diff_key($chartsCols, array_flip(['trimphr'/*, 'trimppw'*/, 'load', 'perceivedload', 'fatigue', 'hracwr'])) as $col => $description){
 		    $subObjects['sptsessions']['atts']['colsDescription'][$col] = ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => [$col => ['localActionStatus'  => $this->cellChartChangeLocalAction()]]]]]];
 		}
 		$this->customize($customDataWidgets, $subObjects, [ 'grid' => ['calendar', 'displayeddate', 'synchrostart', 'synchroend', 'loadchart', 'performedloadchart', 'weekloadchart', 'weekperformedloadchart', 'weeklies'],

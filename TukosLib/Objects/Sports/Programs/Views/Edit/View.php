@@ -173,7 +173,7 @@ EOT
             ]
         ];
        $this->actionWidgets['googlesync'] =  ['type' => 'ObjectProcess', 'atts' => ['label' => $this->view->tr('Googlesync'), 'allowSave' => true,
-           'urlArgs' => ['query' => ['params' => json_encode(['process' => 'googleSynchronize', 'save' => true])]], 'includeWidgets' => ['parentid', 'googlecalid', 'synchrostart', 'synchroend', 'lastsynctime'],
+           'urlArgs' => ['query' => ['params' => json_encode(['process' => 'googleSynchronize', 'save' => true])]], 'includeWidgets' => ['parentid', 'googlecalid', 'synchrostart', 'synchroend', 'lastsynctime'], 'clientTimeout' => 64000,
            'conditionDescription' => $this->googleSyncConditionDescription($qtr('needgooglecalid'), $qtr('youneedtoselectagooglecalid')),
        ]];
        $this->actionLayout['contents']['actions']['widgets'][] = 'googlesync';
@@ -268,7 +268,7 @@ EOT
 var form = this;
 require (["tukos/objects/sports/programs/LocalActions"], function(LocalActions){
     form.localActions = new LocalActions({form: form, plannedColumns: {$plannedCols}, performedColumns: {$performedCols}});
-    if (form.viewModeOption){
+    if (form.viewModeOption && !form.getWidget(form.viewModeOption).get('checked')){
         form.getWidget(form.viewModeOption).set('checked', true);
         form.localActions.viewModeOption(form.viewModeOption);
     }
@@ -278,7 +278,10 @@ EOT
 	}
 	public function viewModeOptionOnClick($optionName){
         return <<<EOT
-this.form.localActions.viewModeOption('{$optionName}', true);
+const self = this;
+dojo.ready(function(){
+    self.form.localActions && self.form.localActions.viewModeOption('{$optionName}', true);
+});
 EOT
         ;
 	}

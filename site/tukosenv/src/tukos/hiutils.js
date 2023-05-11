@@ -11,45 +11,55 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
         var addTableRows = function(object){
             var rowToReturn = {count: 0};
             for (var key in object){
-                checkboxPath.push(key);
-                if (typeof object[key] === 'object'){
-                    var row = addTableRows(object[key]), rowCount = row.count;
-                    if (rowCount > 0){
-                        var keyTd = dct.create('td', {style: "border: 1px solid black; padding: 5px; vertical-align:top;", rowspan: rowCount});
-                    	dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: keyToHtml(key)}, keyTd);
-                        row.tr.insertBefore(keyTd, row.tr.firstChild);
-                        rowToReturn.count += rowCount;
-                    }
-                }else{
-                    var row = {tr:dct.create('tr', null, table)};
-                    dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: keyToHtml(key)}, dct.create('td', {style: "border: 1px solid black;padding: 5px; vertical-align:top;"} , row.tr));
-                    dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: object[key]}, dct.create('td', {style: "border: 1px solid black;padding: 5px; vertical-align:top;font-style: italic"} , row.tr));
-                    //var valueTd = dct.create('td', {innerHTML: object[key], style: "border: 1px solid black;padding: 5px; vertical-align:top;font-style: italic" + maxWidth}, row.tr);
-                    if (hasCheckboxes){
-                        var stringPath = checkboxPath.join('.');
-                        var checkboxTd = dct.create('td', {style: "border: 1px solid black;padding: 5px;"}, row.tr);
-                        var checkbox = dct.create(
-                            'input', 
-                            {type: 'checkbox', style: {width: '30px'}, onchange: lang.partial(
-                                    function(stringPath, key, change){
-                                        lang.setObject(stringPath, change.currentTarget.checked, selectedLeaves);
-                                        if (atts.checkBoxChangeCallback){
-                                        	atts.checkBoxChangeCallback();
-                                        }
-                                    },
-                                    stringPath,
-                                    key
-                                )
-                            },
-                            checkboxTd
-                        );
-                    }
-                    rowToReturn.count += 1;
-                }
-                if (rowToReturn.tr === undefined){
-                    rowToReturn.tr = row.tr;
-                }
-                checkboxPath.pop(key);
+                if (key !== '#tKey'){
+	                checkboxPath.push(key);
+	                if (typeof object[key] === 'object' && !Object.hasOwn(object[key], "#leafValue")){
+	                    var row = addTableRows(object[key]), rowCount = row.count;
+	                    if (rowCount > 0){
+	                        var keyTd = dct.create('td', {style: "border: 1px solid black; padding: 5px; vertical-align:top;", rowspan: rowCount});
+	                    	dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: keyToHtml(object[key]["#tKey"] || key)}, keyTd);
+	                        row.tr.insertBefore(keyTd, row.tr.firstChild);
+	                        rowToReturn.count += rowCount;
+	                    }
+	                }else{
+	                    let tKey, leafValue;
+	                    if (Object.hasOwn(object[key], "#leafValue")){
+							tKey = object[key]["#tKey"];
+							leafValue = object[key]["#leafValue"];
+						}else{
+							tKey = key;
+							leafValue = object[key];
+						}
+	                    var row = {tr:dct.create('tr', null, table)};
+	                    dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: keyToHtml(tKey)}, dct.create('td', {style: "border: 1px solid black;padding: 5px; vertical-align:top;"} , row.tr));
+	                    dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: leafValue}, dct.create('td', {style: "border: 1px solid black;padding: 5px; vertical-align:top;font-style: italic"} , row.tr));
+	                    //var valueTd = dct.create('td', {innerHTML: object[key], style: "border: 1px solid black;padding: 5px; vertical-align:top;font-style: italic" + maxWidth}, row.tr);
+	                    if (hasCheckboxes){
+	                        var stringPath = checkboxPath.join('.');
+	                        var checkboxTd = dct.create('td', {style: "border: 1px solid black;padding: 5px;"}, row.tr);
+	                        var checkbox = dct.create(
+	                            'input', 
+	                            {type: 'checkbox', style: {width: '30px'}, onchange: lang.partial(
+	                                    function(stringPath, key, change){
+	                                        lang.setObject(stringPath, change.currentTarget.checked, selectedLeaves);
+	                                        if (atts.checkBoxChangeCallback){
+	                                        	atts.checkBoxChangeCallback();
+	                                        }
+	                                    },
+	                                    stringPath,
+	                                    key
+	                                )
+	                            },
+	                            checkboxTd
+	                        );
+	                    }
+	                    rowToReturn.count += 1;
+	                }
+	                if (rowToReturn.tr === undefined){
+	                    rowToReturn.tr = row.tr;
+	                }
+	                checkboxPath.pop(key);
+				}
             }
             return rowToReturn;
         }

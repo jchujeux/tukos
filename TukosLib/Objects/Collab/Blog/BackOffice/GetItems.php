@@ -16,18 +16,20 @@ class GetItems extends ObjectTranslator{
     }
     function get($query){
         $storeAtts = $query['storeatts'];
+        $parentId = $storeAtts['where']['contextid'];
+        $storeAtts['where'] = [[['col' => 'contextid', 'opr' => '=', 'values' => $parentId], ['col' => 'parentid', 'opr' => '=', 'values' => $parentId, 'or' => true]]];
         $items = $this->blogModel->getAll(['where' => $this->user->filterPrivate($storeAtts['where']), 'cols' => ['id', 'parentid', 'name', 'comments', 'published'/*, 'updated', 'updator'*/]]);
-        foreach($items as &$item){
-            $item['onClickGotoTab'] = 'edit';
-            $item['hasChildren'] = false;
-            $item['published'] =  substr($item['published'], 0, 10);
+        $parentIds = array_column($items, 'parentid');
+        $itemsToReturn = [];
+        foreach($items as $item){
+            if ($item['parentid'] == '' || $item['parentid'] === '0' || $item['parentid'] === $parentId){
+                $item['onClickGotoTab'] = 'edit';
+                $item['hasChildren'] = in_array($item['id'], $parentIds);
+                $item['published'] =  substr($item['published'], 0, 10);
+                $itemsToReturn[] = $item;
+            }
         }
-        if (! empty($storeAtts['range'])){
-            return ['items' => $items, 'total' => $this->blogModel->foundRows()];
-        }else{
-            return ['items' => $items];
-        }
-        return (!empty($storeAtts['range'])) ?  ['items' => $items, 'total' => $this->blogModel->foundRows()] : ['items' => $items];
+        return ['items' => $itemsToReturn];
     }
 }
 ?>

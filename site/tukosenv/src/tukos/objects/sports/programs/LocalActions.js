@@ -6,70 +6,77 @@ function(declare, lang, utils, Pmg){
 		},
 		viewModeOption: function(optionName, isOptionChange){
 			var form = this.form, sessionsWidget = form.getWidget('sptsessions'), column, customizationPath = sessionsWidget.customizationPath;
-			this.sessionsFilter = this.sessionsWidget || (new sessionsWidget.store.Filter());
-			sessionsWidget.optionHiddenCols = sessionsWidget.optionHiddenCols || [];
-			form.optionHiddenWidgets = form.optionHiddenWidgets || [];
-			sessionsWidget.customizationPath = '';
-			sessionsWidget.isBulk = true;
-			sessionsWidget.optionHiddenCols.forEach(function(col){
-			    sessionsWidget.toggleColumnHiddenState(col, false);
-			});
-			sessionsWidget.optionHiddenCols = [];
-			form.optionHiddenWidgets.forEach(function(widgetName){
-				form.getWidget(widgetName).set('hidden', false);
-			});
-			form.getWidget('templatesPane').set('hidden', false);
-			form.optionHiddenWidgets = [];
-			switch (optionName){
-			    case 'viewplanned':
-			        this.performedColumns.forEach(function(col){
-			            if ((column = sessionsWidget.columns[col]) && !column.hidden){
-			                sessionsWidget.toggleColumnHiddenState(col, true);
-			                sessionsWidget.optionHiddenCols.push(col);
-			            }
-			        });
-					['performedloadchart', 'weekperformedloadchart'].forEach(lang.hitch(this, this.widgetOptionalHide));
-					//sessionsWidget.set('collection', sessionsWidget.get('collection').filter(this.sessionsFilter.ne('mode', 'performed')));
-					sessionsWidget.extraUserFilters = {mode: ['NOT RLIKE', 'performed']};
-					sessionsWidget.set('collection', sessionsWidget.store.getRootCollection());
-			        break;
-			    case 'viewperformed':
-			        this.plannedColumns.forEach(function(col){
-			            if ((column = sessionsWidget.columns[col]) && !column.hidden){
-			                sessionsWidget.toggleColumnHiddenState(col, true);
-			                sessionsWidget.optionHiddenCols.push(col);
-			            }
-			        });
-					form.getWidget('templatesPane').set('hidden', true);
-					['loadchart', 'weekloadchart'/*, 'templates', 'warmup', 'mainactivity', 'warmdown'*/].forEach(lang.hitch(this, this.widgetOptionalHide));
-					//sessionsWidget.set('collection', sessionsWidget.get('collection').filter(this.sessionsFilter.eq('mode', 'performed')));
-					sessionsWidget.extraUserFilters = {mode: ['RLIKE', 'performed']};
-					sessionsWidget.set('collection', sessionsWidget.store.getRootCollection());
-			        break;
-			    case 'viewall':
-					if (isOptionChange){
-						sessionsWidget.extraUserFilters = false;
-						sessionsWidget.set('collection', sessionsWidget.store.getRootCollection());
-					}
-			        break;
-			}
-			sessionsWidget.customizationPath = customizationPath;
-			sessionsWidget.isBulk = false;
-			//sessionsWidget.refresh();
 			if (isOptionChange){
-            	form.unfreezeWidth = true;
+            	/*//form.unfreezeWidth = true;
 				form.unfrozenWidths = 0;
 				form.resize();
-				form.unfreezeWidth = false;
+				//form.unfreezeWidth = false;
 				if (form.unfrozenWidths){
 					form.needsToFreezeWidth = true;
 					form.resize();
 					form.needsToFreezeWidth = false;
+				}*/
+				if (form.parent.inLocalRefresh){
+					Pmg.addFeedback(Pmg.message('actionnotcompletedwait'));
+				}else{
+					form.viewModeOption = optionName;
+					//if (!Pmg.isRestrictedUser()){
+						lang.setObject('customization.viewModeOption', optionName, form);
+					//}
+	                //Pmg.tabs.refresh('Tab', {}, {values: true, customization: true});
+	                Pmg.tabs.localRefresh({values: true, customization: true});
 				}
-				form.viewModeOption = optionName;
-				if (!Pmg.isRestrictedUser()){
-					lang.setObject('customization.viewModeOption', optionName, form);
+                return;
+			}else{
+				this.sessionsFilter = this.sessionsWidget || (new sessionsWidget.store.Filter());
+				sessionsWidget.optionHiddenCols = sessionsWidget.optionHiddenCols || [];
+				form.optionHiddenWidgets = form.optionHiddenWidgets || [];
+				sessionsWidget.customizationPath = '';
+				sessionsWidget.isBulk = true;
+				sessionsWidget.optionHiddenCols.forEach(function(col){
+				    sessionsWidget.toggleColumnHiddenState(col, false);
+				});
+				sessionsWidget.optionHiddenCols = [];
+				form.optionHiddenWidgets.forEach(function(widgetName){
+					form.getWidget(widgetName).set('hidden', false);
+				});
+				form.getWidget('templatesPane').set('hidden', false);
+				form.optionHiddenWidgets = [];
+				switch (optionName){
+				    case 'viewplanned':
+				        this.performedColumns.forEach(function(col){
+				            if ((column = sessionsWidget.columns[col]) && !column.hidden){
+				                sessionsWidget.toggleColumnHiddenState(col, true);
+				                sessionsWidget.optionHiddenCols.push(col);
+				            }
+				        });
+						['performedloadchart', 'weekperformedloadchart'].forEach(lang.hitch(this, this.widgetOptionalHide));
+						//sessionsWidget.set('collection', sessionsWidget.get('collection').filter(this.sessionsFilter.ne('mode', 'performed')));
+						sessionsWidget.extraUserFilters = {mode: ['NOT RLIKE', 'performed']};
+						sessionsWidget.set('collection', sessionsWidget.store.getRootCollection());
+				        break;
+				    case 'viewperformed':
+				        this.plannedColumns.forEach(function(col){
+				            if ((column = sessionsWidget.columns[col]) && !column.hidden){
+				                sessionsWidget.toggleColumnHiddenState(col, true);
+				                sessionsWidget.optionHiddenCols.push(col);
+				            }
+				        });
+						form.getWidget('templatesPane').set('hidden', true);
+						['loadchart', 'weekloadchart'/*, 'templates', 'warmup', 'mainactivity', 'warmdown'*/].forEach(lang.hitch(this, this.widgetOptionalHide));
+						//sessionsWidget.set('collection', sessionsWidget.get('collection').filter(this.sessionsFilter.eq('mode', 'performed')));
+						sessionsWidget.extraUserFilters = {mode: ['RLIKE', 'performed']};
+						sessionsWidget.set('collection', sessionsWidget.store.getRootCollection());
+				        break;
+				    case 'viewall':
+						if (isOptionChange){
+							sessionsWidget.extraUserFilters = false;
+							sessionsWidget.set('collection', sessionsWidget.store.getRootCollection());
+						}
+				        break;
 				}
+				sessionsWidget.customizationPath = customizationPath;
+				sessionsWidget.isBulk = false;
 			}
 		},
 		widgetOptionalHide: function(widgetName){

@@ -1,11 +1,12 @@
 /*
  *    Provides a tab  object and associated methods
  */
- define (["dojo/_base/declare", "dijit/layout/ContentPane", "dijit/Tooltip", "tukos/ObjectPane", "tukos/PageManager"], 
-    function(declare, ContentPane, Tooltip, ObjectPane, Pmg){
+ define (["dojo/_base/declare", "dojo/_base/lang", "dijit/layout/ContentPane", "dijit/Tooltip", "tukos/ObjectPane", "tukos/PageManager"], 
+    function(declare, lang, ContentPane, Tooltip, ObjectPane, Pmg){
     return declare(ContentPane, {
         postCreate: function (){    
             if (this.formContent != undefined){
+				this.serverFormContent = lang.clone(this.formContent);
                 this._createForm(this.formContent);
             }
             this.widgetType = "TukosTab";

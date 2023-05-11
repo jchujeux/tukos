@@ -62,13 +62,14 @@ class BlogView extends Translator{
                     $blogTemplate = "MobileBlogTemplate.php";
                     $this->pageManagerArgs['headerTitle'] = $blogTitle;
                 }else{
-                    $blogTemplate = "BlogTemplate.php";
+                    $blogTemplate = "BlogTemplate.php";//<font size="6" style="font-weight: bold;">Hello</font>
                     $this->pageManagerArgs['headerContent'] = <<<EOT
-<table width="100%"><tr><td style="text-align:left;"><span id="tukosHeaderLoading"></span></td><td style="text-align:center;"><H1>{$blogTitle}</H1></td><td style="text-align:right;"><b><i>The Ultimate Knowledge Organizational System</i></b></td></table>
+<table width="100%"><tr><td style="text-align:left;"><span id="tukosHeaderLoading"></span></td><td style="text-align:center;"></br><font size="6" style="font-weight: bold;">{$blogTitle}</font></br></td><td style="text-align:right;"><b><i>The Ultimate Knowledge Organizational System</i></b></td></table>
 EOT
                     ;
                     $blogModel = Tfk::$registry->get('objectsStore')->objectModel('blog');
                     $onClickString = $blogModel->onClickGotoTabString('edit', "name:'{$this->tr('BlogWelcome')}'");
+                    $this->pageManagerArgs['rightPanelWidth'] = Tfk::$registry->blogRightPanelWidth;
                     $this->pageManagerArgs['rightPaneContent'] = '<div style="background-color: #d0e9fc;text-align: center;" ' . $onClickString . '></br><img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.png" style="height:150px; width: 200px;"></br>' .
                         '<span style="' . HUtl::urlStyle() . "\">{$this->tr('BlogWelcome')}</span></div>";
                 }

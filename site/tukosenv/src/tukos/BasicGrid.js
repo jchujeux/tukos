@@ -177,7 +177,6 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         	return this.grid._renderContent(this, object, node, '', {backgroundColor: value});
         },
         renderGauge: function(object, value, node){
-			console.log('renderGauge: ' + value);
 			const pValue = value ? JSON.parse(value) : value;
 			return this.grid._renderContent(this, object, node, (pValue && typeof pValue === 'object') ? (pValue.gauge ? pValue.gauge.toString() : '') : (pValue ? pValue.toString() : ''));
 		},

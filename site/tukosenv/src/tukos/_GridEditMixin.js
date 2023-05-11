@@ -429,7 +429,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         },
         
         keepChanges: function(){
-            return {data: this.store.fetchSync(), dirty: this.dirty, deleted: this.deleted};
+            return {/*data: this.store.fetchSync(), */dirty: this.dirty, deleted: this.deleted};
         },
         
         iterate: function(callback){
@@ -440,11 +440,22 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         },
         
         restoreChanges: function (changes){
-            this.store.setData(changes.data);
-            this.dirty = changes.dirty;
-            this.deleted = changes.deleted;
-             if(!utils.empty(this.dirty) || this.deleted.length > 0){
-                //this.form.changedWidgets[this.widgetName] = this;
+            //this.set('value', changes.data);
+            const self = this, idProperty = this.collection.idProperty;
+            this.isBulkRowAction = true;
+            utils.forEach(changes.dirty, function(row, idPropertyValue){
+				row[idProperty] = idPropertyValue;
+				if (self.collection.getSync(idPropertyValue)){
+					self.updateRow(row);
+				}else{
+					self.createNewRow(row);
+				}
+			});
+			this.isBulkRowAction = false;
+			changes.deleted.forEach(function(item){
+				self.deleteRowItem(self.store.filter({id: item.id}).fetchSync()[0], false, true);
+			});
+            if(!utils.empty(this.dirty) || this.deleted.length > 0){
                  wutils.markAsChanged(this, 'noStyle');
             }
             this.refresh({keepScrollPosition: true});
