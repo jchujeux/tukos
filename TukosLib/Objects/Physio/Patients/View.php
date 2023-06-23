@@ -41,6 +41,8 @@ class View extends AbstractView {
             'age' => ViewUtils::textBox($this, 'Age', ['atts' => ['edit' => [ 'style' => ['width' => '5em'], 'disabled' => true]]]),
             'imc' => ViewUtils::tukosNumberBox($this, 'IMC', ['atts' => ['edit' => ['disabled' => true, 'constraints' => ['pattern' => '00.']]]]),
             'hrmin' => ViewUtils::tukosNumberBox($this, 'Hrmin'),
+            'hrmax' => ViewUtils::tukosNumberBox($this, 'Hrmax', ['atts' => ['edit' => ['onWatchLocalAction' => ['value' => [
+                'hrmax' => ['localActionStatus' => ['action' => $this->hrMaxLocalAction()]]]]]]]),
             'hrthreshold' => ViewUtils::tukosNumberBox($this, 'Hrthreshold'),
             'h4timethreshold' => ViewUtils::tukosNumberBox($this, 'H4timethreshold'),
             'h5timethreshold' => ViewUtils::tukosNumberBox($this, 'H5timethreshold'),
@@ -111,6 +113,20 @@ class View extends AbstractView {
         ];
 
         $this->customize($customDataWidgets, $subObjects, [ 'grid' => ['age', 'imc'], 'get' => ['age', 'imc'], 'post' => ['age', 'imc']]);
-    }    
+    }  
+    function hrMaxLocalAction(){
+        return <<<EOT
+const form = sWidget.form, hrMin = form.valueOf('hrmin'); 
+if (hrMin){
+    form.setValueOf('hrthreshold', 0.8*(newValue-hrMin) + hrMin);
+    form.setValueOf('h4timethreshold', 0.7*(newValue-hrMin) + hrMin);
+    form.setValueOf('h5timethreshold', 0.85*(newValue-hrMin) + hrMin);
+    return true;
+}else{
+    return false;
+}
+EOT
+        ;
+    }
 }
 ?>

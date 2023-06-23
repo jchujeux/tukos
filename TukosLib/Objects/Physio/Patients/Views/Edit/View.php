@@ -24,9 +24,10 @@ class View extends EditView{
                             ],
                         ],
                         'col2' => [
-                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'label' => $this->view->tr('Medicalbackground')],      
+                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'label' => $this->view->tr('Physiologicalbackground')],      
                             'contents' => [              
-                                'row1' => ['tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => ['laterality', 'height', 'weight', 'imc', 'corpulence', 'morphotype', 'hrthreshold', 'ftp', 'speedthreshold', 'hrmin', 'h4timethreshold', 'h5timethreshold']],
+                                'row1' => ['tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true], 'widgets' => ['laterality', 'height', 'weight', 'imc', 'corpulence', 'morphotype', 'hrmin', 'hrmax', 'hrthreshold', 'h4timethreshold',
+                                    'h5timethreshold', 'ftp', 'speedthreshold']],
                                 'row2' => ['tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'], 'widgets' => [ 'antecedents']],
                             ]
                         ],

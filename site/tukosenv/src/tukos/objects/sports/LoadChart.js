@@ -181,12 +181,14 @@ return declare(null, {
 		},
 		updateCharts: function(grid, isPerformed, col){
 			var form = grid.form;
+			console.log('updateCharts - isPerformed: ' + isPerformed);
 			this.equivalentDistanceCoefficients = utils.toObject(form.programsConfig && JSON.parse(form.programsConfig.equivalentDistance), 'sport', 'coefficient');
 			(isPerformed 
 				? (isPerformed === 'changed' ? ['performedloadchart', 'weekperformedloadchart', 'loadchart', 'weekloadchart'] : ['performedloadchart', 'weekperformedloadchart'])
 				: ['loadchart', 'weekloadchart']).forEach(function(chartName){
 			    var chartWidget = form.getWidget(chartName);
 			    if (!chartWidget.get('hidden') && (!col || chartWidget.get('chartAtts').cols[col])){
+				console.log('updateCharts - isPerformed: ' + chartName);
 			        switch(chartName){
 			            case 'loadchart':
 			            case 'performedloadchart':

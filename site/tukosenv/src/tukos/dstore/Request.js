@@ -11,7 +11,7 @@ define(['dojo/request',	'dojo/_base/lang', 'dojo/_base/array', 'dojo/json', 'doj
 		},
         requestDialog: function(queryOptions){
             var query = {storeatts: queryOptions} || {};
-            var response = Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query:  this.params ? lang.mixin(query, {params: this.params}) : query}, {}, '', true);
+            var response = Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query:  this.params ? lang.mixin(query, {params: this.params}) : query}, {}, '~', true);
 			var collection = this;
 			return {
 				data: response.then(function (response) {

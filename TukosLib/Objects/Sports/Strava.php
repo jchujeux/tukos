@@ -22,7 +22,7 @@ class Strava {
             'avgpw' => ['stName' => 'average_watts', 'format' => ['type' => 'round', 'args' => [0]]],
             'timemoving' => ['stName' => 'moving_time', 'format' => ['type' => 'divide', 'args' => [60]]],
             'avgcadence' => ['stName' => 'average_cadence', 'format' => ['type' => 'round', 'args' => [0]]],
-            'startdate' => ['stName' => 'start_date'],
+            'startdate' => ['stName' => 'start_date_local'],
             'sport' => ['stName' => 'type', 'format' => ['type' => 'map', 'args' => ['Ride' => 'bicycle', 'VirtualRide' => 'bicycle', 'Run' => 'running', 'Swim' => 'swimming', 'Crossfit' => 'bodybuilding']]],
             'name' => ['stName' => 'name'],
             'stravaid' => ['stName' => 'id']
@@ -67,7 +67,7 @@ class Strava {
             self::$adapter = new \GuzzleHttp\Client(['base_uri' => 'https://www.strava.com/api/v3/']);
         }
         $athletesModel = Tfk::$registry->get('objectsStore')->objectModel('sptathletes');
-        $options = json_decode($athletesModel->getOne(['where' => ['id' => $athleteId], 'cols' => ['stravainfo']])['stravainfo'], true);
+        $options = json_decode(Utl::getItem('stravainfo', $athletesModel->getOne(['where' => ['id' => $athleteId], 'cols' => ['stravainfo']])), true);
         if (is_array($options)){
             $token = new AccessToken($options);
             if ($token->hasExpired()){

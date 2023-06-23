@@ -79,12 +79,12 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
 									        	Pmg.setFeedback(Pmg.message('actionDoing'));
 												var label = this.get('label'), _self = this;	                    						
 												this.set('label', Pmg.loading(label));
-												self.form.serverDialog(urlArgs, {ids: toProcess.all || toProcess.ids, values: grid.modify.values}, [], Pmg.message('actionDone')).then(function(response){
+												self.form.serverDialog(urlArgs, {ids: toProcess.all || toProcess.ids, values: grid.modify.values}, [], '').then(function(response){
 	        	                                    tooltipDialog.close();
 	                    							grid.revert();
 	                                        	});	                        						
 									            grid.on('dgrid-refresh-complete', function(){
-													Pmg.setFeedback(Pmg.message('actionDone'));
+													//Pmg.addFeedback(Pmg.message('actionDone'));
 													_self.set('label', label);
 												});
 											}
@@ -154,7 +154,7 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
 			this.set('label', Pmg.loading(label));
             grid.set('collection', grid.store.filter(filter));
             grid.on('dgrid-refresh-complete', function(){
-				Pmg.setFeedback(Pmg.message('actionDone'));
+				//Pmg.addFeedback(Pmg.message('actionDone'));
 				self.set('label', label);
 			});
         },
@@ -164,7 +164,7 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
 			var label = this.get('label'), self = this;	                    						
 			this.set('label', Pmg.loading(label));
         	if (queryParams){
-                form.serverDialog({action: 'Reset', query: {params: queryParams}}, options || {}, [], Pmg.message('actionDone')).then(function(response){
+                form.serverDialog({action: 'Reset', query: {params: queryParams}}, options || {}, [], false).then(function(response){
             		response.feedback.pop();
                     Pmg.alert({title: Pmg.message(queryParams.process), content: response.feedback.join('<br>')});
                 	grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
@@ -173,7 +173,7 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
             	grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
         	}
              grid.on('dgrid-refresh-complete', function(){
-				Pmg.setFeedback(Pmg.message('actionDone'));
+				//Pmg.addFeedback(Pmg.message('actionDone'));
 				self.set('label', label);
 			});
        },

@@ -152,11 +152,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
                 return true;
             }
        },
-		setChangedWidget: function(widget){
+		setChangedWidget: function(widget, context){
 			if (!widget.ignoreChanges){
 				var name = widget.widgetName;
 				this.changedWidgets[name] = widget;
-	            if (this.watchContext === 'user'){
+	            if ((context || this.watchContext) === 'user'){
 	            	this.userChangedWidgets[name] = widget;
 	            }
 			}
@@ -266,28 +266,29 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
             this.nestedWatchActions = this.nestedWatchActions || 0;
             nestedWidgetWatchActions[watchedAtt] = nestedWidgetWatchActions[watchedAtt] || 0;
             for (var widgetName in localActionFunctions){
-                var targetWidget = this.getWidget(widgetName),
-                      widgetActionFunctions =  localActionFunctions[widgetName];
-                for (var att in widgetActionFunctions){
-                    if (allowedNestedWatchActions === undefined || (this.nestedWatchActions <= allowedNestedWatchActions) && nestedWidgetWatchActions[watchedAtt] < 1){
-                        var actionFunction = widgetActionFunctions[att];
-                        if (actionFunction.triggers[this.watchContext]){
-                    		this.nestedWatchActions += 1;
-                        	nestedWidgetWatchActions[watchedAtt] += 1;
-                            var newAtt = actionFunction.action(widget, targetWidget, newValue, oldValue);
-                            if (newAtt != undefined && widget){
-                                if (targetWidget && newAtt !== targetWidget.get(att)){
-                                    targetWidget.set(att, newAtt);
-                                    if (att === 'hidden'){
-                                        this.mayNeedResize = true;
-                                    }
-                                }
-                            }
-                    		this.nestedWatchActions += -1;
-                        	nestedWidgetWatchActions[watchedAtt]  += -1;
-                        }
-                    }
-                }
+                var targetWidget = this.getWidget(widgetName), widgetActionFunctions =  localActionFunctions[widgetName];
+                if (targetWidget){
+	                for (var att in widgetActionFunctions){
+	                    if (allowedNestedWatchActions === undefined || (this.nestedWatchActions <= allowedNestedWatchActions) && nestedWidgetWatchActions[watchedAtt] < 1 && ((targetWidget.nestedWatchActions || {})[att] || 0) < 1){
+	                        var actionFunction = widgetActionFunctions[att];
+	                        if (actionFunction.triggers[this.watchContext]){
+	                    		this.nestedWatchActions += 1;
+	                        	nestedWidgetWatchActions[watchedAtt] += 1;
+	                            var newAtt = actionFunction.action(widget, targetWidget, newValue, oldValue);
+	                            if (newAtt != undefined && widget){
+	                                if (targetWidget && newAtt !== targetWidget.get(att)){
+	                                    targetWidget.set(att, newAtt);
+	                                    if (att === 'hidden'){
+	                                        this.mayNeedResize = true;
+	                                    }
+	                                }
+	                            }
+	                    		this.nestedWatchActions += -1;
+	                        	nestedWidgetWatchActions[watchedAtt]  += -1;
+	                        }
+	                    }
+	                }
+				}
             }
         },
         buildLocalActionFunctions: function(localActionFunctions, actionDescriptions){

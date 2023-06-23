@@ -16,9 +16,9 @@ class View extends AbstractView {
         $tr = $this->tr;
         $isMobile = Tfk::$registry->isMobile;
         $leftRightTdStyle = [/*'whiteSpace' => 'nowrap', */'verticalAlign' => 'top', 'paddingTop' => '7px', 'fontSize' => '12px', 'fontFamily' => 'Arial, Helvetica, sans-serif', 'width' => $isMobile ? '80px' : '200px', 'wordWrap' => 'break-word'];
-        $gaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '',
+        $gaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 1, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 3, 'showValue' => true, 'tickLabel' => '',
             'gradient' => [0, '#B22222', 0.5, '#FF8C00', 1, '#7FFFD4'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
-        $reversedGaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 0, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 5, 'showValue' => true, 'tickLabel' => '',
+        $reversedGaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 1, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 3, 'showValue' => true, 'tickLabel' => '',
             'gradient' => [0, '#7FFFD4', 0.5, '#FF8C00', 1, '#B22222'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
         $gaugeStyle = ['height' => '150px', 'width' => 'auto'];
         $gaugeTableStyle = ['tableLayout' => 'fixed', 'width' => '100%'];
@@ -89,8 +89,9 @@ class View extends AbstractView {
             'mechload' => ViewUtils::numberTextBox($this, 'Tukos_Mechanical_Load'),
             'h4time' => ViewUtils::secondsTextBox($this, 'H4_Time_in_Zone'),
             'h5time' => ViewUtils::secondsTextBox($this, 'H5_Time_in_Zone'),
-            'sts' => ViewUtils::tukosNumberBox($this, 'sts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'lts' => ViewUtils::tukosNumberBox($this, 'lts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
+            'progressivity' => ViewUtils::tukosNumberBox($this, 'progressivity', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
+            'sts' => ViewUtils::tukosNumberBox($this, 'sts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'tsb' => ViewUtils::tukosNumberBox($this, 'tsb', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['hidden' => true]],
                 'objToEdit' => ['stravaLink' => ['class' => $this]], 'objToStoreEdit' => ['stravaLink' => ['class' => $this]], 'objToOverview' => ['stravaLink' => ['class' => $this]]]),
@@ -155,6 +156,7 @@ $performedCols.forEach(function(col){
     }
 });
 form.resize();
+form.resize();//needed twice for edit in a dialog window, or else the horizontal gauges don't show-up when moving from planned to performed
 EOT
         ;
     }

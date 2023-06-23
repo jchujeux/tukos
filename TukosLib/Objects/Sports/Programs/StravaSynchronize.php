@@ -47,7 +47,12 @@ trait StravaSynchronize {
                 }
             }else{
                 $sessionsActivitiesToSync = [];
-                $stravaActivitiesToSync = $client->getAthleteActivities(strtotime(DUtl::dayAfter($query['synchroend'])), strtotime($query['synchrostart']));
+                if ($query['synchrostart'] <= date('Y-m-d')){
+                    $stravaActivitiesToSync = $client->getAthleteActivities(strtotime(DUtl::dayAfter($query['synchroend'])), strtotime($query['synchrostart']));
+                }else{
+                    Feedback::add('synchrostartmustbetodayorbefore');
+                    return;
+                }
             }
         } catch(\Exception $e){
             $message = $e->getMessage();
@@ -66,6 +71,12 @@ trait StravaSynchronize {
             return;
         }
         $athleteParams = Tfk::$registry->get('objectsStore')->objectModel('sptathletes')->getOne(['where' => ['id' => $athleteId], 'cols' => ['hrmin', 'hrthreshold', 'h4timethreshold', 'h5timethreshold', 'ftp', 'speedthreshold', 'sex']]);
+        $coachId = Tfk::$registry->get('objectsStore')->objectModel('sptprograms')->getOne(['where' => ['id' => $programId], 'cols' => ['coach']])['coach'];
+        $users = Tfk::$registry->get('objectsStore')->objectModel('users')->getAll(['where' => [['col' => 'parentid', 'opr' => 'IN', 'values' => [$coachId, $athleteId]]], 'cols' => ['id', 'parentid']]);
+        $acl = ['1' => ['userid' => Tfk::tukosBackOfficeUserId, 'permission' => '3']];
+        foreach($users as $user){
+            $acl[] = ['userid' => $user['id'], 'permission' => '3'];
+        }
         $metricsToExtract = ST::allMetrics();
         $datesToSync = [];
         foreach ($stravaActivitiesToSync as $activity){
@@ -78,7 +89,6 @@ trait StravaSynchronize {
         $sessionsActivitiesToSync = Utl::toAssociativeGrouped($sessionsActivitiesToSync, 'startdate');
         ksort($sessionsActivitiesToSync);
         $sessionsToSync = Utl::toAssociativeGrouped($sessionsToSync, 'startdate');
-        $acl = ['1' => ['rowId' => 1, 'userid' => $updator, 'permission' => '3'], '2' => ['rowId' => 2, 'userid' => Tfk::tukosBackOfficeUserId, 'permission' => '3']];
         $createdSessions = $updatedSessions = [];
         foreach($sessionsActivitiesToSync as $day => $activities){
             $times = array_column($activities, 'starttime');

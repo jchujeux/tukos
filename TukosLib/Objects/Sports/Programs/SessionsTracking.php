@@ -31,10 +31,10 @@ trait SessionsTracking {
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
                     'contents' => array_merge(
                         $isSportsProgram ? [
-                            'row1' => [
+                            /*'row1' => [
                                 'tableAtts' =>['cols' => 6,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
                                 'widgets' => ['eventformurl', 'synchroflag', 'synchrosource', 'formpresentation', 'version'],
-                            ]] : [], [
+                            ]*/] : [], [
                                 'headerRow' => [],
                                 'row2' => [
                                     'tableAtts' => ['cols' => 4,  'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 150],
@@ -47,6 +47,8 @@ trait SessionsTracking {
                                 ],
                             ]),
                 ],
+                'widgetsHider' =>  true,
+                'widgetsHiderArgs' => ['dialogPath' => 'sessionstracking.atts.dialogDescription.paneDescription.widgetsDescription.'],
                 'onOpenAction' => $this->onOpenAction(),
         ]];
         $STTracking = new StravaSessionsTracking($this);

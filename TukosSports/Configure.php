@@ -48,14 +48,14 @@ class Configure{
         
         $this->modulesMenuLayout = [
             'admin' => [[
-                '#users' => [['#customviews' => [], '#navigation' => []]], '#contexts' => [], '#objrelations' => [], '#translations' => [],
+                '#users' => [['#customviews' => []/*, '#navigation' => []*/]], '#contexts' => []/*, '#objrelations' => []*/, '#translations' => [],
                 'mail' => [[
                     '#mailsmtps' => [], '#mailservers' => [], '#mailaccounts' => [],
-                    '#mailtukosmessages' => [],
+                    /*'#mailtukosmessages' => [],*/
                 ]],
-                '#scripts' => [['#scriptsoutputs' => []]], '#health' => [['#healthtables' => []]],
+                /*'#scripts' => [['#scriptsoutputs' => []]], '#health' => [['#healthtables' => []]],*/
             ]],
-            'collab' => [['#people' => [], '#organizations' => []/*, '#teams' => []*/, '#notes' => []/*, '#documents' => []*/, '#calendars' => [['#calendarsentries' => []]], '#tasks' => []]],
+            'collab' => [['#people' => [], '#organizations' => []/*, '#teams' => []*/, '#notes' => []/*, '#documents' => []*/, '#calendars' => [['#calendarsentries' => []]]/*, '#tasks' => []*/]],
             'bustrack' => [
                 ['#bustrackcategories' => [],
                     '#bustrackcatalog' => [], 'bustrackcustomers' => [['#bustrackpeople' => [], '#bustrackorganizations' => []]], '#bustrackquotes' => [],

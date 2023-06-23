@@ -23,7 +23,7 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
                if (format === 'time'){
             	   return this.secondsToTime((toDate - fromDate)/1000);
                }else{
-                   interval = (duration == null || duration == '' || format === 'minute') ? 'minute' : (typeof duration === 'string' ? JSON.parse(duration)[1] : duration[1]);
+                   var interval = (duration == null || duration == '' || format === 'minute') ? 'minute' : (typeof duration === 'string' ? JSON.parse(duration)[1] : duration[1]);
                    var correctedToDate = (correction ? new Date(this.dateAdd(toDateObject, interval, 1).getTime() - 1) : toDateObject), difference = dojo.date.difference(fromDateObject, correctedToDate, interval);
                    return format === 'minute' ? difference : JSON.stringify([difference, interval]);
                }

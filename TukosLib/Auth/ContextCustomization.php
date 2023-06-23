@@ -43,7 +43,7 @@ trait ContextCustomization {
     private function setContextId($module){
         $this->customContexts();
         $contextId = $this->moduleCustomContextId($module, $this->modulesMenuLayout);
-        if ($contextId === true){//module was found and has no customization in its ancestors
+        if ($contextId === true || $contextId === ''){//module was found and has no customization in its ancestors
             return $this->contextModel->getContextId('name', Utl::getItem($module, $this->objectModulesDefaultContextName, $module, $module));
         }else if ($contextId === false){//module was not found: default to root
             return $this->contextModel->rootId;

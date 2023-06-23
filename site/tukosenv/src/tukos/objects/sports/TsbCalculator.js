@@ -8,7 +8,7 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 			this.stsDailyDecay = this.ltsDailyDecay = 0.0;
         },
         initialize: function(){
-        	const self = this, form = this.form, isDisplayMode = form.valueOf('displayfromdate');
+        	const self = this, form = this.form, fromDate = form.valueOf('fromdate'), displayFromDate = form.valueOf('displayfromdate'), isDisplayMode = displayFromDate && displayFromDate !== fromDate;
         	utils.forEach({fromDate: isDisplayMode ? 'displayfromdate' : 'fromdate', stsDailyDecay: 'stsdays', ltsDailyDecay: 'ltsdays', stsRatio: 'stsratio', initialSts: isDisplayMode ? 'displayfromsts': 'initialsts', initialLts: isDisplayMode ? 'displayfromlts': 'initiallts'}, function(source, target){
 				const value = form.valueOf(source);
 				switch(target){

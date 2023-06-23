@@ -36,7 +36,7 @@ define (["dojo/_base/lang", "dijit/Tooltip", "tukos/widgetUtils"],
 				if (name){
 					self.customContextMenuItems = function(){
 						return [{atts: {label: tukos.Pmg.message('help')  , onClick: function(){
-							tukos.Pmg.viewTranslatedInBrowserWindow(name, atts.onClickLinkObject || self.getRootForm().object)
+							tukos.Pmg.viewTranslatedInBrowserWindow(name, atts.onClickLink.object || self.getRootForm().object)
 						}}}];
 					};
 				}

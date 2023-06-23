@@ -65,7 +65,7 @@ function(declare, lang, on, ready, string, registry, utils, Pmg){
                                             	if (toProcess.all){
                                             		urlArgs.query.storeatts = {where: grid.userFilters()};
                                             	}
-                        						self.form.serverDialog(urlArgs, {ids: toProcess.all || toProcess.ids, values: grid.modify.values}, [], Pmg.message('actionDone')).then(function(response){
+                        						self.form.serverDialog(urlArgs, {ids: toProcess.all || toProcess.ids, values: grid.modify.values}, [], Pmg.message('~actionDone')).then(function(response){
             	                                    tooltipDialog.close();
                         							grid.revert();
                                             	});	                        						

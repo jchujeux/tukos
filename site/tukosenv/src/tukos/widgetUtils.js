@@ -28,11 +28,11 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
             }
         },
 
-        markAsChanged: function(widget, styleFlag){
+        markAsChanged: function(widget, styleFlag, context){
         	if (styleFlag !== 'noStyle'){
         		this.setStyleToChanged(widget);
            	}
-           	widget.form.setChangedWidget(widget);
+           	widget.form.setChangedWidget(widget, context);
         }, 
         markAsUnchanged: function(widget){
             this.setStyleToUnchanged(widget);
@@ -57,8 +57,8 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
             var form = widget.form, Pmg = form.Pmg;
             if (oldValue !== value && form){
                 if (attr === 'value' && form.markIfChanged && !widget.noMarkAsChanged && (form.markAllChanges || widget.forceMarkIfChanged || arrayUtil.indexOf(form.postElts, widget.widgetName)!= -1)){
-                   	if (!form.changedWidgets.permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL'])){
-                		Pmg.setFeedback(Pmg.message('itemislocked')); Pmg.beep();
+                   	if (form.valueOf('id') && !form.changedWidgets.permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL', 'UL'])){
+                		setTimeout(function(){Pmg.addFeedback(Pmg.message('itemislocked')); Pmg.beep();}, 100);
                    	}
                    	this.markAsChanged(widget);
                 }

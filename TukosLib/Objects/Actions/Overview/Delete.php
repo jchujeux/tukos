@@ -31,7 +31,7 @@ class Delete extends AbstractAction{
         }
         if ($result === 0){
             Feedback::add($this->view->tr('Nothingtodelete!'));
-        }else{
+        }else if ($result !== false){
             Feedback::add([$this->view->tr('DoneEntriesDeleted') => $result]);
         }
         return [];

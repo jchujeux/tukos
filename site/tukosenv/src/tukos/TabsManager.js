@@ -21,7 +21,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
                 if (!utils.empty(changedTabs.widgets)){
                 	theMessage = Pmg.message('tabsvalueschangednotsaved') + ': <br>' + changedTabs.widgets.join(', ');
                 }
-                if (!utils.empty(changedTabs.customization)){
+                if (!utils.empty(changedTabs.customization) && !Pmg.isRestrictedUser()){
                 	theMessage = (theMessage ? theMessage + '<br>' : '') + Pmg.message('tabscustomizationchangednotsaved') + ': <br>' + changedTabs.customization.join(', ');
                 }
                 if (theMessage){
@@ -54,7 +54,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
             var theNewTab = new TukosTab(args);
             ready(lang.hitch(this, function(){
                 this.container.addChild(theNewTab);
-                Pmg.setFeedback(args.feedback, Pmg.message('tabCreated'));
+                //Pmg.setFeedback(args.feedback, Pmg.message('tabCreated'));
 				//theNewTab.resize();
             }));
             return theNewTab;
@@ -81,7 +81,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
                     if (response.focusOnOpen){
                         ready(function(){
                             self.container.selectChild(theNewTab);
-                            Pmg.setFeedback(response['feedback'], Pmg.message('Ok'));
+                            Pmg.setFeedback(response['feedback'], '');
                             tukosHeaderLoading.innerHTML = '';
                         });
                     }

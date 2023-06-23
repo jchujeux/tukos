@@ -1,7 +1,7 @@
 define(["dojo/ready", "dojo/has", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/form/_ComboBoxMenuMixin", "dijit/registry", 
 		"dojo/json", "dojo/date/locale", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/_ComboBoxMenuMixinExtend", "tukos/utils"],
 function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, _ComboBoxMenuMixin, registry, JSON, dojoDateLocale, _WidgetsExtend, _WidgetsFormExtend, _ComboBoxMenuMixinExtend, utils){
-    var stores, openedBrowserTabs = {}, windows = {},
+    var stores, openedBrowserTabs = {}, windows = {}, numWindows = 0,
         objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
 		lang.extend(_WidgetBase, _WidgetsExtend);//for this to work in all cases, no require for a widget should be made before this statement executes, above in PageManager, and in modules required in evalUtils (which _WidgetsExtend depends on)
@@ -91,7 +91,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 		        };
                 self.serverTranslations = function(expressions, actModel){
                     var results = {}, actionModel = actModel || 'GetTranslations';
-                    return self.serverDialog({object: 'users', view: 'NoView', action: 'Get', query:{params: {actionModel: actionModel}}}, {data: expressions}, self.message('actionDone')).then(function (response){
+                    return self.serverDialog({object: 'tukos', view: 'NoView', action: 'Get', query:{params: {actionModel: actionModel}}}, {data: expressions}, self.message('actionDone')).then(function (response){
                             utils.forEach(response.data, function(translations, objectName){
                                 var objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {});
                                 results[objectName] = {};
@@ -177,15 +177,20 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 		},
 		viewTranslatedInBrowserWindow: function(toTranslate, object){
 			const name = 'tukosItem' + toTranslate;
-			if (windows[name] && !windows[name].closed){
-				//tukos.windows[name].close();
-				window.blur();
-				windows[name].focus();
-			}//else{
-				this.serverTranslations({[object]: [toTranslate]}).then(function(translation){
-	        		windows[name] = utils.viewInBrowserWindow(name, translation[object][toTranslate]);
-				});
-			//}
+			let screenX = 25, screenY = 50, winPosition;
+			if (windows[name]){// if we don't close an existing window, focusing on it will not bring it to the front
+				winPosition = windows[name].winPosition;
+				if (!windows[name].closed){
+					windows[name].close();
+				}
+			}else{
+				winPosition = numWindows;
+				numWindows +=1;
+			}
+			this.serverTranslations({[object]: [toTranslate]}).then(function(translation){
+        		windows[name] = utils.viewInBrowserWindow(name, translation[object][toTranslate], screenX + 35*winPosition, screenY+25*winPosition);
+        		windows[name].winPosition = winPosition;
+			});
 		},
 		viewUrlInBrowserWindow: function(url, name, options){
 			if (windows[name] && !windows[name].closed){
@@ -274,7 +279,11 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
                     self.addMessagesToCache(response.messages, urlArgs.object);
                     self.addExtrasToCache(response.extras);
                     if (defaultFeedback !== false){
-                        self.setFeedback(response.feedback, defaultFeedback);
+                        if (defaultFeedback && defaultFeedback[0] === '~'){
+							self.addFeedback(response.feedback, defaultFeedback.substring(1));
+						}else{
+							 self.setFeedback(response.feedback, defaultFeedback);
+						}
                     }
                     if (isObjectFeedback){
                     	set(att, attValue);
@@ -315,7 +324,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
             if (beep){
                 this.beep();
             }
-            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object") ? serverFeedback.join("<br>") : (serverFeedback  || clientFeedback || '' /*|| this.message('Ok')*/), widget,
+            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object" && serverFeedback.length > 0) ? serverFeedback.join(separator || '<br>') : (typeof serverFeedback === 'string' ? serverFeedback  : (clientFeedback || '')), widget,
                   currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;
 			if (this.focusedPanel === "leftPanel"){
 				console.log('focus is on left panel');
@@ -337,7 +346,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
                 widget.set('value', separator ? widget.get('value') + separator + newFeedback : newFeedback);
             }
             if (this.logWidget){
-            	this.logWidget.set('value', this.logWidget.get('value') + (separator ? separator : '\n') + newFeedback);
+            	this.logWidget.set('value', this.logWidget.get('value') + (separator ? separator : '<br>') + newFeedback);
             }else{
             	if (this.logWidget !== false){
                 	ready(function(){
@@ -354,7 +363,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
             }
         },
         addFeedback: function(serverFeedback, clientFeedback, beep){
-            this.setFeedback(serverFeedback, clientFeedback, "\n", beep);
+            this.setFeedback(serverFeedback, clientFeedback, "<br>", beep);
         },
         namedId: function(id){
             //return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].name + '(' + id + ')' : '(' + id + ')') : '');

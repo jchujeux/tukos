@@ -79,7 +79,8 @@ class PageView extends Translator{
                     'items' => [
                         ['type' => 'MenuItem', 'atts' => ['onClickArgs' => $this->onTriggerUrlArgs($object, 'Edit'),     'label' => $this->tr('default')]],
                         ['type' => 'PopupMenuItem',   'atts' => ['label' => $this->tr('fromtemplate')], 
-                         'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectatemplate'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'Edit'), 'sendAsNew' => true, 'object' => $object, 'mode' => 'Tab', 'dropdownFilters' => ['grade' => 'TEMPLATE']], true),
+                         'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectatemplate'), 'onChangeArgs' => $this->onTriggerUrlArgs($object, 'Edit'), 'sendAsNew' => true, 'object' => $object, 'mode' => 'Tab', 
+                             'dropdownFilters' => ['grade' => 'TEMPLATE']], true),
                         ]
                     ],
                 ],

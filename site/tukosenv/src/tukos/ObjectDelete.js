@@ -13,7 +13,7 @@ define (["dojo/_base/declare", "dojo/dom", "dojo/on", "dijit/form/Button", "diji
                 var idValue = self.form.valueOf('id');
                 if (idValue == ''){/* is new entry, nothing to delete on the server side*/
                 	Pmg.alert({title: Pmg.message('nothingToDelete'), content: Pmg.message('newItemResetInstead')});
-                }else if(!form.changedValues().permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL'])){
+                }else if(!form.changedValues().permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL', 'UL'])){
                     	Pmg.setFeedback(Pmg.message('itemislocked')); Pmg.beep();
                 }else{
                     Pmg.confirm({title: Pmg.message('deleteExistingItem'), content: Pmg.message('sureWantToDeleteItem')}).then(

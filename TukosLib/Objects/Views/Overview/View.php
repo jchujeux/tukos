@@ -52,7 +52,9 @@ class View {
         	'export'  => ['type' => 'OverviewAction',     'atts' => ['label' => $this->view->tr('Export'), 'grid' => 'overview', 'serverAction' => 'Process', 'queryParams' => ['process' => 'exportItems']]],
         	 'process' => ['type' => 'OverviewAction',     'atts' => ['label' => $this->view->tr('Process'), 'grid' => 'overview', 'serverAction' => 'Process']],
        'clearFeedback' => ['type' => 'ObjectFieldClear','atts' => ['label' => $this->view->tr('Clear Feedback'), 'fieldToClear' => 'feedback']],
-           'feedback'  => Widgets::tukosTextArea(['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 80, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),
+           //'feedback'  => Widgets::tukosTextArea(['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'cols' => 80, 'disabled' => true, 'style' => ['maxHeight' => '50px', 'overflow' => 'auto']]),
+            'feedback'  => Widgets::htmlContent(
+                ['title' => $this->view->tr('Feedback'), 'label' => '<b>' . $this->view->tr('Feedback') . ':</b>', 'disabled' => true, 'ignoreChanges' => true, 'style' => ['minHeight' => '30px', 'maxHeight' => '50px', 'minWidth' => '30em', 'overflow' => 'auto', 'backgroundColor' => '#F0F0F0']]),
         ];
         if (Tfk::$registry->isMobile){
             foreach(['edit', 'import', 'export', 'process', 'clearFeedback', 'feedback'] as $action){

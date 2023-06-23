@@ -120,6 +120,9 @@ class View {
         if (isset($this->view->allowedNestedWatchActions)){
             $defAtts['allowedNestedWatchActions'] = $this->view->allowedNestedWatchActions;
         }
+        if (isset($this->beforeInstantiationAction)){
+            $defAtts['beforeInstantiationAction'] = $this->beforeInstantiationAction;
+        }
         if (isset($this->onOpenAction)){
             $defAtts['onOpenAction'] = $this->onOpenAction;
         }

@@ -43,31 +43,43 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
                 if (theFormContent.viewMode === 'Overview' && currentPane.isAccordion()){
                 	query.title = currentPane.get('title');
                 }
+	            Pmg.setFeedback(Pmg.message('actionDoing'));
             	return Pmg.serverDialog({object: theFormContent.object, view: theFormContent.viewMode, mode: theFormContent.paneMode, action: action, query: query}, {data: data}, {widget: currentPane, att: 'title', defaultFeedback: false}).then(
                     function(response){
 						currentPane.set('title', response.title);
 						currentPane.serverFormContent = lang.clone(response.formContent);
-						if (changesToRestore && changesToRestore.customization){
+						/*if (changesToRestore && changesToRestore.customization){
 							response.formContent = utils.mergeRecursive(response.formContent, changesToRestore.customization);
-						}
+						}*/
 						currentPane.refresh(response.formContent);
 	                    ready(function(){
+	            			Pmg.setFeedback(Pmg.message('actionDoing'));
 	                        currentPane.resize();
-							if (changesToRestore){
+							//if (changesToRestore){
 								utils.waitUntil(
 									function(){
 										return currentPane.form && currentPane.form.markIfChanged;
 									}, 
 									function(){
-										(currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);
-	                            		Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
+										if (changesToRestore){
+											currentPane.form.restoreChanges(changesToRestore, keepOptions);
+											if (changesToRestore.customization){
+												currentPane.form.customization = changesToRestore.customization;
+											}
+										}
+										ready(function(){
+											currentPane.resize();
+			                				ready(function(){
+												Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
+											});
+										});
 	                            		//currentPane.resize();
 									}, 
 									100);
 	                            //setTimeout(function(){(currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);}, 1000);// due to similar setTimeout in ObjectPane affecting markIfChanged
-							}else{
+							/*}else{
 	                        	Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
-							}
+							}*/
 	                    });
                         return response;
                     }
@@ -79,7 +91,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
                 return theForm.checkChangesDialog(refreshAction);
             }
         },
-        localRefresh: function(keepOptions, currentPane){
+        localRefresh: function(keepOptions, callback, currentPane){
             var currentPane = currentPane || this.currentPane(), theForm = currentPane.form, theFormContent = lang.clone(currentPane.serverFormContent), changesToRestore = (keepOptions ? theForm.keepChanges(keepOptions) : null);
 			if (currentPane.inLocalRefresh){
 				Pmg.addFeedback(Pmg.message('actionnotcompletedwait'));
@@ -95,16 +107,19 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
 				currentPane.resize();
             	currentPane.set('title', Pmg.loading(title));
 				Pmg.setFeedback(Pmg.message('refreshing'));
-				if (changesToRestore.widgets){
+				if (changesToRestore && changesToRestore.customization){
+					currentPane.form.customization = changesToRestore.customization;
+				}
+				if (changesToRestore && changesToRestore.widgets){
 					utils.waitUntil(
 						function(){
 							return currentPane.form && currentPane.form.markIfChanged;
 						}, 
 						function(){
-							//currentPane.resize();
 							(currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);
                 			currentPane.set('title', title);
 							currentPane.inLocalRefresh = false;
+							callback && callback(currentPane.form);
 							ready(function(){
 								currentPane.resize();
                 				ready(function(){

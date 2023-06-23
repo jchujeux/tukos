@@ -497,10 +497,11 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					waiter = setInterval(wait, delay);
 				}
 			},
-	        viewInBrowserWindow: function(windowName, htmlContent){
-	            const newWindow = window.open('', windowName, 'left=100,right=100, width=600,height=800');
+	        viewInBrowserWindow: function(windowName, htmlContent, screenX, screenY, innerWidth, innerHeight){
+	            const newWindow = window.open('', windowName, 'screenX=' + (screenX || 50) + ',screenY=' + (screenY || 50) + ',innerWidth=' + (innerWidth || 800) + ',innerHeight=' + (innerHeight || 800));
 	            newWindow.document.write(htmlContent);
 	            newWindow.document.close();
+	            newWindow.tukos = window.tukos;
 	            return newWindow;
 	            //newWindow.focus();// in case the window already existed
 	        },
