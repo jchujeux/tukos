@@ -40,6 +40,7 @@ class Model extends AbstractModel {
         	'morphotype' => 'VARCHAR(10) DEFAULT NULL ',
         	'antecedents' => 'longtext DEFAULT NULL',
             'hrmin' => 'SMALLINT DEFAULT NULL',
+            'hrmax' => 'SMALLINT DEFAULT NULL',
             'hrthreshold' => 'SMALLINT DEFAULT NULL',
             'h4timethreshold' => 'SMALLINT DEFAULT NULL',
             'h5timethreshold' => 'SMALLINT DEFAULT NULL',

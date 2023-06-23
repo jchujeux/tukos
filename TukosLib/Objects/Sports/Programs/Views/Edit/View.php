@@ -25,7 +25,7 @@ class View extends EditView{
             	'row1' => [
                     'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => '130'],
                     'widgets' => ['id', 'parentid', 'coach', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'coachemail', 'coachorganization', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter',
-                        'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'stsratio', 'initialsts', 'initiallts', 'displayfromdate', 'displayfromsts', 'displayfromlts', 'synchrosource']
+                        'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'stsratio', 'initialsts', 'initiallts', 'initialprogressivity', 'displayfromdate', 'displayfromsts', 'displayfromlts', 'synchrosource']
                 ],
             	'row2' => [
             	    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['80%', '20%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
@@ -62,7 +62,9 @@ class View extends EditView{
                 ]
         ];
         $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
-        $this->onOpenAction =  $this->view->OpenEditAction() . $this->onViewOpenAction() .  $this->view->gridOpenAction($this->view->gridWidgetName) . $this->view->gridOpenAction('weeklies') . $this->viewModeOptionOpenAction();
+        $this->beforeInstantiationAction = $this->beforeInstantiationAction();
+        $this->onOpenAction =  "setTimeout(function(){Pmg.setFeedback(Pmg.message('actionDoing'));},0);" . $this->view->OpenEditAction() . $this->onViewOpenAction() . $this->viewModeOptionOpenAction() . 
+        $this->view->gridOpenAction('weeklies') .  $this->view->gridOpenAction($this->view->gridWidgetName);
         $plannedOptionalCols = ['name', 'duration', 'intensity', 'sport', 'sportimage', 'stress', 'distance', 'elevationgain', 'content']; $plannedColOptions = [];
         $performedOptionalCols = ['name', 'duration', 'sport', 'sportimage', 'distance', 'elevationgain', 'perceivedeffort', 'perceivedmechload', 'sensations', 'mood', 'athletecomments', 'coachcomments']; $plannedColOptions = [];
         $optionalWeeks = ['performedthisweek', 'plannedthisweek', 'performedlastweek', 'plannedlastweek'];
@@ -94,10 +96,10 @@ EOT
                         'onWatchLocalAction' =>  $this->watchLocalAction('performedcolstoinclude')])),
                     'optionalweeks' => Widgets::multiSelect(Widgets::complete(['title' => $this->view->tr('weekstoinclude'), 'options' => $weekOptions, 'style' => ['height' => '150px'], 'onWatchLocalAction' =>  $this->watchLocalAction('optionalweeks')])),
                     'contentseparator' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('separator'), 'style' => ['width' => '5em'], 'onWatchLocalAction' =>  $this->watchLocalAction('contentseparator')])),
-                   'prefixwarmup' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('warmup'), 'style' => ['width' => '10em'], 'onWatchLocalAction' =>  $this->watchLocalAction('prefixwarmup')])),
-                   'prefixmainactivity' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('mainactivity'), 'style' => ['width' => '10em'],  'onWatchLocalAction' => $this->watchLocalAction('prefixmainactivity')])),
-                   'prefixwarmdown' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('warmdown'), 'style' => ['width' => '10em'], 'onWatchLocalAction' => $this->watchLocalAction('prefixwarmdown')])),
-                   'prefixcomments' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('comments'), 'style' => ['width' => '10em'], 'onWatchLocalAction' =>  $this->watchLocalAction('prefixcomments')])),
+                   'prefixwarmup' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('warmup')/*, 'style' => ['width' => '10em']*/, 'onWatchLocalAction' =>  $this->watchLocalAction('prefixwarmup')])),
+                   'prefixmainactivity' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('mainactivity')/*, 'style' => ['width' => '10em']*/,  'onWatchLocalAction' => $this->watchLocalAction('prefixmainactivity')])),
+                   'prefixwarmdown' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('warmdown')/*, 'style' => ['width' => '10em']*/, 'onWatchLocalAction' => $this->watchLocalAction('prefixwarmdown')])),
+                   'prefixcomments' => Widgets::textBox(Widgets::complete(['title' => $this->view->tr('prefix') . ' ' . $this->view->tr('comments')/*, 'style' => ['width' => '10em']*/, 'onWatchLocalAction' =>  $this->watchLocalAction('prefixcomments')])),
                    'duration' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showduration'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('duration')])),
                    'intensity' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showintensity'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('intensity')])),
                    'sport' => Widgets::checkBox(Widgets::complete(['title' => $this->view->tr('showsport'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('sport')])),
@@ -126,35 +128,13 @@ EOT
                                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
                                     'contents' => ['row1' => ['tableAtts' => ['label' => $this->view->tr('weeklyprogram')]]],
                                 ],
-                                'row2' => [
-                                    'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'orientation' => 'vert'],
-                                    'contents' => [
-                                        'col1' => [
-                                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
-                                            'widgets' => ['optionalweeks']
-                                        ],
-                                        'col2' => [
-                                            'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
-                                            'contents' => [
-                                                'row8' => [
-                                                    'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true],
-                                                    'widgets' => ['firstday', 'lastday', 'weekoftheyear', 'weekofprogram', 'weeksinprogram'],
-                                                ],
-                                                'row9' => [
-                                                    'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 100],
-                                                    'widgets' => ['prefixwarmup', 'prefixmainactivity', 'prefixwarmdown', 'prefixcomments','contentseparator'],
-                                                ],
-                                                'row10' => [
-                                                    'tableAtts' => ['cols' => 7, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 50],
-                                                    'widgets' => ['presentation'/*, 'duration', 'intensity', 'sport', 'sportimage', 'stress'*/, 'rowintensitycolor'],
-                                                ],
-                                            ]
-                                        ],
-                                        'col3' => [
-                                            'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
-                                            'widgets' => ['plannedcolstoinclude', 'performedcolstoinclude']
-                                        ]
-                                    ]
+                               'row21' => [
+                                    'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert'],
+                                    'widgets' => ['optionalweeks', 'plannedcolstoinclude', 'performedcolstoinclude']
+                                ],
+                                'row22' => [
+                                    'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true],
+                                    'widgets' => ['firstday', 'lastday', 'weekoftheyear', 'weekofprogram', 'weeksinprogram', 'prefixwarmup', 'prefixmainactivity', 'prefixwarmdown', 'prefixcomments','contentseparator', 'presentation', 'rowintensitycolor'],
                                 ],
                                 'row11' => [
                                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'labelWidth' => 100],
@@ -254,11 +234,25 @@ EOT
         $this->setSessionsTrackingActionWidget();
         $this->actionWidgets['viewplanned'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewplanned'), 'value' => 'viewplanned', 'onClickAction' => $this->viewModeOptionOnClick('viewplanned')]];
         $this->actionWidgets['viewperformed'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewperformed'), 'value' => 'viewperformed', 'onClickAction' => $this->viewModeOptionOnClick('viewperformed')]];
-        $this->actionWidgets['viewall'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewall'), 'value' => 'viewall', 'checked' => true, 'onClickAction' => $this->viewModeOptionOnClick('viewall')]];
+        $this->actionWidgets['viewall'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewall'), 'value' => 'viewall'/*, 'checked' => true*/, 'onClickAction' => $this->viewModeOptionOnClick('viewall')]];
         $this->actionLayout['tableAtts']['cols'] = 3;
         $this->actionLayout['contents'] = array_merge(array_splice($this->actionLayout['contents'], 0, 1), 
             ['sessionViewOptions' => ['tableAtts' => ['cols' => 1, 'customClass' => 'actionTable', 'showLabels' => true,  'label' => '<b>' . $this->view->tr('SessionsMode') . ':</b>'], 'widgets' => [ 'viewplanned',  'viewperformed', 'viewall']]],
             $this->actionLayout['contents']);
+	}
+	public function beforeInstantiationAction(){
+	    return <<<EOT
+const form = this;
+form.openActionCompleted = false;
+form.initiallyUnHiddenCharts = [];
+['loadchart', 'weekloadchart', 'performedloadchart', 'weekperformedloadchart'].forEach(function(chartName){
+    if (!form.widgetsDescription[chartName].atts.hidden){
+        form.widgetsDescription[chartName].atts.hidden = true;
+        form.initiallyUnHiddenCharts.push(chartName);
+    }
+});
+EOT
+	    ;
 	}
 	public function viewModeOptionOpenAction(){
 	    $sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
@@ -266,11 +260,18 @@ EOT
 	    $performedCols = json_Encode($sessionsModel->performedCols);
 	    return <<<EOT
 var form = this;
+Pmg.setFeedback(Pmg.message('actionDoing'));
 require (["tukos/objects/sports/programs/LocalActions"], function(LocalActions){
     form.localActions = new LocalActions({form: form, plannedColumns: {$plannedCols}, performedColumns: {$performedCols}});
+    form.initiallyUnHiddenCharts.forEach(function(chartName){
+        form.getWidget(chartName).set('hidden', false);
+    });
     if (form.viewModeOption && !form.getWidget(form.viewModeOption).get('checked')){
         form.getWidget(form.viewModeOption).set('checked', true);
-        form.localActions.viewModeOption(form.viewModeOption);
+        //if (form.viewModeOption !== 'viewall'){
+            console.log('entering viewModeOption');            
+            form.localActions.viewModeOption(form.viewModeOption);
+        //}
     }
 });
 EOT

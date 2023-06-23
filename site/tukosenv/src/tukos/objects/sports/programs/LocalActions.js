@@ -4,18 +4,12 @@ function(declare, lang, utils, Pmg){
 		constructor: function(args){
 			lang.mixin(this, args);
 		},
-		viewModeOption: function(optionName, isOptionChange){
-			var form = this.form, sessionsWidget = form.getWidget('sptsessions'), column, customizationPath = sessionsWidget.customizationPath;
+		viewModeOption: function(optionName, isOptionChange, form){
+			var self = this, form = form || this.form, sessionsWidget = form.getWidget('sptsessions'), column, customizationPath = sessionsWidget.customizationPath;
+			if ((optionName === form.viewModeOption) && isOptionChange){
+				return;
+			}
 			if (isOptionChange){
-            	/*//form.unfreezeWidth = true;
-				form.unfrozenWidths = 0;
-				form.resize();
-				//form.unfreezeWidth = false;
-				if (form.unfrozenWidths){
-					form.needsToFreezeWidth = true;
-					form.resize();
-					form.needsToFreezeWidth = false;
-				}*/
 				if (form.parent.inLocalRefresh){
 					Pmg.addFeedback(Pmg.message('actionnotcompletedwait'));
 				}else{
@@ -69,10 +63,10 @@ function(declare, lang, utils, Pmg){
 						sessionsWidget.set('collection', sessionsWidget.store.getRootCollection());
 				        break;
 				    case 'viewall':
-						if (isOptionChange){
+						//if (isOptionChange){
 							sessionsWidget.extraUserFilters = false;
 							sessionsWidget.set('collection', sessionsWidget.store.getRootCollection());
-						}
+						//}
 				        break;
 				}
 				sessionsWidget.customizationPath = customizationPath;

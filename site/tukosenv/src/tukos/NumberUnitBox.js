@@ -15,7 +15,7 @@ function(declare, lang, dst, Widget, _FocusMixin, TextBox, StoreSelect, wutils, 
             		self.onChange(newValue);
             	}
             	if (!newValue || (self.noNumberUnit || {})[newValue]){
-            		self.numberField.set('value', '');
+            		//self.numberField.set('value', '');
             		//self.numberField.set('disabled', true);
             		dst.set(self.numberField.domNode, 'display', 'none');
             	}else{

@@ -81,6 +81,7 @@ class Get extends ViewsGetModel {
             if (isset($query['grade'])){
                 //$response['data']['value']['grade'] = $query['grade'];
                 $value['grade'] = $query['grade'];
+                $value['permission'] = 'RO';
             }
             $response['forceMarkIfChanged'] = true;
             $customMode = 'item';

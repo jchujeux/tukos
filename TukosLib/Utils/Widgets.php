@@ -63,16 +63,16 @@ class Widgets{
     public static function numberTextBox($atts, $editOnly = true){
         $defAtts = [
             'edit' => ['style' => ['width' => 'auto', 'maxWidth' => '5em']],
-            'storeedit' => ['editorArgs' => ['style' => ['width' => '3em']], 'width' => 60, 'editOn' => 'click'],
-            'overview' => ['width' => 60],
+            'storeedit' => ['editorArgs' => ['style' => ['width' => '3em']], 'minWidth' => 60, 'editOn' => 'click'],
+            'overview' => ['minWidth' => 60],
         ];
         return ['type' =>'NumberTextBox', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
     public static function tukosNumberBox($atts, $editOnly = true){
         $defAtts = [
             'edit' => ['style' => ['width' => 'auto', 'maxWidth' => '5em']],
-            'storeedit' => ['editorArgs' => ['style' => ['width' => '5em']], 'width' => 60, 'editOn' => 'click'],
-            'overview' => ['width' => 60],
+            'storeedit' => ['editorArgs' => ['style' => ['width' => '5em']], 'minWidth' => 60, 'editOn' => 'click'],
+            'overview' => ['minWidth' => 60],
         ];
         return ['type' =>'TukosNumberBox', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }

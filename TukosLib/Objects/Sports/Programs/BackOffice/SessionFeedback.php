@@ -20,7 +20,7 @@ class SessionFeedback extends ObjectTranslator{
         $this->programsModel = $this->objectsStore->objectModel('sptprograms');
         $this->sessionsModel = Tfk::$registry->get('objectsStore')->objectModel('sptsessions');
         $this->view  = $this->objectsStore->objectView('sptsessions');
-        $this->instantiateVersion($query['version']);
+        $this->instantiateVersion(Utl::getItem('version', $query, 'V2', 'V2'));
         $this->synchroFields = '["' .  implode('", "', $this->version->synchroWidgets) . '"]';
         $this->weeklyFields = '["' .  implode('", "', $this->version->formWeeklyCols) . '"]';
         $this->dataWidgets = $this->version->getFormDataWidgets();
@@ -194,7 +194,11 @@ class SessionFeedback extends ObjectTranslator{
         $savedCount = count($values);
         $id = $query['id'];
         if ($savedCount){
-            $values['acl'] = ['1' => ['rowId' => 1, 'userid' => $programInformation['updator'], 'permission' => '3'], '2' => ['rowId' => 2, 'userid' => Tfk::tukosBackOfficeUserId, 'permission' => '3']];
+            $users = Tfk::$registry->get('objectsStore')->objectModel('users')->getAll(['where' => [['col' => 'parentid', 'opr' => 'IN', 'values' => [$programInformation['coach'], $programInformation['parentid']]]], 'cols' => ['id', 'parentid']]);
+            $values['acl'] = ['1' => ['userid' => Tfk::tukosBackOfficeUserId, 'permission' => '3']];
+            foreach($users as $user){
+                $values['acl'][] = ['userid' => $user['id'], 'permission' => '3'];
+            }
             if (empty($id)){
                 $where = Utl::getItems(['parentid', 'startdate', 'sessionid', 'mode', 'contextid'], array_merge($query, $values, ['mode' => 'performed', 'contextid' => $programInformation['contextid']]));
                 $id = $this->sessionsModel->updateOne(array_merge(['contextid' => $programInformation['contextid']], $values), ['where' => $this->user->filterPrivate($where, 'sptsessions')], true, false, 
@@ -266,7 +270,7 @@ class SessionFeedback extends ObjectTranslator{
         return $id;
     }
     function getProgramInformation($programId){
-        $programInformation = $this->programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['parentid', 'googlecalid', 'weeklies', 'synchrosource', 'contextid', 'updator']], ['weeklies' => []]);
+        $programInformation = $this->programsModel->getOne(['where' => ['id' => $programId], 'cols' => ['parentid', 'coach', 'googlecalid', 'weeklies', 'synchrosource', 'contextid', 'updator']], ['weeklies' => []]);
         return $programInformation;
     }
     function showSynchroFieldsLocalAction(){

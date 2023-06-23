@@ -1,5 +1,6 @@
-define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-construct",  "dijit/layout/ContentPane", "dijit/layout/BorderContainer", "dijit/registry", "tukos/utils",  "tukos/widgetUtils", "tukos/_TukosLayoutMixin", "tukos/_ObjectPaneMixin", "tukos/PageManager"], 
-    function(declare, lang, when, dct, ContentPane, BorderContainer, registry, utils, wutils, _TukosLayoutMixin,  _ObjectPaneMixin, Pmg){
+define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-construct",  "dijit/layout/ContentPane", "dijit/layout/BorderContainer", "dijit/registry", "tukos/utils",  "tukos/evalutils", "tukos/widgetUtils", "tukos/_TukosLayoutMixin", "tukos/_ObjectPaneMixin",
+		 "tukos/PageManager"], 
+    function(declare, lang, when, dct, ContentPane, BorderContainer, registry, utils, eutils, wutils, _TukosLayoutMixin,  _ObjectPaneMixin, Pmg){
     return declare([BorderContainer, _TukosLayoutMixin, _ObjectPaneMixin], {
 
         postCreate: function(){
@@ -9,6 +10,9 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 			this.Pmg = Pmg;
             this.widgetsName = [];
             this.customization = {};
+            if (this.beforeInstantiationAction){
+				eutils.actionFunction(this, 'beforeInstantiation', this.beforeInstantiationAction);
+			}
             var dataPane = new ContentPane({region: "center", 'class': "centerPanel", style: "padding: 0px;  overflow: auto; width: 100%; height: 100%; "}, dojo.doc.createElement("div"));
             var dataTable = this.tableLayout(this.dataLayout, dataPane, lang.hitch(wutils, wutils.setWatchers), this.commonWidgetsAtts);
             this.addChild(dataPane);
@@ -55,11 +59,29 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 	                        this.openAction(this.onOpenAction);
 	                    }
 	                    setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
-	                    	this.markIfChanged = true;
-	                        this.watchContext = 'user';
-	                        this.setUserContextPaths(); 
-	                        if (this.offlineChangedValues){
-								this.setWidgets({value: this.offlineChangedValues});
+							if (this.hasOwnProperty('openActionCompleted')){
+								const form = this;
+								utils.waitUntil(
+									function(){
+										return form.openActionCompleted;
+									}, 
+									function(){
+				                    	form.markIfChanged = true;
+				                        form.watchContext = 'user';
+				                        form.setUserContextPaths(); 
+				                        if (form.offlineChangedValues){
+											form.setWidgets({value: form.offlineChangedValues});
+										}
+										Pmg.setFeedback(Pmg.message('actionDone'));
+									}, 
+									100);
+							}else{
+		                    	this.markIfChanged = true;
+		                        this.watchContext = 'user';
+		                        this.setUserContextPaths(); 
+		                        if (this.offlineChangedValues){
+									this.setWidgets({value: this.offlineChangedValues});
+								}
 							}
 	                    }), 0);
 						this.needsToFreezeWidth = true;

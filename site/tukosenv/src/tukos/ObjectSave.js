@@ -15,7 +15,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/on", "dijit/
                 	}
                     if (utils.empty(changedValues)){
                         Pmg.setFeedback(messages.noChangeToSubmit);
-                    }else if(!changedValues.permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL'])){
+                    }else if(!changedValues.permission && utils.in_array(form.valueOf('permission'), ['PL', 'RL', 'UL'])){
                     	Pmg.setFeedback(Pmg.message('itemislocked')); Pmg.beep();
                     }else{
                         Pmg.setFeedback(messages.actionDoing);

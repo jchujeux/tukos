@@ -9,6 +9,7 @@ use TukosLib\Objects\Collab\Calendars\CalendarsViewUtils;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
+
 class View extends AbstractView {
 
 	use CalendarsViewUtils, ViewActionStrings, SpiderView;
@@ -154,12 +155,13 @@ class View extends AbstractView {
 		    ]]];
 		};
 		$customDataWidgets = [
-		    'parentid' => ['atts' => ['edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['sportsmanemail' => ['value' => "return sWidget.getItemProperty('email');"], 'parentid' => ['localActionStatus' => $this->relatedSportsmanAction()]]]]],
+		    'parentid' => ['atts' => ['edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['sportsmanemail' => ['value' => "return sWidget.getItemProperty('email');"], 'parentid' => ['localActionStatus' => $this->programAclLocalAction()]]]]],
 		    'comments' => ['atts' => ['edit' => ['height' => 'auto']]],
 		    'coach' => ViewUtils::objectSelect($this, 'Coach', 'people', ['atts' => [
 		        'edit' => ['storeArgs' => ['cols' => ['email', 'parentid']]/*, 'onChangeLocalAction' => ['coachemail' => ['value' => "return sWidget.getItemProperty('email');"]]*/,'onWatchLocalAction' => ['value' => [
 		            'coachorganization' => ['value' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return sWidget.getItemProperty('parentid');"]],
-		            'coachemail' => ['value' => ['triggers' => ['server' => false, 'user' => 'true'], 'action' => "return sWidget.getItemProperty('email');"]]
+		            'coachemail' => ['value' => ['triggers' => ['server' => false, 'user' => 'true'], 'action' => "return sWidget.getItemProperty('email');"]],
+		            'coach' => ['localActionStatus' => $this->programAclLocalAction()]
 		        ]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
@@ -176,14 +178,14 @@ class View extends AbstractView {
 							'onChangeLocalAction' => [
 								'todate'  => ['value' => "if (!newValue){return '';}else{return dutils.dateString(sWidget.valueOf('#fromdate'), newValue, sWidget.valueOf('#todate'),true)}" ]
 							],
-							'unit' => ['style' => ['width' => '6em'], 'onWatchLocalAction' => ['value' => "widget.numberField.set('value', dutils.convert(widget.numberField.get('value'), oldValue, newValue));"]],
+							'unit' => ['style' => ['width' => '6em']/*, 'onWatchLocalAction' => ['value' => "widget.numberField.set('value', parseInt(dutils.convert(widget.numberField.get('value'), oldValue, newValue)));"]*/],
 					],
 					'storeedit' => ['formatType' => 'numberunit'],
 					'overview' => ['formatType' => 'numberunit', 'hidden' => true],
 			]]),
 			'todate'   => ViewUtils::tukosDateBox($this, 'Ends on', ['atts' => ['edit' => [
 							'onChangeLocalAction' => [
-								'duration'  => ['value' => "if (!newValue){return '';}else{return dutils.durationString(sWidget.valueOf('#fromdate'), newValue, sWidget.valueOf('#duration'),true)}" ],
+								'duration'  => ['value' => "if (!newValue){return '';}else{return dutils.durationString(sWidget.valueOf('#fromdate'), newValue, sWidget.valueOf('#duration'),false)}" ],
 							    'loadchart' => ['localActionStatus' => $this->loadChartLocalAction('loadchart')],
 							    'performedloadchart' => ['localActionStatus' => $this->loadChartLocalAction('performedloadchart')],
 							],
@@ -239,8 +241,8 @@ class View extends AbstractView {
 						 'ruler' => ['field' => 'stress', 'map' => Sports::$stressOptions, 'atts' => ['minimum' => 0, 'maximum' => 4, 'showButtons' => false, 'discreteValues' => 5]],
 					]],
 					'onChangeNotify' => [$this->gridWidgetName => [
-						'startTime' => 'startdate', 'duration' => 'duration', 'summary' => 'name', 'comments' => 'comments', 'intensity' => 'intensity', 'stress' => 'stress', 'sport' => 'sport', 'warmup' => 'warmup',
-					    'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'trimphr' => 'trimphr', 'trimppw' => 'trimppw'
+						'startTime' => 'startdate', 'duration' => 'duration', 'summary' => 'name', 'comments' => 'comments', 'intensity' => 'intensity', 'stress' => 'stress', 'sport' => 'sport'/*, 'warmup' => 'warmup',
+					    'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown'*/, 'mode' => 'mode'/*, 'trimphr' => 'trimphr', 'trimppw' => 'trimppw'*/
 					]],
 					'onWatchLocalAction' => ['date' => $dateChangeLocalAction(false)]]]], 
 				'fromdate', 'todate'),
@@ -257,23 +259,27 @@ class View extends AbstractView {
     	        ]]]
 	        ),
 		    'stsdays' => ViewUtils::tukosNumberBox($this, 'stsdays', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.']], 'onChangeLocalAction' => ['stsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('stsdays')]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.'], 'onChangeLocalAction' => ['stsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('stsdays')]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'ltsdays' => ViewUtils::tukosNumberBox($this, 'ltsdays', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.']], 'onChangeLocalAction' => ['ltsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('ltsdays')]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.'], 'onChangeLocalAction' => ['ltsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('ltsdays')]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'stsratio' => ViewUtils::tukosNumberBox($this, 'stsratio', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.00']], 'onChangeLocalAction' => ['stsratio' => ['localActionStatus' => $this->tsbParamsChangeAction('stsratio')]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.00'], 'onChangeLocalAction' => ['stsratio' => ['localActionStatus' => $this->tsbParamsChangeAction('stsratio')]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'initialsts' => ViewUtils::tukosNumberBox($this, 'initialsts', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##']], 'onChangeLocalAction' => ['initialsts' => ['localActionStatus' => $this->tsbParamsChangeAction('initialsts')]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##'], 'onChangeLocalAction' => ['initialsts' => ['localActionStatus' => $this->tsbParamsChangeAction('initialsts')]], 'hidden' => true],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'initiallts' => ViewUtils::tukosNumberBox($this, 'initiallts', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##']], 'onChangeLocalAction' => ['initiallts' => ['localActionStatus' => $this->tsbParamsChangeAction('initiallts')]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##'], 'onChangeLocalAction' => ['initiallts' => ['localActionStatus' => $this->tsbParamsChangeAction('initiallts')]]],
+		        'overview' => ['hidden' => true]
+		    ]]),
+		    'initialprogressivity' => ViewUtils::tukosNumberBox($this, 'initialprogressivity', ['atts' => [
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#.#'], 'onChangeLocalAction' => ['initialprogressivity' => ['localActionStatus' => $this->initialProgressivityChangeAction()]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'displayfromdate' => ViewUtils::tukosDateBox($this, 'Displayfrom', ['atts' => ['edit' => [
@@ -295,9 +301,9 @@ class View extends AbstractView {
 					'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
 					'onChangeNotify' => [
 						'calendar' => [
-							'startdate' => 'startTime',  'duration' => 'duration',  'name' => 'summary', 'comments' => 'comments', 'intensity' => 'intensity', 'stress' => 'stress', 'sport' => 'sport', 
+							'startdate' => 'startTime',  'duration' => 'duration',  'name' => 'summary', 'comments' => 'comments', 'intensity' => 'intensity', 'stress' => 'stress', 'sport' => 'sport'/*, 
 						      'warmup' => 'warmup',
-						    'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown', 'mode' => 'mode', 'trimphr' => 'trimphr', 'trimppw' => 'trimppw'
+						    'mainactivity' => 'mainactivity', 'warmdown' => 'warmdown'*/, 'mode' => 'mode'/*, 'trimphr' => 'trimphr', 'trimppw' => 'trimppw'*/
 					]],
 					'onDropMap' => [
                         'templates' => ['fields' => ['name' => 'name', 'comments' => 'comments', 'startdate' => 'startdate', 'duration' => 'duration', 'intensity' => 'intensity', 'stress' => 'stress', 
@@ -310,9 +316,9 @@ class View extends AbstractView {
 					'sort' => [['property' => 'startdate', 'descending' => true], ['property' => 'sessionid', 'descending' => true]],
 					'onWatchLocalAction' => [
 					    'allowApplicationFilter' => ['sptsessions' => $this->dateChangeGridLocalAction("tWidget.form.valueOf('displayeddate')", 'tWidget', 'newValue')],
-					    'value' => ['sptsessions' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->sptSessionsTsbAction()]]],
+					    'value' => ['sptsessions' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->sptSessionsTsbAction()]]],
 					    'collection' => [
-					        //'sptsessions' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->sptSessionsTsbAction()]],
+					        'sptsessions' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => false], 'action' => $this->sptSessionsTsbAction()]],
 					        'calendar' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => 'tWidget.currentView && tWidget.currentView.invalidateLayout();return true;']],
 					        //'weekloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekloadchart'),]],
 					        //'weekperformedloadchart' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->weekLoadChartLocalAction('weekperformedloadchart')]],
@@ -325,7 +331,10 @@ class View extends AbstractView {
 				    'colsDescription' => [
 				        'startdate' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['startdate' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
 				        'trimphr' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['trimphr' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
-				        'mode' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['mode' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]]
+				        'mode' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['mode' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
+				        /*'sts' => ['atts' => ['storeedit' => ['noMarkAsChanged' => true]]],
+				        'lts' => ['atts' => ['storeedit' => ['noMarkAsChanged' => true]]],
+				        'tsb' => ['atts' => ['storeedit' => ['noMarkAsChanged' => true]]],*/
 				    ],
 			        'afterActions' => ['createNewRow' => $this->afterCreateRow(), 'updateRow' => $this->afterUpdateRow(), 'deleteRow' => $this->afterDeleteRow(), 'deleteRows' => $this->afterDeleteRows()],
 				    'beforeActions' => ['createNewRow' => $this->beforeCreateRow(), 'deleteRows' => $this->beforeDeleteRows(), 'updateRow' => $this->beforeRowChange()],
@@ -382,33 +391,54 @@ class View extends AbstractView {
 			],
 		];
 		foreach (array_diff_key($chartsCols, array_flip(['trimphr'/*, 'trimppw'*/, 'load', 'perceivedload', 'fatigue', 'hracwr'])) as $col => $description){
-		    $subObjects['sptsessions']['atts']['colsDescription'][$col] = ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => [$col => ['localActionStatus'  => $this->cellChartChangeLocalAction()]]]]]];
+		    $defaultColsDescription[$col] = ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => [$col => ['localActionStatus'  => $this->cellChartChangeLocalAction()]]]]]];
+		    
 		}
+		$subObjects['sptsessions']['atts']['colsDescription'] = Utl::array_merge_recursive_replace($defaultColsDescription, $subObjects['sptsessions']['atts']['colsDescription']);
 		$this->customize($customDataWidgets, $subObjects, [ 'grid' => ['calendar', 'displayeddate', 'synchrostart', 'synchroend', 'loadchart', 'performedloadchart', 'weekloadchart', 'weekperformedloadchart', 'weeklies'],
 		    'get' => ['displayeddate', 'loadchart', 'performedloachart', 'weekloadchart', 'weekperformedloadchart'],
 		    'post' => ['displayeddate', 'loadchart', 'performedloadchart', 'weekloadchart', 'weekperformedloadchart', 'synchrostart', 'synchroend']], ['weeklies' => [], 'displayfrom' => []]);
 	}
-	public static function relatedSportsmanAction(){
+	public static function programAclLocalAction(){
+	    $tukosBackOfficeUserId = Tfk::tukosBackOfficeUserId;
 	    return <<<EOT
-const form = sWidget.form, acl = form.getWidget('acl');
-;
-if (newValue){
-    Pmg.serverDialog({object: 'sptathletes', view: 'Edit', action: 'GetItem', query: {id: newValue, storeatts: JSON.stringify({cols: ['id']})}}).then(
-        function(response){
-        	return Pmg.serverDialog({object: 'users', view: 'Edit', action: 'GetItem', query: {parentid: response.data.value.id, storeatts: JSON.stringify({cols: []})}}).then(
-            	function (response){
-                    acl.set('value', '');
-                    if (response.data.value.id){
-                        acl.addRow(null, {rowId:1,userid: response.data.value.id,permission:"2"});
-                    }else{
-                        Pmg.setFeedback(Pmg.message('sportsmanhasnouserassociatednoacl', 'sptprograms'));
-                    }
-    			}
-    		);
-        }
-    );
+const form = sWidget.form, acl = form.getWidget('acl'), coachId = form.valueOf('coach'), athleteId = form.valueOf('parentid');
+if (!coachId){
+    Pmg.setFeedback('needtodefinecoach');
+    return false;
+}
+if (athleteId && coachId){
+    Pmg.serverDialog({object: 'users', view: 'Edit', action: 'GetItems', query: {storeatts: JSON.stringify({where: [{col: 'parentid', opr: 'IN', values: [athleteId, coachId]}], cols: ['id', 'parentid']})}}).then(
+    	function (response){
+            if (response.data.items.length > 0){
+                acl.set('value', '');
+                acl.addRow(null, {userid: $tukosBackOfficeUserId,permission:"2"});
+                if (response.data.items.length === 1){
+                        acl.addRow(null, {userid: response.data.items[0].id, permission: "3"});
+                }else{
+                    response.data.items.forEach(function(item){
+                        acl.addRow(null, {userid: item.id, permission: item.parentid == athleteId ? "2" : "3"});
+                    });
+                }
+                let sessionsWidget = form.getWidget('sptsessions'), idp = sessionsWidget.store.idProperty, sessionsRows = sessionsWidget.store.fetchSync();
+                let aclValue = {1: {rowId: 1, userid: $tukosBackOfficeUserId, permission:"3"}}, rowId = 2;
+                response.data.items.forEach(function(item){
+                    aclValue[rowId] = {rowId: rowId, userid: item.id, permission:"3"};
+                    rowId += 1;
+                });
+                aclValue = JSON.stringify(aclValue);
+                sessionsRows.forEach(function(row){
+                    const toUpdate = {acl:  aclValue};
+                    toUpdate[idp] = row[idp];
+                    sessionsWidget.updateRow(toUpdate);
+                });
+            }else{
+                Pmg.setFeedback(Pmg.message('sportsmanorcoachhasnouserassociatednoacl', 'sptprograms'), null, null, true);
+            }
+		}
+	);
 }else{
-    acl.deleteRows(acl.store.fetchSync(), true);
+    acl.deleteRows(lang.clone(acl.store.fetchSync()), true);
 }
 return true;
 EOT;
@@ -429,7 +459,10 @@ require (["tukos/objects/sports/TsbCalculator", "tukos/objects/sports/LoadChart"
             for (const spider of spiders){
                 form.kpiChartUtils.setChartValue('spider' + spider.id);
             }
+            form.openActionCompleted = true;
         });
+    }else{
+        form.openActionCompleted = true;
     }
 });
 return true;
@@ -449,7 +482,7 @@ if (fromDate && toDate){
 }
 if (Pmg.isRestrictedUser()){
     const self = this;
-    ['parentid', 'name', 'fromdate', 'duration', 'todate'].forEach(function(widgetName){
+    ['parentid', 'name', 'fromdate', 'duration', 'todate', 'initialsts', 'initiallts', 'initialprogressivity'].forEach(function(widgetName){
         self.getWidget(widgetName).set('disabled', true);
     });
 }
@@ -528,17 +561,42 @@ if (!this.isBulkRowAction){
 EOT
 	    ;
 	}
-	function afterCreateRow(){
+	public function sessionCreationAclLocalAction(){
+	    $tukosBackOfficeUserId = Tfk::tukosBackOfficeUserId;
 	    return <<<EOT
-console.log('afterCreateRow');
+const self = this, idp = this.store.idProperty;
+Pmg.serverDialog({object: 'users', view: 'Edit', action: 'GetItems', query: {storeatts: JSON.stringify({where: [{col: 'parentid', opr: 'IN', values: [row.sportsman, this.valueOf('coach')]}], cols: ['id', 'parentid'], promote: true})}}).then(
+	function (response){
+        if (response.data.items.length > 0){
+            let acl = {1: {rowId: 1, userid: $tukosBackOfficeUserId, permission:"3"}}, rowId = 2;
+            response.data.items.forEach(function(item){
+                acl[rowId] = {rowId: rowId, userid: item.id, permission:"3"};
+                rowId += 1;
+            });
+            const toUpdate = {acl:  JSON.stringify(acl)};
+            toUpdate[idp] = row[idp];
+            self.updateRow(toUpdate);
+        }else{
+            Pmg.setFeedback(Pmg.message('sportsmanorcoachhasnouserassociatednoacl', 'sptprograms'), null, null, true);
+        }
+	}
+);
+EOT
+	    ;
+	}
+	function afterCreateRow(){
+	    $tukosBackOfficeUserId = Tfk::tukosBackOfficeUserId;
+	    return <<<EOT
+const self = this, idp = this.store.idProperty;
 if (!this.isBulkRowAction){
     var row = arguments[1][0] || this.clickedRow.data;
     if (!row.startdate){
         return;
     }
     if (row.mode === 'performed'){
-        this.tsbCalculator && this.tsbCalculator.updateRowAction(this, this.store.getSync(row[this.store.idProperty]), true);
+        this.tsbCalculator && this.tsbCalculator.updateRowAction(this, this.store.getSync(row[idp]), true);
     }
+    {$this->sessionCreationAclLocalAction()}
     this.loadChartUtils.updateCharts(this, row.mode);
 }
 EOT
@@ -661,15 +719,26 @@ EOT
 	function tsbParamsChangeAction($reset){
 	    return <<<EOT
 var form = sWidget.form, grid = form.getWidget('sptsessions'); 
-if ($reset){
+if ("$reset"){
     utils.forEach({displayfromdate: 'fromdate', displayfromsts: 'initialsts', displayfromlts: 'initiallts'}, function(source, target){
-        form.setValueOf(target) = form.valueOf(source);
+        form.setValueOf(target, form.valueOf(source));
     });
 }
 grid.tsbCalculator.initialize();
 grid.tsbCalculator.updateRowAction(grid, false, true);
-grid.loadChartUtils.updateCharts(grid, true);
 grid.refresh({skipScrollPosition: true});
+grid.loadChartUtils.updateCharts(grid, true);
+return true;
+EOT
+	    ;
+	}
+	function initialProgressivityChangeAction(){
+	    return <<<EOT
+const initialLts = sWidget.form.valueOf('initiallts');
+console.log('initialsts: ' + initialLts);
+if (initialLts){
+    sWidget.form.setValueOf('initialsts', initialLts * newValue);
+}
 return true;
 EOT
 	    ;

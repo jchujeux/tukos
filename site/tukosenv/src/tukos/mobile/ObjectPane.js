@@ -51,9 +51,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", 
 	                        this.openAction(this.onOpenAction);
 	                    }
 	                    setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
-	                    		this.markIfChanged = true;
-	                            this.watchContext = 'user';
-	                            this.setUserContextPaths(); 
+	                    		dojo.ready(function(){
+									this.markIfChanged = true;
+	                            	this.watchContext = 'user';
+	                            	this.setUserContextPaths();
+	                            });
 	                    	}), 0);
 	                }));
 	

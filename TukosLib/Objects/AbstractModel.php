@@ -30,7 +30,7 @@ abstract class AbstractModel extends ObjectTranslator {
 
     use ItemHistory, ItemJsonCols, ItemsChildren, Store, ItemCustomization, ContentExporter, ItemsExporter, ItemsImporter;
     
-    protected $permissionOptions = ['NOTDEFINED', 'PL', 'PR', 'RL', 'RO', 'PU', 'ACL'];
+    protected $permissionOptions = ['NOTDEFINED', 'PL', 'PR', 'RL', 'RO', 'UL', 'PU', 'ACL'];
     protected $aclOptions = ['0' => 'none', '1' => 'RO', '2' => 'RW', '3' => 'RWD'];
     protected $gradeOptions = ['TEMPLATE', 'NORMAL', 'GOOD', 'BEST'];
     protected $yesOrNoOptions = ['yes', 'no'];
@@ -273,7 +273,7 @@ abstract class AbstractModel extends ObjectTranslator {
             if ( $insertIfNoOld){
                 return $this->insert($newValues, $init);
             }else{
-                Feedback::add($this->tr('objectNotFound') . ': ' . json_encode($atts['where']));
+                Feedback::add($this->tr('itemNotFound') . ': ' . json_encode($atts['where']));
                 return false;
             }
         }else{
@@ -518,13 +518,13 @@ abstract class AbstractModel extends ObjectTranslator {
         return $duplicate;
     }
     public function delete ($where){
-        $cols = $cols =['id', 'updator', 'permission', 'updated', 'creator'];
+        $cols = $cols =['id', 'updator', 'permission', 'acl', 'updated', 'creator'];
         $oldItems = $this->getAll(['where' => $where, 'cols' => property_exists($this, 'additionalColsForBulkDelete') ? array_merge($cols, $this->additionalColsForBulkDelete) : $cols], [], null, true, false);
         if ($restoreIsBulkProcessing = !$this->isBulkProcessing){
             $this->isBulkProcessing = true;
         }
         foreach($oldItems as $old){
-            if ($this->user->hasDeleteRights($old)){
+            if ($this->user->hasDeleteRights($old, $this->objectName)){
                 $toDelete[] = $old['id'];
                 if (property_exists($this, 'processDeleteForBulk') && method_exists($this, $processDeleteForBulk = $this->processDeleteForBulk)){
                     $this->$processDeleteForBulk($old);
@@ -538,7 +538,7 @@ abstract class AbstractModel extends ObjectTranslator {
         }
         if (empty($toDelete)){
             Feedback::add($this->tr('noitemwasdeleted'));
-            $result = false; false;
+            $result = false;
         }else{
             $result = $this->updateItems([], ['where' => [['col' => 'id', 'opr' => 'in', 'values' => $toDelete]], 'set' => ['id' => '-id', 'updated' => "'" . date('Y-m-d H:i:s') . "'", 'updator' => $this->user->id()]]);
         }

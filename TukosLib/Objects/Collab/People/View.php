@@ -14,13 +14,13 @@ class View extends AbstractView {
         parent::__construct($objectName, $translator, 'Organization', 'Lastname');
 
         $customDataWidgets = $this->customDataWidgets();
-        $subObjects['tasks'] = [
+        /*$subObjects['tasks'] = [
             'atts'  => ['title' => $this->tr('Assigned tasks'),],
             'filters' => ['responsible' => '@id', 'completed' => ['<', 1],//['col' => 'completed', 'opr' => '<', 'values' => 1],
             ],
             'allDescendants' => true,
             //'allDescendants' => 'hasChildrenOnly',
-        ];
+        ];*/
         $subObjects['notes'] = [
             'atts' => ['title' => $this->tr('Notes'), 'storeType' => 'LazyMemoryTreeObjects'],
             'filters' => ['parentid' => '@id'],

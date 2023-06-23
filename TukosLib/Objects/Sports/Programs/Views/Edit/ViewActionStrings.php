@@ -13,11 +13,11 @@ trait ViewActionStrings{
     var widget = this.getWidget(widgetName);
         widget.plots.week.values = dutils.difference(dutils.getDayOfWeek(1, new Date(this.valueOf('displayfromdate'))), this.valueOf('displayeddate'), 'week')+1;
     widget.chart.addPlot('week', widget.plots.week);
-	try{
+	/*try{
     widget.chart.render();
     }catch(err){
         console.log('Error rendering chart in onViewOpenAction for widget: ' + widget.widgetName);
-    }
+    }*/
 }));
 EOT;
   }
@@ -124,7 +124,7 @@ return Pmg.serverDialog({object: 'organizations', view: 'Edit', action: 'GetItem
             {tag: 'table', atts: tableAtts, content: [
                 {tag: 'tr', content: {tag: 'td', atts: 'style="background-color: black; color: White; font-size: large; font-weight: bold; ' + cellBorderStyle + '" colspan=' + numberOfCols, content:
                     {tag: 'table', atts: tableAtts, content: {tag: 'tr', content: [
-                        {tag: 'td', atts: 'style="width: 10%;"', content: logo},//utils.transform(logo, 'image')},
+                        {tag: 'td', atts: 'style="width: 10%;"', content: logo},
                         {tag: 'td', atts: 'style="text-align:center; color: White; font-size: large; font-weight: bold; width: 90%"', content: 
                           '{$tr('trainingplan', 'escapeSQuote')}' + ': ' + form.valueOf('name') + '<br>' + title + ' - ' + (presentation === 'persession' 
                             ? ''

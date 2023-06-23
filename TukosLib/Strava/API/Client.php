@@ -2,9 +2,9 @@
 namespace TukosLib\Strava\API;
 
 use Strava\API\Client as BasvandorstClient;
-use Strava\API\Exception as ClientException;
 use Strava\API\Service\Exception as ServiceException;
 use TukosLib\Utils\Feedback;
+use TukosLib\TukosFramework as Tfk;
 
 class Client extends BasvandorstClient{
 
@@ -13,8 +13,7 @@ class Client extends BasvandorstClient{
         try {
             return $this->service->getActivityStreams($id, $keys, $resolution,  $series_type);
         } catch (ServiceException $e) {
-            //throw new ClientException('[SERVICE] ' . $e->getMessage());
-            Feedback::add("Nostreamfoundforstravaid $id");
+            Feedback::add(Tfk::tr('nostreamfoundforstravaid') . ': ' .  $id);
             return [];
         }
     }

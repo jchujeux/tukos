@@ -54,6 +54,7 @@ class Model extends AbstractModel {
             'h4time' => 'VARCHAR(10) DEFAULT NULL',
             'h5time' => 'VARCHAR(10) DEFAULT NULL',
             'sts' => 'FLOAT DEFAULT NULL',
+            'progressivity' => 'FLOAT DEFAULT NULL',
             'lts' => 'FLOAT DEFAULT NULL',
             'tsb' => 'FLOAT DEFAULT NULL',
             'stravaid' => 'VARCHAR(30) DEFAULT NULL',
@@ -129,8 +130,10 @@ class Model extends AbstractModel {
             $mostRecentPerformed = $this->getOne(['where' => ['parentid' => $programId, 'mode' => 'performed'], 'cols' => ['startdate'], 'orderBy' => ['startdate' => 'DESC']]);
             $programModel = Tfk::$registry->get('objectsStore')->objectModel('sptprograms');
             $programInfo = $programModel->getOne(['where' => ['id' => $programId], 'cols' => ['id', 'parentid', 'fromdate', 'googlecalid']]);
-            $programModel->stravaProgramSynchronize(array_merge($programInfo, ['ignoresessionflag' => false, 'synchrostart' => empty($mostRecentPerformed) ? $programInfo['fromdate'] : DUtl::dayAfter($mostRecentPerformed['startdate']), 'synchroend' => date('Y-m-d'),
-                'synchrostreams' => true]));
+            if (isset($programInfo['fromdate'])){
+                $programModel->stravaProgramSynchronize(array_merge($programInfo, ['ignoresessionflag' => false, 'synchrostart' => empty($mostRecentPerformed) ? $programInfo['fromdate'] : $mostRecentPerformed['startdate'], 'synchroend' => date('Y-m-d'),
+                    'synchrostreams' => true]));
+            }
         }
         return parent::getAllExtended($atts);
     }
@@ -156,20 +159,32 @@ class Model extends AbstractModel {
         return $session;
     }
     public function delete ($where){
-        if ($sessionId = Utl::getItem('id', $where)){
-            list('parentid' => $programId, 'googleid' => $googleId) = $this->getOne(['where' => ['id' => $sessionId], 'cols' => ['parentid', 'googleid']]);
-            if ($googleId && ($calId = Utl::getItem('googlecalid', $this->getProgram($programId)))){
-                Calendar::deleteEvent($calId, $googleId);
+        try{
+            if ($sessionId = Utl::getItem('id', $where)){
+                list('parentid' => $programId, 'googleid' => $googleId) = $this->getOne(['where' => ['id' => $sessionId], 'cols' => ['parentid', 'googleid']]);
+                if ($googleId && ($calId = Utl::getItem('googlecalid', $this->getProgram($programId)))){
+                    Calendar::deleteEvent($calId, $googleId);
+                }
             }
+        }catch(\Exception $e){
+            Feedback::add('calendareventtodeletenotfound');
         }
         return parent::delete($where);
     }
     public function sessionGoogleSynchronize($session){
-        if (!($programId = Utl::getItem('parentid', $session))){
-            $programId = $this->getOne(['where' => ['id' => $session['id']], 'cols' => ['parentid']])['parentid'];
+        if (!($parentProgram = Utl::getItem('parentid', $session))){
+            if (!empty($dbSession = $this->getOne(['where' => ['id' => $session['id']], 'cols' => ['parentid']]))){
+                $parentProgram = Utl::getItem('parentid', $dbSession);
+                if (!$parentProgram){
+                    Feedback::add($this->tr('programnotfound') . ': ' . $session['id']);
+                    return;
+                }
+            }else{
+                Feedback::add($this->tr('itemNotFound') . ': ' . $session['id']);
+                return;
+            }
         }
-        $programId = Utl::getItem('id', $this->getProgram($programId));
-        if (($programId = Utl::getItem('id', $this->getProgram($programId))) && ($calId = Utl::getItem('googlecalid', $this->programCache))){
+        if (($programId = Utl::getItem('id', $this->getProgram($parentProgram))) && ($calId = Utl::getItem('googlecalid', $this->programCache))){
             $this->programsModel->googleSynchronizeOne($programId, $calId, $session['id'], true, true, '', 'V2');
         }
     }

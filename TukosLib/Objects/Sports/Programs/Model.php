@@ -40,6 +40,7 @@ class Model extends AbstractModel {
             'stsratio' => 'FLOAT DEFAULT NULL',
             'initialsts' => 'FLOAT DEFAULT NULL',
             'initiallts' => 'FLOAT DEFAULT NULL',
+            'initialprogressivity' => 'FLOAT DEFAULT NULL',
             'synchrosource' => 'VARCHAR(30) DEFAULT NULL',
             'displayfrom' => 'longtext'
         ];
@@ -54,7 +55,8 @@ class Model extends AbstractModel {
         $today = date('Y-m-d', $nextMondayStamp = strtotime('next monday'));
         return parent::initialize(array_merge(
             ['coach' => $coach, 'coachemail' => $coachEmail, 'fromdate' => $fromDate = $today, 'displayfromdate' => $today, 'duration' =>'[1,"week"]', 'todate' => date('Y-m-d', strtotime('next sunday', $nextMondayStamp)), 'displayeddate' => $fromDate,
-                'loadchart' => $this->defaultLoadChart(), 'performedloadchart' =>  $this->defaultPerformedLoadChart(), 'synchroweeksbefore' => 0, 'synchroweeksafter' => 0, 'synchnextmonday' => 'YES', 'synchrosource' => 'strava', 'acl'=> ['1' => ['rowId' => 1, 'userid' => Tfk::tukosBackOfficeUserId, 'permission' => '2']]
+                'loadchart' => $this->defaultLoadChart(), 'performedloadchart' =>  $this->defaultPerformedLoadChart(), 'synchroweeksbefore' => 0, 'synchroweeksafter' => 0, 'synchnextmonday' => 'YES', 'synchrosource' => 'strava', 
+                'stsdays' => 7, 'ltsdays' => 42, 'stsratio' => 0.5, 'initiallts' => 30, 'initialprogressivity' => 1, 'initialsts' => 30, 'acl'=> ['1' => ['rowId' => 1, 'userid' => Tfk::tukosBackOfficeUserId, 'permission' => '2']]
             ], $init));
     }
     

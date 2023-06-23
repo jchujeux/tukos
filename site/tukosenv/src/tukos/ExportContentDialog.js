@@ -83,7 +83,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
                         row7: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['fileheader', 'filecover', 'content', 'filefooter']},
                         row5: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['fileheadertemplate', 'template', 'filefootertemplate','filecovertemplate']}
                 }},
-                style: {minWidth: (dojo.window.getBox().w*0.8) + 'px', overflow: 'auto'},
+                style: {maxWidth: (dojo.window.getBox().w*0.95) + 'px', overflow: 'auto'},
                 widgetsHider: true,
     			widgetsHiderArgs: {dialogPath: this.attachedWidget.widgetName + '.atts.dialogDescription.paneDescription.widgetsDescription.'}
             }};

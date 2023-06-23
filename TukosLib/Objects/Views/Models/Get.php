@@ -34,7 +34,7 @@ class Get extends AbstractViewModel {
         if (!$silent){
             if (empty($value)){
                 $value = $this->initialize($modelToView);
-                Feedback::add([$this->view->tr('objectNotFound') => json_encode($query)]);
+                Feedback::add([$this->view->tr('itemNotFound') => json_encode($query)]);
             }else{
                 Feedback::add([$this->view->tr('doneObjectFetched') => json_encode($query)]);
             }

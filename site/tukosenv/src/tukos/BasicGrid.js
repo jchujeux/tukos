@@ -189,7 +189,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         _renderContent: function(column, storeRow, tdCell, innerHTML, styleAtts, noCreate){
             var row =this.row(storeRow), rowHeight = (this.rowHeights[row.id] ? this.rowHeights[row.id] : column.minHeightFormatter), atts = {style: lang.mixin({maxHeight: rowHeight, overflow: 'auto'}, styleAtts)},
             	rowId =  storeRow[this.collection.idProperty], node;
-            if (this.dirty[rowId] && typeof this.dirty[rowId][column.field] !== 'undefined' && !atts.style.backgroundColor){
+            if (!column.noMarkAsChanged &&  (this.dirty[rowId] && typeof this.dirty[rowId][column.field] !== 'undefined' && !atts.style.backgroundColor)){
                 atts.style.backgroundColor =  wutils.changeColor;
             }
             if(! innerHTML || ! /\S/.test(innerHTML) || innerHTML === '~delete'){

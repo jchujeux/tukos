@@ -46,7 +46,7 @@ class View extends EditView{
             ],
             'row5' => [
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 75],
-                'widgets' => ['sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'avgcadence', 'mechload', 'hr95', 'h4time', 'h5time'],
+                'widgets' => ['sts', 'lts', 'tsb', 'progressivity', 'timemoving', 'avghr', 'avgpw', 'trimphr', 'trimppw', 'trimpavghr', 'trimpavgpw', 'avgcadence', 'mechload', 'hr95', 'h4time', 'h5time'],
             ],
         ];
     }

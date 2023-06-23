@@ -18,6 +18,7 @@ class UserInformation{
         $this->tukosCkey = $tukosCkey;
         $this->objectsStore = Tfk::$registry->get('objectsStore');
         $this->lockedMode = true;
+        $this->promoteRestricted = false;
     }
     
     public function setUser($where){
@@ -180,29 +181,29 @@ class UserInformation{
         return ($tableName === '' ? '' : $tableName . '.') . $colName;
     }
     function filterPrivate($where, $objectName=''){
-        switch ($this->rights()){
+        $rights = $this->rights();
+        if ($rights === 'RESTRICTEDUSER' && $this->promoteRestricted){
+            $rights = 'ENDUSER';
+        }
+        switch ($rights){
             case 'SUPERADMIN':
                 break;
             case 'ADMIN':
             case 'ENDUSER' :
                 $where[] = [
                     [
-                        [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RL','RO','PU']], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
+                        [['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RL','RO','UL','PU']], ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']],
                         [['col' => $this->fullColName('updator'), 'opr' => 'LIKE', 'values' => $this->id()],[['col' => $this->fullColName('creator'), 'opr' => 'LIKE', 'values' => $this->id()],['col' => $aclName, 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']], 'or' => true], 'or' => true
                     ],
                     ['col' => $aclName, 'opr' => 'RLIKE', 'values' => $this->id() . '","permission":"[123]"', 'or' => true]
                 ];
                 break;
             case 'RESTRICTEDUSER':
-                $permissions = empty($objectName) || !$this->isRestricted($objectName) ?  ['RL', 'RO', 'PU'] : ['PU'];
+                $permissions = (empty($objectName) || !$this->isRestricted($objectName)) ?  ['RL', 'RO', 'UL', 'PU'] : ['UL','PU'];
                 $where[] = [
                     [
                         [
-                            [
-                                ['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => $permissions],
-                                [['col' => $this->fullColName('grade'), 'opr' => 'LIKE', 'values' => 'TEMPLATE'], ['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => ['RL','RO','PU']]],
-                                'or' => true
-                            ],
+                            ['col' => $this->fullColName('permission'), 'opr' => 'IN', 'values' => $permissions],
                             ['col' => ($aclName = $this->fullColName('acl')), 'opr' => 'NOT RLIKE', 'values' => $this->id() . '","permission":"0"']
                             
                         ],
@@ -223,7 +224,7 @@ class UserInformation{
             case "SUPERADMIN":
                 break;
             case 'RESTRICTEDUSER':
-                if (!empty($objectName) && !$this->isRestricted($objectName)){
+                if (!empty($objectName) && $this->isRestricted($objectName)){
                     $where[] = [
                         ['col' => $this->fullColName('updator'), 'opr' => '=', 'values' => $this->id(), 'or' => true],
                         ['col' => $this->fullColName('acl'), 'opr' => 'RLIKE', 'values' => $this->id(). '","permission":"[23]"', 'or' => true]
@@ -285,18 +286,18 @@ class UserInformation{
         return $this->lockedMode;
     }
     public function hasUpdateRights($item, $newItem=[]){
-        if ($this->lockedMode && in_array(Utl::getItem('permission', $item) , ['PL', 'RL']) && !empty($newItem) && Utl::getItem('permission', $newItem, $item['permission']) === $item['permission']){
+        if ($this->lockedMode && in_array(Utl::getItem('permission', $item) , ['PL', 'RL', 'UL']) && !empty($newItem) && Utl::getItem('permission', $newItem, $item['permission']) === $item['permission']){
             return false;
         }
         $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
         return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 1)) || $aclRights > 1 || $item['id'] === $userId || ($item['creator'] === $userId && !$aclRights) ;
     }
-    public function hasDeleteRights($item){
-        if ($this->lockedMode && in_array($item['permission'] , ['PL', 'RL'])){
+    public function hasDeleteRights($item, $objectName=''){
+        if ($this->lockedMode && (in_array($item['permission'] , ['PL', 'RL', 'UL']))){
             return false;
         }
-        $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));
-        return $this->isSuperAdmin() || $item['updator'] === $userId || ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 2)) || $aclRights > 2 || ($item['creator'] === $userId && !$aclRights);
+        $aclRights = $this->aclRights($userId = $this->id(), Utl::getItem('acl', $item));// || ($this->rights() === 'RESTRICTEDUSER' && (empty($objectName) || $this->isRestricted($objectName)))
+        return $this->isSuperAdmin() /*|| $item['updator'] === $userId */|| ($item['permission'] === 'PU' && ($aclRights === false || $aclRights > 2)) || $aclRights > 2 || ($item['creator'] === $userId && !$aclRights);
     }
     public function getDropboxUserAccessToken($userId){
         if (is_string($this->userInfo['custom'])){

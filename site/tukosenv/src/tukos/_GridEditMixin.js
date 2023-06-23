@@ -177,8 +177,8 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                     this.setSummary();
                     this.isUserEdit = false;
                 }
-                if (!this.noMarkAsChanged){
-                	wutils.markAsChanged(this, 'noStyle');    
+                if (!(this.noMarkAsChanged || (this.columns[field] && this.columns[field].noMarkAsChanged))){
+                	wutils.markAsChanged(this, 'noStyle', 'user');    
                 }        	
             }
         },
@@ -306,10 +306,10 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             return this.createNewRow(item, (where === 'before' ? this.clickedRow.data : {}), where);
         },
         updateRow: function(item){
-        	var idPropertyValue = item[this.collection.idProperty], storeItem = this.collection.getSync(idPropertyValue) || {};
+        	var idp = this.collection.idProperty, idPropertyValue = item[idp], storeItem = this.collection.getSync(idPropertyValue) || {};
 			eutils.actionFunction(this, 'updateRow', this.updateRowAction, 'row', item);
         	utils.forEach(item, lang.hitch(this, function(value, col){
-        		if (value !== storeItem[col] && col !== 'connectedIds'){
+        		if (value !== storeItem[col] && col !== 'connectedIds' && col !== idp){
         			this.updateDirty(idPropertyValue, col, value);
         		}
         	}));       		
@@ -540,12 +540,12 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             this.noRefreshOnUpdateDirty = noRefresh;
 			this.set('collection', this.store.getRootCollection());
             this.setSummary();
-    		setTimeout(function(){
+    		/*setTimeout(function(){
 	                const noMarkAsChanged = self.noMarkAsChanged;
 	                self.noMarkAsChanged = true;
     				wutils.watchCallback(self, 'value', null, value);
     				self.noMarkAsChanged = noMarkAsChanged;
-    			}, 0);
+    			}, 0);*/
         },
 
         _setDuplicate: function(value){

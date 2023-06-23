@@ -12,7 +12,7 @@ define([
 ], function(dojo, dijit, domAttr, _Plugin, registry, lang, on, has, string, Pmg) {
 
     var TukosTooltipLinkDialog = dojo.declare(_Plugin, {
-        htmlTemplate: "<span onclick=\"event.stopImmediatePropagation();if (!getElementById('dijitEditorBody')){parent.tukos.Pmg.viewTranslatedInBrowserWindow('${tukosTooltipNameInput}TukosTooltip', '${tukosObjectInput}');}\" style=\"color: blue; cursor: pointer; text-decoration: underline;\">${textInput}</span>",
+        htmlTemplate: "<span onclick=\"event.stopImmediatePropagation();if (!getElementById('dijitEditorBody')){opener.tukos.Pmg.viewTranslatedInBrowserWindow('${tukosTooltipNameInput}TukosTooltip', '${tukosObjectInput}');}\" style=\"color: blue; cursor: pointer; text-decoration: underline;\">${textInput}</span>",
         // tag: [protected] String
         //		Tag used for the link type.
         tag: "span",
