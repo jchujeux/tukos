@@ -1,7 +1,4 @@
 <?php
-/**
- * 
- */
 namespace TukosLib\Objects\Admin\Health\Scripts;
 
 use TukosLib\Utils\Utilities as Utl;
