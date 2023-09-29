@@ -26,20 +26,15 @@
             	var grid = this.getGrid();
             	return grid.newRowPrefixNamedIdItem(id);
             }else{
-                return {id: id, name: Pmg.namedId(id)};
-/*
+                //return {id: id, name: Pmg.namedId(id)};
                 var namedId = Pmg.namedId(id);
-                if (namedId !== id){
+                if (namedId.substring(1,namedId.length-1) != id){
                     return {id: id, name: namedId};
                 }else{
-                    return Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query: {one: true, storeatts: {where: {id: id}, cols: ['id', 'name']}}}).then(function(response){
-                        var obj = {};
-                        obj[response.id] = {name: response.name, object: this.object};
-                        Pmg.addExtendedIdsToCache(obj);
-                        return {id: response.id, name: response.name + '(' + response.id + ')'};
+                    return Pmg.serverDialog({object: 'BackOffice', view: 'noView', mode: 'Tab', action: 'getExtendedIds', query: {storeatts: {where: {ids: [id]}, cols: ['id', 'name']}}}).then(function(response){
+                        return {id: id, name: Pmg.namedId(id)};
                     });
                 }
-*/
             }
         },
     

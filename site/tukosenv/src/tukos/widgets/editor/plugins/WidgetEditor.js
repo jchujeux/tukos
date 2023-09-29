@@ -35,7 +35,7 @@ function(declare, lang, when, dcl, string, _TagEditDialog, utils, hiutils, tukos
 	       				 	body: {type: 'TukosTextarea', atts: {label: Pmg.message('body'), style: {width: '15em', height: '1em'}}},
 	       				 	filename: {type: 'TukosTextarea', atts: {label: Pmg.message('filename'), style: {width: '15em', height: '1em'}}}
 	        			},
-                    	{headerRow: {tableAtts: {cols: 4, customClass: 'labelsAndValues', label: Pmg.message('widgetEditor'), showLabels: true, orientation: 'vert'}, widgets: extraWidgets}},
+                    	{headerRow: {tableAtts: {cols: 4, customClass: 'labelsAndValues', label: Pmg.message('widgetEditor', 'tukos'), showLabels: true, orientation: 'vert'}, widgets: extraWidgets}},
                     	['insert'/*, 'replace'*/, 'remove', 'close'], {tableAtts: {cols: 4,   customClass: 'labelsAndValues', showLabels: false}, widgets: ['insert'/*, 'replace'*/, 'remove', 'close']},
                     	attWidgets
         			);

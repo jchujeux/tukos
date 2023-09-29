@@ -62,7 +62,7 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
                    	}
                    	this.markAsChanged(widget);
                 }
-                if (form.watchOnChange){
+                if (form.watchOnChange && widget.watchOnChange !== false){
                     form.mayNeedResize = form.mayNeedResize || false;
                     if (attr === 'value'/* && form.watchContext === 'user'*/){
                         if (widget.onChangeServerAction && !widget.inOnChangeServerAction){

@@ -20,14 +20,11 @@ class View extends AbstractView {
 
             'name' => ['atts' => ['edit' => ['colspan' => 2, 'style' => ['width' => '24em']]]],
             'parentid' => ['atts' => ['edit' => [
-                'onChangeServerAction' => [
-                        'inputWidgets' => ['parentid', 'assesmenttype'],
-                        'urlArgs' => ['query' => ['params' => json_encode(['getOne' => 'getPatientChanged'])]],
-                ]
+                'onWatchLocalAction' => ['value' => ['progress' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->onPatientChangeLocalAction()]]]]
             ]]],
             'profession' => ViewUtils::textBox($this, 'Profession', ['atts' => ['edit' => ['colspan' => 2, 'disabled' => true, 'style' => ['width' => '24em']]]]),
             'sex'        => ViewUtils::storeSelect('sex', $this, 'Sex', null, ['atts' => ['edit' => ['disabled' => true]]]),
-        	'height' => ViewUtils::tukosNumberBox($this, 'Height', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em']]]]),
+            'height' => ViewUtils::tukosNumberBox($this, 'Height', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##']]]]),
             'weight' => ViewUtils::tukosNumberBox($this, 'Weight', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em']]]]),
             'morphotype' => ViewUtils::storeSelect('morphotype', $this, 'Morphotype', null, ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '10em']]]]),
             'age' => ViewUtils::textBox($this, 'Age', ['atts' => ['edit' => [ 'style' => ['width' => '5em'], 'disabled' => true]]]),
@@ -112,5 +109,15 @@ class View extends AbstractView {
 		];
 		$this->customize($customDataWidgets, $subObjects, ['grid' => array_merge($this->model->patientCols, $this->model->noGridCols), 'get' => $this->model->patientCols, 'post' => $this->model->patientCols]);
     }    
+    function onPatientChangeLocalAction(){
+        return <<<EOT
+return Pmg.serverDialog({object: 'physioassesments', view: 'Edit', action: 'Process', query: {parentid: sWidget.valueOf('parentid'), progress: sWidget.valueOf('assesmenttype'), params: {process: 'getPatientChanged', noget: true}}}).then(function(response){
+    utils.forEach(response.data, function(value, widgetName){
+        sWidget.setValueOf(widgetName, value);
+    });
+});
+EOT
+        ;
+    }
 }
 ?>

@@ -67,6 +67,9 @@ class Main{
             $storeProfiles = Tfk::$registry->get('store')->profilerMessages();
             $storeProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($storeProfiles, []));
             file_put_contents(Tfk::$tukosTmpDir . '/tukosstoreprofiles.html', $storeProfilesOutput);
+            $configStoreProfiles = Tfk::$registry->get('configStore')->profilerMessages();
+            $configStoreProfilesOutput = HUtl::page('Tukos Profiler Results',  HUtl::table($configStoreProfiles, []));
+            file_put_contents(Tfk::$tukosTmpDir . '/configstoreprofiles.html', $configStoreProfilesOutput);
         }else{
             $dialogue->sendResponse();
         }

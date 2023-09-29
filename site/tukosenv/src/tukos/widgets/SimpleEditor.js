@@ -37,7 +37,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/Editor", "
 
         _getValueAttr: function(){
                var value = this.inherited(arguments), forceSpace = '';//this.isInViewSource && this.isInViewSource() ? '' : '&nbsp;';
-               return value ? forceSpace + value.replace(/<span><\/span>|colspan="1"|rowspan="1"/g, '').replace(/[\n\t ]+/g, ' ').trim() + forceSpace : value;
+               return value ? forceSpace + value.replace(/<span><\/span>|colspan="1"|rowspan="1"/g, '')/*.replace(/[\n\t ]+/g, ' ')*/.trim() + forceSpace : value;
         },
 
         startup: function(){

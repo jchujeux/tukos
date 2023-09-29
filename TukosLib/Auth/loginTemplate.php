@@ -17,7 +17,7 @@
             			</table>
             		</form>
 			</td></tr>
-			<tr><td><img alt="logo" src="<?= $this->logo?>"><br><?= $this->headerBanner ?></td></tr>
+			<tr><td><img alt="logo" src="<?= $this->logo?>"><br><a href="<?= $this->orgLink?>" target="_blank"><?= $this->headerBanner ?></span></td></tr>
 			<tr><td><br><?= $this->confidentialityPolicy ?></td></tr>
 			
 		</table>

@@ -33,9 +33,9 @@ class View extends AbstractView {
         $this->customize($customDataWidgets, $subObjects, ['get' => ['password'], 'grid' => ['password']]);
 
 
-        if ($this->user->isAdmin()){
+        if ($this->user->isAtLeastAdmin()){
             $this->customContentAtts = [
-                'edit' => ['actionLayout' => ['contents' => ['actions' => ['tableAtts' => ['cols' => 7], 'widgets' => ['save', 'reset', 'delete', 'duplicate', 'new', 'edit', 'process']]]]],
+                'edit' => ['actionLayout' => ['contents' => ['actions' => ['tableAtts' => ['cols' => 7], 'widgets' => ['save', 'reset', 'delete', 'duplicate', 'new', 'edit']]]]],
             ];
         }
     }    

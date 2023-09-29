@@ -7,17 +7,17 @@
 namespace TukosLib\Objects;
 
 use ManuelLemos\CharTextDiff;
-use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
 
 
 
 trait ItemHistory {
 
-
+    private static $oldCompressedHistoryCache = [];
+    
     protected function expandHistory($item, $atts){// rebuild the full successive previous item values from current value and the successive differences - adds $history[$i]['id'] starting at 1.
         $history = json_decode($item['history'], true);
-        ItemsCache::cacheExtra($history, 'compressedhistory', $atts);
+        self::$oldCompressedHistoryCache[$item['id']] = $history;
         $historyMaxItems = $this->user->historyMaxItems();
         return $this->_expandHistory($item, empty($historyMaxItems) ? $history : array_slice($history, 0, $historyMaxItems));
     }
@@ -49,10 +49,10 @@ trait ItemHistory {
     public function subHistory($value, $wantedNonEmptyCols, $wantedAdditionalCols=['updated']){// retrieves the history for $wantedNonEmptyCols. $wantedAdditionalCols is added on every returned row
         $subHistory = [];
         if (!empty($expandedHistory = $value['history'])){
-            $compressedHistory = ItemsCache::getExtrafromCache('compressedhistory', $value['id']);
+            /*$compressedHistory = ItemsCache::getExtrafromCache('compressedhistory', $value['id']);
             if (count($compressedHistory) > ($length = count($expandedHistory))){
                 $expandedHistory = array_merge($expandedHistory, $this->_expandHistory(end($expandedHistory), array_slice($compressedHistory, $length)));
-            }
+            }*/
             $wantedNonEmptyKeys    = array_flip($wantedNonEmptyCols);
             $wantedAdditionalKeys = array_flip($wantedAdditionalCols);
             foreach ($expandedHistory as $historicValue){
@@ -74,12 +74,12 @@ trait ItemHistory {
         return $newHistory;
     }
 
-    private function compressHistory($item, $id){
+    private function compressHistory($item, $oldHistory, $id){
         $history = $item['history'];
         $historyToCompress = $history[0];// only the $history added by the last $addHistory needs to be compressed into the differences with $item
         $modifiedJsonCols = array_intersect(array_keys($historyToCompress), $this->jsonCols);
         $modifiedTextCols = array_diff(array_intersect(array_keys($historyToCompress), $this->textColumns), $modifiedJsonCols);
-        $oldCompressedHistory = ItemsCache::getExtrafromCache('compressedhistory', $id);
+        $oldCompressedHistory = self::$oldCompressedHistoryCache[$id];
 
         foreach ($modifiedTextCols as $col){
             //$start = microtime(true);
@@ -91,6 +91,9 @@ trait ItemHistory {
         foreach ($modifiedJsonCols as $col){
             if (is_string($item[$col])){ 
                 $item[$col] = json_decode($item[$col], true);
+                if (is_null($item[$col])){
+                    $item[$col] = [];
+                }
             }
             if (is_string($historyToCompress[$col])){
                 $historyToCompress[$col] = json_decode($historyToCompress[$col], true);

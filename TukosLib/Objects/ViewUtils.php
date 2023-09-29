@@ -241,11 +241,5 @@ class ViewUtils{
             $custom
             );
     }
-    public static function onDemandGrid($view, $label, $columns, $custom=[]){
-        return  Utl::array_merge_recursive_replace(
-            ['type' => 'OnDemandGrid', 'atts' => ['edit' => ['label' => $view->tr($label), 'columns' => $columns]]],
-            $custom
-            );
-    }
 }
 ?>

@@ -54,7 +54,7 @@ class Model extends AbstractModel {
             'h4time' => 'VARCHAR(10) DEFAULT NULL',
             'h5time' => 'VARCHAR(10) DEFAULT NULL',
             'sts' => 'FLOAT DEFAULT NULL',
-            'progressivity' => 'FLOAT DEFAULT NULL',
+            'hracwr' => 'FLOAT DEFAULT NULL',//acute chronic work ratio
             'lts' => 'FLOAT DEFAULT NULL',
             'tsb' => 'FLOAT DEFAULT NULL',
             'stravaid' => 'VARCHAR(30) DEFAULT NULL',

@@ -2,7 +2,6 @@
 namespace TukosLib\Web;
 
 use Aura\View\ViewFactory;
-use TukosLib\Web\PageCustomization;
 use TukosLib\Utils\Translator;
 use TukosLib\utils\Feedback;
 use TukosLib\Utils\Widgets;
@@ -12,17 +11,15 @@ use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class PageView extends Translator{
-
-    use PageCustomization;
-    
+   
     protected $tabContent, $tabTitle; 
     
     public function __construct($controller){
         parent::__construct($controller->tr);
         $this->user = $controller->user;
         $this->dialogue = $controller->dialogue;
-    	$this->leftPaneButtons = '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showHideLeftPane">' . $this->tr('showhideleftpane') . '</button>'.
-    							 '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showMaxLeftPane">' . $this->tr('maximinimizeleftpane') . '</button>';
+    	$this->leftPaneButtons = '<span id="leftPaneButtons"><button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showHideLeftPane">' . $this->tr('showhideleftpane') . '</button>'.
+    							 '<button data-dojo-type="dijit/form/Button" data-dojo-props="showLabel: false" type="button" id="showMaxLeftPane">' . $this->tr('maximinimizeleftpane') . '</button></span>';
     	$this->pageManagerArgs = [
             'contextTreeAtts' => array_merge($this->user->contextTreeAtts($this->tr), ['style' => ['width' => '15em', 'backgroundColor' => '#F8F8F8']]),
             'sortParam' => 'sort',
@@ -94,7 +91,11 @@ class PageView extends Translator{
         if (in_array($key[0], ['#', '$', '@'])){
             $module = substr($key, 1);
             if (!in_array($module, $this->user->allowedModules())){
-                return;
+                if (empty($layout[0])){
+                    return;
+                }else{
+                    $key[0] = 'x';
+                }
             }
         }else{
             $module = $key;
@@ -103,7 +104,7 @@ class PageView extends Translator{
         if (empty($layout['atts']) || !isset($layout['atts']['label'])){
             $layout['atts']['label'] = $this->tr($module);
             $layout['atts']['moduleName'] = $module;
-            $layout['atts']['tukosTooltip'] = ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => $module . 'TukosTooltip', 'object' => 'tukoslib']];
+            $layout['atts']['tukosTooltip'] = ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => $module . 'TukosTooltip', 'object' => $module]];
         }
         $theDescription[$module]['atts'] = $layout['atts'];
         $contexts = ['tukosContext' => $this->user->customContextId($module, 'tukos'), 'userContext' => $this->user->customContextId($module, 'user'), 'activeContext' => $this->user->getContextId($module)];
@@ -120,7 +121,7 @@ class PageView extends Translator{
         }
         if (in_array($key[0], ['#', '$'])){
             $theDescription[$module]['popup'] = ['type' => 'DropDownMenu', 'items' => $this->defaultModuleActions($module, $key[0], $customAtts)];
-        	$theDescriptionItems = &$theDescription[$module]['popup'];
+            $theDescriptionItems = &$theDescription[$module]['popup'];
         }else if(isset($layout['type']) && in_array($layout['type'], ['PopupMenuBarItem', 'PopupMenuItem']) && !isset($theDescription[$module]['popup'])){
         	$theDescription[$module]['popup'] = ['type' => 'DropDownMenu'];
         	$theDescriptionItems = &$theDescription[$module]['popup'];
@@ -138,10 +139,12 @@ class PageView extends Translator{
                 $theDescriptionItems['items'] = [];
             }
             foreach ($layout[0] as $itemKey => $itemLayout){
-                if (empty($itemLayout['type'])){
-                	$itemLayout['type'] = 'PopupMenuItem';
-                }
-            	$this->buildDescription($itemKey, $itemLayout, $theDescriptionItems['items']);
+                //if (!empty($itemLayout)){
+                    if (empty($itemLayout['type'])){
+                    	$itemLayout['type'] = 'PopupMenuItem';
+                    }
+                	$this->buildDescription($itemKey, $itemLayout, $theDescriptionItems['items']);
+                //}
             }
             if (empty($theDescriptionItems['items'])){
                 //unset($theDescriptionItems);
@@ -152,18 +155,18 @@ class PageView extends Translator{
     public function menuBarDescription($modulesMenuLayout){
         $theDescription = [];
         foreach ($modulesMenuLayout as $key => $layout){
-            if (!empty($layout)){
-                if (empty($layout['type'])){
-                    $layout['type'] = 'PopupMenuBarItem';
-                }
-                $this->buildDescription($key, $layout, $theDescription);
+            if (empty($layout['type'])){
+                $layout['type'] = 'PopupMenuBarItem';
             }
+            $this->buildDescription($key, $layout, $theDescription);
         }
         return ['items' => $theDescription];
     }
     function welcomeConnect($logoutUrl){
-        return $this->tr('Welcome') . ', <span id="pageusername" ' . ($this->user->rights() === 'RESTRICTEDUSER' ? '>' : 'style="text-decoration:underline; color:blue; cursor:pointer">') .
-               $this->user->username() . '</span> <a href="' . $logoutUrl . '" />' . $this->tr('logout') . '</a>';
+        return 
+                $this->tr('Welcome') . ', <span id="pageusername" ' . ($this->user->rights() === 'RESTRICTEDUSER' ? '>' : 'style="text-decoration:underline; color:blue; cursor:pointer">') .
+                $this->user->username() . '</span> ' . 
+                '<a href="' . $logoutUrl . '" />' . $this->tr('logout') . '</a>';
     }
     function addToPageManager($args){
         $this->pageManagerArgs = Utl::array_merge_recursive_replace($this->pageManagerArgs, $args);
@@ -181,17 +184,22 @@ class PageView extends Translator{
             $view->language = Tfk::$registry->get('translatorsStore')->getLanguage();
             $view->enableOffline = $this->user->isOfflineEnabled();
             $view->loadingMessage = $this->tr('Loading') . '...';
+            $this->pageManagerArgs['appName'] = Tfk::$registry->appName;
             $this->pageManagerArgs['menuBarDescription'] = $this->menuBarDescription($modulesMenuLayout);
             $this->pageManagerArgs['objectsDomainAliases'] = Directory::objectsDomainAliases();
             $this->pageManagerArgs['userRights'] = $this->user->rights();
             $this->pageManagerArgs['presentTukosTooltips'] = Tfk::$registry->get('translatorsStore')->presentTukosTooltips();
             $this->pageManagerArgs['swToTranslate'] = ['savedoffline', 'resettoofflineinitialvalues'];
+            $this->pageManagerArgs['allowedModules'] = $this->user->allowedModules();
             
             if ($this->pageManagerArgs['isMobile'] = Tfk::$registry->isMobile){
                 $this->pageManagerArgs['headerContent'] = $this->tr(Tfk::$registry->appName . 'HeaderBanner');
             }else{
                 $this->pageManagerArgs['headerContent'] = Utl::substitute(
-                    '<table width="100%"><tr><td> ${buttons}<b>Tukos 2.0</b><span id="tukosHeaderLoading"></span></td><td align="center"><b><i>${header} ${ownerorg}</i></b></td><td align="right">${welcome}</td></table>', [
+                    '<table width="100%"><tr><td> ${buttons}<b>Tukos 2.0</b><span id="tukosHeaderLoading"></span></td><td align="center">' . 
+                        '<span id="tukosHeaderTitleAndOrg" style="cursor:pointer;"><b><i>${header} ${ownerorg}</i></b></span></td>' .
+                    Tfk::$registry->headerHelpLink . 
+                    '<td align="right">${welcome}</td></table>', [
                         'buttons' => empty($this->pageManagerArgs['accordionDescription']) ? '' : $this->leftPaneButtons, 'header' => $this->tr(Tfk::$registry->appName . 'HeaderBanner', 'none'),
                         'ownerorg' => $this->tr($this->user->tukosOrganization(), 'none'), 'welcome' => $this->welcomeConnect(Tfk::$registry->pageUrl . 'auth/logout')]
                     );
@@ -202,9 +210,7 @@ class PageView extends Translator{
                         SUtl::addItemsIdCols($this->pageManagerArgs[$pageModeCustomization]['panesConfig'], ['id']);
                     }
                 }
-                $this->pageManagerArgs['pageCustomDialogDescription'] = $this->pageCustomDialogDescription($this->pageManagerArgs['pageCustomization']);
             }
-            SUtl::addIdCols([18]);//tukos
             $this->pageManagerArgs = array_merge($this->pageManagerArgs, ['extras' => Tfk::getExtras()],
                 array_filter(['extendedIds' => SUtl::translatedExtendedIdCols(), 'messages' => Tfk::$registry->get('translatorsStore')->getSetsMessages(['page', 'common']), 'feedback' => Feedback::get()])
                 );

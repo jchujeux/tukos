@@ -35,7 +35,7 @@ class View {
                     'widgets' => ['id', 'name', 'setname']
                 ],
                 'row2' => [
-                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetCellStyle' => ['verticalAlign' => 'top']],
+                    'tableAtts' => ['cols' => 3, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetCellStyle' => ['verticalAlign' => 'top'], 'widgetWidths' => ['33%', '33%', '33%']],
                     'widgets' => ['en_us', 'fr_fr', 'es_es']
                 ]
                 ]

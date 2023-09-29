@@ -52,11 +52,13 @@ class Registry{
         }else if (!empty($route = explode('/', substr($_SERVER['PATH_INFO'], 1)))){
             $routeSteps = ['application', 'controller', 'object', 'view', 'mode', 'action', 'pane'];
             foreach($route as $key => $value){
-                $this->route[$routeSteps[$key]] = $value;
+                if (!empty($value)){
+                    $this->route[$routeSteps[$key]] = $value;
+                }
             }
             $this->isMobile = (new MobileDetect)->isMobile();
             $this->isCrawler = isset($_SERVER['HTTP_USER_AGENT']) && preg_match('/bot|crawl|slurp|spider|mediapartners/i', $_SERVER['HTTP_USER_AGENT']);
-            $this->request = array_merge(['controller' => 'Page', 'object' => 'Help', 'view' => 'Overview', 'mode' => 'Tab'], $this->route);
+            $this->request = array_merge(['controller' => 'Page', 'object' => 'tukos', 'view' => 'Overview', 'mode' => 'Tab'], $this->route);
             if ($this->isMobile){
                 switch (strtolower($this->request['controller'])){
                     case 'page': $this->request['controller'] = 'MobilePage'; break;
@@ -83,11 +85,12 @@ class Registry{
         }
         /* Used for login page: at that time, we don't know who the user will be, then to which organization he belongs (in particular in redirects)*/
         $this->organization = Utl::extractItem('org', $this->urlQuery, 'tukos');
-        $this->logo = ['tukos' => 'https://tukos.site' . Tfk::$publicDir . 'images/tukosswissknife.png', 'tds' => Tfk::$publicDir . 'images/tdspetit.jpg', 'uca' => 'http://v-assets.cdnsw.com/Root/doe5d/logo_uca_fb.gif?s=YqFEmnE='][$this->organization];
-        $this->headerBanner = ['tukos' => 'headerBanner', 'tds' => 'tdsHeaderBanner', 'uca' => 'ucaHeaderBanner'][$this->organization];
+        $this->logo = ['tukos' => $this->rootUrl . Tfk::$publicDir . 'images/tukosswissknife.png', 'tds' => Tfk::$publicDir . 'images/tdspetit.jpg', 'uca' => 'http://v-assets.cdnsw.com/Root/doe5d/logo_uca_fb.gif?s=YqFEmnE='][$this->organization];
+        $this->headerBanner = $this->organization . 'HeaderBanner';
+        $this->orgLink = $this->organization . 'OrgLink';
     }        
     public function setAppName($appName){
-        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus', 'tukosblog' => 'TukosBlog', 'jchblog' => 'JCHBlog', 'tukosmsqr' => 'TukosMSQR', 'tukoswoundtrack' => 'TukosWoundTrack',
+        return ['tukosapp' => 'TukosApp', 'tukossports' => 'TukosSports', 'tukosbus' => 'TukosBus', 'tukosmsqr' => 'TukosMSQR', 'tukosblog' => 'TukosBlog', 'jchblog' => 'JCHBlog', 'tukosmsqr' => 'TukosMSQR', 'tukoswoundtrack' => 'TukosWoundTrack',
             'tukostrainingplans' => 'TukosTrainingPlans'][strtolower($appName)];
     }
     public function set($service, $serviceObject){

@@ -32,7 +32,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dijit/popup", "
         addTriggers: function(widget){
             if (widget.onClickArgs){
                 lang.setObject('query.contextpathid', this.moduleContextId(widget), this.onClickArgs);
-                //widget.onClick = this.onClickMenuItem;
                 widget.on('click', this.onClickMenuItem);
             }
             if (widget.onChangeArgs){
@@ -41,7 +40,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dijit/popup", "
             return widget;
         },
         addContext: function(item){
-			if (Pmg.get('userRights') === 'SUPERADMIN' || Pmg.getCustom('contextCustomForAll') === 'YES' || (!Pmg.get('noContextCustomForAll') && Pmg.getCustom('contextCustomForAll') !== 'NO')){
+			if (Pmg.isAtLeastAdmin() || Pmg.getCustom('contextCustomForAll') === 'YES' || (!Pmg.get('noContextCustomForAll') && Pmg.getCustom('contextCustomForAll') !== 'NO')){
 				item.on ('contextmenu', lang.hitch(this, this.contextMenuCallback, item));
 			}
             return item;
@@ -76,7 +75,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dijit/popup", "
             			postElts: ['tukosContext', 'userContext']
                 	}});
                     ready(function(){
-                    	if (!(Pmg.get('userRights') === 'SUPERADMIN')){
+                    	if (!Pmg.isAtLeastAdmin()){
                     		customContextDialog.pane.getWidget('tukosContext').set('hidden', true);
                     	}
                     	self.openDialog(item);

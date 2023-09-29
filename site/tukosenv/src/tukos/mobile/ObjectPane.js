@@ -45,6 +45,42 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", 
                     this.markIfChanged = true;
                 }
                 dojo.ready(lang.hitch(this, function(){
+					when (this.setWidgets(this.data), lang.hitch(this, function(result){
+	                    if (this.onOpenAction){
+	                        this.openAction(this.onOpenAction);
+	                    }
+	                    setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
+							if (this.hasOwnProperty('openActionCompleted')){
+								const form = this;
+								utils.waitUntil(
+									function(){
+										return form.openActionCompleted;
+									}, 
+									function(){
+				                    	form.markIfChanged = true;
+				                        form.watchContext = 'user';
+				                        form.setUserContextPaths(); 
+				                        if (form.offlineChangedValues){
+											form.setWidgets({value: form.offlineChangedValues});
+										}
+										Pmg.setFeedback(Pmg.message('actionDone'));
+									}, 
+									100);
+							}else{
+		                    	this.markIfChanged = true;
+		                        this.watchContext = 'user';
+		                        this.setUserContextPaths(); 
+		                        if (this.offlineChangedValues){
+									this.setWidgets({value: this.offlineChangedValues});
+								}
+							}
+	                    }), 0);
+						this.needsToFreezeWidth = true;
+						this.resize();
+						this.needsToFreezeWidth = false;
+	                }));
+				}));
+/*                dojo.ready(lang.hitch(this, function(){
 					this.resize();//or else spinwheelSlot get('value') gets screwed-up
 					when (this.setWidgets(this.data), lang.hitch(this, function(result){
 	                    if (this.onOpenAction){
@@ -59,7 +95,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", 
 	                    	}), 0);
 	                }));
 	
-				}));
+				}));*/
             }));
         },
         layoutAction: function(layout, optionalWidgetInstantiationCallback){

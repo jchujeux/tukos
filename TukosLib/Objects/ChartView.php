@@ -218,7 +218,7 @@ EOT
         $itemsUntilTranslations = ['TODAY' => $this->tr('today'), 'ENDOFLASTWEEK' => $this->tr('endoflastweek'), 'DATE' => $this->tr('date')];
         $itemsUntilStoreArgsData = [['id' => 'today', 'name' => $this->tr('today'), 'tooltip' => $this->tr('todayKpiTooltip')], ['id' => 'endoflastweek', 'name' => $this->tr('endoflastweek'), 'tooltip' => $this->tr('endoflastweekKpiTooltip')],
             ['id' => 'datetoday', 'name' => $this->functionLabel('date', 'today'), 'tooltip' => $this->tr('datetodayKpiTooltip')], ['id' => 'endoflastweek', 'name' => $this->functionLabel('date', 'endoflastweek'), 'tooltip' => $this->tr('endoflastweekKpiTooltip')],
-            ['id' => 'yyyy-mm-dd', 'name' => $this->tr('yyyy-mm-dd'), 'tooltip' => $this->tr('yyyy-mm-ddKpiTooltip cliquer <a href="https://tukos.site" target="_blank">ici</a>!')],
+            ['id' => 'yyyy-mm-dd', 'name' => $this->tr('yyyy-mm-dd'), 'tooltip' => $this->tr('yyyy-mm-ddKpiTooltip cliquer <a href=' . Tfk::$registry->rootUrl . ' target="_blank">ici</a>!')],
         ];
         if ($selectedDate){
             $itemsUntilTranslations = array_merge($itemsUntilTranslations, ['DISPLAYEDDATE' => $this->tr('displayeddate'), 'ENDOFDISPLAYEDWEEK' => $this->tr('endofdisplayedweek')]);

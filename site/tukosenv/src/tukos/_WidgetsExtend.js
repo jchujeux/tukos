@@ -45,8 +45,8 @@ define (["dojo/_base/lang", "dijit/Tooltip", "tukos/widgetUtils"],
 						this.tooltipInstance.destroy();
 					}
 					if (name){
-						this.tooltipInstance = new Tooltip({connectId: [this.domNode], label: atts.label +  '<span style="text-decoration: underline; color: blue; cursor: pointer;" onclick="tukos.Pmg.viewTranslatedInBrowserWindow(\''+ name + '\', \'' + (atts.onClickLink.object || self.getRootForm().object) + '\')">' + 
-								(atts.onClickLink.label || '(' + tukos.Pmg.message("more") + ' ...)') + ' </span>'});
+						this.tooltipInstance = new Tooltip({connectId: atts.connectId || [this.domNode], label: atts.label +  '<span style="text-decoration: underline; color: blue; cursor: pointer;" onclick="tukos.Pmg.viewTranslatedInBrowserWindow(\''+ name + '\', \'' + 
+							(atts.onClickLink.object || self.getRootForm().object) + '\')">' + 	(atts.onClickLink.label || '(' + tukos.Pmg.message("more") + ' ...)') + ' </span>'});
 					}else if (atts.label){
 						this.tooltipInstance = new Tooltip({connectId: [this.domNode], label: atts.label});
 					}

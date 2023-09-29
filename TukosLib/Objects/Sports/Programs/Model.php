@@ -40,7 +40,7 @@ class Model extends AbstractModel {
             'stsratio' => 'FLOAT DEFAULT NULL',
             'initialsts' => 'FLOAT DEFAULT NULL',
             'initiallts' => 'FLOAT DEFAULT NULL',
-            'initialprogressivity' => 'FLOAT DEFAULT NULL',
+            'initialhracwr' => 'FLOAT DEFAULT NULL',
             'synchrosource' => 'VARCHAR(30) DEFAULT NULL',
             'displayfrom' => 'longtext'
         ];

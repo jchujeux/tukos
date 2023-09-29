@@ -14,10 +14,10 @@ class View extends EditView{
 
         $this->dataLayout['contents']['row1'] = [
             'tableAtts' => ['cols' => 5, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => 80],
-            'widgets' => ['id', 'parentid', 'name', 'password', 'rights', 'language', 'environment', 'targetdb', 'tukosorganization', 'dropboxaccesstoken', 'dropboxbackofficeaccess', 'enableoffline']
+            'widgets' => ['id', 'parentid', 'name', 'password', 'rights', 'language', 'environment', 'targetdb', 'tukosorganization', 'dropboxaccesstoken', 'dropboxbackofficeaccess', 'googletranslationaccesskey', 'enableoffline']
         ];
         $this->dataLayout['contents']['rowcomments'] = [
-            'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['10%', '20%', '10%', '30%', '30%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
+            'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['10%', '10%', '25%', '10%', '20%', '25%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
             'widgets' => ['modules', 'restrictedmodules', 'customviewids', 'customcontexts', 'pagecustom', 'comments'],
         ];
     }

@@ -65,7 +65,7 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 			var self = this, collection = this.getCollection();
 			if ((row === false || row.startdate) && self.isActive()){
 				when(collection.fetchSync(), function(data){
-					var iterator = self.sessionsIterator, idp = collection.idProperty, item, sessionStress, sts, lts, tsb, stsHasChanged, ltsHasChanged, tsbHasChanged, previousItem, daysDifference, previousLts, previousSts,
+					var iterator = self.sessionsIterator, idp = collection.idProperty, item, sessionStress, sts, lts, tsb, hracwr, stsHasChanged, ltsHasChanged, tsbHasChanged, previousItem, daysDifference, previousLts, previousSts,
 				    currentRow, updateRowOrDirty;
 					switch(cudMode){
 						case 'create':
@@ -124,6 +124,7 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 							ltsHasChanged = updateRowOrDirty('lts', lts);
 							tsb = lts - sts * self.stsRatio;
 							tsbHasChanged = updateRowOrDirty('tsb', tsb);
+							updateRowOrDirty('hracwr', sts/lts);
 						}
 						if (row === false || (stsHasChanged || ltsHasChanged || tsbHasChanged)){
 							if (cudMode === 'delete'){
@@ -145,6 +146,10 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 								tsb = lts - sts * self.stsRatio;
 								if (Math.abs(tsb - Number(item.tsb || 0)) > 0.01){
 									grid.updateDirty(item[idp], 'tsb', tsb);
+								}
+								hracwr = sts / lts;
+								if (Math.abs(hracwr - Number(item.hracwr || 0)) > 0.01){
+									grid.updateDirty(item[idp], 'hracwr', hracwr);
 								}
 								previousItem = item;
 							}

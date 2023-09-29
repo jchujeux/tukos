@@ -20,10 +20,9 @@ class Model extends AbstractModel{
             'port'      =>  "ENUM ('" . implode("','", $this->portOptions) . "')",
             'security'  =>  "ENUM ('" . implode("','", $this->securityOptions) . "')",
             'auth'      =>  "ENUM ('" . implode("','", $this->authOptions) . "')",
-            'software'  =>  "ENUM ('" . implode("','", $this->softwareOptions) . "')",
             'adminpwd'  =>  'VARCHAR(255)  DEFAULT NULL',
         ];
-        parent::__construct($objectName, $translator, 'mailservers', ['parentid' => ['organizations', 'itsystems', 'people']], [], $colsDefinition, [], ['security', 'auth', 'software']);
+        parent::__construct($objectName, $translator, 'mailservers', ['parentid' => ['organizations', 'itsystems', 'people']], [], $colsDefinition, [], ['security', 'auth']);
     }
     public function getOne ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null, $absentColsFlag = 'forbid'){
         $result = parent::getOne($atts, $jsonColsPaths, $jsonNotFoundValue, $absentColsFlag);

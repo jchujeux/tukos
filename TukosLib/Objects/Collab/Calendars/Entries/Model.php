@@ -6,11 +6,9 @@
 namespace TukosLib\Objects\Collab\Calendars\Entries;
 
 use TukosLib\Objects\AbstractModel;
-use TukosLib\Objects\ItemsCache;
 use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\Google\Calendar;
 use TukosLib\Utils\DateTimeUtilities as Dutl;
-use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
@@ -146,7 +144,7 @@ class Model extends AbstractModel {
 	}
     
     public function getGoogleEvent($calId, $id, $rogooglecalid = true){
-    	return ItemsCache::insert($this->googleEventToCalendarEntry(Calendar::getEvent($calId, $id), $calId, $rogooglecalid));
+    	return $this->googleEventToCalendarEntry(Calendar::getEvent($calId, $id), $calId, $rogooglecalid);
     }
 
     protected function isTukosEvent($id){

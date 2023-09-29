@@ -90,7 +90,7 @@ class View extends AbstractView {
             'h4time' => ViewUtils::secondsTextBox($this, 'H4_Time_in_Zone'),
             'h5time' => ViewUtils::secondsTextBox($this, 'H5_Time_in_Zone'),
             'lts' => ViewUtils::tukosNumberBox($this, 'lts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
-            'progressivity' => ViewUtils::tukosNumberBox($this, 'progressivity', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
+            'hracwr' => ViewUtils::tukosNumberBox($this, 'hracwr', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'sts' => ViewUtils::tukosNumberBox($this, 'sts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'tsb' => ViewUtils::tukosNumberBox($this, 'tsb', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['hidden' => true]],
@@ -162,11 +162,11 @@ EOT
     }
     function updateTrimpAvgHr(){
         return <<<EOT
-var form = sWidget.form, sportsman = form.valueOf('sportsman'), timemoving = form.valueOf('timemoving'), avghr = form.valueOf('avghr');
+const sportsman = sWidget.valueOf('#sportsman'), timemoving = sWidget.valueOf('#timemoving'), avghr = sWidget.valueOf('#avghr');
 if (sportsman && timemoving && avghr){
-    Pmg.serverDialog({action: 'Process', object: "sptsessions", view: 'edit', query: {id: form.valueOf('id'), sportsman: sportsman, timemoving: timemoving, avghr: avghr, params: {process: 'updateTrimpAvgHr', noget: true}}}, {data: {}}).then(
+    Pmg.serverDialog({action: 'Process', object: "sptsessions", view: 'edit', query: {id: sWidget.valueOf('#id'), sportsman: sportsman, timemoving: timemoving, avghr: avghr, params: {process: 'updateTrimpAvgHr', noget: true}}}, {data: {}}).then(
             function(response){
-                response.data.value && form.setValueOf('trimpavghr', response.data.value.trimpavghr);
+                response.data.value && sWidget.setValueOf('#trimpavghr', response.data.value.trimpavghr);
             },
             function(error){
                 console.log('error');
@@ -179,11 +179,11 @@ EOT
     }
     function updateTrimpAvgPw(){
         return <<<EOT
-var form = sWidget.form, sportsman = form.valueOf('sportsman'), timemoving = form.valueOf('timemoving'), avgpw = form.valueOf('avgpw');
+const sportsman = sWidget.valueOf('#sportsman'), timemoving = sWidget.valueOf('#timemoving'), avgpw = sWidget.valueOf('#avgpw');
 if (sportsman && timemoving && avgpw){
-    Pmg.serverDialog({action: 'Process', object: "sptsessions", view: 'edit', query: {id: form.valueOf('id'), sportsman: sportsman, timemoving: timemoving, avgpw: avgpw, params: {process: 'updateTrimpAvgPw', noget: true}}}, {data: {}}).then(
+    Pmg.serverDialog({action: 'Process', object: "sptsessions", view: 'edit', query: {id: sWidget.valueOf('#id'), sportsman: sportsman, timemoving: timemoving, avgpw: avgpw, params: {process: 'updateTrimpAvgPw', noget: true}}}, {data: {}}).then(
             function(response){
-                response.data.value && form.setValueOf('trimpavgpw', response.data.value.trimpavgpw);
+                response.data.value && sWidget.setValueOf('#trimpavgpw', response.data.value.trimpavgpw);
             },
             function(error){
                 console.log('error');

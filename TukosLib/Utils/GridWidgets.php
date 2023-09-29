@@ -25,9 +25,6 @@ trait  GridWidgets{
         }
         return $attsTarget;
     }
-    public static function onDemandGrid($atts, $editOnly = true){
-        return ['type' => 'OnDemandGrid', 'atts' => $atts];
-    }
     public static function basicGrid($atts, $editOnly = true){
         if (isset($atts['columns'])){
             foreach ($atts['columns'] as $key => &$description){
@@ -130,7 +127,7 @@ trait  GridWidgets{
     public static function colGridAtts($element, $col, $mode='storeedit', $lazyEditor = null){
         $defColAtts = [
             'overflow' => 'auto', 'renderHeaderCell' => 'renderHeaderContent',
-            'renderCell' => 'renderContent', 'minHeightFormatter' => '5em', 'maxHeightFormatter' => '30em',
+            'renderCell' => 'renderContent',
             'rowsFilters' => true,
         ];
         $atts = (empty($element['atts'][$mode]) ? [] : $element['atts'][$mode]);

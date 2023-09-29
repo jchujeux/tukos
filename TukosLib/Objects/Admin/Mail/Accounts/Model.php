@@ -26,7 +26,6 @@ class Model extends AbstractModel {
         parent::__construct($objectName, $translator, 'mailaccounts', ['parentid' => ['users'], 'smtpserverid' => ['mailsmtps'], 'mailserverid' => ['mailservers']], [], $colsDefinition);
         $this->openedAccounts = [];
 
-        $this->mailConfig = Tfk::$registry->get('appConfig')->mailConfig;
         $this->init = ['draftsfolder' => 'Drafts'];
     }
 
@@ -70,33 +69,6 @@ class Model extends AbstractModel {
             }
         }
         return $this->openedAccounts[$id];
-    }
-
-    /*
-     * Creates or updates the account on tukos mail server (currently supports only Mercury server)
-     */    
-    function processOne($where){
-        $accountInfo = $this->getAccountInfo(['where' => $where, 'cols' => ['id', 'name', 'eaddress', 'password', 'privacy', 'mailserverid']]);
-        if (!empty($accountInfo['mailserverid'])){
-            $objectsStore = Tfk::$registry->get('objectsStore');
-            $serverObj  = $objectsStore->objectModel('mailservers');
-            $serverInfo  = $serverObj->getOne(['where' => ['id' => $accountInfo['mailserverid']], 'cols' => ['id', 'name', 'hostname', 'protocol', 'port', 'security', 'auth', 'software', 'adminpwd']]);
-            if ($serverInfo['hostname'] === $this->mailConfig['host'] && $serverInfo['software'] === $this->mailConfig['software']){
-                try{
-                    $accountMgtClass  = 'TukosLib\\Objects\\Admin\\Mail\\Accounts\\' . $serverInfo['software'];
-                    $this->accountMgt = new $accountMgtClass(Tfk::mailServerFolder, $serverInfo);
-                }catch(\Exception $e){
-                    $accountMgtClass  = 'TukosLib\\Objects\\Admin\\Mail\\Accounts\\' . 'Unsupported';
-                    $this->accountMgt = new $accountMgtClass(Tfk::mailServerFolder);
-                }            
-        
-                return $this->accountMgt->processOne($accountInfo);
-            }else{
-                Feedback::add('NotTukosMailServer');
-            }
-        }else{
-            Feedback::add('nomailserverdefined');
-        }
     }
 }
 ?>

@@ -118,20 +118,8 @@ class View extends AbstractView {
 						'title' => $this->tr('Templates'), 'storeType' => 'LazyMemoryTreeObjects',  'colspan' => 1, 'noSendOnSave' => ['selected'],
 						'dndParams' => ['copyOnly' => true, 'selfAccept' => false], 
 				        'columns' => ['selected' => Widgets::description(viewUtils::checkBox($this, 'Selected', ['atts' => ['edit' => [
-							'onChangeLocalAction' => ['selected' => ['localActionStatus' => [
-								"if (newValue){\n" .
-									"var grid = sWidget.grid, collection = grid.collection, idp = collection.idProperty, dirty = grid.dirty, rowValues = grid.clickedRowValues(), calendarEntries = grid.form.getWidget('calendarsentries');\n" .
-									"console.log('newValue is true: ' + newValue);\n" .
-									"collection.fetchSync().forEach(function(item){\n" .
-										"var idv = item[idp], dirtyItem = dirty[idv];\n" .
-										"if ((dirtyItem && dirtyItem.hasOwnProperty('selected') && dirtyItem.selected) || item.selected){\n" .
-											"grid.updateDirty(idv, 'selected', false);\n" .
-										"}\n" .
-									"})\n;" .
-									"calendarEntries.set('initialRowValue', {duration: rowValues.duration, backgroundcolor: rowValues.backgroundcolor})\n;" .
-								"}\n" .
-								"return true;\n"
-						]]]]]]), false),]],
+				            'onChangeLocalAction' => ['selected' => ['localActionStatus' => "utils.selectedAction(sWidget, tWidget, newValue);"
+						]]]]]), false),]],
 					'filters' => ['grade' => 'TEMPLATE'],
 					'sendOnHidden' => ['contextid']
     			],
@@ -142,19 +130,8 @@ class View extends AbstractView {
 				'sources' => ViewUtils::jsonGrid($this, 'Calendars', [
 						'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
 						'selected' => viewUtils::checkBox($this, 'Selected', ['atts' => [/*'storeedit' => ['editOn' => 'click'], */'edit' => [
-								'onChangeLocalAction' => ['selected' => ['localActionStatus' => [
-										"if (newValue){\n" .
-										"var grid = sWidget.grid, collection = grid.collection, idp = collection.idProperty, dirty = grid.dirty;\n" .
-										"console.log('newValue is true: ' + newValue);\n" .
-										"collection.fetchSync().forEach(function(item){\n" .
-										"var idv = item[idp], dirtyItem = dirty[idv];\n" .
-										"if ((dirtyItem && dirtyItem.hasOwnProperty('selected') && dirtyItem.selected) || item.selected){\n" .
-										"grid.updateDirty(idv, 'selected', false);\n" .
-										"}\n" .
-										"})\n;" .
-										"}\n" .
-										"return true;\n"
-								]]],
+								'onChangeLocalAction' => ['selected' => ['localActionStatus' => "utils.selectedAction(sWidget, tWidget, newValue);"
+								]],
 						]]]),
 						'visible' => viewUtils::checkBox($this, 'Visible'),
 						
@@ -180,7 +157,7 @@ class View extends AbstractView {
 												'backgroundColor' => ['value' => "return '';"
 												]],
 								],
-								'storeedit' => ['width' => 400]
+								'storeedit' => ['width' => 400, 'renderCell' => 'renderContent']
 						]]),
 						'backgroundcolor' => viewUtils::colorPickerTextBox($this, 'BackgroundColor'),
 					],

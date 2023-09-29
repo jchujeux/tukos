@@ -101,10 +101,10 @@ class TukosFramework{
     public static function setTranslator($language = null){
         self::$tr = self::$registry->get('translatorsStore')->translator('Page', [self::$registry->appName, 'tukosLib', 'common'], $language);
     }
-    public static function tr($theText){
-        return call_user_func(self::$tr, $theText);
+    public static function tr($theText, $mode=null){
+        return call_user_func(self::$tr, $theText, $mode);
     }
-    public static function addExtra($id, $value){
+    public static function addExtra($id, $value, $mode){
     	self::$extras[$id] =$value;
     }
     public static function getExtras(){

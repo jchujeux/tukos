@@ -19,10 +19,17 @@
 				dojo.ready(function(){
 					const atts = self.titleTukosTooltip, name = Pmg.tukosTooltipName(atts.onClickLink.name);
 					if (name){
-						new Tooltip({connectId: ['centerPanel_tablist_' + self.id], label: atts.label +  '<span style="text-decoration: underline; color: blue; cursor: pointer;" onclick="tukos.Pmg.viewTranslatedInBrowserWindow(\''+ name + '\', \'' +
-							 (atts.onClickLink.object || self.formContent.object) + '\')">' + (atts.onClickLink.label || '(' + tukos.Pmg.message("more") + ' ...)') + ' </span>'});
-					}else if (atts.label){
-						new Tooltip({connectId: ['center_panel_' + self.id], label: atts.label});//centerPanel_tablist_dijit_layout_ContentPane_7
+						self.customContextMenuItems = function(){
+							return [{atts: {label: tukos.Pmg.message('help')  , onClick: function(){
+								Pmg.viewTranslatedInBrowserWindow(name, atts.onClickLink.object || self.getRootForm().object)
+							}}}];
+						};
+						if (name){
+							new Tooltip({connectId: ['centerPanel_tablist_' + self.id], label: atts.label +  '<span style="text-decoration: underline; color: blue; cursor: pointer;" onclick="tukos.Pmg.viewTranslatedInBrowserWindow(\''+ name + '\', \'' +
+								 (atts.onClickLink.object || self.formContent.object) + '\')">' + (atts.onClickLink.label || '(' + tukos.Pmg.message("more") + ' ...)') + ' </span>'});
+						}else if (atts.label){
+							new Tooltip({connectId: ['center_panel_' + self.id], label: atts.label});//centerPanel_tablist_dijit_layout_ContentPane_7
+						}
 					}
 				});
             }

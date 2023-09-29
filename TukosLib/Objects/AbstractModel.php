@@ -16,7 +16,6 @@ use TukosLib\Objects\ItemHistory;
 use TukosLib\Objects\ItemJsonCols;
 use TukosLib\Objects\ItemsChildren;
 use TukosLib\Objects\Store;
-use TukosLib\Objects\ItemsCache;
 use TukosLib\Objects\ItemCustomization;
 use TukosLib\Objects\ContentExporter;
 use TukosLib\Objects\ItemsExporter;
@@ -30,7 +29,7 @@ abstract class AbstractModel extends ObjectTranslator {
 
     use ItemHistory, ItemJsonCols, ItemsChildren, Store, ItemCustomization, ContentExporter, ItemsExporter, ItemsImporter;
     
-    protected $permissionOptions = ['NOTDEFINED', 'PL', 'PR', 'RL', 'RO', 'UL', 'PU', 'ACL'];
+    protected $permissionOptions = ['PL', 'PR', 'RL', 'RO', 'UL', 'PU'];
     protected $aclOptions = ['0' => 'none', '1' => 'RO', '2' => 'RW', '3' => 'RWD'];
     protected $gradeOptions = ['TEMPLATE', 'NORMAL', 'GOOD', 'BEST'];
     protected $yesOrNoOptions = ['yes', 'no'];
@@ -89,9 +88,6 @@ abstract class AbstractModel extends ObjectTranslator {
     public function setUseItemsCache($newValue){
         $this->useItemsCache = $newValue;
     }
-    public static function emptyItemsCache(){// empties the cache for all objects, not only for this object
-        ItemsCache::emptyCache();
-    }
     public function setInits(){
         if (!property_exists($this, 'init')){
             $this->init = ['permission' =>  'RO', 'contextid' => $this->user->getContextId($this->objectName)/*, 'comments' => ''*/, 'grade' => 'NORMAL', 'configstatus' => 'users'];
@@ -132,29 +128,18 @@ abstract class AbstractModel extends ObjectTranslator {
             }
         }
         $atts = ['table' => $this->tableName, 'union' => Utl::extractItem('union', $atts, $this->tukosModel->parameters['union'])] + $atts;
-		$missingCols = ($this->useItemsCache ? ItemsCache::missingCols($atts) : $atts['cols']);
-		if (empty($missingCols)){
-            $result = ItemsCache::getOne($atts);
-        }else{
-            $requiredCols = $atts['cols'];
-            $atts['cols'] = $missingCols;
 
-            $result =  $this->getItem($atts);
+        $result =  $this->getItem($atts);
 
-            if ($result){
-                if ($jsonColsPaths){
-                    $this->jsonDecode($result, array_keys($jsonColsPaths));
-                }
-                if (!empty($result['history'])){
-                    $result['history'] = $this->expandHistory($result, $atts);
-                }
-            	if ($this->useItemsCache){
-                    $atts['cols'] = $requiredCols;
-                    $result = ItemsCache::mergeOne($result, $atts);
-                }
-            }else{
-            	return [];
+        if ($result){
+            if ($jsonColsPaths){
+                $this->jsonDecode($result, array_keys($jsonColsPaths));
             }
+            if (!empty($result['history'])){
+                $result['history'] = $this->expandHistory($result, $atts);
+            }
+        }else{
+        	return [];
         }
         if ($jsonColsPaths){
             $this->drilldown($result, $jsonColsPaths, $jsonNotFoundValue);
@@ -278,7 +263,7 @@ abstract class AbstractModel extends ObjectTranslator {
             }
         }else{
             $this->lastUpdateOneOldId = Utl::getItem('id', $oldValues, false);
-            if ($this->user->hasUpdateRights($oldValues, $newValues)){
+            if ($this->user->hasUpdateRights($oldValues, $this->objectName, $newValues)){
                 return $this->_update($oldValues, $newValues, $jsonFilter);
             }else{
                 Feedback::add($this->tr('Noupdaterightsfor') . ' ' . $oldValues['id']);
@@ -344,7 +329,7 @@ abstract class AbstractModel extends ObjectTranslator {
 
         $updatedRows = [];
         foreach ($oldValuesArray as $key => $oldValues){
-            if ($this->user->hasUpdateRights($oldValues, $newValues)){
+            if ($this->user->hasUpdateRights($oldValues, $this->objectName, $newValues)){
                 if (!empty($oldValues['history'])){
                     $oldValues['history'] = $this->expandHistory($oldValues, ['where' => $oldValues['id'], 'table' => $this->tableName]);
                 }
@@ -381,14 +366,11 @@ abstract class AbstractModel extends ObjectTranslator {
                 Feedback::addErrorCode($NoIdInUpdate);
                 return false;
             }
-            if ($this->useItemsCache){
-                ItemsCache::updateOne($differences, $id);
-            }
             if (in_array('history', $this->allCols)){
                 $differences['history'] = $this->addHistory($oldHistory, Utl::getItems(array_keys($differences), $oldValues));
             }
             if (!empty($differences['history'])){
-                $differences['history'] = $this->compressHistory($differences, $id);
+                $differences['history'] = $this->compressHistory($differences, $oldHistory, $id);
             }
             
             $this->jsonEncode($differences, $jsonFilter);
@@ -478,9 +460,6 @@ abstract class AbstractModel extends ObjectTranslator {
             if (!isset($values[$idCol])){
                 $values[$idCol] = 0;
             }
-        }
-        if ($this->useItemsCache){
-            ItemsCache::insert($values);
         }
         $this->jsonEncode($values, $jsonFilter);
         $this->insertItem($values);

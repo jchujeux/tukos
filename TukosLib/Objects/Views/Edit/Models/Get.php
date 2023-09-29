@@ -18,7 +18,8 @@ class Get extends ViewsGetModel {
     }
 
     protected function setProtection(&$data){
-        if (empty($data['value']['id']) || $this->user->hasUpdateRights($data['value'])){
+        $actionsToEnableDisable = $this->view->getActionsToEnableDisable();
+        if (empty($data['value']['id']) || $this->user->hasUpdateRights($data['value'], $this->objectName)){
         	foreach ($this->view->dataWidgets as $col => $description){
         		$data['disabled'][$col] = (isset($description['atts']['edit']['disabled']) &&  $description['atts']['edit']['disabled']) ? true : false;
         	}
@@ -30,9 +31,9 @@ class Get extends ViewsGetModel {
         	foreach ($this->view->subObjects as $col => $description){
         		$data['disabled'][$col] = (isset($description['atts']['disabled']) &&  $description['atts']['disabled']) ? true : false;
         	}
-        	$data['disabled']['save'] = false;
-        	$data['disabled']['delete'] = false;
-        	$data['disabled']['process'] = false;
+        	foreach($actionsToEnableDisable as $action){
+        	    $data['disabled'] = false;
+        	}
         	return false;
         }else{
         	foreach ($this->view->dataWidgets as $col => $description){
@@ -41,9 +42,9 @@ class Get extends ViewsGetModel {
         	foreach ($this->view->subObjects as $col => $description){
         		$data['disabled'][$col] = true;
         	}
-        	$data['disabled']['save'] = true;
-        	$data['disabled']['delete'] = true;
-        	$data['disabled']['process'] = true;
+        	foreach ($actionsToEnableDisable as $action){
+        	    $data['disabled'][$action] = true;
+        	}
         	return true;
         }
     }

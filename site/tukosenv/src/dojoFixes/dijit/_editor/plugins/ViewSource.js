@@ -225,6 +225,7 @@ define([
 	                    }), true);
 	                    this._setListenerAfter = aspect.after(ed, "setValue", lang.hitch(this, function(htmlTxt){
 	                       sourceArea.initialValue = sourceArea.value = format.prettyPrint(this._filter(htmlTxt || ''), 2, 0, false, false, ['td']);
+	                       //sourceArea.initialValue = sourceArea.value = htmlTxt;
 	                    }), true);
 	                    ed.set('value', sourceArea.value);
 	                 }));

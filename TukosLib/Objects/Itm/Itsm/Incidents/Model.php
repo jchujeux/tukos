@@ -36,13 +36,13 @@ class Model extends AbstractModel {
         return parent::initialize(array_merge($this->initVals, ['notifiedby' => $this->user->peopleId()], $init));
     }
 
-    public function getProgressChanged($atts){
+    public function getProgressChanged($query){
         $svcDescsModel = Tfk::$registry->get('objectsStore')->objectModel('itsvcdescs');
-        $item = $svcDescsModel->getOne(['where' => ['id' => $atts['where']['parentid']], 'cols' => ['incidentswf']], ['incidentswf' => []]);
+        $item = $svcDescsModel->getOne(['where' => ['id' => $query['parentid']], 'cols' => ['incidentswf']], ['incidentswf' => []]);
         if (!empty($item)){
             $incidentsWf = $item['incidentswf'];
-            $wfStep = Utl::array2D_Search_Strict($incidentsWf, 'progress', $atts['where']['progress']);
-            return ['assignedto' => (isset($incidentsWf[$wfStep]['assignedto']) ? $incidentsWf[$wfStep]['assignedto'] : '')];
+            $wfStep = Utl::array2D_Search_Strict($incidentsWf, 'progress', $query['progress']);
+            return ['data' => ['assignedto' => (isset($incidentsWf[$wfStep]['assignedto']) ? $incidentsWf[$wfStep]['assignedto'] : '')]];
         }else{
             return [];
         }

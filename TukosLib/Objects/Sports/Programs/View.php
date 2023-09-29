@@ -156,7 +156,7 @@ class View extends AbstractView {
 		};
 		$customDataWidgets = [
 		    'parentid' => ['atts' => ['edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['sportsmanemail' => ['value' => "return sWidget.getItemProperty('email');"], 'parentid' => ['localActionStatus' => $this->programAclLocalAction()]]]]],
-		    'comments' => ['atts' => ['edit' => ['height' => 'auto']]],
+		    'comments' => ['atts' => ['edit' => ['style' => ['height' => '300px']]]],
 		    'coach' => ViewUtils::objectSelect($this, 'Coach', 'people', ['atts' => [
 		        'edit' => ['storeArgs' => ['cols' => ['email', 'parentid']]/*, 'onChangeLocalAction' => ['coachemail' => ['value' => "return sWidget.getItemProperty('email');"]]*/,'onWatchLocalAction' => ['value' => [
 		            'coachorganization' => ['value' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return sWidget.getItemProperty('parentid');"]],
@@ -259,33 +259,33 @@ class View extends AbstractView {
     	        ]]]
 	        ),
 		    'stsdays' => ViewUtils::tukosNumberBox($this, 'stsdays', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.'], 'onChangeLocalAction' => ['stsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('stsdays')]]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.'], 'onChangeLocalAction' => ['stsdays' => ['localActionStatus' => $this->tsbParamsChangeAction("'stsdays'")]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'ltsdays' => ViewUtils::tukosNumberBox($this, 'ltsdays', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.'], 'onChangeLocalAction' => ['ltsdays' => ['localActionStatus' => $this->tsbParamsChangeAction('ltsdays')]]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '00.'], 'onChangeLocalAction' => ['ltsdays' => ['localActionStatus' => $this->tsbParamsChangeAction("'ltsdays'")]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'stsratio' => ViewUtils::tukosNumberBox($this, 'stsratio', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.00'], 'onChangeLocalAction' => ['stsratio' => ['localActionStatus' => $this->tsbParamsChangeAction('stsratio')]]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '0.00'], 'onChangeLocalAction' => ['stsratio' => ['localActionStatus' => $this->tsbParamsChangeAction("'stsratio'")]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'initialsts' => ViewUtils::tukosNumberBox($this, 'initialsts', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##'], 'onChangeLocalAction' => ['initialsts' => ['localActionStatus' => $this->tsbParamsChangeAction('initialsts')]], 'hidden' => true],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##'], 'onChangeLocalAction' => ['initialsts' => ['localActionStatus' => $this->tsbParamsChangeAction("'initialsts'")]], 'hidden' => true],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'initiallts' => ViewUtils::tukosNumberBox($this, 'initiallts', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##'], 'onChangeLocalAction' => ['initiallts' => ['localActionStatus' => $this->tsbParamsChangeAction('initiallts')]]],
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##'], 'onChangeLocalAction' => ['initiallts' => ['localActionStatus' => $this->tsbParamsChangeAction("'initiallts'")]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
-		    'initialprogressivity' => ViewUtils::tukosNumberBox($this, 'initialprogressivity', ['atts' => [
-		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#.#'], 'onChangeLocalAction' => ['initialprogressivity' => ['localActionStatus' => $this->initialProgressivityChangeAction()]]],
+		    'initialhracwr' => ViewUtils::tukosNumberBox($this, 'initialhracwr', ['atts' => [
+		        'edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#.#'], 'onChangeLocalAction' => ['initialhracwr' => ['localActionStatus' => $this->initialProgressivityChangeAction()]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
 		    'displayfromdate' => ViewUtils::tukosDateBox($this, 'Displayfrom', ['atts' => ['edit' => [
 		        'onChangeLocalAction' => [
-		            'loadchart' => ['localActionStatus' => $this->loadChartLocalAction('loadchart')],
-		            'performedloadchart' => ['localActionStatus' => $this->loadChartLocalAction('performedloadchart')],
+		            //'loadchart' => ['localActionStatus' => $this->loadChartLocalAction('loadchart')],
+		            //'performedloadchart' => ['localActionStatus' => $this->loadChartLocalAction('performedloadchart')],
 		            'displayfromdate' => ['localActionStatus' => $this->displayFromDateChangeAction()]
 		        ]]]]),
 		    'displayfromsts' => ViewUtils::tukosNumberBox($this, 'Displayinitialsts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '###.##']], 'overview' => ['hidden' => true]]]),
@@ -343,11 +343,8 @@ class View extends AbstractView {
 				],
 			    'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@displayfromdate'], ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], 
 				    [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
-			    'removeCols' => /*$this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] :*/ ['sportsman','grade', 'configstatus'],
-			    'hiddenCols' => /*$this->user->isRestrictedUser() 
-			         ? ['parentid', 'sessionid', 'googleid', 'mode', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
-			            'contextid', 'updated'] 
-			         :*/ ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
+			    'removeCols' => ['sportsman','grade', 'configstatus'],
+			    'hiddenCols' => ['parentid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'sessionid', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'trimpavghr', 'trimpavgpw', 'trimphr', 'trimppw', 'mechload', 'h4time', 'h5time',
 			            'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
 			],
@@ -482,7 +479,7 @@ if (fromDate && toDate){
 }
 if (Pmg.isRestrictedUser()){
     const self = this;
-    ['parentid', 'name', 'fromdate', 'duration', 'todate', 'initialsts', 'initiallts', 'initialprogressivity'].forEach(function(widgetName){
+    ['parentid', 'name', 'fromdate', 'duration', 'todate', 'initialsts', 'initiallts', 'initialhracwr'].forEach(function(widgetName){
         self.getWidget(widgetName).set('disabled', true);
     });
 }
@@ -557,6 +554,9 @@ if (!this.isBulkRowAction){
     if (!row.mode){
         row.mode = (this.form.viewModeOption === 'viewperformed') ? 'performed' : 'planned';
     }
+    if (!row.sport){
+        row.sport = 'other';
+    }
 }
 EOT
 	    ;
@@ -564,7 +564,7 @@ EOT
 	public function sessionCreationAclLocalAction(){
 	    $tukosBackOfficeUserId = Tfk::tukosBackOfficeUserId;
 	    return <<<EOT
-const self = this, idp = this.store.idProperty;
+//const self = this, idp = this.store.idProperty;
 Pmg.serverDialog({object: 'users', view: 'Edit', action: 'GetItems', query: {storeatts: JSON.stringify({where: [{col: 'parentid', opr: 'IN', values: [row.sportsman, this.valueOf('coach')]}], cols: ['id', 'parentid'], promote: true})}}).then(
 	function (response){
         if (response.data.items.length > 0){
@@ -718,8 +718,8 @@ EOT
 	}
 	function tsbParamsChangeAction($reset){
 	    return <<<EOT
-var form = sWidget.form, grid = form.getWidget('sptsessions'); 
-if ("$reset"){
+const form = sWidget.form, grid = form.getWidget('sptsessions'); 
+if ($reset){
     utils.forEach({displayfromdate: 'fromdate', displayfromsts: 'initialsts', displayfromlts: 'initiallts'}, function(source, target){
         form.setValueOf(target, form.valueOf(source));
     });
@@ -744,11 +744,26 @@ EOT
 	    ;
 	}
 	function displayFromDateChangeAction(){
+	    $tsbParamsChangeAction = $this->tsbParamsChangeAction('false');
 	    return <<<EOT
-var form = sWidget.form, grid = form.getWidget('sptsessions'), tsbCalculator = grid.tsbCalculator;
-tsbCalculator.setDisplayFromStsAndLts(form.valueOf('displayfromdate'));
+const form = sWidget.form, grid = form.getWidget('sptsessions'), tsbCalculator = grid.tsbCalculator, displayFromDate = form.valueOf('displayfromdate'), fromDate = form.valueOf('fromdate');
+if (newValue < oldValue && form.parent.serverFormContent.data.value.displayfromdate > fromDate){
+    grid.watchOnChange = false;
+    when(form.serverDialog({action: 'Save', query: {id: form.valueOf('id')}}, {displayfromdate: fromDate}, form.get('dataElts'), Pmg.message('actionDone'), false), function(response){
+		grid.watchOnChange = true;
+        if (response !== false){
+			sWidget.form.setValueOf('displayfromdate', displayFromDate);
+            tsbCalculator.setDisplayFromStsAndLts(displayFromDate);
+            $tsbParamsChangeAction;
+		}
+	});
+return; 
+}else{
+    tsbCalculator.setDisplayFromStsAndLts(displayFromDate);
+    $tsbParamsChangeAction;
+}
 EOT
-	. $this->tsbParamsChangeAction('false');
+	    ;
 	}
 	function loadChartChangeAction($chartName, $changedAtt){
 	    return <<<EOT
@@ -782,6 +797,9 @@ EOT
 this.tsbCalculator.deleteRowAction(this, row);
 EOT
 	    ;
+	}
+	function getActionsToEnableDisable(){
+	   return array_merge(parent::getActionsToEnableDisable(), ['googlesync', 'sessionstracking']);
 	}
 }
 ?>

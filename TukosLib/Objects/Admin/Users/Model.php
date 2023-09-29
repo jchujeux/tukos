@@ -25,6 +25,7 @@ class Model extends AbstractModel{
             'tukosorganization' =>  "VARCHAR(80) DEFAULT NULL",
             'dropboxaccesstoken'      =>  'VARCHAR(255)  DEFAULT NULL',
             'dropboxbackofficeaccess' => 'VARCHAR(10) DEFAULT NULL',
+            'googletranslationaccesskey'      =>  'VARCHAR(255)  DEFAULT NULL',
             'enableoffline'  => 'VARCHAR(10) DEFAULT NULL',
             'customviewids' =>  'longtext DEFAULT NULL',
             'customcontexts'=>  'longtext DEFAULT NULL',
@@ -59,24 +60,6 @@ class Model extends AbstractModel{
     	    return $result;
     	}else{
     	    $result['targetdb'] = Tfk::$registry->get('configStore')->getOne(['where' => ['username' => $result['name']], 'table' => 'usersauth', 'cols' => ['targetdb']])['targetdb'];
-    	    if (isset($result['customviewids'])){
-    	        if (is_string($result['customviewids'])){
-    	            $result['customviewids'] = json_decode($result['customviewids'], true);
-    	        }
-    	        if (!empty($result['customviewids'])){
-    	            ksort($result['customviewids']);
-    	            $ids = [];
-    	            $callback = function($id)use (&$ids){
-    	                $ids[] = $id;
-    	            };
-    	            array_walk_recursive($result['customviewids'], $callback);
-    	            $customviewsname = array_column(Tfk::$registry->get('objectsStore')->objectModel('customviews')->getAll(['where' => [['col' => 'id', 'opr' => 'in', 'values' => $ids]], 'cols' => ['id', 'name']]), 'name',  'id');
-    	            array_walk_recursive($result['customviewids'], function (&$id) use ($customviewsname){
-    	                $id = [$id => Utl::getItem($id, $customviewsname, 'customviewnotfound')];
-    	            });
-    	                $result['customviewids'] = Utl::map_array_recursive($result['customviewids'], $this->tr);
-    	        }
-    	    }
     	    return $result;
     	}
     }
