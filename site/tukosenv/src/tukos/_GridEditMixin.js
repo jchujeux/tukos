@@ -206,7 +206,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             }
             var localActionFunctions = column.localDataChangeActionFunctions;
             if (!utils.empty(localActionFunctions)){
-            	var sourceCell = this.cell(idPropertyValue, column.field), idPropertyValue, sourceWidget = this.getEditorInstance(column.field) || sourceCell.element.widget || sourceCell.element.input,
+            	var sourceCell = this.cell(idPropertyValue, column.field), sourceWidget = this.getEditorInstance(column.field) || sourceCell.element.widget || sourceCell.element.input,
             		allowedNestedRowWatchActions = this.allowedNestedRowWatchActions/*, needsRefresh = false*/;
                 this.nestedRowWatchActions = this.nestedRowWatchActions || 0;
                 column.nestedWatchActions = column.nestedWatchActions || 0;

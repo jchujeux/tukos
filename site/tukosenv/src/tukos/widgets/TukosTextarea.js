@@ -8,13 +8,13 @@ define(["dojo/_base/declare", "dijit/form/SimpleTextarea", "tukos/utils"],
         		node.style.height = '15px';
         	}else{
             	node.style.height = 'inherit';
-            	var computed = window.getComputedStyle(node);
+            	var computed = window.getComputedStyle(node), computedHeight = computed.getPropertyValue('height');
             	var height = parseInt(computed.getPropertyValue('border-top-width'), 10)
             	             + parseInt(computed.getPropertyValue('padding-top'), 10)
             	             + node.scrollHeight
             	             + parseInt(computed.getPropertyValue('padding-bottom'), 10)
             	             + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
-            	node.style.height = height + 'px';        		
+				node.style.height = height + 'px';
         	}
         },
 		_onInput: function(/*Event?*/ e){

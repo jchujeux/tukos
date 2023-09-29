@@ -3,17 +3,20 @@ define(["dojo/_base/lang", "dojo/dom", "dojo/dom-style", "dojo/ready", "dojo/whe
 function (lang, dom, domStyle, ready, when, registry, BorderContainer, TabContainer, ContentPane, AccordionContainer, focusUtil, NavigationMenu, TabsManager, AccordionManager, TabOnClick, utils, WidgetsLoader, Pmg) {
 	return {
 		initialize: function(){
-			var self = this, obj = Pmg.cache, appLayout = new BorderContainer({design: 'sidebar'}, "appLayout"), pageCustomization = obj.pageCustomization || {}, hideLeftPane = pageCustomization.hideLeftPane === 'YES', 
-				leftPaneWidth = pageCustomization.leftPaneWidth || "12%", panesConfig = pageCustomization.panesConfig || [], newPageCustomization = obj.newPageCustomization = lang.clone(pageCustomization),
+			var self = this, obj = Pmg.cache, 
+				 pageCustomization = obj.pageCustomization || {}, hideLeftPane = pageCustomization.hideLeftPane === 'YES', 
+				leftPaneWidth = pageCustomization.leftPaneWidth || "12%", newPageCustomization = obj.newPageCustomization = lang.clone(pageCustomization),
+				appLayout = new BorderContainer({design: 'sidebar'}, "appLayout"),
 				leftAccordion = new AccordionContainer({id: 'leftPanel', region: "left", 'class': "left", splitter: true, style: {width: leftPaneWidth, padding: "0px", display: (hideLeftPane ? "none" : "block")}});
 			appLayout.addChild(leftAccordion);
 			Pmg.accordion   = new AccordionManager({container: leftAccordion});
 			var contentHeader = new ContentPane({id: 'tukosHeader', region: "top", 'class': "edgePanel", style: "padding: 0px;", content: obj.headerContent});
-			if (Pmg.get('userRights') === 'SUPERADMIN' || Pmg.getCustom('pageCustomForAll') === 'YES' || (!Pmg.get('noPageCustomForAll') && Pmg.getCustom('pageCustomForAll') !== 'NO')){
+			if (Pmg.isAtLeastAdmin() || Pmg.getCustom('pageCustomForAll') === 'YES' || (!Pmg.get('noPageCustomForAll') && Pmg.getCustom('pageCustomForAll') !== 'NO')){
 				contentHeader.on('contextmenu', lang.hitch(this, this.contextMenuCallback));
 			}
 			contentHeader.addChild(new NavigationMenu(obj.menuBarDescription));
 			appLayout.addChild(contentHeader);
+			//contentHeader.set('tukosTooltip', {connectId: ['tukosHeaderTitleAndOrg'], label: '', position: ['below'], onClickLink: {label: Pmg.message('help'), name: 'tukosTukosTooltip', object: 'TukosLib'}});
 
 			var contentTabs = new TabContainer({id: "centerPanel", region: "center", tabPosition: "top", 'class': "centerPanel", style: "width: 100%; height: 100%; padding: 0px"});
 			appLayout.addChild( contentTabs );
@@ -99,7 +102,7 @@ function (lang, dom, domStyle, ready, when, registry, BorderContainer, TabContai
 				   	var leftSplitter = appLayout.getSplitter("left");
 				       domStyle.set(dom.byId('loadingOverlay'), 'display', 'none');
 				   	dojo.connect(leftSplitter.domNode, 'onmouseup', function(){
-				       	var newWidth = this.parentNode.children[0].style.width, leftPaneWidthWidget = registry.byId('tukos_page_custom_dialogleftPaneWidth');
+				       	var newWidth = this.parentNode.children[0].style.width, leftPaneWidthWidget = Pmg.getCustom('leftPaneWidth');
 				       	if (leftPaneWidthWidget){
 				       		leftPaneWidthWidget.set('value', newWidth);
 				       	}
@@ -204,12 +207,12 @@ function (lang, dom, domStyle, ready, when, registry, BorderContainer, TabContai
             evt.stopPropagation();
             if (! this.pageCustomDialog){
                 var self = this;
-                require(["tukos/TukosTooltipDialog"], function(TukosTooltipDialog){
-                    self.pageCustomDialog = new TukosTooltipDialog(Pmg.cache.pageCustomDialogDescription);
+                require(["tukos/PageCustomDialog"], function(PageCustomDialog){
+					self.pageCustomDialog = new PageCustomDialog();
                     ready(function(){
                         self.pageCustomDialog.open({x: evt.clientX, y: evt.clientY});
                     });
-                });
+				});
             }else{
                 this.pageCustomDialog.open({x: evt.clientX, y: evt.clientY});
             }

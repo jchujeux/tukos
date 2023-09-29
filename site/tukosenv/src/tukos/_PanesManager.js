@@ -18,7 +18,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             if (evt.target.checked || (evt.target.checked !== false && pane.isObjectPane() && pane.title === registry.getEnclosingWidget(evt.target).label)){
                 mutils.setContextMenuItems(this.container, [
 					{atts: {label: Pmg.message('refresh'), onClick: function(evt){self.refresh('Tab', []);}}}, 
-					{atts: {label: Pmg.message('customization'), onClick: lang.hitch(this, this.openCustomDialog), tukosTooltip:{label: '', onClickLink: {label: Pmg.message('help'), name: 'customization' + pane.formContent.viewMode + 'TukosTooltip', object: 'tukoslib'}}}}]);
+					{atts: {label: Pmg.message('customization'), onClick: lang.hitch(this, this.openCustomDialog), tukosTooltip:{label: '', 
+						onClickLink: {label: Pmg.message('help'), name: 'customization' + pane.formContent.viewMode + 'TukosTooltip', object: pane.formContent.object}}}}
+				].concat(pane.customContextMenuItems ? pane.customContextMenuItems() : []));
             }else{
                 mutils.setContextMenuItems(this.container, []);
             }
@@ -48,9 +50,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
                     function(response){
 						currentPane.set('title', response.title);
 						currentPane.serverFormContent = lang.clone(response.formContent);
-						/*if (changesToRestore && changesToRestore.customization){
+						if (changesToRestore && changesToRestore.customization){
 							response.formContent = utils.mergeRecursive(response.formContent, changesToRestore.customization);
-						}*/
+						}
 						currentPane.refresh(response.formContent);
 	                    ready(function(){
 	            			Pmg.setFeedback(Pmg.message('actionDoing'));

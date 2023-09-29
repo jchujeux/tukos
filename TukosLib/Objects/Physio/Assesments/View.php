@@ -20,10 +20,7 @@ class View extends AbstractView {
 
             'name' => ['atts' => ['edit' => ['style' => ['width' => '30em']]]],
             'parentid' => ['atts' => ['edit' => [
-                'onChangeServerAction' => [
-                        'inputWidgets' => ['parentid', 'assesmenttype'],
-                        'urlArgs' => ['query' => ['params' => json_encode(['getOne' => 'getDescriptionChanged'])]],
-                ]
+                'onWatchLocalAction' => ['value' => ['progress' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->onPrescriptionChangeLocalAction()]]]]
             ]]],
             'patient' => ViewUtils::objectSelect($this, 'Patient', 'physiopatients', ['atts' => ['edit' => ['placeHolder' => '', 'disabled' => true]]]),
             'prescriptor' => ViewUtils::objectSelect($this, 'Prescriptor', 'people', ['atts' => ['edit' => ['placeHolder' => '', 'disabled' => true]]]),
@@ -39,5 +36,15 @@ class View extends AbstractView {
 
         $this->customize($customDataWidgets, [], [ 'grid' => ['patient', 'prescriptor'], 'get' => ['patient', 'prescriptor'], 'post' => ['patient', 'prescriptor']]);
     }    
+    function onPrescriptionChangeLocalAction(){
+        return <<<EOT
+return Pmg.serverDialog({object: 'physioassesments', view: 'Edit', action: 'Process', query: {parentid: sWidget.valueOf('parentid'), progress: sWidget.valueOf('assesmenttype'), params: {process: 'getPrescriptionChanged', noget: true}}}).then(function(response){
+    utils.forEach(response.data, function(value, widgetName){
+        sWidget.setValueOf(widgetName, value);
+    });
+});
+EOT
+        ;
+    }
 }
 ?>

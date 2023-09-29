@@ -1,5 +1,5 @@
-define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom", "dijit/form/Button", "dijit/registry", "tukos/PageManager"], 
-    function(declare, lang, dom, Button, registry, Pmg){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/form/Button", "dijit/registry", "tukos/PageManager"], 
+    function(declare, lang, when, Button, registry, Pmg){
     return declare("tukos.ObjectReset", [Button],{
         postCreate: function(){
             this.inherited(arguments);
@@ -13,11 +13,14 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom", "dijit/form/Butto
                     	});
                     }
                 	Pmg.setFeedback(Pmg.message('actionDoing'));
-                    self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Reset'), query: self.urlArgs 
+                    when(self.form.serverDialog({action: (self.urlArgs && self.urlArgs.action ? self.urlArgs.action : 'Reset'), query: self.urlArgs 
 							? (idValue ? lang.mixin({id: idValue}, self.urlArgs.query) : self.urlArgs.query)
-							: (idValue ? {id: idValue} : {})}, sendOnReset, self.form.get('dataElts'), Pmg.message('actionDone'), idValue ? false : true).then(function(){
-								self.postAction();
-							}); 
+							: (idValue ? {id: idValue} : {})}, sendOnReset, self.form.get('dataElts'), Pmg.message('actionDone'), idValue ? false : true), function(response){
+								if (response !== false){
+									self.postAction();
+								}
+							}
+					); 
                 }
                 form.checkChangesDialog(setResetValues, true);
             }

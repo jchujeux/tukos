@@ -219,7 +219,7 @@ trait GoogleSessionsEvents {
         if ($includeTrackingFormUrl){
             $sessionName = rawurlencode($session['name']);
             $sport = rawurlencode($session['sport']);
-            $description .= '<a href="' .  Tfk::$registry->rootUrl . '/tukos/index20.php/tukosTrainingPlans/' .
+            $description .= '<a href=' .  Tfk::$registry->rootUrl . '/tukos/index20.php/tukosTrainingPlans/' .
             "Form/backoffice/Edit?object=sptprograms&form=SessionFeedback&version=$version&parentid=$programId&date={$session['startdate']}&name=$sessionName&sport=$sport" . 
             ($session['mode'] === 'performed' ? "&id={$session['id']}" : '') . (empty($session['sessionid']) ? '' : "&sessionid={$session['sessionid']}") .
             ($synchroFlag ? "&synchroflag=$synchroFlag" : '') . ($synchrostreams ? "&synchrostreams=$synchrostreams" : '') . ($presentation ? "&presentation=$presentation" : '');

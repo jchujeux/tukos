@@ -58,7 +58,7 @@ class Get extends AbstractViewModel {
         $result = $this->modelToView($result, $modelToView, true);
         foreach ($result as $i => $row){
             if (isset($row['permission'])){
-                $result[$i]['canEdit'] = $this->user->hasUpdateRights($row);
+                $result[$i]['canEdit'] = $this->user->hasUpdateRights($row, $this->objectName);
             }else{
                 $result[$i]['canEdit'] = true;
             }

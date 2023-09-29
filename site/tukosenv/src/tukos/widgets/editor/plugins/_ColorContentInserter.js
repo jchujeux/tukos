@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
-function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, Pmg, messages) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dojo/json", "tukos/TukosTooltipDialog", "tukos/PageManager"], 
+function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, Pmg) {
     var templateType = 'colorContent', templateClass = templateType + 'Template', instanceClass = templateType + 'Instance', templateIdPrefix = templateType + '_',
 		inserterCell = '<div class="' + instanceClass + '" style="display: inline;"><textarea onblur="${textAreaBlurAction}" style="display: inline; height: 20px">${placeHolder}</textarea><span ondblclick="${spanClickAction}" style="display: none;"></span></div> ',
 		spanClickAction = "var inserter=this; while((inserter=inserter.parentNode) && inserter.className!='" + instanceClass + "');var textArea=inserter.children[0];" +
@@ -10,43 +10,42 @@ function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, Pmg, 
 	    	"span.style.display='inline';" +
 	    	"this.style.display='none';";
 
-	return declare(null, {
+	var _colorContentInserter = declare(null, {
 
-        colorContentInserter: function(){
+        constructor: function(args){
+		    lang.mixin(this, args);
+	    },
+        inserterDialog: function(){
         	return this.cirDialog || (this.cirDialog = new TooltipDialog(this.cirDialogDescription()));
         },
 
         cirDialogDescription: function(){
-            var loadColorPicker = lang.hitch(this, this.loadColorPicker), insertNameToWidgets = lang.hitch(this, this.insertNameToWidgets), i = 0,
+            var inserter = this.inserter, loadColorPicker = lang.hitch(inserter, inserter.loadColorPicker), insertNameToWidgets = lang.hitch(this, this.insertNameToWidgets), i = 0,
             	widgetsList = ['labelLabel', 'oprLabel', 'valueLabel', 'colorLabel'],
             	widgetsDescription = {
-                    insertName: {type: 'StoreComboBox', atts: {label: messages.inserterName, onChange: insertNameToWidgets, storeArgs: {data: this.templateNames(templateType)}}},
-                    //placeHolder: {type: 'TextBox', atts: {label: messages.defaultContent, value: '', style: {width: '20em'}}},
-                    nanLabel: {type: 'HtmlContent', atts: {value: messages.nanLabel, style: {textAlign: 'center'}}},
-                    nanCheckBox: {type: 'CheckBox', atts: {}},
+                    insertName: {type: 'StoreComboBox', atts: {label: Pmg.message('inserterName', 'tukos'), onChange: insertNameToWidgets, storeArgs: {data: inserter.templateNames(templateType)}}},
+                    //nanLabel: {type: 'HtmlContent', atts: {value: Pmg.message('nanLabel', 'tukos'), style: {textAlign: 'center'}}},
+                    nanCheckBox: {type: 'CheckBox', atts: {label: Pmg.message('nanLabel', 'tukos')}},
                     nanColor: {type: 'DropDownButton', atts: {iconClass: "dijitEditorIcon dijitEditorIconHiliteColor", loadDropDown: function(callback){(this.dropDown = loadColorPicker('nanColor', 'cirDialog')).startup(); callback();}}},
-                    elseLabel: {type: 'HtmlContent', atts: {value: messages.elseLabel, style: {textAlign: 'center'}}},
-                    elseColor: {type: 'DropDownButton', atts: {iconClass: "dijitEditorIcon dijitEditorIconHiliteColor", loadDropDown: function(callback){(this.dropDown = loadColorPicker('elseColor', 'cirDialog')).startup(); callback();}}},
-                    colorParentLabel: {type: 'HtmlContent', atts: {value: messages.colorParentLabel, style: {textAlign: 'center'}}},
-                    colorParentCheckBox: {type: 'CheckBox', atts: {checked: true}},
-                    labelLabel: {type: 'HtmlContent', atts: {value: ''}, style: {textAlign: 'center'}},
-                    oprLabel: {type: 'HtmlContent', atts: {value: messages.oprLabel}, style: {textAlign: 'center'}},
-                    valueLabel: {type: 'HtmlContent', atts: {value: messages.valueLabel}, style: {textAlign: 'center'}},
-                    colorLabel: {type: 'HtmlContent', atts: {value: messages.colorLabel}, style: {textAlign: 'center'}}
+                    //elseLabel: {type: 'HtmlContent', atts: {value: Pmg.message('elseLabel', 'tukos'), style: {textAlign: 'center'}}},
+                    elseColor: {type: 'DropDownButton', atts: {title: Pmg.message('elseLabel', 'tukos'), iconClass: "dijitEditorIcon dijitEditorIconHiliteColor", loadDropDown: function(callback){(this.dropDown = loadColorPicker('elseColor', 'cirDialog')).startup(); callback();}}},
+                    colorParentCheckBox: {type: 'CheckBox', atts: {label: Pmg.message('colorParentLabel', 'tukos'), checked: false}},
+                    labelLabel: {type: 'HtmlContent', atts: {value: '', style: {textAlign: 'center', minWidth: '5em'}}},
+                    oprLabel: {type: 'HtmlContent', atts: {value: Pmg.message('oprLabel', 'tukos')}, style: {textAlign: 'center'}},
+                    valueLabel: {type: 'HtmlContent', atts: {value: Pmg.message('valueLabel', 'tukos')}, style: {textAlign: 'center'}},
+                    colorLabel: {type: 'HtmlContent', atts: {value: Pmg.message('colorLabel', 'tukos')}, style: {textAlign: 'center'}}
             };
             ['one', 'two', 'three', 'four', 'five'].forEach(function(row){
             	i += 1;
             	var rowLabel = row + 'Label', rowOpr = row + 'Opr', rowValue = row + 'Value', rowColor = row + 'Color';
             	widgetsList.push(rowLabel, rowOpr, rowValue, rowColor);
-            	widgetsDescription[rowLabel] = {type: 'HtmlContent', atts: {value: messages.criteria + ' ' + i, style: {textAlign: 'center'}}};
-            	widgetsDescription[rowOpr] = {type: 'StoreSelect', atts: {style: {width: '8em'}, storeArgs: {data: [{id: '', name: ''},{id: '==', name: '='},{id: '&lt;', name: '<'}, {id: 'contains', name: messages.contains}/*, {id: 'doesnotcontain', name: messages.doesnotcontain}*/]}}};
+            	widgetsDescription[rowLabel] = {type: 'HtmlContent', atts: {value: Pmg.message('criteria', 'tukos') + ' ' + i, style: {textAlign: 'center'}}};
+            	widgetsDescription[rowOpr] = {type: 'StoreSelect', atts: {style: {width: '8em'}, storeArgs: {data: [{id: '', name: ''},{id: '==', name: '='},{id: '&lt;', name: '<'}, {id: 'contains', name: Pmg.message('contains', 'tukos')}]}}};
             	widgetsDescription[rowValue] = {type: 'TextBox', atts: {}};
             	widgetsDescription[rowColor] = {type: 'DropDownButton', atts: {iconClass: "dijitEditorIcon dijitEditorIconHiliteColor", loadDropDown: function(callback){(this.dropDown = loadColorPicker(rowColor, 'cirDialog')).startup(); callback();}}};                  
             });
-            messages['cirSave'] = messages['save'];
-            messages['cirInsert'] = messages['insert'];
-            ['cirSave', 'cirInsert', 'remove', 'close'].forEach(lang.hitch(this, function(action){
-                    widgetsDescription[action] = {type: 'TukosButton', atts: {label: messages[action], onClick: lang.hitch(this, this[action], templateType)}};
+            ['save', 'insert', 'remove', 'close'].forEach(lang.hitch(this, function(action){
+                    widgetsDescription[action] = {type: 'TukosButton', atts: {label: Pmg.message(action, 'tukos'), onClick: lang.hitch(this, this[action], templateType)}};
             }));
         	return {
                 paneDescription: {
@@ -55,10 +54,9 @@ function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, Pmg, 
                         tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'},
                         contents: {
                         	row1: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true}, widgets: ['insertName']},
-                        	//row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true}, widgets: ['placeHolder']},
-                        	row3: {tableAtts: {cols: 7, showLabels: false}, widgets: ['nanLabel', 'nanCheckBox', 'nanColor', 'elseLabel', 'elseColor', 'colorParentLabel', 'colorParentCheckBox']},
+                        	row3: {tableAtts: {cols: 4, showLabels: true}, widgets: ['nanCheckBox', 'nanColor', 'elseColor', 'colorParentCheckBox']},
                         	row4: {tableAtts: {cols: 4, showLabels: false}, widgets: widgetsList},
-                        	row5: {tableAtts: {cols: 4, showLabels: false}, widgets: ['cirSave', 'cirInsert', 'remove', 'close']}
+                        	row5: {tableAtts: {cols: 4, showLabels: false}, widgets: ['save', 'insert', 'remove', 'close']}
                         }
                     }
                 },
@@ -67,7 +65,14 @@ function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, Pmg, 
         	
         },
 
-        cirSave: function(){
+        close: function(){
+			this.cltDialog.close();
+			this.inserter.close();
+		},
+        remove: function(templateType){
+			this.inserter.remove(this, templateType);
+		},
+        save: function(){
             var pane = this.cirDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), insertNameWidget = paneGetWidget('insertName'), insertName = insertNameWidget.get('value');
             if (insertName){
 	            var insertId = templateIdPrefix + insertName, content = JSON.stringify(this.widgetsToInserter()), existingInsert = this.editor.document.getElementById(insertId);
@@ -75,27 +80,27 @@ function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, Pmg, 
 	            	existingInsert.innerHTML = content;
 	            }else{
 	            	dct.create('div', {id: insertId, className: templateClass, innerHTML: content, style: {display: 'none'}}, this.editor.document.getElementById('dijitEditorBody'));
-	            	insertNameWidget.store.setData(this.templateNames(templateType)) ;
+	            	insertNameWidget.store.setData(this.inserter.templateNames(templateType)) ;
 	            }
             }else{
             	Pmg.addFeedback(messages.mustprovideaname);
             }
 	    },
-	    cirInsert: function(){
+	    insert: function(){
 	    	var pane = this.cirDialog.pane, valueOf = lang.hitch(pane, pane.valueOf), name = valueOf('insertName');
 	    	if (name){
 	    		var inserter = this.widgetsToInserter(), colorSetter = this.cirColorSetter(name, inserter), selection = this.editor.selection, selectedElement = selection.getSelectedElement(), placeHolder;
-	    		this.cirSave();
-	    		this.remove(templateType);
+	    		this.save();
+	    		this.inserter.remove(templateType);
 	    		placeHolder = (selectedElement || {}).tagName === 'TD' && selectedElement.innerHTML ? selectedElement.innerHTML : (selection.getSelectedHtml() || '{' + name + '}');
 	    		toInsert = string.substitute(inserterCell, {textAreaBlurAction: string.substitute(textAreaColorBlurAction, {colorSetter: colorSetter, placeHolder: placeHolder}), spanClickAction: spanClickAction, placeHolder: placeHolder});
-	            this.editor.execCommand("inserthtml", this.visualTag + toInsert + this.visualTag);
+	            this.editor.execCommand("inserthtml", this.inserter.visualTag + toInsert + this.inserter.visualTag);
 	    	}else{
             	Pmg.addFeedback(messages.mustprovideaname);
 	    	}
 	    },
 
-	    colorContentHtmlToRestore: function(selectedInstance){
+	    htmlToRestore: function(selectedInstance){
 	    	return (((selectedInstance || {}).childNodes || [])[1] || {}).innerHTML || '';
 	    },
 
@@ -154,4 +159,6 @@ function(declare, lang, dct, domStyle, string, JSON, TooltipDialog, utils, Pmg, 
             });
 	    }
     });
+    _colorContentInserter.translations = {tukos: ['nanLabel', 'elseLabel', 'oprLabel', 'valueLabel', 'colorLabel', 'criteria', 'contains']};
+    return _colorContentInserter;
 });

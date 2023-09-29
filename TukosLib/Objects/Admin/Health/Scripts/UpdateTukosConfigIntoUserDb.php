@@ -28,9 +28,9 @@ class UpdateTukosConfigIntoUserDb {
         $user = Tfk::$registry->get('user');
         $user->setLockedMode(false);
         try{
-            $changedConfigs = $keepUserChanges
+            $changedConfigs = ($keepUserChanges
                 ? $store->query("SELECT t1.object, t1.id FROM tukosconfig.tukos as t1 LEFT JOIN tukosconfigold.tukos as t2 on (t1.id = t2.id) WHERE (t1.updated > t2.updated OR t2.id IS NULL) and t1.id > 0 and t1.id < 10000")
-                : $store->query("SELECT t1.object, t1.id FROM tukosconfig.tukos as t1 WHERE t1.id > 0 and t1.id < 10000")
+                : $store->query("SELECT t1.object, t1.id FROM tukosconfig.tukos as t1 WHERE t1.id > 0 and t1.id < 10000"))
             ->fetchAll(\PDO::FETCH_COLUMN|\PDO::FETCH_GROUP);
             $incompatibleObjects = []; 
             $updatedIds = [];
@@ -56,13 +56,23 @@ class UpdateTukosConfigIntoUserDb {
                      * dans $configItem, remplacer les colonnes qui ont été modifiées par l'utilisateur, C.A.D celles dont la valeur est différente de celle de $itemConfigOld
                      * 
                      */
-                    unset($configItem['history']);
-                    unset($configItem['updator']);
-                    Utl::extractItems(['history', 'updator', 'updated', 'creator', 'created'], $configItem);
+                    Utl::extractItems(['laststart', 'lastend', 'history', 'updator', 'updated', 'creator', 'created'], $configItem);
                     if ($keepUserChanges){
-                        Utl::extractItems(['id', 'updator', 'updated', 'creator', 'created'], $userItem);
+                        Utl::extractItems(['id', 'laststart', 'lastend', 'updator', 'updated', 'creator', 'created'], $userItem);
                         $colsToKeep = array_diff($userItem, Utl::getItem($id, $configItemsOld, []));
                         if (!empty($colsToKeep)){
+                            $configItemOld = Utl::getItem($id, $configItemsOld, [], []);
+                            $jsonColsToKeep = array_intersect($objectModel->jsonCols, array_keys($colsToKeep));
+                            foreach ($jsonColsToKeep as $col){
+                                $colsToKeep[$col] = json_decode($colsToKeep[$col], true);
+                                if ($configItemOld[$col]){
+                                    $configItemOld[$col] = json_decode($configItemOld[$col], true);
+                                }
+                            }
+                            $jsonColsContentToKeep = Utl::array_diff_assoc_recursive($colsToKeep, $configItemOld);
+                            foreach ($jsonColsToKeep as $col){
+                                $colsToKeep[$col] = json_encode(Utl::array_merge_recursive_replace(json_decode($configItem[$col], true), $jsonColsContentToKeep[$col]));// we replace the full jsonCol value by the part which the user has changed
+                            }
                             $colsToKeepIds[] = $id;
                         }
                     }else{
@@ -76,21 +86,22 @@ class UpdateTukosConfigIntoUserDb {
                     }
                 }
             }
+            
             if (!empty($incompatibleObjects)){
-                echo 'incompatible objects or missing id in object table(not copied): ' . var_dump($incompatibleObjects) . '<br>';
+                echo Tfk::tr('incompatibleobjects') . ': ' . var_dump($incompatibleObjects) . '<br>';
             }
             if (!empty($colsToKeepIds)){
-                echo 'the following ids had modified columns that were not updated: ' . implode(',', $colsToKeepIds) . '<br>';
+                echo Tfk::tr('modifiedconfigitemskept') . ': ' . implode(',', $colsToKeepIds) . '<br>';
             }
             if (!empty($updatedIds)){
-                echo 'the following ids were updated: ' . implode(',', $updatedIds) . '<br>';
+                echo Tfk::tr('updatedconfigids') . ': ' . implode(',', $updatedIds) . '<br>';
             }
             if (!empty($noChangeIds)){
-                echo 'the following ids did not change: ' . implode(',', $noChangeIds) . '<br>';
+                echo Tfk::tr('unchangedconfigids') . ': ' . implode(',', $noChangeIds) . '<br>';
             }
             
         }catch(\Exception $e){
-            Tfk::error_message('on', 'an exception occured while runnins script updateTukosConfigIntoUserDb : ', $e->getMessage());
+            Tfk::error_message('on', 'an exception occured while running script updateTukosConfigIntoUserDb : ', $e->getMessage());
         }
     }
 }

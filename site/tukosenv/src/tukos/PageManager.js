@@ -1,8 +1,7 @@
-define(["dojo/ready", "dojo/has", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/form/_ComboBoxMenuMixin", "dijit/registry", 
+define(["dojo/ready", "dojo/has", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "dojo/string", "dojo/request", "dijit/_WidgetBase", "dijit/form/_FormValueMixin", "dijit/form/_CheckBoxMixin", "dijit/form/_ComboBoxMenuMixin", "dijit/registry", 
 		"dojo/json", "dojo/date/locale", "tukos/_WidgetsExtend", "tukos/_WidgetsFormExtend", "tukos/_ComboBoxMenuMixinExtend", "tukos/utils"],
-function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, _ComboBoxMenuMixin, registry, JSON, dojoDateLocale, _WidgetsExtend, _WidgetsFormExtend, _ComboBoxMenuMixinExtend, utils){
+function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormValueMixin, _CheckboxMixin, _ComboBoxMenuMixin, registry, JSON, dojoDateLocale, _WidgetsExtend, _WidgetsFormExtend, _ComboBoxMenuMixinExtend, utils){
     var stores, openedBrowserTabs = {}, windows = {}, numWindows = 0,
-        objectsTranslations = {}, objectsUntranslations = {},
         urlTemplate = '${dialogueUrl}${object}/${view}/${mode}/${action}';
 		lang.extend(_WidgetBase, _WidgetsExtend);//for this to work in all cases, no require for a widget should be made before this statement executes, above in PageManager, and in modules required in evalUtils (which _WidgetsExtend depends on)
 		lang.extend(_FormValueMixin, _WidgetsFormExtend);
@@ -89,26 +88,93 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 		            event.stopPropagation();
 		        	self.tabs.gotoTab(target);
 		        };
-                self.serverTranslations = function(expressions, actModel){
-                    var results = {}, actionModel = actModel || 'GetTranslations';
-                    return self.serverDialog({object: 'tukos', view: 'NoView', action: 'Get', query:{params: {actionModel: actionModel}}}, {data: expressions}, self.message('actionDone')).then(function (response){
-                            utils.forEach(response.data, function(translations, objectName){
-                                var objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {});
-                                results[objectName] = {};
-                                utils.forEach(translations, function(translation, expression){
-                                    objectTranslations[expression] = translation;
-                                    objectUntranslations[translation] = expression;
-                                    if (actionModel === 'GetTranslations'){
-                                        results[objectName][expression] = translation;
-                                    }else{
-                                        results[objectName][translation] = expression;
-                                    }
-                                });
-                            });
-                            return results;
-                    });
-                };
+		        if (!obj.isMobile){
+					self.lazyCreateAccordion = buildPage.lazyCreateAccordion;
+				}
             });
+        },
+        serverTranslations: function(expressions, actModel, language){
+            var self = this, results = {}, actionModel = actModel || 'GetTranslations', objectsUntranslations = this.cache.objectsUntranslations || (this.cache.objectsUntranslations = {}), objectsMessages = this.cache.objectsMessages || (this.cache.objectsMessages = {});
+			if (actionModel === 'GetUntranslations'){
+                utils.forEach(expressions, function(objectTranslations, objectName){
+					const objectUntranslations = objectsUntranslations[objectName] || {}, foundIndexes = [];
+					objectTranslations.forEach(function(translation, index){
+						const expression = objectUntranslations[translation];
+						if (expression){
+							const objectResults = results[objectName] || (results[objectName] = {}); 
+							objectResults[translation] = expression;
+							foundIndexes.push(index);
+						}else{
+							const objectMessages = objectsMessages[objectName];
+							if(objectMessages){
+							  	utils.some(objectMessages, function(cacheTranslation, expression){
+									if (cacheTranslation === translation){
+										const objectResults = results[objectName] || (results[objectName] = {}); 
+										objectResults[translation] = expression; 
+										foundIndexes.push(index);
+										return true;
+									}else{
+										return false;
+									}
+							 	});
+							}
+						}
+					});
+					if (foundIndexes.length === objectTranslations.length){
+						delete expressions[objectName];
+					}else{
+						foundIndexes.forEach(function(index){
+							objectTranslations.splice(index, 1);								
+						});
+					}
+				});
+			}else if(!utils.empty(self.cache.objectsMessages)){
+                utils.forEach(expressions, function(objectExpressions, objectName){
+					const objectMessages = self.cache.objectsMessages[objectName];
+					if (objectMessages){
+						const foundIndexes = [];
+						objectExpressions.forEach(function(expression, index){
+							const translation = objectMessages[expression];
+							if (translation){
+								const objectResults = results[objectName] || (results[objectName] = {}); 
+								objectResults[expression] = translation;
+								foundIndexes.push(index);
+							}
+						});
+						if (foundIndexes.length === objectExpressions.length){
+							delete expressions[objectName];
+						}else{
+							foundIndexes.forEach(function(index){
+								objectExpressions.splice(index, 1);								
+							});
+						}
+					}
+				});
+			}
+			if (utils.empty(expressions)){
+				return results;
+			}else{
+                const query  = {params: {actionModel: actionModel}};
+                if (language){
+					query.language = language;
+				}
+                return self.serverDialog({object: 'tukos', view: 'NoView', action: 'Get', query: query}, {data: expressions}, self.message('actionDone')).then(function (response){
+                        utils.forEach(response.data, function(translations, objectName){
+                            var objectUntranslations = self.cache.objectsUntranslations[objectName] || (self.cache.objectsUntranslations[objectName] = {}), objectTranslations = self.cache.objectsMessages[objectName] || (self.cache.objectsMessages[objectName] = {});
+                            results[objectName] = results[objectName] || {};
+                            utils.forEach(translations, function(translation, expression){
+                                objectTranslations[expression] = translation;
+                                if (actionModel === 'GetTranslations'){
+                                    results[objectName][expression] = translation;
+                                }else{
+                                    results[objectName][translation] = expression;
+                                	objectUntranslations[translation] = expression;
+                                }
+                            });
+                        });
+                        return results;
+                });
+			}
         },
 		isMobile: function(){
 			return this.cache.isMobile;
@@ -160,23 +226,23 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 			return promise;			
 		},
 		tukosTooltipName: function(name){
-			const tooltips = this.cache.presentTukosTooltips || [];
-			let index;
-			if (this.isRestrictedUser()){
-				index = tooltips.indexOf('Restricted' + name);
+			const tooltips = this.cache.presentTukosTooltips || [], userRights = this.cache['userRights'], rightsMap = {SUPERADMIN: 'SuperAdmin', ADMIN: 'Admin', ENDUSER: 'EndUser', RESTRICTEDUSER: 'Restricted'};
+			let index = tooltips.indexOf(rightsMap[userRights] + name);
+			if (index === -1){
+				const rightsKeys = Object.keys(rightsMap);
+				let currentRights = rightsKeys.indexOf(userRights) + 1;
+				while (currentRights <= rightsKeys.length && index === -1){
+					index = tooltips.indexOf(rightsMap[rightsKeys[currentRights]] + name);
+					currentRights += 1;
+				}
 				if (index === -1){
 					index = tooltips.indexOf(name);
-				}
-			}else{
-				index = tooltips.indexOf(name);
-				if (index === -1){
-					index = tooltips.indexOf('Restricted' + name);
 				}
 			}
 			return index === -1 ? false : tooltips[index];
 		},
-		viewTranslatedInBrowserWindow: function(toTranslate, object){
-			const name = 'tukosItem' + toTranslate;
+		viewTranslatedInBrowserWindow: function(toTranslate, object, language){
+			const name = 'tukosItem' + toTranslate + object;
 			let screenX = 25, screenY = 50, winPosition;
 			if (windows[name]){// if we don't close an existing window, focusing on it will not bring it to the front
 				winPosition = windows[name].winPosition;
@@ -187,9 +253,14 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 				winPosition = numWindows;
 				numWindows +=1;
 			}
-			this.serverTranslations({[object]: [toTranslate]}).then(function(translation){
+			when (this.serverTranslations({[object]: [toTranslate]}, 'GetTranslations', language), function(translation){
         		windows[name] = utils.viewInBrowserWindow(name, translation[object][toTranslate], screenX + 35*winPosition, screenY+25*winPosition);
         		windows[name].winPosition = winPosition;
+			});
+		},
+		viewTranslatedInTooltipWindow: function(domNode, toTranslate, object, language){
+			when (this.serverTranslations({[object]: [toTranslate]}, 'GetTranslations', language), function(translation){
+				domNode.title = translation[object][toTranslate];
 			});
 		},
 		viewUrlInBrowserWindow: function(url, name, options){
@@ -220,6 +291,9 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
         },
         isRestrictedUser: function(){
 			return this.cache['userRights'] === 'RESTRICTEDUSER';
+		},
+		isAtLeastAdmin: function(){
+			return utils.in_array(this.cache['userRights'], ['SUPERADMIN', 'ADMIN']);
 		},
         set: function(item, value){
         	this.cache[item] = value;
@@ -403,7 +477,9 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
         	return (id ? (this.cache.extras[id] && this.cache.extras[id].name ? this.cache.extras[id].name : id) : '');
         },
         message: function(key, object){
-        	return object ? ((this.cache.objectsMessages || {})[object] || {})[key] || this.cache.messages[key] || key : this.cache.messages[key] || key;
+        	return object 
+        		? ((this.cache.objectsMessages || {})[object] || {})[key] || this.cache.messages[key] || (key.toLowerCase ? (this.cache.messages[key.toLowerCase()] || key) : key)
+        		: this.cache.messages[key] || (key.toLowerCase ? (this.cache.messages[key.toLowerCase()] || key) : key);
         },
         messages: function(keys){
         	var result = {}, messages = this.cache.messages;
@@ -419,29 +495,17 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
     		})
     		return store;
     	},
-        defaultTranslator: function(expression, objectName){
-            var objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {});
-            return objectTranslations[expression] || (objectTranslations[expression] = undefined);
-        },
-
-        defaultUntranslator: function(expression, objectName){
-            var objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {});
-            return objectUntranslations[expression.toLowerCase()];
-        },
-        
         widgetNameTranslator: function(widgetName, objectName, form){
-            var objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {});
-            return objectTranslations[widgetName] || this._getWidgetNameTranslation(widgetName, objectName, form);
+            return ((this.cache.objectsMessages || {})[objectName] || {})[widgetName] || this._getWidgetNameTranslation(widgetName, objectName, form);
         },
         
         widgetNameUntranslator: function(translatedWidgetName, objectName, form){
-            var objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {});
-            
-            return objectUntranslations[translatedWidgetName] || this._getWidgetNameUntranslation(translatedWidgetName, objectName, form);
+            return ((this.cache.objectsUntranslations || {})[objectName] || {})[translatedWidgetName] || this._getWidgetNameUntranslation(translatedWidgetName, objectName, form);
         },
 
         _getWidgetNameTranslation: function(widgetName, objectName, form){
-            var form = form || this.tabs.objectPane(objectName, 'Edit'), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}), translation;
+            var form = form || this.tabs.objectPane(objectName, 'Edit'), objectsUntranslations = this.cache.objectsUntranslations || (this.cache.objectsUntranslations = {}), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), 
+            	objectsTranslations = this.cache.objectsMessages || (this.cache.objectsMessages = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}), translation;
             if (form){
                 var widget = form.getWidget(widgetName);
                 if (widget){
@@ -459,7 +523,8 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
         },
 
         _getWidgetNameUntranslation: function(translatedWidgetName, objectName, form){
-            var form = form || this.tabs.objectPane(objectName, 'Edit'), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}), untranslation;
+            var form = form || this.tabs.objectPane(objectName, 'Edit'), objectsUntranslations = this.cache.objectsUntranslations || (this.cache.objectsUntranslations = {}), objectUntranslations = objectsUntranslations[objectName] || (objectsUntranslations[objectName] = {}), 
+            	objectsTranslations = this.cache.objectsMessages || (this.cache.objectsMessages = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}), unTranslation;
             if (form){
                 form.widgetsName.some(function(widgetName){
                     var widget = form.getWidget(widgetName), translation = undefined;
@@ -469,7 +534,7 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
                     if (translation){
                         objectUntranslations[translation.toLowerCase()] = widgetName;
 	                    if (translation.toLowerCase() === translatedWidgetName.toLowerCase()){
-	                        untranslation = widgetName;
+	                        unTranslation = widgetName;
 	                        return true;
 	                    }
                     }
@@ -501,6 +566,14 @@ function(ready, has, lang, Deferred, string, request, _WidgetBase, _FormValueMix
 					this.cache.newPageCustomization = value;
 				}
 			}
-        }
+        }, 
+		idsNamesStore: function(items, capitalize){
+			const self = this, result = [];
+			items.forEach(function(item){
+				const name = self.message(item);
+				result.push({id: item, name: capitalize ? (name.charAt(0).toUpperCase() + name.substring(1).toLowerCase()) : name});
+			});
+			return result;
+		}
     };
 });

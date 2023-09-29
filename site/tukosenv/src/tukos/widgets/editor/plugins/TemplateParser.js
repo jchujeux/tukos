@@ -158,7 +158,7 @@ define([
             this.selectHtml = string.substitute(this._selectTemplate, {id: this._uniqueId, 'new': messages.anew, otherOptions: this.setOtherChoiceListOptions()});
             this.dropDown.set('content', this.dropDown.title +
                 "<div style='border-bottom: 1px black solid;padding-bottom:2pt;margin-bottom:4pt'></div>" +
-                string.substitute(this._dialogTemplate, {id: this._uniqueId, listName: 'nom de liste', choice: messages.choice, insert: messages.insert, save: messages.save, selectTemplate: this.selectHtml, close: messages.close})
+                string.substitute(this._dialogTemplate, {id: this._uniqueId, listName: 'nom de liste', choice: messages.choice, insert: messages.insert, save: Pmg.message('save'), selectTemplate: this.selectHtml, close: Pmg.message('close')})
             );
             this.currentListName = this.currentContextMenu ? this.getListName(this.currentContextMenu) : '';
             registry.byId(this._uniqueId + '_choiceList').set('value', this.currentListName);

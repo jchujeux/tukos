@@ -22,7 +22,7 @@ class Get extends ViewsGetModel {
     	$result = [];
     	foreach ($childrenNames as $id => $name){
     		$atts = $childrenAtts[$id];
-    		$result[] = array_merge($name, ['id' => $id, 'object' => $objectName, 'children' => $atts['children'], 'canEdit' => $this->user->hasUpdateRights($atts, $atts)]);
+    		$result[] = array_merge($name, ['id' => $id, 'object' => $objectName, 'children' => $atts['children'], 'canEdit' => $this->user->hasUpdateRights($atts, $objectName, $atts)]);
     	}
     	return $result;
     }

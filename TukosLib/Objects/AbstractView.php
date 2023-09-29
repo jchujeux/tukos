@@ -39,10 +39,10 @@ abstract class AbstractView extends ObjectTranslator{
                 ]
             ), 
             'parentid'  => ViewUtils::objectSelectMulti($parentObjects, $this, $parentWidgetTitle),
-            'name'      => ViewUtils::textBox($this, $nameWidgetTitle, ['atts' => [/*'edit' => ['tukosTooltip' => ['label' => 'Hello world!', 'onClickLink' => ['label' => 'more...', 'name' => 'dailyavg']]], */'storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
+            'name'      => ViewUtils::textBox($this, $nameWidgetTitle, ['atts' => ['storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
             'comments'  => ViewUtils::lazyEditor($this, 'CommentsDetails', ['atts' => ['edit' => ['height' => '400px', 'customizableAtts' => $customizableAtts]]]),
             'permission' => ViewUtils::storeSelect('permission', $this, 'Access Control', [true, 'ucfirst', false, false, false], ['atts' => 
-                ['edit' => ['readonly' => true, /*'onWatchLocalAction' => ['value' => ['acl' => ['hidden' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return newValue === 'ACL' ? false : true"]]]]*/],
+                ['edit' => ['readonly' => true],
                  'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]
             ]),
             'acl' => ViewUtils::JsonGrid($this, 'Acl', [
@@ -77,7 +77,7 @@ abstract class AbstractView extends ObjectTranslator{
             }
         }
         if ($this->user->rights() === 'SUPERADMIN'){
-            $this->dataWidgets['configstatus'] = ViewUtils::storeSelect('configStatus', $this, 'Config Status', null, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]);
+            $this->dataWidgets['configstatus'] = ViewUtils::storeSelect('configStatus', $this, 'Config Status', null, ['atts' => ['edit' => ['hidden' => true], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]);
         }
         $this->defaultDataWidgetsElts = array_keys($this->dataWidgets);
         $this->responseContent = null;
@@ -97,8 +97,13 @@ abstract class AbstractView extends ObjectTranslator{
             $this->subObjects = $subObjects;
         }
         $this->_exceptionCols = array_merge($this->_exceptionCols, $exceptionCols);
-        $this->jsonColsPathsView     = array_merge(['acl' => []], $jsonColsPathsView);
-
+        //$this->jsonColsPathsView     = array_merge(['acl' => []], $jsonColsPathsView);
+        /*$processJsonCols = function($jsonCol, $key) use ($jsonColsPathsView) {
+            $this->jsonColsPathsView[$jsonCol] =  Utl::getItem($jsonCol, $jsonColsPathsView, []);
+        }*/
+        array_walk($this->model->jsonCols, function($jsonCol, $key) use ($jsonColsPathsView) {
+            $this->jsonColsPathsView[$jsonCol] =  Utl::getItem($jsonCol, $jsonColsPathsView, []);
+        });
         if (in_array('custom', $this->model->allCols)){
             $this->dataWidgets['custom'] = ['type' => 'textArea', 'atts' => ['edit' => ['label' => $this->tr('itemcustom')], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]];
             $this->_exceptionCols['edit'][] = 'custom';
@@ -169,7 +174,8 @@ abstract class AbstractView extends ObjectTranslator{
         if (empty($values['id'])){
         	return $this->tr($this->objectName) . ' (' . $this->tr('new') . ')';
         }else{
-            $name = SUtl::translatedExtendedNames([$values['id']])[$values['id']];
+            //$name = SUtl::translatedExtendedNames([$values['id']])[$values['id']];
+            $name = Utl::getItem($id = $values['id'], SUtl::translatedExtendedNames([$id]), $id);
         }
         return $name . ' (' . ucfirst($this->tr($this->objectName)) . '  '  . $values['id'] . ')';
     }
@@ -178,6 +184,9 @@ abstract class AbstractView extends ObjectTranslator{
     }
     function getToTranslate(){
         return property_exists($this, 'toTranslate') ? $this->toTranslate : [];
+    }
+    function getActionsToEnableDisable(){
+        return ['save', 'delete', 'process'];
     }
 }
 ?>

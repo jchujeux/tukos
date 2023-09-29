@@ -37,6 +37,8 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         postCreate: function(){
             var self = this, form = this.form;
         	this.inherited(arguments);
+        	this.minHeightFormatter = this.minHeightFormatter || '5em';
+        	this.maxHeightFormatter = this.maxHeightFormatter || '30em';
         	if (!this.collection){
         		require(["dstore/Memory"], function(Memory){
         			self.collection = new Memory({idProperty: self.idProperty || 'id', data: []});
@@ -187,7 +189,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             return grid._renderContent(this, object, node, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {}, noCreate);
         },
         _renderContent: function(column, storeRow, tdCell, innerHTML, styleAtts, noCreate){
-            var row =this.row(storeRow), rowHeight = (this.rowHeights[row.id] ? this.rowHeights[row.id] : column.minHeightFormatter), atts = {style: lang.mixin({maxHeight: rowHeight, overflow: 'auto'}, styleAtts)},
+            var row =this.row(storeRow), rowHeight = (this.rowHeights[row.id] ? this.rowHeights[row.id] : this.minHeightFormatter), atts = {style: lang.mixin({maxHeight: rowHeight, overflow: 'auto'}, styleAtts)},
             	rowId =  storeRow[this.collection.idProperty], node;
             if (!column.noMarkAsChanged &&  (this.dirty[rowId] && typeof this.dirty[rowId][column.field] !== 'undefined' && !atts.style.backgroundColor)){
                 atts.style.backgroundColor =  wutils.changeColor;
@@ -278,7 +280,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 		toggleFormatterRowHeight: function(grid){
             var row = grid.clickedCell.row,
                 column = grid.clickedCell.column;
-            grid.rowHeights[row.id] = (grid.rowHeights[row.id] == column.maxHeightFormatter ? column.minHeightFormatter : column.maxHeightFormatter); 
+            grid.rowHeights[row.id] = (grid.rowHeights[row.id] == grid.maxHeightFormatter ? grid.minHeightFormatter : grid.maxHeightFormatter); 
             grid.refresh({keepScrollPosition: true});
         },
         viewCellInPopUpDialog: function(grid){
@@ -318,7 +320,9 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             }
             if (!utils.empty(query)){
                 Pmg.tabs.gotoTab({object: object, view: 'Edit', mode: 'Tab', action: 'Tab', query: query});
-            }
+            }else{
+				Pmg.setFeedback(Pmg.message('needtosavebeforeeditinnewtab'), null, null, true);
+			}
         },
         showInNavigator: function(grid){
         	var targetId = grid.cellValueOf(grid.clickedCell.column.field);

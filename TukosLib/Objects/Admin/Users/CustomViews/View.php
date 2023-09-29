@@ -7,8 +7,9 @@ use TukosLib\Objects\ViewUtils;
 class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
-        parent::__construct($objectName, $translator, 'User', 'View Name');
+        parent::__construct($objectName, $translator, 'Parent', 'View Name');
         $customDataWidgets = [
+            'parentid' => ['atts' => ['edit' => ['hidden' => true]]],
             'comments' => ['atts' => ['edit' => ['height' => '250px']]],
             'vobject'     => ViewUtils::storeSelect('vobject', $this, 'Object', null, ['objToEdit' => ['strtolower' => []]]),
             'view'       => ViewUtils::storeSelect('view', $this, 'View'),

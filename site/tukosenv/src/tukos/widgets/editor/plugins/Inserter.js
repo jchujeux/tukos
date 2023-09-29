@@ -1,7 +1,6 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", "dojo/string", "dijit/_editor/_Plugin", "dijit/form/DropDownButton", "dijit/DropDownMenu", "dijit/MenuItem",
-        "dijit/PopupMenuItem", "dijit/ColorPalette", "dijit/popup", "tukos/utils", "tukos/hiutils", "tukos/PageManager", "tukos/widgets/editor/plugins/_ColorContentInserter",
-        "tukos/widgets/editor/plugins/_ChoiceListInserter", "tukos/widgets/editor/plugins/_HtmlSourceInserter", "dojo/i18n!tukos/nls/messages"], 
-function(declare, lang, domStyle, ready, string, _Plugin, Button, Menu, MenuItem, PopupMenuItem, ColorPicker, popup, utils, hiutils, Pmg, _ColorContentInserter, _ChoiceListInserter, _HtmlSourceInserter, messages) {
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", "dojo/when", "dojo/string", "dijit/_editor/_Plugin", "dijit/form/DropDownButton", "dijit/DropDownMenu", "dijit/MenuItem",
+        "dijit/PopupMenuItem", "dijit/ColorPalette", "dijit/popup", "tukos/utils", "tukos/hiutils", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
+function(declare, lang, domStyle, ready, when, string, _Plugin, Button, Menu, MenuItem, PopupMenuItem, ColorPicker, popup, utils, hiutils, Pmg, messages) {
     var inserters = {
     	fieldTemplate: '${^@xxx}',
         subfieldTemplate: '${^@xxx|yyy}',
@@ -10,18 +9,18 @@ function(declare, lang, domStyle, ready, string, _Plugin, Button, Menu, MenuItem
 		checkboxTemplate: "<span class=\"checkboxTemplate\" style=\"background-color:aliceblue;\"><span contenteditable=\"false\" onclick=\"this.innerHTML = (this.innerHTML == '☐' ? '☑' : '☐')\" style=\"cursor: pointer;\">☑</span>${selectedHtml}</span><span class=\"checkboxTemplateEnd\" contenteditable=\"false\">■</span>",
 		pageBreak: '&nbsp;<div class="pagebreak" style="width: 100%; height: 20px; border-bottom: 1px solid black; text-align: center"><span style="font-size: 20px; background-color: #F3F5F6; padding: 0 10px;">' + messages.pageBreak + '</span></div>&nbsp;',
         pageNumber: '<span class="pagenumber" style="background-color: #F3F5F6;">xx</span>&nbsp;',
-        numberOfPages: '<span class="numberofpages" style="background-color: #F3F5F6">NN</span>&nbsp;'},
+        numberOfPages: '<span class="numberofpages" style="background-color: #F3F5F6">NN</span>&nbsp;',
+        tooltip: '<span style="color: blue; cursor: pointer;" title="tooltipcontent">textwithtooltip</span>'},
 
-	    inserterOptions = utils.objectKeys(inserters);
+	    inserterOptions = Object.keys(inserters);
         
-    var Inserter = declare([_Plugin, _ColorContentInserter, _ChoiceListInserter, _HtmlSourceInserter], {
+    var Inserter = declare([_Plugin], {
     
         iconClassPrefix: "dijitAdditionalEditorIcon",
         
         visualTag: utils.visualTag(),
 
         _initButton: function(){
-            //var editor = this.editor, createDropDown = lang.hitch(this, this._createDropDown);//, option = this.option;
             this.button = new Button({
                 label: messages["insertHtml"],
                 showLabel: false,
@@ -42,20 +41,26 @@ function(declare, lang, domStyle, ready, string, _Plugin, Button, Menu, MenuItem
         },
         
         _loadDropDown: function(callback){
-        	require(["tukos/widgets/editor/plugins/_ExpressionInserter", "tukos/widgets/editor/plugins/WidgetEditor"], 
-        			lang.hitch(this, function(ExpressionInserter, WidgetEditor){
-        		var dropDown = (this.dropDown = this.button.dropDown = new Menu()), editor = this.editor, insert = this._insert, expression = new ExpressionInserter({inserter: this}),
-        			widgetEditor = new WidgetEditor({editor: editor, button: this.button});
-            	inserterOptions.forEach(function(option){
-            		dropDown.addChild(new MenuItem({label: messages[option], onClick: function(){insert(option, editor);}}));
-            	});
-                dropDown.addChild(new PopupMenuItem({label: messages.colorcontentinserter, popup: lang.hitch(this, this.colorContentInserter)()}));
-                dropDown.addChild(new PopupMenuItem({label: messages.choicelistinserter, popup: lang.hitch(this, this.choiceListInserter)()}));
-                dropDown.addChild(new PopupMenuItem({label: messages.htmlSource, popup: lang.hitch(this, this.htmlSourceInserter)()}));
-                dropDown.addChild(new PopupMenuItem({label: Pmg.message('expressionEditor'), popup: lang.hitch(expression, expression.inserterDialog)()}));
-                dropDown.addChild(new PopupMenuItem({label: Pmg.message('widgetEditor'), popup: lang.hitch(widgetEditor, widgetEditor.inserterDialog)()}));
-            	ready(callback);
-        	}));
+        	//when(Pmg.serverTranslations(_HtmlSourceInserter.translations), lang.hitch(this, function(){
+				require(["tukos/widgets/editor/plugins/_ExpressionInserter", "tukos/widgets/editor/plugins/WidgetEditor", "tukos/widgets/editor/plugins/_ColorContentInserter", "tukos/widgets/editor/plugins/_ChoiceListInserter", "tukos/widgets/editor/plugins/_HtmlSourceInserter"], 
+	        			lang.hitch(this, function(ExpressionInserter, WidgetEditor, _ColorContentInserter, _ChoiceListInserter, _HtmlSourceInserter){
+	        		var dropDown = (this.dropDown = this.button.dropDown = new Menu()), editor = this.editor, insert = this._insert, expression = new ExpressionInserter({inserter: this}),
+	        			widgetEditor = new WidgetEditor({editor: editor, button: this.button});
+	            	inserterOptions.forEach(function(option){
+	            		dropDown.addChild(new MenuItem({label: messages[option] || option, onClick: function(){insert(option, editor);}}));
+	            	});
+        			when(Pmg.serverTranslations(utils.mergeRecursive(utils.mergeRecursive(utils.mergeRecursive({tukos: ['htmlSource', 'expressionEditor', 'widgetEditor', 'inserterName', 'colorParentLabel', 'mustprovideaname']}, _HtmlSourceInserter.translations, true), _ChoiceListInserter.translations, true), _ColorContentInserter.translations, true)), lang.hitch(this, function(){
+		            	const colorContentInserter = new _ColorContentInserter({editor: this.editor, inserter: this}), 
+		            		  choiceListInserter = new _ChoiceListInserter({editor: this.editor, inserter: this}), 
+		            		  htmlSourceInserter = new _HtmlSourceInserter({editor: this.editor, inserter: this});
+		                dropDown.addChild(new PopupMenuItem({label: messages.colorcontentinserter, popup: (this.cirDialog = lang.hitch(colorContentInserter, colorContentInserter.inserterDialog)())}));
+		                dropDown.addChild(new PopupMenuItem({label: messages.choicelistinserter, popup: (this.cltDialog = lang.hitch(choiceListInserter, choiceListInserter.inserterDialog)())}));
+		                dropDown.addChild(new PopupMenuItem({label: Pmg.message('htmlSource', 'tukos'), popup: lang.hitch(htmlSourceInserter, htmlSourceInserter.inserterDialog)()}));
+		                dropDown.addChild(new PopupMenuItem({label: Pmg.message('expressionEditor', 'tukos'), popup: lang.hitch(expression, expression.inserterDialog)()}));
+		                dropDown.addChild(new PopupMenuItem({label: Pmg.message('widgetEditor', 'tukos'), popup: lang.hitch(widgetEditor, widgetEditor.inserterDialog)()}));
+		            	ready(callback);
+					}));
+	        	}));
         },
         _insert: function(option, editor){
             var htmlTemplate = inserters[option], match = htmlTemplate.match(/<([^ ]*)/);
@@ -91,10 +96,10 @@ function(declare, lang, domStyle, ready, string, _Plugin, Button, Menu, MenuItem
 	    close: function(){
 	    	popup.close(this.button.dropDown);
 	    },
-        remove: function(templateType){
+        remove: function(subInserter, templateType){
         	var selectedInstance = this.selectedInstance(this.editor.selection, templateType);
         	if (selectedInstance){
-        		var contentToRestore = this[templateType + 'HtmlToRestore'](selectedInstance);
+        		var contentToRestore = subInserter.htmlToRestore(selectedInstance);
         		if (selectedInstance.parentNode){
                 	var node = selectedInstance.parentNode, previousBackgroundColor =  node.getAttribute('data-backgroundColor')
                 	if (previousBackgroundColor !== null){

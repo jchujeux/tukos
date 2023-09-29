@@ -352,7 +352,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
             return urlArgs;
         },
         openAction: function(description){
-            return description ? (typeof description === 'string' ? eutils.actionFunction(this, 'open', description) : description()) : '';
+            return description ? (typeof description === 'string' ? eutils.actionFunction(this, 'open', description) : lang.hitch(this, description)()) : '';
         }
     });
 });

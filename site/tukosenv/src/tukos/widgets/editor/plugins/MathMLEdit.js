@@ -1,6 +1,6 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-class", "dojo/ready", "dojo/when", "dojo/string", "dojo/keys", "dijit/_editor/_Plugin", "dijit/form/DropDownButton", "dijit/layout/ContentPane",
-	"dijit/registry", "dijit/popup", "dojox/editor/plugins/EntityPalette", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/hiutils", "tukos/menuUtils", "tukos/PageManager", "tukos/widgets/editor/plugins/_HtmlSourceInserter"], 
-function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, ContentPane, registry, popup, EntityPalette, TooltipDialog, utils, hiutils, mutils, Pmg, _HtmlSourceInserter) {
+	"dijit/registry", "dijit/popup", "dojox/editor/plugins/EntityPalette", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/hiutils", "tukos/menuUtils", "tukos/PageManager"/*, "tukos/widgets/editor/plugins/_HtmlSourceInserter"*/], 
+function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, ContentPane, registry, popup, EntityPalette, TooltipDialog, utils, hiutils, mutils, Pmg/*, _HtmlSourceInserter*/) {
 	var textTags = ['mi','mo', 'mn', 'mtext'], openingParenthesis = {')': '(', ']': '[', '}': '{', '|': '|'},
 		isTextTag = function(tag){
 			return textTags.indexOf(tag) > -1;
@@ -77,7 +77,7 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
 		symbols = [['parentheses', 'sqBrackets', 'clBrackets', 'leftClBrackets', 'doubleVertBrackets', 'angleBrackets', 'ket', 'bra', 'braket'], ['frac', 'msup', 'msub', 'msubsup', 'mover', 'sum', 'int', 'sqrt'], ['table21'], 
 			['hamilt', 'lagran', 'planckh', 'hbar', 'part', 'kro', 'thinsp']];
 
-    var MathMLEdit = declare([_Plugin, _HtmlSourceInserter], {
+    var MathMLEdit = declare([_Plugin/*, _HtmlSourceInserter*/], {
         menuDescription: function(){
         	return {type: 'Menu',
             	items: [

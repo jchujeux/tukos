@@ -58,7 +58,11 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			editor.widgetName = this.widgetName;
 			editor.pane = this.pane;
 			editor.lazyEditor = this;
-			editor.set({height: height || "auto", width: "100%"});
+			if (this.editorType === 'basic'){
+				domStyle.set(editor.domNode, {maxHeight: htmlContent.get('style').height || 'auto'});
+			}else{
+				editor.set({height: height || "auto", width: "100%"});
+			}
 			if (editor.iframe){
 				editor.iframe.style.height = height;
 				domStyle.set(editor.editingArea, {height: height, width: "auto"});

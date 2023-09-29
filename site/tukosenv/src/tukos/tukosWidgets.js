@@ -61,7 +61,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-construct", "dojo/keys",
 			
 	return {
     	widgetTypes: function(){
-    		return utils.objectKeys(widgetParams);
+    		return Object.keys(widgetParams);
     	},
     	widgetParams: function(widgetType){
     		return ['name', 'type'].concat(widgetParams[widgetType]);

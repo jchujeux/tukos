@@ -63,10 +63,10 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/on", "dojo/promise/all",
                         onWatchLocalAction: onWatch('sendas', this.sendAsWatchAction)
                     }},
                     fileheadertemplate: {type: 'LazyEditor', atts: {label: messages.fileheadertemplate, height: '100px', style: {backgroundColor: 'White'}, onWatchLocalAction: onWatch('fileheader', this.templateWatchAction)}},
-                    template: {type: 'LazyEditor', atts: {label: messages.template, height: '130px', style: {backgroundColor: 'White'}, onWatchLocalAction: onWatch('content', this.templateWatchAction)}},
+                    template: {type: 'LazyEditor', atts: {label: messages.template, height: '130px', style: {backgroundColor: 'White', minHeight: '130px'}, onWatchLocalAction: onWatch('content', this.templateWatchAction)}},
                     filefootertemplate: {type: 'LazyEditor', atts: {label: messages.filefootertemplate, height: '100px', style: {backgroundColor: 'White'}, onWatchLocalAction: onWatch('filefooter', this.templateWatchAction)}},
                     filecovertemplate: {type: 'LazyEditor', atts: {label: messages.filecovertemplate, height: '100px', style: {backgroundColor: 'White'}, onWatchLocalAction: onWatch('coverpage', this.templateWatchAction)}},
-                    close: {type: 'TukosButton', atts: {label: messages.close, onClick: function(){this.pane.close();}}},
+                    close: {type: 'TukosButton', atts: {label: Pmg.message('close'), onClick: function(){this.pane.close();}}},
                     sendemail: {type: 'TukosButton', atts: {label: messages.sendemail, onClick: lang.hitch(this, this.sendEmail)}},
                     savefile: {type: 'TukosButton', atts: {label: messages.savefile, onClick: lang.hitch(this, this.saveFile)}}
                 },

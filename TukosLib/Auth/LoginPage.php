@@ -38,9 +38,10 @@ class LoginPage{
         }
         $view->authentication = Tfk::tr(Tfk::$registry->appName . 'HeaderBanner', 'none');// . ' - ' . Tfk::tr('Authentication');
         $view->serverFeedback = Tfk::tr($svrFeedback);
-        $view->headerBanner =  Tfk::tr(Tfk::$registry->headerBanner);
-        $view->confidentialityPolicy =  '<font size="2"><span style="font-style: italic;"><a href="https://tukos.site/tukos/Politique%20de%20confidentialit%C3%A9%20-%20fran%C3%A7ais.htm" target="_blank">'  . 
-            "Politique de confidentialit&eacute" . '</a></span></font>';
+        $view->headerBanner = $isMobile ? Tfk::tr(Tfk::$registry->headerBanner, 'addslashes') : Tfk::tr(Tfk::$registry->headerBanner);
+        $view->orgLink = Tfk::tr(Tfk::$registry->orgLink);
+        $view->confidentialityPolicy =  '<font size=\"2\"><span style=\"font-style: italic;\"><a href=' . Tfk::$registry->rootUrl . Tfk::tr('privacypolicyurl') . ' target=\"_blank\">'  . 
+            Tfk::tr('privacypolicy') . '</a></span></font>';
         $view->logo = Tfk::$registry->logo;
         $view->pageManagerArgs = json_encode(['isMobile' => Tfk::$registry->isMobile, 'messages' => Tfk::$registry->get('translatorsStore')->getTranslations(['authenticationfailed'], 'Page')]);
         $viewRegistry = $view->getViewRegistry();

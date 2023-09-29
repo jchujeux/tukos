@@ -48,11 +48,7 @@ class View extends AbstractView {
             'priority'          => ViewUtils::storeSelect('priority', $this, 'Priority', null, ['atts' => ['edit' => ['placeHolder' => 'from urgency and impact', 'disabled' => true, 'style' => ['fontWeight' => 700]]]]),
             'progress'            => ViewUtils::storeSelect('incidentsProgress', $this, 'Progress', null, [
                     'atts' => ['edit' => [
-                            'onChangeServerAction' => [
-                                'inputWidgets' => ['parentid', 'progress'],
-                                //'outputWidgets' => ['assignedto'],
-                                'urlArgs' => ['query' => ['params' => json_encode(['getOne' => 'getProgressChanged'])]],
-                            ],
+                            'onWatchLocalAction' => ['value' => ['progress' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->onProgressLocalAction()]]]]
                         ],
                     ],
                 ]
@@ -81,11 +77,22 @@ class View extends AbstractView {
                     'object' => $this->objectName,
                     'colsDescription' => $this->widgetsDescription($gridCols, false), 
                     'objectIdCols' => array_values(array_intersect($gridCols, $this->model->idCols)),
-                    'maxHeight' => '300px', 'colspan' => 1, 'disabled' => true
+                    'maxHeight' => '300px', 'colspan' => 1, 'disabled' => true,
+                'storeArgs' => ['idProperty' => 'idg']
                 ]
             ],
         ];
 
+    }
+    function onProgressLocalAction(){
+        return <<<EOT
+return Pmg.serverDialog({object: 'itincidents', view: 'Edit', action: 'Process', query: {parentid: sWidget.valueOf('parentid'), progress: sWidget.valueOf('progress'), params: {process: 'getProgressChanged', noget: true}}}).then(function(response){
+    utils.forEach(response.data, function(value, widgetName){
+        sWidget.setValueOf(widgetName, value);
+    });
+});
+EOT
+        ;
     }
 }
 ?>

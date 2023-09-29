@@ -33,8 +33,12 @@ define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferre
             if (body){
                 var functionName = action + 'ActionFunction';
             	if (!object[functionName]){
-                    var myEval = object.myEval || (object.myEval = lang.hitch(object, this.eval));
-                    object[functionName] = myEval(body, evalArgs || '');
+                    if (typeof body === 'function'){
+						object[functionName] = body;
+					}else{
+	                    var myEval = object.myEval || (object.myEval = lang.hitch(object, this.eval));
+	                    object[functionName] = myEval(body, evalArgs || '');
+					}
                 }
                 return object[functionName](args);
             }

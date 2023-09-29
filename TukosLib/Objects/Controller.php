@@ -32,7 +32,7 @@ class Controller extends ObjectTranslator{
     function response($request, $query, $ignoreUnallowed = false){
         $this->request = $request;
         $this->paneMode = $request['mode'];
-        if ($this->user->isAllowed($request['object'], $query)){
+        if ($request['action'] === 'ObjectSelect' || $this->user->isAllowed($request['object'], $query)){
             try{
                 $action = $this->objectsStore->objectAction($this, $request);
                 if (isset($query['storeatts']) && isset($this->view->dataWidgets) && !empty($query['storeatts']['where'])){

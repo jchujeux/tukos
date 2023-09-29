@@ -16,7 +16,7 @@ class Tab extends AbstractAction{
         $this->actionViewModel->respond($formContent, $query);
         return [
             'title'       => $this->view->tabEditTitle($item = $formContent['data']['value']),
-            'titleTukosTooltip' => ['label' => '', 'onClickLink' => ['label' => Tfk::tr('help'), 'name' => $formContent['object'] . 'EditTukosTooltip']],
+            'titleTukosTooltip' => ['label' => '', 'onClickLink' => ['label' => Tfk::tr('help'), 'name' => $formContent['object'] . 'EditTukosTooltip', 'object' => $formContent['object']]],
             'contentId' => Utl::getItem('id', $item),
             'contentName' => Utl::getItem('name', $item),
             'closable'    => true,

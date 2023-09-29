@@ -61,19 +61,41 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				}
 			},
 			forEach: function(object, callback) {
-				for (var key in object) {
-					if (object.hasOwnProperty(key)) {
-						callback(object[key], key, object);
+				if (object){
+					switch (typeof(object)){
+						case 'object':
+							if (Array.isArray(object)){
+								object.forEach(function(item, key, object){
+									callback(item, key, object);
+								});
+							}else{
+								const keys = Object.keys(object);
+								for (const key of keys){
+									callback(object[key], key, object);
+								}
+							}
 					}
 				}
 			},
 			some: function(object, callback) {
 				var result = false;
-				for (var key in object) {
-					if (object.hasOwnProperty(key)) {
-						if ((result = callback(object[key], key, object))) {
-							return result;
-						}
+				if (object){
+					switch (typeof(object)){
+						case 'object':
+							if (Array.isArray(object)){
+								for (const key of object){
+									if ((result = callback(object[key], key, object))) {
+										return result;
+									}
+								}
+							}else{
+								const keys = Object.keys(object);
+								for (var key of keys){
+									if ((result = callback(object[key], key, object))) {
+										return result;
+									}
+								}					
+							} 		
 					}
 				}
 				return result;
@@ -96,7 +118,23 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				}
 				return object;
 			},
-			objectKeys: function(object) {
+			filterRecursive: function(object, callback){//removes branches with empty leaves
+				if (this.isObject(object)){
+					const keys = Object.keys(object);
+					for (var key of keys){
+						if ((callback || this.empty)(object[key])){
+								delete object[key];
+							}else{
+								this.filterRecursive(object[key]);
+								if ((callback || this.empty)(object[key])){
+									delete object[key];
+								}
+							}
+					}
+				}
+				return object;
+			},
+			/*objectKeys: function(object) {
 				var objectKeys = [];
 				for (var key in object) {
 					if (object.hasOwnProperty(key)) {
@@ -104,7 +142,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					}
 				}
 				return objectKeys;
-			},
+			},*/
 			object_search: function(needle, object) {
 				for (var key in object) {
 					if (object.hasOwnProperty(key) && object[key] === needle) {
@@ -226,13 +264,17 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					return source;
 				}
 			},
-			mergeRecursive: function(target, source) { //Use the returned value to be sure to get the modified value in all cases
+			mergeRecursive: function(target, source, concatenateArrays) { //Use the returned value to be sure to get the modified value in all cases
 				var self = this;
 				this.wasModified = false;
 				var mergeRecursive = function(target, source) {
 					for (var i in source) {
 						if (self.isObject(target[i]) && self.isObject(source[i])) {
-							mergeRecursive(target[i], source[i]);
+							if (concatenateArrays && Array.isArray(target[i]) && Array.isArray(source[i])){
+								target[i] = target[i].concat(source[i]);
+							}else{
+								mergeRecursive(target[i], source[i]);
+							}
 						} else {
 							if (target[i] !== source[i]) {
 								target[i] = source[i];
@@ -547,6 +589,17 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					}
 				}
 				return transformedData;
+			},
+			selectedAction: function(sWidget, tWidget, newValue){
+				if (newValue){
+				    var grid = sWidget.parent, collection = grid.collection, idp = collection.idProperty, dirty = grid.dirty;
+				    collection.fetchSync().forEach(function(item){
+				        var idv = item[idp], dirtyItem = dirty[idv], sName = sWidget.widgetName;
+				        if (((dirtyItem && dirtyItem.hasOwnProperty(sName) && (dirtyItem[sName]) || item[sName])) && tWidget.row.id != idv){
+				            grid.updateDirty(idv, sName, false);
+				        }
+				    })
+				}
 			}
 		};
 	});

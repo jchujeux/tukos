@@ -11,8 +11,10 @@ define (["dojo/_base/declare", "dojo/when", "dijit/form/Button", "dijit/popup", 
                     var dropDown = self.dropDown,
                         newAction = function(dupid){
                         	form.resetChangedWidgets();
-                    		form.serverDialog({action: 'Edit', query: dupid ? {dupid: dupid} : {}}, [], form.get('dataElts'), Pmg.message('actionDone'), true).then(function(){
-								self.postAction();
+                    		when(form.serverDialog({action: 'Edit', query: dupid ? {dupid: dupid} : {}}, [], form.get('dataElts'), Pmg.message('actionDone'), true), function(response){
+								if (response !== false){
+									self.postAction();
+								}
 							}); 
                         	popup.close(self.dropDown);
                     	},

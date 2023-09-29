@@ -23,7 +23,7 @@ class TukosModel {
         'updated'      =>  "timestamp",
         'creator'      =>  'INT(11) NOT NULL',
         'updator'      =>  'INT(11) NOT NULL',
-        'permission'   =>  "ENUM ('NOTDEFINED', 'PL',  'PR', 'RL',  'RO', 'UL', 'PU', 'ACL')",
+        'permission'   =>  "ENUM ('PL',  'PR', 'RL',  'RO', 'UL', 'PU')",
         'acl'           => 'longtext',
         'grade'          =>  "ENUM ('TEMPLATE', 'NORMAL', 'GOOD', 'BEST')",
         'worksheet'    =>  'longtext',
@@ -44,16 +44,17 @@ class TukosModel {
     	$this->colsDescription = $this->_colsDefinition;
         if (!$this->store->tableExists($this->tableName)){
             $now = date('Y-m-d H:i:s');
+            $tukosUserId = Tfk::tukosUserId;
             $this->store->createTable($this->tableName, $this->_colsDefinition, $this->_colsIndexes);
-            $this->store->insert(['id' => Tfk::tukosSchedulerUserId, 'name' => 'tukosscheduler', 'object' => 'users', 'contextid' => 1, 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => 13, 'updator' => 13], ['table' => $this->tableName]);
-            $this->store->insert(['id' => Tfk::tukosUserId, 'name' => 'tukos', 'object' => 'users', 'contextid' => 1, 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => 13, 'updator' => 13], ['table' => $this->tableName]);
-            $this->store->insert(['id' => Tfk::tukosBackOfficeUserId, 'name' => 'tukosBackOffice', 'object' => 'users', 'contextid' => 1, 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => 13, 'updator' => 13], ['table' => $this->tableName]);
+            $this->store->insert(['id' => Tfk::tukosSchedulerUserId, 'name' => 'tukosscheduler', 'object' => 'users', 'contextid' => 1, 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => $tukosUserId, 'updator' => $tukosUserId], ['table' => $this->tableName]);
+            $this->store->insert(['id' => Tfk::tukosUserId, 'name' => 'tukos', 'object' => 'users', 'contextid' => 1, 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => $tukosUserId, 'updator' => $tukosUserId], ['table' => $this->tableName]);
+            $this->store->insert(['id' => Tfk::tukosBackOfficeUserId, 'name' => 'tukosBackOffice', 'object' => 'users', 'contextid' => 1, 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => $tukosUserId, 'updator' => $tukosUserId], ['table' => $this->tableName]);
             require __DIR__.'/Admin/Users/Model.php';
             $this->store->createTable('users', array_merge([ 'id'  =>  'INT(11) PRIMARY KEY'], UserModel::$_colsDefinition), UserModel::$_colsIndexes);
             $this->store->insert(['id' => Tfk::tukosSchedulerUserId, 'rights' => 'SUPERADMIN'], ['table' => 'users']);
             $this->store->insert(['id' => Tfk::tukosUserId, 'rights' => 'SUPERADMIN'], ['table' => 'users']);
             $this->store->insert(['id' => Tfk::tukosBackOfficeUserId, 'rights' => 'RESTRICTEDUSER'], ['table' => 'users']);
-            $this->store->insert(['id' => 1, 'name' => 'tukos', 'object' => 'contexts', 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => 2, 'updator' => 2], ['table' => $this->tableName]);
+            $this->store->insert(['id' => 1, 'name' => 'tukos', 'object' => 'contexts', 'permission' => 'RO', 'created' => $now, 'updated' => $now, 'creator' => $tukosUserId, 'updator' => $tukosUserId], ['table' => $this->tableName]);
             $this->store->createTable($this->_nextIdTable, [/*'id' => 'INT(11)', */'configrange' => 'VARCHAR(20) PRIMARY KEY', 'nextid' => 'INT(11)', 'updated' => 'datetime']);
             forEach (Directory::configStatusRange() as $status => $range){
             	$this->store->insert(['configrange' => $status, 'nextid' => $range, 'updated' => date('Y-m-d H:i:s')], ['table' => $this->_nextIdTable]);

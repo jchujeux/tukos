@@ -1,6 +1,8 @@
 <?php
 namespace TukosLib\Objects;
 
+use TukosLib\TukosFramework as Tfk;
+
 class Directory{
     private static $directory =  [
         'tukos'             => 'Tukos',
@@ -12,12 +14,13 @@ class Directory{
         'contexts'          => 'Admin\Contexts',
         'objrelations'      => 'Admin\ObjRelations',
         'translations'      => 'Admin\Translations',
+        'glossary'      => 'Admin\Translations',
         'mailsmtps'         => 'Admin\Mail\Smtps',
         'mailservers'       => 'Admin\Mail\Servers',
         'mailaccounts'      => 'Admin\Mail\Accounts',
-        'mailboxes'         => 'Admin\Mail\Boxes',
+        /*'mailboxes'         => 'Admin\Mail\Boxes',
         'mailmessages'      => 'Admin\Mail\Messages',
-        'mailtukosmessages' => 'Admin\Mail\TukosMessages',
+        'mailtukosmessages' => 'Admin\Mail\TukosMessages',*/
         'scripts'           => 'Admin\Scripts',
         'scriptsoutputs'    => 'Admin\Scripts\Outputs',
         'health'            => 'Admin\Health',
@@ -97,6 +100,7 @@ class Directory{
         ];
     private static $objectsDomainAliases = ['people' => ['bustrack' => 'bustrackpeople', 'sports' => 'sptathletes', 'physio' => 'physiopatients'], 'organizations' => ['bustrack' => 'bustrackorganizations', 'wine' => 'winegrowers'], 'bustrackquotes' => ['physio' => 'physiopersoquotes']];
     private static $configStatusRange = ['tukos' => 16, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'users' => 10001];
+    private static $translatedModules = [];
     
     public static function objectsDomainAliases(){
         return self::$objectsDomainAliases;
@@ -113,8 +117,20 @@ class Directory{
     public static function getObjs(){
         return array_keys(self::$directory);
     }
+    public static function getModules(){
+        return array_diff(array_keys(self::$directory), ['tukos', 'backoffice']);
+    }
+    public static function getTranslatedModules(){
+        if (empty(self::$translatedModules)){
+            $modules = self::getModules();
+            foreach ($modules as $module){
+                self::$translatedModules[$module] = Tfk::tr($module);
+            }
+        }
+        return self::$translatedModules;
+    }
     public static function getNativeObjs(){
-        return array_diff(array_keys(self::$directory), ['tukos', 'backoffice', 'mailboxes', 'mailmessages', 'translations']);
+        return array_diff(array_keys(self::$directory), ['tukos', 'navigation', 'backoffice'/*, 'mailboxes', 'mailmessages'*/, 'translations']);
     }
     public static function getDomains(){
         $domains = [];

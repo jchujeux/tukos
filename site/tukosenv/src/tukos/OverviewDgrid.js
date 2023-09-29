@@ -97,7 +97,16 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
             var widgetDescription = grid.colValueWidgetsDescription[field];    
         	switch (widgetDescription.type){
         		case 'CheckBox': lang.setObject('atts.style', {marginLeft: '40%'}, widgetDescription); break;
-        		case 'LazyEditor': break;
+        		case 'LazyEditor': lang.setObject('atts.style.height', '300px', widgetDescription); break;
+        		case 'ObjectEditor': widgetDescription = {type: 'TukosTextarea', atts: {style: {maxHeight: '300px'}, onMouseUp: function(evt){
+							console.log("is mouseup");
+							if (this.domNode.clientHeight != this.mouseDownHeight){
+								grid.resize();
+							}
+						}, onMouseDown: function(){
+							this.mouseDownHeight = this.domNode.clientHeight;
+						}
+					}};
         		default: lang.setObject('atts.style.width', '100%', widgetDescription); break;
         	}
             widgetDescription.atts.placeHolder = messages.entertargetvalue;

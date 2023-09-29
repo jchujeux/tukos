@@ -2,6 +2,7 @@
 namespace TukosLib\Objects\Physio\Assesments;
 
 use TukosLib\Objects\AbstractModel;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {
@@ -25,17 +26,17 @@ class Model extends AbstractModel {
         if (!empty($result['parentid'])){
             $prescriptionsModel = Tfk::$registry->get('objectsStore')->objectModel('physioprescriptions');
             $prescription = $prescriptionsModel->getOneExtended(['where' => ['id' => $result['parentid']], 'cols' => ['parentid', 'prescriptor']]);
-            $result['patient'] = $prescription['parentid'];
-            $result['prescriptor'] = $prescription['prescriptor'];
+            $result['patient'] = Utl::getItem('patient', $prescription);
+            $result['prescriptor'] = Utl::getItem('prescriptor', $prescription);
         }
         return $result;
     }
 
-    public function getDescriptionChanged($atts){
-        if (!empty($atts['where']['parentid'])){
+    public function getPrescriptionChanged($query){
+        if (!empty($query['parentid'])){
             $objectsStore = Tfk::$registry->get('objectsStore');
             $prescriptionsModel = $objectsStore->objectModel('physioprescriptions');
-            $prescription = $prescriptionsModel->getOneExtended(['where' => ['id' => $atts['where']['parentid']], 'cols' => ['name', 'parentid', 'prescriptor']]);
+            $prescription = $prescriptionsModel->getOneExtended(['where' => ['id' => $query['parentid']], 'cols' => ['name', 'parentid', 'prescriptor']]);
             if (isset($prescription)){
                 $patientId = $prescription['parentid'];
                 if (!empty($patientId)){
@@ -44,10 +45,10 @@ class Model extends AbstractModel {
                 }else{
                     $patientName = '';
                 }
-                return ['patient' => $patientId, 'prescriptor' => $prescription['prescriptor'], 'name' => $patientName . '-' . $prescription['name'] . '-' . $this->tr($atts['where']['assesmenttype'])];
+                return ['patient' => $patientId, 'prescriptor' => $prescription['prescriptor'], 'name' => $patientName . '-' . $prescription['name'] . '-' . $this->tr($query['assesmenttype'])];
             }
         }
-        return ['patient' => '', 'prescriptor' => '', 'name' => ''];
+        return ['data' => ['patient' => '', 'prescriptor' => '', 'name' => '']];
     }
 }
 ?>

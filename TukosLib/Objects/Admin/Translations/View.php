@@ -16,6 +16,7 @@ class View extends AbstractView {
         $this->user  = Tfk::$registry->get('user');
         $this->sendOnSave = $this->sendOnDelete = [];
         $this->mustGetCols = ['id'];
+        $this->tr = Tfk::$tr;//so that admin in setname is translated as administration, not administrator
         $tr = $this->tr;
         $customizableAtts = [$tr('editorType') => ['att' => 'editorType', 'type' => 'StoreSelect', 'name' => $tr('editorType'), 'storeArgs' => ['data' => [['id' => 'normal', 'name' => $tr('normal')], ['id' =>  'simple', 'name' =>  $tr('simple')], ['id' =>  'basic', 'name' =>  $tr('basic')]]]]];
         $this->dataWidgets = [
@@ -30,17 +31,15 @@ class View extends AbstractView {
             'name'      => ViewUtils::textArea($this, 'Translation key', ['atts' => ['storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
         	'setname'  => ViewUtils::storeSelect('setName', $this, 'Translation set'),
             'en_us'    => ViewUtils::lazyEditor($this, 'English', ['atts' => ['edit' => [
-                'height' => '12em',
-                'height' => '12em', 'editorType' => 'basic',
+                'height' => '550px', 'editorType' => 'normal',
                 'customizableAtts' => $customizableAtts
             ]]]),
-            'fr_fr'    => ViewUtils::lazyEditor($this, 'French', ['atts' => ['edit' => [
-                'height' => '12em', 'editorType' => 'basic',
+            'fr_fr'    => ViewUtils::lazyEditor($this, 'fr_fr', ['atts' => ['edit' => [
+                'height' => '550px', 'editorType' => 'normal',
                 'customizableAtts' => $customizableAtts
             ]]]),
             'es_es'    => ViewUtils::lazyEditor($this, 'Spanish', ['atts' => ['edit' => [
-                'height' => '12em',
-                'height' => '12em', 'editorType' => 'basic',
+                'height' => '550px', 'editorType' => 'normal',
                 'customizableAtts' => $customizableAtts
             ]]])
         ];
@@ -48,6 +47,7 @@ class View extends AbstractView {
         $this->responseContent = null;
         $this->subObjects = [];
         $this->customContentAtts = ['overview' => ['widgetsDescription' => ['overview' => ['atts' => ['sort' => [['property' => 'id', 'descending' => true]]]]]]];
+        $this->jsonColsPathsView = [];
         $this->customize([]);
     }
     function gridCols(){// cols which are rendered on the overview grid & on subobjects grids

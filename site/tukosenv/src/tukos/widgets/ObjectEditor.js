@@ -2,7 +2,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dijit/_W
 function(declare, lang, dct, Widget, utils, hiutils, wutils){
     return declare(Widget, {
         postCreate: function(){
-        	if (this.isEditTabWidget){
+        	if (this.isEditTabWidget && !this.checkBoxChangeCallback){
         		this.checkBoxChangeCallback = lang.hitch(wutils, wutils.markAsChanged, this);
         	}
         },

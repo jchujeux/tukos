@@ -23,17 +23,10 @@ class View extends AbstractView {
             'auth'     => ViewUtils::storeSelect('auth', $this, 'Auth'),
         ];
         if ($this->user->isSuperAdmin()){
-            $tukosMailHost = Tfk::$registry->get('appConfig')->mailConfig['host'];
-            $customDataWidgets['software'] = ViewUtils::storeSelect('software', $this, 'Software');
             $customDataWidgets['adminpwd'] = ViewUtils::textBox($this, 'Admin Password', ['atts' => ['edit' =>  ['type' => 'password']], 'editToObj' => ['encrypt' => ['class' => $this->user, 'shared']]]);
-            $customDataWidgets['hostname']['atts']['edit']['onChangeLocalAction'] = [
-                'software' => ['hidden' =>"if (newValue === '" . $tukosMailHost . "'){return false;}else{return true}"],
-                'adminpwd' => ['hidden' =>"if (newValue === '" . $tukosMailHost . "'){return false;}else{return true}"],
-                'process'  => ['hidden' =>"if (newValue === '" . $tukosMailHost . "'){return false;}else{return true}"],
-            ];
-            $this->customize($customDataWidgets, [], ['get' => ['adminpwd'], 'grid' => ['software', 'adminpwd']]);
+            $this->customize($customDataWidgets, [], ['get' => ['adminpwd'], 'grid' => ['adminpwd']]);
             $this->customContentAtts = [
-                'edit' => ['actionLayout' => ['contents' => ['actions' => ['tableAtts' => ['cols' => 7], 'widgets' => ['save', 'reset', 'delete', 'duplicate', 'new', 'edit', 'process']]]]],
+                'edit' => ['actionLayout' => ['contents' => ['actions' => ['tableAtts' => ['cols' => 7], 'widgets' => ['save', 'reset', 'delete', 'duplicate', 'new', 'edit']]]]],
             ];
         }else{
             $this->customize($customDataWidgets);

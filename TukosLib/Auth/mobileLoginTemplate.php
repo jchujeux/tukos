@@ -49,7 +49,7 @@
         <?= $this->addUserNameForm?>
 		loginView.startup();
 		var svrFeedbackDiv = dct.create('div', {hidden: true, id: 'svrFeedback', style: {textAlign: 'center'}}, loginView.domNode);
-		dct.create('div', {style: {textAlign: 'center'}, innerHTML: '<br><?= $this->confidentialityPolicy ?>'}, loginView.domNode);
+		dct.create('div', {style: {textAlign: 'center'}, innerHTML: "<br><a href=\"<?= $this->orgLink?>\" target=\"_blank\"><?= $this->headerBanner ?><br><br><?= $this->confidentialityPolicy ?>"}, loginView.domNode);
     });
 </script>
 </head>

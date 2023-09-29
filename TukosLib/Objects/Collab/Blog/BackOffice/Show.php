@@ -56,14 +56,22 @@ class Show extends ObjectTranslator{
     function get($query){
         Utl::extractItems(['object', 'form'], $query);
         $values = $this->blogModel->getOne(['where' => $this->user->filterPrivate($query), 'cols' => ['id', 'parentid', 'name', 'comments', 'published', 'updated', 'creator', 'updator'], 'orderby' => ['blog.published DESC']]);
-        $publisher = $this->user->peoplefirstAndLastNameOrUserName($values['creator']);
-        $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']) . '<br><a nohref="" onclick="parent.tukos.Pmg.editorGotoUrl(\'' . Tfk::$registry->blogUrl . '/post?id=' . $values['id'] . 
-            '\', event)" style="color:blue; cursor:pointer; text-decoration:underline;" target="_blank">'  . $this->view->tr('directlink') . '</a>';
-        if ($values['updated'] > $values['published']){
-            $updator = $this->user->peoplefirstAndLastNameOrUserName($values['updator']);
-            $postedByAndWhen .= "&nbsp;&nbsp;&nbsp;&nbsp;<i>{$this->view->tr('updatedon')}</i> " . DUtl::toUTC($values['updated']);
+        if (empty($values) && $name = Utl::getItem('name', $query)){
+            $values = $this->blogModel->getOne(['where' => $this->user->filterPrivate([['col' => 'name', 'opr' => 'RLIKE', 'values' => $name]]), 'cols' => ['id', 'parentid', 'name', 'comments', 'published', 'updated', 'creator', 'updator'], 'orderby' => ['blog.published DESC']]);
         }
-        return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'postedbyandwhen' => $postedByAndWhen, 'comments' => $values['comments']];
+        if (!empty($values)){
+            $publisher = $this->user->peoplefirstAndLastNameOrUserName($values['creator']);
+            $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']) . '<br><a nohref="" onclick="parent.tukos.Pmg.editorGotoUrl(\'' . Tfk::$registry->blogUrl . '/post?id=' . $values['id'] .
+            '\', event)" style="color:blue; cursor:pointer; text-decoration:underline;" target="_blank">'  . $this->view->tr('directlink') . '</a>' . '&nbsp; (id: ' . $values['id'] . ')';
+            if ($values['updated'] > $values['published']){
+                $updator = $this->user->peoplefirstAndLastNameOrUserName($values['updator']);
+                $postedByAndWhen .= "&nbsp;&nbsp;<i>{$this->view->tr('updatedon')}</i> " . DUtl::toUTC($values['updated']);
+            }
+            return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'postedbyandwhen' => $postedByAndWhen, 'comments' => $values['comments']];
+        }else{
+            $postNotFound = $this->view->tr('postnotfound');
+            return ['id' => 0, 'name' => '', 'posttitle' => $postNotFound, 'postedbyandwhere' => '', 'comments' => ''];
+        }
     }
     function save($query, $valuesToSave){
         return false;

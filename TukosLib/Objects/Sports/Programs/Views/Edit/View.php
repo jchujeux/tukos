@@ -25,7 +25,7 @@ class View extends EditView{
             	'row1' => [
                     'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => '130'],
                     'widgets' => ['id', 'parentid', 'coach', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'coachemail', 'coachorganization', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter',
-                        'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'stsratio', 'initialsts', 'initiallts', 'initialprogressivity', 'displayfromdate', 'displayfromsts', 'displayfromlts', 'synchrosource']
+                        'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'stsratio', 'initialsts', 'initiallts', 'initialhracwr', 'displayfromdate', 'displayfromsts', 'displayfromlts', 'synchrosource']
                 ],
             	'row2' => [
             	    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['80%', '20%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      

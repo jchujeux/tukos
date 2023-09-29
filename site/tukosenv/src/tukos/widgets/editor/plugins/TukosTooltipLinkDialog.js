@@ -12,7 +12,10 @@ define([
 ], function(dojo, dijit, domAttr, _Plugin, registry, lang, on, has, string, Pmg) {
 
     var TukosTooltipLinkDialog = dojo.declare(_Plugin, {
-        htmlTemplate: "<span onclick=\"event.stopImmediatePropagation();if (!getElementById('dijitEditorBody')){opener.tukos.Pmg.viewTranslatedInBrowserWindow('${tukosTooltipNameInput}TukosTooltip', '${tukosObjectInput}');}\" style=\"color: blue; cursor: pointer; text-decoration: underline;\">${textInput}</span>",
+        htmlTemplateBrowser: 
+        	"<span onclick=\"event.stopImmediatePropagation();(opener||parent||window).tukos.Pmg.viewTranslatedInBrowserWindow('${tukosNameInput}', '${tukosObjectInput}', '${languageInput}');\" style=\"color: blue; cursor: pointer; text-decoration: underline;\">${textInput}</span>",
+        htmlTemplateTooltip: 
+        	"<span onmouseover=\"var node=this, delay=setTimeout(function(){(opener||parent||window).tukos.Pmg.viewTranslatedInTooltipWindow(node, '${tukosNameInput}', '${tukosObjectInput}', '${languageInput}');}, 500);node.onmouseout=function(){clearTimeout(delay);node.removeAttribute('title');};\" style=\"color: blue; cursor: pointer;\">${textInput}</span>",
         // tag: [protected] String
         //		Tag used for the link type.
         tag: "span",
@@ -26,13 +29,19 @@ define([
         _template: [
             "<table role='presentation'>", 
             "<tr><td><label for='${id}_tukosNameInput'>${tooltipName}</label></td>",
-                "<td><input dojoType='dijit.form.ValidationTextBox' required='true' " + "id='${id}_tukosNameInput' name='tukosTooltipNameInput' intermediateChanges='true'>",
+                "<td><input dojoType='dijit.form.ValidationTextBox' required='true' " + "id='${id}_tukosNameInput' name='tukosNameInput' intermediateChanges='true'>",
             "</td></tr>",
             "<tr><td><label for='${id}_tukosObjectInput'>${object}</label></td>",
                 "<td><input dojoType='dijit.form.ValidationTextBox' required='true' id='${id}_tukosObjectInput' " + "name='tukosObjectInput' intermediateChanges='true'>",
             "</td></tr>",
             "<tr><td><label for='${id}_textInput'>${description}</label></td>",
                 "<td><input dojoType='dijit.form.ValidationTextBox' required='true' id='${id}_textInput' " + "name='textInput' intermediateChanges='true'>",
+            "</td></tr>",
+            "<tr><td><label for='${id}_languageInput'>${language}</label></td>",
+                "<td><input dojoType='dijit.form.ValidationTextBox' required='false' id='${id}_languageInput' " + "name='languageInput' intermediateChanges='true'>",
+            "</td></tr>",
+            "<tr><td><label for='${id}_isTooltipWindowCheckbox'>${isTooltipWindow}</label></td>",
+                "<td><input dojoType='dijit.form.CheckBox'  id='${id}_isTooltipWindowCheckbox' " + "name='isTooltipWindowCheckbox' >",
             "</td></tr>",
             "<tr><td colspan='2'>",
             "<button dojoType='dijit.form.Button' type='submit' id='${id}_setButton'>${apply}</button>",
@@ -43,7 +52,7 @@ define([
         _initButton: function(){
             // summary:
             //		Override _Plugin._initButton() to initialize DropDownButton and TooltipDialog.
-            var _this = this, messages = Pmg.messages(['createTukosTooltipLink', 'object', 'view', 'tooltipName', 'description', 'apply', 'cancel']);
+            var _this = this, messages = Pmg.messages(['createTukosTooltipLink', 'object', 'view', 'tooltipName', 'description', 'language', 'isTooltipWindow', 'apply', 'cancel']);
     
             // Build the dropdown dialog we'll use for the button
             var dropDown = (this.dropDown = new dijit.TooltipDialog({
@@ -170,7 +179,7 @@ define([
             // make sure values are properly escaped, etc.
             args = this._checkValues(args);
             this.editor.execCommand('inserthtml',
-                string.substitute(this.htmlTemplate, args));
+                string.substitute(args.isTooltipWindowCheckbox[0] === 'on' ? this.htmlTemplateTooltip : this.htmlTemplateBrowser, args));
         },
     
         _onCloseDialog: function(){
@@ -179,15 +188,23 @@ define([
             }
         },
         _getCurrentValues: function(tag){
-            var tukosName, tukosObject, text;
-            if(tag && tag.tagName.toLowerCase() === "span" && dojo.attr(tag, "tukosObject")){
-                tukosName = tag.getAttribute('tukosName');
-                tukosObject = tag.getAttribute('tukosObject');
-                this.editor.selection.selectElement(tag, true);
+            var tukosName, tukosObject, text, language, isTooltip;
+            if(tag && tag.tagName.toLowerCase() === "span"){
+            	const regExp = /(viewTranslatedInBrowserWindow|viewTranslatedInTooltipWindow)[^']*'([^']*)[' ,]*([^']*)[, ']*([^')]*)'?\)/g,
+            		  matchArray = regExp.exec(tag.outerHTML);
+                if (matchArray){
+                	if (matchArray[1] !== 'viewTranslatedInBrowserWindow'){
+						isTooltip = 'on';
+					}
+                	tukosName = matchArray[2];
+                	tukosObject = matchArray[3];
+                	language = matchArray[4];
+				}
+                text = tag.innerHTML;
             }else{
                 text = this.editor.selection.getSelectedText();
             }
-            return {tukosNameInput: tukosName || '', tukosObjectInput: tukosObject || '', textInput: text || ''};
+            return {tukosNameInput: tukosName || '', tukosObjectInput: tukosObject || '', textInput: text || '', languageInput: language, isTooltipWindowCheckbox: isTooltip};
         },
     
         _onOpenDialog: function(){

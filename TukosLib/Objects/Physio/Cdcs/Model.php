@@ -116,11 +116,11 @@ class Model extends AbstractModel {
         return $item;        	
     }
     
-    public function getPatientChanged($atts){
-        if (!empty($atts['where']['parentid'])){
+    public function getPatientChanged($query){
+        if (!empty($query['parentid'])){
             $objectsStore = Tfk::$registry->get('objectsStore');
             $patientsModel = $objectsStore->objectModel('physiopatients');
-            return $patientsModel->getOneExtended(['where' => ['id' => $atts['where']['parentid']], 'cols' => $this->patientCols]);
+            return $patientsModel->getOneExtended(['where' => ['id' => $query['parentid']], 'cols' => $this->patientCols]);
         }else{
         	foreach ($this->patientCols as $col){
         		$result[$col] = '';

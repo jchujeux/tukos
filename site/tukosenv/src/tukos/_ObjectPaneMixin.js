@@ -30,10 +30,19 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
         },
 
         serverDialog: function(urlArgs, data, emptyBeforeSet, defaultDoneMessage, markResponseIfChanged, clientTimeout){
-            var noLoadingIcon = this.noLoadingIcon;
+            var self = this, noLoadingIcon = this.noLoadingIcon;
             //Pmg.setFeedback(''/*messages.actionDoing*/);
             if (this.inServerDialog){
             	Pmg.setFeedback(Pmg.message('actionnotcompletedwait'), '', '', true);
+            	utils.waitUntil(
+					function(){
+						return !self.inServerDialog;
+					},
+					function(){
+						//Pmg.addFeedback(Pmg.message('nowitiscomplete'));
+					},
+					200
+				);
             	return false;//should be a deferred/promise
             }else{
                 this.inServerDialog = true;
@@ -42,7 +51,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
                 urlArgs.mode = urlArgs.mode || this.paneMode;
                 urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: this.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
                 return all(data).then(lang.hitch(this, function(data){
-                    return Pmg.serverDialog(urlArgs, {data: data, timeout: clientTimeout ? clientTimeout : 32000}, noLoadingIcon ? defaultDoneMessage : {widget: this.parent, att: 'title', defaultFeedback: defaultDoneMessage}).then(lang.hitch(this, function(response){
+                    return Pmg.serverDialog(urlArgs, {data: data, timeout: clientTimeout ? clientTimeout : 32000}, noLoadingIcon ? defaultDoneMessage : (this.parent ? {widget: this.parent, att: 'title', defaultFeedback: defaultDoneMessage} : defaultDoneMessage)).then(lang.hitch(this, function(response){
 	                    	if (response['data'] === false){
 	    	                        this.inServerDialog = false;
 	    	                		return response;
@@ -50,29 +59,33 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
 		                        this.markIfChanged = this.watchOnChange = false;
 		                        this.watchContext = 'server';
 		                        return when(this.emptyWidgets(emptyBeforeSet), lang.hitch(this, function(){;
-		                            this.resetChangedWidgets();
+		                            if (!markResponseIfChanged){
+		                            	this.resetChangedWidgets();
+									}
 		                            this.watchOnChange = true;
 		                            this.markIfChanged = (markResponseIfChanged && response.data.value && !response.data.value.id) ? true : false;
 		                            return when(this.setWidgets(response['data']), lang.hitch(this, function(){
 		                                if (response['title'] && dcl.contains(this.domNode.parentNode, 'dijitTabPane')){
 		                                    Pmg.tabs.setCurrentTabTitle(response['title']);
 		                                }
-		                                const serverFormContentData = this.parent.serverFormContent.data;
-		                                serverFormContentData.value = null;
-		                                serverFormContentData = utils.merge(serverFormContentData, response.data);
+		                                if (((this.parent || {}).serverFormContent || {}).data){
+			                                let serverFormContentData = this.parent.serverFormContent.data;
+			                                serverFormContentData.value = null;
+			                                serverFormContentData = utils.merge(serverFormContentData, response.data);
+										}
 		                                setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
 		                                	/*if (!this.markIfChanged){
 	    	                                    this.resetChangedWidgets();
 		                                	}*/
 		                                	this.markIfChanged = true;
 		                                	this.watchContext = 'user';
+		                            		self.inServerDialog = false;
 		                                }, 0));
 		                                ready(function(){
 		                                    if (Pmg.tabs){
 			                                	Pmg.tabs.currentPane().resize();	                                    	
 		                                    }
 		                                });
-		                                this.inServerDialog = false;
 		                                return response;
 		                            }));
 		                        }));

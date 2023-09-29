@@ -1,5 +1,5 @@
-define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string", "dojo/when", "dojo/promise/all", "tukos/utils", "tukos/tukosWidgets", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"],
-  function(lang, dct, dstyle, string, when, all, utils, tukosWidgets, Pmg, messages){
+define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "dojo/promise/all", "tukos/utils", "tukos/tukosWidgets", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"],
+  function(lang, dct, string, when, all, utils, tukosWidgets, Pmg, messages){
 	var separator = '|';
     return {
       
@@ -17,7 +17,9 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
 	                    var row = addTableRows(object[key]), rowCount = row.count;
 	                    if (rowCount > 0){
 	                        var keyTd = dct.create('td', {style: "border: 1px solid black; padding: 5px; vertical-align:top;", rowspan: rowCount});
-	                    	dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: keyToHtml(object[key]["#tKey"] || key)}, keyTd);
+	                    	dct.create('div', {contentEditable: true, onblur: function(evt){
+									console.log('onblur of a td from the table');
+								},style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: keyToHtml(object[key]["#tKey"] || key)}, keyTd);
 	                        row.tr.insertBefore(keyTd, row.tr.firstChild);
 	                        rowToReturn.count += rowCount;
 	                    }
@@ -33,7 +35,6 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
 	                    var row = {tr:dct.create('tr', null, table)};
 	                    dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: keyToHtml(tKey)}, dct.create('td', {style: "border: 1px solid black;padding: 5px; vertical-align:top;"} , row.tr));
 	                    dct.create('div', {style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: leafValue}, dct.create('td', {style: "border: 1px solid black;padding: 5px; vertical-align:top;font-style: italic"} , row.tr));
-	                    //var valueTd = dct.create('td', {innerHTML: object[key], style: "border: 1px solid black;padding: 5px; vertical-align:top;font-style: italic" + maxWidth}, row.tr);
 	                    if (hasCheckboxes){
 	                        var stringPath = checkboxPath.join('.');
 	                        var checkboxTd = dct.create('td', {style: "border: 1px solid black;padding: 5px;"}, row.tr);
@@ -42,6 +43,9 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
 	                            {type: 'checkbox', style: {width: '30px'}, onchange: lang.partial(
 	                                    function(stringPath, key, change){
 	                                        lang.setObject(stringPath, change.currentTarget.checked, selectedLeaves);
+	                                        if (!change.currentTarget.checked){
+												utils.filterRecursive(selectedLeaves);
+											}
 	                                        if (atts.checkBoxChangeCallback){
 	                                        	atts.checkBoxChangeCallback();
 	                                        }
@@ -63,7 +67,11 @@ define(["dojo/_base/lang", "dojo/dom-construct",  "dojo/dom-style", "dojo/string
             }
             return rowToReturn;
         }
-        var table = dct.create('table', {style: "border: 1px solid black; border-collapse: collapse; background-color: lightblue;"});
+        var table = dct.create('table', {/*contentEditable: true, oninput: function(evt){
+				console.log('I am in the input event of the contentEditable');
+			}, onblur: function(evt){
+				console.log('blur at teble level');
+			}, */style: "border: 1px solid black; border-collapse: collapse; background-color: lightblue;"});
         addTableRows(object);
         return table;  
     },

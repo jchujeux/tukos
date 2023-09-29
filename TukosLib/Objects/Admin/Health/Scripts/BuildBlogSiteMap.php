@@ -19,11 +19,11 @@ class BuildBlogSiteMap {
             */]);
             switch($store->dbName){
                 case 'tukosblog':
-                        $blogUrl = 'https://tukos.site/' . 'blog';
+                    $blogUrl = Tfk::$registry->rootUrl . '/blog';
                         $fullFileName = Tfk::$tukosPhpDir . 'tmp/sitemapblog.xml';
                         break;
                 case 'jchblog': 
-                        $blogUrl = 'https://tukos.site/' . 'jch/blog';
+                    $blogUrl = Tfk::$registry->rootUrl . '/jch/blog';
                         $fullFileName = Tfk::$tukosPhpDir . 'tmp/sitemapjchblog.xml';
                         break;
                 default: 

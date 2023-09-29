@@ -1,6 +1,6 @@
 <?php
 
-namespace TukosLib\Objects\Itm\Itsm\incidents\Views\Edit\Models;
+namespace TukosLib\Objects\Itm\Itsm\Incidents\Views\Edit\Models;
 
 use TukosLib\Objects\Views\Edit\Models\Get as EditGet;
 use TukosLib\Utils\Utilities as Utl;

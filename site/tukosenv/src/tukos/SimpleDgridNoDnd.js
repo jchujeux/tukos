@@ -10,30 +10,52 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/on",
 
         postCreate: function(){
             this.inherited(arguments);
-            if (!this.disabled){
-                var self = this;
-                var addedItems = [
-                        {atts: {label: messages.insertrowbefore  ,   onClick: function(evt){self.addRow('before')}}}, 
-                        {atts: {label: messages.addrow    ,   onClick: function(evt){self.addRow('append')}}}, 
-                        {atts: {label: messages.copyrow,   onClick: function(evt){self.copyRow(evt)}}}
-                ];
-                if (!this.noDeleteRow){
-                	addedItems.push({atts: {label:messages.deleterow,   onClick: function(evt){self.deleteRow()}}});
-                }
-                this.contextMenuItems.row = this.contextMenuItems.row.concat(addedItems);
-                this.contextMenuItems.idCol = this.contextMenuItems.idCol.concat(addedItems);
-                this.contextMenuItems.header.push({atts: {label: messages.addrow   ,   onClick: function(evt){self.addRow('append')}}});
-                if (this.columnsEdit){
-                    this.contextMenuItems.header.push({atts: {label: messages.insertcolumn, onClick: function(evt){self.addColumn()}}});
-                    this.contextMenuItems.header.push({atts: {label: messages.deletecolumn, onClick: function(evt){self.deleteColumn()}}});
-                }
-            }
+			this.setEditContextMenuItems(!this.disabled);
             this.revert();//Necessary for the children rows expansion / collapse to work (!)
         },
 		_setStore: function(storeArgs){
 			delete this.store;
 			this.store = new MemoryTreeObjects(storeArgs);
 			this.collection = this.store.getRootCollection();
+		},
+		_setDisabled: function(newValue){
+            if (newValue != this.disabled){
+            	this.setEditContextMenuItems(!newValue);
+            	this.disabled = newValue;
+			}
+		},
+		setEditContextMenuItems: function(canEdit){
+            if (canEdit){
+	            this.contextMenuItemsWithoutEdit = this.contextMenuItemsWithoutEdit || lang.clone(this.contextMenuItems);
+	            if (!this.disabled){
+	                const self = this;
+	                this.contextMenuItems = this.contextMenuItemsWithEdit || function(){
+		                self.contextMenuItemsWithEdit = lang.clone (self.contextMenuItemsWithoutEdit);
+		                const addedItems = [
+		                        {atts: {label: messages.insertrowbefore  ,   onClick: function(evt){self.addRow('before')}}}, 
+		                        {atts: {label: messages.addrow    ,   onClick: function(evt){self.addRow('append')}}}, 
+		                        {atts: {label: messages.copyrow,   onClick: function(evt){self.copyRow(evt)}}}
+		                ];
+		                if (!self.noDeleteRow){
+		                	addedItems.push({atts: {label:messages.deleterow,   onClick: function(evt){self.deleteRow()}}});
+		                }
+		                self.contextMenuItemsWithEdit.row = self.contextMenuItemsWithoutEdit.row.concat(addedItems);
+		                self.contextMenuItemsWithEdit.idCol = self.contextMenuItemsWithoutEdit.idCol.concat(addedItems);
+		                self.contextMenuItemsWithEdit.header.push({atts: {label: messages.addrow   ,   onClick: function(evt){self.addRow('append')}}});
+		                if (self.columnsEdit){
+		                    self.contextMenuItemsWithEdit.header.push({atts: {label: messages.insertcolumn, onClick: function(evt){self.addColumn()}}});
+		                    self.contextMenuItemsWithEdit.header.push({atts: {label: messages.deletecolumn, onClick: function(evt){self.deleteColumn()}}});
+		                }
+		                return self.contextMenuItemsWithEdit;
+					}();
+	            }else{
+					this.contextMenuItems = this.contextMenuItemsWithEdit;
+				}
+			}else{
+				if (this.contextMenuItemsWithoutEdit){
+					this.contextMenuItems = this.contextMenuItemsWithoutEdit;
+				}
+			}
 		}
 
     }); 

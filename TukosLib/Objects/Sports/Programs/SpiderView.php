@@ -2,6 +2,7 @@
 namespace TukosLib\Objects\Sports\Programs;
 use TukosLib\Utils\Widgets;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\TukosFramework as Tfk;
 
 trait SpiderView {
     public function functionLabel ($funcName, $dayOrWeekOrMonth){
@@ -67,7 +68,7 @@ trait SpiderView {
                                 ['id' => 'endofdisplayedweek', 'name' => $this->tr('endofdisplayedweek'), 'tooltip' => $this->tr('endOfdisplayedWeekKpiTooltip')],
                                 ['id' => 'datetoday', 'name' => $this->functionLabel('date', 'today'), 'tooltip' => $this->tr('datetodayKpiTooltip')], ['id' => 'endoflastweek', 'name' => $this->functionLabel('date', 'endoflastweek'), 'tooltip' => $this->tr('endoflastweekKpiTooltip')],
                                 ['id' => 'datedisplayedday', 'name' => $this->functionLabel('date', 'datedisplayedday'), 'tooltip' => $this->tr('datedisplayedDayKpiTooltip')],
-                                ['id' => 'dateendofdisplayedweek', 'name' => $this->functionLabel('date', 'endofdisplayedweek'), 'tooltip' => $this->tr('dateendOfdisplayedWeekKpiTooltip')], ['id' => 'yyyy-mm-dd', 'name' => $this->tr('yyyy-mm-dd'), 'tooltip' => $this->tr('yyyy-mm-ddKpiTooltip cliquer <a href="https://tukos.site" target="_blank">ici</a>!')],
+                                ['id' => 'dateendofdisplayedweek', 'name' => $this->functionLabel('date', 'endofdisplayedweek'), 'tooltip' => $this->tr('dateendOfdisplayedWeekKpiTooltip')], ['id' => 'yyyy-mm-dd', 'name' => $this->tr('yyyy-mm-dd'), 'tooltip' => $this->tr('yyyy-mm-ddKpiTooltip cliquer <a href=' . Tfk::$registry->rootUrl . ' target="_blank">ici</a>!')],
                             ]]],
                         // ['today', ['date, 'today'], 
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 150]]), false),
