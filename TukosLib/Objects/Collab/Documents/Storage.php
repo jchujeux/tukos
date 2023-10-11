@@ -31,7 +31,7 @@ trait Storage {
         if (!isset($this->filesStore)){
             $appConfig = Tfk::$registry->get('appConfig');
             
-            $this->filesStore = new Store($appConfig->filesStore);
+            $this->filesStore = new Store($appConfig->dataSource . 'files');
     
             if (!$this->filesStore->tableExists($this->_filesTableName)){
                 $this->filesStore->createTable($this->_nextFileIdTableName, $this->_nextFileIdTableColsDefinition);

@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", "dojo/aspect", "dijit/registry", "dojox/mobile/Container", 
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/when", "dojo/aspect", "dijit/registry", "dojox/mobile/Container", 
 		"dojox/mobile/ToolBarButton", "tukos/widgets/WidgetsLoader", "tukos/_ObjectPaneMixin", "tukos/_TukosLayoutMixin", "tukos/utils", "tukos/widgetUtils", "tukos/PageManager"], 
-    function(declare, lang, dst, when, aspect, registry, Container, ToolBarButton, widgetsLoader, _ObjectPaneMixin, _TukosLayoutMixin, utils, wutils, Pmg){
+    function(declare, lang, dct, dst, when, aspect, registry, Container, ToolBarButton, widgetsLoader, _ObjectPaneMixin, _TukosLayoutMixin, utils, wutils, Pmg){
 	return declare([Container, _ObjectPaneMixin, _TukosLayoutMixin], {
         postCreate: function(){
             var self = this;
@@ -80,27 +80,15 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when", 
 						this.needsToFreezeWidth = false;
 	                }));
 				}));
-/*                dojo.ready(lang.hitch(this, function(){
-					this.resize();//or else spinwheelSlot get('value') gets screwed-up
-					when (this.setWidgets(this.data), lang.hitch(this, function(result){
-	                    if (this.onOpenAction){
-	                        this.openAction(this.onOpenAction);
-	                    }
-	                    setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
-	                    		dojo.ready(function(){
-									this.markIfChanged = true;
-	                            	this.watchContext = 'user';
-	                            	this.setUserContextPaths();
-	                            });
-	                    	}), 0);
-	                }));
-	
-				}));*/
             }));
         },
         layoutAction: function(layout, optionalWidgetInstantiationCallback){
             var self = this, tableAtts = layout.tableAtts, heading = this.viewPane.heading, actionsHeading = this.viewPane.actionsHeading;
             if (tableAtts && layout.widgets){
+            	if (tableAtts.label && !this.viewPane.heading){//so we know it is blog
+					//actionsHeading.set('label', tableAtts.label);
+					dct.place('<span style="line-height: 20px; font-size: 18px; display: inline-block;vertical-align: middle;max-width: 150px;white-space: normal;">' + tableAtts.label + '</span>', actionsHeading.domNode);
+				}
             	layout.widgets.forEach(lang.hitch(this, function(widgetName){
                     var widgetDescription = this.widgetsDescription[widgetName], instantiatingWidget, widgetType;
                 	if (widgetName !== 'feedback' && widgetDescription && (widgetType = widgetDescription['type'])){

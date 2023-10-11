@@ -28,7 +28,7 @@ class Configure extends AbstractConfigure{
             'physio' => [['#physiopatients' => [], 'physiopersotrack' => [['#physiopersoquotes' => [], '#physiopersoplans' => [], '#physiopersotreatments' => [], '#physiopersodailies' => [['#physiopersosessions' => []]], '#physiopersoexercises' => []]], '#physioprescriptions' => [],
                 'physiowoundtrack' => [['#physiogameplans' => [], '#physiogametracks' => []]],
                 '#physioassesments' => [], '#physiocdcs' => []/*, '#physiotemplates' => []*/]],
-            'help' => ['type' => 'MenuBarItem', 'atts' => ['onclick' => 'tukos.Pmg.viewTranslatedInBrowserWindow("tukosSportsTukosTooltip", "Tukoslib");', 'style' => ['fontStyle' => 'italic']]]
+            //'help' => ['type' => 'MenuBarItem', 'atts' => ['onclick' => 'tukos.Pmg.viewTranslatedInBrowserWindow("tukosSportsTukosTooltip", "Tukoslib");', 'style' => ['fontStyle' => 'italic']]]
         ];
         
         $accordion = [
@@ -39,7 +39,7 @@ class Configure extends AbstractConfigure{
             ['object' => 'navigation', 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'navigationTree'],
         ];
         
-        parent::__construct('tukossportstds', $modulesMenuLayout, [], $accordion);
+        parent::__construct($modulesMenuLayout, [], $accordion);
     }
 }
 AbstractConfigure::__initialize();

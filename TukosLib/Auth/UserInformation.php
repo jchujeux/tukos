@@ -97,6 +97,15 @@ class UserInformation{
             return "{$people['firstname']} {$people['name']}";
         }
     }
+    public function peopleEmail($userId){
+        $peopleId = $this->getModel('users')->getOne(['where' => ['id' => $userId], 'cols' => ['parentid']])['parentid'];
+        if(empty($peopleId)){
+            return 'tukosBackOffice@gmail.com';
+        }else{
+            $people = $this->getModel('people')->getOne(['where' => ['id' => $peopleId], 'cols' => ['name', 'firstname', 'email']]);
+            return "{$people['firstname']} {$people['name']} <{$people['email']}>";
+        }
+    }
     public function contextid(){
         return $this->userInfo['contextid'];
     }

@@ -13,12 +13,16 @@ class Save extends AbstractAction{
     function response($query){
         $savedId = $this->saveViewModel->save($query);
         if ($savedId){
-            $response = [];
-            $this->getViewModel->respond($response, ($isBackOffice = $this->request['object'] === 'backoffice') ? array_merge($query, ['id' => $savedId]) : ['id' => $savedId]);
-            if (!$isBackOffice){
-                $response['title'] = $this->view->tabEditTitle($response['data']['value']);
+            if (is_array($savedId)){
+                return $savedId;
+            }else{
+                $response = [];
+                $this->getViewModel->respond($response, ($isBackOffice = $this->request['object'] === 'backoffice') ? array_merge($query, ['id' => $savedId]) : ['id' => $savedId]);
+                if (!$isBackOffice){
+                    $response['title'] = $this->view->tabEditTitle($response['data']['value']);
+                }
+                return $response;
             }
-            return $response;
         }else{
             return ['data' => false];
         }

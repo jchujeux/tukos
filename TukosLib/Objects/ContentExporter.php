@@ -80,7 +80,7 @@ EOT
 			$mailArgs['username'] = $accountInfo['username'];
 			$mailArgs['password'] = $accountInfo['password'];
 			$mailArgs['gmailtoken'] = json_decode($accountInfo['gmailtoken'], true);
-			$mailArgs['googlecredentials'] = Tfk::$registry->get('tukosModel')->getOption('googlewebappcredentials');
+			$mailArgs['googlecredentials'] = Tfk::$registry->getOption('googlewebappcredentials');
 			$smtpModel  = $objectsStore->objectModel('mailsmtps');
 	
 			if ($atts['sendas'] === 'appendtobody' || $atts['sendas'] === 'bodyandattachment'){

@@ -32,7 +32,7 @@ class Configure extends AbstractConfigure{
             'physio' => [['#physiopatients' => [], 'physiopersotrack' => [['#physiopersoquotes' => [], '#physiopersoplans' => [], '#physiopersotreatments' => [], '#physiopersodailies' => [['#physiopersosessions' => []]], '#physiopersoexercises' => []]],
                 'physiowoundtrack' => [['#physiogameplans' => [], '#physiogametracks' => []]],
                 '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
-            'helptukosapp' => ['type' => 'MenuBarItem', 'atts' => ['onclick' => 'tukos.Pmg.viewTranslatedInBrowserWindow("tukosAppTukosTooltip", "Tukos");', 'style' => ['fontStyle' => 'italic']]]
+            //'helptukosapp' => ['type' => 'MenuBarItem', 'atts' => ['onclick' => 'tukos.Pmg.viewTranslatedInBrowserWindow("tukosAppTukosTooltip", "Tukos");', 'style' => ['fontStyle' => 'italic']]]
         ];
         
         $accordion = [
@@ -42,7 +42,7 @@ class Configure extends AbstractConfigure{
             ['object' => 'users'     , 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'log'],
             ['object' => 'navigation', 'view' => 'Pane', 'action' => 'Accordion', 'pane' => 'navigationTree'],
         ];
-        parent::__construct('tukos20', $modulesMenuLayout, [], $accordion);
+        parent::__construct($modulesMenuLayout, [], $accordion);
         Tfk::$registry->headerHelpLink = $this->headerHelpTukosTooltipLink();
     }
 }

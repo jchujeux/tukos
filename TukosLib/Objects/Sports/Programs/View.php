@@ -408,7 +408,8 @@ if (athleteId && coachId){
     Pmg.serverDialog({object: 'users', view: 'Edit', action: 'GetItems', query: {storeatts: JSON.stringify({where: [{col: 'parentid', opr: 'IN', values: [athleteId, coachId]}], cols: ['id', 'parentid']})}}).then(
     	function (response){
             if (response.data.items.length > 0){
-                acl.set('value', '');
+                //acl.set('value', '');
+                acl.deleteRows(lang.clone(acl.store.fetchSync()), true);
                 acl.addRow(null, {userid: $tukosBackOfficeUserId,permission:"2"});
                 if (response.data.items.length === 1){
                         acl.addRow(null, {userid: response.data.items[0].id, permission: "3"});

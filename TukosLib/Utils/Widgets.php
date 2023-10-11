@@ -136,6 +136,13 @@ class Widgets{
         ];
         return ['type' =>'Editor', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
     }
+    public static function simpleEditor($atts, $editOnly = true){
+        $defAtts = [
+            'edit' => [/*'style' => ['fontFamily' => 'courier']*/],
+            'storeedit' => ['editOn'  => 'click',],
+        ];
+        return ['type' =>'SimpleEditor', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
+    }
     public static function lazyEditor($atts, $editOnly = true){
     	$defAtts = [
             'edit' => [],

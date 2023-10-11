@@ -71,7 +71,7 @@ class Strava {
         if (is_array($options)){
             $token = new AccessToken($options);
             if ($token->hasExpired()){
-                $oauth = new OAuth(array_merge(Tfk::$registry->get('tukosModel')->getOption('strava'), ['redirectUri' => '']));
+                $oauth = new OAuth(array_merge(Tfk::$registry->getOption('strava'), ['redirectUri' => '']));
                 $token = $oauth->getAccessToken('refresh_token', ['refresh_token' => $token->getRefreshToken()]);
                 $athletesModel->updateItems(['stravainfo' => json_encode(['access_token' => $token->getToken(), 'refresh_token' => $token->getRefreshToken(), 'expires' => $token->getExpires()])], ['table' => 'people', 'where' => ['id' => $athleteId]]);
             }

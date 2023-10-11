@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>Tukos Blog</title>
+        <title><?= $this->headerTitle ?></title>
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dijit/themes/claro/claro.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dgridLocation ?>/css/dgrid.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/css/StatusBar.css" media="screen">

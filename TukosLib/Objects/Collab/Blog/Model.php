@@ -16,11 +16,14 @@ class Model extends AbstractModel {
         ];
         parent::__construct($objectName, $translator, 'blog', ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], [], $colsDefinition, [['language']]);
     }
-    function gotoTabString($view, $queryString){
-        return     "tukos.Pmg.tabs.gotoTab({object: 'backoffice', view:'{$view}', mode: 'Tab', action: 'Tab', query:{object: 'blog', form: 'Show', {$queryString}}});";
+    function gotoTabString($view, $queryString, $form){
+        return     "tukos.Pmg.tabs.gotoTab({object: 'backoffice', view:'{$view}', mode: 'Tab', action: 'Tab', query:{object: 'blog', form: '$form', {$queryString}}});";
     }
     function onClickGotoTabString($view, $queryString){
-        return " onclick=\"{$this->gotoTabString($view, $queryString)}\"";
+        return " onclick=\"{$this->gotoTabString($view, $queryString, 'Show')}\"";
+    }
+    function onClickGotoContactTabString($view, $queryString){
+        return " onclick=\"{$this->gotoTabString($view, $queryString, 'Contact')}\"";
     }
     function getRecentPosts(){
         return $this->getPosts([], 5);

@@ -42,12 +42,12 @@ class Configure extends AbstractConfigure{
                         'popup' => Widgets::objectSelect(['placeHolder' => Tfk::tr('selectanitem'), 'onChangeArgs' => ['object' => 'physiopersodailies', 'view' => 'edit', 'mode' => 'Tab', 'action' => 'Tab'], 'object' => 'physiopersodailies', 'mode' => 'Tab'], true)],
                     'overview' => ['type' => 'MenuItem', 'atts' => ['onClickArgs' => ['object' => 'physiopersodailies', 'view' => 'Overview', 'mode' => 'Tab', 'action' => 'Tab'], 'label' => Tfk::tr('overview')]],
                 ]],
-                    'help' => ['type' => 'MenuBarItem', 'atts' => ['onclick' => 'tukos.Pmg.viewTranslatedInBrowserWindow("tukosMSQRTukosTooltip", "Tukoslib");', 'style' => ['fontStyle' => 'italic']]]
+                    //'help' => ['type' => 'MenuBarItem', 'atts' => ['onclick' => 'tukos.Pmg.viewTranslatedInBrowserWindow("tukosMSQRTukosTooltip", "Tukoslib");', 'style' => ['fontStyle' => 'italic']]]
                 ]
             );
         };
 
-        parent::__construct('tukos20', $modulesMenuLayout, ['users', 'people', 'organizations', 'physiopatients', 'physiopersoplans', 'physiopersotreatments'], []);
+        parent::__construct($modulesMenuLayout, ['users', 'people', 'organizations', 'physiopatients', 'physiopersoplans', 'physiopersotreatments'], []);
         
     }
 }

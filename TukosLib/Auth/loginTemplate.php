@@ -35,7 +35,7 @@
 			require(["dojo/dom", "dojo/on", "dojo/request", "dojo/dom-form", "tukos/login", "tukos/google/clientOAuth", "tukos/PageManager"],
 				function(dom, on, request, domForm, login, clientOAuth, Pmg){
         			Pmg.initializeNoPage(<?= $this->pageManagerArgs ?>);
-					clientOAuth.windowOnLoad("<?= $this->requestGoogleValidationUrl ?>");
+					clientOAuth.windowOnLoad("<?= $this->requestGoogleValidationUrl ?>", "<?= $this->googleClientId ?>");
 					const form = dom.byId('formNode');
 					// Attach the onsubmit event handler of the form
 					on(form, "submit", function(evt){

@@ -13,6 +13,7 @@ class LoginPage{
         $view = (new ViewFactory)->newInstance();
         $view->requestUrl = $pageUrl . 'auth/loginValidation';
         $view->requestGoogleValidationUrl = $pageUrl . 'auth/loginGoogleValidation';
+        $view->googleClientId = Tfk::$registry->getOption('googlewebappcredentials')['web']['client_id'];
         $view->dojoBaseLocation = Tfk::dojoBaseLocation();
         $view->tukosBaseLocation = Tfk::$tukosBaseLocation;
         $view->loginMessage = Tfk::tr('loginMessage');

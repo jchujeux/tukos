@@ -77,13 +77,22 @@ class ViewUtils{
         return Utl::array_merge_recursive_replace(['type' => 'checkBox', 'atts' => ['edit' => ['label' => $view->tr($label), 'value' => 'YES']]], $custom);
     }
     static public function editor($view, $label, $custom=[]){
-           return Utl::array_merge_recursive_replace([
-                    'type' => 'editor',
-                    'atts' => ['edit' =>  ['label' => $view->tr($label), 'height' => '100%']],
-                    'objToEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
-                    'objToStoreEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
-                ],
-                $custom);
+        return Utl::array_merge_recursive_replace([
+            'type' => 'editor',
+            'atts' => ['edit' =>  ['label' => $view->tr($label), 'height' => '100%']],
+            'objToEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
+            'objToStoreEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
+        ],
+            $custom);
+    }
+    static public function simpleEditor($view, $label, $custom=[]){
+        return Utl::array_merge_recursive_replace([
+            'type' => 'simpleEditor',
+            'atts' => ['edit' =>  ['label' => $view->tr($label), 'height' => '100%']],
+            'objToEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
+            'objToStoreEdit' => ['nullToBlank' => ['class' => 'TukosLib\Utils\Utilities']],
+        ],
+            $custom);
     }
     static public function lazyEditor($view, $label, $custom=[]){
     	return Utl::array_merge_recursive_replace([

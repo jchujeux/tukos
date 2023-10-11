@@ -414,6 +414,9 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
 				}
 			}
             if (widget){
+                if (widget.domNode.style.display === 'none'){
+					widget.domNode.style.display = 'block';
+				}
                 if (beep){
 					newFeedback = '<div style="color: red; font-weight: 500;">' + newFeedback + '</div>';
 				}

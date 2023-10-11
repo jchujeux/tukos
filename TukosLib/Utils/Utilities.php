@@ -687,7 +687,10 @@ class Utilities{
                     foreach($description['objToStoreEdit'] as $func => $params){
                         foreach($items as &$item){
                             if (isset($item[$col])){
-                                $item[$col] = call_user_func_array([$params['class'], $func], [$item[$col]]);
+                                if (isset($params['class'])){
+                                    
+                                }
+                                $item[$col] = isset($params['class']) ? call_user_func_array([$params['class'], $func], [$item[$col]]) : $func($item[$col]);
                             }
                         }
                     }

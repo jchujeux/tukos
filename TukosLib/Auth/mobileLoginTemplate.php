@@ -25,7 +25,7 @@
     	"tukos/login", "tukos/google/clientOAuth", "tukos/PageManager"], function (dom, dct, request, registry, Mobile, View, Heading, FormLayout, Pane, login, clientOAuth, Pmg) {
          // now parse the page for widgets
         Pmg.initializeNoPage(<?= $this->pageManagerArgs ?>);
-		clientOAuth.windowOnLoad("<?= $this->requestGoogleValidationUrl ?>");
+		clientOAuth.windowOnLoad("<?= $this->requestGoogleValidationUrl ?>", "<?= $this->googleClientId ?>");
         var loginForm = {columns: 'two', rows: [
 			{label: {innerHTML: "<?= $this->username?>" }, widget: {type: "TextBox", atts: {id: "username", title: "<?= $this->username?>", mobileWidgetType: "TextBox", onInput: function(){dom.byId('svrFeedback').hidden = true}}}}, 
 			{label: {innerHTML: "<?= $this->password?>"}, widget: {type: 'TextBox', atts: {id: 'password', mobileWidgetType: "TextBox", title: "<?= $this->password?>", type: "password"}}},

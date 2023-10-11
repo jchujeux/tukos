@@ -6,12 +6,15 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
         	var created, selected, descriptions = this.viewsDescription;
         	this.container.selectChild = function(target, transitionDir, transition){
         		if (this.selectedChildWidget !== target){
-            		this.selectedChildWidget.performTransition(target.id, transitionDir || 1, transition || "slide");
+            		if (transitionDir !== false){
+            			this.selectedChildWidget.performTransition(target.id, transitionDir, transition || "slide");
+					}
             		this.selectedChildWidget = target;
         		}else{
         			Pmg.beep();
         		}
 				target.set('style', {height: 'auto'});
+				Pmg.tabs.pageWidget.bottomContainer.set('style', {display: target.form.hideBottomContainer ? 'none' : 'block'});
         	}
 			if (descriptions.length === 0){
 				//this.navigationView();

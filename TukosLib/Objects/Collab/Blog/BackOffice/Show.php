@@ -5,6 +5,7 @@ use TukosLib\Objects\ObjectTranslator;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\TukosFramework as Tfk;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Utils\HtmlUtilities as HUtl;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
 
 class Show extends ObjectTranslator{
@@ -54,17 +55,23 @@ class Show extends ObjectTranslator{
         return [];
     }
     function get($query){
+        $directLinkTemplate = '<a nohref="" onclick="parent.tukos.Pmg.editorGotoUrl(\'' . Tfk::$registry->blogUrl . '/post?id=${id}\', event)" style="color:blue; cursor:pointer; text-decoration:underline;" target="_blank">${linkText}</a>';
         Utl::extractItems(['object', 'form'], $query);
         $values = $this->blogModel->getOne(['where' => $this->user->filterPrivate($query), 'cols' => ['id', 'parentid', 'name', 'comments', 'published', 'updated', 'creator', 'updator'], 'orderby' => ['blog.published DESC']]);
         if (empty($values) && $name = Utl::getItem('name', $query)){
             $values = $this->blogModel->getOne(['where' => $this->user->filterPrivate([['col' => 'name', 'opr' => 'RLIKE', 'values' => $name]]), 'cols' => ['id', 'parentid', 'name', 'comments', 'published', 'updated', 'creator', 'updator'], 'orderby' => ['blog.published DESC']]);
         }
         if (!empty($values)){
-            $publisher = $this->user->peoplefirstAndLastNameOrUserName($values['creator']);
-            $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']) . '<br><a nohref="" onclick="parent.tukos.Pmg.editorGotoUrl(\'' . Tfk::$registry->blogUrl . '/post?id=' . $values['id'] .
-            '\', event)" style="color:blue; cursor:pointer; text-decoration:underline;" target="_blank">'  . $this->view->tr('directlink') . '</a>' . '&nbsp; (id: ' . $values['id'] . ')';
+            $blogModel = Tfk::$registry->get('objectsStore')->objectModel('blog');
+            $publisherName = $this->user->peoplefirstAndLastNameOrUserName($values['creator']);
+            $subject = addslashes("article: {$values['name']} ({$values['id']})"); 
+            $directLink = Utl::substitute($directLinkTemplate, ['id' => $values['id'], 'linkText' => $this->view->tr('directlink')]);
+            $onContactClickString = $blogModel->onClickGotoContactTabString('edit', "sendto: '$publisherName', formtitle: 'postcontactform', formexplanation: 'postcontactformexplanation', creator: '{$values['creator']}', subject: '$subject'");
+            $publisher = '<span style="' . HUtl::urlStyle() . '" ' . $onContactClickString . ">{$publisherName}</span>";
+            $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']) . '<br>' . $directLink .
+                '&nbsp; (id: ' . $values['id'] . ')';
             if ($values['updated'] > $values['published']){
-                $updator = $this->user->peoplefirstAndLastNameOrUserName($values['updator']);
+                //$updator = $this->user->peoplefirstAndLastNameOrUserName($values['updator']);
                 $postedByAndWhen .= "&nbsp;&nbsp;<i>{$this->view->tr('updatedon')}</i> " . DUtl::toUTC($values['updated']);
             }
             return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'postedbyandwhen' => $postedByAndWhen, 'comments' => $values['comments']];

@@ -102,5 +102,8 @@ class Registry{
     public function isInstantiated($service){
         return $this->container->isInstantiated($service);
     }
+    public function getOption($name){
+        return json_decode($this->get('configStore')->getOne(['table' => 'options', 'where' => ['name' => $name], 'cols' => ['value']])['value'], true);
+    }
 }
 ?>

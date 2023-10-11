@@ -5,7 +5,7 @@ class Client {
     private static $client = null;
 	public static function get($jsonCredentials = null){
 		if (is_null(self::$client)){
-		    putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/tukos-f090e7fe437e.json');
+		    putenv('GOOGLE_APPLICATION_CREDENTIALS=' . __DIR__ . '/tukos-142721-f51b93ddf1f3.json');
 		    self::$client = new \Google_Client();
 			self::$client->setApplicationName('tukos');
 			if (is_null($jsonCredentials)){

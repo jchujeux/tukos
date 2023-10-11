@@ -3,7 +3,7 @@ define(["dojo/_base/lang", "dojo/_base/window", "dojo/_base/config", "dojo/ready
 function (lang, win, config, ready, dom, dst, dct, when, topic, focusUtil, Container, Heading, Button, Opener, TukosPane, PostsManager, widgetsLoader, TabOnClick, Pmg) {
 	return {
 		initialize: function(){
-			var self = this, homeButton, buttonsContainer = new Container({style: {maxWidth: '150px'}}), postsContainer = new Container({style: {backgroundColor: '#d0e9fc'}}), 
+			var self = this, buttonsContainer = new Container({style: {maxWidth: '150px'}}), postsContainer = new Container({style: {backgroundColor: '#d0e9fc'}}), 
 				actionWidgets = Pmg.cache.rightPaneDescription.paneContent.widgetsDescription, searchPane, searchButton, homeUrlArgs = {action: 'Tab', mode: 'Tab', object: 'backoffice', view: 'edit', query: {form: 'Show', object: 'blog', name: Pmg.message('blogwelcome', 'backoffice')}};
         	this.heading = new Heading({/*label: Pmg.cache.headerTitle, */style: {height: '65px'}});
 			this.heading.addChild(buttonsContainer);
@@ -47,11 +47,14 @@ function (lang, win, config, ready, dom, dst, dct, when, topic, focusUtil, Conta
         	win.body().appendChild(this.heading.categoriesOpener.domNode);
 			this.heading.searchOpener = new Opener();
         	win.body().appendChild(this.heading.searchOpener.domNode);
-			Pmg.tabs = Pmg.mobileViews = new PostsManager({container: postsContainer, viewsDescription: Pmg.cache.tabsDescription});
-			topic.subscribe("/dojox/mobile/viewChanged", function(view){
+			Pmg.tabs = Pmg.mobileViews = new PostsManager({container: postsContainer, viewsDescription: Pmg.cache.tabsDescription, pageWidget: this});
+			/*topic.subscribe("/dojox/mobile/viewChanged", function(view){//only useful if View is SwapView!
+				Pmg.tabs.container.selectChild(view, false);
+			});*/
+			/*topic.subscribe("/dojox/mobile/viewChanged", function(view){
 				Pmg.tabs.selectedChildWidget = view;
 				view.set('style', {height: 'auto'});
-			});
+			});*/
 			var form = Pmg.tabs.currentPane().form;
 			['recentposts', 'categories'].forEach(function(widgetName, i){
 				when(widgetsLoader.instantiate(actionWidgets[widgetName].type, lang.mixin(lang.clone(actionWidgets[widgetName].atts), {pane: {form: form}, onBlur: function(){self.heading[widgetName+'Opener'].hide();}})), function (Widget){
@@ -62,7 +65,7 @@ function (lang, win, config, ready, dom, dst, dct, when, topic, focusUtil, Conta
 			searchPane = new TukosPane({widgetsDescription: {searchbox: lang.clone(actionWidgets.searchbox), searchresults: lang.clone(actionWidgets.searchresults)}, layout: {tableAtts: {customClass: 'labelsAndValues', showLabels: false},
 				widgets: ['searchbox', 'searchresults']}, form: form, tabindex: '0'});
 			this.heading.searchOpener.domNode.appendChild(searchPane.domNode);
-			var bottomLayout = new Container({style: {backgroundColor: '#d0e9fc'}}), bottomPane = new TukosPane(lang.mixin(Pmg.cache.rightPaneDescription.paneContent, {form: form/*, focusOnResults: true*/}));
+			var bottomLayout = this.bottomContainer = new Container({style: {backgroundColor: '#d0e9fc'}}), bottomPane = new TukosPane(lang.mixin(Pmg.cache.rightPaneDescription.paneContent, {form: form/*, focusOnResults: true*/}));
 			bottomLayout.addChild(bottomPane);
 			document.body.appendChild(bottomLayout.domNode);
 			
@@ -76,6 +79,7 @@ function (lang, win, config, ready, dom, dst, dct, when, topic, focusUtil, Conta
 				}, 100);
 				dct.place('<span style="line-height: 25px; display: inline-block;vertical-align: middle;max-width: 130px;white-space: normal;">' + Pmg.cache.headerTitle + '</span>', self.heading.domNode);
 				new TabOnClick({url: homeUrlArgs}, dct.place('<img alt="logo" src="/tukos/images/tukosswissknife.png" style="height: 60px; width:auto; float: right;margin-top: -50px">', self.heading.domNode));
+				dct.place(Pmg.cache.contactSpan, self.heading.domNode);
 		    });
 			focusUtil.watch("curNode", function(name, oldValue, newValue){
 				if (newValue === searchPane.getWidget('searchbox').textbox || newValue === searchPane.getWidget('searchbox').arrowButton || newValue === searchPane.domNode || newValue === searchButton.domNode){

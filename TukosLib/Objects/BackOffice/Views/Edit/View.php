@@ -92,6 +92,9 @@ class View {
         if (!empty($onOpenAction = $this->view->onOpenAction($query))){
             $formContent['onOpenAction'] = $onOpenAction;
         }
+        if (isset($this->view->backOffice->hideBottomContainer)){
+            $formContent['hideBottomContainer'] = $this->view->backOffice->hideBottomContainer;
+        }
         return $formContent;
     } 
 }

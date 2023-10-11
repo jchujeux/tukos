@@ -7,7 +7,7 @@ class Configure extends AbstractConfigure{
     
     function __construct(){
         
-        parent::__construct('tukossportstds', [],  ['users', 'people', 'organizations', 'physiopatients', 'physiogametracks'], []);
+        parent::__construct([],  ['users', 'people', 'organizations', 'physiopatients', 'physiogametracks'], []);
         
     }
 }

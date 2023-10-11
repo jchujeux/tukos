@@ -15,7 +15,7 @@ function (ready, dom, dst, dct, View, Heading, ObjectPane, TukosTextarea, Pmg) {
 		    ready(function(){
 			   	Pmg.setFeedback(Pmg.cache.feedback);
 			   	appLayout.startup();
-			   	dct.place("<span>" + formContent.title + "</span>", appLayout.heading.domNode);
+			   	appLayout.heading.set('label', formContent.title);
 		    });
 		}
 	}

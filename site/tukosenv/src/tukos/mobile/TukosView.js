@@ -57,10 +57,28 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojox/mobile/Vi
 	        	this.heading.nextViewButton = new ToolBarButton({icon: "mblDomButtonWhiteRightArrow", style: "float: left", targetView: nextView, onClick: function(evt){
 	        		self.mobileViews.selectPane(this.targetView);
 	        	}}).placeAt(this.heading, 2);
-			}        	
+			}else{
+	        	if (this.paneModuleType === 'objectPane'){
+					if (!utils.empty(this.formContent.actionLayout)){
+						this.addChild(this.actionsHeading = new Heading({style: {display: 'block'}}));
+		            	/*(this.actionsHeadingToggle = new ToolBarButton({icon: "mblDomButtonWhitePlus", style: "float: right", onClick: lang.hitch(this, function(){
+		            		var heading = this.actionsHeading, toggle = this.actionsHeadingToggle, displayStatus = heading.get('style').display;
+		            		if (displayStatus === 'none'){
+		            			heading.set('style', {display: 'block'});
+		            			toggle.set('icon', 'mblDomButtonWhiteMinus');
+		            		}else{
+		            			heading.set('style', {display: 'none'});
+		            			toggle.set('icon', 'mblDomButtonWhitePlus');
+		            			
+		            		}
+		            		this.resize();
+		            	})})).placeAt(this.heading, 'first');*/
+					}
+				}     	
+			}
 			require([paneModules[this.paneModuleType]], function(PaneModule){
             	self.form = new PaneModule(viewPaneContent);
-				if (self.actionsHeading){
+				if (/*self.heading && */self.actionsHeading){
 					new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){
 	             		console.log('here is where I need to act');
 	             		self.destroy();
@@ -73,17 +91,26 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojox/mobile/Vi
         	});
         },
         destroy: function(){
-        	var self = this, _arguments = arguments, previousView = this.heading.previousViewButton.get('targetView'), nextView = this.heading.nextViewButton.get('targetView');
-        	if (previousView === this){
-        		this.mobileViews.navigationView();
-        		previousView = this.heading.nextViewButton.get('targetView');
-        		nextView = this.heading.nextViewButton.get('targetView');
-        	}else{
-        		this.mobileViews.selectPane(nextView);
-        	}
-        	nextView.heading.previousViewButton.set('targetView', previousView);
-        	previousView.heading.nextViewButton.set('targetView', nextView);
-        	setTimeout(function(){self.inherited(_arguments);}, 100);
+        	const self = this, _arguments = arguments;
+        	if (this.mobileViews.navigationView){
+	        	const previousView = this.heading.previousViewButton.get('targetView'), nextView = this.heading.nextViewButton.get('targetView');
+	        	if (previousView === this){
+	        		this.mobileViews.navigationView();
+	        		previousView = this.heading.nextViewButton.get('targetView');
+	        		nextView = this.heading.nextViewButton.get('targetView');
+	        	}else{
+	        		this.mobileViews.selectPane(nextView);
+	        	}
+	        	nextView.heading.previousViewButton.set('targetView', previousView);
+	        	previousView.heading.nextViewButton.set('targetView', nextView);
+	        	setTimeout(function(){self.inherited(_arguments);}, 100);
+			}else{
+				Pmg.mobileViews.isLastPane() ? Pmg.mobileViews.selectPreviousPane() : Pmg.mobileViews.selectNextPane();
+				Pmg.mobileViews.container.previousButton.set('style', {display: Pmg.mobileViews.isFirstPane() ? 'none' : 'block'});
+				Pmg.mobileViews.container.nextButton.set('style', {display: Pmg.mobileViews.isLastPane() ? 'none' : 'block'});
+	        	setTimeout(function(){self.inherited(_arguments);}, 100);
+				console.log('on joue la montre');
+			}
         },
         createPane: function(){
             if (!this.form){

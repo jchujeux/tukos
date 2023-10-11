@@ -11,6 +11,8 @@ function (ready, dom, dst, BorderContainer, ContentPane, TabContainer, ObjectPan
 				 //centerPane= new ObjectPane(obj.blogDescription[0].formContent);
 				 rightPane = new TukosPane(obj.rightPaneDescription.paneContent);
 			Pmg.tabs = new TabsManager({container: contentCenter, tabsDescription: obj.tabsDescription});
+			obj.newPageCustomization = {};
+			Pmg.addCustom('showTooltips', 'YES');
 			//contentCenter.addChild(centerPane);
 			contentRight.addChild(rightPane);
 			appLayout.addChild(contentHeader);

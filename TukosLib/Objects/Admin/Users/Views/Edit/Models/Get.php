@@ -6,7 +6,7 @@ use TukosLib\Objects\Views\Edit\Models\Get as EditGetModel;
 class Get extends EditGetModel {
 
     protected function setProtection(&$data){
-        if (!$this->user->isAtLeastAdmin() && !empty($data['value']['id']) && $data['value']['id'] === $this->user->id()){
+        if (!$this->user->isAtLeastAdmin()/* && !empty($data['value']['id']) && $data['value']['id'] === $this->user->id()*/){
             $disabledCols = ['parentid', 'name', 'rights', 'tukosorganization', 'modules', 'restrictedmodules', 'environment', 'comments', 'permission', 'grade', 'contextid', 'targetdb', 'enableoffline', 'acl', 'delete', 'duplicate', 'new'];
             foreach ($disabledCols as $col){
                 $data['disabled'][$col] = true;

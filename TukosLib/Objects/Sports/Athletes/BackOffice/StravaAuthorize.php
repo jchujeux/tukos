@@ -62,7 +62,7 @@ class StravaAuthorize extends ObjectTranslator{
         return [];
     }
     function get($query){
-        $oauth = new OAuth(array_merge(Tfk::$registry->get('tukosModel')->getOption('strava'), ['redirectUri' => Tfk::$registry->rootUrl . $_SERVER['REQUEST_URI']]));
+        $oauth = new OAuth(array_merge(Tfk::$registry->getOption('strava'), ['redirectUri' => Tfk::$registry->rootUrl . $_SERVER['REQUEST_URI']]));
         if ($error = Utl::getItem('error', $query)){
             return ['authenticationmessage' => $this->tr('errorauthenticating') . '<p>' . $this->tr('stravaauthenticationask', [['substitute', ['organization' => "<b>{$query['organization']}</b>"]]]) . '<center><a href="'. ($oauth->getAuthorizationUrl(['scope' => ['read', 'activity:read', 'activity:read_all']])) .
             '"><img alt="logo" src="' . Tfk::$publicDir . 'images/Logo_Strava.png" style="width: 300px; height: auto;"></a></center>'];

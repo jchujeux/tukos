@@ -64,6 +64,10 @@ class Model extends AbstractModel{
     	}
     }
     public function insertExtended($values, $init=false, $jsonFilter = false){
+        if (!$this->user->isAtLeastAdmin() && $values['id'] !== $this->user->id()){
+            Feedback::add($this->tr('needAdminRightsToCreateUser'));
+            return false;
+        }
         if ($values['grade'] === 'TEMPLATE'){
             return parent::insertExtended($values, $init, $jsonFilter);
         }else{
@@ -104,6 +108,10 @@ class Model extends AbstractModel{
         }
     }
     public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
+        if (!$this->user->isAtLeastAdmin() && $newValues['id'] !== $this->user->id()){
+            Feedback::add($this->tr('needAdminRightsToCreateUser'));
+            return false;
+        }
         if ($newValues['grade'] === 'TEMPLATE'){
             return parent::updateOneExtended($newValues, $atts, $insertIfNoOld, $jsonFilter, $init);
         }else{

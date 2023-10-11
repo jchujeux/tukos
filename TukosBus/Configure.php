@@ -16,9 +16,9 @@ class Configure extends AbstractConfigure{
             'bustrackpayments' => [['#bustrackpaymentscustomers' => [['#bustrackpaymentscustomersitems' => []]], '#bustrackpaymentssuppliers' => [['#bustrackpaymentssuppliersitems' => []]]]],
             'bustrackreconciliations' => [['#bustrackreconciliationscustomers' => [], '#bustrackreconciliationssuppliers' => []]],
             'bustrackdashboards' => [['#bustrackdashboardscustomers' => [], '#bustrackdashboardssuppliers' => []]],
-            'help' => ['type' => 'MenuBarItem', 'atts' => ['onclick' => 'tukos.Pmg.viewTranslatedInBrowserWindow("tukosBusTukosTooltip", "Tukoslib");', 'style' => ['fontStyle' => 'italic']]]
+            //'help' => ['type' => 'MenuBarItem', 'atts' => ['onclick' => 'tukos.Pmg.viewTranslatedInBrowserWindow("tukosBusTukosTooltip", "Tukoslib");', 'style' => ['fontStyle' => 'italic']]]
         ];
-        parent::__construct('tukos20', $modulesMenuLayout, ['users', 'people', 'organizations', 'physiopatients'], []);
+        parent::__construct($modulesMenuLayout, ['users', 'people', 'organizations', 'physiopatients'], []);
         
     }
 }

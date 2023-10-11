@@ -3,12 +3,12 @@ define(["dojo/_base/lang", "dojo/dom", "tukos/login"],
 function(lang, dom, login){
     return {
 		loginValidationUrl: '',
-		windowOnLoad: function(loginValidationUrl){
+		windowOnLoad: function(loginValidationUrl, clientId){
 	        const self = this;
 	        this.loginValidationUrl = loginValidationUrl;
 	        window.onload = function () {
 	          google.accounts.id.initialize({
-	            client_id: "722055405701-ukrl22bn0e6s3r0rfkmvflo7q8gjv43v.apps.googleusercontent.com",
+	            client_id: clientId,
 	            callback: lang.hitch(self, self.handleCredentialResponse)
 	          });
 	          google.accounts.id.renderButton(

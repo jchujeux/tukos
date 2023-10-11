@@ -7,7 +7,6 @@ class Directory{
     private static $directory =  [
         'tukos'             => 'Tukos',
         'backoffice'        => 'BackOffice',
-        'blog'              => 'Collab\Blog',
     	'users'             => 'Admin\Users',
         'customviews'       => 'Admin\Users\CustomViews',
         'navigation'        => 'Admin\Users\Navigation',
@@ -32,6 +31,7 @@ class Directory{
         'calendars'         => 'Collab\Calendars',
         'calendarsentries'   => 'Collab\Calendars\Entries',
         'tasks'             => 'Collab\Tasks',
+        'blog'              => 'Collab\Blog',
         //'deals'             => 'deals',
         //'dealsstatus'       => 'deals\status',
         //'dealsteams'        => 'deals\teams',
@@ -96,7 +96,7 @@ class Directory{
         'bustrackdashboardssuppliers' => 'BusTrack\Dashboards\Suppliers',
         'bustrackreconciliationscustomers' => 'BusTrack\Reconciliations\Customers',
         'bustrackreconciliationssuppliers' => 'BusTrack\Reconciliations\Suppliers',
-        'help'              => 'Help'
+        //'help'              => 'Help'
         ];
     private static $objectsDomainAliases = ['people' => ['bustrack' => 'bustrackpeople', 'sports' => 'sptathletes', 'physio' => 'physiopatients'], 'organizations' => ['bustrack' => 'bustrackorganizations', 'wine' => 'winegrowers'], 'bustrackquotes' => ['physio' => 'physiopersoquotes']];
     private static $configStatusRange = ['tukos' => 16, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'users' => 10001];
@@ -118,7 +118,7 @@ class Directory{
         return array_keys(self::$directory);
     }
     public static function getModules(){
-        return array_diff(array_keys(self::$directory), ['tukos', 'backoffice']);
+        return array_diff(array_keys(self::$directory), ['tukos', 'backoffice', 'glossary']);
     }
     public static function getTranslatedModules(){
         if (empty(self::$translatedModules)){
