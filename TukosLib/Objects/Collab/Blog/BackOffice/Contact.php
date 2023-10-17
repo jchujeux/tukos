@@ -19,11 +19,11 @@ class Contact extends ObjectTranslator{
         $this->usersModel = $this->objectsStore->objectModel('users');
         $this->view  = $this->objectsStore->objectView('blog');
         $this->dataWidgets = [
-            'explanation' => ViewUtils::htmlContent($this->view, 'explanation', ['atts' => ['edit' => ['widgetCellStyle' => ['backgroundColor' => '#d0e9fc'], 'style' => ['color' => 'black', 'font-size' => '12px']]]]),
-            'sendto' => ViewUtils::textBox($this, 'Sendto', ['atts' => ['edit' => ['disabled' => true]]]),
-            'subject' => ViewUtils::textBox($this, 'subject', ['atts' => ['edit' => ['style' => ['width' => '100%'], 'onChangeLocalAction' => ['subject' => ['localActionStatus' => "sWidget.form.getWidget('send').set('disabled', false);"]]]]]),
-            'senderemail' => ViewUtils::textBox($this, 'senderemail', ['atts' => ['edit' => ['onChangeLocalAction' => ['senderemail' => ['localActionStatus' => "sWidget.form.getWidget('send').set('disabled', false);"]]]]]),
-            'comments'  => ViewUtils::simpleEditor($this, 'Yourcontactformcomments', ['atts' => ['edit' => ['style' => ['height' => '400px', 'color' => 'black', 'fontWeight' => 'normal'], 'onChangeLocalAction' => ['comments' => ['localActionStatus' => "sWidget.form.getWidget('send').set('disabled', false);"]]]]]),
+            'explanation' => ViewUtils::htmlContent($this->view, 'explanation', ['atts' => ['edit' => ['widgetCellStyle' => ['backgroundColor' => '#d0e9fc'], 'style' => ['color' => 'black', 'font-size' => '12px', 'width' => '100%', 'touchAction' => 'pan-y']]]]),
+            'sendto' => ViewUtils::textBox($this, 'Sendto', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '100%', 'touchAction' => 'pan-y']]]]),
+            'subject' => ViewUtils::textBox($this, 'subject', ['atts' => ['edit' => ['style' => ['width' => '100%', 'touchAction' => 'pan-y'], 'onChangeLocalAction' => ['subject' => ['localActionStatus' => "sWidget.form.getWidget('send').set('disabled', false);"]]]]]),
+            'senderemail' => ViewUtils::textBox($this, 'senderemail', ['atts' => ['edit' => ['style' => ['width' => '100%', 'touchAction' => 'pan-y'], 'onChangeLocalAction' => ['senderemail' => ['localActionStatus' => "sWidget.form.getWidget('send').set('disabled', false);"]]]]]),
+            'comments'  => ViewUtils::simpleEditor($this, 'Yourcontactformcomments', ['atts' => ['edit' => ['style' => ['height' => '400px', 'color' => 'black', 'fontWeight' => 'normal', 'touchAction' => 'pane-y'], 'onChangeLocalAction' => ['comments' => ['localActionStatus' => "sWidget.form.getWidget('send').set('disabled', false);"]]]]]),
         ];
         $this->dataElts = array_keys($this->dataWidgets);
         $this->dataLayout = [
@@ -34,7 +34,7 @@ class Contact extends ObjectTranslator{
                     'widgets' => Tfk::$registry->isMobile ? ['feedback', 'explanation'] : ['explanation']
                 ],
                 'row1' => [
-                    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true],
+                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true],
                     'widgets' => ['sendto', 'senderemail']
                 ],
                 'row2' => [

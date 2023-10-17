@@ -71,6 +71,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
 					}
 				});
 			}
+			this.container.previousButton.set('style', {display: this.isFirstPane() ? 'none' : 'block'});
+			this.container.nextButton.set('style', {display: this.isLastPane() ? 'none' : 'block'});
 		},
 		selectNextPane: function(){
 			var self = this, panes = this.container.getChildren(), currentPane = this.currentPane();
@@ -81,6 +83,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "tukos/mobile/TukosView", "tuk
 					}
 				});
 			}
+			this.container.previousButton.set('style', {display: this.isFirstPane() ? 'none' : 'block'});
+			this.container.nextButton.set('style', {display: this.isLastPane() ? 'none' : 'block'});
 		},
 		isFirstPane: function(){
 			return this.currentPane() === this.firstPane();

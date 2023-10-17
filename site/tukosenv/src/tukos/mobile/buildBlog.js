@@ -3,7 +3,7 @@ define(["dojo/_base/lang", "dojo/_base/window", "dojo/_base/config", "dojo/ready
 function (lang, win, config, ready, dom, dst, dct, when, topic, focusUtil, Container, Heading, Button, Opener, TukosPane, PostsManager, widgetsLoader, TabOnClick, Pmg) {
 	return {
 		initialize: function(){
-			var self = this, buttonsContainer = new Container({style: {maxWidth: '150px'}}), postsContainer = new Container({style: {backgroundColor: '#d0e9fc'}}), 
+			var self = this, buttonsContainer = new Container({style: {maxWidth: '150px'}}), postsContainer = new Container({style: {backgroundColor: '#d0e9fc', touchAction: 'none'}}), 
 				actionWidgets = Pmg.cache.rightPaneDescription.paneContent.widgetsDescription, searchPane, searchButton, homeUrlArgs = {action: 'Tab', mode: 'Tab', object: 'backoffice', view: 'edit', query: {form: 'Show', object: 'blog', name: Pmg.message('blogwelcome', 'backoffice')}};
         	this.heading = new Heading({/*label: Pmg.cache.headerTitle, */style: {height: '65px'}});
 			this.heading.addChild(buttonsContainer);
@@ -29,15 +29,11 @@ function (lang, win, config, ready, dom, dst, dct, when, topic, focusUtil, Conta
 				Pmg.mobileViews.gotoTab({action: 'Tab', mode: 'Tab', object: 'backoffice', view: 'edit', query: {form: 'Show', object: 'blog', name: Pmg.message('blogwelcome', 'backoffice')}});
 			}}));
 			buttonsContainer.addChild(postsContainer.previousButton = new Button({icon: require.toUrl('tukos/resources/images/left24.png'), style: {display: 'none', 'float': 'left', padding: '1px', margin: '0px'}, onClick: function(){
-        		Pmg.mobileViews.selectPreviousPane();
-				postsContainer.previousButton.set('style', {display: Pmg.mobileViews.isFirstPane() ? 'none' : 'block'});
-				postsContainer.nextButton.set('style', {display: Pmg.mobileViews.isLastPane() ? 'none' : 'block'});
-        	}}));
+				Pmg.mobileViews.selectPreviousPane();
+			}}));
 			buttonsContainer.addChild(postsContainer.nextButton = new Button({icon: require.toUrl('tukos/resources/images/right24.png'), style: {display: 'none', 'float': 'left', padding: '1px', margin: '0px'}, onClick: function(){
-        		Pmg.mobileViews.selectNextPane();
-				postsContainer.previousButton.set('style', {display: Pmg.mobileViews.isFirstPane() ? 'none' : 'block'});
-				postsContainer.nextButton.set('style', {display: Pmg.mobileViews.isLastPane() ? 'none' : 'block'});
-        	}}));
+				Pmg.mobileViews.selectNextPane();
+			}}));
 			this.heading.startup();
 			document.body.appendChild(this.heading.domNode);
 			document.body.appendChild(postsContainer.domNode);

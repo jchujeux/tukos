@@ -18,9 +18,9 @@ class Show extends ObjectTranslator{
         $this->usersModel = $this->objectsStore->objectModel('users');
         $this->view  = $this->objectsStore->objectView('blog');
         $this->dataWidgets = [
-            'posttitle' => ViewUtils::htmlContent($this->view, 'postTitle', ['atts' => ['edit' => ['widgetCellStyle' => ['backgroundColor' => '#d0e9fc'], 'style' => ['color' => 'black']]]]),
-            'postedbyandwhen' => ViewUtils::htmlContent($this->view, 'postedby',  ['atts' => ['edit' => ['widgetCellStyle' => ['textAlign' =>'right', 'backgroundColor' => '#d0e9fc'], 'style' => ['fontSize' => 'smaller', 'color' => 'black']]]]),
-            'comments' => ViewUtils::htmlContent($this->view, 'post', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'white', 'color' => 'black', 'paddingTop' => '1em']]]]),
+            'posttitle' => ViewUtils::htmlContent($this->view, 'postTitle', ['atts' => ['edit' => ['widgetCellStyle' => ['backgroundColor' => '#d0e9fc'], 'style' => ['color' => 'black', 'touchAction' => 'pan-y']]]]),
+            'postedbyandwhen' => ViewUtils::htmlContent($this->view, 'postedby',  ['atts' => ['edit' => ['widgetCellStyle' => ['textAlign' =>'right', 'backgroundColor' => '#d0e9fc'], 'style' => ['fontSize' => 'smaller', 'color' => 'black', 'touchAction' => 'pan-y']]]]),
+            'comments' => ViewUtils::htmlContent($this->view, 'post', ['atts' => ['edit' => ['style' => ['backgroundColor' => 'white', 'color' => 'black', 'paddingTop' => '1em', 'touchAction' => 'pan-y']]]]),
         ];
         $this->dataElts = array_keys($this->dataWidgets);
         $this->dataLayout = [
