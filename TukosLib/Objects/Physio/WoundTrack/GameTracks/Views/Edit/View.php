@@ -5,7 +5,7 @@ use TukosLib\Objects\Views\Edit\View as EditView;
 use TukosLib\Objects\Views\Edit\EditConfig;
 use TukosLib\Objects\Views\LocalActions;
 use TukosLib\Objects\Physio\WoundTrack\IndicatorsConfig;
-use TukosLib\Strava\Views\Edit\SynchronizationAction as StravaSyncAction;
+use TukosLib\Objects\Sports\Strava\Views\Edit\SynchronizationAction as StravaSyncAction;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
@@ -78,7 +78,7 @@ class View extends EditView{
         $this->actionLayout['contents']['actions']['widgets'][] = 'showhidegameplan';
         $this->actionLayout['contents']['actions']['widgets'][] = 'showhideanalysis';
         $this->setEditConfigActionWidget();
-        $this->setStravaActionButton(grid: 'records', athlete: 'patientid', coach: 'physiotherapist', synchrostart: null, synchroend: null, daySortCol: 'rowId', dayDateCol: 'recorddate', 
+        $this->setStravaActionButton(targetObject: 'physiogametracks', grid: 'records', athlete: 'patientid', coach: 'physiotherapist', synchrostart: null, synchroend: null, daySortCol: 'rowId', dayDateCol: 'recorddate', 
             sportsMapping: ['col' => 'recordtype', 'map' => ['running' => 1, 'bicycle' => 2]]);
         
         $this->onOpenAction =  $this->openAction();

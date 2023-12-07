@@ -85,9 +85,10 @@ class Model extends AbstractModel {
                     $scriptName = $scriptInfo['path'] . $scriptInfo['scriptname'];
                         if ($position = strpos($scriptInfo['parameters'], 'tukosScheduler.php')){
                             $position = $position + 18;
-                            foreach ([' --db ' => Tfk::$registry->get('appConfig')->dataSource['dbname'], ' --parentid ' => $scriptInfo['id'], ' --app ' => Tfk::$registry->appName] as $parameter => $value){
+                            foreach ([' --db ' => Tfk::$registry->get('appConfig')->dataSource['dbname'], ' --parentid ' => $scriptInfo['id'], ' --app ' => Tfk::$registry->appName, ' --rootUrl ' => Tfk::$registry->rootUrl] as $parameter => $value){
                                 if (!strpos($scriptInfo['parameters'], $parameter)){
                                     $scriptInfo['parameters'] = substr_replace($scriptInfo['parameters'],  $parameter . $value, $position, 0);
+                                    //$scriptInfo['parameters'] .= $parameter . $value;
                                 }
                             }
                         }

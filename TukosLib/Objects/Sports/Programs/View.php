@@ -445,7 +445,7 @@ EOT;
 	    return <<<EOT
 require (["tukos/objects/sports/TsbCalculator", "tukos/objects/sports/LoadChart"], function(TsbCalculator, LoadChart){
     var grid = sWidget, form = grid.form, params = {};
-    sWidget.tsbCalculator = this.tsbCalculator || new TsbCalculator({sessionsStore: sWidget.store, form: form});
+    sWidget.tsbCalculator = this.tsbCalculator || new TsbCalculator({sessionsStore: sWidget.store, form: form, stressProperties: ['trimphr', 'trimpavghr']});
     sWidget.tsbCalculator.initialize();
     sWidget.tsbCalculator.updateRowAction(sWidget, false, true);
     grid.loadChartUtils = grid.loadChartUtils || new LoadChart({sessionsStore: grid.store});

@@ -24,13 +24,19 @@ function(declare, lang, utils){
 				});
 			}
         },
-		setChartsValue: function(){
+		_setChartsValue: function(){
             const form = this.form, charts = this.charts;
             if (form.chartUtils){
 	            for (const chart of charts){
 	                form.chartUtils[chart.chartType] && form.chartUtils[chart.chartType].setChartValue(chart.widgetName);
 	            }
 			}
+		},
+		setChartsValue: function(){
+			if (!this.debouncedChartsValue){
+				this.debouncedChartsValue = utils.debounce(lang.hitch(this, this._setChartsValue), 200);
+			}
+			this.debouncedChartsValue();
 		},
 		setChartValue: function(chartWidgetName){
 			const form = this.form, chartUtilsInstance = form.chartUtils && form.chartUtils[this.chartTypeOf[chartWidgetName]];

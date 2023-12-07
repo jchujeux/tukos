@@ -34,7 +34,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
             //Pmg.setFeedback(''/*messages.actionDoing*/);
             if (this.inServerDialog){
             	Pmg.setFeedback(Pmg.message('actionnotcompletedwait'), '', '', true);
-            	utils.waitUntil(
+            	/*utils.waitUntil(
 					function(){
 						return !self.inServerDialog;
 					},
@@ -42,8 +42,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
 						//Pmg.addFeedback(Pmg.message('nowitiscomplete'));
 					},
 					200
-				);
-            	return false;//should be a deferred/promise
+				);*/
+            	return false;
             }else{
                 this.inServerDialog = true;
             	urlArgs.object = urlArgs.object || this.object;

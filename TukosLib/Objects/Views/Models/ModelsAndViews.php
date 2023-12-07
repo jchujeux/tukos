@@ -104,7 +104,7 @@ trait ModelsAndViews{
         }
         return $values;
     }
-    public static function toUTC($values, $col){
+    /*public static function toUTC($values, $col){
         if (isset($values[$col])){
             $values[$col] = Dutl::toUTC($values[$col]);
         }
@@ -115,7 +115,7 @@ trait ModelsAndViews{
             $values[$col] = Dutl::fromUTC($values[$col]);
         }
         return $values;
-    }
+    }*/
 
     public function format($value, $formatInfo){
         if ($formatInfo['type'] === 'date'){

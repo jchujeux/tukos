@@ -1,5 +1,5 @@
 <?php
-namespace TukosLib\Strava;
+namespace TukosLib\Objects\Sports\Strava;
 
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
@@ -32,7 +32,7 @@ trait AuthorizeAndSynchronize {
                 'content' => $this->tr('Stravaemailmessage', [['substitute', ['firstname' => $athlete['firstname'], 'organization' => "<b>{$name}</b>", 'authurltag' => $authUrlTag]]])
                 ])));
             $atts = json_decode($atts, true);
-            $this->sendContent([], array_merge($atts, ['to' => $athleteEmail, 'cc' => $coachEmail, 'sendas' => 'appendtobody']), ['parentid' => $this->user->id()]);
+            $this->sendContent([], array_merge($atts, ['to' => $athleteEmail, 'cc' => $coachEmail, 'sendas' => 'appendtobody']), ['name' => 'tukosBackOffice']);
         }else{
             if (!$coachEmail){
                 Feedback::add($this->tr('coachneedsanemail'));
@@ -45,14 +45,15 @@ trait AuthorizeAndSynchronize {
     public function stravaSynchronize($query, $atts = []){//needs $this->stravaCols(), which must include at least stravaid, startdate, starttime
         $athleteId = $query['athleteid'];
         $synchroStreams = $query['synchrostreams'] === 'false' ? false : $query['synchrostreams'];
-        $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities'); 
-        $stravaColsDescription = $this->stravaCols(); $stravaCols = array_keys($stravaColsDescription);
-        $outcome = $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams, $stravaCols);
+        $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
+        $targetView = Tfk::$registry->get('objectsStore')->objectView('sptworkouts');
+        $stravaCols = $this->stravaCols();
+        $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams, $stravaCols);
         $stravaActivities = $stravaActivitiesModel->getAll(['where' => [['col' => 'startdate', 'opr' => '>=', 'values' => $query['synchrostart']], ['col' =>'startdate', 'opr' => '<=', 'values' => $query['synchroend']]],
             'cols' => $stravaCols, 'orderBy' => ['startdate' =>  'ASC']]);
-        $stravaActivities = Utl::objToEdit($stravaActivities, $stravaColsDescription);
+        $stravaActivities = Utl::objToEdit($stravaActivities, $targetView->dataWidgets);
         $stravaActivities = Utl::toAssociativeGrouped($stravaActivities, 'startdate');
-        foreach ($stravaActivities as $startdate => $activities){
+        foreach ($stravaActivities as $activities){
             $times = array_column($activities, 'starttime');
             array_multisort($times, SORT_ASC, $activities);
         }

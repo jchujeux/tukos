@@ -47,12 +47,6 @@ class AbstractConfigure{
             return new StreamsManager();
         });
         
-        $request =Tfk::$registry->request;
-        $query = Tfk::$registry->urlQuery;
-        if (($request['controller'] === 'Page' && $request['view'] === 'Edit') && !isset($query['id']) && !isset($query['notab'])){
-            $query['notab'] = 'yes';
-            Tfk::$registry->urlQuery = $query;
-        }
         $this->modulesMenuLayout = $modulesMenuLayout;
         $this->transverseModules = ['admin', 'collab'];
         $this->objectModulesDefaultContextName = ['tukos' => 'tukos', 'customviews' => 'tukos'];
@@ -65,6 +59,12 @@ class AbstractConfigure{
         $this->noContextCustomForAll = true;
         
         if (Tfk::$registry->mode === 'interactive'){
+            $request =Tfk::$registry->request;
+            $query = Tfk::$registry->urlQuery;
+            if (($request['controller'] === 'Page' && $request['view'] === 'Edit') && !isset($query['id']) && !isset($query['notab'])){
+                $query['notab'] = 'yes';
+                Tfk::$registry->urlQuery = $query;
+            }
             Tfk::$registry->set('dialogue', function(){
                 return new WebDialogue(Tfk::$registry->get('translatorsStore'));
             });

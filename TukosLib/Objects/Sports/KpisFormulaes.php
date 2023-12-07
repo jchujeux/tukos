@@ -18,16 +18,16 @@ class KpisFormulaes {
     public static function metricIntensity($metric, $threshold, $sex, $min = 0, $b = null){
         return self::intensity(self::rate($metric, $threshold, $min), is_null($b) ? self::$b[$sex] : $b);
     }
-    public static function avgload($avgMetric, $threshold, $minutesActive, $sex, $min = 0, $b = null){
-        return intval($minutesActive / 0.6 * self::metricIntensity($avgMetric, $threshold, $sex, $min, $b));
+    public static function avgload($metrics, $threshold, $secondsActive, $sex, $min = 0, $b = null){
+        return intval($secondsActive / 36 * self::metricIntensity($metrics, $threshold, $sex, $min, $b));
     }
-    public static function load($metrics, $threshold, $sex, $smoothSeconds = 1, $min = 0, $b = null){//$metrics is an array of the metric value for every seconds of the workout
+    public static function load($metrics, $threshold, $sex = null, $smoothSeconds = 1, $min = 0, $b = null){//$metrics is an array of the metric value for every seconds of the workout
         $metrics = array_map(function($value){return intval($value);}, $smoothSeconds === 1 ? $metrics : Average::exponentialMovingAverage($metrics, $smoothSeconds));
         $load = 0;
         if (is_array($b)){
             $count = count($metrics);
             for ($i = 0; $i < $count; $i++){
-                $load += self::metricIntensity($metrics[$i], $threshold, $sex, $min, $b[i]);
+                $load += self::metricIntensity($metrics[$i], $threshold, $sex, $min, $b[$i]);
             }
         }else{
             $distinctMetrics= array_count_values($metrics);

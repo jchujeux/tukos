@@ -173,7 +173,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
                         chart.render();
                         chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
                     }catch(err){
-                        console.log('error while rendering or resizing chart for widget: ' + this.widgetName);
+                        console.log('error while rendering or resizing chart for widget: ' + this.widgetName + ' - ' + err.message);
                     }
                     if (this.legend){
 						if (!this.legendWidget){

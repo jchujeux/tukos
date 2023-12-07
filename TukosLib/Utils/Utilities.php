@@ -2,6 +2,7 @@
 namespace TukosLib\Utils;
 
 class Utilities{
+    public static $transliterator;
     public static function nullToBlank($value){
         return  ($value === null ? '' : $value);
     }
@@ -326,6 +327,20 @@ class Utilities{
     	return $paArray;
     }
 
+    public static function array_merge_recursive_concat($paArray1, $paArray2){
+        if (!is_array($paArray1) && !is_array($paArray2)){
+            return "{$paArray1}{$paArray2}";
+        }else{
+            if (!is_array($paArray1) or !is_array($paArray2)){
+             return $paArray2;
+             }
+             foreach ($paArray2 AS $sKey2 => $sValue2){
+                $paArray1[$sKey2] = Self::array_merge_recursive_concat(@$paArray1[$sKey2], $sValue2);
+             }
+             return $paArray1;
+        }
+    }
+    
     public static function array_diff_assoc_recursive($array1, $array2) {
         $difference=array();
         foreach($array1 as $key => $value) {
@@ -405,8 +420,10 @@ class Utilities{
         return $reduced;
     }
     public static function removeAccents($string){
-        $transliterator = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC');
-        return $transliterator->transliterate($string);
+        if (empty(self::$transliterator)){
+            self::$transliterator = \Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC');
+        }
+        return self::$transliterator->transliterate($string);
     }
     public static function replace($comparisonOperator, $arrayToSearch, $searchProperty, $searchValue, $returnProperty, &$cache, $ignoreCase, $ignoreAccent){
         if (empty($cache[$searchValue])){
@@ -521,7 +538,7 @@ class Utilities{
     public static function translations($ids, $translator = null, $translationMode = 'ucfirst'){
         $result = [];
         foreach ($ids as $id){
-            $result[$id] = $translator ? $translator($id, $translationMode) : $id;
+            $result[$id] = $translator ? $translator($id, $translationMode) : self::transform($id, $translationMode);
         }
         return $result;
     }
@@ -618,7 +635,39 @@ class Utilities{
         }
         return $value;
     }
-
+    public static function transform($translation, $mode){
+        switch ($mode){
+            case 'escapeSQuote':
+                return self::escapeSQuote($translation);
+            case 'addslashes':
+                return addslashes($translation);
+            case 'ucfirst':
+                return ucfirst(mb_strtolower($translation));
+            case 'lowercase':
+                return mb_strtolower($translation);
+            case 'uppercase':
+                return mb_strtoupper($translation);
+            case 'uppercasenoaccent':
+                return strtoupper(self::removeAccents($translation));
+            case 'ucwords':
+                return ucwords(mb_strtolower($translation));
+            case 'plural':
+            case 'none':
+            case null:
+            case '':
+                return $translation;
+            default://assumes it is an array describing the transformation, e.g. ['replace', ['(', ')'], ' ']
+                switch ($mode[0]){
+                    case 'replace':
+                        return str_replace($mode[1], $mode[2], $translation);
+                    case 'substitute':
+                        return self::substitute($translation, $mode[1]);
+                    default:
+                        return $translation;
+                        
+                }
+        }
+    }
     public static function utf8($value){
         switch ($encoding = mb_detect_encoding($value, null, true)){
             case 'UTF-8' : 
@@ -687,9 +736,6 @@ class Utilities{
                     foreach($description['objToStoreEdit'] as $func => $params){
                         foreach($items as &$item){
                             if (isset($item[$col])){
-                                if (isset($params['class'])){
-                                    
-                                }
                                 $item[$col] = isset($params['class']) ? call_user_func_array([$params['class'], $func], [$item[$col]]) : $func($item[$col]);
                             }
                         }

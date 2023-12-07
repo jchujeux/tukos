@@ -158,12 +158,14 @@ class ViewUtils{
         return  Utl::array_merge_recursive_replace(['type' => 'timeTextBox' , 'atts' => [
             'edit' =>  ['label' => $view->tr($label), 'constraints' => ['timePattern' => 'HH:mm:ss', 'clickableIncrement' => 'T00:15:00', 'visibleRange' => 'T01:00:00']],
             'storeedit' => ['formatType' => 'tHHMMSSToHHMMSS'],
-            'overview' => ['formatType' => 'secondssToHHMMSS']
+            'overview' => ['formatType' => 'tHHMMSSToHHMMSS']
         ],
             'objToEdit' => ['secondsToTime' => ['class' => self::dutl]],
             'editToObj' => ['timeToSeconds' => ['class' => self::dutl]],
             'objToStoreEdit' => ['secondsToTime' => ['class' => self::dutl]],
             'storeEditToObj' => ['timeToSeconds' => ['class' => self::dutl]],
+            'objToOverview' => ['secondsToTime' => ['class' => self::dutl]],
+            'overviewToObj' => ['timeToSeconds' => ['class' => self::dutl]],
         ], $custom);
     }
     static public function minutesTextBox($view, $label, $custom=[]){
@@ -185,10 +187,9 @@ class ViewUtils{
                 'storeedit' => ['width' => 85,  'formatType' => 'datetime'],
                 'overview' => ['width' => 85,  'formatType' => 'datetime'],
             ],
-            'objToEdit'        => ['toUTC' => []], 'editToObj'         => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
-            'objToStoreEdit'   => ['toUTC' => []], 'storeEditToObj'    => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
-            'objToOverview'    => ['toUTC' => []], 'overviewToObj'     => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
-            //	'editToObj' => ['blankToNull' => ['class' => self::utl]], 'storeEditToObj' => ['blankToNull' => ['class' => self::utl]], 'overviewToObj' => ['blankToNull' => ['class' => self::utl]],
+            'objToEdit'        => ['toUTC' => ['class' => self::dutl]], 'editToObj'         => ['fromUTC' => ['class' => self::dutl], 'blankToNull' => ['class' => self::utl]],
+            'objToStoreEdit'   => ['toUTC' => ['class' => self::dutl]], 'storeEditToObj'    => ['fromUTC' => ['class' => self::dutl], 'blankToNull' => ['class' => self::utl]],
+            'objToOverview'    => ['toUTC' => ['class' => self::dutl]], 'overviewToObj'     => ['fromUTC' => ['class' => self::dutl], 'blankToNull' => ['class' => self::utl]],
         ],
             $custom
             );
@@ -200,10 +201,9 @@ class ViewUtils{
                       'storeedit' => ['width' => 85,  'formatType' => 'datetime'],
                        'overview' => ['width' => 85,  'formatType' => 'datetime'],
                 ],
-             'objToEdit'        => ['toUTC' => []], 'editToObj'         => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
-             'objToStoreEdit'   => ['toUTC' => []], 'storeEditToObj'    => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
-             'objToOverview'    => ['toUTC' => []], 'overviewToObj'     => ['fromUTC' => [], 'blankToNull' => ['class' => self::utl]],
-        	//	'editToObj' => ['blankToNull' => ['class' => self::utl]], 'storeEditToObj' => ['blankToNull' => ['class' => self::utl]], 'overviewToObj' => ['blankToNull' => ['class' => self::utl]], 
+             'objToEdit'        => ['toUTC' => ['class' => self::dutl]], 'editToObj'         => ['fromUTC' => ['class' => self::dutl], 'blankToNull' => ['class' => self::utl]],
+             'objToStoreEdit'   => ['toUTC' => ['class' => self::dutl]], 'storeEditToObj'    => ['fromUTC' => ['class' => self::dutl], 'blankToNull' => ['class' => self::utl]],
+             'objToOverview'    => ['toUTC' => ['class' => self::dutl]], 'overviewToObj'     => ['fromUTC' => ['class' => self::dutl], 'blankToNull' => ['class' => self::utl]],
          ],
             $custom
         );

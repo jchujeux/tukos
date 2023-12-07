@@ -18,6 +18,7 @@ class CheckOrphanIds {
                  'db-s'		    => 'tukos application database name (not needed in interactive mode)',
                  'class=s'      => 'this class name',
                  'parentid-s'   => 'parent id (optional)',
+                 'rootUrl-s'		=> 'https://tukos.site or https://localhost, omit if interactive',
                  'clean-s'      => 'set removed orphan ids to null'
                 ]);
             $ids     = [];
@@ -57,7 +58,7 @@ class CheckOrphanIds {
                         $output .= '<br>' . $objectName . ': ' . implode(', ', array_column($modelIds, 'id'));
                     }
                 }
-                if ($options->clean && strtolower($options->clean) === 'yes'){
+                if (($cleanOption=$options->getOption('clean')) && strtolower($cleanOption) === 'yes'){
                     $tukosModel = Tfk::$registry->get('tukosModel');
                     $tukosIdCols = array_keys($tukosModel->idColsObjects);
                     $presentOrphanIds = $store->query("SELECT -id FROM tukos WHERE -id in (" . implode(',', $orphanIds). ")")->fetchAll(\PDO::FETCH_COLUMN, 0);

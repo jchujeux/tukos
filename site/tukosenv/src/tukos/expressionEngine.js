@@ -16,13 +16,16 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 			}
 		}
 	};
-	const kpiLanguage = function (items, cache, idp) {
+	const kpiLanguage = function (items, cache, valueOf, previousKpiValuesCache, previousItems, kpiDate) {
+		const getValueOf = function(value){
+			return dojo.isString(value) && value[0] === '@' ? valueOf(value.substring(1)): value;
+		}
 		const formulaCache = {}, 
 			  getFormula = function(arg){
 				if (formulaCache[arg]){
 					return formulaCache[arg];
 				}else{
-					const formulaString = arg.replaceAll(/[$](\w+)/g, '(!Number.isNaN(x=Number(item.$1)) ? x : (item.$1 === undefined ? utils.putInCache("$1", item[idp], cache)  : dutils.timeToSeconds(item.$1)))');
+					const formulaString = arg.replaceAll(/[$]((?:\w|_)+)/g, '(!Number.isNaN(x=Number(item.$1)) ? x : (item.$1 === undefined ? utils.putInCache("$1", item[idp], cache)  : item.$1))');
 					return formulaCache[arg] = eutils.eval('return ' + formulaString + ';', 'item, cache, x');
 				}
 			},
@@ -37,15 +40,29 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 				});
 				return result;
 			},
-			formulaExpAvg = function(arg, initialAvg, initialDate, daysConstant, kpiDate){
-				const formula = getFormula(arg, cache);
-				let average = Number(initialAvg), previousDate = initialDate, dailyDecay = Math.exp(-1/daysConstant);
+			formulaExpAvg = function(arg, initialAvg, initialDate, daysConstant){
+				const formula = getFormula(arg), dailyDecay = Math.exp(-1/getValueOf(daysConstant));
+				let average, previousDate;
+				if (!previousKpiValuesCache[arg + daysConstant]){
+					average = Number(getValueOf(initialAvg)); previousDate = getValueOf(initialDate);
+					previousItems.forEach(function(item){
+						const value = formula(item, cache, x);
+						average =  (isNaN(value) ? 0 : value) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
+						previousDate = item.startdate
+					});
+				}else{
+					[average, previousDate] = previousKpiValuesCache[arg + daysConstant];
+				}
 				items.forEach(function(item){
-					const value = formula(item, cache, x);
-					average =  (isNaN(value) ? 0 : value) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
-					previousDate = item.startdate
+					if (previousDate < item.startdate){
+						const value = formula(item, cache, x);
+						average =  (isNaN(value) ? 0 : value) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
+						previousDate = item.startdate
+					}
 				});
-				return kpiDate && kpiDate !== previousDate ? average * Math.pow(dailyDecay, dutils.difference(previousDate, kpiDate)) : average;
+				const kpiValue = kpiDate && kpiDate !== previousDate ? average * Math.pow(dailyDecay, dutils.difference(previousDate, kpiDate)) : average;
+				previousKpiValuesCache[arg + daysConstant] = [kpiValue, kpiDate ? kpiDate : previousDate];
+				return kpiValue;
 			},
 			formulaMin = function(arg){
 				const formula = getFormula(arg, cache);
@@ -70,14 +87,25 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 				return result;
 			},
 			formulaFirst = function(arg){
-				return getFormula(arg)(items[0], cache, x);
+				return items.length ? getFormula(arg)(items[0], cache, x) : undefined;
 			},
 			formulaLast = function(arg){
-				return getFormula(arg)(items[items.length-1], cache, x);
+				return items.length ? getFormula(arg)(items[items.length-1], cache, x) : undefined;
 			},
 			formulaItem = function(arg, index){
 				const formula = getFormula(arg);
-				return formula(items[index], cache, x);
+				if (items.length){
+					const targetIndex = index < 0 ? items.length+index -1 : index - 1;
+					return items[targetIndex] ? formula(items[targetIndex], cache, x) : undefined;
+				}else{
+					return undefined;
+				}
+			},
+			formulaTimeToSeconds = function(timeString){//if timeString is a number, we assume it is seconds, so no need to convert
+				return timeString && isNaN(timeString) ? dutils.timeToSeconds(timeString) : timeString;
+			},
+			formulaDate = function(formulaString){
+				return dutils.formulaStringToDate(formulaString, valueOf);
 			};
 		return {
 			INFIX_OPS: {
@@ -111,6 +139,9 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 				'NEG':  unpackArgs(function(a){
 					return - a();
 				}),
+				'TOFIXED': unpackArgs(function(a, digits){
+					return Number(a().toFixed(digits()));
+				}), 
 				'SUM': function(col){
 					return formulaSum(col());
 				},
@@ -120,8 +151,8 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 				'DAILYAVG': unpackArgs(function(col, durationDays){
 					return formulaSum(col()) / durationDays;
 				}),
-				'EXPAVG': unpackArgs(function(col, initialAvg, initialDate, daysConstant, kpiDate){
-					return formulaExpAvg(col(), initialAvg(), initialDate(), daysConstant(), kpiDate);
+				'EXPAVG': unpackArgs(function(col, initialAvg, initialDate, daysConstant){
+					return formulaExpAvg(col(), initialAvg(), initialDate(), daysConstant());
 				}),
 				'MIN': function(col){
 					return formulaMin(col());
@@ -137,9 +168,15 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 				},
 				'ITEM': unpackArgs(function(col, index){
 					return formulaItem(col(), index());
-				})
+				}),
+				'TIMETOSECONDS': function(timeString){
+					return formulaTimeToSeconds(timeString());
+				},
+				'DATE': function(formulaString){
+					return formulaDate(formulaString());
+				}
 			},
-			PRECEDENCE:[['ARRAY', 'NEG', 'SUM', 'AVG', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM'], ['*', '/'], ['+', '-'], [',']],
+			PRECEDENCE:[['ARRAY', 'NEG', 'TOFIXED', 'SUM', 'AVG', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'TIMETOSECONDS', 'DATE'], ['*', '/'], ['+', '-'], [',']],
 			LITERAL_OPEN: '"',
 			LITERAL_CLOSE: '"',
 			GROUP_OPEN: '(',
@@ -163,8 +200,8 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 	};
 
 	return {
-		expression: function(itemsAscendingStartDateArray, missingColsCache){
-			return new parser.default(kpiLanguage(itemsAscendingStartDateArray, missingColsCache, idp));
+		expression: function(itemsAscendingStartDateArray, missingColsCache, valueOf, previousKpiValuesCache, previousItems, kpiDate){
+			return new parser.default(kpiLanguage(itemsAscendingStartDateArray, missingColsCache, valueOf, previousKpiValuesCache, previousItems, kpiDate));
 		}
 	};
 });

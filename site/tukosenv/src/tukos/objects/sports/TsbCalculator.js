@@ -3,7 +3,7 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
     return declare(null, {
         constructor: function(args){
 			lang.mixin(this, args);
-			this.filter = new this.sessionsStore.Filter();
+			this.filter = new (this.sessionsStore || this.workoutsStore).Filter();
 			this.sessionsIterator = new ArrayIterator();
 			this.stsDailyDecay = this.ltsDailyDecay = 0.0;
         },
@@ -31,6 +31,14 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 		isActive: function(){
 			return (this.stsDailyDecay || this.ltsDailyDecay);
 		},
+		getStress(item){
+			for (const property of this.stressProperties){
+				if (item[property]){
+					return item[property];
+				}
+			};
+			return 0;
+		},
 		createRowAction: function(grid, row){
 			this.rowAction(grid, row, 'create');
 		},
@@ -41,14 +49,14 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 			this.rowAction(grid, row, 'delete');
 		},
 		getCollection: function(){
-			return this.sessionsStore.filter(this.tsbFilter).sort([{property: 'startdate'}, {property: 'sessionid'}]);
+			return (this.sessionsStore || this.workoutsStore).filter(this.tsbFilter).sort([{property: 'startdate'}, {property: 'sessionid'}]);
 		},
 		setDisplayFromStsAndLts: function(displayFromDate){
 			const form = this.form, fromDate = form.valueOf('fromdate');
 			if (displayFromDate <= fromDate){
 				form.setValuesOf({displayfromdate: fromDate, displayfromsts: form.valueOf('initialsts'), displayfromlts: form.valueOf('initiallts')});
 			}else{
-				const truncatedSessions = this.sessionsStore.filter(this.filter.eq('mode', 'performed').ne('sts', NaN).ne('lts', NaN).lt('startdate', displayFromDate)).sort([{property: 'startdate', descending: true}, {property: 'sessionid', descending: true}]).fetchSync();
+				const truncatedSessions = (this.sessionsStore || this.workoutsStore).filter(this.filter.eq('mode', 'performed').ne('sts', NaN).ne('lts', NaN).lt('startdate', displayFromDate)).sort([{property: 'startdate', descending: true}, {property: 'sessionid', descending: true}]).fetchSync();
 				let fromDate, initialSts, initialLts;
 				if (truncatedSessions.length){
 					const lastTruncatedSession = truncatedSessions[0];
@@ -91,7 +99,7 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 							iterator.next();
 					}
 					if (item){
-						sessionStress = item.trimphr || item.trimpavghr || 0;
+						sessionStress = self.getStress(item);
 						currentRow = cudMode === 'delete' ? iterator.next() : item;
 						updateRowOrDirty = function(col, value){
 							if (Math.abs(value - Number(currentRow[col] || 0)) > 0.01){
@@ -135,11 +143,11 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 							}
 							while (item = iterator.next()){
 								daysDifference = dutils.difference(previousItem.startdate, item.startdate);
-								sts = self.exponentialAvg(item.trimphr || item.trimpavghr || 0, previousItem.sts, daysDifference, self.stsDailyDecay);
+								sts = self.exponentialAvg(self.getStress(item), previousItem.sts, daysDifference, self.stsDailyDecay);
 								if (Math.abs(sts - Number(item.sts || 0)) > 0.01){
 									grid.updateDirty(item[idp], 'sts', sts);
 								}
-								lts = self.exponentialAvg(item.trimphr || item.trimpavghr || 0, previousItem.lts, daysDifference, self.ltsDailyDecay);
+								lts = self.exponentialAvg(self.getStress(item), previousItem.lts, daysDifference, self.ltsDailyDecay);
 								if (Math.abs(lts - Number(item.lts || 0)) > 0.01){
 									grid.updateDirty(item[idp], 'lts', lts, isUserEdit);
 								}

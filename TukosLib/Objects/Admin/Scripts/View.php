@@ -30,8 +30,10 @@ class View extends AbstractView {
                                             'filters'   => ['parentid' => '@id'],
                                        'allDescendants' => false];
         $this->customize($customDataWidgets, $subObjects);
-        $this->customContentAtts = [
-            'edit'      => ['actionLayout' => ['contents' => ['actions' => ['widgets' => ['save', 'reset', 'delete', 'duplicate', 'new', 'edit', 'calendartab', 'export', 'process']]]]],
+        $this->customContentAtts = [//        $this->customContentAtts = ['edit' => ['widgetsDescription' => ['export' => ['atts' => ['conditionDescription' => "return this.valueOf('id');"]]]]];
+            
+            'edit'      => ['actionLayout' => ['contents' => ['actions' => ['widgets' => ['save', 'reset', 'delete', 'duplicate', 'new', 'edit', 'calendartab', 'export', 'process']]]],
+                            'widgetsDescription' => ['process' => ['atts' => ['clientTimeout' => 64000]]]],
             'overview'  => ['actionLayout' => ['contents' => ['selection' => ['widgets' => ['duplicate', 'modify', 'delete', 'edit', 'import', 'export', 'process']]]]],
         ];
     }    

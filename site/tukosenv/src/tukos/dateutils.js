@@ -2,6 +2,16 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
     var durations = {second: 1, minute: 60, hour: 3600, day: 24*3600, week: 7*24*3600, month: 24*3600*30, quarter: 24*3600*30*3, year: 24*3600*365},
     	daysName = ['sunday', 'monday', 'tuesday', 'wednesday','thursday', 'friday', 'saturday', 'sunday'];
 	return {
+        isValidDate: function(dateString, silent){
+			if (isNaN(Date.parse(dateString))){
+				if (!silent){
+					Pmg.setFeedback(Pmg.message('invaliddate' + ': ' + dateString));
+				}
+				return false;
+			}else{
+				return true;
+			}
+		},
         toISO: function(date, options){
             return dojo.date.stamp.toISOString(date, options || {zulu: true});
         },
@@ -79,14 +89,22 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
         dayName: function(dayNumber){
 			return Pmg.message(daysName[dayNumber]);
 		},
+		dayNumber: function(dayName){
+			return daysName.indexOf(dayName);
+		},
 		getDayOfWeek: function (number, date) {// returns a date
-          const newDate = new Date(date), day = date.getDay(), diff = date.getDate() - day + number + (day == 0 ? -7:0); // adjust when day is sunday
-          newDate.setDate(diff);
+          const newDate = new Date(date), day = date.getDay(), newMonthDay = date.getDate() - day + (number || 7) + (day == 0 ? -7:0); // adjust when day is sunday
+          newDate.setDate(newMonthDay);
           return newDate;
         },
         dateToDayName: function(date){
         	return daysName[date.getDay()];
         },
+        getDayOfMonth: function(number, date){
+          const newDate = new Date(date);
+          newDate.setDate(number);
+          return newDate;
+		},
         getDayOfYear(date){
     		return (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;	
 		},
@@ -208,6 +226,32 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
             }else{
                 return duration;
             } 
-        }
+        },
+        formulaStringToDate: function(formulaString, valueOf){// (day|week|month)[<number>][$widgetname][,(nameOfDay|dayNumberInMonth)]) | YYYY-MM-DD
+			let returnDate;
+			let [unit, offset, selectedDate, targetDay] = formulaString.replace(/\s/g, '').replace('$', '@').match(/([^+-@;]*)([+-]?\d*)([^;]*)[;]?(.*)/i).slice(1);
+			if (unit){
+				unit = unit.toLowerCase();
+				offset = offset ? parseInt(offset) : 0;
+				selectedDate = selectedDate ? new Date(valueOf(selectedDate.substring(1))) : new Date();
+				if (offset){
+					selectedDate = this.dateAdd(selectedDate, unit, offset);
+				}
+				switch(unit){
+					case 'week':
+						returnDate = this.getDayOfWeek(this.dayNumber(targetDay.toLowerCase() || 'monday'), selectedDate);
+						break;
+					case 'month':
+						returnDate = this.getDayOfMonth(targetDay || 1, selectedDate);
+						break;
+					case 'day':
+					default:
+						returnDate = selectedDate;
+				}
+				return this.formatDate(returnDate);
+			}else{
+				return formulaString;
+			}
+		}
     }
 });

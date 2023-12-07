@@ -52,13 +52,15 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				}
 			},
 			isEquivalent: function(value1, value2) {
-				if (typeof value1 === "number" || typeof value2 === "number") {
+				const emptyValues = ['undefined', 'null', ''];
+				return value1 === value2 || String(value1) === String(value2) || (this.in_array(String(value1), emptyValues) && this.in_array(String(value2), emptyValues));
+				/*if (typeof value1 === "number" && typeof value2 === "number") {
 					return value1 === value2;
 				}else if (typeof value1 === "boolean" || typeof value2 === "boolean") {
 					return value1 === value2;
 				}else{
 					return String(value1 || '') == String(value2 || '');
-				}
+				}*/
 			},
 			forEach: function(object, callback) {
 				if (object){
@@ -342,7 +344,11 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 							value = value.replace("T", " ");
 							break;
 						case 'datetime': // from yyyy-mm-ddThh:mm:ssZ to yyyy-mm-dd hh:mm:ss (server time format i.e. ISO to dojo widgets time format
+							const isTime = value && value[0] === 'T';
 							value = dojo.date.locale.format(stamp.fromISOString(value));
+							if (isTime){
+								value = value.substring(11);
+							}
 							break;
 						case 'date':
 							if (value.length > 10 && value[10] !== 'T') { //hack as we change from datetime to date for sptsessions. 
@@ -500,18 +506,19 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				return intoArray.slice(0, atIndex).concat(valueOrArrayToInject).concat(intoArray.slice(atIndex));
 			},
 			debounce: function(func, wait, immediate) {
-				var timeout;
+				var timeout, result;
 				return function() {
 					var context = this,
 						args = arguments;
 					var later = function() {
 						timeout = null;
-						if (!immediate) func.apply(context, args);
+						if (!immediate) result = func.apply(context, args);
 					};
 					var callNow = immediate && !timeout;
 					clearTimeout(timeout);
 					timeout = setTimeout(later, wait);
-					if (callNow) func.apply(context, args);
+					if (callNow) result = func.apply(context, args);
+					return result;
 				};
 			},
 			throttle: function(func, limit) {
@@ -575,19 +582,20 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				switch(widgetType){
 					case 'HorizontalLinearGauge': 
 						const pValue = value ? JSON.parse(value) : value;
-						return typeof pValue === 'object' ? (pValue.gauge || 0) : (pValue  || 0);
+						return (pValue !== null && typeof pValue === 'object') ? (pValue.gauge || 0) : (pValue  || 0);
 					default:
 						return value;
 				}
 			},
 	        toNumeric: function(data, grid){
-				const transformedData = [];
-				for (const row in data){
-					transformedData[row] = {};
-					for (const column in data[row]){
-						transformedData[row][column] = this.widgetNumericValue((grid.columns[column] || {}).editor, data[row][column]);
+				let self = this, transformedData = [];
+				data.forEach(function(row){
+					let transformedRow = {};
+					for (const column in row){
+						transformedRow[column] = self.widgetNumericValue((grid.columns[column] || {}).editor, row[column]);
 					}
-				}
+					transformedData.push(transformedRow);
+				});
 				return transformedData;
 			},
 			selectedAction: function(sWidget, tWidget, newValue){
@@ -600,6 +608,43 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				        }
 				    })
 				}
+			},
+			escapeRegExp: function (string) {
+    			return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
+			},
+			_translate : function(value, translations, mode/* 'translate' | 'untranslate' */){
+				if (translations){
+					let self = this, matchingTranslations = [];
+					this.forEach(translations, function(translated, untranslated){
+						let source = (mode === 'translate' ? untranslated : translated), target = (mode === 'translate' ? translated : untranslated), sourceRegExp = new RegExp('\\b' + self.escapeRegExp(source) + '(?!\w)', 'g');
+						if (sourceRegExp.test(value)){
+                        	matchingTranslations.push([source, sourceRegExp, target]);
+						}
+					});
+					if (matchingTranslations.length <= 0){
+						return value;
+					}else if(matchingTranslations.length === 1){
+						const [source, sourceRegExp, target] = matchingTranslations[0];
+						return value.replaceAll(sourceRegExp, target);
+					}else{
+						matchingTranslations.sort(function(a, b){
+							return b[0].length - a[0].length;
+						});
+						matchingTranslations.forEach(function(translation){
+							const [source, sourceRegExp, target] = translation;
+							value = value.replaceAll(sourceRegExp, target);
+						});
+						return value;
+					}
+				}else{
+					return value;
+				}
+			},
+			translate: function(value, translations){
+				return this._translate(value, translations, 'translate');
+			},
+			untranslate: function(value, translations){
+				return this._translate(value, translations, 'untranslate');
 			}
 		};
 	});

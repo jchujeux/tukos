@@ -1,11 +1,11 @@
 <?php
-namespace TukosLib\Strava\Views\Edit;
+namespace TukosLib\Objects\Sports\Strava\Views\Edit;
 
 use TukosLib\Utils\Widgets;
 
 trait SynchronizationAction {
     
-    public function setStravaActionButton($grid, $athlete, $coach, $synchrostart = 'synchrostart', $synchroend = 'synchroend', $daySortCol = 'sessionid', $dayDateCol = 'startdate', $sportsMapping = null){
+    public function setStravaActionButton($targetObject, $grid, $athlete, $coach, $synchrostart = 'synchrostart', $synchroend = 'synchroend', $daySortCol = 'sessionid', $dayDateCol = 'startdate', $sportsMapping = null){
         $view = $this->view;
         $tr = $view->tr;
         $view->addToTranslate(['bicycle', 'swimming', 'running', 'other', 'noneedtosync', 'needsstravaauthorization', 'isstravaauthorized', 'cannotsynchronizestrava', 'needtodefinecoach', 'needtodefineathlete']);
@@ -16,8 +16,10 @@ trait SynchronizationAction {
                 'widgetsDescription' => [
                         'ignoreitemflag' => Widgets::checkBox(Widgets::complete(['title' => $tr('ignoreitemflag'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('ignoreitemflag')])),
                     'synchrostreams' => Widgets::checkBox(Widgets::complete(['title' => $tr('synchrostreams'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('synchrostreams')])),
-                    'synchrostart' => Widgets::tukosDateBox(['title' => $tr('synchrostart')]),
-                    'synchroend' => Widgets::tukosDateBox(['title' => $tr('synchroend')]),
+                    'synchrostart' => Widgets::tukosDateBox(Widgets::complete(['title' => $tr('synchrostart'), 'onWatchLocalAction' => ['value' => [
+                        'synchrostart' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->synchroStartLocalAction()]]]]])),
+                    'synchroend' => Widgets::tukosDateBox(Widgets::complete(['title' => $tr('synchroend'), 'onWatchLocalAction' => ['value' => [
+                        'synchroend' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "const toDate = dutils.parseDate(sWidget.pane.form.valueOf('todate')); return toDate < newValue ? toDate : newValue;"]]]]])),
                     'stlink' => Widgets::htmlContent(['title' => $tr('stlink'), 'readonly' => true]),
                     'stauthorize' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('stauthorize'), 'onClickAction' => 'this.pane.stravaLocalActions.authorizeStrava(this.pane);']],
                     'stsync' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('synchronize'), 'onClickAction' => 'this.pane.stravaLocalActions.synchronizeWithStrava(this.pane);']],
@@ -53,11 +55,11 @@ trait SynchronizationAction {
                         ],
                     ],
                 ],
-                'onOpenAction' => $this->onOpenAction($view, $tr, $grid, $athlete, $coach, $synchrostart, $synchroend, $daySortCol, $dayDateCol, $sportsMapping)
+                'onOpenAction' => $this->onOpenAction($view, $tr, $targetObject, $grid, $athlete, $coach, $synchrostart, $synchroend, $daySortCol, $dayDateCol, $sportsMapping)
         ]];
     }
 
-    protected function _stravaHtmlContent($view, $tr, $grid, $athlete, $coach, $daySortCol, $dayDateCol, $sportsMapping){
+    protected function _stravaHtmlContent($view, $tr, $targetObject, $grid, $athlete, $coach, $daySortCol, $dayDateCol, $sportsMapping){
             $sportsMappingString = json_encode($sportsMapping);
             return <<<EOT
 const athleteId = this.form.valueOf("$athlete");
@@ -71,23 +73,34 @@ if (athleteId){
             self.getWidget('stauthorize').set('hidden', isStravaAuthorized);
             self.resize();
             require(["tukos/strava/LocalActions"], function(LocalActions){
-                self.stravaLocalActions = new LocalActions({grid: "$grid", athlete: "$athlete", coach: "$coach", daySortCol: "$daySortCol", dayDateCol: "$dayDateCol", sportsMapping: $sportsMappingString});
+                self.stravaLocalActions = new LocalActions({targetObject: "$targetObject", grid: "$grid", athlete: "$athlete", coach: "$coach", daySortCol: "$daySortCol", dayDateCol: "$dayDateCol", sportsMapping: $sportsMappingString});
             });
 		}
    );
 }else{
 	Pmg.alert({title: Pmg.message('cannotsynchronizestrava', "{$view->objectName}"), content: Pmg.message('needtodefineathlete', "{$view->objectName}")});
-    pane.close();
+    this.close();
 }
 EOT
             ;
         }
-        protected function onOpenAction($view, $tr, $grid, $athlete, $coach, $synchrostart, $synchroend, $daySortCol, $dayDateCol, $sportsMapping){
+        protected function onOpenAction($view, $tr, $targetObject, $grid, $athlete, $coach, $synchrostart, $synchroend, $daySortCol, $dayDateCol, $sportsMapping){
             return <<<EOT
-const synchroend = "$synchroend" ? this.pane.form.valueOf("$synchroend") : dutils.formatDate(new Date()), synchrostart = "$synchrostart" ? this.pane.form.valueOf("$synchrostart") : dutils.dateAdd(synchroend, 'day', -7);
+const synchroend = "$synchroend" ? this.form.valueOf("$synchroend") : dutils.formatDate(new Date()), synchrostart = "$synchrostart" ? this.form.valueOf("$synchrostart") : dutils.dateAdd(synchroend, 'day', -7);
 this.setWidgets({value: {synchrostart: synchrostart, synchroend: synchroend}});
-{$this->_stravaHtmlContent($view, $tr, $grid, $athlete, $coach, $daySortCol, $dayDateCol, $sportsMapping)}
+{$this->_stravaHtmlContent($view, $tr, $targetObject, $grid, $athlete, $coach, $daySortCol, $dayDateCol, $sportsMapping)}
 EOT;
         }
+    protected function synchroStartLocalAction(){
+        return <<<EOT
+const fromDate = dutils.parseDate(sWidget.pane.form.valueOf('fromdate'));
+if (fromDate > newValue){
+    Pmg.setFeedback(Pmg.message('synchrostartlowerthanfromdate'), null, null, true);
+    return fromDate;
+}else{
+    return newValue;
+}
+EOT;
     }
+}
 ?>

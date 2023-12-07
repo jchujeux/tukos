@@ -5,9 +5,9 @@ use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 trait IndicatorsView {
-    public function functionLabel ($funcName, $dayOrWeekOrMonth){
+    /*public function functionLabel ($funcName, $dayOrWeekOrMonth){
         return $this->tr($funcName) . '(' . $this->tr($dayOrWeekOrMonth) . ', 1)';
-    }
+    }*/
     public function indicatorDescription($indicatorId, $id, $description, $minimum = 0, $maximum = 10, $tickinterval = 10, $ticklabel = '', $snapinterval = 1, $showvalue = 'yes'){
         return ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
             'label' => $this->tr('TrackingIndicator') . " $id : " . $this->tr($description), 'style' => ['width' => 'auto', 'maxWidth' => '800px', 'margin' => '0 auto'], 

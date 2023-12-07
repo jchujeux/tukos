@@ -4,7 +4,6 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
     const runningWidgets = ['duration', 'distance', 'elevationgain', 'perceivedload', 'perceivedintensity', 'intensitydetails'],
           activityWidgets = ['globalsensation', 'globalsensationdetails', 'environment', 'environmentdetails', 'recovery', 'recoverydetails', 'activitydetails', 'perceivedstress', 'stressdetails', 'mentaldifficulty', 
           	'mentaldifficultydetails'];
-          //commonWidgets = ['rowId', 'recordtype', 'recorddate', 'notecomments'];
     return declare(null, {
 		constructor: function(args){
 			lang.mixin(this, args);

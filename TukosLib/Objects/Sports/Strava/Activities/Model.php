@@ -6,8 +6,8 @@ use TukosLib\Strava\API\Client;
 use TukosLib\Strava\API\Service\REST;
 use League\OAuth2\Client\Token\AccessToken as AccessToken;
 use Strava\API\OAuth;
-use TukosLib\Objects\Sports\TrainingFormulaes as TF;
 use TukosLib\Objects\Sports\KpisFormulaes as KF;
+use TukosLib\Objects\Sports\Strava\Activities\Kpis;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
 use TukosLib\Utils\Utilities as Utl;
@@ -15,7 +15,7 @@ use TukosLib\TukosFramework as TFK;
 
 class Model extends AbstractModel {
 
-    //use Kpis;
+    use Kpis;
     function __construct($objectName, $translator=null){
         $colsDefinition = [
             'stravaid' => 'VARCHAR(30) DEFAULT NULL',
@@ -38,26 +38,14 @@ class Model extends AbstractModel {
             'grade_smoothstream' => 'longtext',
             'velocity_smoothstream' => 'longtext',
             'kpiscache' => 'longtext'
-            
-            /*'hr95' => 'MEDIUMINT DEFAULT NULL',
-            'trimphr' => 'MEDIUMINT DEFAULT NULL',
-            'trimpavghr' => 'MEDIUMINT DEFAULT NULL',
-            'trimppw' => 'MEDIUMINT DEFAULT NULL',
-            'trimpavgpw' => 'MEDIUMINT DEFAULT NULL',
-            'mechload' =>'MEDIUMINT DEFAULT NULL',
-            'h4time' => 'VARCHAR(10) DEFAULT NULL',
-            'h5time' => 'VARCHAR(10) DEFAULT NULL',
-            'sts' => 'FLOAT DEFAULT NULL',
-            'lts' => 'FLOAT DEFAULT NULL',
-            'tsb' => 'FLOAT DEFAULT NULL',*/
         ];
         $this->metrics = [
-            'duration' => ['stName' => 'elapsed_time', 'format' => ['type' => 'divide', 'args' => [60]]],
+            'duration' => ['stName' => 'elapsed_time'],
             'distance' => ['stName' => 'distance', 'format' => ['type' => 'divide', 'args' => [1000]]],
             'elevationgain' => ['stName' => 'total_elevation_gain'],
             'avghr' => ['stName' => 'average_heartrate', 'format' => ['type' => 'round', 'args' => [0]]],
             'avgpw' => ['stName' => 'average_watts', 'format' => ['type' => 'round', 'args' => [0]]],
-            'timemoving' => ['stName' => 'moving_time', 'format' => ['type' => 'divide', 'args' => [60]]],
+            'timemoving' => ['stName' => 'moving_time'],
             'avgcadence' => ['stName' => 'average_cadence', 'format' => ['type' => 'round', 'args' => [0]]],
             'startdate' => ['stName' => 'start_date'],
             'sport' => ['stName' => 'type', 'format' => ['type' => 'map', 'args' => ['Ride' => 'bicycle', 'VirtualRide' => 'bicycle', 'Run' => 'running', 'Swim' => 'swimming', 'Crossfit' => 'bodybuilding']]],
@@ -72,33 +60,6 @@ class Model extends AbstractModel {
     }   
     public function hasStreams($id){
         return !empty($this->getOne(['where' => ['id' => $id, ['col' => 'timestream', 'opr' => 'IS NOT NULL', 'values' => null]], 'cols' => ['id']]));
-    }
-    public function updateTrimpAvgHr($query, $atts){
-        $value = [];
-        $this->setTrimpAvgHr($value, DUtl::timeToMinutes($query['timemoving']), $query['avghr'], $query['sportsman']);
-        return ['data' => empty($value) ? [] : ['value' => $value]];
-    }
-    public function updateTrimpAvgPw($query, $atts){
-        $value = [];
-        $this->setTrimpAvgPw($value, DUtl::timeToMinutes($query['timemoving']), $query['avgpw'], $query['sportsman']);
-        return ['data' => empty($value) ? [] : ['value' => $value]];
-    }
-    public function setTrimpAvgHr(&$item, $timemoving, $avgHr, $athleteId){
-        if (!empty($athleteId)){
-            list('hrmin' => $hrMin, 'hrthreshold' => $hrThreshold, 'sex' => $sex) = Tfk::$registry->get('objectsStore')->objectModel('sptathletes')->getOne(['where' => ['id' => $athleteId], 'cols' => ['hrmin', 'hrthreshold', 'sex']]);
-            if (($hrMin != $hrThreshold) && !empty($hrThreshold) && !empty($sex)){
-                //$item['trimpavghr'] = intval(TF::avgHrTrainingload($avgHr, $hrMin, $hrThreshold, $timemoving, $sex));
-                $item['trimpavghr'] = intval(KF::avgload($avgHr, $hrThreshold, $timemoving, $sex, $hrMin));
-            }
-        }
-    }
-    public function setTrimpAvgPw(&$item, $timemoving, $avgPw, $athleteId){
-        if (!empty($athleteId)){
-            list('ftp' => $ftp, 'sex' => $sex) = Tfk::$registry->get('objectsStore')->objectModel('sptathletes')->getOne(['where' => ['id' => $athleteId], 'cols' => ['ftp', 'sex']]);
-            if (!empty($ftp) && !empty($sex)){
-                $item['trimpavgpw'] = intval(TF::avgPwTrainingload($avgPw, $ftp, $timemoving, $sex));
-            }
-        }
     }
     public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
         $atts['cols'][] = 'kpiscache';
@@ -115,6 +76,12 @@ class Model extends AbstractModel {
             $newValues['kpiscache'] = json_encode(Utl::extractItems($kpisCacheCols, $newValues));
         }
         return parent::updateOne($newValues, $atts, $insertIfNoOld, true, $init);
+    }
+    public function insert($values, $init = false, $jsonFilter = false, $reference = null){
+        if (!$jsonFilter && (!empty($kpisCacheCols = array_diff(array_keys($values), $this->allCols)))){
+            $values['kpiscache'] = json_encode(Utl::extractItems($kpisCacheCols, $values));
+        }
+        return parent::insert($values, $init, $jsonFilter, $reference);
     }
     public function activityToTukos($activity){
         $tukosActivity = [];
@@ -176,37 +143,21 @@ class Model extends AbstractModel {
         }
         return $tukosStreamData;
     }
-    public function addStreamsAndMetrics($session, $athleteParams, $needsStreams, $streamCols, $client){
-        list('hrmin' => $hrMin, 'hrthreshold' => $hrThreshold, 'h4timethreshold' => $h4timeThreshold, 'h5timethreshold' => $h5timeThreshold, 'ftp' => $ftp, 'speedthreshold' => $speedThreshold, 'sex' => $sex) = $athleteParams;
+    public function addStreamsAndMetrics($activity, $athleteId, $needsStreams, $streamCols, $client){
         if ($needsStreams){
-            $session = array_merge($session, $this->stravaStreamsToTukosStreams($client->getActivityStreams($session['stravaid'], implode(',', array_map(function($tukosName){return substr($tukosName, 0, -6);}, $streamCols)))));
+            $activity = array_merge($activity, $this->stravaStreamsToTukosStreams($client->getActivityStreams($activity['stravaid'], implode(',', array_map(function($tukosName){return substr($tukosName, 0, -6);}, $streamCols)))));
         }
-        if (($hrMin != $hrThreshold) && !empty($hrThreshold) && !empty($sex)){
-            if (!empty($session['avghr']) && !empty($session['timemoving'])){
-                $session['trimpavghr'] = intval(TF::avgHrTrainingload($session['avghr'], $hrMin, $hrThreshold, $session['timemoving'], $sex));
-                if (!empty($session['heartratestream'])){
-                    $session['trimphr'] = TF::hrTrainingLoad($session['heartratestream'], $hrMin, $hrThreshold, $sex);
-                    list($lower, $session['h4time'], $session['h5time']) = TF::timeInZones($session['heartratestream'], [$h4timeThreshold, $h5timeThreshold], 3);
-                }
-            }
+        $kpisToCompute = ['heartrate_avgload', 'heartrate_load', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'power_avgload', 'power_load'];
+        if ($activity['sport'] === 'running'){
+            $kpisToCompute[] = 'mechanical_load';
         }
-        if (!empty($ftp) && !empty($sex)){
-            if ( !empty($session['avgpw'])){
-                $session['trimpavgpw'] = intval(TF::avgPwTrainingload($session['avgpw'], $ftp, $session['timemoving'], $sex));
-            }
-            if (!empty($session['wattsstream'])){
-                $session['trimppw'] = TF::pwTrainingLoad($session['wattsstream'], $ftp, $sex, 30);
-            }
-        }
-        if ($session['sport'] === 'running' && !empty($session['cadencestream']) && !empty($session['distancestream']) && !empty($speedThreshold)){
-            $session['mechload'] = TF::runningMechanicalLoad($session['distancestream'], $session['cadencestream'], $speedThreshold / 0.36);
-        }
+        $activity = array_merge(Utl::getItem($activity['id'], $this->computeKpis($athleteId, [$activity['id'] => $kpisToCompute], [$activity['id'] => $activity]), [], []), $activity);
         foreach($streamCols as $col){
-            if (!empty($session[$col])){
-                $session[$col] = json_encode($session[$col]);
+            if (!empty($activity[$col])){
+                $activity[$col] = json_encode($activity[$col]);
             }
         }
-        return $session;
+        return $activity;
     }
     public function activitiesToTukos($athleteId, $synchroStart, $synchroEnd, $synchroStreams, $stravaColsToGet){
         $athleteModel = Tfk::$registry->get('objectsStore')->objectModel('people');
@@ -227,23 +178,19 @@ class Model extends AbstractModel {
             Feedback::add($this->tr('Noactivitytosyncforathlete') . '  ' . $athleteId);
             return [];
         }
-        $athleteParams = $athleteModel->getOne(['where' => ['id' => $athleteId], 'cols' => ['hrmin', 'hrthreshold', 'h4timethreshold', 'h5timethreshold', 'ftp', 'speedthreshold', 'sex']]);
-        $insertedStravaCols = []; $updatedStravaCols = [];
         foreach ($stravaActivitiesToSync as $activity){
             $tukosActivity = $this->activityToTukos($activity);
             $tukosActivity['parentid'] = $athleteId;
             $existingTukosActivity = $this->getOne(['where' => ['stravaid' => $activity['id']], 'cols' => ['id', 'timestream']]);
             if (empty($existingTukosActivity)){
-                $this->insert($tukosActivity = $this->addStreamsAndMetrics($tukosActivity, $athleteParams, $synchroStreams, $this->streamCols, $client));
-                $insertedStravaCols[$tukosActivity['stravaid']] = Utl::getItems($stravaColsToGet, $tukosActivity);
+                $this->updateOne($tukosActivity = $this->addStreamsAndMetrics($this->insert($tukosActivity), $athleteId, $synchroStreams, $this->streamCols, $client));
             }else{
-                if ($updated = $this->updateOne($tukosActivity, ['where' => ['id' => $existingTukosActivity['id']]]) || ($synchroStreams && empty($existingTukosActivity['timestream']))){
-                    $this->updateOne($tukosActivity = $this->addStreamsAndMetrics($tukosActivity, $athleteParams, $synchroStreams, $this->streamCols, $client));
-                    $updatedStravaCols[$tukosActivity['stravaid']] = Utl::getItems($stravaColsToGet, $tukosActivity);
+                $tukosActivity['id'] = $existingTukosActivity['id'];
+                if ($this->updateOne($tukosActivity) || ($synchroStreams && empty($existingTukosActivity['timestream']))){
+                    $this->updateOne($tukosActivity = $this->addStreamsAndMetrics($tukosActivity, $athleteId, $synchroStreams, $this->streamCols, $client));
                 }
             }
         }
-        return ['inserted' => $insertedStravaCols, 'updated' => $updatedStravaCols];
     }
 }
 ?>

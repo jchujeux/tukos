@@ -31,7 +31,7 @@
                 if (namedId.substring(1,namedId.length-1) != id){
                     return {id: id, name: namedId};
                 }else{
-                    return Pmg.serverDialog({object: 'BackOffice', view: 'noView', mode: 'Tab', action: 'getExtendedIds', query: {storeatts: {where: {ids: [id]}, cols: ['id', 'name']}}}).then(function(response){
+                    return Pmg.serverDialog({object: 'Tukos', view: 'noView', mode: 'Tab', action: 'getExtendedIds', query: {storeatts: {where: {ids: [id]}, cols: ['id', 'name']}}}).then(function(response){
                         return {id: id, name: Pmg.namedId(id)};
                     });
                 }

@@ -2,7 +2,8 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "tukos/ArrayIterat
 function(declare, lang, when, ArrayIterator, utils, dutils, Pmg){
 return declare(null, {
         constructor: function(args){
-			this.sessionsStore = args.sessionsStore;
+			this.sessionsStore = (args.sessionsStore || args.workoutsStore);
+			this.sessionsWidgetName = args.sessionsStore ? 'sptsessions' : 'sptworkouts';
 			this.collection = this.sessionsStore.sort([{property: 'startdate'}, {property: 'sessionid'}]);
 			this.sessionsIterator = new ArrayIterator();
         },
@@ -11,7 +12,7 @@ return declare(null, {
 			if (!hidden){
 				dojo.ready(function(){
 					var chartAtts = chartWidget.get('chartAtts'), date = new Date(form.valueOf('displayeddate')), dayDate, chartItem, tableItem, chartData = [],
-					    tableData = [], grid = form.getWidget('sptsessions'), dayType = chartWidget.get('daytype'), filter = new grid.store.Filter(), presentCols = [], colsTLabel = {}, series = chartWidget.get('series'), 
+					    tableData = [], grid = form.getWidget(self.sessionsWidgetName), dayType = chartWidget.get('daytype'), filter = new grid.store.Filter(), presentCols = [], colsTLabel = {}, series = chartWidget.get('series'), 
 						sessionsFilter = chartAtts.filter, previousSession, stsDailyDecay = grid.tsbCalculator.get('stsDailyDecay'), ltsDailyDecay = grid.tsbCalculator.get('ltsDailyDecay'), 
 						stsRatio = grid.tsbCalculator.get('stsRatio'), hasSession, hasPMC;
 					utils.forEach(series, function(content, col){
@@ -64,7 +65,7 @@ return declare(null, {
 			if (!hidden){
 				dojo.ready(function(){
 					var chartWidget = form.getWidget(chartWidgetName), chartAtts = chartWidget.get('chartAtts'), fromDateS = form.valueOf('displayfromdate') || form.valueOf('fromdate'), toDateS = form.valueOf('todate'), chartItem, tableItem, 
-						chartData = [], tableData = [], grid = form.getWidget('sptsessions'), weekType = chartWidget.get('weektype'), filter = new grid.store.Filter(), presentCols = [], colsTLabel = {},
+						chartData = [], tableData = [], grid = form.getWidget(self.sessionsWidgetName), weekType = chartWidget.get('weektype'), filter = new grid.store.Filter(), presentCols = [], colsTLabel = {},
 						series = chartWidget.get('series'), sessionsFilter = chartAtts.filter, stsDailyDecay = grid.tsbCalculator.get('stsDailyDecay'), ltsDailyDecay = grid.tsbCalculator.get('ltsDailyDecay'), 
 						stsRatio = grid.tsbCalculator.get('stsRatio'), fromDate, weekNumber = 0,
 						previousSession = {startdate: fromDateS, sts: grid.tsbCalculator.get('initialSts'), lts: grid.tsbCalculator.get('initialLts')}, mondayDate, mondayDateS, 

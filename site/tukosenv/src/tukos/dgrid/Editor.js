@@ -299,7 +299,7 @@ define([
 
 				// focus / blur-handler-resume logic is surrounded in a setTimeout
 				// to play nice with Keyboard's dgrid-cellfocusin as an editOn event
-				self._editTimer = setTimeout(function () {
+				//self._editTimer = setTimeout(function () {//JCH removing setTimeout allows the tukos tooltip to show up on clicking the cell. Implies dgrid-cellfocusin should not be used as an editOn event
 					// focus the newly-placed control (supported by form widgets and HTML inputs)
 					if (cmp.focus) {
 						cmp.focus();
@@ -310,7 +310,7 @@ define([
 					}
 					self._editTimer = null;
 					dfd.resolve(cmp);
-				}, 0);
+				//}, 0);
 			}
 
 			if (!cell.column) {

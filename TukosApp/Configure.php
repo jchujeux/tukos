@@ -28,7 +28,7 @@ class Configure extends AbstractConfigure{
             'itm' => [['itsm' => [['#itsvcdescs' => [['#itslatargets' => []]], '#itincidents' => []]], '#itsystems' => [], '#networks' => [],
                 '#hosts' => [['#macaddresses' => [], '#hostsdetails' => [], '#servicesdetails' => []]], '#connexions' => [],
             ]],
-            'sports' => [['#sptathletes' => [], '#sptprograms' => [],  '#sptsessions' => [['#sptsessionsstages' => []]], '#sptexercises' => [['#sptexerciseslevels' => []]], '#stravaactivities' => [],]],
+            'sports' => [['#sptathletes' => [], '#sptprograms' => [['#sptsessions' => [['#sptsessionsstages' => []]]]], '#sptplans' => [['#sptworkouts' => []]], '#sptexercises' => [['#sptexerciseslevels' => []]], '#stravaactivities' => [],]],
             'physio' => [['#physiopatients' => [], 'physiopersotrack' => [['#physiopersoquotes' => [], '#physiopersoplans' => [], '#physiopersotreatments' => [], '#physiopersodailies' => [['#physiopersosessions' => []]], '#physiopersoexercises' => []]],
                 'physiowoundtrack' => [['#physiogameplans' => [], '#physiogametracks' => []]],
                 '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],

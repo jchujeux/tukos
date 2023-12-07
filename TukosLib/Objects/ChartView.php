@@ -4,12 +4,17 @@ use TukosLib\Utils\Widgets;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
+
 trait ChartView {
 
-    public function ChartDescription($chartId, $chartInfo, $kpiParameters, $dateOfOriginParameters = ['firstrecorddate'], $selectedDate = null){
-        $tr = $this->tr;
-        $kpiFunctions = ['SUM', 'EXPAVG', 'DAILYAVG', 'AVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM'];
-        $kpiTranslations = Utl::translations($kpiFunctions, $this->tr, 'uppercase');
+    static  $dateFormulaesToTranslate = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY', 'DAY', 'WEEK', 'MONTH'];
+
+    public function functionLabel ($funcName, $dayOrWeekOrMonth){
+        return $this->tr($funcName) . '(' . $this->tr($dayOrWeekOrMonth) . ', 1)';
+    }
+    public function ChartDescription($chartId, $chartInfo, $dateWidgetNames = ['firstrecorddate'], $kpisWidgetsNames, $missingKpisIndex, $selectedDateWidgetName = null){
+        $kpiFunctions = ['TOFIXED', 'SUM', 'EXPAVG', 'DAILYAVG', 'AVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'DATE'];
+        $kpiTranslations = array_merge(Utl::translations($kpiFunctions, $this->tr, 'uppercasenoaccent'), Utl::translations($kpisWidgetsNames, $this->tr, 'lowercase'), Utl::translations(self::$dateFormulaesToTranslate, $this->tr, 'lowercase'));
         return ['type' => 'dynamicChart', 'atts' => ['edit' => [
             'title' => $chartInfo['name'], 
             'ignoreChanges' => true,
@@ -22,6 +27,7 @@ trait ChartView {
             'tooltip' => true,
             'mouseZoomAndPan' => $chartInfo['chartType'] === 'trend' ? true : false,
             'noMarkAsChanged' => true,
+            'missingKpisIndex' => $missingKpisIndex,
             'onWatchLocalAction' => [
                 'hidden' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'hidden')]]],
                 'axesToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'axes')]]],
@@ -31,29 +37,33 @@ trait ChartView {
                 'kpisToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'kpis')]]],
                 'itemsSetsToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'itemsSets')]]],
             ],
-            'customizableAtts' => $chartInfo['chartType'] === 'trend' ? $this->trendChartCustomizableAtts($kpiTranslations, $dateOfOriginParameters) : $this->spiderChartCustomizableAtts($kpiTranslations, $selectedDate)
+            'customizableAtts' => $chartInfo['chartType'] === 'trend' ? $this->trendChartCustomizableAtts($kpiTranslations, $dateWidgetNames, $selectedDateWidgetName) : $this->spiderChartCustomizableAtts($kpiTranslations, $dateWidgetNames, $selectedDateWidgetName)
         ]]];
     }
-    public function chartPreMergeCustomizationAction(&$response, &$chartLayoutRow, $customMode, $grid, $dateCol, $kpiParameters, $dateOfOriginParameters, $selectedDate = null){
-    $editConfig =  $customMode === 'object'
-        ? $this->user->getCustomView($this->objectName, 'edit', 'tab', ['editConfig'])
-        : $this->model->getCombinedCustomization(['id' => Utl::getItem('id', $response['data']['value'])], 'edit', 'tab', ['editConfig']);
-        if (!empty($editConfig)){
-            $chartsPerRow = Utl::getItem('chartsperrow', $editConfig);
-            if ($chartsPerRow){
-                $chartLayoutRow['tableAtts']['cols'] = $chartsPerRow;
-            }
-            $charts = Utl::getItem('charts', $editConfig);
-            if ($charts){
-                $charts = json_decode($charts, true);
-                foreach ($charts as $chart){
-                    $chartId = 'chart' . $chart['id'];
-                    $response['widgetsDescription'][$chartId] = Widgets::description($this->chartDescription($chartId, $chart, $kpiParameters, $dateOfOriginParameters, $selectedDate));
-                    $chartLayoutRow['widgets'][] = $chartId;
+    public function chartPreMergeCustomizationAction(&$response, &$chartLayoutRow, $customMode, $grid, $dateCol, $dateWidgetNames, $kpisWidgetsNames, $missingKpisIndex, $selectedDateWidgetName = null){
+        if (!empty($response['widgetsDescription'])){
+            $editConfig =  $customMode === 'object'
+                ? $this->user->getCustomView($this->objectName, 'edit', 'tab', ['editConfig'])
+                : $this->model->getCombinedCustomization(['id' => Utl::getItem('id', $response['data']['value'])], 'edit', 'tab', ['editConfig']);
+            if (!empty($editConfig)){
+                $chartsPerRow = Utl::getItem('chartsperrow', $editConfig);
+                if ($chartsPerRow){
+                    $chartLayoutRow['tableAtts']['cols'] = $chartsPerRow;
                 }
-                $response['widgetsDescription'][$grid]['atts']['onWatchLocalAction'] = ['collection' => [$grid => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->gridWatchAction($dateCol, $selectedDate)]]]];
-                $response['widgetsDescription'][$grid]['atts']['afterActions'] = array_merge(isset($response['widgetsDescription'][$grid]['atts']['afterActions']) ? $response['widgetsDescription'][$grid]['atts']['afterActions'] : [], 
-                    ['createNewRow' => $this->gridRowWatchAction(), 'updateRow' => $this->gridRowWatchAction(), 'deleteRow' => $this->gridRowWatchAction(), 'deleteRows' => $this->gridRowWatchAction()]); 
+                $charts = Utl::getItem('charts', $editConfig);
+                if ($charts){
+                    $charts = json_decode($charts, true);
+                    foreach ($charts as $chart){
+                        $chartId = 'chart' . $chart['id'];
+                        $response['widgetsDescription'][$chartId] = Widgets::description($this->chartDescription($chartId, $chart, $dateWidgetNames, $kpisWidgetsNames, $missingKpisIndex, $selectedDateWidgetName));
+                        $chartLayoutRow['widgets'][] = $chartId;
+                    }
+                    $response['widgetsDescription'][$grid]['atts'] = Utl::array_merge_recursive_replace($response['widgetsDescription'][$grid]['atts'],
+                        ['onWatchLocalAction' => ['collection' => [$grid => ['chartViewStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->gridWatchAction($dateCol, $selectedDateWidgetName)]]]]]);
+                    $response['widgetsDescription'][$grid]['atts'] = Utl::array_merge_recursive_concat($response['widgetsDescription'][$grid]['atts'], ['afterActions' => [
+                        'createNewRow' => $this->gridRowWatchAction(), 'updateRow' => $this->gridRowWatchAction(), 'deleteRow' => $this->gridRowWatchAction(), 'deleteRows' => $this->gridRowWatchAction()
+                    ]]);
+                }
             }
         }
         return $response;
@@ -61,11 +71,10 @@ trait ChartView {
     public function chartChangeAction($chartId, $changedAtt){
         return <<<EOT
 var form = sWidget.form;
-form.resize();
+//form.resize();
 if (!newValue || '$changedAtt' !== 'hidden'){
     form.charts.setChartValue('$chartId');
 }
-return true;
 EOT
         ;
     }
@@ -73,21 +82,26 @@ EOT
         return <<<EOT
 const form = sWidget.form;
 if (form.editConfig && form.editConfig.charts){
-    const charts = JSON.parse(form.editConfig.charts);
+    const chartsConfig = JSON.parse(form.editConfig.charts);
     if (form.charts){
+        form.resize();
         form.charts.setChartsValue();     
-    }else{    
-        require(["tukos/charting/Charts"], function(Charts){
-            form.charts = new Charts({form: form, grid: sWidget, dateCol: '$dateCol', selectedDate: '$selectedDate', charts: charts});
-            dojo.ready(function(){
+		/*utils.waitUntil(
+			function(){
+				return form.markIfChanged;
+			}, 
+			function(){
                 form.markIfChanged = form.watchOnChange = false;
                 form.charts.setChartsValue();
-                setTimeout(function(){form.markIfChanged = form.watchOnChange = true;}, 0);//or else some of the edit form widget appear as changed
-            });
+                form.markIfChanged = form.watchOnChange = true;
+			}, 
+			100);*/
+    }else{    
+        require(["tukos/charting/Charts"], function(Charts){
+            form.charts = new Charts({form: form, grid: sWidget, dateCol: '$dateCol', selectedDate: '$selectedDate', charts: chartsConfig});
         });
     }
 }
-return true;
 EOT
         ;
     }
@@ -96,9 +110,8 @@ EOT
 console.log('in gridRowWatchAction');
 const form = this.form;
 if (form.editConfig && form.editConfig.charts){
-    form.charts.setChartsValue(JSON.parse(form.editConfig.charts));
+    form.charts.setChartsValue();
 }
-return true;
 EOT
         ;
     }
@@ -152,8 +165,9 @@ if (grid.clickedCell.column.field === 'rowId'){
 EOT
 ;
     }
-    public function trendChartCustomizableAtts($kpiTranslations, $dateOfOriginParameters){
+    public function trendChartCustomizableAtts($kpiTranslations, $dateWidgetNames, $selectedDateWidgetName){
         $tr = $this->tr;
+        $dateFormulaesTranslations = Utl::translations(array_merge(self::$dateFormulaesToTranslate, $dateWidgetNames), $this->tr, 'lowercase');
         return [
             'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'style' => ['width' => '800px'], 'storeArgs' => ['idProperty' => 'idg'],
             'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartAxesTukosTooltip', 'object' => 'physiogametracks']],
@@ -172,7 +186,12 @@ EOT
                 'minorTicks' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Minorticks')], 'storeedit' => ['width' => 60]]), false),
                 'tickslabel' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['daysinceorigin', 'dateofday', 'dayoftheyear', 'weeksinceorigin', 'dateofweek', 'weekoftheyear'], $tr)], 'label' => $tr('tickslabel')],
                     'storeedit' => ['width' => 80]]), false),
-                'dateoforigin' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore($dateOfOriginParameters, $tr)], 'label' => $tr('dateoforigin')], 'storeedit' => ['width' => 80]]), false),
+                'firstdate' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('firstdate'), 'style' => ['width' => '15em'], 'translations' => $kpiTranslations,
+                    'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'ChartDateFormulaesTukosTooltip', 'object' => $this->objectName]]],
+                    'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false),
+                'lastdate' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('lastdate'), 'style' => ['width' => '15em'], 'translations' => $kpiTranslations,
+                    'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'ChartDateFormulaesTukosTooltip', 'object' => 'sptplans']]],
+                    'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false),
                 'min' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('axisMin'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                 'max' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('axisMax'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                 'adjustmax' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Adjustmax')], 'storeedit' => ['width' => 80]]), false),
@@ -195,7 +214,7 @@ EOT
                     'gap' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Barsgap'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'vertical' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('vertical')], ['id' => false, 'name' => $tr('horizontal')]]], 'label' => $tr('indicatororientation')],
                         'storeedit' => ['width' => 80]]), false),
-                    'values' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Indicatorvalue'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
+                    'values' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('Indicatorvalue'), 'translations' => $dateFormulaesTranslations], 'storeedit' => ['width' => 60]]), false),
                     'label' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Label'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                 ]])), ['att' => 'plotsToInclude', 'type' => 'SimpleDgridNoDnd', 'name' => $this->tr('plotsToInclude'), 'atts' => ['initialRowValue' => ['lines' => true, 'markers' => true], 'onCellClickAction' => $this->onPlotRowIdClickAction()]]),
             //'gridFilter' => ['att' => 'gridFilter', 'type' => 'TextBox', 'name' => $tr('gridFilter')],
@@ -214,7 +233,8 @@ EOT
                 ]])), ['att' => 'kpisToInclude', 'type' => 'SimpleDgridNoDnd', 'name' => $this->tr('dataToInclude')])
         ];
     }
-    public function spiderChartCustomizableAtts($kpiTranslations, $selectedDate){
+    public function spiderChartCustomizableAtts($kpiTranslations, $dateWidgetNames,  $selectedDate){
+        $dateFormulaesTranslations = Utl::translations(array_merge(self::$dateFormulaesToTranslate, $dateWidgetNames), $this->tr, 'lowercase');
         $itemsUntilTranslations = ['TODAY' => $this->tr('today'), 'ENDOFLASTWEEK' => $this->tr('endoflastweek'), 'DATE' => $this->tr('date')];
         $itemsUntilStoreArgsData = [['id' => 'today', 'name' => $this->tr('today'), 'tooltip' => $this->tr('todayKpiTooltip')], ['id' => 'endoflastweek', 'name' => $this->tr('endoflastweek'), 'tooltip' => $this->tr('endoflastweekKpiTooltip')],
             ['id' => 'datetoday', 'name' => $this->functionLabel('date', 'today'), 'tooltip' => $this->tr('datetodayKpiTooltip')], ['id' => 'endoflastweek', 'name' => $this->functionLabel('date', 'endoflastweek'), 'tooltip' => $this->tr('endoflastweekKpiTooltip')],
@@ -254,7 +274,7 @@ EOT
                             ['id' => 'endofdisplayedweek', 'name' => $this->tr('endofdisplayedweek'), 'tooltip' => $this->tr('endOfdisplayedWeekKpiTooltip')], ['id' => 'yyyy-mm-dd', 'name' => $this->tr('yyyy-mm-dd'), 'tooltip' => $this->tr('yyyy-mm-ddKpiTooltip')]
                         ]]],
                     'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 150]]), false),*/
-                'durationOrSince' => Widgets::description(Widgets::storeComboBox([
+                /*'durationOrSince' => Widgets::description(Widgets::storeComboBox([
                     'edit' => ['label' => $this->tr('durationOrSince'), 'style' => ['width' => '150px'], 'translations' => ['DURATION' => $this->tr('duration'), 'LASTITEM' => $this->tr('lastitem'), 'DAY' => $this->tr('day'), 'WEEK' => $this->tr('week'), 'MONTH' => $this->tr('month')],
                         'storeArgs' => ['data' => [['id' => 'day', 'name' => $this->functionLabel('duration', 'day'), 'tooltip' => $this->tr('durationOrSinceTooltip')], ['id' => 'week', 'name' => $this->functionLabel('duration', 'week'), 'tooltip' => $this->tr('durationOrSinceTooltip')],
                             ['id' => 'month', 'name' => $this->functionLabel('duration', 'month'), 'tooltip' => $this->tr('durationOrSinceTooltip')], ['id' => 'lastitem', 'name' => "{$this->tr('lastitem')}(0)", 'tooltip' => $this->tr('durationOrSinceTooltip')],
@@ -263,7 +283,16 @@ EOT
                     'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 150]]), false),
                 'itemsUntil' => Widgets::description(Widgets::storeComboBox([
                     'edit' => ['label' => $this->tr('itemsUntil'), 'style' => ['width' => '150px'], 'translations' => $itemsUntilTranslations, 'storeArgs' => ['data' => $itemsUntilStoreArgsData]],
-                    'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 150]]), false),
+                    'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 150]]), false),*/
+                    'firstdate' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('firstdate'), 'style' => ['width' => '15em'], 'translations' => $kpiTranslations,
+                    'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'ChartDateFormulaesTukosTooltip', 'object' => $this->objectName]]],
+                    'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false),
+                    'lastdate' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('lastdate'), 'style' => ['width' => '15em'], 'translations' => $kpiTranslations,
+                    'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'ChartDateFormulaesTukosTooltip', 'object' => 'sptplans']]],
+                    'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false),
+                    'kpidate' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('kpidate'), 'style' => ['width' => '15em'], 'translations' => $kpiTranslations,
+                    'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'ChartDateFormulaesTukosTooltip', 'object' => 'sptplans']]],
+                    'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false),
                 'fillColor' => Widgets::description(Widgets::colorPickerTextBox(['edit' => ['label' => $this->tr('fillcolor')], 'storeedit' => ['width' => 80]]), false),
                 'itemsFilter' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('itemsfilter')/*, 'title' => 'this is the title'*/, 'style' => ['width' => '200px']], 'storeedit' => [/*'width' => 400*/]]), false),
                         

@@ -81,6 +81,7 @@ abstract class AbstractModel extends ObjectTranslator {
         );
         $this->objectCols = array_keys($colsDefinition);
         $this->allCols = array_merge(array_diff($this->tukosModel->sharedObjectCols, $this->absentOptionalCols), $this->objectCols);
+        $this->removeExtraColsOnSave = true;
         $this->colsToTranslate = array_merge(['permission', 'grade', 'configstatus'], $colsToTranslate);
         $this->isBulkProcessing = false;
         $this->bulkParentObject = null;
@@ -90,7 +91,7 @@ abstract class AbstractModel extends ObjectTranslator {
     }
     public function setInits(){
         if (!property_exists($this, 'init')){
-            $this->init = ['permission' =>  'RO', 'contextid' => $this->user->getContextId($this->objectName)/*, 'comments' => ''*/, 'grade' => 'NORMAL', 'configstatus' => 'users'];
+            $this->init = ['permission' =>  'RO', 'contextid' => $this->user->getContextId($this->objectName)/*, 'comments' => ''*/, 'grade' => 'NORMAL'/*, 'configstatus' => 'users'*/];
         }
     }
     public function initialize($init=[]){
@@ -275,10 +276,12 @@ abstract class AbstractModel extends ObjectTranslator {
     public function lastUpdateOneOldId(){
         return $this->lastUpdateOneOldId;
     }
-    
+    public function trimExtraNewValues($values, $exceptions = []){//might not be needed as we also remove extra cols in store::insertItem and UpdateItem
+        return $this->removeExtraColsOnSave ? array_intersect_key($values, array_flip(array_merge($this->allCols, $exceptions))) : $values;
+    }
     public function updateOneExtended($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
         $this->processLargeCols($newValues);
-        return $this->updateOne(array_intersect_key($newValues, array_flip($this->allCols)), $atts, $insertIfNoOld, $jsonFilter, $init);
+        return $this->updateOne($this->trimExtraNewValues($newValues), $atts, $insertIfNoOld, $jsonFilter, $init);
     }
     
     public function processLargeCols(&$newValues){
@@ -475,7 +478,7 @@ abstract class AbstractModel extends ObjectTranslator {
             $values = array_merge($this->initializeExtended(), $values);
         }
         $this->processLargeCols($values);
-        return $this->insert(array_intersect_key($values, array_flip(array_merge($this->allCols, ['configstatus']))), false, $jsonFilter);        
+        return $this->insert($this->trimExtraNewValues($values, ['configstatus']), false, $jsonFilter);        
     }
     public function duplicate($ids, $cols=['*']){
         $result = [];

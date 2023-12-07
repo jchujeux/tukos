@@ -12,15 +12,15 @@ $phpDir = dirname(__DIR__) . '/';
 require $phpDir . 'TukosLib/TukosFramework.php';
 require $phpDir . 'TukosLib/cmdenv.php';
 
-$params = getopt('', ['app:', 'class:', 'parentid:', 'db:', 'scriptids:']);
+$params = getopt('', ['app:', 'class:', 'parentid:', 'db:', 'rootUrl:', 'scriptids:']);
 
 $appName = $params['app'];
 $dbName = $params['db'];
+Tfk::initialize('commandLine', $appName, $phpDir);
 require $phpDir . "$appName/Configure.php";
 
 echo "database: $dbName<br>";
 
-Tfk::initialize('commandLine', $appName, $phpDir);
 $configure = "\\$appName\\Configure";
 Tfk::$registry->set('appConfig', new $configure());
 $appConfig = Tfk::$registry->get('appConfig');

@@ -10,11 +10,12 @@ class FullClean {
         $store        = Tfk::$registry->get('store');
         try{
             $options = new \Zend_Console_Getopt([
-            	'app-s'		=> 'tukos application name (mandatory if run from the command line, not needed in interactive mode)',
+                'app-s'		=> 'tukos application name (not needed in interactive mode)',
                 'db-s'		    => 'tukos application database name (not needed in interactive mode)',
-                'class=s'          => 'this class name',
+                'class=s'      => 'this class name',
+                'parentid-s'   => 'parent id (optional)',
+                'rootUrl-s'		=> 'https://tukos.site or https://localhost, omit if interactive',
                 'removeDelay-s'    => 'recent deleted ids to keep in php interval_spec format (optional: 0 if omitted)',
-                'parentid-s'       => 'parent id (optional, default is user->id())',
             ]);
             if ($options->removeDelay){
                 $deleteBefore = (new \DateTime)->sub(new \DateInterval($options->removeDelay))->format('Y-m-d H:i:s');

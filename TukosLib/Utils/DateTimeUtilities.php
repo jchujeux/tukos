@@ -26,10 +26,10 @@ class DateTimeUtilities{
     	return json_encode([$round === 'ceiling' ? ceil($newValue) : ($round === 'floor' ? floor($newValue) : $newValue), $unit]);
     }
     public static function toUTC($value){
-        return empty($value) ? $value : gmdate('Y-m-d\TH:i:s\Z', strtotime($value));
+        return empty($value) ? $value : gmdate(strlen($value) === 9 ? '\TH:i:s\Z' : 'Y-m-d\TH:i:s\Z', strtotime($value));
     }
     public static function fromUTC($value){
-        return empty($value) ? $value : date('Y-m-d H:i:s', strtotime($value));
+        return empty($value) ? $value : gmdate($value[0] === 'T' ? 'H:i:s\Z' : 'Y-m-d H:i:s', strtotime($value));
     }
     public static function toUserDate($value){
     	return empty($value) ? $value : date('Y-m-d', strtotime($value) - Tfk::$registry->timezoneOffset);

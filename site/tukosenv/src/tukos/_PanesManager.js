@@ -57,31 +57,25 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
 	                    ready(function(){
 	            			Pmg.setFeedback(Pmg.message('actionDoing'));
 	                        currentPane.resize();
-							//if (changesToRestore){
-								utils.waitUntil(
-									function(){
-										return currentPane.form && currentPane.form.markIfChanged;
-									}, 
-									function(){
-										if (changesToRestore){
-											currentPane.form.restoreChanges(changesToRestore, keepOptions);
-											if (changesToRestore.customization){
-												currentPane.form.customization = changesToRestore.customization;
-											}
+							utils.waitUntil(
+								function(){
+									return currentPane.form && currentPane.form.markIfChanged;
+								}, 
+								function(){
+									if (changesToRestore){
+										currentPane.form.restoreChanges(changesToRestore, keepOptions);
+										if (changesToRestore.customization){
+											currentPane.form.customization = changesToRestore.customization;
 										}
-										ready(function(){
-											currentPane.resize();
-			                				ready(function(){
-												Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
-											});
+									}
+									ready(function(){
+										currentPane.resize();
+		                				ready(function(){
+											Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
 										});
-	                            		//currentPane.resize();
-									}, 
-									100);
-	                            //setTimeout(function(){(currentPane.form || currentPane).restoreChanges(changesToRestore, keepOptions);}, 1000);// due to similar setTimeout in ObjectPane affecting markIfChanged
-							/*}else{
-	                        	Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
-							}*/
+									});
+								}, 
+								100);
 	                    });
                         return response;
                     }

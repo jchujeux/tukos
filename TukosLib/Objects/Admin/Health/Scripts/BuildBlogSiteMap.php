@@ -1,29 +1,30 @@
 <?php
 namespace TukosLib\Objects\Admin\Health\Scripts;
 
-use TukosLib\Utils\Utilities as Utl;
-//use Zend\Console\Getopt;
 use TukosLib\Utils\HtmlUtilities as HUtl;
 use TukosLib\TukosFramework as Tfk;
 
 class BuildBlogSiteMap {
 
     function __construct($parameters){ 
-        $user         = Tfk::$registry->get('user');
         $store        = Tfk::$registry->get('store');
         $objectsStore = Tfk::$registry->get('objectsStore');
         try{
-            $options = new \Zend_Console_Getopt([/*
-                'class=s'      => 'this class name',
+            $options = new \Zend_Console_Getopt([
+                'app-s'      => 'this class name',
+                'db-s'      => 'database name',
+                'class-s'      => 'this class name',
+                'parentid-s'      => 'why ?',
+                'rootUrl-s'		=> 'https://tukos.site or https://localhost, omit if interactive',
                 'blogname-s'		=> 'blog or jch/blog',
-            */]);
+            ]);
             switch($store->dbName){
                 case 'tukosblog':
-                    $blogUrl = Tfk::$registry->rootUrl . '/blog';
+                    $blogUrl = $options->getOption('rootUrl') . '/blog';
                         $fullFileName = Tfk::$tukosPhpDir . 'tmp/sitemapblog.xml';
                         break;
                 case 'jchblog': 
-                    $blogUrl = Tfk::$registry->rootUrl . '/jch/blog';
+                    $blogUrl = $options->getOption('rootUrl') . '/jch/blog';
                         $fullFileName = Tfk::$tukosPhpDir . 'tmp/sitemapjchblog.xml';
                         break;
                 default: 
@@ -41,7 +42,7 @@ class BuildBlogSiteMap {
 
             echo "<b>sitemap generated: " . $fullFileName;
         }catch(\Zend_Console_Getopt_Exception $e){
-            Tfk::error_message('on', 'an exception occured while parsing command arguments : ', $e->getUsageMessage());
+            Tfk::error_message('on', 'an exception occured while parsing command arguments : ', $e->getMessage() . '<br>' . $e->getUsageMessage());
         }
     }
 }

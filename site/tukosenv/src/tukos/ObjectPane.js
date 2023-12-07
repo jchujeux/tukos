@@ -82,6 +82,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 		                        if (this.offlineChangedValues){
 									this.setWidgets({value: this.offlineChangedValues});
 								}
+								Pmg.setFeedback(Pmg.message('actionDone'));
 							}
 	                    }), 0);
 						this.needsToFreezeWidth = true;

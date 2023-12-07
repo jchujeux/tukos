@@ -5,7 +5,6 @@ use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Objects\ChartView;
 use TukosLib\Objects\Physio\WoundTrack\IndicatorsView;
-//use TukosLib\Objects\Physio\WoundTrack\GameTracks\TrendChartView;
 use TukosLib\Objects\Physio\WoundTrack\GameTracks\AccordionGridUtilities as Agu;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
@@ -165,7 +164,7 @@ EOT;
      public function preMergeCustomizationAction($response, $customMode){
          $response =  $this->gameTracksIndicatorsPreMerge($response, $customMode);
          return $this->chartPreMergeCustomizationAction($response, $response['dataLayout']['contents']['row1']['contents']['col2']['contents']['rowcharts'], $customMode, 'records', 'recorddate',
-             ['recordtype', 'recorddate', 'globalsensation', 'environment', 'recovery', 'duration', 'distance', 'elevationgain', 'perceivedload', 'perceivedintensity', 'perceivedstress', 'mentaldifficulty'], ['woundstartdate', 'treatmentstartdate', 'firstrecorddate']);
+             ['woundstartdate', 'treatmentstartdate', 'firstrecorddate'], [], 'stravaid');
      }
      public function getRowLabelAction(){
          return <<<EOT

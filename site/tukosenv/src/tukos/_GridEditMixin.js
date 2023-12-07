@@ -3,7 +3,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "tukos/dgrid/Edit
 function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mutils, wcutils, Pmg, TukosTooltipDialog, messages){
 	var copyDialogTooltip, 
 		applyCallback = function(){
-	        var grid = copyDialogTooltip.grid, numberOfCopies = parseInt(copyDialogTooltip.pane.valueOf('copies') || '1'), incrementFrom = copyDialogTooltip.pane.valueOf('incrementfrom');
+	        var grid = copyDialogTooltip.grid, numberOfCopies = parseInt(copyDialogTooltip.pane.valueOf('copies') || '1'), incrementFrom;
 	        copyDialogTooltip.pane.close();
 	        var data = grid.clickedRowValues(), name = data.name || '', re = /(^.*)([0-9]+$)/g, match = re.exec(name), item = grid.copyItem(data);
 			if (match){
@@ -329,7 +329,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         },
         
         copyRow: function(evt){
-			copyDialog(this).open({x: evt.clientX, y: evt.clientY});
+			copyDialog(this).open({x: evt.clientX, y: evt.clientY, parent: this});
         },
         
         deleteRow: function(rowItem, skipDeleteAction, isUserRowEdit){

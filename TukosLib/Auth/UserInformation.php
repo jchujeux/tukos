@@ -12,7 +12,7 @@ use TukosLib\TukosFramework as Tfk;
 class UserInformation{
     use ContextCustomization;
     public function __construct($objectModulesDefaultContextName, $modulesMenuLayout, $tukosCkey){
-        $this->objectModules = Tfk::$registry->get('appConfig')->objectModules;// $this->objectModules[] = 'help';
+        $this->objectModules = Tfk::$registry->get('appConfig')->objectModules;
         $this->objectModulesDefaultContextName = $objectModulesDefaultContextName;
         $this->modulesMenuLayout = $modulesMenuLayout;
         $this->tukosCkey = $tukosCkey;

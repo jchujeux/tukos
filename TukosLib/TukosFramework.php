@@ -12,7 +12,7 @@ class TukosFramework{
 
     const dojoModules = ['dojo', 'dijit', 'dojox'];
 
-    const tukosSchedulerUserId = 12, tukosUserId = 13, tukosBackOfficeUserId = 15;
+    const tukosSchedulerUserId = 12, tukosUserId = 13, tukosBackOfficeUserId = 15, tukosBackOfficeMailAccountId = 18;
     
     public static $publicDir, $tukosPhpDir, $phpVendorDir, $vendorDir = [], $tukosTmpDir, $tukosPhpImages,
                   $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment, $tukosBaseLocation, $dojoBaseLocation, $tukosFormsDojoBaseLocation, $dojoCdnBaseLocation, $tukosFormsTukosBaseLocation, 
@@ -104,7 +104,7 @@ class TukosFramework{
     public static function tr($theText, $mode=null){
         return call_user_func(self::$tr, $theText, $mode);
     }
-    public static function addExtra($id, $value, $mode){
+    public static function addExtra($id, $value){
     	self::$extras[$id] =$value;
     }
     public static function getExtras(){

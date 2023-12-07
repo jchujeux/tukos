@@ -99,10 +99,10 @@ class TranslatorsManager {
                     if (is_array($mode)){
                         $translation = $translatedName;
                         foreach($mode as $subMode){
-                            $translation = $this->transform($translation, $subMode);
+                            $translation = Utl::transform($translation, $subMode);
                         }
                     }else{
-                        $translation = $this->transform($translatedName, $mode);
+                        $translation = Utl::transform($translatedName, $mode);
                     }
                 }else if (strtoupper($name) === $name){
                     $translation = mb_strtoupper($translatedName);
@@ -165,37 +165,6 @@ class TranslatorsManager {
             return $key;
         };
     } 
-    function transform($translation, $mode){
-        switch ($mode){
-            case 'escapeSQuote':
-                return Utl::escapeSQuote($translation);
-            case 'addslashes':
-                return addslashes($translation);
-            case 'ucfirst':
-                return ucfirst(mb_strtolower($translation));
-            case 'lowercase':
-                return mb_strtolower($translation);
-            case 'uppercase':
-                return mb_strtoupper($translation);
-            case 'ucwords':
-                return ucwords(mb_strtolower($translation));
-            case 'plural':
-            case 'none':
-            case null:
-            case '':
-                return $translation;
-            default://assumes it is an array describing the transformation, e.g. ['replace', ['(', ')'], ' ']
-                switch ($mode[0]){
-                    case 'replace':
-                        return str_replace($mode[1], $mode[2], $translation);
-                    case 'substitute':
-                        return Utl::substitute($translation, $mode[1]);
-                    default:
-                        return $translation;
-                        
-                }
-        }
-    }
     function presentTukosTooltips(){
         return Tfk::$registry->get('configStore')->query("SELECT name FROM translations WHERE name RLIKE 'TukosTooltip$'")->fetchAll(\PDO::FETCH_COLUMN, 0);
     }
