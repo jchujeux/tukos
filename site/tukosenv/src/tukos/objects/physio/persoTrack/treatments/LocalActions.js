@@ -7,7 +7,6 @@ function(declare, lang, utils, Pmg){
 			this.dailiesStore = dailiesGrid.store;
 			exportButton.clientDialogDescription = {paneDescription: {onOpenAction: function(){
 				var pane = exportButton.dropDown.pane, patient;
-				console.log('I am in exportbutton');
 				if (!pane.valueOf('to') && (patientId = form.valueOf('patient'))){
                 	Pmg.serverDialog({object: 'users', view: 'NoView', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'GetItems'}}}, {data: utils.newObj([[patientId, ['email']]])}).then(
                     	function (response){
@@ -109,8 +108,8 @@ function(declare, lang, utils, Pmg){
 			this.startdateChangeLocalAction(undefined, undefined, session.startdate === sessionBeforeChange.startdate ? sessions.startdate : undefined, session.startdate);
 			delete this.rowBeforeChange;
 		},
-		beforerDeleteSessionsRows: function(args){
-			console.log('I am here');
+		beforeDeleteSessionsRows: function(args){
+			console.log('I am in beForeDeleteSessionRows');
 		},
 		afterDeleteSessionsRows: function(){
 			var dates = [], self = this, needsRefresh = false;;

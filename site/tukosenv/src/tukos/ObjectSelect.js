@@ -5,9 +5,6 @@ define (["dojo/_base/declare", 	"dojo/_base/lang", "dojo/dom", "dojo/dom-attr", 
 	    clickedNode = node;
 	    return [node, by];
 	});
-	/*focusUtil.on("widget-focus", function(widget){
-		console.log("focused widget: ", widget);
-	});*/
     return declare([FilteringSelect], {
 		_firstClick: true,
 		constructor: function(args){

@@ -22,7 +22,6 @@
             })
         },
         onShow: function(){
-        	console.log('TukosAccordionPane - onShow ');
         	this.createPane();
         },
         createPane: function(){

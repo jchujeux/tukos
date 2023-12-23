@@ -44,6 +44,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
                         att: {type: 'StoreSelect', atts: {widgetName: 'attribute', title: messages.attribute, placeHolder: messages.attribute + '  ...', style: {width: 'auto', maxWidth: '15em'}, storeArgs: {}}},
             			NumberUnitBox: {type: 'NumberUnitBox', atts: {widgetName: 'attValue', number: {style: {width: '3em'}, disabled: true}, unit: {placeHolder: messages.enterunit, style: {width: 'auto'}, storeArgs: {data:[]}}}}, 
             			TextBox: {type: 'TextBox', atts: {widgetName: 'attValue', style: {width: '20em'}, hidden: true}},
+            			TukosTextarea: {type: 'TukosTextarea', atts: {widgetName: 'attValue', style: {width: '20em'}, hidden: true}},
             			StoreSelect: {type: 'StoreSelect', atts: {placeHolder: messages.selectvalue, style: {width: 'auto'}, hidden: true, storeArgs: {data: []}}},
             			RestSelect: {type: 'RestSelect', atts: {placeHolder: messages.selectvalue, style: {width: 'auto'}, hidden: true}},
 						MultiSelect: {type: 'MultiSelect', atts: {widgetName: 'attValue', hidden: true, style: {width: 'auto', height: '200px'}}},
@@ -54,8 +55,8 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
                     layout:{
                         tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},
                         contents: {
-                           row1: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['att', 'NumberUnitBox', 'TextBox', 'StoreSelect', 'RestSelect', 'MultiSelect', 'SimpleDgridNoDnd']},
-                           row2: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['cancel', 'apply']}
+                           row1: {tableAtts: {cols: 4, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['att', 'NumberUnitBox', 'cancel', 'apply']},
+                           row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['TextBox', 'TukosTextarea', 'StoreSelect', 'RestSelect', 'MultiSelect', 'SimpleDgridNoDnd']}
                         }
                     }
                 },
@@ -108,7 +109,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 
         attWatchCallback: function(attr, oldValue, newValue){
             var self = this, pane = widgetCustomDialog.pane, getWidget = lang.hitch(pane, pane.getWidget), customAtts = this.customAtts,
-            	attValueWidgets = {NumberUnitBox: getWidget('NumberUnitBox'), TextBox: getWidget('TextBox'), StoreSelect: getWidget('StoreSelect'), RestSelect: getWidget('RestSelect'),
+            	attValueWidgets = {NumberUnitBox: getWidget('NumberUnitBox'), TextBox: getWidget('TextBox'), TukosTextarea: getWidget('TukosTextarea'), StoreSelect: getWidget('StoreSelect'), RestSelect: getWidget('RestSelect'),
 					MultiSelect: getWidget('MultiSelect'), SimpleDgridNoDnd: getWidget('SimpleDgridNoDnd')};
             if (newValue === ''){
             	var attValueType = 'NumberUnitBox', attValueWidget = this.attValueWidget = attValueWidgets.NumberUnitBox;
@@ -137,9 +138,9 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 						case 'SimpleDgridNoDnd':
 							widget.set('columns', atts.atts.columns);
 							widget.set('store', atts.atts.storeArgs);
-							if (atts.atts.style){
-								dst.set(widget.domNode, atts.atts.style);
-							}
+							//if (atts.atts.style){
+								dst.set(widget.domNode, atts.atts.style || widget.style);
+							//}
 							if (atts.atts.initialRowValue){
 								widget.set('initialRowValue', atts.atts.initialRowValue);
 							}else{

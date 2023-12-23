@@ -3,9 +3,9 @@ define(["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom-construct",  "dojo/d
         "dojox/charting/themes/ThreeD", "dojox/charting/StoreSeries", "dojo/store/Observable", "dojo/store/Memory"/*, "dstore/Memory"*/, "dojo/ready", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager"], 
 function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, Observable, Memory/*, DMemory*/, ready, utils, dutils, evalutils, wcutils, Pmg){
     var classesPath = {
-        Curves:  "*dojoFixes/dojox/charting/plot2d/Default", Columns: "dojox/charting/plot2d/", ClusteredColumns: "dojox/charting/plot2d/", Lines: "dojox/charting/plot2d/", Areas: "dojox/charting/plot2d/", Pie: "dojox/charting/plot2d/", Spider: "tukos/charting/plot2d/",
-        Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "tukos/widgets/", axis2dDefault:  "*dojox/charting/axis2d/Default", axis2dBase: "*dojox/charting/axis2d/Base", Tooltip: "dojox/charting/action2d/", BasicGrid: "tukos/",
-		MouseIndicator: "dojox/charting/action2d/", MouseZoomAndPan: "dojox/charting/action2d/"
+        Curves:  "*dojoFixes/dojox/charting/plot2d/Default", Columns: "dojox/charting/plot2d/", ClusteredColumns: "dojox/charting/plot2d/", Lines: "dojox/charting/plot2d/", Areas: "dojox/charting/plot2d/", Bubble: "dojox/charting/plot2d/", Pie: "dojox/charting/plot2d/", 
+        Spider: "tukos/charting/plot2d/", Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "tukos/widgets/", axis2dDefault:  "*dojox/charting/axis2d/Default", axis2dBase: "*dojox/charting/axis2d/Base", Tooltip: "dojox/charting/action2d/",
+        BasicGrid: "tukos/", MouseIndicator: "dojox/charting/action2d/", MouseZoomAndPan: "dojox/charting/action2d/"
     };
 	return declare(Widget, {
         
@@ -26,7 +26,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 			if (this.hasOwnProperty('showTable')){
             	const table = this.table = dct.create('table', {style: {tableLayout: 'fixed', width: '100%'}}, this.domNode), tr = dct.create('tr', {}, table);
             	this.tableNode = dct.create('div', {style: tableStyle}, dct.create('td', {style: {width: this.tableWidth || "20%"}}, tr));
-            	this.chartNode = dct.create('div', {style: chartStyle}, dct.create('td', {}, tr));
+            	this.chartNode = dct.create('div', {style: chartStyle}, dct.create('td', {style: {verticalAlign: 'top'}}, tr));
 				this.watch('showTable', lang.hitch(this, function(){
 	            	this.set('value', this.value);
 	            }));
@@ -119,9 +119,12 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 					}            		
                     for (let axisName in axes){
                         const axisOptions = axes[axisName];
-                        if (axisOptions.tickslabel){
+                        /*if (this.getLabel){
+							axisOptions.labelFunc = lang.hitch(this, this.getLabel, axisOptions);
+						}*/
+                        /*if (axisOptions.tickslabel){
                             axisOptions.labelFunc = lang.hitch(this, this.getLabel, axisOptions);
-                        }
+                        }*/
                         chart.addAxis(axisName, axisOptions);
                     }
                     for (let plotName in plots){
@@ -138,8 +141,6 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 	                    	plotOptions.mouseZoomAndPan = new chartClasses['MouseZoomAndPan'](chart, plotName);
 	                    }
                     }
-	                store.setData(value.data);
-	                this.sortedData = store.query(kwArgs.query, kwArgs);
                     const showTable = this.showTable, tableNode = this.tableNode, chartNode = this.chartNode, width = dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height"),
                     	tableHeight = (parseInt(height)-20) + 'px';
 					if (showTable === 'yes'){
@@ -162,9 +163,17 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 						chart.series = [];
 						chart.runs = {};
 					}
+	                if (value.data){
+		                store.setData(value.data);
+		                this.sortedData = store.query(kwArgs.query, kwArgs);
+					}
 					for (let seriesName in series){
 						const serie = series[seriesName];
-                        chart.addSeries(seriesName, new StoreSeries(store, kwArgs, serie.value), serie.options);
+                        if (serie.arrayValues){
+                        	chart.addSeries(seriesName, series.arrayValues);
+						}else{
+                        	chart.addSeries(seriesName, new StoreSeries(store, kwArgs, serie.value), serie.options);
+						}
                     }
 					if (chartClasses['MouseIndicator'] && !chart.mouseIndicator){
 						chart.mouseIndicator = new chartClasses['MouseIndicator'](chart, this.mouseIndicator.plot, this.mouseIndicator.kwArgs);
@@ -192,14 +201,14 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
             }
         },
         
-        getLabel: function(options, formattedValue, rawValue){
+        /*getLabel: function(options, formattedValue, rawValue){
             if (utils.in_array(['dateofday', 'dateofweek'], options.tickslabel) && options.firstDate){
 				return dutils.formatDate(dutils.dateAdd(options.firstDate, 'day', rawValue - 1));
 			}else{
 				return formattedValue;
 			}
             //return  this.sortedData[rawValue-1] ? this.sortedData[rawValue-1][labelCol]: '';
-        },
+        },*/
         classLocation: function(classType){
             const classPath = classesPath[classType];
         	return classPath.charAt(0) === '*' ? classPath.substring(1) : classPath +  classType;

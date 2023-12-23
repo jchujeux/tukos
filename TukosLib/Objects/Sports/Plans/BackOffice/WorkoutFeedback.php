@@ -144,28 +144,24 @@ class WorkoutFeedback extends ObjectTranslator{
                 Feedback::add($this->tr('workoutnotfounddeleted') . "(id = $id)");
                 return [];
             }else if(empty($performedWorkout['starttime'])){
-                if (($synchroSource = $programInformation['synchrosource']) === 'strava'){
-                    Feedback::suspend();
-                    $this->plansModel->stravaProgramSynchronize([
-                        'id' => $programId, 'parentid' => $programInformation['parentid'], 'ignoreworkoutflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrosource' => $synchroSource, 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
-                        'updator' => $programInformation['updator'], 'googlecalid' => $programInformation['googlecalid']]);
-                    $performedWorkout = $this->workoutsModel->getOne(['where' => $this->user->filterPrivate(['id' => $id], 'sptworkouts'), 'cols' => $this->version->formObjectWidgets()]);
-                    Feedback::resume();
-                }
+                Feedback::suspend();
+                $this->plansModel->stravaProgramSynchronize([
+                    'id' => $programId, 'parentid' => $programInformation['parentid'], 'ignoreworkoutflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
+                    'updator' => $programInformation['updator'], 'googlecalid' => $programInformation['googlecalid']]);
+                $performedWorkout = $this->workoutsModel->getOne(['where' => $this->user->filterPrivate(['id' => $id], 'sptworkouts'), 'cols' => $this->version->formObjectWidgets()]);
+                Feedback::resume();
             }
             Feedback::add($this->tr('Updateworkoutfeedback'));
             $performedWorkout['sportsman'] = $programInformation['parentid'];
         }else{
             $performedWorkout = $this->workoutsModel->getOne(['where' => $this->user->filterPrivate(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'starttime' => $query['starttime'], 'mode' => 'performed']), 'sptworkouts'), 'cols' => $this->version->formObjectWidgets()]);
             if (empty($performedWorkout) || empty($performedWorkout['starttime'])){
-                if (($synchroSource = $programInformation['synchrosource']) === 'strava'){
-                    Feedback::suspend();
-                    $this->plansModel->stravaProgramSynchronize([
-                        'id' => $programId, 'parentid' => $programInformation['parentid'], 'ignoreworkoutflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrosource' => $synchroSource, 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
-                        'updator' => $programInformation['updator'], 'googlecalid' => $programInformation['googlecalid']]);
-                    $performedWorkout = $this->workoutsModel->getOne(['where' => $this->user->filterPrivate(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'starttime' => $query['starttime'],  'mode' => 'performed']), 'sptworkouts'), 'cols' => $this->version->formObjectWidgets()]);
-                    Feedback::resume();
-                }
+                Feedback::suspend();
+                $this->plansModel->stravaProgramSynchronize([
+                    'id' => $programId, 'parentid' => $programInformation['parentid'], 'ignoreworkoutflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
+                    'updator' => $programInformation['updator'], 'googlecalid' => $programInformation['googlecalid']]);
+                $performedWorkout = $this->workoutsModel->getOne(['where' => $this->user->filterPrivate(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'starttime' => $query['starttime'],  'mode' => 'performed']), 'sptworkouts'), 'cols' => $this->version->formObjectWidgets()]);
+                Feedback::resume();
                 if (empty($performedWorkout)){
                     $performedWorkout = ['id' => '', 'sportsman' => $programInformation['parentid'], 'startdate' => $query['date'], 'starttime' => $query['starttime'], 'name' => rawurldecode($query['name']), 'sport' => rawurldecode($query['sport']), 'duration' => '0', 'distance' => 0, 'elevationgain' => 0];
                 }
@@ -266,7 +262,7 @@ class WorkoutFeedback extends ObjectTranslator{
         return $id;
     }
     function getProgramInformation($programId){
-        $programInformation = $this->plansModel->getOne(['where' => ['id' => $programId], 'cols' => ['parentid', 'coach', 'googlecalid', 'weeklies', 'synchrosource', 'contextid', 'updator']], ['weeklies' => []]);
+        $programInformation = $this->plansModel->getOne(['where' => ['id' => $programId], 'cols' => ['parentid', 'coach', 'googlecalid', 'weeklies', 'contextid', 'updator']], ['weeklies' => []]);
         return $programInformation;
     }
     function showSynchroFieldsLocalAction(){
@@ -304,10 +300,8 @@ var form = $form, hasSomeValue;
 if ('$synchroflag'){
     hasSomeValue = {$this->synchroFields}.some(function(name){
         var value = form.valueOf(name);
-        console.log('name = ' + name + ' - value = ', value);
         return name === 'duration' ? (value != 'T00:00:00') : (value ? true : false); 
     });
-    console.log('hasSomeValue = ' + hasSomeValue);
     {$this->synchroFields}.forEach(function(name){
         form.getWidget(name).set('hidden', !hasSomeValue);
     });
@@ -321,7 +315,6 @@ hasSomeValue = {$this->weeklyFields}.some(function(name){
     form.getWidget(name).set('hidden', !hasSomeValue);
 });
 form.getWidget('showweeklies').set('label', Pmg.message(hasSomeValue ? 'hideweeklies' : 'showweeklies', 'backoffice'));
-console.log('label for showweeklies: ' + Pmg.message(hasSomeValue ? 'hideweeklies' : 'showweeklies', 'backoffice'));
 form.weekliesAreShown = hasSomeValue;
 form.resize();
 EOT

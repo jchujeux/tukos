@@ -25,7 +25,7 @@ class View extends EditView{
             	'row1' => [
                     'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => '130'],
                     'widgets' => ['id', 'parentid', 'coach', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'coachemail', 'coachorganization', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter',
-                            'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'initialsts', 'initiallts', 'initialhracwr', 'displayfromdate', 'displayfromsts', 'displayfromlts', 'synchrosource']
+                            'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'initialsts', 'initiallts', 'initialhracwr', 'displayfromdate', 'displayfromsts', 'displayfromlts']
                 ],
             	'row2' => [
             	    'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['80%', '20%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],      
@@ -247,7 +247,6 @@ require (["tukos/objects/sports/plans/LocalActions"], function(LocalActions){
     form.localActions = new LocalActions({form: form, plannedColumns: {$plannedCols}, performedColumns: {$performedCols}});
     if (form.viewModeOption && !form.getWidget(form.viewModeOption).get('checked')){
         form.getWidget(form.viewModeOption).set('checked', true);
-        console.log('entering viewModeOption');            
         form.localActions.viewModeOption(form.viewModeOption);
     }
 });

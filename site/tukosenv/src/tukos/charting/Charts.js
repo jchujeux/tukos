@@ -1,7 +1,7 @@
 "use strict";
 define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils"], 
 function(declare, lang, utils){
-	const classes = {trend: "tukos/charting/TrendChart", spider: "tukos/charting/SpiderChart"};
+	const classes = {trend: "tukos/charting/TrendChart", spider: "tukos/charting/SpiderChart", pie: "tukos/charting/PieChart", repartition: "tukos/charting/RepartitionChart", xy: "tukos/charting/XyChart"};
 	return declare(null, {
         constructor: function(args){
 			lang.mixin(this, args);

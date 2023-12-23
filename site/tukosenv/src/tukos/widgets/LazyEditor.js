@@ -81,7 +81,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 		
 		onBlurCallback: function(){
 			var htmlContent = this.htmlContent, self = this, newValue, editor = editors[this.editorType];
-			console.log('calling onBlurCallback - isPlaced: ' + isPlaced);
 			this.onBlurHandle.remove();
 			if (editor && this.getIndexOfChild(editor) > -1/* && editor.isFullscreen !== true*/){//case where focus not via onClick, e.g. onDrop
 				//htmlContent.set('style', {height: this.editorToContentHeight(editor.get('height'))});

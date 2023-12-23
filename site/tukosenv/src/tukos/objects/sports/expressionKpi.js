@@ -153,7 +153,7 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 	};
 
 	return {
-		expression: function(kpiDate, durationDays, sessionsAscendingStartDateArray, lastSessionOffset, cache){
+		expression: function(kpiDate, durationDays, sessionsAscendingStartDateArray, lastSessionOffset, cache, idp){
 			return new parser.default(kpiLanguage(kpiDate, durationDays, sessionsAscendingStartDateArray, lastSessionOffset, cache, idp));
 		}
 	};

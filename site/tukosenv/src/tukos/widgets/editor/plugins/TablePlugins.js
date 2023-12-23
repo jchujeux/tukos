@@ -152,7 +152,6 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
 
     checkAvailable: function(){
         // For table plugs Checking if a table or part of a table has focus so that Plugs can change their status
-        //console.log('calling checkAvailable');
     	if(this.availableCurrentlySet){// availableCurrentlySet is set for a short amount of time, so that all  plugins get the same return without doing the method over
             return this.currentlyAvailable;
         }else{
@@ -164,8 +163,6 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
             }else{
                 this.currentlyAvailable = this.editor.focused && (this._savedTableInfo ? this._savedTableInfo.tbl :
                     this.editor.hasAncestorElement("table"));
-                //console.log('has table ancestor: ' + this.editor.hasAncestorElement("table"));
-                //console.log('currentlyavailable: ' + this.currentlyAvailable);
                 if(this.currentlyAvailable){
                     this.connectTableKeys();
                 }else{
@@ -315,28 +312,7 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/_base/lang", "dojo/_base
 		}
   		
   	},
-/*
-  	onKeyUp: function(evt){
-        var key = evt.keyCode;
-        switch (key){
-	    	case keys.SHIFT	: 
-	    	case keys.CTRL  :
-	    	case keys.ALT   : 
-	    		//evt.preventDefault();
-	    	case keys.META  : 
-	    		break;
-	    	case keys.RIGHT_ARROW:
-	    	case keys.LEFT_ARROW :
-	    	case keys.DOWN_ARROW :
-	    	case keys.UP_ARROW   : 
-	    		this.onDisplayChanged(); break;
-	    	case keys.TAB : 
-	    		dojo.stopEvent(evt);//if (this.stopEvent){dojo.stopEvent(evt);}; break;
-        }
-    },
-*/
     onDisplayChanged: function(){
-        console.log('onDisplayChanged');
     	this.currentlyAvailable = false;
         this._tempStoreTableData(false);
         this._tempAvailability(false);

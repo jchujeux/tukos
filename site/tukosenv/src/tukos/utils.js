@@ -393,11 +393,12 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 							break;
 						case 'translate':
 							if (formatOptions.translations){
-								this.forEach(formatOptions.translations, function(translated, untranslated){
+								value = this.translate(value, formatOptions.translations);
+								/*this.forEach(formatOptions.translations, function(translated, untranslated){
 									if (value.includes(untranslated)){
 										value = value.replaceAll(untranslated, translated);
 									}
-								});
+								});*/
 							}else{
 								value = Pmg.message(value, (formatOptions || {}).object);
 							}
@@ -616,7 +617,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				if (translations){
 					let self = this, matchingTranslations = [];
 					this.forEach(translations, function(translated, untranslated){
-						let source = (mode === 'translate' ? untranslated : translated), target = (mode === 'translate' ? translated : untranslated), sourceRegExp = new RegExp('\\b' + self.escapeRegExp(source) + '(?!\w)', 'g');
+						let source = (mode === 'translate' ? untranslated : translated), target = (mode === 'translate' ? translated : untranslated), sourceRegExp = new RegExp('(\\b|_)(' + self.escapeRegExp(source) + ')(\\b|_)', 'g');
 						if (sourceRegExp.test(value)){
                         	matchingTranslations.push([source, sourceRegExp, target]);
 						}
@@ -625,14 +626,18 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 						return value;
 					}else if(matchingTranslations.length === 1){
 						const [source, sourceRegExp, target] = matchingTranslations[0];
-						return value.replaceAll(sourceRegExp, target);
+						return value.replaceAll(sourceRegExp, function(match, p1, p2, p3){
+								return p1 + target + p3;
+							});
 					}else{
 						matchingTranslations.sort(function(a, b){
 							return b[0].length - a[0].length;
 						});
 						matchingTranslations.forEach(function(translation){
 							const [source, sourceRegExp, target] = translation;
-							value = value.replaceAll(sourceRegExp, target);
+							value = value.replaceAll(sourceRegExp, function(match, p1, p2, p3){
+								return p1 + target + p3;
+							});
 						});
 						return value;
 					}

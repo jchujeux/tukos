@@ -622,7 +622,6 @@ define([
 			}
 
 			function onblur() {
-				console.log('Editor onBlur');
 				var parentNode = node.parentNode,
 					options = { alreadyHooked: true },
 					cell = self.cell(node);

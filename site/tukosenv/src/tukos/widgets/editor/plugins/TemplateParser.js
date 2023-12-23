@@ -212,7 +212,6 @@ define([
         },
         
         updateChoiceListFields: function(newValue){
-            console.log('the new value is: ' + newValue);
             var existingContextMenu = this.editor.document.getElementById('choiceList_' + newValue), i = 0;
             if (existingContextMenu){
                 var choiceList = this.getChoiceList(existingContextMenu);

@@ -268,10 +268,7 @@ require (["tukos/objects/sports/programs/LocalActions"], function(LocalActions){
     });
     if (form.viewModeOption && !form.getWidget(form.viewModeOption).get('checked')){
         form.getWidget(form.viewModeOption).set('checked', true);
-        //if (form.viewModeOption !== 'viewall'){
-            console.log('entering viewModeOption');            
-            form.localActions.viewModeOption(form.viewModeOption);
-        //}
+        form.localActions.viewModeOption(form.viewModeOption);
     }
 });
 EOT

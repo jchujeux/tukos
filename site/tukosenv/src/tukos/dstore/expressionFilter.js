@@ -41,6 +41,9 @@ define(['tukos/ExpressionParser', 'tukos/dateutils'], function (parser, dutils) 
 				'=': function(a, b){
 					return filter.eq(a, b);
 				},
+				'<>': function(a, b){
+					return filter.ne(a, b);
+				},
 				'IN': function(a, b){
 					return filter.in(a, b);
 				},
@@ -97,7 +100,7 @@ define(['tukos/ExpressionParser', 'tukos/dateutils'], function (parser, dutils) 
 						return term;
 				}
 			}
-		}
+		};
 	};
 
 	return {

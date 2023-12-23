@@ -180,7 +180,6 @@ if (tWidget.getEditorInstance && tWidget.getEditorInstance('exerciseid')){
         editorInstance.store.setData(data);
     });
 }
-console.log('I am in exercisesLocalAction');
 return true;
 EOT;
      }

@@ -1,42 +1,41 @@
 "use strict";
-define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], function (parser, dutils, eutils) {
+define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalutils'], function (parser, utils, dutils, eutils) {
     let x;
     const unpackArgs = function(f){
 		return function(expr){
 			let result = expr();
-			if (!(0, parser.isArgumentsArray)(result)){
-				if (f.length > 1){
-                	throw new Error(`Too few arguments. Expected ${f.length}, found 1 (${JSON.stringify(result)})`);
-				}
-				return f(function(){return result;});
-			}else if(result.length === f.length || f.length === 0){
-				return f.apply(null, result);
-			}else{
-            	throw new Error(`Incorrect number of arguments. Expected ${f.length}`);
-			}
+			return (0, parser.isArgumentsArray)(result) ? f.apply(null, result) : f(function(){return result;});
 		}
 	};
-	const kpiLanguage = function (items, cache, valueOf, previousKpiValuesCache, previousItems, kpiDate) {
+	const kpiLanguage = function (items, idProperty, cache, valueOf, previousKpiValuesCache, previousItems, kpiDate) {
 		const getValueOf = function(value){
 			return dojo.isString(value) && value[0] === '@' ? valueOf(value.substring(1)): value;
+		}
+		const nanToSecondsOrZero = function(value){
+			return isNaN(value) ? (typeof value === 'string' ? dutils.timeToSeconds(value) : 0) : value;
 		}
 		const formulaCache = {}, 
 			  getFormula = function(arg){
 				if (formulaCache[arg]){
 					return formulaCache[arg];
 				}else{
-					const formulaString = arg.replaceAll(/[$]((?:\w|_)+)/g, '(!Number.isNaN(x=Number(item.$1)) ? x : (item.$1 === undefined ? utils.putInCache("$1", item[idp], cache)  : item.$1))');
-					return formulaCache[arg] = eutils.eval('return ' + formulaString + ';', 'item, cache, x');
+					const formulaString = arg.replaceAll(/[$]((?:\w|_)+)/g, '(!Number.isNaN(x=Number(item.$1)) ? x : (item.$1 === undefined ? utils.putInCache("$1", item.' + idProperty + ', cache)  : item.$1))');
+					return formulaCache[arg] = eutils.eval('return ' + formulaString + ';', 'item, cache, ' + idProperty + ', x');
 				}
+			},
+			formulaVector = function(arg){
+				const formula = getFormula(arg);
+				let result = [];
+				items.forEach(function(item){
+					result.push(formula(item));
+				});
+				return result;
 			},
 			formulaSum = function(arg){
 				const formula = getFormula(arg);
 				let result = 0;
 				items.forEach(function(item){
-					const value = formula(item, cache, x);
-					if (!isNaN(value)){
-						result += value;
-					}
+					result += nanToSecondsOrZero(formula(item, cache, idProperty, x));
 				});
 				return result;
 			},
@@ -46,8 +45,7 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 				if (!previousKpiValuesCache[arg + daysConstant]){
 					average = Number(getValueOf(initialAvg)); previousDate = getValueOf(initialDate);
 					previousItems.forEach(function(item){
-						const value = formula(item, cache, x);
-						average =  (isNaN(value) ? 0 : value) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
+						average =  nanToSecondsOrZero(formula(item, cache, idProperty, x)) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
 						previousDate = item.startdate
 					});
 				}else{
@@ -55,8 +53,7 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 				}
 				items.forEach(function(item){
 					if (previousDate < item.startdate){
-						const value = formula(item, cache, x);
-						average =  (isNaN(value) ? 0 : value) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
+						average =  nanToSecondsOrZero(formula(item, cache, idProperty, x)) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
 						previousDate = item.startdate
 					}
 				});
@@ -66,23 +63,17 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 			},
 			formulaMin = function(arg){
 				const formula = getFormula(arg, cache);
-				let result = 0;
+				let result = MAX_VALUE;
 				items.forEach(function(item){
-					const value = Math.min(result, formula(item, cache, x));
-					if (!isNaN(value)){
-						result = value;
-					}
+					result = Math.min(result, nanToSecondsOrZero(formula(item, cache, idProperty, x)));
 				});
 				return result;
 			},
 			formulaMax = function(arg){
 				const formula = getFormula(arg);
-				let result = 0;
+				let result = MIN_VALUE;
 				items.forEach(function(item){
-					const value = Math.max(result, formula(item, cache, x));
-					if (!isNaN(value)){
-						result = value;
-					}
+					result = Math.max(result, nanToSecondsOrZero(formula(item, cache, idProperty, x)));
 				});
 				return result;
 			},
@@ -120,7 +111,31 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 				},
 				'/': function(a, b){
 					const x = a(), y = b();
-					return x ? x / y : 0;
+					if (Array.isArray(x)){
+						if (Array.isArray(y)){
+							let result = [];
+							for (let i in x){
+								result.push(y[i] ? x[i] / y[i] : 0);
+							}
+							return result;
+						}else{
+							let result = [];
+							for (let i in x){
+								result.push(y ? x[i] / y : 0);
+							}
+							return result;
+						}
+					}else{
+						if (Array.isArray(y)){
+							let result = [];
+							for (let i in y){
+								result.push(y[i] ? x / y[i] : 0);
+							}
+							return result;
+						}else{
+							return y ? x / y : 0;
+						}
+					}
 				},
 	            ",": (a, b) => {
 	                const aVal = a();
@@ -140,8 +155,88 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 					return - a();
 				}),
 				'TOFIXED': unpackArgs(function(a, digits){
-					return Number(a().toFixed(digits()));
-				}), 
+					let x = a(), dg = digits();
+					if (Array.isArray(x)){
+						for(let i in x){
+							x[i] = Number(x[i].toFixed(dg));
+						}
+						return x;
+					}else{
+						return Number(a().toFixed(dg));
+					}
+				}),
+				'JSONPARSE': function(a){
+					return JSON.parse(a());
+				},
+				'VECTOR': function(col){
+					return formulaVector(col());
+				},
+				XY: unpackArgs(function(a,b, c){
+					const aValue = a(), x = typeof aValue === "string" ? JSON.parse(aValue) : aValue;
+					if (!b){
+						return x;
+					}
+					const bValue = b(), y = typeof bValue === "string" ? JSON.parse(bValue) : bValue;
+					const cValue = !c ? undefined : c(), z = utils.in_array(cValue, [undefined, 'index', 'xValue', 'xTime']) ? null : (typeof cValue === 'string' ? JSON.parse(cValue) : cValue);
+					let thePoint;
+					if (Array.isArray(x[0])){
+						switch(cValue){
+							case undefined:
+								thePoint = function(i, x, y){
+									return [x[i][1], y[i][1]];
+								};
+								break;
+							case 'index':
+								thePoint = function(i, x, y, z){
+									return [x[i][1], y[i][1], i];
+								}
+								break;
+							case 'xValue':
+								thePoint = function(i, x, y){
+									return [x[i][1], y[i][1], x[i][0]];
+								}
+								break;
+							case 'xTime':
+								thePoint = function(i, x, y){
+									return [x[i][1], y[i][1], dutils.secondsToTime(x[i][0]).substring(1)];
+								}
+								break;
+							default:
+								thePoint = function(i, x, y, z){
+									return [x[i][1], y[i][1], z[i][1]];
+								}
+						}
+					}else{
+						switch(cValue){
+							case undefined:
+								thePoint = function(i, x, y){
+									return [x[i], y[i]];
+								};
+								break;
+							case 'index':
+								thePoint = function(i, x, y, z){
+									return [x[i], y[i], i];
+								}
+								break;
+							case 'xValue'://should not happen, fallback to undefined
+							case 'xTime':
+								thePoint = function(i, x, y){
+									return [x[i], y[i]];
+								}
+								break;
+							default:
+								thePoint = function(i, x, y, z){
+									return [x[i], y[i], z[i]];
+								}
+						}
+					}
+
+					let result = [];
+					for (let i in x){
+						result.push(thePoint(i, x, y, z));
+					}
+					return result;
+				}),
 				'SUM': function(col){
 					return formulaSum(col());
 				},
@@ -176,7 +271,7 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 					return formulaDate(formulaString());
 				}
 			},
-			PRECEDENCE:[['ARRAY', 'NEG', 'TOFIXED', 'SUM', 'AVG', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'TIMETOSECONDS', 'DATE'], ['*', '/'], ['+', '-'], [',']],
+			PRECEDENCE:[['ARRAY', 'VECTOR', 'NEG', 'TOFIXED', 'JSONPARSE', 'XY', 'SUM', 'AVG', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'TIMETOSECONDS', 'DATE'], ['*', '/'], ['+', '-'], [',']],
 			LITERAL_OPEN: '"',
 			LITERAL_CLOSE: '"',
 			GROUP_OPEN: '(',
@@ -185,7 +280,7 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 			SYMBOLS: ['*', '/', '+', '-', '(', ')', '[', ']', ','],
 			AMBIGUOUS: {'-': 'NEG'},
             SURROUNDING: {
-                ARRAY: {
+                XARRAY: {
                     OPEN: "[",
                     CLOSE: "]",
                 },
@@ -200,8 +295,8 @@ define(['tukos/ExpressionParser', 'tukos/dateutils', 'tukos/evalutils'], functio
 	};
 
 	return {
-		expression: function(itemsAscendingStartDateArray, missingColsCache, valueOf, previousKpiValuesCache, previousItems, kpiDate){
-			return new parser.default(kpiLanguage(itemsAscendingStartDateArray, missingColsCache, valueOf, previousKpiValuesCache, previousItems, kpiDate));
+		expression: function(itemsAscendingStartDateArray, idProperty, missingColsCache, valueOf, previousKpiValuesCache, previousItems, kpiDate){
+			return new parser.default(kpiLanguage(itemsAscendingStartDateArray, idProperty, missingColsCache, valueOf, previousKpiValuesCache, previousItems, kpiDate));
 		}
 	};
 });

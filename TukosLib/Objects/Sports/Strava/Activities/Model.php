@@ -61,9 +61,9 @@ class Model extends AbstractModel {
     public function hasStreams($id){
         return !empty($this->getOne(['where' => ['id' => $id, ['col' => 'timestream', 'opr' => 'IS NOT NULL', 'values' => null]], 'cols' => ['id']]));
     }
-    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
+    public function getAllExtended ($atts){
         $atts['cols'][] = 'kpiscache';
-        $results = parent::getAll($atts, $jsonColsPaths, $jsonNotFoundValues, $processLargeCols);
+        $results = parent::getAllExtended($atts);
         foreach ($results as &$activity){
             if (!empty($kpisCache = Utl::extractItem('kpiscache', $activity))){
                 $activity = array_merge($activity, json_decode($kpisCache, true));

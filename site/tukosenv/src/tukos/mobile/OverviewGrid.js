@@ -27,13 +27,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/on", "tuko
 			    	newMaxHeight = parseInt(style.maxHeight);
 			    	this.previousViewHeight = viewHeight;
 				}
-		    	console.log('maxHeight: ' + maxHeight + ' bodyHeight: ' + bodyHeight + ' viewHeight: ' + viewHeight + ' newMaxHeight: ' + newMaxHeight);
 	    	}
         },
         contextMenuCallback: function(evt){
             evt.preventDefault();
 			evt.stopPropagation();
-        	console.log('mobile contextmenucallback');
         	var row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column, clickedColumn = this.clickedColumn = this.column(evt);
                 var menuItems = lang.clone(this.contextMenuItems);
                 var colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';

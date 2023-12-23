@@ -107,7 +107,7 @@ class View extends AbstractView {
             'name' => ['atts' => ['edit' => ['hidden' => true], 'overview' => ['hidden' => true]]],
             'comments' => ['atts' => ['edit' => ['height' => '100px', 'editorType' => 'simple', 'hidden' => true], 'overview' => ['hidden' => true]]],
             'records' => ViewUtils::JsonGrid($this, 'Records', array_merge(['rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true]], $recordsDataWidgets), 
-                ['type' => 'accordionGrid', 'atts' => ['edit' => ['disabled' => true, 'noDataMessage' => '', 'storeArgs' => ['idProperty' => 'rowId'], 'noSendOnSave' => [], 'initialRowValue' => ['recorddate' => date('Y-m-d')],
+                ['type' => 'accordionGrid', 'atts' => ['edit' => ['disabled' => true, 'noDataMessage' => '', 'storeArgs' => ['idProperty' => 'rowId'], 'noSendOnSave' => [], 'initialRowValue' => ['recorddate' => date('Y-m-d')], 'object' => 'physiogametracks',
                     'onWatchLocalAction' => ['value' => ['records' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => false], 'action' => $this->stravaInitialSynchronizeLocalAction()]]]], 
                     'afterActions' => [
                         'expandRow' => Tfk::$registry->isMobile 
@@ -164,7 +164,7 @@ EOT;
      public function preMergeCustomizationAction($response, $customMode){
          $response =  $this->gameTracksIndicatorsPreMerge($response, $customMode);
          return $this->chartPreMergeCustomizationAction($response, $response['dataLayout']['contents']['row1']['contents']['col2']['contents']['rowcharts'], $customMode, 'records', 'recorddate',
-             ['woundstartdate', 'treatmentstartdate', 'firstrecorddate'], [], 'stravaid');
+             ['woundstartdate', 'treatmentstartdate', 'firstrecorddate'], [], false);
      }
      public function getRowLabelAction(){
          return <<<EOT

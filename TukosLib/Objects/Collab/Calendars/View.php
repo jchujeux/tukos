@@ -71,7 +71,6 @@ class View extends AbstractView {
 
     							'&initSource' =>
 	    							"var sources = grid.form.getWidget('sources'), collection = sources.collection, idp = collection.idProperty, dirty = sources.dirty;\n" .
-	    							"console.log('in filter for initializing source');\n" .
 	    							"collection.fetchSync().some(function(sourceItem){\n" .
 	    								"var idv = sourceItem[idp], dirtyItem = dirty[idv] || {};\n" .
 	    								"if (dirtyItem.hasOwnProperty('selected') ? dirtyItem.selected : sourceItem.selected){\n" .

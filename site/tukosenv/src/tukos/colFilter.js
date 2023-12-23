@@ -53,7 +53,6 @@ function(declare, lang, dct, Memory, Widget, TextBox, Select, registry, JSON, Pm
             	this.onFilterChange(this);
             	this.hasChanged = false;
             }
-            console.log('was a blur in colFilter');
         }
     });
 }); 

@@ -25,14 +25,14 @@ class View extends AbstractView {
             'laterality'  => ViewUtils::storeSelect('laterality', $this, 'Laterality'),
             'height' => ViewUtils::tukosNumberBox($this, 'Height', ['atts' => ['edit' => ['title' => $this->tr('Height') . '(m)', 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00'],
                     'onWatchLocalAction' => ['value' => [
-                        'imc' => ['value' => ['triggers' => ['server' => true, 'user' => true], 'action' => "var weight = sWidget.form.valueOf('weight'); console.log('weight: ' + weight + ' newValue: ' + newValue);if (weight > 0 && newValue > 0){return weight / newValue / newValue;}else{return ''}"]],
+                        'imc' => ['value' => ['triggers' => ['server' => true, 'user' => true], 'action' => "var weight = sWidget.form.valueOf('weight'); if (weight > 0 && newValue > 0){return weight / newValue / newValue;}else{return ''}"]],
                     ]],
             ]]]),
             'weight' => ViewUtils::tukosNumberBox($this, 'Weight', ['atts' => ['edit' => [
                     'title' => $this->tr('Weight') . '(kg)',
                     'style' => ['width' => '5em'],
                     'onWatchLocalAction' => ['value' => [
-                        'imc' => ['value' => ['triggers' => ['server' => true, 'user' => true], 'action' => "var height = sWidget.form.valueOf('height'); console.log('height: ' + height + ' newValue: ' + newValue);if (height > 0 && newValue > 0){return newValue / height / height;}else{return ''}"]],
+                        'imc' => ['value' => ['triggers' => ['server' => true, 'user' => true], 'action' => "var height = sWidget.form.valueOf('height'); if (height > 0 && newValue > 0){return newValue / height / height;}else{return ''}"]],
                     ]],
             ]]]),
             'corpulence'  => ViewUtils::storeSelect('corpulence', $this, 'Corpulence'),

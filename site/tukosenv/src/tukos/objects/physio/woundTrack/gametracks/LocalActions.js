@@ -1,6 +1,6 @@
 "use strict";
-define(["dojo/_base/declare", "dojo/_base/lang", "dijit/registry", "tukos/utils", "tukos/dateutils", "tukos/widgetUtils", "tukos/PageManager"], 
-function(declare, lang, registry, utils, dutils, wutils,  Pmg){
+define(["dojo/_base/declare", "dojo/_base/lang"], 
+function(declare, lang){
     const runningWidgets = ['duration', 'distance', 'elevationgain', 'perceivedload', 'perceivedintensity', 'intensitydetails'],
           activityWidgets = ['globalsensation', 'globalsensationdetails', 'environment', 'environmentdetails', 'recovery', 'recoverydetails', 'activitydetails', 'perceivedstress', 'stressdetails', 'mentaldifficulty', 
           	'mentaldifficultydetails'];
@@ -51,7 +51,7 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 					pane.getWidget('activitydetails').set('hidden', true);
 					pane.getWidget('notecomments').set('hidden', false);
 					i = 1;
-					while (indicatorWidget = pane.getWidget('trackindicator' + i)){
+					while ((indicatorWidget = pane.getWidget('trackindicator' + i))){
 						indicatorWidget.set('hidden', false);
 						i += 1;
 					}
@@ -143,6 +143,6 @@ function(declare, lang, registry, utils, dutils, wutils,  Pmg){
 			const form = this.form, analysisPane = form.getWidget('roadTrackAnalysis');
 			analysisPane.set('hidden', !analysisPane.get('hidden'));
 			form.resize();
-		},
+		}
 	});
 });

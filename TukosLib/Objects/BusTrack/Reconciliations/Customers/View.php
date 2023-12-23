@@ -116,7 +116,6 @@ if (amount && !isNaN(amount)){
         filters[i] = {0: {col: targetCol, opr: 'IS NULL', values : ''}, 1: {col: targetCol, opr: '=', values: value, or: true}};
     }
 });
-//console.log('isExplained: ' + isExplained);
 if (unexplainedOnly){
     i += 1;
     filters[i] = {0: {col: 'isexplained', opr: 'IS NULL', values : ''}, 1: {col: 'isexplained', opr: '=', values: '', or: true}};
@@ -163,7 +162,6 @@ EOT
     public function amountLocalAction(){
         return <<<EOT
 
-console.log('in amountLocalAction');
 var  parentid = tWidget.row.data.parentid;
 if (parentid){
     var grid = tWidget.column.grid, collection = grid.collection, idProperty = collection.idProperty, delta = newValue - (oldValue || 0);

@@ -26,8 +26,6 @@ define (["dijit/registry", "tukos/expressions", "dojo/request", "tukos/PageManag
 	    	request("https://" + Pmg.get('tukosFormsDomainName') + "/tukos/index20.php/tukosApp/Dialogue/backoffice/NoView/NoMode/SendEmail", 
         			{method: 'POST', handleAs: 'json', data: data}).then(
         		function(response){
-        			console.log('the response is: ' + response);
-        			//widget.set('label', label + '... ' + Pmg.message('sent'));
         			widget.set('label', label + '... ' + response.feedback[0]);
         			setTimeout(function(){widget.set('label', label);}, 1000);
         		},

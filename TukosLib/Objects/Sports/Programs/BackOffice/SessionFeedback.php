@@ -308,10 +308,8 @@ var form = $form, hasSomeValue;
 if ('$synchroflag'){
     hasSomeValue = {$this->synchroFields}.some(function(name){
         var value = form.valueOf(name);
-        console.log('name = ' + name + ' - value = ', value);
         return name === 'duration' ? (value != 'T00:00:00') : (value ? true : false); 
     });
-    console.log('hasSomeValue = ' + hasSomeValue);
     {$this->synchroFields}.forEach(function(name){
         form.getWidget(name).set('hidden', !hasSomeValue);
     });
@@ -325,7 +323,6 @@ hasSomeValue = {$this->weeklyFields}.some(function(name){
     form.getWidget(name).set('hidden', !hasSomeValue);
 });
 form.getWidget('showweeklies').set('label', Pmg.message(hasSomeValue ? 'hideweeklies' : 'showweeklies', 'backoffice'));
-console.log('label for showweeklies: ' + Pmg.message(hasSomeValue ? 'hideweeklies' : 'showweeklies', 'backoffice'));
 form.weekliesAreShown = hasSomeValue;
 form.resize();
 EOT

@@ -290,10 +290,10 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
             return this.cache[item];
         },
         isRestrictedUser: function(){
-			return this.cache['userRights'] === 'RESTRICTEDUSER';
+			return this.cache.userRights === 'RESTRICTEDUSER';
 		},
 		isAtLeastAdmin: function(){
-			return utils.in_array(this.cache['userRights'], ['SUPERADMIN', 'ADMIN']);
+			return utils.in_array(this.cache.userRights, ['SUPERADMIN', 'ADMIN']);
 		},
         set: function(item, value){
         	this.cache[item] = value;
@@ -401,14 +401,13 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
             var newFeedback = (serverFeedback != null && typeof serverFeedback == "object" && serverFeedback.length > 0) ? serverFeedback.join(separator || '<br>') : (typeof serverFeedback === 'string' ? serverFeedback  : (clientFeedback || '')), widget,
                   currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;
 			if (this.focusedPanel === "leftPanel"){
-				console.log('focus is on left panel');
 				var currentPane = this.accordion ? this.accordion.currentPane() : false, form = currentPane.form || {};
 				if (form.getWidget){
 					widget = form.getWidget('feedback');
 				}
 			}         
 			if (!widget){
-				form = (currentTab || {}).form || {};
+				const form = (currentTab || {}).form || {};
 				if (form.getWidget){
 					widget = form.getWidget('feedback');
 				}
@@ -495,7 +494,7 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
     		var store = [{id: '', name: ''}], messages = this.cache.messages;
     		ids.forEach(function(id){
     			store.push({id: id, name: messages[id] || id});
-    		})
+    		});
     		return store;
     	},
         widgetNameTranslator: function(widgetName, objectName, form){
@@ -530,7 +529,7 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
             	objectsTranslations = this.cache.objectsMessages || (this.cache.objectsMessages = {}), objectTranslations = objectsTranslations[objectName] || (objectsTranslations[objectName] = {}), unTranslation;
             if (form){
                 form.widgetsName.some(function(widgetName){
-                    var widget = form.getWidget(widgetName), translation = undefined;
+                    var widget = form.getWidget(widgetName), translation;
                     if (widget){
                     	var translation = objectTranslations[widgetName] = form.getWidget(widgetName).title || form.getWidget(widgetName).label || undefined;
                     }

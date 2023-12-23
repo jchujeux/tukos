@@ -152,7 +152,6 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
         	domAttr.set(expression, {id: newId, title: newName});
         },
     	onBlur: function(textArea){
-    		console.log('entering expressions.onBlur');
     		var expression = textArea.parentNode, span = this.span(expression), newValue = textArea.value, oldValue = textArea.oldValue;//textArea.innerHTML ||span.innerHTML;
     		if (lastKeyDown !== keys.ESCAPE/* && newValue !== oldValue*/){
 	    		if ((newValue || ' ').charAt(0) === '='){
@@ -166,7 +165,6 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
     		textArea.style.display = 'none';
     	},
     	onClick: function(expression, stringToAppend){
-    		console.log('is onclick');
     		var textArea = this.textArea(expression), span = this.span(expression);
     		textArea.value = textArea.oldValue = textArea.innerHTML.trim() || span.innerHTML;
     		textArea.style.display = 'inline';
@@ -178,7 +176,6 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
     	},
     	checkLastKeyDown: function(evt, keyCode, editor){
     		var target = evt.target, parent = target.parentNode;
-    		//console.log('checkLastKeyDown - keyCode: ' + keyCode + ' evt.target.tagName: ' + target.tagName);
     		if (this.isExpression(parent)){
     			lastKeyDown = keyCode;
     			if (keyCode === keys.ENTER){

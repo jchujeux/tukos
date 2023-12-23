@@ -6,6 +6,9 @@ class Utilities{
     public static function nullToBlank($value){
         return  ($value === null ? '' : $value);
     }
+    public static function nullToZero($value){
+        return  ($value === null ? 0 : $value);
+    }
     public static function nullToBlankFloatVal($value){
         return  ($value === null ? '' : floatval($value));
     }
@@ -418,6 +421,62 @@ class Utilities{
             }
         }
         return $reduced;
+    }
+    public static function xShrinkCallback($item, &$cache, $params){
+        list($x, $y) = $item; $xShrink = $params['xShrink'];
+        if (!isset($cache['counter'])){
+            $cache['counter'] = 1;
+            return false;
+        }else if ($cache['counter'] < $xShrink){
+            $cache['counter'] += 1;
+            $cache['lastWasFalse'] = true;
+            return false;
+        }else{
+            $cache['counter'] = 0;
+            $cache['lastWasFalse'] = false;
+            return $item;
+        }
+    }
+    public static function minXmaxYWeightShrinkCallback($item, &$cache, $params){
+        list($x, $y) = $item;
+        if (!isset($cache['minX'])){//first time
+            $cache['minX'] = $cache['previousX'] = $x;
+            $cache['maxY'] = $cache['previousY'] = $y;
+            $cache['deltaX'] = self::getItem('deltaX', $params, $x);
+            $cache['deltaY'] = self::getItem('deltaY', $params, $y / 100);
+            $cache['maxDeltaX'] = self::getItem('maxDeltaX', $params, $cache['deltaX'] * 1000);
+            $cache['maxDeltaY'] = self::getItem('maxDeltaY', $params, $cache['deltaY'] * 10);
+            return $item;
+        }else{
+            if($x - $cache['previousX'] < $cache['deltaX'] && $cache['previousY'] - $y < $cache['deltaY']){
+                $cache['lastWasFalse'] = true;
+                return false;
+            }else{
+                $cache['deltaX'] = min($cache['maxDeltaX'], 2 * $cache['deltaX']);
+                $cache['deltaY'] = min($cache['maxDeltaY'], 2 * $cache['deltaY']);
+                $cache['previousX'] = $x;
+                $cache['previousY'] = $y;
+                $cache['lastWasFalse'] = false;
+                return $item;
+            }
+        }
+    }
+    public static function array_shrink($numericArray, $callback, $params = []){
+        $result = [];
+        $cache = [];
+        if (empty($numericArray)){
+            return $numericArray;
+        }else{
+            array_walk($numericArray, function ($item, $key) use (&$cache, $callback, $params, &$result){
+                if ($shrunkItem = $callback($item, $cache, $params)){
+                    $result[] = $shrunkItem;
+                }
+            });
+                if ($cache['lastWasFalse']){
+                    $result[] = $numericArray[count($numericArray) - 1];
+                }
+        }
+        return $result;
     }
     public static function removeAccents($string){
         if (empty(self::$transliterator)){

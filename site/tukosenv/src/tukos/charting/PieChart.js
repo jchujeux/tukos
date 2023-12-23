@@ -10,7 +10,7 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 			filterStrings.push('"' + dateCol + '" <= "' + expression.expressionToValue(set.lastdate) + '"');
 		}
 		if (set.itemsFilter){
-			filterStrings.push(set.itemsFilter);
+			filterStrings.push(set.kpiFilter);
 		}
 		return filterStrings.join(' AND ');
 	};
@@ -29,60 +29,30 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 					}else{
 						collection = grid.collection.sort([{property: dateCol}, {property: 'rowId'}]);
 					}
-					let kpisDescription = JSON.parse(chartWidget.kpisToInclude), itemsSets = (chartWidget.itemsSetsToInclude && JSON.parse(chartWidget.itemsSetsToInclude)) || [{setName: Pmg.message('allitemstodate')}], kpiData = {}, expKpi = {}, chartData = [], axes = {},
-						series = {}, kpiFilters = {}, tableColumns = {kpi: {label: Pmg.message('kpi', form.object), field: 'kpi', renderCell: 'renderContent'}}, idProperty = collection.idProperty, collectionData = utils.toNumeric(collection.fetchSync(), grid),
+					let kpisDescription = JSON.parse(chartWidget.kpisToInclude), kpiData = {}, expKpi = {}, chartData = [], axes = {},
+						series = {}, kpiFilters = {}, tableColumns = {name: {label: Pmg.message('name', form.object), field: 'name', renderCell: 'renderContent'}, value: {label: Pmg.message('value', form.object), field: 'value', renderCell: 'renderContent'}},
+						idProperty = collection.idProperty, collectionData = utils.toNumeric(collection.fetchSync(), grid),
 						expression = expressionEngine.expression(collectionData, idProperty, missingItemsKpis, valueOf);
+					const plots =  {thePie: {'type': 'Pie', labelOffset: -10}};
+					let previousKpiValuesCache = {}, i = 0;
+					series[0] = {value: {text: 'name', y: 'value'}, options: {plot: 'thePie'/*, fill: set.fillColor || 'black'*/}};
 					for (const kpiDescription of kpisDescription){
 						try{
-							const kpiName = kpiDescription.name + (kpiDescription.tooltipunit || '');
-							chartData.push({kpi: kpiName});
-							axes[kpiName] = {'type': 'Base', min: kpiDescription.axisMin || 0, max: kpiDescription.axisMax};
-							if (kpiDescription.kpiFilter){
-								kpiFilters[kpiName] = expFilter.expressionToValue(kpiDescription.kpiFilter);
-							}
-						}catch(e){
-							Pmg.addFeedback(Pmg.message('errorkpifilter') + ': ' + e.message + ' - ' + Pmg.message('filter') + ': ' + kpiDescription.kpi);
-						}
-					}
-					const plots =  {theSpider: {'type': 'Spider', labelOffset: -10, divisions:  4, precision: 0, seriesFillAlpha: 0.2, seriesWidth: 2, markerSize: 5}};
-					let previousKpiValuesCache = {};
-					for (const set of itemsSets){
-						try{
-							let setName = set.setName, filterString = setFilterString(set, expression, dateCol), kpiDate = expression.expressionToValue(set.kpidate), setCollection = collection, setData = collectionData, previousToDate, previousData = [];
+							let filterString = setFilterString(kpiDescription, expression, dateCol), kpiDate = expression.expressionToValue(kpiDescription.kpidate), kpiCollection, previousToDate, previousData = [], expKpi;
 							if (filterString){
-								setCollection = collection.filter(expFilter.expressionToValue(filterString));
-								setData = utils.toNumeric(setCollection.fetchSync(), grid);
-								previousToDate = dutils.dateString(setData[setData.length - 1][dateCol], [-1, 'day']);
+								kpiCollection = collection.filter(expFilter.expressionToValue(filterString));
+								kpiData = utils.toNumeric(kpiCollection.fetchSync(), grid);
+								previousToDate = dutils.dateString(kpiData[kpiData.length - 1][dateCol], [-1, 'day']);
 								previousData = utils.toNumeric(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
+							}else{
+								kpiCollection = collection;
+								kpiData = collectionData;
 							}
-							previousKpiValuesCache[setName] = {};
-							let setExp = expressionEngine.expression(utils.toNumeric(setData, grid), idProperty, missingItemsKpis, valueOf, previousKpiValuesCache[setName], previousData, kpiDate);
-							series[setName] = {value: {key: 'kpi', value: setName}, options: {plot: 'theSpider', fill: set.fillColor || 'black'}};
-							tableColumns[setName] = {label: setName, field: setName, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}};
-							let setKpiData = (kpiData[setName] = {}), setExpKpi = (expKpi[setName] = {});
-							for (const kpiDescription of kpisDescription){
-								const kpiName = kpiDescription.name;
-								if (kpiDescription.kpiFilter){
-									setKpiData[kpiName] = utils.toNumeric(setCollection.filter(kpiFilters[kpiName]).fetchSync(), grid);
-									setExpKpi[kpiName] = expressionEngine.expression(setKpiData[kpiName], idProperty, missingItemsKpis, valueOf, previousKpiValuesCache, previousData, kpiDate);
-								}else{
-									setKpiData[kpiName] = setData;
-									setExpKpi[kpiName] = setExp;
-								}
-							}
+							expKpi = expressionEngine.expression(kpiData, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache, previousData, kpiDate);
+							chartData[i] = {name: kpiDescription.name, value: expKpi.expressionToValue(kpiDescription.kpi)};
+							i += 1;
 						}catch(e){
-							Pmg.addFeedback(Pmg.message('erroritemsset') + ': ' + e.message + ' - ' + Pmg.message('set') + ': ' + JSON.stringify(set));
-						}
-					}
-					for (const set of itemsSets){
-						let i = 0, setName = set.setName;
-						for (const kpiDescription of kpisDescription){
-							try{
-								chartData[i][setName] = expKpi[setName][kpiDescription.name].expressionToValue(kpiDescription.kpi);
-								i += 1;
-							}catch(e){
-								Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
-							}
+							Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 						}
 					}
 					if (missingKpisIndex && !utils.empty(missingItemsKpis)){

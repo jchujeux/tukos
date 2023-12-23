@@ -99,7 +99,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
         		case 'CheckBox': lang.setObject('atts.style', {marginLeft: '40%'}, widgetDescription); break;
         		case 'LazyEditor': lang.setObject('atts.style.height', '300px', widgetDescription); break;
         		case 'ObjectEditor': widgetDescription = {type: 'TukosTextarea', atts: {style: {maxHeight: '300px'}, onMouseUp: function(evt){
-							console.log("is mouseup");
 							if (this.domNode.clientHeight != this.mouseDownHeight){
 								grid.resize();
 							}

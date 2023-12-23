@@ -92,7 +92,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
 					setTimeout(function(){
 						self.scrollTo(previousScrollPosition);
 					}, 100);
-				    //console.log('maxHeight: ' + maxHeight + ' bodyHeight: ' + bodyHeight + ' viewHeight: ' + viewHeight + ' newMaxHeight: ' + newMaxHeight);
 		    	}
 				this.customizationPath = customizationPath;
 			}

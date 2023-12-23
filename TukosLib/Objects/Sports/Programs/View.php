@@ -736,7 +736,6 @@ EOT
 	function initialProgressivityChangeAction(){
 	    return <<<EOT
 const initialLts = sWidget.form.valueOf('initiallts');
-console.log('initialsts: ' + initialLts);
 if (initialLts){
     sWidget.form.setValueOf('initialsts', initialLts * newValue);
 }

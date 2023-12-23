@@ -80,7 +80,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "tukos/mobile/Sw
             	self.form = new PaneModule(viewPaneContent);
 				if (/*self.heading && */self.actionsHeading){
 					new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){
-	             		console.log('here is where I need to act');
 	             		self.destroy();
 	             	}}).placeAt(self.actionsHeading, 1);
 				}
@@ -109,7 +108,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "tukos/mobile/Sw
 				Pmg.mobileViews.container.previousButton.set('style', {display: Pmg.mobileViews.isFirstPane() ? 'none' : 'block'});
 				Pmg.mobileViews.container.nextButton.set('style', {display: Pmg.mobileViews.isLastPane() ? 'none' : 'block'});
 	        	setTimeout(function(){self.inherited(_arguments);}, 100);
-				console.log('on joue la montre');
 			}
         },
         createPane: function(){
@@ -119,7 +117,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "tukos/mobile/Sw
             }
         },
         onShow: function(){
-        	console.log('TukosView - onShow ');
         	this.createPane();
         },
         isObjectPane: function(){

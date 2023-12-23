@@ -20,7 +20,7 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
         },
         timeToSeconds: function(time){
         	var duration = time.slice(-8).split(':');
-        	return duration[0] * 3600 + duration[1] * 60 + parseInt(duration[2]);
+        	return duration.length === 3 ? duration[0] * 3600 + duration[1] * 60 + parseInt(duration[2]) : time;
         },
         secondsToTime: function(seconds){
         	var seconds = parseInt(seconds), hours;
@@ -141,7 +141,6 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
            return (typeof dateString === 'string' ? (dateString.length > 10 && dateString[10] === 'T' ?  this.fromISO(dateString) : dojo.date.locale.parse(dateString, {selector: 'date', datePattern: (dateString.length === 10 ? 'y-M-d' : 'y-M-d H:m:s')})): undefined);
         },
         formatDate: function(date, datePattern){
-            //console.log('dateutils.formatDate - date: ' + date);
             return dojo.date.locale.format(date, {selector: 'date', datePattern: datePattern || 'yyyy-MM-dd'});
         },
         dateAdd: function(date, interval, units) {

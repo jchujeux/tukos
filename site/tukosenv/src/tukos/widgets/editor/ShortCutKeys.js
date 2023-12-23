@@ -74,7 +74,6 @@ function(declare, lang, keys, has, domStyle, expressions, utils){
 		onKeyDown: function(/* Event */ e){
 			// override RichText to support Alt key
 			var keyCode = e.keyCode, key = e.key, ancestorContext = (this.selection.getAncestorElement('math', 'table') || {tagName: ''}).tagName.toLowerCase(), handled;
-			//console.log('ShortCutKeys - keyCode: ' + keyCode + ' key: ' + e.key);
 			switch(keyCode){
 				case keys.SHIFT:
 				case keys.ALT: //e.preventDefault();
@@ -138,7 +137,6 @@ function(declare, lang, keys, has, domStyle, expressions, utils){
 					expressions.checkLastKeyDown(e, keyCode, this);
 					break;
 				default: 
-					//console.log('ShortCutKeys - keyCode: ' + keyCode);
 					switch(ancestorContext){
 						case 'math':
 							this.handleMathML(e); break;

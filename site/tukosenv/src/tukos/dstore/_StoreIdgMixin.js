@@ -8,7 +8,8 @@ define([
             this.idpLast = 0;
         },
         setData : function(value){
-            this.idpLast = 0, self = this, idp = this.idProperty;
+            const self = this, idp = this.idProperty;
+            this.idpLast = 0;
             value.forEach(function(row){
                 row[idp] = self.idpLast +=1;
             });

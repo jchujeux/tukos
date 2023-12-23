@@ -91,7 +91,6 @@ class View extends AbstractView {
 			    'edit' => ['style' => ['width' => '4em'], 'onWatchLocalAction' => ['value' => ['synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $this->synchroStartLocalAction('#displayeddate', 'newValue')]]]]],
 			    'overview' => ['hidden' => true]
 			]]),
-		    'synchrosource' => ViewUtils::textBox($this, 'Synchrosource', ['atts' => ['edit' => ['hidden' => true]]]),
 			'questionnairetime'  =>  ViewUtils::timeStampDataWidget($this, 'QuestionnaireTime', ['atts' => ['edit' => ['disabled' => true]]]),
 			'calendar' => $this->calendarWidgetDescription([
 				'type' => 'StoreSimpleCalendar', 
@@ -157,7 +156,7 @@ class View extends AbstractView {
 			'sptworkouts' => [
 				'atts' => [
 				    'title' => $this->tr('Workouts'), 'allDescendants' => true, 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'startdate',
-				        'endDateTimeCol' => 'startdate'/*, 'freezeWidth' => true*/, 'minWidth' => '50',
+				        'endDateTimeCol' => 'startdate'/*, 'freezeWidth' => true*/, 'minWidth' => '40',
 					'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
 					'onChangeNotify' => [
 						'calendar' => [
@@ -194,9 +193,8 @@ class View extends AbstractView {
 			    'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@displayfromdate'], ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'], 
 				    [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
 			    'removeCols' => ['sportsman','grade', 'configstatus'],
-			    'hiddenCols' => ['parentid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'starttime', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'heartrate_avgload', 'power_avgload', 'heartrate_load', 'power_load', 'mechload', 
-			        'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110',
-			            'contextid', 'updated'],
+			    'hiddenCols' => ['parentid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'starttime', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'heartrate_avgload', 'power_avgload', 'heartrate_load', 'power_load', 
+			        'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
 			],
 
@@ -213,9 +211,8 @@ class View extends AbstractView {
 				'filters' => ['grade' => 'TEMPLATE'],
 			    'initialRowValue' => ['mode' => 'planned'],
 			    'removeCols' => /*$this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] : */['sportsman','grade', 'configstatus'],
-			    'hiddenCols' => ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'starttime', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'heartrate_avgload', 'power_avgload', 'heartrate_load', 'power_load', 'mechload',
-			        'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110',
-			        'contextid', 'updated'],
+			    'hiddenCols' => ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'starttime', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'heartrate_avgload', 'power_avgload', 
+			        'heartrate_load', 'power_load', 'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'contextid', 'updated'],
 			    'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'], // temporary: these were suppressed but maybe present in some customization items
 			    'allDescendants' => true, 'width' => '400'
 			],
@@ -262,11 +259,13 @@ class View extends AbstractView {
 EOT;
 	}
 	public function preMergeCustomizationAction($response, $customMode){
-	    $kpisWidgetsNames = ['fromdate', 'duration', 'todate', 'displayeddate', 'stsdays', 'ltsdays', 'initialsts', 'initiallts', 'initialhracwr', 'displayfromdate', 'displayfromsts', 'displayfromlts', 
-	        'startdate', 'intensity', 'stress', 'distance', 'elevationgain', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'sts', 'lts', 'tsb', 'hracwr', 'timemoving', 'avghr', 'avgpw', 'heartrate_load', 'power_load', 'heartrate_avgload', 'power_avgload',
-	        'avgcadence', 'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110'];
+	    $namesToTranslate = array_merge(
+	        ['fromdate', 'duration', 'todate', 'displayeddate', 'stsdays', 'ltsdays', 'initialsts', 'initiallts', 'initialhracwr', 'displayfromdate', 'displayfromsts', 'displayfromlts', 
+	           'startdate', 'intensity', 'stress', 'distance', 'elevationgain', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'sts', 'lts', 'tsb', 'hracwr', 'timemoving', 'avghr', 'avgpw', 'heartrate_load', 'power_load', 'heartrate_avgload', 'power_avgload',
+	           'avgcadence', 'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'heartrate', 'power', 'avgload', 'timeabove', 'timebelow', 'timecurve', 'durationcurve', 'shrink'],
+	        Sports::$sportOptions, Sports::$modeOptions);
 	    return $this->chartPreMergeCustomizationAction($response, $response['dataLayout']['contents']['row2']['contents']['col1']['contents']['rowcharts'], $customMode, 'sptworkouts', 'startdate', ['fromdate', 'todate', 'displayeddate', 'displayfromdate'], 
-	        $kpisWidgetsNames, 'stravaid', 'displayeddate');
+	        $namesToTranslate, 'stravaid', 'displayeddate');
 	}
 	
 	public static function programAclLocalAction(){
@@ -546,7 +545,6 @@ EOT
 	function initialProgressivityChangeAction(){
 	    return <<<EOT
 const initialLts = sWidget.form.valueOf('initiallts');
-console.log('initialsts: ' + initialLts);
 if (initialLts){
     sWidget.form.setValueOf('initialsts', initialLts * newValue);
 }

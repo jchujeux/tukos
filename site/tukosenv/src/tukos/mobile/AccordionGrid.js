@@ -71,7 +71,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 		},
 		rowWidgetsLocalAction: function(sWidget, tWidget, newValue, oldValue){
 			var pane = sWidget.pane, grid = pane.grid, collection = grid.collection, idp = collection.idProperty, item = pane.item;
-			console.log('here I should do something'); 
 			if (newValue !== oldValue){
 				grid.updateDirty(item[idp], sWidget.widgetName, sWidget.get('value'), false, true);
 				registry.byNode(pane.domNode.parentNode)._at.labelNode.innerHTML = grid.getRowLabel(item);
@@ -132,7 +131,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			this.setSummary();
             this.accordion.removeChild(rowPane);
 			rowPane.destroyRecursive();
-			console.log('in deleterow');
 		},
 		instantiateRow: function(rowPane){
 			if (!rowPane.editorPane){
@@ -171,7 +169,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when",  "dojo/aspect", "
 			
 		},
 		collapseRow: function(){
-			console.log('AccordionGrid: collapseRow');
 			if (this.hasChangedSinceLastCollapse){
 				this.set('collection', this.collection);
 				this.hasChangedSinceLastCollapse = false;

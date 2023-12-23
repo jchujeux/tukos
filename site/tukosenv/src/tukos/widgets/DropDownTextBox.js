@@ -31,7 +31,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dijit/form/MappedTextBox", "d
             }
         },
         onDropDownChange: function(newValue){
-        	console.log('the new value is: ' + newValue);
         	this.set('value', newValue);
         }
 

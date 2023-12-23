@@ -394,7 +394,7 @@ define(["require", "exports"], function (require, exports) {
             return this.rpnToThunk(this.expressionToRpn(expression), terms);
         }
         expressionToValue(expression, terms) {
-            return this.rpnToValue(this.expressionToRpn(expression), terms);
+            return expression ? this.rpnToValue(this.expressionToRpn(expression), terms) : expression;
         }
         tokensToValue(tokens) {
             return this.rpnToValue(this.tokensToRpn(tokens));

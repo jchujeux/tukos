@@ -17,7 +17,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 		
 		onClickCallback: function(){
 			if (!this.disabled && !this.readonly){
-				console.log('entering onCLickCallback - this.id:' + this.id);
 				if (this.onClickHandle){
 					this.onClickHandle.remove();
 				}
@@ -39,7 +38,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			return contentHeight ? (parseInt(contentHeight) - 78) + 'px' : undefined;
 		},
 		placeEditor: function(){
-			console.log('calling placeEditor');
 			var htmlContent = this.htmlContent, height = this.contentToEditorHeight(htmlContent.get('style').height);
 			editor.widgetName = this.widgetName;
 			editor.pane = this.pane;
@@ -54,7 +52,6 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			this.container.addChild(editor);
 		},
 		onBlurCallback: function(){
-			console.log('calling onBlurCallback');
 			var htmlContent = this.htmlContent;
 			setTimeout(lang.hitch(this, function(){// to let time for editor html onblur to completre before getting the resulting html, e.g. in expressions.onBlur
 				if (editor && this.getIndexOfChild(editor) > -1/* && editor.isFullscreen !== true*/){//case where focus not via onClick, e.g. onDrop

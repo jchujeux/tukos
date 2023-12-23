@@ -40,7 +40,6 @@ class Model extends AbstractModel {
             'initialsts' => 'FLOAT DEFAULT NULL',
             'initiallts' => 'FLOAT DEFAULT NULL',
             'initialhracwr' => 'FLOAT DEFAULT NULL',
-            'synchrosource' => 'VARCHAR(30) DEFAULT NULL',
             'displayfrom' => 'longtext'
         ];
         parent::__construct($objectName, $translator, 'sptplans', ['parentid' => ['sptathletes'], 'coach' => ['people']], ['weeklies', 'displayfrom'], $colsDefinition, [], []);
@@ -54,7 +53,7 @@ class Model extends AbstractModel {
         $today = date('Y-m-d', $nextMondayStamp = strtotime('next monday'));
         return parent::initialize(array_merge(
             ['coach' => $coach, 'coachemail' => $coachEmail, 'fromdate' => $fromDate = $today, 'displayfromdate' => $today, 'duration' =>'[1,"week"]', 'todate' => date('Y-m-d', strtotime('next sunday', $nextMondayStamp)), 'displayeddate' => $fromDate,
-                'synchroweeksbefore' => 0, 'synchroweeksafter' => 0, 'synchnextmonday' => 'YES', 'synchrosource' => 'strava', 
+                'synchroweeksbefore' => 0, 'synchroweeksafter' => 0, 'synchnextmonday' => 'YES', 
                 'stsdays' => 7, 'ltsdays' => 42, 'initiallts' => 30, 'initialprogressivity' => 1, 'initialsts' => 30, 'acl'=> ['1' => ['rowId' => 1, 'userid' => Tfk::tukosBackOfficeUserId, 'permission' => '2']]
             ], $init));
     }

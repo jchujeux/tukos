@@ -48,7 +48,6 @@ function(declare, lang, dct, domStyle, string, TooltipDialog, Pmg) {
                     }
                 },
                 onOpen: lang.hitch(this, function(){
-                	console.log('opening tooltip');
                     var pane = this.cltDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), cltNameWidget = paneGetWidget('cltName');
                 	cltNameWidget.store.setData(inserter.templateNames(templateType));
     		    	var selection = this.editor.selection, currentCltInstance = inserter.selectedInstance(selection, templateType);

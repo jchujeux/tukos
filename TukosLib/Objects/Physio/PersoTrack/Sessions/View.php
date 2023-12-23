@@ -95,7 +95,6 @@ exercises.forEach(function(exercise){
     data.push({id: exercise.idg, name: exercise.name});
 });
 tWidget.store.setData(data);
-console.log('I am in exercisesLocalAction value: ', tWidget.get('value'));
 return true;
 EOT;
     }

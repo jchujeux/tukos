@@ -158,7 +158,6 @@ return Pmg.serverDialog({object: 'organizations', view: 'Edit', action: 'GetItem
                 break;
         }
     });
-    //console.log('generated html: ' + html);
     self.getWidget('weeklytable').set('value', html);
 });
 EOT;
@@ -234,7 +233,6 @@ EOT;
 if (newname){
     this.set('label', Pmg.loading(label));
 	pane.serverAction( {action: 'Process', query: {id: true, params: {process: 'createCalendar', noget: true}}}, {includeWidgets: ['newname', 'newacl']}).then(lang.hitch(this, function(response){
-		console.log('server action completed');
 		pane.setWidgets({hidden: {newname: true, newacl: true, managecalendar: false, createcalendar: true, hide: true}, value: {googlecalid: response.googlecalid}});
 		this.set('label', label);
 		pane.resize();
@@ -249,7 +247,6 @@ EOT;
 	var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');
 	this.set('label', Pmg.loading(label));
 	pane.serverAction( {action: 'Process', query: {id: true, params: {process: 'updateAcl', noget: true}}}, {includeWidgets: ['googlecalid', 'acl']}).then(lang.hitch(this, function(response){
-		console.log('server action completed');
 		pane.getWidget('acl').set('value', response.acl);
 		this.set('label', label);
 		pane.resize();
@@ -262,7 +259,6 @@ EOT;
 	var pane = this.pane, targetPane = pane.attachedWidget.form, paneGetWidget = lang.hitch(pane, pane.getWidget), targetGetValue = lang.hitch(targetPane, targetPane.getWidget), label = this.get('label');
 	this.set('label', Pmg.loading(label));
 	pane.serverAction({action: 'Process', query: {id: true, params: {process: 'deleteCalendar', noget: true}}}, {includeWidgets: ['googlecalid']}).then(lang.hitch(this, function(){
-	    console.log('server action completed');
 		pane.setWidgets({hidden: {name: true, acl: true, newacl: true, updateacl: true, deletecalendar: true, hide: true}, value: {newname: '', name: '', newacl: '', acl: '', googlecalid: ''}});
 		targetPane.markIfChanged = false;
 		targetPane.setWidgets({value: {googlecalid: null, lastsynctime: null}});

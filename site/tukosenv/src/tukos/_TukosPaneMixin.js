@@ -51,9 +51,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
         },
         getWidget: function(widgetName){
             var widget = registry.byId(this.id + widgetName);
-        	if (!widget){
-        		console.log('undefined widget: ' + widgetName);
-        	}
         	return widget;
         },
         valueOf: function(widgetName, undefinedIfNotFound){
@@ -62,7 +59,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
                 var result =  widget.get('serverValue') || widget.get('value');
                 return (typeof result === 'undefined' || result === null) ? '' : result;
             }else{
-        	  	console.log('widget: ' + widgetName + ' not found');
         	  	return undefinedIfNotFound ? undefined :  '';
             }
         },
@@ -72,7 +68,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
                 var result =  widget.get('displayedValue') || widget.get('serverValue') || widget.get('value');
                 return (typeof result === 'undefined' || result === null) ? '' : result;
             }else{
-        	  	console.log('widget: ' + widgetName + ' not found');
         	  	return undefinedIfNotFound ? undefined :  '';
             }
         },
@@ -81,7 +76,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
             if (widget){
                 return result =  widget.domNode.innerHTML;
             }else{
-        	  	console.log('widget: ' + widgetName + ' not found');
         	  	return undefinedIfNotFound ? undefined :  '';
             }
         },

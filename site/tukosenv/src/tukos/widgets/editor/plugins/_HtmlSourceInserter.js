@@ -40,7 +40,6 @@ function(declare, lang, dct, htmlFormat, TooltipDialog, Pmg) {
                     }
                 },
                 onOpen: lang.hitch(this, function(){
-                	console.log('opening tooltip');
                     var pane = this.srcDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget), contentWidget = paneGetWidget('content'), selection = this.editor.selection, ancestorTag = paneGetWidget('ancestor').get('value');
                 	contentWidget.set('value', selection.getSelectedHtml());
                 })

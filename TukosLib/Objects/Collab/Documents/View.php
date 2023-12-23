@@ -20,7 +20,7 @@ class View extends AbstractView {
             'size'  => ViewUtils::textBox($this, 'Size', ['atts' => [
                     'edit' =>  [
                         'style' => ['width' => '9em'], 'disabled' => true,
-                        'onChangeLocalAction' => ['downloader' => ['hidden' =>"console.log('newValue: ' + newValue);if (newValue > 0){return false;}else{return true}"]],
+                        'onChangeLocalAction' => ['downloader' => ['hidden' =>"if (newValue > 0){return false;}else{return true}"]],
                     ],
                     'storeedit' => ['width' => 65],
                 ]

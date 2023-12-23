@@ -202,7 +202,6 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 						this.chart.mouseIndicator = new this.chartClasses['MouseIndicator'](this.chart, this.mouseIndicator.plot, this.mouseIndicator.kwArgs);
 					}
                     try {
-                        console.log('Chart line 205: before chart.render then resize: ' + this.widgetName);
                         chart.render();
                         chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
                     }catch(err){

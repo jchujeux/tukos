@@ -54,5 +54,10 @@ class Model extends AbstractModel {
     public function stravaCols(){
         return ['stravaid' => null, 'startdate' => null, 'starttime' => null, 'sport' => null, 'duration' => ['objToStoreEdit' => ['minutesToTime' => ['class' => 'TukosLib\Utils\DateTimeUtilities']]], 'distance' => null, 'elevationgain' => null];
     }
+    public function getKpis($query, $kpisToGet){// associated to process action
+        $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
+        $activitiesKpis = $stravaActivitiesModel->computeKpis($query['athlete'], $kpisToGet, [], 'stravaid');
+        return ['data' => ['kpis' => $activitiesKpis]];
+    }
 }
 ?>

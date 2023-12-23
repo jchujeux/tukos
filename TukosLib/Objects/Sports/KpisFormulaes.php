@@ -3,6 +3,7 @@ namespace TukosLib\Objects\Sports;
 
 use MathPHP\Statistics\Average;
 use TukosLib\Utils\Fuzzy as FZ;
+use TukosLib\Utils\Utilities as Utl;
 
 class KpisFormulaes {
     
@@ -104,6 +105,35 @@ class KpisFormulaes {
             $value = intval($value);
         }
         return $loadInZones;
+    }
+    public static function timeCurve($metrics){
+        $distinctMetrics = array_count_values(array_map(['TukosLib\Utils\Utilities', 'nullToZero'], $metrics));
+        krsort($distinctMetrics);
+        $cumulatedTime = 0; $result = [];
+        foreach ($distinctMetrics as $metric => $time){
+            $cumulatedTime += $time;
+            $result[] = [$cumulatedTime, $metric];
+        }
+        return json_encode(Utl::array_shrink($result, ['TukosLib\Utils\Utilities', 'minXmaxYWeightShrinkCallback']));
+    }
+    public static function durationCurve($metrics){
+        $smoothSeconds = 1; $totalDuration = count($metrics);
+        $metrics = array_map(function($value){return intval($value);}, $metrics);
+        $result = [];
+        while ($smoothSeconds < $totalDuration){
+            $result[] = [$smoothSeconds, intval(max(Average::exponentialMovingAverage($metrics, $smoothSeconds)))];
+            $smoothSeconds = $smoothSeconds * 2;
+        }
+        $result[] = [$totalDuration, intval(max(Average::exponentialMovingAverage($metrics, $smoothSeconds)))];
+        return json_encode($result);
+    }
+    public static function shrink($metrics, $shrinkSeconds, $smoothSeconds = 0, $intval){
+        $smoothSeconds = $smoothSeconds === 0 ? $shrinkSeconds : $smoothSeconds;
+        return json_encode(Utl::array_shrink
+            (array_map(function($key, $value) use ($intval){return [$key, $intval ? intval($value) : $value];}, array_keys($metrics), $smoothSeconds === 1 ? $metrics : Average::exponentialMovingAverage($metrics, $smoothSeconds)), 
+            ['TukosLib\Utils\Utilities', 'xShrinkCallback'], 
+            ['xShrink' => $shrinkSeconds])
+        );
     }
     public static function contributes($metric, $lowestThreshold, $highestThreshold, $belowLowest, $aboveHighest){
         return !( !$belowLowest && $metric <= $lowestThreshold || !$aboveHighest && $metric >= $highestThreshold );

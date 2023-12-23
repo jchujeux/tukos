@@ -83,7 +83,7 @@ class View extends AbstractView {
             'power_avgload' => ViewUtils::numberTextBox($this, 'Power_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
             'avgcadence' => ViewUtils::numberTextBox($this, 'Avgcadence', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
             'mechload' => ViewUtils::numberTextBox($this, 'Mechload'),
-            'heartrate_timeabove_threshold_90' => ViewUtils::secondsTextBox($this, 'Heartrate _timeabove_threshold_90'),
+            'heartrate_timeabove_threshold_90' => ViewUtils::secondsTextBox($this, 'Heartrate_timeabove_threshold_90'),
             'heartrate_timeabove_threshold' => ViewUtils::secondsTextBox($this, 'Heartrate_timeabove_threshold'),
             'heartrate_timeabove_threshold_110' => ViewUtils::secondsTextBox($this, 'Heartrate_timeabove_threshold_110'),
             'lts' => ViewUtils::tukosNumberBox($this, 'lts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),

@@ -508,20 +508,11 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                     }          		
             	}
             }else{//current memory store needs to be updated with contents of current object, then saved (to empty dirty)
-/*
-            	for (var row in value){
-                    for (var col in value[row]){
-                        this.updateDirty(row, col, value[row][col]);
-                    }
-                }
-*/
                 this.store.setData([]);
                 this.dirty = {};
             	for (var row in value){
                 	this.store.addSync(value[row]);
                 }
-                console.log('_GridEditMixin: thought this was not in use!!')
-                //this.save();
             }
             if (resetCounters){
                 this.newRowPrefixId = 0;
@@ -540,12 +531,6 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             this.noRefreshOnUpdateDirty = noRefresh;
 			this.set('collection', this.store.getRootCollection());
             this.setSummary();
-    		/*setTimeout(function(){
-	                const noMarkAsChanged = self.noMarkAsChanged;
-	                self.noMarkAsChanged = true;
-    				wutils.watchCallback(self, 'value', null, value);
-    				self.noMarkAsChanged = noMarkAsChanged;
-    			}, 0);*/
         },
 
         _setDuplicate: function(value){

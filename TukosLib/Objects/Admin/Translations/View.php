@@ -31,15 +31,15 @@ class View extends AbstractView {
             'name'      => ViewUtils::textArea($this, 'Translation key', ['atts' => ['storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
         	'setname'  => ViewUtils::storeSelect('setName', $this, 'Translation set'),
             'en_us'    => ViewUtils::lazyEditor($this, 'English', ['atts' => ['edit' => [
-                'height' => '550px', 'editorType' => 'normal',
+                'height' => '550px', 'editorType' => 'basic',
                 'customizableAtts' => $customizableAtts
             ]]]),
             'fr_fr'    => ViewUtils::lazyEditor($this, 'fr_fr', ['atts' => ['edit' => [
-                'height' => '550px', 'editorType' => 'normal',
+                'height' => '550px', 'editorType' => 'basic',
                 'customizableAtts' => $customizableAtts
             ]]]),
             'es_es'    => ViewUtils::lazyEditor($this, 'Spanish', ['atts' => ['edit' => [
-                'height' => '550px', 'editorType' => 'normal',
+                'height' => '550px', 'editorType' => 'basic',
                 'customizableAtts' => $customizableAtts
             ]]])
         ];

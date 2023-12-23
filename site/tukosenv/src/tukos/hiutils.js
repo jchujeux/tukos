@@ -18,7 +18,6 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
 	                    if (rowCount > 0){
 	                        var keyTd = dct.create('td', {style: "border: 1px solid black; padding: 5px; vertical-align:top;", rowspan: rowCount});
 	                    	dct.create('div', {contentEditable: true, onblur: function(evt){
-									console.log('onblur of a td from the table');
 								},style: {maxWidth: maxWidth, wordWrap: "break-word"}, innerHTML: keyToHtml(object[key]["#tKey"] || key)}, keyTd);
 	                        row.tr.insertBefore(keyTd, row.tr.firstChild);
 	                        rowToReturn.count += rowCount;
@@ -38,7 +37,7 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
 	                    if (hasCheckboxes){
 	                        var stringPath = checkboxPath.join('.');
 	                        var checkboxTd = dct.create('td', {style: "border: 1px solid black;padding: 5px;"}, row.tr);
-	                        var checkbox = dct.create(
+	                        dct.create(
 	                            'input', 
 	                            {type: 'checkbox', style: {width: '30px'}, onchange: lang.partial(
 	                                    function(stringPath, key, change){
@@ -66,12 +65,8 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
 				}
             }
             return rowToReturn;
-        }
-        var table = dct.create('table', {/*contentEditable: true, oninput: function(evt){
-				console.log('I am in the input event of the contentEditable');
-			}, onblur: function(evt){
-				console.log('blur at teble level');
-			}, */style: "border: 1px solid black; border-collapse: collapse; background-color: lightblue;"});
+        };
+        var table = dct.create('table', {style: "border: 1px solid black; border-collapse: collapse; background-color: lightblue;"});
         addTableRows(object);
         return table;  
     },
@@ -93,7 +88,6 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
         return (result && result[1]) || undefined;
     },
     processTemplate: function(content, panes){
-        //console.log('calling processTemplate: ' + content);
     	if (content){
         	return when(content, lang.hitch(this, function(content){
                 try {
@@ -392,7 +386,7 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
                                 if (widgetItemTranslation){
                                     return '${' + translatedCharFlag + matchType +  itemTranslation + separator + widgetItemTranslation + '}';
                                 }else{
-                                    Pmg.addFeedback(messages.couldnotfindtranslateditem + ' ' + widgetItem + ' ' + messages.couldnotfindin + ' ' + match)
+                                    Pmg.addFeedback(messages.couldnotfindtranslateditem + ' ' + widgetItem + ' ' + messages.couldnotfindin + ' ' + match);
                                     return match;
                                 }
                             }else{
@@ -430,4 +424,5 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
     capitalToBlank: function(string){
         return string.replace(/([A-Z])/g, ' $1');
     }
-}});
+};
+});

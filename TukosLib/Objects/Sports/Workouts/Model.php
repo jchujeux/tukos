@@ -100,7 +100,7 @@ class Model extends AbstractModel {
             }
         }
     }
-    public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
+    /*public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
         $atts['cols'][] = 'kpiscache';
         $results = parent::getAll($atts, $jsonColsPaths, $jsonNotFoundValues, $processLargeCols);
         foreach ($results as &$workout){
@@ -109,7 +109,7 @@ class Model extends AbstractModel {
             }
         }
         return $results;
-    }
+    }*/
     public function getAllExtended($atts){
         if ($this->user->isRestrictedUser() && $programId = Utl::getItem('parentid', $atts['where'])){
             $mostRecentPerformed = $this->getOne(['where' => ['parentid' => $programId, 'mode' => 'performed'], 'cols' => ['startdate'], 'orderBy' => ['startdate' => 'DESC']]);
@@ -120,7 +120,14 @@ class Model extends AbstractModel {
                     'synchrostreams' => true]));
             }
         }
-        return parent::getAllExtended($atts);
+        $atts['cols'][] = 'kpiscache';
+        $results = parent::getAllExtended($atts);
+        foreach ($results as &$workout){
+            if (!empty($kpisCache = Utl::extractItem('kpiscache', $workout))){
+                $workout = array_merge($workout, json_decode($kpisCache, true));
+            }
+        }
+        return $results;
     }
     public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
         if (!empty($kpisCacheCols = array_diff(array_keys($newValues), $this->allCols))){
@@ -206,28 +213,9 @@ class Model extends AbstractModel {
         return HUtl::imageUrl($this->getLogoImage($programId));
     }
     public function getKpis($query, $kpisToGet){// associated to process action
-        /*$workoutIds = implode(',', array_keys($kpisToGet));
-        $results = SUtl::$tukosModel->store->query(<<<EOT
-            SELECT `sptworkouts`.`id` as `workout_id`, `stravaactivities`.`id` as `strava_id`
-            FROM `sptworkouts`
-                INNER JOIN (`stravaactivities`) ON `sptworkouts`.`stravaid` = `stravaactivities`.`stravaid`
-            WHERE (`sptworkouts`.`id` IN ($workoutIds))
-EOT
-        );
-        $results = $results->fetchAll(\PDO::FETCH_ASSOC);
-        $stravaActivitiesKpisToGet = [];
-        foreach($results as $value){
-            $stravaActivitiesKpisToGet[$value['strava_id']] = $kpisToGet[$value['workout_id']];
-        }*/
         $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
-        $activitiesKpis = $stravaActivitiesModel->computeKpis($query['athlete'], $kpisToGet/*$stravaActivitiesKpisToGet*/, [], 'stravaid');
-        /*$workoutsKpis = [];
-        foreach($results as $value){
-            $id = $value['workout_id'];
-            $workoutsKpis[$id] = $activitiesKpis[$value['strava_id']];
-            $this->updateOne(newValues: ['id' => $id, 'kpiscache' => $workoutsKpis[$id]], jsonFilter: true);
-        }*/
-        return ['data' => ['kpis' => $activitiesKpis/*$workoutsKpis*/]];
+        $activitiesKpis = $stravaActivitiesModel->computeKpis($query['athlete'], $kpisToGet, [], 'stravaid');
+        return ['data' => ['kpis' => $activitiesKpis]];
     }
 }
 ?>
