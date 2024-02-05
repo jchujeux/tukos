@@ -27,7 +27,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				const formula = getFormula(arg);
 				let result = [];
 				items.forEach(function(item){
-					result.push(formula(item));
+					result.push(formula(item, cache, idProperty, x));
 				});
 				return result;
 			},
@@ -78,16 +78,16 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				return result;
 			},
 			formulaFirst = function(arg){
-				return items.length ? getFormula(arg)(items[0], cache, x) : undefined;
+				return items.length ? getFormula(arg)(items[0], cache, idProperty, x) : undefined;
 			},
 			formulaLast = function(arg){
-				return items.length ? getFormula(arg)(items[items.length-1], cache, x) : undefined;
+				return items.length ? getFormula(arg)(items[items.length-1], cache, idProperty, x) : undefined;
 			},
 			formulaItem = function(arg, index){
 				const formula = getFormula(arg);
 				if (items.length){
 					const targetIndex = index < 0 ? items.length+index -1 : index - 1;
-					return items[targetIndex] ? formula(items[targetIndex], cache, x) : undefined;
+					return items[targetIndex] ? formula(items[targetIndex], cache, idProperty, x) : undefined;
 				}else{
 					return undefined;
 				}
@@ -115,13 +115,19 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 						if (Array.isArray(y)){
 							let result = [];
 							for (let i in x){
-								result.push(y[i] ? x[i] / y[i] : 0);
+								const divider = nanToSecondsOrZero(y[i]);
+								result.push(divider ? nanToSecondsOrZero(x[i]) / divider : 0);
 							}
 							return result;
 						}else{
 							let result = [];
 							for (let i in x){
-								result.push(y ? x[i] / y : 0);
+								const divider = nanToSecondsOrZero(y), xValue = x[i];
+								if (Array.isArray(xValue)){// assumes it is [a,b] and divider should apply to b 
+									result.push([xValue[0], divider ? nanToSecondsOrZero(xValue[1]) / divider : 0]);									
+								}else{
+									result.push(divider ? nanToSecondsOrZero(xValue) / divider : 0);
+								}
 							}
 							return result;
 						}
@@ -129,11 +135,13 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 						if (Array.isArray(y)){
 							let result = [];
 							for (let i in y){
-								result.push(y[i] ? x / y[i] : 0);
+								const divider = nanToSecondsOrZero(y[i]);
+								result.push(divider ? nanToSecondsOrZero(x) / divider : 0);
 							}
 							return result;
 						}else{
-							return y ? x / y : 0;
+							const divider = nanToSecondsOrZero(y);
+							return divider ? nanToSecondsOrZero(x) / divider : 0;
 						}
 					}
 				},
@@ -158,11 +166,15 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 					let x = a(), dg = digits();
 					if (Array.isArray(x)){
 						for(let i in x){
-							x[i] = Number(x[i].toFixed(dg));
+							if (Array.isArray(x[i])){// assumes it is [a,b] and divider should apply to b 
+								x[i][1] = Number(nanToSecondsOrZero(x[i][1]).toFixed(dg));
+							}else{
+								x[i] = Number(nanToSecondsOrZero(x[i]).toFixed(dg));
+							}
 						}
 						return x;
 					}else{
-						return Number(a().toFixed(dg));
+						return Number(nanToSecondsOrZero(a()).toFixed(dg));
 					}
 				}),
 				'JSONPARSE': function(a){

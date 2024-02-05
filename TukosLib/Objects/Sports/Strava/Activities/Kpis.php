@@ -8,18 +8,23 @@ use TukosLib\TukosFramework as Tfk;
 trait Kpis {
 
     public static $beta = 2.6, $refCadence = 180, $thresholdsMap = ['heartrate' => 'hrthreshold', 'power' => 'ftp', 'speed' => 'speedthreshold'], $minsMap = ['heartrate' => 'hrmin'],
-        $functionsMap = ['avgload' => 'avgLoad', 'load' => 'load', 'timeabove' => 'timeAbove', 'timebelow' => 'timeBelow', 'timecurve' => 'timeCurve', 'durationcurve' => 'durationCurve', 'shrink' => 'shrink'],
+        $functionsMap = ['avgload' => 'avgLoad', 'load' => 'load', 'timeinzones' => 'timeInZones', 'timeabove' => 'timeAbove', 'timebelow' => 'timeBelow', 'loadinzones' => 'loadInZones', 'loadabove' => 'loadAbove', 'loadbelow' => 'loadBelow', 
+            'timecurve' => 'timeCurve', 'durationcurve' => 'durationCurve', 'shrink' => 'shrink'],
         $streamsMap = ['heartrate' => 'heartrate', 'power' => 'watts', 'distance' => 'distance', 'cadence' => 'cadence', 'grade' => 'grade_smooth', 'speed' => 'velocity_smooth'],
+        $athleteParamsDescription = ['heartrate' => ['threshold' => 'hrthreshold', 'sex' => 'sex', 'min' => 'hrmin'], 'power' => ['threshold' => 'ftp', 'sex' => 'sex'], 'mechanical' => ['threshold' => 'speedthreshold']],
         $kpisDescription = [
-            'heartrate_avgload' => ['metrics' => 'avghr', 'activityParams' => ['secondsActive' => 'timemoving'], 'athleteParams' => ['threshold' => 'hrthreshold', 'sex' => 'sex', 'min' => 'hrmin']],
-            'heartrate_load' => ['metrics' => 'stream', 'athleteParams' => ['threshold' => 'hrthreshold', 'sex' => 'sex', 'min' => 'hrmin']],
-            'power_avgload' => ['metrics' => 'avgpw', 'activityParams' => ['secondsActive' => 'timemoving'], 'athleteParams' => ['threshold' => 'ftp', 'sex' => 'sex']],
-            'power_load' => ['metrics' => 'stream', 'athleteParams' => ['threshold' => 'ftp', 'sex' => 'sex'], 'otherParams' => ['smoothSeconds' => 30]],
-            'mechanical_load' => ['metrics' => 'velocity_smoothstream', 'activityParams' => ['cadencestream' => 'cadencestream'], 'athleteParams' => ['threshold' => 'speedthreshold'], 'otherParams' => ['b' => ['cadenceCorrection']]],
-            'timecurve' => ['metrics' => 'stream', 'athleteParams' => []],
-            'durationcurve' => ['metrics' => 'stream', 'athleteParams' => []],
+            'heartrate_avgload' => ['metrics' => 'avghr', 'activityParams' => ['secondsActive' => 'timemoving']],
+            'power_avgload' => ['metrics' => 'avgpw', 'activityParams' => ['secondsActive' => 'timemoving']],
+            'load' => ['metrics' => 'stream'],
+            'mechanical_load' => ['metrics' => 'velocity_smoothstream', 'activityParams' => ['cadencestream' => 'cadencestream'], 'otherParams' => ['b' => ['cadenceCorrection']]],
+            'timecurve' => ['metrics' => 'stream'],
+            'durationcurve' => ['metrics' => 'stream'],
+            'timeinzones' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
             'timeabove' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
             'timebelow' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
+            'loadinzones' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
+            'loadabove' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
+            'loadbelow' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
             'shrink' => ['metrics' => 'stream', 'otherParams' => ['intval' => true]],
         ];
     public static function getDescription($name, $formula){
@@ -27,15 +32,14 @@ trait Kpis {
         if (Utl::getItem('metrics', $description) === 'stream'){
             $description['metrics'] = self::$streamsMap[$name].'stream';
         }
+        if (strpos($formula, 'time') === false  && strpos($formula, 'duration') === false&& strpos($formula, 'shrink') === false){
+            $description['athleteParams'] = Utl::getItem($name, self::$athleteParamsDescription, []);
+        }
+        if ($name === 'power' && strpos($formula, 'load') !== false && strpos($formula, 'avg') === false){
+            $description['otherParams'] = isset($description['otherParams']) ? array_merge($description['otherParams'], ['smoothSeconds' => 30]) : ['smoothSeconds' => 30];
+        }
         return $description;
     }
-    /*public static function zoneDescription($explodedName, $athlete){
-        if ($explodedName[2] === 'threshold'){
-            return ['metrics' => "$explodedName[0]stream", 'athleteParams' => ['threshold' => self::$thresholdsMap[$explodedName[0]]]];
-        }else{
-            
-        }
-    }*/
     public static function valueOf($name){
         if ($name[0] === 'n' && is_numeric($value = substr($name, 1))){
             return - $value;
@@ -43,17 +47,6 @@ trait Kpis {
             return $name;
         }
     }
-    /*public static function getThreshold($name, $index, $athlete){
-        if ($name[$index] === 'threshold'){
-            $threshold = ['heartrate' => $athlete['hrthreshold'], 'power' => $athlete['ftp'], 'speed' => $athlete['speedthreshold']][$name[0]];
-            if (isset($name[index+1]) && is_numeric($name[$index+1])){
-                $threshold = $threshold * $name[$index+1] / 100;
-            }
-            return $threshold;
-        }else{
-            return self::valueOf($name[$index]);
-        }
-    }*/
     public static function hasRequiredAthleteParams($kpiName, $athlete){
         [$name, $formula, $param1] = array_pad(explode('_', $kpiName), 3, '');
         return empty(array_diff(Utl::getItem('athleteParams', self::getDescription($name, $formula), []), array_keys($athlete))) && $param1 === 'threshold' ? !empty($athlete[self::$thresholdsMap[$name]]) : true;
@@ -82,14 +75,30 @@ trait Kpis {
         switch($formula){
             case 'timeabove':
             case 'timebelow':
+            case 'loadabove':
+            case 'loadbelow':
                 if ($param1 === 'threshold'){
                     $thresholdRatio = empty($param2) ? 100 : $param2;
                     $thresholdValue = intval($athlete[self::$thresholdsMap[$name]]);
                     $minValue = empty($minIndex = Utl::getItem($name, self::$minsMap)) ? 0 : $athlete[$minIndex];
-                    $arguments['threshold'] = $thresholdValue * $thresholdRatio / 100;
-                    $arguments['threshold'] = intval(($thresholdValue - $minValue) * $thresholdRatio / 100 + $minValue);
+                    $arguments['kpiThreshold'] = $thresholdValue * $thresholdRatio / 100;
+                    $arguments['kpiThreshold'] = intval(($thresholdValue - $minValue) * $thresholdRatio / 100 + $minValue);
                 }else{
-                    $arguments['threshold'] = self::valueOf($param1);
+                    $arguments['kpiThreshold'] = self::valueOf($param1);
+                }
+                break;
+            case 'timeinzones':
+            case 'loadinzones':
+                $minValue = empty($minIndex = Utl::getItem($name, self::$minsMap)) ? 0 : $athlete[$minIndex];
+                if ($param1 === 'threshold'){
+                    $thresholdValue = intval($athlete[self::$thresholdsMap[$name]]);
+                    $kpiThresholds = array_slice(explode('_', $kpiName), 3);
+                    foreach($kpiThresholds as &$threshold){
+                        $threshold = intval(($thresholdValue - $minValue) * $threshold / 100 + $minValue);
+                    }
+                    $arguments['kpiThresholds'] = $kpiThresholds;
+                }else{
+                    $arguments['kpiThresholds'] = array_slice(explode('_', $kpiName), 2);
                 }
                 break;
             case 'shrink':

@@ -18,6 +18,9 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
         constructor: function(args){
 			lang.mixin(this, args);
         },
+        postCreate: function(){
+			this.recursionDepth = 0;
+		},
 		setChartValue: function(chartWidgetName){
 			var self = this, form = this.form, valueOf = lang.hitch(form, form.valueOf), chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex;
 			if (!hidden && chartWidget.kpisToInclude){
@@ -35,7 +38,7 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 						expression = expressionEngine.expression(collectionData, idProperty, missingItemsKpis, valueOf);
 					const plots =  {thePie: {'type': 'Pie', labelOffset: -10}};
 					let previousKpiValuesCache = {}, i = 0;
-					series[0] = {value: {text: 'name', y: 'value'}, options: {plot: 'thePie'/*, fill: set.fillColor || 'black'*/}};
+					series[0] = {value: {text: 'name', y: 'value', tooltip: 'tooltip'}, options: {plot: 'thePie'/*, fill: set.fillColor || 'black'*/}};
 					for (const kpiDescription of kpisDescription){
 						try{
 							let filterString = setFilterString(kpiDescription, expression, dateCol), kpiDate = expression.expressionToValue(kpiDescription.kpidate), kpiCollection, previousToDate, previousData = [], expKpi;
@@ -49,8 +52,18 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 								kpiData = collectionData;
 							}
 							expKpi = expressionEngine.expression(kpiData, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache, previousData, kpiDate);
-							chartData[i] = {name: kpiDescription.name, value: expKpi.expressionToValue(kpiDescription.kpi)};
-							i += 1;
+								//chartData[kpiDescription.categoryIndex][kpiDescription.kpiIndex + 'Tooltip'] = kpiDescription.name + ': ' + kpiValue + (kpiDescription.tooltipunit === undefined ? '' :  kpiDescription.tooltipunit);
+							const value = expKpi.expressionToValue(kpiDescription.kpi);
+							if (Array.isArray(value)){
+								for (const subValue of value){
+									const subName = kpiDescription.name + subValue[0];
+									chartData[i] = {name: subName, value: subValue[1], tooltip: subName + ': ' + (kpiDescription.displayformat ? utils.transform(subValue[1], kpiDescription.displayformat) : subValue[1]) + ' ' + (kpiDescription.tooltipunit || '')};
+									i += 1;
+								}
+							}else{
+								chartData[i] = {name: kpiDescription.name, value: value, tooltip: kpiDescription.name + ': ' + (kpiDescription.displayformat ? utils.transform(value, kpiDescription.displayformat) : value) + ' ' + (kpiDescription.tooltipunit || '')};
+								i += 1;
+							}
 						}catch(e){
 							Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 						}
@@ -65,6 +78,11 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							}
 						});
 					    if (!utils.empty(data)){
+						    if (self.recursionDepth > 2){
+								Pmg.addFeedback(Pmg.message('too many recursions') + ': ' + self.recursionDepth + ' (PieChart)');
+								self.recursionDepth = 0;
+								return;
+							}
 						    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athlete: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
 						            function(response){
 						           		const kpis = response.data.kpis;
@@ -84,10 +102,12 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 						            }
 						    );
 						}else{
-							chartWidget.set('value', {data: chartData, tableColumns: tableColumns, axes: axes, plots: plots, series: series});
+							chartWidget.set('value', {data: chartData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
+							self.recursionDepth = 0;
 						}
 					}else{
-						chartWidget.set('value', {data: chartData, tableColumns: tableColumns, axes: axes, plots: plots, series: series});
+						chartWidget.set('value', {data: chartData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
+						self.recursionDepth = 0;
 					}
 				});
 			}		  

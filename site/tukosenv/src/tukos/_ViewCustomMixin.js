@@ -287,8 +287,8 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 								break;
 							case 'series':
 								utils.forEach(subContent, function(widgetContent, widgetName){
-									translateContent(widgetContent, subDescription[widgetName]);
-									widgetContent["#tKey"] = subDescription[widgetName].options.label;
+									translateContent(widgetContent, subDescription && subDescription[widgetName]);
+									widgetContent["#tKey"] = subDescription && subDescription[widgetName] ? subDescription[widgetName].options.label : widgetName;//For DynamicChart series do not correspond to a widgetName and should not be translated (user entry)
 								});
 								break;
 							case 'editDialogAtts':

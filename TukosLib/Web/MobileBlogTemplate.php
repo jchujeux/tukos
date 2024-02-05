@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <title>Tukos mobile</title>
+    <?= $this->structuredDataHeaderScript ?>
     <script type="text/javascript">
     	dojoBaseLocation = "<?= $this->dojoBaseLocation ?>";<!-- used in deviceTheme.js -->
     </script>

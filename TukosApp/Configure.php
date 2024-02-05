@@ -9,7 +9,7 @@ class Configure extends AbstractConfigure{
 
         $modulesMenuLayout = [
             'admin' => [[
-                '#users' => [['#customviews' => []]], '#contexts' => [], '#objrelations' => [], '#translations' => [],
+                '#users' => [['#customviews' => [], '#customwidgets' => []]], '#contexts' => [], '#objrelations' => [], '#translations' => [],
                 'mail' => [[
                     '#mailsmtps' => [], '#mailservers' => [], '#mailaccounts' => [],
                 ]],

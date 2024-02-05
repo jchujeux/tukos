@@ -237,6 +237,7 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
                         }*/
     
                         label.innerHTML = child.get("label") || child.get("title");
+                        child.tableContainerLabel = label;
                         //label.innerHTML = child.get("title") || child.get("label") || '';
                     }
                 }

@@ -25,7 +25,7 @@ class KpisFormulaes {
     public static function load($metrics, $threshold, $sex = null, $smoothSeconds = 1, $min = 0, $b = null){//$metrics is an array of the metric value for every seconds of the workout
         $metrics = array_map(function($value){return intval($value);}, $smoothSeconds === 1 ? $metrics : Average::exponentialMovingAverage($metrics, $smoothSeconds));
         $load = 0;
-        if (is_array($b)){
+        if (is_array($b)){//to allow for cadence correection of mechanical load
             $count = count($metrics);
             for ($i = 0; $i < $count; $i++){
                 $load += self::metricIntensity($metrics[$i], $threshold, $sex, $min, $b[$i]);
@@ -40,7 +40,7 @@ class KpisFormulaes {
         }
         return intval($load / 36);
     }
-    public static function timeInZones($metrics, $thresholds, $uncertainty = 3, $fuzzyType = 'absolute', $belowLowest = true, $aboveHighest = true){
+    public static function _timeInZones($metrics, $thresholds, $uncertainty = 3, $fuzzyType = 'absolute', $belowLowest = true, $aboveHighest = true){
         $timeInZones = [];
         for ($i = 0; $i <= count($thresholds); $i++){
             $timeInZones[$i] = 0;
@@ -62,14 +62,23 @@ class KpisFormulaes {
         }
         return $timeInZones;
     }
-    public static function timeAbove($metrics, $threshold, $uncertainty = 3, $fuzzyType = 'absolute'){
-        return self::timeInZones($metrics, [$threshold], $uncertainty, $fuzzyType, false, true)[1];
+    public static function timeInZones($metrics, $kpiThresholds, $uncertainty = 3, $fuzzyType = 'absolute', $belowLowest = true, $aboveHighest = true){
+        $timeInZones = self::_timeInZones($metrics, $kpiThresholds, $uncertainty, $fuzzyType, $belowLowest, $aboveHighest);
+        foreach ($kpiThresholds as $key => $threshold){
+            $result[] = ['< ' . $threshold, $timeInZones[$key]];
+        }
+        $last = count($kpiThresholds);
+        $result[$last] = ['> ' . $kpiThresholds[$last-1], $timeInZones[$last]];
+        return $result;
     }
-    public static function timeBelow($metrics, $threshold, $uncertainty = 3, $fuzzyType = 'absolute'){
-        return self::timeInZones($metrics, [$threshold], $uncertainty, $fuzzyType, true, false)[0];
+    public static function timeAbove($metrics, $kpiThreshold, $uncertainty = 3, $fuzzyType = 'absolute'){
+        return self::_timeInZones($metrics, [$kpiThreshold], $uncertainty, $fuzzyType, false, true)[1];
     }
-    public static function loadInZones($metrics, $zoneThresholds, $intensityThreshold, $sex, $smoothSeconds = 1, $min = 0, $b = null, $uncertainty = 3, $fuzzyType = 'absolute', $belowLowest = true, $aboveHighest = true){
-        if ($smoothSeconds != 1){
+    public static function timeBelow($metrics, $kpiThreshold, $uncertainty = 3, $fuzzyType = 'absolute'){
+        return self::_timeInZones($metrics, [$kpiThreshold], $uncertainty, $fuzzyType, true, false)[0];
+    }
+    public static function _loadInZones($metrics, $zoneThresholds, $intensityThreshold, $sex, $smoothSeconds = 1, $min = 0, $b = null, $uncertainty = 3, $fuzzyType = 'absolute', $belowLowest = true, $aboveHighest = true){
+        if ($smoothSeconds > 1){
             $metrics = array_map(function($value){return intval($value);}, Average::exponentialMovingAverage($metrics, $smoothSeconds));
         }
         $loadInZones = [];
@@ -93,7 +102,7 @@ class KpisFormulaes {
             $distinctMetrics = array_count_values($metrics);
             foreach ($distinctMetrics as $metric => $secondsActive){
                 if (self::contributes($metric, $lowestThreshold, $highestThreshold, $belowLowest, $aboveHighest)){
-                    $fuzzyValue = FZ::fuzzyValueAbsolute($metric, $fuzzyDomain);
+                    $fuzzyValue = FZ::fuzzyValue($metric, $fuzzyDomain);
                     $intensity = self::metricIntensity($metric, $intensityThreshold, $sex, $min, $b);
                     foreach($fuzzyValue as $key => $value){
                         $loadInZones[$key] += $secondsActive * $intensity * $value;
@@ -102,9 +111,24 @@ class KpisFormulaes {
             }
         }
         foreach ($loadInZones as $key => &$value){
-            $value = intval($value);
+            $value = intval($value / 36);
         }
         return $loadInZones;
+    }
+    public static function loadInZones($metrics, $kpiThresholds, $threshold, $sex, $smoothSeconds = 1, $min = 0, $b = null, $uncertainty = 3, $fuzzyType = 'absolute', $belowLowest = true, $aboveHighest = true){
+        $loadInZones = self::_loadInZones($metrics, $kpiThresholds, $threshold, $sex, $smoothSeconds, $min, $b, $uncertainty, $fuzzyType, $belowLowest, $aboveHighest);
+        foreach ($kpiThresholds as $key => $threshold){
+            $result[] = ['< ' . $threshold, $loadInZones[$key]];
+        }
+        $last = count($kpiThresholds);
+        $result[$last] = ['> ' . $kpiThresholds[$last-1], $loadInZones[$last]];
+        return $result;
+    }
+    public static function loadAbove($metrics, $kpiThreshold, $threshold, $sex, $smoothSeconds = 1, $min = 0, $b = null, $uncertainty = 3, $fuzzyType = 'absolute'){
+        return self::_loadInZones($metrics, [$kpiThreshold], $threshold, $sex, $smoothSeconds, $min, $b, $uncertainty, $fuzzyType, false, true)[1];
+    }
+    public static function loadBelow($metrics, $kpiThreshold, $threshold, $sex, $smoothSeconds = 1, $min = 0, $b = null, $uncertainty = 3, $fuzzyType = 'absolute'){
+        return self::_loadInZones($metrics, [$kpiThreshold], $threshold, $sex, $smoothSeconds, $min, $b, $uncertainty, $fuzzyType, true, false)[0];
     }
     public static function timeCurve($metrics){
         $distinctMetrics = array_count_values(array_map(['TukosLib\Utils\Utilities', 'nullToZero'], $metrics));

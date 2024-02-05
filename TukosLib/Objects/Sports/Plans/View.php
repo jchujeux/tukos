@@ -262,7 +262,8 @@ EOT;
 	    $namesToTranslate = array_merge(
 	        ['fromdate', 'duration', 'todate', 'displayeddate', 'stsdays', 'ltsdays', 'initialsts', 'initiallts', 'initialhracwr', 'displayfromdate', 'displayfromsts', 'displayfromlts', 
 	           'startdate', 'intensity', 'stress', 'distance', 'elevationgain', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'sts', 'lts', 'tsb', 'hracwr', 'timemoving', 'avghr', 'avgpw', 'heartrate_load', 'power_load', 'heartrate_avgload', 'power_avgload',
-	           'avgcadence', 'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'heartrate', 'power', 'avgload', 'timeabove', 'timebelow', 'timecurve', 'durationcurve', 'shrink'],
+	           'avgcadence', 'mechload'/*, 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110'*/, 'heartrate', 'power', 'avgload', 'load', 'timeabove', 'timebelow', 'loadabove', 'loadbelow', 'threshold', 'timecurve',
+	           'durationcurve', 'shrink'],
 	        Sports::$sportOptions, Sports::$modeOptions);
 	    return $this->chartPreMergeCustomizationAction($response, $response['dataLayout']['contents']['row2']['contents']['col1']['contents']['rowcharts'], $customMode, 'sptworkouts', 'startdate', ['fromdate', 'todate', 'displayeddate', 'displayfromdate'], 
 	        $namesToTranslate, 'stravaid', 'displayeddate');

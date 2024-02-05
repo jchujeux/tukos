@@ -64,6 +64,11 @@ define (["dojo/_base/lang", "dijit/Tooltip", "tukos/widgetUtils"],
 				};
 			}
 		},
+		_setTableContainerLabelAttr: function(newValue){
+			if (this.tableContainerLabel){
+				this.tableContainerLabel.innerHTML = newValue;
+			}
+		},
         getRootForm: function(){
         	return this.form.form || this.form;
         }

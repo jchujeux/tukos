@@ -35,7 +35,7 @@ class DateTimeUtilities{
     	return empty($value) ? $value : date('Y-m-d', strtotime($value) - Tfk::$registry->timezoneOffset);
     }
     public static function timeToSeconds(/*xxxhh:mm:ss*/$time){
-        if ($time){
+        if ($time && is_string($time)){
             $duration = explode(':', substr($time,-8));
             return $duration[0] * self::timeIntervals['hour'] + $duration[1] * self::timeIntervals['minute'] + $duration[2];
         }else{

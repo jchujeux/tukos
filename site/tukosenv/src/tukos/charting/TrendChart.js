@@ -5,6 +5,9 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
         constructor: function(args){
 			lang.mixin(this, args);
         },
+        postCreate: function(){
+			this.recursionDepth = 0;
+		},
 		setChartValue: function(chartWidgetName){
 			var self = this, form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex, xLabels = [];
 			if (!hidden  && chartWidget.kpisToInclude){
@@ -99,7 +102,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 									if (isNaN(chartItem[index1]) && kpiDescription.absentiszero){
 										chartItem[index1] = 0;
 									}
-									chartItem[index1 + 'Tooltip'] = kpiDescription.name + ': ' + chartItem[index1] + (kpiDescription.tooltipunit === undefined ? '' :  kpiDescription.tooltipunit) + 
+									chartItem[index1 + 'Tooltip'] = kpiDescription.name + ': ' + (kpiDescription.displayformat ? utils.transform(chartItem[index1], kpiDescription.displayformat) : chartItem[index1]) + ' ' + (kpiDescription.tooltipunit || '') + 
 										(isWeek ? '<br><small>(' + Pmg.message('weekendingon', 'sptplans') + ' ' + dutils.formatDate(toDateObject, 'd MMM') + ')</small>' : '');
 									if (kpiDescription.scalingfactor){
 										chartItem[index1] = chartItem[index1] * kpiDescription.scalingfactor;
@@ -136,6 +139,11 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							}
 						});
 					    if (!utils.empty(data)){
+						    if (self.recursionDepth > 2){
+								Pmg.addFeedback(Pmg.message('too many recursions') + ': ' + self.recursionDepth + ' (TrendChart)');
+								self.recursionDepth = 0;
+								return;
+							}
 						    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athlete: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
 						            function(response){
 						           		const kpis = response.data.kpis;
@@ -155,10 +163,12 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 						            }
 						    );
 						}else{
-							chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series});
+							chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
+							self.recursionDepth = 0;
 						}
 					}else{
-						chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series});
+						chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
+						self.recursionDepth = 0;
 					}
 				});
 			}		  

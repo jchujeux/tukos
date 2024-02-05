@@ -18,6 +18,9 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
         constructor: function(args){
 			lang.mixin(this, args);
         },
+        postCreate: function(){
+			this.recursionDepth = 0;
+		},
 		setChartValue: function(chartWidgetName){
 			var self = this, form = this.form, valueOf = lang.hitch(form, form.valueOf), chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex;
 			if (!hidden && chartWidget.kpisToInclude){
@@ -57,7 +60,7 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							}
 							previousKpiValuesCache[setName] = {};
 							let setExp = expressionEngine.expression(utils.toNumeric(setData, grid), idProperty, missingItemsKpis, valueOf, previousKpiValuesCache[setName], previousData, kpiDate);
-							series[setName] = {value: {key: 'kpi', value: setName}, options: {plot: 'theSpider', fill: set.fillColor || 'black'}};
+							series[setName] = {value: {key: 'kpi', value: setName, tooltip: setName + 'Tooltip'}, options: {plot: 'theSpider', fill: set.fillColor || 'black'}};
 							tableColumns[setName] = {label: setName, field: setName, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}};
 							let setKpiData = (kpiData[setName] = {}), setExpKpi = (expKpi[setName] = {});
 							for (const kpiDescription of kpisDescription){
@@ -78,8 +81,32 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 						let i = 0, setName = set.setName;
 						for (const kpiDescription of kpisDescription){
 							try{
-								chartData[i][setName] = expKpi[setName][kpiDescription.name].expressionToValue(kpiDescription.kpi);
+/*
+							const value = expKpi.expressionToValue(kpiDescription.kpi);
+							if (Array.isArray(value)){
+								for (const subValue of value){
+									const subName = kpiDescription.name + subValue[0];
+									chartData[i] = {name: subName, value: subValue[1], tooltip: subName + ': ' + (kpiDescription.displayformat ? utils.transform(subValue[1], kpiDescription.displayformat) : subValue[1]) + ' ' + (kpiDescription.tooltipunit || '')};
+									i += 1;
+								}
+							}else{
+								chartData[i] = {name: kpiDescription.name, value: value, tooltip: kpiDescription.name + ': ' + (kpiDescription.displayformat ? utils.transform(value, kpiDescription.displayformat) : value) + ' ' + (kpiDescription.tooltipunit || '')};
 								i += 1;
+							}
+*/
+								const value = expKpi[setName][kpiDescription.name].expressionToValue(kpiDescription.kpi);
+								if (Array.isArray(value)){
+									for (const subValue of value){
+										const subName = kpiDescription.name + subValue[0], yValue = subValue[1];
+										chartData[i][setName] = value;
+										chartData[i][setName + 'Tooltip'] = setName + "<br/>" + subName + ":<br/>" + (kpiDescription.displayformat ? utils.transform(yValue, kpiDescription.displayformat) : yValue) + ' ' + (kpiDescription.tooltipunit || '');
+										i += 1;
+									}
+								}else{
+									chartData[i][setName] = value;
+									chartData[i][setName + 'Tooltip'] = setName + "<br/>" + kpiDescription.name + ":<br/>" + (kpiDescription.displayformat ? utils.transform(value, kpiDescription.displayformat) : value) + ' ' + (kpiDescription.tooltipunit || '');
+									i += 1;
+								}
 							}catch(e){
 								Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 							}
@@ -95,6 +122,11 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							}
 						});
 					    if (!utils.empty(data)){
+						    if (self.recursionDepth > 2){
+								Pmg.addFeedback(Pmg.message('too many recursions') + ': ' + self.recursionDepth + ' (SpiderChart)');
+								self.recursionDepth = 0;
+								return;
+							}
 						    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athlete: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
 						            function(response){
 						           		const kpis = response.data.kpis;
@@ -114,10 +146,12 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 						            }
 						    );
 						}else{
-							chartWidget.set('value', {data: chartData, tableColumns: tableColumns, axes: axes, plots: plots, series: series});
+							chartWidget.set('value', {data: chartData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
+							self.recursionDepth = 0;
 						}
 					}else{
-						chartWidget.set('value', {data: chartData, tableColumns: tableColumns, axes: axes, plots: plots, series: series});
+						chartWidget.set('value', {data: chartData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
+						self.recursionDepth = 0;
 					}
 				});
 			}		  

@@ -361,13 +361,16 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 						case 'minutesToHHMM':
 							minutes = parseInt(value);
 							return this.pad(parseInt(minutes / 60), 2) + ':' + this.pad(minutes % 60, 2);
+						case 'minutesToHHMMSS':
+							seconds = parseInt(value * 60);
+							return this.pad(hours = parseInt(seconds / 3600), 2) + ':' + this.pad(parseInt((seconds - hours * 3600) / 60), 2) + ':' + this.pad(seconds % 60, 2);
 						case 'secondsToHHMMSS':
 							seconds = parseInt(value);
-							return this.pad(hours = parseInt(seconds / 3600), 2) + ':' + this.pad(minutes = parseInt((seconds - hours * 3600) / 60), 2) + ':' + this.pad(seconds % 60, 2);
+							return this.pad(hours = parseInt(seconds / 3600), 2) + ':' + this.pad(parseInt((seconds - hours * 3600) / 60), 2) + ':' + this.pad(seconds % 60, 2);
 						case 'tHHMMSSToHHMM':
-							return value.substring(1, 6);
+							return (value && value.substring) ? value.substring(1, 6) : value;
 						case 'tHHMMSSToHHMMSS':
-							return value.substring(1, 9);
+							return (value && value.substring) ? value.substring(1, 9) : value;
 						case 'numberunit':
 							var values = JSON.parse(value),
 								count = values[0],
@@ -617,7 +620,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				if (translations){
 					let self = this, matchingTranslations = [];
 					this.forEach(translations, function(translated, untranslated){
-						let source = (mode === 'translate' ? untranslated : translated), target = (mode === 'translate' ? translated : untranslated), sourceRegExp = new RegExp('(\\b|_)(' + self.escapeRegExp(source) + ')(\\b|_)', 'g');
+						let source = (mode === 'translate' ? untranslated : translated), target = (mode === 'translate' ? translated : untranslated), sourceRegExp = new RegExp('(\\b|_)(' + self.escapeRegExp(source) + ')((?!\\w)|_)', 'g');
 						if (sourceRegExp.test(value)){
                         	matchingTranslations.push([source, sourceRegExp, target]);
 						}

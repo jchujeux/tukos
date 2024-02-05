@@ -18,6 +18,9 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
         constructor: function(args){
 			lang.mixin(this, args);
         },
+        postCreate: function(){
+			this.recursionDepth = 0;
+		},
 		setChartValue: function(chartWidgetName){
 			var self = this, form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex;
 			if (!hidden  && chartWidget.kpisToInclude){
@@ -26,7 +29,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 					const grid = self.grid, dateCol = self.dateCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter),
 						 kpisDescription = JSON.parse(chartWidget.kpisToInclude), series = {}, chartData = [], tableColumns = [], tableData = [{}], axesDescription = JSON.parse(chartWidget.axesToInclude), axes = {},
 						 plotsDescription = JSON.parse(chartWidget.plotsToInclude), plots = {};
-				axesDescription.forEach(function(axisDescription){
+					axesDescription.forEach(function(axisDescription){
 						axes[axisDescription.name] = axisDescription;
 						if (axisDescription.scaletype){
 							log10 = Math.log(10);
@@ -122,6 +125,11 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 							}
 						});
 					    if (!utils.empty(data)){
+						    if (self.recursionDepth > 2){
+								Pmg.addFeedback(Pmg.message('too many recursions') + ': self.recursionDepth (XyChart)');
+								self.recursionDepth = 0;
+								return;
+							}
 						    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athlete: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
 						            function(response){
 						           		const kpis = response.data.kpis;
@@ -141,11 +149,13 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 						            }
 						    );
 						}else{
-							chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series});
+							chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
+							self.recursionDepth = 0;
 						}
 					}else{
-						chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series});
-					}
+						chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
+						self.recursionDepth = 0;
+				}
 				});
 			}		  
 		},

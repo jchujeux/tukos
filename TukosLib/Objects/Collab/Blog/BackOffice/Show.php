@@ -7,6 +7,7 @@ use TukosLib\TukosFramework as Tfk;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\HtmlUtilities as HUtl;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
+use TukosLib\Web\BlogPostStructuredData;
 
 class Show extends ObjectTranslator{
     function __construct($query){
@@ -64,16 +65,19 @@ class Show extends ObjectTranslator{
         if (!empty($values)){
             $blogModel = Tfk::$registry->get('objectsStore')->objectModel('blog');
             $publisherName = $this->user->peoplefirstAndLastNameOrUserName($values['creator']);
+            $datePublished = DUtl::toUTC($values['published']);
+            $dateUpdated = DUtl::toUTC($values['updated']);
             $subject = addslashes("article: {$values['name']} ({$values['id']})"); 
             $directLink = Utl::substitute($directLinkTemplate, ['id' => $values['id'], 'linkText' => $this->view->tr('directlink')]);
             $onContactClickString = $blogModel->onClickGotoContactTabString('edit', "sendto: '$publisherName', formtitle: 'postcontactform', formexplanation: 'postcontactformexplanation', creator: '{$values['creator']}', subject: '$subject'");
             $publisher = '<span style="' . HUtl::urlStyle() . '" ' . $onContactClickString . ">{$publisherName}</span>";
-            $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . DUtl::toUTC($values['published']) . '<br>' . $directLink .
+            $postedByAndWhen = "<i>{$this->view->tr('postedby')}</i>: $publisher <i>{$this->view->tr('postedon')}</i> " . $datePublished . '<br>' . $directLink .
                 '&nbsp; (id: ' . $values['id'] . ')';
             if ($values['updated'] > $values['published']){
                 //$updator = $this->user->peoplefirstAndLastNameOrUserName($values['updator']);
-                $postedByAndWhen .= "&nbsp;&nbsp;<i>{$this->view->tr('updatedon')}</i> " . DUtl::toUTC($values['updated']);
+                $postedByAndWhen .= "&nbsp;&nbsp;<i>{$this->view->tr('updatedon')}</i> " . $dateUpdated;
             }
+            Tfk::$registry->blogStructuredDataHeaderScript = BlogPostStructuredData::headerScript($values['name'], $datePublished, $dateUpdated, $publisherName);
             return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'postedbyandwhen' => $postedByAndWhen, 'comments' => $values['comments']];
         }else{
             $postNotFound = $this->view->tr('postnotfound');

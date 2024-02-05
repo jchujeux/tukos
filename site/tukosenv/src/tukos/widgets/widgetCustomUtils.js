@@ -42,7 +42,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
                 widgetCustomDialogDescription = {
                     widgetsDescription: {
                         att: {type: 'StoreSelect', atts: {widgetName: 'attribute', title: messages.attribute, placeHolder: messages.attribute + '  ...', style: {width: 'auto', maxWidth: '15em'}, storeArgs: {}}},
-            			NumberUnitBox: {type: 'NumberUnitBox', atts: {widgetName: 'attValue', number: {style: {width: '3em'}, disabled: true}, unit: {placeHolder: messages.enterunit, style: {width: 'auto'}, storeArgs: {data:[]}}}}, 
+            			NumberUnitBox: {type: 'NumberUnitBox', atts: {widgetName: 'attValue', hidden: true, number: {style: {width: '3em'}, disabled: true}, unit: {placeHolder: messages.enterunit, style: {width: 'auto'}, storeArgs: {data:[]}}}}, 
             			TextBox: {type: 'TextBox', atts: {widgetName: 'attValue', style: {width: '20em'}, hidden: true}},
             			TukosTextarea: {type: 'TukosTextarea', atts: {widgetName: 'attValue', style: {width: '20em'}, hidden: true}},
             			StoreSelect: {type: 'StoreSelect', atts: {placeHolder: messages.selectvalue, style: {width: 'auto'}, hidden: true, storeArgs: {data: []}}},
@@ -50,13 +50,15 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 						MultiSelect: {type: 'MultiSelect', atts: {widgetName: 'attValue', hidden: true, style: {width: 'auto', height: '200px'}}},
 						SimpleDgridNoDnd: {type: 'SimpleDgridNoDnd', atts: {widgetName: 'attValue', hidden: true, dynamicColumns: true, adjustLastColumn: false, style: {maxWidth: '1000px'}}},
                         cancel: {type: 'TukosButton', atts: {label: Pmg.message('close'), onClickAction:  'this.pane.close();'}},
-                        apply: {type: 'TukosButton', atts: {label: messages.apply}}
+                        apply: {type: 'TukosButton', atts: {label: Pmg.message('apply')}},
+                        import: {type: 'TukosButton', atts: {label: Pmg.message('import')}},
+                        export: {type: 'TukosButton', atts: {label: Pmg.message('export')}}
                     },
                     layout:{
                         tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},
                         contents: {
-                           row1: {tableAtts: {cols: 4, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['att', 'NumberUnitBox', 'cancel', 'apply']},
-                           row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['TextBox', 'TukosTextarea', 'StoreSelect', 'RestSelect', 'MultiSelect', 'SimpleDgridNoDnd']}
+                           row1: {tableAtts: {cols: 6, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['att', 'cancel', 'apply', 'import', 'export']},
+                           row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['NumberUnitBox', 'TextBox', 'TukosTextarea', 'StoreSelect', 'RestSelect', 'MultiSelect', 'SimpleDgridNoDnd']}
                         }
                     }
                 },
@@ -112,7 +114,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
             	attValueWidgets = {NumberUnitBox: getWidget('NumberUnitBox'), TextBox: getWidget('TextBox'), TukosTextarea: getWidget('TukosTextarea'), StoreSelect: getWidget('StoreSelect'), RestSelect: getWidget('RestSelect'),
 					MultiSelect: getWidget('MultiSelect'), SimpleDgridNoDnd: getWidget('SimpleDgridNoDnd')};
             if (newValue === ''){
-            	var attValueType = 'NumberUnitBox', attValueWidget = this.attValueWidget = attValueWidgets.NumberUnitBox;
+            	var attValueType = '', attValueWidget = this.attValueWidget = attValueWidgets.NumberUnitBox;
             }else{
             	var atts = customAtts[newValue], attValueType = atts.type || 'NumberUnitBox', attValueWidget = this.attValueWidget = attValueWidgets[attValueType];
             }
@@ -220,7 +222,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 					case 'SimpleDgridNoDnd':
 						return oldAttValue ? JSON.parse(oldAttValue) : oldAttValue;
 					default:
-						return oldAttValue;
+						return oldAttValue || '';
         		}
            }else{
         	   	return '';
@@ -249,13 +251,20 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
             var self = this;
 			ready(function(){
                 var pane = widgetCustomDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget);
+                const importExportHideValue = utils.empty(widget.customizableAtts);
                 self.widget = widget;
                 self.column = column;
+                
                 paneGetWidget('apply').onClickFunction = (column ? lang.hitch(self, self.applyGridEditorCustom) : lang.hitch(self, self.applyCustom));
+                paneGetWidget('import').onClickFunction = lang.hitch(self, self.importAction);
+                paneGetWidget('export').onClickFunction = lang.hitch(self, self.exportAction);
+                paneGetWidget('import').set('hidden', importExportHideValue);
+                paneGetWidget('export').set('hidden', importExportHideValue);
                 lang.hitch(self, self.setWidgetTypeAtts)(widget);
                 widgetCustomDialog.open({parent: widget, x: evt.clientX, y: evt.clientY});
 				paneGetWidget('att').set('value', '');
 				paneGetWidget('NumberUnitBox').set('value', undefined);
+				widgetCustomDialog.resize();
             });
 	
 		},
@@ -282,6 +291,68 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 				default:
 					return attValueWidget.get('value');
 			}
-        }
+        },
+        importAction: function(){
+			const self = this, widget = this.widget, widgetTypeFilter = widget.widgetType + (widget.chartType ? '_' + widget.chartType : '');
+            Pmg.confirm({title: Pmg.message('Selectwidgetcustomtemplatetoimport'), content: '<input data-dojo-type="tukos/ObjectSelect" name="id" id="id" data-dojo-props="object:\'customwidgets\', dropdownFilters:{widgettype:\'' + widgetTypeFilter + '\'} ">'}).then(
+				function(){
+					const theResponse = Pmg.dialogConfirm.get('value');
+					Pmg.serverDialog({action: 'getItem', object: 'customwidgets', view: 'edit', query: {id: theResponse.id}}, 
+						{},Pmg.message('ActionDone')).then(
+							function(response){
+								const customization = response.data  && response.data.value && response.data.value.customization;
+								if (customization){
+									utils.forEach(customization, function(newAtt, attRoot){
+										widget.set(attRoot, newAtt);
+                						lang.setObject((widget.itemCustomization || 'customization') + (attRoot === 'value' ? ('.data.value.' + widget.widgetName) : ('.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot)), newAtt, widget.pane);
+									});
+								}else{
+									Pmg.setFeedbackAlert(Pmg.message('YouNeedtoselecttemplateortemplatehasnocustomization'));
+								}
+							},
+							function(error){
+								Pmg.setFeedbackAlert('something went wrong');
+							}
+						);
+				},
+				function(){
+					//Pmg.setFeedback('Cancelled');
+				}
+			);
+		},
+        exportAction: function(){
+			const widget = this.widget, widgetTypeFilter = widget.widgetType + (widget.chartType ? '_' + widget.chartType : ''),  customAtts = {};
+			utils.forEach(widget.customizableAtts, function(customAtt){
+				if (widget.hasOwnProperty(customAtt.att)){
+					customAtts[customAtt.att] = widget[customAtt.att];
+				}
+			});
+			if (utils.empty(customAtts)){
+				Pmg.setFeedbackAlert(Pmg.message('NoCustomizationtosave'));
+			}else{
+				const content = '<table>' +
+					'<tr><td colspan=2 style="max-width: 350px;background-color:lightgrey"><i>' + Pmg.message('WidgetCustomExportExplanation') + '</i></td></tr>' +
+					'<tr><td><label for="name">' + Pmg.message('existingCustomization') + ': </label></td><td><input data-dojo-type="tukos/ObjectSelect" name="id" id="id" data-dojo-props="object:\'customwidgets\', dropdownFilters:{widgettype:\'' + widgetTypeFilter + '\'} "></td></tr>' +
+					'<tr><td><label for="name">' + Pmg.message('newName') + ': </label></td><td><input data-dojo-type="dijit/form/TextBox" type="text" name="name" id="name"></td></tr>' +
+				'</table>';
+                Pmg.confirm({title: Pmg.message('Exportcustomization'), content: content}).then(
+					function(){
+						const theResponse = Pmg.dialogConfirm.get('value');
+						if (theResponse.id || theResponse.name){
+							Pmg.serverDialog({action: 'Save', object: 'customwidgets', view: 'edit', query: {id: theResponse.id, timezoneOffset: (new Date()).getTimezoneOffset()}}, 
+								{data: theResponse.id 
+									? (theResponse.name	? {name: theResponse.name, customization: customAtts}	: {customization: customAtts})
+									: {parentid: Pmg.get('userid'), name: theResponse.name, vobject: widget.form.object, widgettype: widget.widgetType + (widget.chartType ? '_' + widget.chartType : ''), customization: customAtts}
+							},Pmg.message('ActionDone'));
+						}else{
+							Pmg.setFeedbackAlert(Pmg.message('YouneedtoselectExistingorenternew'));
+						}
+					},
+					function(){
+						//Pmg.setFeedback('Cancelled');
+					}
+				);
+			}
+		}
     }
 });

@@ -4,7 +4,7 @@ define(["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom-construct",  "dojo/d
 function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, Observable, Memory/*, DMemory*/, ready, utils, evalutils, wcutils){
     var classesPath = {
         Default:  "dojoFixes/dojox/charting/plot2d/", Columns: "dojox/charting/plot2d/", ClusteredColumns: "dojox/charting/plot2d/", Lines: "dojox/charting/plot2d/", Areas: "dojox/charting/plot2d/", Pie: "dojox/charting/plot2d/", Spider: "tukos/charting/plot2d/",
-        Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "tukos/widgets/", axis2dDefault:  "*dojox/charting/axis2d/Default", axis2dBase: "*dojox/charting/axis2d/Base", Tooltip: "dojox/charting/action2d/", BasicGrid: "tukos/",
+        Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "tukos/charting/widget/", axis2dDefault:  "*dojox/charting/axis2d/Default", axis2dBase: "*dojox/charting/axis2d/Base", Tooltip: "dojox/charting/action2d/", BasicGrid: "tukos/",
 		MouseIndicator: "dojox/charting/action2d/", MouseZoomAndPan: "dojox/charting/action2d/"
     };
 	return declare(Widget, {

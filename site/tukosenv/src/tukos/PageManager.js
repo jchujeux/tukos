@@ -441,6 +441,9 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
         addFeedback: function(serverFeedback, clientFeedback, beep){
             this.setFeedback(serverFeedback, clientFeedback, "<br>", beep);
         },
+		setFeedbackAlert(feedback){
+			this.setFeedback(feedback, null, null, true);
+		},
         namedId: function(id){
             //return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].name + '(' + id + ')' : '(' + id + ')') : '');
             return id ? (utils.drillDown(this.cache.extendedIds, [id, 'name']) || utils.drillDown(this.cache.extras, [id, 'name'], '')) + '(' + id + ')' : '';

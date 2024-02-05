@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title><?= $this->headerTitle ?></title>
+        <?= $this->structuredDataHeaderScript ?>
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dijit/themes/claro/claro.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dgridLocation ?>/css/dgrid.css" media="screen">
         <link rel="stylesheet" href="<?= $this->dojoBaseLocation ?>dojox/editor/plugins/resources/css/StatusBar.css" media="screen">

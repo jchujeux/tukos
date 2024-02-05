@@ -53,38 +53,39 @@ class BlogView extends Translator{
             array_walk($packagesLocation, function(&$module){
                 $module = '{"name":"' . $module . '","location":"' . Tfk::moduleLocation($module) . '"}';
             });
-                $view->packagesString = '[' . implode(',', $packagesLocation) . ']';
-                $view->tukosLocation = Tfk::moduleLocation('tukos');
-                $view->dgridLocation = Tfk::moduleLocation('dgrid');
-                $view->dojoBaseLocation = Tfk::dojoBaseLocation();
-                $view->language = Tfk::$registry->get('translatorsStore')->getLanguage();
-                $view->loadingMessage = $this->tr('Loading') . '...';
-                $blogTitle = $this->tr(Tfk::$registry->blogTitle);
-                $view->headerTitle = $blogTitle;
-                $blogModel = Tfk::$registry->get('objectsStore')->objectModel('blog');
-                $contactName = Tfk::$registry->get('tukosModel')->getOption('blogcontact')['name'];
-                $onContactClickString = $blogModel->onClickGotoContactTabString('edit', "sendto: '$contactName', formtitle: 'Tukosblogcontactform', formexplanation: 'tukosblogcontactformexplanation'");
-                $this->pageManagerArgs['contactSpan'] =  '<span style="float: right;  font-size: 12px; margin-right: -60px; margin-top: -10px; ' . HUtl::urlStyle() . '" ' . $onContactClickString . ">{$this->tr('BlogContact')}</span>";
-                if ($this->pageManagerArgs['isMobile'] = Tfk::$registry->isMobile){
-                    $blogTemplate = "MobileBlogTemplate.php";
-                    $this->pageManagerArgs['headerTitle'] = $blogTitle;
-                    $this->pageManagerArgs['contactSpan'];
-                    '</div>';
-                }else{
-                    $blogTemplate = "BlogTemplate.php";
-                    $this->pageManagerArgs['headerContent'] = <<<EOT
+            $view->packagesString = '[' . implode(',', $packagesLocation) . ']';
+            $view->tukosLocation = Tfk::moduleLocation('tukos');
+            $view->dgridLocation = Tfk::moduleLocation('dgrid');
+            $view->dojoBaseLocation = Tfk::dojoBaseLocation();
+            $view->language = Tfk::$registry->get('translatorsStore')->getLanguage();
+            $view->loadingMessage = $this->tr('Loading') . '...';
+            $blogTitle = $this->tr(Tfk::$registry->blogTitle);
+            $view->headerTitle = $blogTitle;
+            $view->structuredDataHeaderScript = Tfk::$registry->blogStructuredDataHeaderScript;
+            $blogModel = Tfk::$registry->get('objectsStore')->objectModel('blog');
+            $contactName = Tfk::$registry->get('tukosModel')->getOption('blogcontact')['name'];
+            $onContactClickString = $blogModel->onClickGotoContactTabString('edit', "sendto: '$contactName', formtitle: 'Tukosblogcontactform', formexplanation: 'tukosblogcontactformexplanation'");
+            $this->pageManagerArgs['contactSpan'] =  '<span style="float: right;  font-size: 12px; margin-right: -60px; margin-top: -10px; ' . HUtl::urlStyle() . '" ' . $onContactClickString . ">{$this->tr('BlogContact')}</span>";
+            if ($this->pageManagerArgs['isMobile'] = Tfk::$registry->isMobile){
+                $blogTemplate = "MobileBlogTemplate.php";
+                $this->pageManagerArgs['headerTitle'] = $blogTitle;
+                $this->pageManagerArgs['contactSpan'];
+                '</div>';
+            }else{
+                $blogTemplate = "BlogTemplate.php";
+                $this->pageManagerArgs['headerContent'] = <<<EOT
 <table width="100%"><tr><td style="text-align:left;"><span id="tukosHeaderLoading"></span></td><td style="text-align:center;"></br><font size="6" style="font-weight: bold;">{$blogTitle}</font></br></td><td style="text-align:right;"><b><i>The Ultimate Knowledge Organizational System</i></b></td></table>
 EOT
-                    ;
-                    $onClickString = $blogModel->onClickGotoTabString('edit', "name:'{$this->tr('BlogWelcome')}'");
-                    $this->pageManagerArgs['rightPanelWidth'] = Tfk::$registry->blogRightPanelWidth;
-                    $this->pageManagerArgs['rightPaneContent'] = 
-                        '<div style="background-color: #d0e9fc;text-align: center;">' .
-                            '<img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.png" style="height:150px; width: 200px;"></br>' .
-                            '<span style="' . HUtl::urlStyle() . '" ' . $onClickString . ">{$this->tr('BlogWelcome')}, </span>" .
-                            '<span style="' . HUtl::urlStyle() . '" ' . $onContactClickString . ">{$this->tr('BlogContact')}</span>";
-                        '</div>';
-                }
+                ;
+                $onClickString = $blogModel->onClickGotoTabString('edit', "name:'{$this->tr('BlogWelcome')}'");
+                $this->pageManagerArgs['rightPanelWidth'] = Tfk::$registry->blogRightPanelWidth;
+                $this->pageManagerArgs['rightPaneContent'] = 
+                    '<div style="background-color: #d0e9fc;text-align: center;">' .
+                        '<img alt="logo" src="' . Tfk::$publicDir . 'images/tukosswissknife.png" style="height:150px; width: 200px;"></br>' .
+                        '<span style="' . HUtl::urlStyle() . '" ' . $onClickString . ">{$this->tr('BlogWelcome')}, </span>" .
+                        '<span style="' . HUtl::urlStyle() . '" ' . $onContactClickString . ">{$this->tr('BlogContact')}</span>";
+                    '</div>';
+            }
         }
         $this->pageManagerArgs = array_merge($this->pageManagerArgs, ['extras' => Tfk::getExtras()],
             array_filter(['messages' => Tfk::$registry->get('translatorsStore')->getTranslations(['actiondoing', 'actiondone', 'actioncancelled', 'fieldshavebeenmodified', 'surewanttoforget', 'cancel'], 'Page'), 'feedback' => Feedback::get()])

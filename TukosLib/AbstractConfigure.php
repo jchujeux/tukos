@@ -49,7 +49,7 @@ class AbstractConfigure{
         
         $this->modulesMenuLayout = $modulesMenuLayout;
         $this->transverseModules = ['admin', 'collab'];
-        $this->objectModulesDefaultContextName = ['tukos' => 'tukos', 'customviews' => 'tukos'];
+        $this->objectModulesDefaultContextName = ['tukos' => 'tukos', 'customviews' => 'tukos', 'customwidgets' => 'tukos'];
         $this->setobjectModulesDefaultContextName($this->modulesMenuLayout);
         $this->objectModules = array_unique(array_merge(array_keys($this->objectModulesDefaultContextName), $requiredModulesNotInLayout));
         

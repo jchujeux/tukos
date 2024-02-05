@@ -9,6 +9,7 @@ class Directory{
         'backoffice'        => 'BackOffice',
     	'users'             => 'Admin\Users',
         'customviews'       => 'Admin\Users\CustomViews',
+        'customwidgets'     => 'Admin\Users\CustomWidgets',
         'navigation'        => 'Admin\Users\Navigation',
         'contexts'          => 'Admin\Contexts',
         'objrelations'      => 'Admin\ObjRelations',
