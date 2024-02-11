@@ -84,6 +84,7 @@ class Fuzzy{
                 }
                 $rightBounds[$last] = $thresholds[$last] - $uncertainty[$last];
                 $leftBounds[$last+1] = $thresholds[$last] + $uncertainty[$last];
+                $slopes[$last]  = 1 / (2 * $uncertainty[$last]);
             }
         }
         return [0, $rightBounds, $leftBounds, $slopes, $thresholds];

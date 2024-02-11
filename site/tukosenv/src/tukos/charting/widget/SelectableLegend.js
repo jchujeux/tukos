@@ -5,7 +5,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojox/charting/widget/Selectab
         toogle: function(plotName, index, hide){
         	this.inherited(arguments);
         	lang.setObject('customization.widgetsDescription.' + this.chartWidgetName + '.atts.series.' + this.chart.series[index].name + '.options.hidden', hide, this.form);
-			//this.tukosChartWidget.series[this.chart.series[index].name].options.hidden = hide;
+			this.tukosChartWidget.series[this.chart.series[index].name].options.hidden = hide;
 			lang.setObject("series." + this.chart.series[index].name + ".options.hidden", hide, this.tukosChartWidget);
         }
     });

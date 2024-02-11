@@ -49,11 +49,15 @@ class View extends EditView{
                 'widgets' => ['sts', 'lts', 'tsb', 'hracwr', 'timemoving', 'avghr', 'avgpw', 'heartrate_load', 'power_load', 'heartrate_avgload', 'power_avgload', 'avgcadence', 'mechload', 
                     'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110'],
             ],
+            'rowcomments' => [
+                'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['30%', '70%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
+                'widgets' => ['kpiscache', 'comments'],
+            ],
         ];
     }
     function __construct($actionController){
         parent::__construct($actionController);
-        $this->dataLayout['contents'] = array_merge(self::editDialogLayout(), Utl::getItems(['rowcomments', 'rowbottom', 'rowacl'], $this->dataLayout['contents']));
+        $this->dataLayout['contents'] = array_merge(self::editDialogLayout(), Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
     }
 }
 ?>

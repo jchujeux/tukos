@@ -64,10 +64,11 @@ class KpisFormulaes {
     }
     public static function timeInZones($metrics, $kpiThresholds, $uncertainty = 3, $fuzzyType = 'absolute', $belowLowest = true, $aboveHighest = true){
         $timeInZones = self::_timeInZones($metrics, $kpiThresholds, $uncertainty, $fuzzyType, $belowLowest, $aboveHighest);
-        foreach ($kpiThresholds as $key => $threshold){
-            $result[] = ['< ' . $threshold, $timeInZones[$key]];
-        }
         $last = count($kpiThresholds);
+        $result[0] = ['< ' . $kpiThresholds[0], $timeInZones[0]];
+        for ($key = 1; $key < $last;  $key++){
+            $result[] = ['[' . $kpiThresholds[$key-1] . ', ' . $kpiThresholds[$key] . ']', $timeInZones[$key]];
+        }
         $result[$last] = ['> ' . $kpiThresholds[$last-1], $timeInZones[$last]];
         return $result;
     }
@@ -130,7 +131,11 @@ class KpisFormulaes {
     public static function loadBelow($metrics, $kpiThreshold, $threshold, $sex, $smoothSeconds = 1, $min = 0, $b = null, $uncertainty = 3, $fuzzyType = 'absolute'){
         return self::_loadInZones($metrics, [$kpiThreshold], $threshold, $sex, $smoothSeconds, $min, $b, $uncertainty, $fuzzyType, true, false)[0];
     }
-    public static function timeCurve($metrics){
+    public static function timeCurve($metrics, $smoothSeconds = 1){
+        if ($smoothSeconds > 1){
+            $metrics = Average::exponentialMovingAverage($metrics, $smoothSeconds);
+        }
+        $metrics = array_map(function($value){return intval($value);}, $metrics);
         $distinctMetrics = array_count_values(array_map(['TukosLib\Utils\Utilities', 'nullToZero'], $metrics));
         krsort($distinctMetrics);
         $cumulatedTime = 0; $result = [];
@@ -140,15 +145,19 @@ class KpisFormulaes {
         }
         return json_encode(Utl::array_shrink($result, ['TukosLib\Utils\Utilities', 'minXmaxYWeightShrinkCallback']));
     }
-    public static function durationCurve($metrics){
-        $smoothSeconds = 1; $totalDuration = count($metrics);
+    public static function durationCurve($metrics, $smoothSeconds = 1){
+        $totalDuration = count($metrics);
+        if ($smoothSeconds > 1){
+            $metrics = Average::exponentialMovingAverage($metrics, $smoothSeconds);
+        }
         $metrics = array_map(function($value){return intval($value);}, $metrics);
         $result = [];
-        while ($smoothSeconds < $totalDuration){
-            $result[] = [$smoothSeconds, intval(max(Average::exponentialMovingAverage($metrics, $smoothSeconds)))];
-            $smoothSeconds = $smoothSeconds * 2;
+        $secondsSmooth = 1;
+        while ($secondsSmooth < $totalDuration){
+            $result[] = [$secondsSmooth, intval(max(Average::exponentialMovingAverage($metrics, $secondsSmooth)))];
+            $secondsSmooth = $secondsSmooth * 2;
         }
-        $result[] = [$totalDuration, intval(max(Average::exponentialMovingAverage($metrics, $smoothSeconds)))];
+        $result[] = [$totalDuration, intval(max(Average::exponentialMovingAverage($metrics, $totalDuration)))];
         return json_encode($result);
     }
     public static function shrink($metrics, $shrinkSeconds, $smoothSeconds = 0, $intval){

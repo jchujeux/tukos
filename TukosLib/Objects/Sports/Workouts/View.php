@@ -3,6 +3,7 @@ namespace TukosLib\Objects\Sports\Workouts;
 
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
+use TukosLib\Objects\ObjectTranslator;
 use TukosLib\Objects\Sports\Sports;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
@@ -14,6 +15,7 @@ class View extends AbstractView {
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Parent', 'Description');
         $tr = $this->tr;
+        $untranslator = new ObjectTranslator($objectName, null, 'untranslator');
         $isMobile = Tfk::$registry->isMobile;
         $leftRightTdStyle = [/*'whiteSpace' => 'nowrap', */'verticalAlign' => 'top', 'paddingTop' => '7px', 'fontSize' => '12px', 'fontFamily' => 'Arial, Helvetica, sans-serif', 'width' => $isMobile ? '80px' : '200px', 'wordWrap' => 'break-word'];
         $gaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 1, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 3, 'showValue' => true, 'tickLabel' => '',
@@ -91,16 +93,24 @@ class View extends AbstractView {
             'sts' => ViewUtils::tukosNumberBox($this, 'sts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'tsb' => ViewUtils::tukosNumberBox($this, 'tsb', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['hidden' => true, 'renderCell' => 'renderStravaLink'], 'overview' => ['hidden' => true, 'renderCell' => 'renderStravaLink']]]),
+            'kpiscache' => [
+                'type' => 'objectEditor',
+                'atts' => ['edit' => ['title' => $this->tr('KpisCache'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 'checkedServerValue' => '~delete', 'onCheckMessage' => $this->tr('checkedleaveswillbedeletedonsave'),
+                    'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/,  'overflow' => 'auto']]],
+                'objToEdit' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]],
+                'editToObj' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $untranslator->tr]],
+            ],
         ],
         	$this->filterWidgets()
         );
 
         //$this->mustGetCols = array_merge($this->mustGetCols, ['name', 'duration', 'intensity', 'stress', 'sport','warmup', 'mainactivity', 'warmdown', 'comments', 'mode', 'athleteweeklyfeeling', 'coachweeklycomments']);
-        $this->mustGetCols = array_merge($this->mustGetCols, array_keys($customDataWidgets));
+        //$this->mustGetCols = array_merge($this->mustGetCols, array_keys($customDataWidgets));
+        $this->mustGetCols = ['kpiscache'];
         
         $subObjects = $this->templatesSubObjects();
 
-        $this->customize($customDataWidgets, $subObjects, Utl::array_merge_recursive_replace(['edit' => $this->model->streamCols, 'grid' => $this->model->streamCols, 'get' => $this->model->streamCols, 'post' => [$this->model->streamCols]], $this->filterWidgetsExceptionCols()));
+        $this->customize($customDataWidgets, $subObjects, Utl::array_merge_recursive_replace(['grid' => ['kpiscache']], $this->filterWidgetsExceptionCols(), false));
     }
     function modeChangeLocalAction(){
         $plannedCols = json_encode($this->model->plannedCols);

@@ -61,6 +61,26 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				previousKpiValuesCache[arg + daysConstant] = [kpiValue, kpiDate ? kpiDate : previousDate];
 				return kpiValue;
 			},
+			formulaExpIntensity = function(arg, min, max, a){
+				const valueToIntensity = function(value){
+					const rate = (value - min) / (max - min);
+					return rate * Math.exp(a * (rate - 1)) * 100;
+				}
+				if (Array.isArray(arg)){
+					let result = [];
+					for (let i in arg){
+						const entityItem = arg[i];
+						if (Array.isArray(entityItem)){
+							result.push([entityItem[0], valueToIntensity(entityItem[1])]);
+						}else{
+							result.push(valueToIntensity(entityItem));
+						}
+					}
+					return result;
+				}else{
+					return valueToIntensity(arg);
+				}
+			},
 			formulaMin = function(arg){
 				const formula = getFormula(arg, cache);
 				let result = MAX_VALUE;
@@ -261,6 +281,9 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				'EXPAVG': unpackArgs(function(col, initialAvg, initialDate, daysConstant){
 					return formulaExpAvg(col(), initialAvg(), initialDate(), daysConstant());
 				}),
+				'EXPINTENSITY': unpackArgs(function(col, min, max, a){
+					return formulaExpIntensity(col(), min(), max(), a());
+				}),
 				'MIN': function(col){
 					return formulaMin(col());
 				},
@@ -283,7 +306,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 					return formulaDate(formulaString());
 				}
 			},
-			PRECEDENCE:[['ARRAY', 'VECTOR', 'NEG', 'TOFIXED', 'JSONPARSE', 'XY', 'SUM', 'AVG', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'TIMETOSECONDS', 'DATE'], ['*', '/'], ['+', '-'], [',']],
+			PRECEDENCE:[['ARRAY', 'VECTOR', 'NEG', 'TOFIXED', 'JSONPARSE', 'XY', 'SUM', 'AVG', 'EXPINTENSITY', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'TIMETOSECONDS', 'DATE'], ['*', '/'], ['+', '-'], [',']],
 			LITERAL_OPEN: '"',
 			LITERAL_CLOSE: '"',
 			GROUP_OPEN: '(',

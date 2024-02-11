@@ -114,7 +114,7 @@ class Model extends AbstractModel {
         }
     }
     public function stravaCols(){
-        return ['name', 'stravaid', 'startdate', 'starttime', 'sport', 'duration', 'timemoving', 'distance', 'elevationgain', 'avghr', 'avgpw', 'avgcadence'];
+        return ['name', 'stravaid', 'startdate', 'starttime', 'sport', 'duration', 'timemoving', 'distance', 'elevationgain', 'avghr', 'avgpw', 'avgcadence', 'kpiscache'];
     }
 }
 ?>

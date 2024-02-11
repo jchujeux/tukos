@@ -67,7 +67,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 								}
 							}
 						};
-						const yellow = Color.fromString('yellow'), green = Color.fromString('orange'), red = Color.fromString('red');
+						const white = Color.fromString('white'), yellow = Color.fromString('yellow'), orange = Color.fromString('orange'), red = Color.fromString('red'), darkRed = Color.fromString('darkred');
 						kpisDescription.forEach(function(kpiDescription){
 							try{
 								let filterString = setFilterString(kpiDescription, expression, dateCol), kpiDate = expression.expressionToValue(kpiDescription.kpidate), kpiCollection = collection, kpiData = collectionData, previousToDate, previousData = [];
@@ -101,7 +101,9 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 									chartData[index][tooltipName] = name + ': {' + xyValue[0] + ', ' + xyValue[1] + (xyValue[2] ? '; ' + xyValue[2] : '') + '}' + (kpiDescription.tooltipunit === undefined ? '' :  kpiDescription.tooltipunit);
 									if (plot.markersProgressColor){
 										const colorRatio = index / xyLength;
-										chartData[index].fill = colorRatio <= 0.5 ? Color.blendColors(yellow, green, colorRatio).toHex() : Color.blendColors(green, red, colorRatio).toHex();
+										chartData[index].fill = colorRatio <= 0.25 ? Color.blendColors(white, yellow, colorRatio).toHex() : (colorRatio <= 0.5 ? Color.blendColors(yellow, orange, colorRatio).toHex() : 
+											(colorRatio <= 0.75 ? Color.blendColors(orange, red, colorRatio).toHex() : Color.blendColors(red, darkRed, colorRatio).toHex()));
+										//chartData[index].fill = colorRatio <= 0.5 ? Color.blendColors(yellow, orange, colorRatio).toHex() : Color.blendColors(orange, red, colorRatio).toHex();									}
 									}
 									if (xAxisIsLogarithmic){
 										chartData[index][xName] = Math.log(xyValue[0]) / log10;

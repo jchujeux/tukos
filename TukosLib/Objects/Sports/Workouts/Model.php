@@ -100,16 +100,6 @@ class Model extends AbstractModel {
             }
         }
     }
-    /*public function getAll ($atts, $jsonColsPaths = [], $jsonNotFoundValues = null, $processLargeCols = false){
-        $atts['cols'][] = 'kpiscache';
-        $results = parent::getAll($atts, $jsonColsPaths, $jsonNotFoundValues, $processLargeCols);
-        foreach ($results as &$workout){
-            if (!empty($kpisCache = Utl::extractItem('kpiscache', $workout))){
-                $workout = array_merge($workout, json_decode($kpisCache, true));
-            }
-        }
-        return $results;
-    }*/
     public function getAllExtended($atts){
         if ($this->user->isRestrictedUser() && $programId = Utl::getItem('parentid', $atts['where'])){
             $mostRecentPerformed = $this->getOne(['where' => ['parentid' => $programId, 'mode' => 'performed'], 'cols' => ['startdate'], 'orderBy' => ['startdate' => 'DESC']]);
@@ -120,7 +110,7 @@ class Model extends AbstractModel {
                     'synchrostreams' => true]));
             }
         }
-        $atts['cols'][] = 'kpiscache';
+        //$atts['cols'][] = 'kpiscache';
         $results = parent::getAllExtended($atts);
         foreach ($results as &$workout){
             if (!empty($kpisCache = Utl::extractItem('kpiscache', $workout))){

@@ -62,7 +62,6 @@ class Model extends AbstractModel {
         return !empty($this->getOne(['where' => ['id' => $id, ['col' => 'timestream', 'opr' => 'IS NOT NULL', 'values' => null]], 'cols' => ['id']]));
     }
     public function getAllExtended ($atts){
-        $atts['cols'][] = 'kpiscache';
         $results = parent::getAllExtended($atts);
         foreach ($results as &$activity){
             if (!empty($kpisCache = Utl::extractItem('kpiscache', $activity))){
@@ -143,15 +142,14 @@ class Model extends AbstractModel {
         }
         return $tukosStreamData;
     }
+    public function activityKpis(){
+        return ['heartrate_avgload', 'heartrate_load', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'power_avgload', 'power_load'];
+    }
     public function addStreamsAndMetrics($activity, $athleteId, $needsStreams, $streamCols, $client){
         if ($needsStreams){
             $activity = array_merge($activity, $this->stravaStreamsToTukosStreams($client->getActivityStreams($activity['stravaid'], implode(',', array_map(function($tukosName){return substr($tukosName, 0, -6);}, $streamCols)))));
         }
-        $kpisToCompute = ['heartrate_avgload', 'heartrate_load', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'power_avgload', 'power_load'];
-        if ($activity['sport'] === 'running'){
-            $kpisToCompute[] = 'mechanical_load';
-        }
-        $activity = array_merge(Utl::getItem($activity['id'], $this->computeKpis($athleteId, [$activity['id'] => $kpisToCompute], [$activity['id'] => $activity]), [], []), $activity);
+        $activity = array_merge(Utl::getItem($activity['id'], $this->computeKpis($athleteId, [$activity['id'] => $this->activityKpis()], [$activity['id'] => $activity]), [], []), $activity);
         foreach($streamCols as $col){
             if (!empty($activity[$col])){
                 $activity[$col] = json_encode($activity[$col]);
@@ -159,7 +157,7 @@ class Model extends AbstractModel {
         }
         return $activity;
     }
-    public function activitiesToTukos($athleteId, $synchroStart, $synchroEnd, $synchroStreams, $stravaColsToGet){
+    public function activitiesToTukos($athleteId, $synchroStart, $synchroEnd, $synchroStreams){
         $athleteModel = Tfk::$registry->get('objectsStore')->objectModel('people');
         try{
             $client = $this->getAthleteClient($athleteId);

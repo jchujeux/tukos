@@ -4,10 +4,10 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
     return {
       
     objectTable: function(object, hasCheckboxes, selectedLeaves, atts){
-        var checkboxPath = [], maxWidth = atts.maxColWidth || '';
-                keyToHtml = lang.hitch(this, function(key){
-                    return (atts.keyToHtml) ?  this[atts.keyToHtml](key) : key;
-                });
+        var onCheckMessagzWasDisplayed = false, checkboxPath = [], maxWidth = atts.maxColWidth || '',
+            keyToHtml = lang.hitch(this, function(key){
+                return (atts.keyToHtml) ?  this[atts.keyToHtml](key) : key;
+            });
         var addTableRows = function(object){
             var rowToReturn = {count: 0};
             for (var key in object){
@@ -41,7 +41,12 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
 	                            'input', 
 	                            {type: 'checkbox', style: {width: '30px'}, onchange: lang.partial(
 	                                    function(stringPath, key, change){
-	                                        lang.setObject(stringPath, change.currentTarget.checked, selectedLeaves);
+	                                        const isChecked = change.currentTarget.checked;
+	                                        lang.setObject(stringPath, isChecked ? atts.checkedServerValue || true : false, selectedLeaves);
+	                                        if (atts.onCheckMessage && isChecked && !onCheckMessagzWasDisplayed){
+												Pmg.setFeedbackAlert(Pmg.message(atts.onCheckMessage));
+												onCheckMessagzWasDisplayed = true;
+											}
 	                                        if (!change.currentTarget.checked){
 												utils.filterRecursive(selectedLeaves);
 											}

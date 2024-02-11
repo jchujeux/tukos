@@ -19,13 +19,15 @@ trait Kpis {
             'mechanical_load' => ['metrics' => 'velocity_smoothstream', 'activityParams' => ['cadencestream' => 'cadencestream'], 'otherParams' => ['b' => ['cadenceCorrection']]],
             'timecurve' => ['metrics' => 'stream'],
             'durationcurve' => ['metrics' => 'stream'],
-            'timeinzones' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
-            'timeabove' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
-            'timebelow' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
-            'loadinzones' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
-            'loadabove' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
-            'loadbelow' => ['metrics' => 'stream', 'otherParams' => ['uncertainty' => 0.02, 'fuzzyType' => 'relative']],
+            'timeinzones' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
+            'timeabove' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
+            'timebelow' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
+            'loadinzones' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
+            'loadabove' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
+            'loadbelow' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
             'shrink' => ['metrics' => 'stream', 'otherParams' => ['intval' => true]],
+            'heartrate' => ['otherParams' => ['uncertainty' => 3]],
+            'power' => ['otherParams' => ['uncertainty' => 10]],
         ];
     public static function getDescription($name, $formula){
         $description = isset(self::$kpisDescription[$name.'_'.$formula]) ? self::$kpisDescription[$name.'_'.$formula] : Utl::getItem($formula, self::$kpisDescription, []);
@@ -34,6 +36,9 @@ trait Kpis {
         }
         if (strpos($formula, 'time') === false  && strpos($formula, 'duration') === false&& strpos($formula, 'shrink') === false){
             $description['athleteParams'] = Utl::getItem($name, self::$athleteParamsDescription, []);
+        }
+        if (isset($description['otherParams']) && isset(self::$kpiDescriptions[$name])){
+            $description['otherParams'] = array_merge($description['otherParams'], Utl::getItem('otherParams', self::$kpisDescription[$name], []));
         }
         if ($name === 'power' && strpos($formula, 'load') !== false && strpos($formula, 'avg') === false){
             $description['otherParams'] = isset($description['otherParams']) ? array_merge($description['otherParams'], ['smoothSeconds' => 30]) : ['smoothSeconds' => 30];
@@ -104,6 +109,10 @@ trait Kpis {
             case 'shrink':
                 $arguments['shrinkSeconds'] = $param1;
                 $arguments['smoothSeconds'] = $param2;
+                break;
+            case 'timecurve':
+            case 'durationcurve':
+                $arguments['smoothSeconds'] = $param1 ? $param1 : 1;
         }
         return [self::$functionsMap[$formula], $arguments];
     }

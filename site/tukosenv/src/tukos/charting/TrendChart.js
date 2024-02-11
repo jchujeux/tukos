@@ -84,9 +84,6 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							index1 = index + 1;
 							series[index1] = {value: {y: index1, tooltip: index1 + 'Tooltip'}, options: {plot: kpiDescription.plot, label: kpiDescription.name, legend: kpiDescription.name}};
 							tableColumns[index1] = {field: index1, label: kpiDescription.name}
-							/*if (!kpiDescription.kpi.match(/^\w+\(/)){
-								kpiDescription.kpi = 'ITEM("' + kpiDescription.kpi + '", 1)';
-							}*/
 						});
 						let i = 1;
 						const previousData = collection.filter(filter.lte(dateCol, previousToDate)).fetchSync();

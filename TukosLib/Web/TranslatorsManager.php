@@ -83,16 +83,30 @@ class TranslatorsManager {
             });
             $names = array_keys($names);
             $translations = $this->_getTranslations($names, $setNames);
-            $i = 0;
             foreach($matchesToTranslate as &$match){
                 list($name, $mode, $translatorName) = explode('|', $match);
-                $translatedName = (empty($nameTranslations = Utl::getItem(strtolower($name), $translations))|| empty($activeSets = array_intersect($this->translatorPaths[$translatorName], array_keys($nameTranslations))) || 
-                                   empty($nameTranslation = $nameTranslations[reset($activeSets)]))
-                    ? $name
-                    : preg_replace('/([^\\\\])"/', '$1\\"', $nameTranslation);
-                    $mode = json_decode(json_decode('"' . $mode . '"', true), true);// because $mode is a substring of $template which is json encoded
-                    //$mode = json_decode($mode, true);// because $mode is a substring of $template which is json encoded
-                    $isPlural = is_array($mode) ? in_array('plural', $mode) : $mode === 'plural';
+                $getTranslation = function($name, $translations, $translatorPaths, $translatorName){
+                    if (empty($nameTranslations = Utl::getItem(strtolower($name), $translations))|| empty($activeSets = array_intersect($translatorPaths[$translatorName], array_keys($nameTranslations))) || empty($nameTranslation = $nameTranslations[reset($activeSets)])){
+                        $subNames = explode('_', $name); $translatedSubNames = [];
+                        if (count($subNames) > 1){
+                            foreach($subNames as $subName){
+                                $translatedSubNames[] =  (empty($nameTranslations = Utl::getItem(strtolower($subName), $translations))|| empty($activeSets = array_intersect($translatorPaths[$translatorName], array_keys($nameTranslations))) ||
+                                                          empty($nameTranslation = $nameTranslations[reset($activeSets)]))
+                                   ? $subName
+                                   : $nameTranslation;
+                            }
+                            return implode('_', $translatedSubNames);
+                        }else{
+                            return $name;
+                        }
+                    }else{
+                        return $nameTranslation;
+                    }
+                };
+                $translatedName = preg_replace('/([^\\\\])"/', '$1\\"', $getTranslation($name, $translations, $this->translatorPaths, $translatorName));
+                //$translatedName = $getTranslation($name, $translations, $this->translatorPaths, $translatorName);
+                $mode = json_decode(json_decode('"' . $mode . '"', true), true);// because $mode is a substring of $template which is json encoded
+                $isPlural = is_array($mode) ? in_array('plural', $mode) : $mode === 'plural';
                 $translatedNames = explode('¤', $translatedName);
                 $translatedName = $isPlural ? Utl::getItem(1, $translatedNames, $translatedNames[0] . 's') : $translatedNames[0];
                 if (!empty($mode)){
@@ -132,14 +146,33 @@ class TranslatorsManager {
     }
     function _getTranslations($names, $setNames){
         $languageCol = $this->getLanguageCol();
-        $translations = Utl::toAssociativeGrouped(Tfk::$registry->get('configStore')->getAll([
-            'table' => 'translations',
-            'where' => [['col' => 'setname', 'opr' => 'IN', 'values' => $setNames], ['col' => 'name', 'opr' => 'IN', 'values' => $names]],
-            'cols' => ['name', 'setname', $languageCol]]), 'name', true);
-        array_walk($translations, function(&$translation, $name) use ($languageCol){
-            $translation = array_column($translation, $languageCol, 'setname');
+        $names = array_filter($names, function($name){
+            return !empty($name) && !is_numeric($name) && !str_starts_with($name, '[');
         });
-        return array_change_key_case(array_filter($translations));
+        if (empty($names)){
+            return [];
+        }else{
+            $namesToTranslate = [];
+            array_walk($names, function($name) use (&$namesToTranslate) {
+                $subNames = explode('_', $name);
+                $namesToTranslate[] = $name;
+                if (count($subNames) > 1){
+                    foreach($subNames as $subName){
+                        if (!is_numeric($subName)){
+                            $namesToTranslate[] = $subName;
+                        }
+                    }
+                }
+            });
+            $translations = Utl::toAssociativeGrouped(Tfk::$registry->get('configStore')->getAll([
+                'table' => 'translations',
+                'where' => [['col' => 'setname', 'opr' => 'IN', 'values' => $setNames], ['col' => 'name', 'opr' => 'IN', 'values' => $namesToTranslate]],
+                'cols' => ['name', 'setname', $languageCol]]), 'name', true);
+            array_walk($translations, function(&$translation, $name) use ($languageCol){
+                $translation = array_column($translation, $languageCol, 'setname');
+            });
+            return array_change_key_case(array_filter($translations));
+        }
     }
     function untranslator($translatorName, $setsPath, $language = null){/* returns a translator callback - usage: $translator->translate('myMessage'); */        
         if (! $language){
@@ -151,6 +184,9 @@ class TranslatorsManager {
         }
         $this->translatorPaths[$translatorName] = $setsPath;
         return function($key) use ($setsPath, $languageCol){
+            if (empty($key) || is_numeric($key) || str_starts_with($key, '[')){
+                return $key;
+            }
             $lckey = mb_strtolower($key);
             $messages = $this->translatorsMessages[$languageCol];
             foreach ($setsPath as $setItem){
@@ -160,7 +196,22 @@ class TranslatorsManager {
                 $translation = array_search($lckey, array_map('mb_strtolower', $messages[$setItem]));
                 if (!empty($translation)){
                     return $translation;
-                }                    
+                }
+            }
+            $subTranslations = explode('_', $lckey);
+            if (count($subTranslations) > 1){
+                $unTranslations = [];
+                foreach($subTranslations as $subTranslation){
+                    $unTranslations[$subTranslation] = $subTranslation;
+                    foreach($setsPath as $setItem){
+                        $unTranslation = array_search($subTranslation, array_map('mb_strtolower', $messages[$setItem]));
+                        if (!empty($unTranslation)){
+                            $unTranslations[$subTranslation] = $unTranslation;
+                            break;
+                        }
+                    }
+                }
+                return implode('_', $unTranslations);
             }
             return $key;
         };

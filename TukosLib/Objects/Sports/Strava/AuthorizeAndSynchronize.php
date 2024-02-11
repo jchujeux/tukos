@@ -48,8 +48,8 @@ trait AuthorizeAndSynchronize {
         $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
         $targetView = Tfk::$registry->get('objectsStore')->objectView('sptworkouts');
         $stravaCols = $this->stravaCols();
-        $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams, $stravaCols);
-        $stravaActivities = $stravaActivitiesModel->getAll(['where' => [['col' => 'startdate', 'opr' => '>=', 'values' => $query['synchrostart']], ['col' =>'startdate', 'opr' => '<=', 'values' => $query['synchroend']]],
+        $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams);
+        $stravaActivities = $stravaActivitiesModel->getAllExtended(['where' => [['col' => 'startdate', 'opr' => '>=', 'values' => $query['synchrostart']], ['col' =>'startdate', 'opr' => '<=', 'values' => $query['synchroend']]],
             'cols' => $stravaCols, 'orderBy' => ['startdate' =>  'ASC']]);
         $stravaActivities = Utl::objToEdit($stravaActivities, $targetView->dataWidgets);
         $stravaActivities = Utl::toAssociativeGrouped($stravaActivities, 'startdate');

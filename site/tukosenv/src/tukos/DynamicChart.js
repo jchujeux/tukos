@@ -10,7 +10,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 	return declare(Widget, {
         
         constructor: function(args){
-        	args.customizableAtts = lang.mixin({chartHeight: wcutils.sizeAtt('chartHeight'), showTable: wcutils.yesOrNoAtt('showTable'), tableWidth: wcutils.sizeAtt('tableWidth')}, args.customizableAtts);
+        	args.customizableAtts = lang.mixin({chartHeight: wcutils.sizeAtt('chartHeight'), chartWidth: wcutils.sizeAtt('chartWidth'), showTable: wcutils.yesOrNoAtt('showTable'), tableWidth: wcutils.sizeAtt('tableWidth')}, args.customizableAtts);
         },
         postCreate: function postCreate(){
             const requiredClasses = this.requiredClasses = {};
@@ -19,6 +19,9 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
             const chartStyle = this.chartStyle || {}, tableStyle = this.tableStyle || {};
             if (this.chartHeight){
             	chartStyle.height = this.chartHeight;
+            	if (this.chartWidth){
+					chartStyle.width = this.chartWidth;
+				}
             	this.chartStyle = chartStyle;
             }
             dst.set(this.domNode, {height: 'auto'});//or else the legend ovelaps other content
@@ -57,6 +60,10 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
             this.watch('chartHeight', lang.hitch(this, function(){
             	this.set('value', this.value);
             }));
+            this.watch('chartWidth', lang.hitch(this, function(){
+            	this.resize(this.chartWidth, this.chartHeight);
+            	this.set('value', this.value);
+            }));
         },
         createTableWidget: function(BasicGrid){
         	this.tableWidget = new BasicGrid(lang.mixin(this.tableAtts, {dynamicColumns: true, hidden: this.showTable !== 'yes', form: this.form}), this.tableNode);
@@ -76,8 +83,8 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 					this.tableWidget.resize();
 				}
             	if (this.chart){
-					const width = dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height");
-            		this.chart.resize(this.showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
+					const width = this.chartWidth || dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height");
+            		this.chart.resize(this.showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : parseInt(width), height);
 				}
 			}
 		},
@@ -100,9 +107,19 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 					this.set('tableContainerLabel', value.title);
 					this.set('title', value.title);
 				}
-            	value.series = utils.mergeRecursive(this.series, value.series);
+            	//value.series = utils.mergeRecursive(this.series, value.series);
+            	if (this.series){
+	            	const initialSeries = this.series;
+	            	utils.forEach(value.series, function(serie, name){// so that selectable legend customozation is taken into account
+						if ((((initialSeries || {})[name] || {}).options || {}).hidden){
+							serie.options.hidden = true;
+							lang.setObject('options.hidden', true, serie);
+						}
+					});
+				}
             	const self = this, chart = this.chart, store = this.store, kwArgs = this.kwArgs || {query: {}}, requiredClasses = this.requiredClasses, axes = lang.clone(value.axes), plots = lang.clone(value.plots), 
-            		  series = this.series ? utils.mergeRecursive(lang.clone(this.series, value.series)) : lang.clone(value.series);// so that selectable legend customozation is taken into account
+            		  series = lang.clone(value.series);
+	            this.series = series;
 	            utils.forEach(plots, function(plot){
 					const requiredType = plot.type;
 	                requiredClasses[requiredType] = self.classLocation(requiredType);
@@ -125,13 +142,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 					}            		
                     for (let axisName in axes){
                         const axisOptions = axes[axisName];
-                        /*if (this.getLabel){
-							axisOptions.labelFunc = lang.hitch(this, this.getLabel, axisOptions);
-						}*/
-                        /*if (axisOptions.tickslabel){
-                            axisOptions.labelFunc = lang.hitch(this, this.getLabel, axisOptions);
-                        }*/
-                        chart.addAxis(axisName, axisOptions);
+                         chart.addAxis(axisName, axisOptions);
                     }
                     for (let plotName in plots){
                         const plotOptions = plots[plotName];
@@ -147,7 +158,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 	                    	plotOptions.mouseZoomAndPan = new chartClasses['MouseZoomAndPan'](chart, plotName);
 	                    }
                     }
-                    const showTable = this.showTable, tableNode = this.tableNode, chartNode = this.chartNode, width = dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height"),
+                    const showTable = this.showTable, tableNode = this.tableNode, chartNode = this.chartNode, width = parseInt(this.chartWidth) || dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height"),
                     	tableHeight = (parseInt(height)-20) + 'px';
 					if (showTable === 'yes'){
                 		dst.set(this.table, {tableLayout: "fixed"});
@@ -190,31 +201,20 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
                     }catch(err){
                         console.log('error while rendering or resizing chart for widget: ' + this.widgetName + ' - ' + err.message);
                     }
-                    if (this.legend){
-						if (!this.legendWidget){
-							this.legendWidget = new chartClasses[this.legend.type](lang.mixin({chart: chart, 
-								chartWidgetName: this.widgetName, form: this.form, tukosChartWidget: this}, this.legend.options || {}), this.legendNode);
+                    if (self.legend){
+						if (!self.legendWidget){
+							self.legendWidget = new chartClasses[self.legend.type](lang.mixin({chart: chart, 
+								chartWidgetName: self.widgetName, form: self.form, tukosChartWidget: self}, self.legend.options || {}), self.legendNode);
 							if (Pmg.isMobile()){
-								this.legendWidget.set('style', {color: 'white'});
+								self.legendWidget.set('style', {color: 'white'});
 							}
 						}else{
-							this.legendWidget.refresh();
+							self.legendWidget.refresh();
 						}
 					}
 	            }));
-
-
             }
         },
-        
-        /*getLabel: function(options, formattedValue, rawValue){
-            if (utils.in_array(['dateofday', 'dateofweek'], options.tickslabel) && options.firstDate){
-				return dutils.formatDate(dutils.dateAdd(options.firstDate, 'day', rawValue - 1));
-			}else{
-				return formattedValue;
-			}
-            //return  this.sortedData[rawValue-1] ? this.sortedData[rawValue-1][labelCol]: '';
-        },*/
         classLocation: function(classType){
             const classPath = classesPath[classType];
         	return classPath.charAt(0) === '*' ? classPath.substring(1) : classPath +  classType;

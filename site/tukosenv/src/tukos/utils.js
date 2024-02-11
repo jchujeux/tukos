@@ -620,9 +620,11 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				if (translations){
 					let self = this, matchingTranslations = [];
 					this.forEach(translations, function(translated, untranslated){
-						let source = (mode === 'translate' ? untranslated : translated), target = (mode === 'translate' ? translated : untranslated), sourceRegExp = new RegExp('(\\b|_)(' + self.escapeRegExp(source) + ')((?!\\w)|_)', 'g');
-						if (sourceRegExp.test(value)){
-                        	matchingTranslations.push([source, sourceRegExp, target]);
+						if (translated){
+							let source = (mode === 'translate' ? untranslated : translated), target = (mode === 'translate' ? translated : untranslated), sourceRegExp = new RegExp('(\\b|_)(' + self.escapeRegExp(source) + ')((?!\\w)|_)', 'g');
+							if (sourceRegExp.test(value)){
+	                        	matchingTranslations.push([source, sourceRegExp, target]);
+							}
 						}
 					});
 					if (matchingTranslations.length <= 0){

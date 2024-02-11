@@ -13,7 +13,7 @@ trait ChartView {
         return $this->tr($funcName) . '(' . $this->tr($dayOrWeekOrMonth) . ', 1)';
     }
     public function ChartDescription($chartId, $chartInfo, $dateWidgetNames = ['firstrecorddate'], $namesToTranslate, $missingKpisIndex, $selectedDateWidgetName = null){
-        $kpiFunctions = ['TOFIXED', 'JSONPARSE', 'VECTOR', 'XY', 'SUM', 'EXPAVG', 'DAILYAVG', 'AVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'DATE', 'TIMETOSECONDS'];
+        $kpiFunctions = ['TOFIXED', 'JSONPARSE', 'VECTOR', 'XY', 'SUM', 'EXPAVG', 'EXPINTENSITY', 'DAILYAVG', 'AVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'DATE', 'TIMETOSECONDS'];
         $translations = array_merge(Utl::translations($kpiFunctions, $this->tr, 'uppercasenoaccent'), Utl::translations($namesToTranslate, $this->tr, 'lowercase'), Utl::translations(self::$dateFormulaesToTranslate, $this->tr, 'lowercase'));
         $customizableAtts = $chartInfo['chartType'] . 'ChartCustomizableAtts';
         return ['type' => 'dynamicChart', 'atts' => ['edit' => [
@@ -22,6 +22,7 @@ trait ChartView {
             'ignoreChanges' => true,
             'style' => ['width' => 'auto'],
             'chartHeight' => '300px',
+            //'chartWidth' => '300px',
             'showTable' => 'no',
             'colspan' => Utl::getItem('colspan', $chartInfo, 1, 1),
             'tableAtts' => ['dynamicColumns' => true],
@@ -76,7 +77,9 @@ trait ChartView {
 var form = sWidget.form;
 //form.resize();
 if (!newValue || '$changedAtt' !== 'hidden'){
-    form.charts.setChartValue('$chartId');
+    setTimeout(function(){//setTimeout needed so that chart render is called after the form has resized
+        form.charts.setChartValue('$chartId');
+    }, 0);
 }
 EOT
         ;
@@ -234,6 +237,7 @@ EOT
                     'tooltipunit' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Tooltipunit'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                     'scalingfactor' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Scalingfactor'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'absentiszero' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Absentiszero')], 'storeedit' => ['width' => 80]]), false),
+                    //'fillColor' => Widgets::description(Widgets::colorPickerTextBox(['edit' => ['label' => $tr('fillcolor')], 'storeedit' => ['width' => 80]]), false),
                     'kpiFilter' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('itemsfilter'), 'style' => ['width' => '15em'], 'translations' => $translations], 
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false)
                 ]])), ['att' => 'kpisToInclude', 'type' => 'SimpleDgridNoDnd', 'name' => $this->tr('dataToInclude')])
@@ -379,6 +383,7 @@ EOT
                     'tooltipunit' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Tooltipunit'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 70]]), false),
                     'scalingfactor' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Scalingfactor'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'absentiszero' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Absentiszero')], 'storeedit' => ['width' => 60]]), false),
+                    'fillColor' => Widgets::description(Widgets::colorPickerTextBox(['edit' => ['label' => $tr('fillcolor')], 'storeedit' => ['width' => 80]]), false),
                     'itemsFilter' => Widgets::description(Widgets::tukosTextarea(['edit' => ['label' => $this->tr('itemsfilter'), 'style' => ['width' => '15em'], 'translations' => $translations],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 150]]), false)
                 ]])), ['att' => 'kpisToInclude', 'type' => 'SimpleDgridNoDnd', 'name' => $this->tr('dataToInclude')])
@@ -455,6 +460,7 @@ EOT
                     'tooltipunit' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Tooltipunit'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 70]]), false),
                     'scalingfactor' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Scalingfactor'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'absentiszero' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Absentiszero')], 'storeedit' => ['width' => 60]]), false),
+                    'fillColor' => Widgets::description(Widgets::colorPickerTextBox(['edit' => ['label' => $tr('fillcolor')], 'storeedit' => ['width' => 80]]), false),
                     'itemsFilter' => Widgets::description(Widgets::tukosTextarea(['edit' => ['label' => $this->tr('itemsfilter'), 'style' => ['width' => '15em'], 'translations' => $translations],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 150]]), false)
                 ]])), ['att' => 'kpisToInclude', 'type' => 'SimpleDgridNoDnd', 'name' => $this->tr('dataToInclude')])

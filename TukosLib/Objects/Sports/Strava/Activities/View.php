@@ -3,6 +3,7 @@ namespace TukosLib\Objects\Sports\Strava\Activities;
 
 use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
+use TukosLib\Objects\ObjectTranslator;
 use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
@@ -10,6 +11,7 @@ class View extends AbstractView {
 	function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Athlete', 'Description');
         $isMobile = Tfk::$registry->isMobile;
+        $untranslator = new ObjectTranslator($objectName, null, 'untranslator');
         $customDataWidgets = [
             'name'      => ['atts' => ['edit' =>  ['style' => ['width' => '30em']]],],
             'startdate' => ViewUtils::tukosDateBox($this, 'date'),
@@ -25,14 +27,21 @@ class View extends AbstractView {
             'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport'),
             'avghr' => ViewUtils::numberTextBox($this,'Average Heart Rate', ['atts' => ['edit' => []]]),
             'avgpw' => ViewUtils::numberTextBox($this, 'Average Power', ['atts' => []]),
-            'trimpavghr' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Avg_Heart_rate', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
-            'trimpavgpw' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Avg_Power', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
-            'heartrate_avgload' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Avg_Heart_rate', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
-            'power_avgload' => ViewUtils::numberTextBox($this, 'Tukos_TRIMP_Avg_Power', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
+            'trimpavghr' => ViewUtils::numberTextBox($this, 'Heartrate_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
+            'trimpavgpw' => ViewUtils::numberTextBox($this, 'Power_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
+            'heartrate_avgload' => ViewUtils::numberTextBox($this, 'Heartrate_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
+            'power_avgload' => ViewUtils::numberTextBox($this, 'Power_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
             'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['hidden' => true]],
                 'objToEdit' => ['stravaLink' => ['class' => $this]], 'objToStoreEdit' => ['stravaLink' => ['class' => $this]], 'objToOverview' => ['stravaLink' => ['class' => $this]]]),
+            'kpiscache' => [
+                'type' => 'objectEditor',
+                'atts' => ['edit' => ['title' => $this->tr('KpisCache'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 'checkedServerValue' => '~delete', 'onCheckMessage' => $this->tr('checkedleaveswillbedeletedonsave'),
+                    'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/,  'overflow' => 'auto']]],
+                'objToEdit' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]],
+                'editToObj' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $untranslator->tr]],
+            ],
         ];
-        $this->customize($customDataWidgets, []/*, ['edit' => $this->model->streamCols, 'grid' => $this->model->streamCols, 'get' => $this->model->streamCols, 'post' => [$this->model->streamCols]]*/);
+        $this->customize($customDataWidgets, [], ['grid' => ['kpiscache']]);
     }
     function stravaLink($stravaId){
         if (!empty($stravaId)){
