@@ -9,11 +9,13 @@ use TukosLib\Utils\Feedback;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\HtmlUtilities as HUtl;
-use TukosLib\Objects\StoreUtilities as SUtl;
+use TukosLib\Objects\Sports\Strava\Activities\Kpis;
 use TukosLib\TukosFramework as TFK;
 
 class Model extends AbstractModel {
 
+    use Kpis;
+    
     function __construct($objectName, $translator=null){
         $colsDefinition = [
             'startdate'  => 'VARCHAR(30)  DEFAULT NULL',
@@ -75,12 +77,12 @@ class Model extends AbstractModel {
     }
     public function updateHeartrate_AvgLoad($query, $atts){
         $value = [];
-        $this->setHeartrate_AvgLoad($value, DUtl::timeToMinutes($query['timemoving']), $query['avghr'], $query['sportsman']);
+        $this->setHeartrate_AvgLoad($value, DUtl::timeToSeconds($query['timemoving']), $query['avghr'], $query['sportsman']);
         return ['data' => empty($value) ? [] : ['value' => $value]];
     }
-    public function updatePowerAvgLoad($query, $atts){
+    public function updatePower_AvgLoad($query, $atts){
         $value = [];
-        $this->setPowerAvgLoad($value, DUtl::timeToMinutes($query['timemoving']), $query['avgpw'], $query['sportsman']);
+        $this->setPower_AvgLoad($value, DUtl::timeToSeconds($query['timemoving']), $query['avgpw'], $query['sportsman']);
         return ['data' => empty($value) ? [] : ['value' => $value]];
     }
     public function setHeartrate_AvgLoad(&$item, $timemoving, $avgHr, $athleteId){
@@ -91,7 +93,7 @@ class Model extends AbstractModel {
             }
         }
     }
-    public function setPowerAvgLoad(&$item, $timemoving, $avgPw, $athleteId){
+    public function setPower_AvgLoad(&$item, $timemoving, $avgPw, $athleteId){
         if (!empty($athleteId)){
             list('ftp' => $ftp, 'sex' => $sex) = Tfk::$registry->get('objectsStore')->objectModel('sptathletes')->getOne(['where' => ['id' => $athleteId], 'cols' => ['ftp', 'sex']]);
             if (!empty($ftp) && !empty($sex)){
@@ -203,9 +205,7 @@ class Model extends AbstractModel {
         return HUtl::imageUrl($this->getLogoImage($programId));
     }
     public function getKpis($query, $kpisToGet){// associated to process action
-        $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
-        $activitiesKpis = $stravaActivitiesModel->computeKpis($query['athlete'], $kpisToGet, [], 'stravaid');
-        return ['data' => ['kpis' => $activitiesKpis]];
+        return ['data' => ['kpis' => $this->computeKpis($query['athlete'], $kpisToGet, 'stravaid')]];
     }
 }
 ?>

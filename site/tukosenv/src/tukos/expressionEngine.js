@@ -1,10 +1,46 @@
 "use strict";
 define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalutils'], function (parser, utils, dutils, eutils) {
-    let x;
+    let x, _lastNaNtoSecondsInput, _lastNaNtoSecondsReturned;
     const unpackArgs = function(f){
 		return function(expr){
 			let result = expr();
 			return (0, parser.isArgumentsArray)(result) ? f.apply(null, result) : f(function(){return result;});
+		}
+	};
+	const _operation = function(a, b, operation){
+		const x = a(), y = b();
+		if (Array.isArray(x)){
+			if (Array.isArray(y)){
+				let result = [];
+				for (let i in x){
+					if (Array.isArray(x[i])){
+						result.push([x[i][0], operation(x[i][1], y[i][1])]);
+					}else{
+						result.push(operation(x[i], y[i]));
+					}
+				}
+				return result;
+			}else{
+				let result = [];
+				for (let i in x){
+					if (Array.isArray(x[i])){// assumes it is [a,b] and divider should apply to b 
+						result.push([x[i][0], operation(x[i][1], y)]);
+					}else{
+						result.push(operation(x[i], y));
+					}
+				}
+				return result;
+			}
+		}else{
+			if (Array.isArray(y)){
+				let result = [];
+				for (let i in y){
+					result.push(operation(x, y[i]));
+				}
+				return result;
+			}else{
+				return operation(x,y);
+			}
 		}
 	};
 	const kpiLanguage = function (items, idProperty, cache, valueOf, previousKpiValuesCache, previousItems, kpiDate) {
@@ -12,7 +48,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 			return dojo.isString(value) && value[0] === '@' ? valueOf(value.substring(1)): value;
 		}
 		const nanToSecondsOrZero = function(value){
-			return isNaN(value) ? (typeof value === 'string' ? dutils.timeToSeconds(value) : 0) : value;
+			return value === _lastNaNtoSecondsInput ? _lastNaNtoSecondsReturned : _lastNaNtoSecondsReturned = (isNaN(value) ? (typeof value === 'string' ? dutils.timeToSeconds(value) : 0) : value);
 		}
 		const formulaCache = {}, 
 			  getFormula = function(arg){
@@ -121,15 +157,27 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 		return {
 			INFIX_OPS: {
 				'+': function(a, b){
-					return a() + b();
+					return _operation(a, b, function(x, y){
+						return x + y;
+					});
 				},
 				'-': function(a, b){
-					return a() - b();
+					return _operation(a, b, function(x, y){
+						return x - y;
+					});
 				},
 				'*': function(a, b){
-					return a() * b();
+					return _operation(a, b, function(x, y){
+						return x * y;
+					});
 				},
-				'/': function(a, b){
+				'/': function(a,b){
+					return _operation(a,b,function(x,y){
+						const divider = nanToSecondsOrZero(y);
+						return (divider ? nanToSecondsOrZero(x) / divider : 0);
+					});
+				},
+				/*'/': function(a, b){
 					const x = a(), y = b();
 					if (Array.isArray(x)){
 						if (Array.isArray(y)){
@@ -164,7 +212,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 							return divider ? nanToSecondsOrZero(x) / divider : 0;
 						}
 					}
-				},
+				},*/
 	            ",": (a, b) => {
 	                const aVal = a();
 	                const aArr = (0, parser.isArgumentsArray)(aVal)

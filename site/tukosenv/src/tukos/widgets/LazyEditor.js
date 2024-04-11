@@ -74,9 +74,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			if (editor.isInViewSource && (this.viewSource !== editor.isInViewSource())){
 				editor.toggle();
 			}
-			editor.focus();
 			isPlaced = true;
 			this.onBlurHandle = editor.on('blur', lang.hitch(this, this.onBlurCallback));
+			editor.focus();
 		},
 		
 		onBlurCallback: function(){

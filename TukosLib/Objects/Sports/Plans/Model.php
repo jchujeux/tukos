@@ -114,7 +114,13 @@ class Model extends AbstractModel {
         }
     }
     public function stravaCols(){
-        return ['name', 'stravaid', 'startdate', 'starttime', 'sport', 'duration', 'timemoving', 'distance', 'elevationgain', 'avghr', 'avgpw', 'avgcadence', 'kpiscache'];
+        return ['name', 'stravaid', 'startdate', 'starttime', 'sport', 'duration', 'timemoving', 'distance', 'elevationgain', 'avghr', 'avgpw', 'avgcadence'];
+    }
+    public function activityKpis(){
+        return ['heartrate_avgload', 'heartrate_load', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'power_avgload', 'power_load'];
+    }
+    public function sessionsModel(){
+        return Tfk::$registry->get('objectsStore')->objectModel('sptworkouts');
     }
 }
 ?>

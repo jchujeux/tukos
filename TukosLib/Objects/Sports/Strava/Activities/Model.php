@@ -7,7 +7,6 @@ use TukosLib\Strava\API\Service\REST;
 use League\OAuth2\Client\Token\AccessToken as AccessToken;
 use Strava\API\OAuth;
 use TukosLib\Objects\Sports\KpisFormulaes as KF;
-use TukosLib\Objects\Sports\Strava\Activities\Kpis;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
 use TukosLib\Utils\Utilities as Utl;
@@ -15,7 +14,6 @@ use TukosLib\TukosFramework as TFK;
 
 class Model extends AbstractModel {
 
-    use Kpis;
     function __construct($objectName, $translator=null){
         $colsDefinition = [
             'stravaid' => 'VARCHAR(30) DEFAULT NULL',
@@ -142,14 +140,10 @@ class Model extends AbstractModel {
         }
         return $tukosStreamData;
     }
-    public function activityKpis(){
-        return ['heartrate_avgload', 'heartrate_load', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'power_avgload', 'power_load'];
-    }
-    public function addStreamsAndMetrics($activity, $athleteId, $needsStreams, $streamCols, $client){
+    public function addStreams($activity, $needsStreams, $streamCols, $client){
         if ($needsStreams){
             $activity = array_merge($activity, $this->stravaStreamsToTukosStreams($client->getActivityStreams($activity['stravaid'], implode(',', array_map(function($tukosName){return substr($tukosName, 0, -6);}, $streamCols)))));
         }
-        $activity = array_merge(Utl::getItem($activity['id'], $this->computeKpis($athleteId, [$activity['id'] => $this->activityKpis()], [$activity['id'] => $activity]), [], []), $activity);
         foreach($streamCols as $col){
             if (!empty($activity[$col])){
                 $activity[$col] = json_encode($activity[$col]);
@@ -181,11 +175,11 @@ class Model extends AbstractModel {
             $tukosActivity['parentid'] = $athleteId;
             $existingTukosActivity = $this->getOne(['where' => ['stravaid' => $activity['id']], 'cols' => ['id', 'timestream']]);
             if (empty($existingTukosActivity)){
-                $this->updateOne($tukosActivity = $this->addStreamsAndMetrics($this->insert($tukosActivity), $athleteId, $synchroStreams, $this->streamCols, $client));
+                $this->updateOne($tukosActivity = $this->addStreams($this->insert($tukosActivity), $synchroStreams, $this->streamCols, $client));
             }else{
                 $tukosActivity['id'] = $existingTukosActivity['id'];
                 if ($this->updateOne($tukosActivity) || ($synchroStreams && empty($existingTukosActivity['timestream']))){
-                    $this->updateOne($tukosActivity = $this->addStreamsAndMetrics($tukosActivity, $athleteId, $synchroStreams, $this->streamCols, $client));
+                    $this->updateOne($tukosActivity = $this->addStreams($tukosActivity, $synchroStreams, $this->streamCols, $client));
                 }
             }
         }

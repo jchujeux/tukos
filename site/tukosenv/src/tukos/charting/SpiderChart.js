@@ -1,6 +1,6 @@
 "use strict";
-define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/PageManager"], 
-function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
+define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/dateutils", "tukos/hiutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/PageManager"], 
+function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngine, Pmg){
 	const setFilterString = function (set, expression, dateCol){
 		const filterStrings = [];
 		if (set.firstdate){
@@ -22,16 +22,17 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 			this.recursionDepth = 0;
 		},
 		setChartValue: function(chartWidgetName){
-			var self = this, form = this.form, valueOf = lang.hitch(form, form.valueOf), chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex;
+			var self = this, form = this.form, valueOf = self.valueOf.bind(self), chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex;
 			if (!hidden && chartWidget.kpisToInclude){
 				dojo.ready(function(){
-					const grid = self.grid, dateCol = self.dateCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter);
+					const grid = self.grid, dateCol = self.dateCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter), chartFilter = chartWidget.get('chartFilter'), precision = {};
 					let collection;
-					if (chartWidget.chartFilter){
-						collection = grid.collection.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
+					if (chartFilter){
+						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
 					}else{
-						collection = grid.collection.sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.sort([{property: dateCol}, {property: 'rowId'}]);
 					}
+					self.recursionDepth +=1;
 					let kpisDescription = JSON.parse(chartWidget.kpisToInclude), itemsSets = (chartWidget.itemsSetsToInclude && JSON.parse(chartWidget.itemsSetsToInclude)) || [{setName: Pmg.message('allitemstodate')}], kpiData = {}, expKpi = {}, chartData = [], axes = {},
 						series = {}, kpiFilters = {}, tableColumns = {kpi: {label: Pmg.message('kpi', form.object), field: 'kpi', renderCell: 'renderContent'}}, idProperty = collection.idProperty, collectionData = utils.toNumeric(collection.fetchSync(), grid),
 						expression = expressionEngine.expression(collectionData, idProperty, missingItemsKpis, valueOf);
@@ -40,14 +41,17 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							const kpiName = kpiDescription.name + (kpiDescription.tooltipunit || '');
 							chartData.push({kpi: kpiName});
 							axes[kpiName] = {'type': 'Base', min: kpiDescription.axisMin || 0, max: kpiDescription.axisMax};
+							precision[kpiName] = kpiDescription.axisPrecision || 0;
 							if (kpiDescription.kpiFilter){
 								kpiFilters[kpiName] = expFilter.expressionToValue(kpiDescription.kpiFilter);
 							}
 						}catch(e){
-							Pmg.addFeedback(Pmg.message('errorkpifilter') + ': ' + e.message + ' - ' + Pmg.message('filter') + ': ' + kpiDescription.kpi);
+							Pmg.addFeedback(Pmg.message('errorkpifilter') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 						}
 					}
-					const plots =  {theSpider: {'type': 'Spider', labelOffset: -10, divisions:  4, precision: 0, seriesFillAlpha: 0.2, seriesWidth: 2, markerSize: 5}};
+					const params = chartWidget.plotsToInclude ? JSON.parse(chartWidget.plotsToInclude)[0] : {}, 
+						  plots =  {theSpider: {'type': 'Spider', labelOffset: params.labelOffset || -10, divisions:  params.divisions || 5, precision: precision, seriesFillAlpha: 0.1, seriesWidth: 2, markerSize: params.markerSiwe || 5,
+						  						axisFont: params.axisFont || "normal normal normal 11pt Arial"}};
 					let previousKpiValuesCache = {};
 					for (const set of itemsSets){
 						try{
@@ -55,13 +59,18 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							if (filterString){
 								setCollection = collection.filter(expFilter.expressionToValue(filterString));
 								setData = utils.toNumeric(setCollection.fetchSync(), grid);
-								previousToDate = dutils.dateString(setData[setData.length - 1][dateCol], [-1, 'day']);
-								previousData = utils.toNumeric(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
+								if (setData.length > 0){
+									previousToDate = dutils.dateString(setData[setData.length - 1][dateCol], [-1, 'day']);
+									previousData = utils.toNumeric(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
+								}else{
+									previousData = [];
+								}
 							}
 							previousKpiValuesCache[setName] = {};
 							let setExp = expressionEngine.expression(utils.toNumeric(setData, grid), idProperty, missingItemsKpis, valueOf, previousKpiValuesCache[setName], previousData, kpiDate);
-							series[setName] = {value: {key: 'kpi', value: setName, tooltip: setName + 'Tooltip'}, options: {plot: 'theSpider', fill: set.fillColor || 'black'}};
-							tableColumns[setName] = {label: setName, field: setName, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}};
+							series[setName] = {value: {key: 'kpi', value: setName, tooltip: setName + 'Tooltip'}, 
+								options: {plot: 'theSpider', fill: set.fillColor || 'black', hasFill: set.fill, stroke: {color: set.fillColor || 'black', style: set.kpimode === 'planned' ? 'shortDash' : ''}}};
+							tableColumns[setName] = {label: hiutils.htmlToText(setName), field: setName, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}};
 							let setKpiData = (kpiData[setName] = {}), setExpKpi = (expKpi[setName] = {});
 							for (const kpiDescription of kpisDescription){
 								const kpiName = kpiDescription.name;
@@ -74,28 +83,18 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 								}
 							}
 						}catch(e){
-							Pmg.addFeedback(Pmg.message('erroritemsset') + ': ' + e.message + ' - ' + Pmg.message('set') + ': ' + JSON.stringify(set));
+							Pmg.addFeedback(Pmg.message('erroritemsset') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('set') + ': ' + JSON.stringify(set));
 						}
 					}
 					for (const set of itemsSets){
 						let i = 0, setName = set.setName;
 						for (const kpiDescription of kpisDescription){
 							try{
-/*
-							const value = expKpi.expressionToValue(kpiDescription.kpi);
-							if (Array.isArray(value)){
-								for (const subValue of value){
-									const subName = kpiDescription.name + subValue[0];
-									chartData[i] = {name: subName, value: subValue[1], tooltip: subName + ': ' + (kpiDescription.displayformat ? utils.transform(subValue[1], kpiDescription.displayformat) : subValue[1]) + ' ' + (kpiDescription.tooltipunit || '')};
-									i += 1;
-								}
-							}else{
-								chartData[i] = {name: kpiDescription.name, value: value, tooltip: kpiDescription.name + ': ' + (kpiDescription.displayformat ? utils.transform(value, kpiDescription.displayformat) : value) + ' ' + (kpiDescription.tooltipunit || '')};
-								i += 1;
-							}
-*/
-								const value = expKpi[setName][kpiDescription.name].expressionToValue(kpiDescription.kpi);
-								if (Array.isArray(value)){
+								//const value = expKpi[setName][kpiDescription.name].expressionToValue(set.kpimode === 'planned' && kpiDescription.plannedkpicol ? "LAST('$' + kpiDescription.plannedkpicol)" : kpiDescription.kpi);
+								const value = set.kpimode === 'planned' && kpiDescription.plannedkpicol && kpiDescription.plannedkpicol[0] !== '$'
+									? kpiDescription.plannedkpicol 
+									: expKpi[setName][kpiDescription.name].expressionToValue(set.kpimode === 'planned' && kpiDescription.plannedkpicol ? "LAST(kpiDescription.plannedkpicol)" : kpiDescription.kpi);
+								if (Array.isArray(value)){//this is untested, and potentially not useful for Spiders
 									for (const subValue of value){
 										const subName = kpiDescription.name + subValue[0], yValue = subValue[1];
 										chartData[i][setName] = value;
@@ -108,7 +107,7 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 									i += 1;
 								}
 							}catch(e){
-								Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
+								Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 							}
 						}
 					}

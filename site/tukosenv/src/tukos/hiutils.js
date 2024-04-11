@@ -3,6 +3,9 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
 	var separator = '|';
     return {
       
+	htmlToText(theHtml){
+		return theHtml.replace(/<[^>]+>/g, ' ');
+	},
     objectTable: function(object, hasCheckboxes, selectedLeaves, atts){
         var onCheckMessagzWasDisplayed = false, checkboxPath = [], maxWidth = atts.maxColWidth || '',
             keyToHtml = lang.hitch(this, function(key){

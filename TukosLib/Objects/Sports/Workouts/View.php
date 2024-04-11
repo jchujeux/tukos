@@ -76,14 +76,14 @@ class View extends AbstractView {
             ]]],
             //'mood' => ViewUtils::storeSelect('mood', $this, 'Mood', [true, 'ucfirst', false, true, false], ['atts' => ['edit' => ['style' => ['width' => '100%', 'maxWidth' => '30em']]]]),
             'athletecomments' => ViewUtils::lazyEditor($this, 'AthleteComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
-            'coachcomments' => ViewUtils::lazyEditor($this, 'CoachWorkoutComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
+            'coachcomments' => ViewUtils::lazyEditor($this, 'CoachSessionComments', ['atts' => ['edit' => ['style' => ['width' => '100%']]]]),
             'avghr' => ViewUtils::numberTextBox($this,'Average Heart Rate', ['atts' => ['edit' => ['onChangeLocalAction' => ['heartrate_avgload' => ['localActionStatus' => $this->updateHeartrate_AvgLoad()]]]]]),
-            'avgpw' => ViewUtils::numberTextBox($this, 'Average Power', ['atts' => ['edit' => ['onChangeLocalAction' => ['heartrate_avgload' => ['localActionStatus' => $this->updatePower_AvgLoad()]]]]]),
+            'avgpw' => ViewUtils::numberTextBox($this, 'Average Power', ['atts' => ['edit' => ['onChangeLocalAction' => ['power_avgload' => ['localActionStatus' => $this->updatePower_AvgLoad()]]]]]),
             'heartrate_load' => ViewUtils::numberTextBox($this, 'Heartrate_load'),
-            'heartrate_avgload' => ViewUtils::numberTextBox($this, 'Heartrate_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
+            'heartrate_avgload' => ViewUtils::numberTextBox($this, 'Heartrate_avgload', ['atts' => ['edit' => [/*'disabled' => true, */'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
             'power_load' => ViewUtils::numberTextBox($this, 'Power_load'),
-            'power_avgload' => ViewUtils::numberTextBox($this, 'Power_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
-            'avgcadence' => ViewUtils::numberTextBox($this, 'Avgcadence', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
+            'power_avgload' => ViewUtils::numberTextBox($this, 'Power_avgload', ['atts' => ['edit' => [/*'disabled' => true, */'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
+            'avgcadence' => ViewUtils::numberTextBox($this, 'Avgcadence', ['atts' => ['edit' => [/*'disabled' => true, */'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
             'mechload' => ViewUtils::numberTextBox($this, 'Mechload'),
             'heartrate_timeabove_threshold_90' => ViewUtils::secondsTextBox($this, 'Heartrate_timeabove_threshold_90'),
             'heartrate_timeabove_threshold' => ViewUtils::secondsTextBox($this, 'Heartrate_timeabove_threshold'),
@@ -170,7 +170,7 @@ EOT
         return <<<EOT
 const sportsman = sWidget.valueOf('#sportsman'), timemoving = sWidget.valueOf('#timemoving'), avgpw = sWidget.valueOf('#avgpw');
 if (sportsman && timemoving && avgpw){
-    Pmg.serverDialog({action: 'Process', object: "sptworkouts", view: 'edit', query: {id: sWidget.valueOf('#id'), sportsman: sportsman, timemoving: timemoving, avgpw: avgpw, params: {process: 'updateTrimpAvgPw', noget: true}}}, {data: {}}).then(
+    Pmg.serverDialog({action: 'Process', object: "sptworkouts", view: 'edit', query: {id: sWidget.valueOf('#id'), sportsman: sportsman, timemoving: timemoving, avgpw: avgpw, params: {process: 'updatePower_AvgLoad', noget: true}}}, {data: {}}).then(
             function(response){
                 response.data.value && sWidget.setValueOf('#power_avgload', response.data.value.power_avgload);
             },

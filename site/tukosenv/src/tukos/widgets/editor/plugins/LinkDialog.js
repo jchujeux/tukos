@@ -460,7 +460,12 @@ define([
 			"<input data-dojo-type='dijit.form.ValidationTextBox' required='false' id='${id}_textInput' " +
 				"name='textInput' data-dojo-props='intermediateChanges:true'/>",
 			"</td></tr><tr><td>",
+			"<label for='${id}_targetSelect'>${target}</label>",
 			"</td><td>",
+			"<select id='${id}_targetSelect' name='targetSelect' data-dojo-type='dijit.form.Select'>",
+			"<option value='standard'>${standard}</option>",
+			"<option value='tukos'>${tukos}</option>",
+			"</select>",
 			"</td></tr><tr><td colspan='2'>",
 			"<button data-dojo-type='dijit.form.Button' type='submit' id='${id}_setButton'>${apply}</button>",
 			"<button data-dojo-type='dijit.form.Button' type='button' id='${id}_cancelButton'>${cancel}</button>",
@@ -470,7 +475,8 @@ define([
 		// htmlTemplate: [protected] String
 		//		String used for templating the `<img>` HTML to insert at the desired point.
 		dijitHtmlTemplate: "<img src=\"${urlInput}\" _djrealurl=\"${urlInput}\" alt=\"${textInput}\" />",
-
+		tukosHtmlTemplate: 
+			'<a href="${urlInput}" onclick="parent.tukos.Pmg.viewUrlInBrowserWindow(\'${urlInput}\', \'${urlInput}\', \'popup, left=100, right=100\');return false;" style="width: 100%;"><img alt="${textInput}" src="${urlInput}" style="max-width: 1200px; width: 95%;"></a>',
 		// tag: [protected] String
 		//		Tag used for the link type (img).
 		tag: "img",

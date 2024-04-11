@@ -11,12 +11,14 @@ function(declare, lang, dct, htmlFormat, TooltipDialog, Pmg) {
        },
        srcDialogDescription: function(){
             var widgetsDescription = {
-                    content: {type: 'Textarea', atts: {label: Pmg.message('htmlSource', 'tukos'), style: {width: '800px', maxHeight: '400px'}}},
+                    content: {type: 'Textarea', atts: {label: Pmg.message('htmlSource', 'tukos'), style: {width: '1000px', maxHeight: '600px'}}},
                     ancestor: {type: 'TextBox', atts:{label: Pmg.message('ancestorTag', 'tukos')}},
+                    newUrl: {type: 'TextBox', atts:{label: Pmg.message('newUrl', 'tukos')}},
+                    description: {type: 'TextBox', atts:{label: Pmg.message('description', 'tukos')}},
                    sourcelang: {type: 'StoreComboBox', atts: {label: Pmg.message('sourceLang', 'tukos'), style: {width: '5em'}, storeArgs: {data: [{id: 'en', name: 'english'}, {id: 'es', name: 'Español'}, {id: 'fr', name: 'français'}]}}},
                    targetlang: {type: 'StoreComboBox', atts: {label: Pmg.message('targetLang', 'tukos'), style: {width: '5em'}, storeArgs: {data: [{id: 'en', name: 'english'}, {id: 'es', name: 'Español'}, {id: 'fr', name: 'français'}]}}}
             };
-            ['srcAncestor', 'srcTranslate', 'srcInsert', 'remove', 'close'].forEach(lang.hitch(this, function(action){
+            ['srcAncestor', 'srcLinkUpdator', 'srcTranslate', 'srcInsert', 'remove', 'close'].forEach(lang.hitch(this, function(action){
                     widgetsDescription[action] = {type: 'TukosButton', atts: {label: Pmg.message(action, 'tukos'), onClick: lang.hitch(this, this[action])}};
             }));
         	return {
@@ -27,12 +29,14 @@ function(declare, lang, dct, htmlFormat, TooltipDialog, Pmg) {
                         contents: {
                         	row1: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['content']},
                         	row2: {
-                        		tableAtts: {cols: 4, customClass: 'labelsAndValues', showLabels: false},
+                        		tableAtts: {cols: 6, customClass: 'labelsAndValues', showLabels: false},
                         		contents: {
                         			col1: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['ancestor']},
                         			col2: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: false}, widgets: ['srcAncestor']},
                         			col3: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['sourcelang', 'targetlang']},
-                        			col4: {tableAtts: {cols: 5, showLabels: false}, widgets: ['srcTranslate']}
+                        			col4: {tableAtts: {cols: 5, showLabels: false}, widgets: ['srcTranslate']},
+                        			col5: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['newUrl', 'description']},
+                        			col6: {tableAtts: {cols: 5, showLabels: false}, widgets: ['srcLinkUpdator']}
                         		}
                         	},
                         	row3: {tableAtts: {cols: 3, showLabels: false}, widgets: ['srcInsert', 'remove', 'close']}
@@ -81,6 +85,16 @@ function(declare, lang, dct, htmlFormat, TooltipDialog, Pmg) {
     
         	paneGetWidget('content').set('value', htmlFormat.prettyPrint(ancestorElement/*.outerHTML*/, 2));
         },
+        srcLinkUpdator: function(){
+	    	const  pane = this.srcDialog.pane, valueOf = lang.hitch(pane, pane.valueOf), sourceContent = valueOf('content'), newUrl = pane.getWidget('newUrl').get('value'), description = pane.getWidget('description').get('value'), 
+	    		   urlRegExp = new RegExp('(https://[^"\']*/[^"\']*)', 'g'),
+				   targetContent = sourceContent.replaceAll(urlRegExp, function(match, p1){
+					   	return (newUrl || p1);
+					}).replaceAll(/alt="([^"]*)/g, function(match, p1){
+						return 'alt="' + (description || p1);
+					});
+            pane.setValueOf('content', targetContent);
+		},
         srcTranslate: function(){//thanks to https://www.googlecloudcommunity.com/gc/AI-ML/Can-the-Google-Translate-API-v2-be-used-in-the-frontend/m-p/598403
 	    	var pane = this.srcDialog.pane, valueOf = lang.hitch(pane, pane.valueOf), content = valueOf('content'), sourceLang = (pane.getWidget('sourcelang').get('item') || {}).id, targetLang = (pane.getWidget('targetlang').get('item') || {}).id;
 	    	if (content && sourceLang && targetLang){

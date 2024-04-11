@@ -48,6 +48,8 @@ class BlogView extends Translator{
             $blogTemplate = "CrawlerBlogTemplate.php";
             $view->title = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['name'];
             $view->content = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['comments'];
+            $view->structuredDataHeaderScript = Tfk::$registry->blogStructuredDataHeaderScript;
+            
         }else{
             $packagesLocation = ['dojo', 'dijit', 'dojox', 'dstore', 'dgrid', 'tukos', 'dojoFixes', 'redips'];
             array_walk($packagesLocation, function(&$module){

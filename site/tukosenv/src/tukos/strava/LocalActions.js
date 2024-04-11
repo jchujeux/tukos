@@ -18,14 +18,17 @@ function(declare, lang, utils, Pmg){
 			}
 		},
 		synchronizeWithStrava: function(pane){
-			var self = this, form = pane.form, athleteid = form.valueOf(this.athlete), grid = form.getWidget(this.grid), contentMessage = !athleteid ?  ' & <br> '  + Pmg.message('needtodefineathlete') : '';
+			var self = this, form = pane.form, athleteid = form.valueOf(this.athlete), coachid = form.valueOf(this.coach), grid = form.getWidget(this.grid), contentMessage = !athleteid ?  ' & <br> '  + Pmg.message('needtodefineathlete') : '';
 			pane.close();
 			if (contentMessage){
 				Pmg.alert({title: Pmg.message('cannotsynchronizestrava'), content: contentMessage});
 			}else{
             	Pmg.setFeedback(Pmg.message('actionDoing'));
-            	form.serverDialog({action:'Process', query: {athleteid: athleteid, synchrostart: pane.valueOf('synchrostart'), synchroend: pane.valueOf('synchroend'), synchrostreams: pane.valueOf('synchrostreams'), 
+            	form.serverDialog({action:'Process', query: {athleteid: athleteid, coachid: coachid, synchrostart: pane.valueOf('synchrostart'), synchroend: pane.valueOf('synchroend'), synchrostreams: pane.valueOf('synchrostreams'), 
             			params:  JSON.stringify({process: 'stravaSynchronize', save: false, noget: true})}}, form.changedValues(), form.get('postElts'), Pmg.message('actionDone')).then(function(response){
+					if (response.usersItems){
+						grid.usersAclCache = {sportsmanId: athleteid, coachId: coachid, usersItems: response.usersItems};
+					}
 					self.mergeStravaActivities(grid, response.stravaActivities);
 				});
 			}
@@ -47,7 +50,7 @@ function(declare, lang, utils, Pmg){
 								  dayItems = collection.filter(filter.eq(self.dayDateCol, startdate).eq(itemSportCol, itemSportToSync).ni(idp, synchedItems)).sort(self.daySortCol).fetchSync();
 							delete mappedActivity.sport;
 							if(dayItems.length >=1){
-								grid.updateRow(lang.mixin({idp: dayItems[0][idp]}, mappedActivity));
+								grid.updateRow(lang.mixin({[idp]: dayItems[0][idp]}, mappedActivity));
 								synchedItems.push(dayItems[0][idp]);
 							}else{
 								mappedActivity[itemSportCol] = itemSportToSync;

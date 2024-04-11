@@ -163,7 +163,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/dom-attr", 
                 if (isWorksheet){
                 	var rows = tableInfo.rows, rCols = tableInfo.rCols, trs = tableInfo.trs, sheetName = table.id, tds = Array.apply(null, trs[0].children);
                 	cols = tableInfo.cols;
-                	for (var c = colIndex; c < cols; c++){
+                	for (var c = colIndex; c < rCols[0]; c++){
                 		tds[c].innerHTML = utils.alphabet(c);
                 	}
                 	for (var r = 1; r < rows; r++){

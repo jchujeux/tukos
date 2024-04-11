@@ -37,7 +37,7 @@ class View extends EditView{
                                     'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'widgetWidths' => ['50%', '50%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
                                     'widgets' => ['comments', 'calendar']],
                                 'rowcharts' => [
-                                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'id' => 'roadTrackAnalysis', 'widgetCellStyle' => ['verticalAlign' => 'top']],
+                                    'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'id' => 'roadTrackAnalysis'],
                                     'widgets' => [],
                                 ],
                                 'row4' => [

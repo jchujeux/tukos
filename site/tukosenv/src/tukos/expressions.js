@@ -3,7 +3,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
 	var expressionReferenceRegExp = /(\b)([a-z][a-z0-9]*)![$]?([A-Z]+)[$]?(\d+)|(\b)([a-z][\w]*)(\b[^.(]|$)|[$]?([A-Z]+)[$]?([0-9]+)/g,
 		expressionNameRegExp = /(\w*)!?([A-Z]*)(\d*)/,
 		cellReferenceRegExp = /([^\w])([$]?)([A-Z]+)([$]?)(\d+)\b/g,
-		expressionReferenceRegExpTemplate = '(\\b)(${name})![$]?(${col})[$]?(${row})|(\\b)(${name})(\\b[^.(]|$)|[$]?(${col})[$]?(${row})\\b',
+		expressionReferenceRegExpTemplate = '(\\b)(${name})!([$]?)(${col})([$]?)(${row})|(\\b)(${name})(\\b[^.(]|$)|([$]?)(${col})([$]?)(${row})\\b',
     	expressionTemplate =
     		'<div class="tukosExpression" id="e_${name}" style="display: inline;" title="${name}" onclick="parent.tukos.onExpClick(this);">${visualPreTag}' +
     		'<textarea onblur="parent.tukos.onExpBlur(this);" onclick="event.stopPropagation();" style="display: none; height: 18px;">${formula} </textarea>' +
@@ -138,14 +138,14 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
             		textArea = self.textArea(referencingFormula);
             		textArea.innerHTML = textArea.innerHTML.replace(
             				regExp, 
-            				function(match, fPre, fName, fCol, fRow, pre, name, postName, col, row){
+            				function(match, fPre, fName, fDollarCol, fCol, fDollarRow, fRow, pre, name, postName, dollarCol, col, dollarRow, row){
             					dcl.replace(referencingFormula, newId, expression.id);
             					return  (fName === undefined && name === undefined ? '' : newNameObject.name) + 
             							fCol === undefined  && col === undefined 
             									? postName === undefined ? '' : postName
             									: fCol === undefined
-        											? newNameObject.col + newNameObject.row
-            										: '!' + newNameObject.col + newNameObject.row;
+        											? (dollarCol || '') + newNameObject.col + (dollarRow || '') + newNameObject.row
+            										: '!' + (fDollarCol || '') + newNameObject.col + (fDollarRow || '') + newNameObject.row;
             		});
             	});
         	}

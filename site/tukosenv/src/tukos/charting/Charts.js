@@ -5,31 +5,25 @@ function(declare, lang, utils){
 	return declare(null, {
         constructor: function(args){
 			lang.mixin(this, args);
-            const self = this, requiredClasses = {}, form = self.form, grid = self.grid, dateCol = self.dateCol, charts = self.charts;
-            this.chartTypeOf = {}
+            const self = this, form = self.form, grid = self.grid, dateCol = self.dateCol, charts = self.charts;
+            this.chartTypeOf = {};
+            this.subValuesCache = {};
+            form.chartWidgets = {};
             for (const chart of charts){
                 if (chart.chartType){
                 	chart.widgetName = 'chart' + chart.id;
-                	requiredClasses[chart.chartType] = classes[chart.chartType];
-                	this.chartTypeOf[chart.widgetName] = chart.chartType;
+                	require([classes[chart.chartType]], function(chartClass){
+						form.chartWidgets[chart.widgetName] = new chartClass({form: form, grid: grid, dateCol: dateCol, valueOf: self.valueOf});
+					})
 				}
             }
-            if (!utils.empty(requiredClasses)){
-            	const requiredTypes = Object.keys(requiredClasses);
-	            form.chartUtils = {};
-	            require(requiredTypes.map(function(i){return requiredClasses[i];}), function(){
-	                for (let i in requiredTypes){
-	                    form.chartUtils[requiredTypes[i]] = new arguments[i]({form: form, grid: grid, dateCol: dateCol});
-	                }
-				});
-			}
         },
 		_setChartsValue: function(){
-            const form = this.form, charts = this.charts;
-            if (form.chartUtils){
-	            for (const chart of charts){
-	                form.chartUtils[chart.chartType] && form.chartUtils[chart.chartType].setChartValue(chart.widgetName);
-	            }
+            const form = this.form;
+            if (form.chartWidgets){
+	            for (let  chartWidgetName in form.chartWidgets){
+					form.chartWidgets[chartWidgetName].setChartValue(chartWidgetName);
+				}
 			}
 		},
 		setChartsValue: function(){
@@ -39,8 +33,25 @@ function(declare, lang, utils){
 			this.debouncedChartsValue();
 		},
 		setChartValue: function(chartWidgetName){
-			const form = this.form, chartUtilsInstance = form.chartUtils && form.chartUtils[this.chartTypeOf[chartWidgetName]];
-			chartUtilsInstance && chartUtilsInstance.setChartValue(chartWidgetName);
+			const form = this.form, chartWidgets = form.chartWidgets;
+			chartWidgets && chartWidgets[chartWidgetName] && chartWidgets[chartWidgetName].setChartValue(chartWidgetName);
+		},
+		valueOf: function(widgetName){
+			const nameAndSubName = widgetName.split('|'), form = this.form;
+			switch(nameAndSubName.length){
+				case 1:
+					return form.valueOf(widgetName);
+				case 2:
+					const name = nameAndSubName[0], subName = nameAndSubName[1], subValuesCache = this.subValuesCache;
+					if (subValuesCache[name] && subValuesCache[name][subName] !== undefined){
+						return subValuesCache[name][subName];
+					}else{
+						lang.setObject(name, subName, subValuesCache);
+						return undefined;
+					}
+				default:
+					Pmg.setFeedbackAlert(Pmg.message('wrongwidgetsubname'));
+			}
 		}
     });
 }); 

@@ -397,11 +397,6 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 						case 'translate':
 							if (formatOptions.translations){
 								value = this.translate(value, formatOptions.translations);
-								/*this.forEach(formatOptions.translations, function(translated, untranslated){
-									if (value.includes(untranslated)){
-										value = value.replaceAll(untranslated, translated);
-									}
-								});*/
 							}else{
 								value = Pmg.message(value, (formatOptions || {}).object);
 							}

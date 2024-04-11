@@ -270,7 +270,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 			let columnsDescription;
 			const translateContent = function(customContent, description){
 				utils.forEach(customContent, function(subContent, key){
-					const subDescription = typeof description === 'object' ? description[key] : {};
+					const subDescription = typeof description === 'object' ? description[key] || {} : {};
 					if (typeof subContent === 'object'){
 						switch (key){
 							case 'widgetsDescription':
@@ -281,8 +281,8 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 								break;
 							case 'columns':
 								utils.forEach(subContent, function(widgetContent, widgetName){
-									translateContent(widgetContent, subDescription[widgetName]);
-									widgetContent["#tKey"] = subDescription[widgetName].label;
+									translateContent(widgetContent, subDescription && subDescription[widgetName]);
+									widgetContent["#tKey"] = subDescription && subDescription[widgetName] ? subDescription[widgetName].label : widgetName;//For DynamicChart series do not correspond to a widgetName and should not be translated (user entry)
 								});
 								break;
 							case 'series':

@@ -155,7 +155,7 @@ class View extends AbstractView {
 		$subObjects = [
 			'sptworkouts' => [
 				'atts' => [
-				    'title' => $this->tr('Workouts'), 'allDescendants' => true, 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'startdate',
+				    'title' => $this->tr('Workouts'), 'allDescendants' => true, 'allowApplicationFilter' => 'no', 'startDateTimeCol' => 'startdate',
 				        'endDateTimeCol' => 'startdate'/*, 'freezeWidth' => true*/, 'minWidth' => '40',
 					'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
 					'onChangeNotify' => [
@@ -262,8 +262,7 @@ EOT;
 	    $namesToTranslate = array_merge(
 	        ['fromdate', 'duration', 'todate', 'displayeddate', 'stsdays', 'ltsdays', 'initialsts', 'initiallts', 'initialhracwr', 'displayfromdate', 'displayfromsts', 'displayfromlts', 
 	           'startdate', 'intensity', 'stress', 'distance', 'elevationgain', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'sts', 'lts', 'tsb', 'hracwr', 'timemoving', 'avghr', 'avgpw', 'heartrate_load', 'power_load', 'heartrate_avgload', 'power_avgload',
-	           'avgcadence', 'mechload'/*, 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110'*/, 'heartrate', 'power', 'avgload', 'load', 'timeabove', 'timebelow', 'loadabove', 'loadbelow', 'threshold', 'timecurve',
-	           'durationcurve', 'shrink'],
+	           'avgcadence', 'mechload', 'heartrate', 'power', 'slope', 'avgload', 'load', 'timeabove', 'timebelow', 'loadabove', 'loadbelow', 'threshold', 'timecurve', 'durationcurve', 'shrink', 'performed', 'planned'],
 	        Sports::$sportOptions, Sports::$modeOptions);
 	    return $this->chartPreMergeCustomizationAction($response, $response['dataLayout']['contents']['row2']['contents']['col1']['contents']['rowcharts'], $customMode, 'sptworkouts', 'startdate', ['fromdate', 'todate', 'displayeddate', 'displayfromdate'], 
 	        $namesToTranslate, 'stravaid', 'displayeddate');
@@ -404,23 +403,34 @@ EOT
 	public function workoutCreationAclLocalAction(){
 	    $tukosBackOfficeUserId = Tfk::tukosBackOfficeUserId;
 	    return <<<EOT
-//const self = this, idp = this.store.idProperty;
-Pmg.serverDialog({object: 'users', view: 'Edit', action: 'GetItems', query: {storeatts: JSON.stringify({where: [{col: 'parentid', opr: 'IN', values: [row.sportsman, this.valueOf('coach')]}], cols: ['id', 'parentid'], promote: true})}}).then(
-	function (response){
-        if (response.data.items.length > 0){
-            let acl = {1: {rowId: 1, userid: $tukosBackOfficeUserId, permission:"3"}}, rowId = 2;
-            response.data.items.forEach(function(item){
-                acl[rowId] = {rowId: rowId, userid: item.id, permission:"3"};
-                rowId += 1;
-            });
-            const toUpdate = {acl:  JSON.stringify(acl)};
-            toUpdate[idp] = row[idp];
-            self.updateRow(toUpdate);
-        }else{
-            Pmg.setFeedback(Pmg.message('sportsmanorcoachhasnouserassociatednoacl', 'sptplans'), null, null, true);
-        }
-	}
-);
+//const self = this;// idp = this.store.idProperty;
+const sportsmanId = this.valueOf('parentid'), coachId = this.valueOf('coach');
+const setAcls = function(usersItems){
+    let acl = {1: {rowId: 1, userid: $tukosBackOfficeUserId, permission:"3"}}, rowId = 2;
+    usersItems.forEach(function(item){
+        acl[rowId] = {rowId: rowId, userid: item.id, permission:"3"};
+        rowId += 1;
+    });
+    const toUpdate = {acl:  JSON.stringify(acl)};
+    toUpdate[idp] = row[idp];
+    self.updateRow(toUpdate);
+};
+if (self.usersAclCache && self.usersAclCache.sportsmanId === sportsmanId && self.usersAclCache.coachId === coachId){
+    if (self.usersAclCache.usersItems.length > 0){
+        setAcls(self.usersAclCache.usersItems);
+    }
+}else{
+    Pmg.serverDialog({object: 'users', view: 'Edit', action: 'GetItems', query: {storeatts: JSON.stringify({where: [{col: 'parentid', opr: 'IN', values: [sportsmanId, coachId]}], cols: ['id', 'parentid'], promote: true})}}).then(
+    	function (response){
+            if (response.data.items.length > 0){
+                setAcls(response.data.items);
+            }else{
+                Pmg.setFeedback(Pmg.message('sportsmanorcoachhasnouserassociatednoacl', 'sptplans'), null, null, true);
+            }
+            self.usersAclCache = {sportsmanId: sportsmanId, coachId: coachId, usersItems: response.data.items};
+    	}
+    );
+}
 EOT
 	    ;
 	}
@@ -465,7 +475,7 @@ if (!this.isBulkRowAction){
         }
     }
     if (startingRow !== undefined){
-        this.tsbCalculator.updateRowAction(this, startingRow ? this.store.getSync(startingRow[this.store.idProperty]) : false, true);
+        this.tsbCalculator && this.tsbCalculator.updateRowAction(this, startingRow ? this.store.getSync(startingRow[this.store.idProperty]) : false, true);
     }
     delete this.rowBeforeChange;
 }

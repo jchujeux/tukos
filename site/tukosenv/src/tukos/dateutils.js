@@ -226,7 +226,7 @@ define(["dojo", "tukos/utils", "tukos/PageManager"], function(dojo, utils, Pmg){
                 return duration;
             } 
         },
-        formulaStringToDate: function(formulaString, valueOf){// (day|week|month)[<number>][$widgetname][,(nameOfDay|dayNumberInMonth)]) | YYYY-MM-DD
+        formulaStringToDate: function(formulaString, valueOf){// (day|week|month)[<number>][$widgetname][;(nameOfDay|dayNumberInMonth)]) | YYYY-MM-DD
 			let returnDate;
 			let [unit, offset, selectedDate, targetDay] = formulaString.replace(/\s/g, '').replace('$', '@').match(/([^+-@;]*)([+-]?\d*)([^;]*)[;]?(.*)/i).slice(1);
 			if (unit){

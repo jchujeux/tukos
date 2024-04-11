@@ -40,13 +40,13 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 						}
 					});
 					if (chartWidget.chartFilter){
-						collection = grid.collection.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
 					}else{
-						collection = grid.collection.sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.sort([{property: dateCol}, {property: 'rowId'}]);
 					}
 					const idProperty = collection.idProperty, collectionData = collection.fetchSync();
 					if (collectionData.length > 1){
-						const data = utils.toNumeric(collectionData, grid), valueOf = form.valueOf.bind(form);//lang.hitch(form, form.valueOf);
+						const data = utils.toNumeric(collectionData, grid), valueOf = self.valueOf.bind(self);
 						let previousKpiValuesCache = {}, filter = collection.Filter(), expression = expressionEngine.expression(data, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache);
 						plotsDescription.forEach(function(plotDescription){
 							plots[plotDescription.name] = plotDescription;
@@ -96,13 +96,13 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 								kpiValue = expression.expressionToValue(kpiDescription.kpi);
 								if (Array.isArray(kpiValue)){
 									for (const subValue of kpiValue){
-										fillChartAndDataTables(kpiDescription, category + subValue[0], subValue[1]);
+										fillChartAndDataTables(kpiDescription, category + ' ' + subValue[0], subValue[1]);
 									}
-								}else{
+								}/*else{
 									fillChartAndDataTables(kpiDescription, category, kpiValue);
-								}
+								}*/
 							}catch(e){
-								Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
+								Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 							}
 						});
 						if (horizontalAxisDescription.max && chartData.length > horizontalAxisDescription.max && horizontalAxisDescription.adjustmax){

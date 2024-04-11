@@ -42,22 +42,28 @@ trait AuthorizeAndSynchronize {
             }
         }
     }
-    public function stravaSynchronize($query, $atts = []){//needs $this->stravaCols(), which must include at least stravaid, startdate, starttime
+    public function stravaSynchronize($query, $atts = []){//needs $this->stravaCols(), which must include at least stravaid, startdate, starttime, and $this->activityKpis(), the kpis to compute during synchronization, and $this->sessionsModel() 
         $athleteId = $query['athleteid'];
         $synchroStreams = $query['synchrostreams'] === 'false' ? false : $query['synchrostreams'];
         $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
         $targetView = Tfk::$registry->get('objectsStore')->objectView('sptworkouts');
         $stravaCols = $this->stravaCols();
+        $sessionsModel = $this->sessionsModel();
         $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams);
         $stravaActivities = $stravaActivitiesModel->getAllExtended(['where' => [['col' => 'startdate', 'opr' => '>=', 'values' => $query['synchrostart']], ['col' =>'startdate', 'opr' => '<=', 'values' => $query['synchroend']]],
             'cols' => $stravaCols, 'orderBy' => ['startdate' =>  'ASC']]);
+        foreach ($stravaActivities as &$activity){
+            $activity = array_merge(Utl::getItem($activity['stravaid'], $sessionsModel->computeKpis($athleteId, [$activity['stravaid'] => $this->activityKpis()], 'stravaid'), [], []), $activity);
+            
+        }
         $stravaActivities = Utl::objToEdit($stravaActivities, $targetView->dataWidgets);
         $stravaActivities = Utl::toAssociativeGrouped($stravaActivities, 'startdate');
         foreach ($stravaActivities as $activities){
             $times = array_column($activities, 'starttime');
             array_multisort($times, SORT_ASC, $activities);
         }
-        return ['stravaActivities' => $stravaActivities];
+        $usersItems = Tfk::$registry->get('objectsStore')->objectModel('users')->getAllExtended(['where' => [['col' => 'parentid', 'opr' => 'IN', 'values' => [$query['athleteid'], $query['coachid']]]], 'cols' => ['id', 'parentid']]);
+        return ['stravaActivities' => $stravaActivities, 'usersItems' => $usersItems];
     }
 }
 ?>

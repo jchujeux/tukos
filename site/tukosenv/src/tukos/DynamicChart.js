@@ -28,7 +28,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 
 			if (this.hasOwnProperty('showTable')){
             	const table = this.table = dct.create('table', {style: {tableLayout: 'fixed', width: '100%'}}, this.domNode), tr = dct.create('tr', {}, table);
-            	this.tableNode = dct.create('div', {style: tableStyle}, dct.create('td', {style: {width: this.tableWidth || "20%"}}, tr));
+            	this.tableNode = dct.create('div', {style: tableStyle}, dct.create('td', {style: {verticalAlign: 'top', width: this.tableWidth || "20%"}}, tr));
             	this.chartNode = dct.create('div', {style: chartStyle}, dct.create('td', {style: {verticalAlign: 'top'}}, tr));
 				this.watch('showTable', lang.hitch(this, function(){
 	            	this.set('value', this.value);
@@ -106,6 +106,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
             	if (value.title){
 					this.set('tableContainerLabel', value.title);
 					this.set('title', value.title);
+					this.set('label', value.title);
 				}
             	//value.series = utils.mergeRecursive(this.series, value.series);
             	if (this.series){
@@ -159,7 +160,7 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 	                    }
                     }
                     const showTable = this.showTable, tableNode = this.tableNode, chartNode = this.chartNode, width = parseInt(this.chartWidth) || dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height"),
-                    	tableHeight = (parseInt(height)-20) + 'px';
+                    	tableHeight = (parseInt(height)) + 'px';
 					if (showTable === 'yes'){
                 		dst.set(this.table, {tableLayout: "fixed"});
                 		dst.set(tableNode, {display: "block"});
@@ -187,9 +188,9 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 					for (let seriesName in series){
 						const serie = series[seriesName];
                         if (serie.arrayValues){
-                        	chart.addSeries(seriesName, series.arrayValues);
+                        	chart.addSeries(seriesName, serie.arrayValues);
 						}else{
-                        	chart.addSeries(seriesName, new StoreSeries(store, kwArgs, serie.value), serie.options);
+                        	chart.addSeries(seriesName, new StoreSeries(store, serie.kwArgs || kwArgs, serie.value), serie.options);
 						}
                     }
 					if (chartClasses['MouseIndicator'] && !chart.mouseIndicator){
@@ -197,7 +198,6 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 					}
                     try {
                         chart.render();
-                        chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, height);
                     }catch(err){
                         console.log('error while rendering or resizing chart for widget: ' + this.widgetName + ' - ' + err.message);
                     }
@@ -212,6 +212,10 @@ function(declare, lang, dct, dst, Deferred, Widget, Chart, theme, StoreSeries, O
 							self.legendWidget.refresh();
 						}
 					}
+                    chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, dst.get(this.chartNode, "height"));
+                    /*if (showTable === 'YES'){
+						this.tableWidget.resize(this.tableWidget.domNode, 'width', dst.get(this.tableNode.parentNode, "height"));
+					}*/
 	            }));
             }
         },

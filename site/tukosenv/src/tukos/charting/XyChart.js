@@ -42,13 +42,14 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 						}
 					});
 					if (chartWidget.chartFilter){
-						collection = grid.collection.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
 					}else{
-						collection = grid.collection.sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.sort([{property: dateCol}, {property: 'rowId'}]);
 					}
 					const idProperty = collection.idProperty, collectionData = collection.fetchSync();
 					if (collectionData.length > 1){
-						const data = utils.toNumeric(collectionData, grid), valueOf = form.valueOf.bind(form);//lang.hitch(form, form.valueOf);
+						self.recursionDepth +=1;
+						const data = utils.toNumeric(collectionData, grid), valueOf = self.valueOf.bind(self);//lang.hitch(form, form.valueOf);
 						let previousKpiValuesCache = {}, filter = collection.Filter(), expression = expressionEngine.expression(data, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache);
 						plotsDescription.forEach(function(plotDescription){
 							plots[plotDescription.name] = plotDescription;
@@ -56,6 +57,15 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 								plotDescription.styleFunc = function(item){
 									return item.fill ? {fill: item.fill, stroke:{color: item.fill, width: 2}} : {};
 								}
+							}
+							if (plotDescription.type === 'Indicator'){
+								if (!plotDescription.lineStroke){
+									plotDescription = lang.mixin(plotDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: 'red', style: 'shortDash', width: 2}, 
+											offset: {x:plotDescription.xlabeloffset || 0, y: plotDescription.ylabeloffset || 0}, labelFunc: function(){
+										return plotDescription.label || this.values;
+									}});
+								}
+								plotDescription.values = Number(plotDescription.values);
 							}
 						});
 						const adjustTableAndChartToXYlength = function(xyArray){
@@ -78,16 +88,16 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 									previousData = utils.toNumeric(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
 									expression = expressionEngine.expression(kpiData, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache, previousData, kpiDate);
 								}
-								/*
-								* Here we are ready to define the x-y curve for that kpi description row: tableColumns, tableData, series, chartData, knowing each curve point has its x,y and tooltip value,
-								*  
-								*/
-								const name = kpiDescription.name, xName = name + ' (x)', yName = name + ' (y)', zName = name + ' (z)', tooltipName = name + 'Tooltip', plotName = kpiDescription.plot, plot = plots[plotName], xAxis = plot.hAxis, yAxis = plot.vAxis, 
-									  xAxisIsLogarithmic = axes[xAxis].isLogarithmic, yAxisIsLogarithmic = axes[yAxis].isLogarithmic;
+								const name = kpiDescription.name, xName = name + ' (x)', yName = name + ' (y)', zName = name + ' (z)', tooltipName = name + 'Tooltip', fillName = name + 'Fill', plotName = kpiDescription.plot, 
+										plot = plots[plotName], xAxis = plot.hAxis, yAxis = plot.vAxis, xAxisIsLogarithmic = axes[xAxis].isLogarithmic, yAxisIsLogarithmic = axes[yAxis].isLogarithmic;
 								tableColumns.push({field: xName, label: xName}, {field: yName, label: yName});
-								series[name] = plot.type === 'Bubble' 
-									? {value: plot.markersProgressColor ? {x: xName, y: yName, size: zName, tooltip: tooltipName, fill: 'fill'} : {x: xName, y: yName, size: zName, tooltip: tooltipName}, options: {plot: plotName, label: name, legend: name}}
-									: {value: plot.markersProgressColor ? {x: xName, y: yName, tooltip: tooltipName, fill: 'fill'} : {x: xName, y: yName, tooltip: tooltipName}, options: {plot: plotName, label: name, legend: name}};
+								series[name] = {value: {x: xName, y: yName, tooltip: tooltipName}, kwArgs: {query: function(item){return item[xName] !== undefined;}}, options: {plot: plotName, label: name, legend: name}};
+								if (plot.type === 'Bubble'){
+									series[name].value.size = zName;
+								}
+								if (plot.markersProgressColor){
+									series[name].value.fill = fillName;
+								}
 								const xyValues = expression.expressionToValue(kpiDescription.kpi), xyLength = xyValues.length;
 								adjustTableAndChartToXYlength(xyValues);
 								
@@ -98,12 +108,12 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 									if (plot.type === 'Bubble'){
 										tableData[index1][zName] = chartData[index][zName] = xyValue[2];
 									}
-									chartData[index][tooltipName] = name + ': {' + xyValue[0] + ', ' + xyValue[1] + (xyValue[2] ? '; ' + xyValue[2] : '') + '}' + (kpiDescription.tooltipunit === undefined ? '' :  kpiDescription.tooltipunit);
+									chartData[index][tooltipName] = name + ': {' + utils.transform(xyValue[0], kpiDescription.xdisplayformat) + ', ' + utils.transform(xyValue[1], kpiDescription.ydisplayformat) + (xyValue[2] ? '; ' + xyValue[2] : '') + '}' + 
+										(kpiDescription.tooltipunit === undefined ? '' :  kpiDescription.tooltipunit);
 									if (plot.markersProgressColor){
 										const colorRatio = index / xyLength;
-										chartData[index].fill = colorRatio <= 0.25 ? Color.blendColors(white, yellow, colorRatio).toHex() : (colorRatio <= 0.5 ? Color.blendColors(yellow, orange, colorRatio).toHex() : 
+										chartData[index][fillName] = colorRatio <= 0.25 ? Color.blendColors(white, yellow, colorRatio).toHex() : (colorRatio <= 0.5 ? Color.blendColors(yellow, orange, colorRatio).toHex() : 
 											(colorRatio <= 0.75 ? Color.blendColors(orange, red, colorRatio).toHex() : Color.blendColors(red, darkRed, colorRatio).toHex()));
-										//chartData[index].fill = colorRatio <= 0.5 ? Color.blendColors(yellow, orange, colorRatio).toHex() : Color.blendColors(orange, red, colorRatio).toHex();									}
 									}
 									if (xAxisIsLogarithmic){
 										chartData[index][xName] = Math.log(xyValue[0]) / log10;
@@ -113,7 +123,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 									}
 								});
 							}catch(e){
-								Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('kpi') + ': ' + name);
+								Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 							}
 						});
 					}
@@ -157,7 +167,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 					}else{
 						chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
 						self.recursionDepth = 0;
-				}
+					}
 				});
 			}		  
 		},

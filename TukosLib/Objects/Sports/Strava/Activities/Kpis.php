@@ -10,7 +10,8 @@ trait Kpis {
     public static $beta = 2.6, $refCadence = 180, $thresholdsMap = ['heartrate' => 'hrthreshold', 'power' => 'ftp', 'speed' => 'speedthreshold'], $minsMap = ['heartrate' => 'hrmin'],
         $functionsMap = ['avgload' => 'avgLoad', 'load' => 'load', 'timeinzones' => 'timeInZones', 'timeabove' => 'timeAbove', 'timebelow' => 'timeBelow', 'loadinzones' => 'loadInZones', 'loadabove' => 'loadAbove', 'loadbelow' => 'loadBelow', 
             'timecurve' => 'timeCurve', 'durationcurve' => 'durationCurve', 'shrink' => 'shrink'],
-        $streamsMap = ['heartrate' => 'heartrate', 'power' => 'watts', 'distance' => 'distance', 'cadence' => 'cadence', 'grade' => 'grade_smooth', 'speed' => 'velocity_smooth'],
+        $streamsMap = ['heartrate' => 'heartrate', 'power' => 'watts', 'distance' => 'distance', 'cadence' => 'cadence', 'slope' => 'grade_smooth', 'speed' => 'velocity_smooth'],
+        $metricsPrecision = ['heartrate' => 0, 'power' => 0, 'distance' => 1, 'cadence' => 0, 'slope' => 1, 'speed' => 2],
         $athleteParamsDescription = ['heartrate' => ['threshold' => 'hrthreshold', 'sex' => 'sex', 'min' => 'hrmin'], 'power' => ['threshold' => 'ftp', 'sex' => 'sex'], 'mechanical' => ['threshold' => 'speedthreshold']],
         $kpisDescription = [
             'heartrate_avgload' => ['metrics' => 'avghr', 'activityParams' => ['secondsActive' => 'timemoving']],
@@ -25,24 +26,33 @@ trait Kpis {
             'loadinzones' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
             'loadabove' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
             'loadbelow' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
-            'shrink' => ['metrics' => 'stream', 'otherParams' => ['intval' => true]],
+            'shrink' => ['metrics' => 'stream'],
             'heartrate' => ['otherParams' => ['uncertainty' => 3]],
             'power' => ['otherParams' => ['uncertainty' => 10]],
+            'slope' => ['otherParams' => ['uncertainty' => 0.1]],
         ];
-    public static function getDescription($name, $formula){
+    public static function metricStream($name){
+        return self::$streamsMap[$name] . 'stream';
+    }
+    public static function isMetricStream($name){
+        return isset(self::$streamsMap[$name]);
+    }
+    public static function getDescription($name, $formula, $param1 = ''){
         $description = isset(self::$kpisDescription[$name.'_'.$formula]) ? self::$kpisDescription[$name.'_'.$formula] : Utl::getItem($formula, self::$kpisDescription, []);
         if (Utl::getItem('metrics', $description) === 'stream'){
-            $description['metrics'] = self::$streamsMap[$name].'stream';
+            $description['metrics'] = self::metricStream($name);
         }
         if (strpos($formula, 'time') === false  && strpos($formula, 'duration') === false&& strpos($formula, 'shrink') === false){
-            $description['athleteParams'] = Utl::getItem($name, self::$athleteParamsDescription, []);
+            $description['athleteParams'] = Utl::getItem(self::isMetricStream($param1) ? $param1 : $name, self::$athleteParamsDescription, []);
         }
-        if (isset($description['otherParams']) && isset(self::$kpiDescriptions[$name])){
-            $description['otherParams'] = array_merge($description['otherParams'], Utl::getItem('otherParams', self::$kpisDescription[$name], []));
+        if (Utl::drillDown($description, ['otherParams', 'fuzzyType']) && isset(self::$kpisDescription[$name])){
+            //$description['otherParams'] = array_merge($description['otherParams'], Utl::getItem('otherParams', self::$kpisDescription[$name], []));
+            $description = Utl::array_merge_recursive_replace($description, self::$kpisDescription[$name]);
         }
-        if ($name === 'power' && strpos($formula, 'load') !== false && strpos($formula, 'avg') === false){
+        if (($name === 'power' || $param1 === 'power')  && strpos($formula, 'avg') === false){
             $description['otherParams'] = isset($description['otherParams']) ? array_merge($description['otherParams'], ['smoothSeconds' => 30]) : ['smoothSeconds' => 30];
         }
+        $description['precision'] = self::$metricsPrecision[$name];
         return $description;
     }
     public static function valueOf($name){
@@ -53,21 +63,22 @@ trait Kpis {
         }
     }
     public static function hasRequiredAthleteParams($kpiName, $athlete){
-        [$name, $formula, $param1] = array_pad(explode('_', $kpiName), 3, '');
-        return empty(array_diff(Utl::getItem('athleteParams', self::getDescription($name, $formula), []), array_keys($athlete))) && $param1 === 'threshold' ? !empty($athlete[self::$thresholdsMap[$name]]) : true;
+        [$name, $formula, $param1, $param2] = array_pad(explode('_', $kpiName), 4, '');
+        return empty(array_diff(Utl::getItem('athleteParams', self::getDescription($name, $formula, $param1), []), array_keys($athlete))) && ($param1 === 'threshold' || $param2 === 'threshold')? !empty($athlete[self::$thresholdsMap[$name]]) : true;
     }
     public static function requiredActivityParams($kpiName){
         [$name, $formula, $param1] = array_pad(explode('_', $kpiName), 3, '');
         ['activityParams' => $activityParams, 'metrics' => $metrics] = Utl::getItems(['activityParams', 'metrics'], self::getDescription($name, $formula), false, []);
-        return $activityParams ? ($metrics ? array_merge(array_values($activityParams), [$metrics]) : array_values($activityParams)) : ($metrics ? [$metrics] : []);
+        $metricsArray = $metrics ? (self::isMetricStream($param1) ? [$metrics, self::metricStream($param1)] : [$metrics]) : [];
+        return $activityParams ? array_merge(array_values($activityParams), $metricsArray) : $metricsArray;
     }
     public static function hasRequiredActivityParams($kpiName, $activityColsToGet){
         return empty(array_diff(self::requiredActivityParams($kpiName), array_keys($activityColsToGet)));
     }
     public static function kpiFunctionAndArguments($kpiName, $athlete, $activity){
-        [$name, $formula, $param1, $param2] = array_pad(explode('_', $kpiName), 4, '');
-        $description = self::getDescription($name, $formula);
-        $arguments = ['metrics' => $activity[$description['metrics']]];
+        [$name, $formula, $param1, $param2, $param3] = array_pad(explode('_', $kpiName), 5, '');
+        $description = self::getDescription($name, $formula, $param1);
+        $arguments = ['metrics' => $activity[$description['metrics']], 'precision' => $description['precision']];
         if (!empty($description['athleteParams'])){
             $arguments = array_merge($arguments, array_combine(array_keys($description['athleteParams']), array_map(function($param) use ($athlete) {return $athlete[$param];}, $description['athleteParams'])));
         }
@@ -77,33 +88,47 @@ trait Kpis {
         if (!empty($description['otherParams'])){
             $arguments = array_merge($arguments, $description['otherParams']);
         }
+        if (self::isMetricStream($param1)){
+            $thresholdParam = 'param2';
+            $nextParam = 'param3';
+            $sliceValue = 4;
+            $arguments['loadMetrics'] = $activity[self::metricStream($param1)];
+            $arguments['precision'] = self::$metricsPrecision[$param1];
+        }else{
+            $thresholdParam = 'param1';
+            $nextParam = 'param2';
+            $sliceValue = 3;
+            if (in_array($formula, ['loadabove', 'loadbelow', 'loadinzones'])){
+                $arguments['loadMetrics'] = $arguments['metrics'];
+            }
+        }
         switch($formula){
             case 'timeabove':
             case 'timebelow':
             case 'loadabove':
             case 'loadbelow':
-                if ($param1 === 'threshold'){
-                    $thresholdRatio = empty($param2) ? 100 : $param2;
-                    $thresholdValue = intval($athlete[self::$thresholdsMap[$name]]);
+                if ($$thresholdParam === 'threshold'){
+                    $thresholdRatio = empty($$nextParam) ? 100 : $$nextParam;
+                    $thresholdValue = round($athlete[self::$thresholdsMap[$name]], $description['precision']);
                     $minValue = empty($minIndex = Utl::getItem($name, self::$minsMap)) ? 0 : $athlete[$minIndex];
                     $arguments['kpiThreshold'] = $thresholdValue * $thresholdRatio / 100;
-                    $arguments['kpiThreshold'] = intval(($thresholdValue - $minValue) * $thresholdRatio / 100 + $minValue);
+                    $arguments['kpiThreshold'] = round(($thresholdValue - $minValue) * $thresholdRatio / 100 + $minValue, $description['precision']);
                 }else{
                     $arguments['kpiThreshold'] = self::valueOf($param1);
                 }
                 break;
             case 'timeinzones':
             case 'loadinzones':
-                $minValue = empty($minIndex = Utl::getItem($name, self::$minsMap)) ? 0 : $athlete[$minIndex];
-                if ($param1 === 'threshold'){
-                    $thresholdValue = intval($athlete[self::$thresholdsMap[$name]]);
-                    $kpiThresholds = array_slice(explode('_', $kpiName), 3);
+                if ($$thresholdParam === 'threshold'){
+                    $minValue = empty($minIndex = Utl::getItem($name, self::$minsMap)) ? 0 : $athlete[$minIndex];
+                    $thresholdValue = round($athlete[self::$thresholdsMap[$name]], $description['precision']);
+                    $kpiThresholds = array_slice(explode('_', $kpiName), $sliceValue);
                     foreach($kpiThresholds as &$threshold){
-                        $threshold = intval(($thresholdValue - $minValue) * $threshold / 100 + $minValue);
+                        $threshold = round(($thresholdValue - $minValue) * $threshold / 100 + $minValue, $description['precision']);
                     }
                     $arguments['kpiThresholds'] = $kpiThresholds;
                 }else{
-                    $arguments['kpiThresholds'] = array_slice(explode('_', $kpiName), 2);
+                    $arguments['kpiThresholds'] = array_slice(explode('_', $kpiName), $sliceValue -1);
                 }
                 break;
             case 'shrink':
@@ -116,15 +141,13 @@ trait Kpis {
         }
         return [self::$functionsMap[$formula], $arguments];
     }
-    public function computeKpis($athleteId, $activitiesKpisToGet, $activities = [], $missingKpisIndex = 'id'){
-        $kpis = []; $kpisOKtoCompute = [];
+    public function computeKpis($athleteId, $activitiesKpisToGet, $missingKpisIndex = 'id'){
+        $kpis = [];
         $athlete = array_filter(Tfk::$registry->get('objectsStore')->objectModel('sptathletes')->getOne(['where' => ['id' => $athleteId], 'cols' => ['hrmin', 'hrthreshold', 'ftp', 'speedthreshold', 'sex']]));
-        $activities = array_filter($activities);
-        $existingActivitiesKpis = Utl::toAssociative($this->getAllExtended(['where' => [['col' => $missingKpisIndex, 'opr' => 'in', 'values' => array_keys($activitiesKpisToGet)]], 'cols' => [$missingKpisIndex, 'kpiscache']]), $missingKpisIndex);
+        $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
         foreach($activitiesKpisToGet as $activityId => $activityKpisToGet){
-            $kpisToCompute = []; $activityColsToGet = []; $existingActivityKpis = $existingActivitiesKpis[$activityId]; $flippedKpisToGet = array_flip($activityKpisToGet); $kpis[$activityId] = [];
-            $missingActivityKpisToGet = array_flip(array_diff_key($flippedKpisToGet, $existingActivityKpis));
-            foreach($missingActivityKpisToGet as $kpiName){
+            $kpisToCompute = [];  $kpisOKtoCompute = []; $activityColsToGet = []; 
+            foreach($activityKpisToGet as $kpiName){
                 if (self::hasRequiredAthleteParams($kpiName, $athlete)){
                     $kpisToCompute[] = $kpiName;
                     $activityColsToGet = array_merge($activityColsToGet, self::requiredActivityParams($kpiName)); 
@@ -134,7 +157,7 @@ trait Kpis {
             }
             if (!empty($activityColsToGet)){
                 $activityColsToGet = array_unique($activityColsToGet);
-                $activity = ($activity = Utl::getItem($activityId, $activities)) ? $activity : array_filter($this->getOne(['where' => [$missingKpisIndex => $activityId], 'cols' => $activityColsToGet]));
+                $activity = array_filter($stravaActivitiesModel->getOne(['where' => [$missingKpisIndex => $activityId], 'cols' => $activityColsToGet]));
                 foreach($kpisToCompute as $kpiName){
                     if (self::hasRequiredActivityParams($kpiName, $activity)){
                         $kpisOKtoCompute[] = $kpiName;
@@ -160,9 +183,11 @@ trait Kpis {
                     }
                     $kpis[$activityId][$kpiName] = KF::$funcName(...$arguments);
                 }
-                $this->updateOne(newValues: [$missingKpisIndex => $activityId, 'kpiscache' => Utl::getItem($activityId, $kpis, 0, 0)], atts: ['where' => [$missingKpisIndex => $activityId]], jsonFilter: true);
+                $kpisWhichCouldNotBeComputed = array_diff($kpisToCompute, $kpisOKtoCompute);
+                foreach($kpisWhichCouldNotBeComputed as $kpiName){
+                    $kpis[$activityId][$kpiName] = 0;
+                }
             }
-            $kpis[$activityId] = array_merge($kpis[$activityId], array_intersect_key($existingActivityKpis, $flippedKpisToGet));
         }
         return $kpis;
     }

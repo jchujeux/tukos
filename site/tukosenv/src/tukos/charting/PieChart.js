@@ -22,16 +22,17 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 			this.recursionDepth = 0;
 		},
 		setChartValue: function(chartWidgetName){
-			var self = this, form = this.form, valueOf = lang.hitch(form, form.valueOf), chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex;
+			var self = this, form = this.form, valueOf = self.valueOf.bind(self), chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex;
 			if (!hidden && chartWidget.kpisToInclude){
 				dojo.ready(function(){
 					const grid = self.grid, dateCol = self.dateCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter);
 					let collection;
 					if (chartWidget.chartFilter){
-						collection = grid.collection.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
 					}else{
-						collection = grid.collection.sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.sort([{property: dateCol}, {property: 'rowId'}]);
 					}
+					self.recursionDepth +=1;
 					let kpisDescription = JSON.parse(chartWidget.kpisToInclude), kpiData = {}, expKpi = {}, chartData = [], axes = {},
 						series = {}, kpiFilters = {}, tableColumns = {name: {label: Pmg.message('name', form.object), field: 'name', renderCell: 'renderContent'}, value: {label: Pmg.message('value', form.object), field: 'value', renderCell: 'renderContent'}},
 						idProperty = collection.idProperty, collectionData = utils.toNumeric(collection.fetchSync(), grid),
@@ -65,7 +66,7 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 								i += 1;
 							}
 						}catch(e){
-							Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
+							Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 						}
 					}
 					if (missingKpisIndex && !utils.empty(missingItemsKpis)){

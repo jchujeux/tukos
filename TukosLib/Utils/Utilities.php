@@ -234,7 +234,6 @@ class Utilities{
             return $callback($arrayOrValue);
         }
     }
-
    /*
     * A series of array_merge_recursive functions extending upon the native php array_merge8recursive
     *

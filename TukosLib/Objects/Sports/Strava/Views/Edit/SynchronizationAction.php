@@ -15,7 +15,7 @@ trait SynchronizationAction {
             'paneDescription' => [
                 'widgetsDescription' => [
                         'ignoreitemflag' => Widgets::checkBox(Widgets::complete(['title' => $tr('ignoreitemflag'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('ignoreitemflag')])),
-                    'synchrostreams' => Widgets::checkBox(Widgets::complete(['title' => $tr('synchrostreams'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('synchrostreams')])),
+                    'synchrostreams' => Widgets::checkBox(Widgets::complete(['title' => $tr('synchrostreams'), 'checked' => true,  'onWatchLocalAction' => $this->watchCheckboxLocalAction('synchrostreams')])),
                     'synchrostart' => Widgets::tukosDateBox(Widgets::complete(['title' => $tr('synchrostart'), 'onWatchLocalAction' => ['value' => [
                         'synchrostart' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->synchroStartLocalAction()]]]]])),
                     'synchroend' => Widgets::tukosDateBox(Widgets::complete(['title' => $tr('synchroend'), 'onWatchLocalAction' => ['value' => [

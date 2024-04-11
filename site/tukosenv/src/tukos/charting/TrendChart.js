@@ -29,13 +29,14 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 					const xType = horizontalAxisDescription.tickslabel || 'daysinceorigin', xTypePosition = ['daysinceorigin', 'dateofday', 'dayoftheyear', 'weeksinceorigin', 'dateofweek', 'weekoftheyear'].indexOf(xType), isWeek = xTypePosition > 2;
 					tableColumns[0] = {field: 0, label: Pmg.message(xType)};
 					if (chartWidget.chartFilter){
-						collection = grid.collection.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
 					}else{
-						collection = grid.collection.sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.sort([{property: dateCol}, {property: 'rowId'}]);
 					}
 					const idProperty = collection.idProperty, collectionData = collection.fetchSync();
 					if (collectionData.length > 1){
-						const data = utils.toNumeric(collectionData, grid), valueOf = form.valueOf.bind(form);//lang.hitch(form, form.valueOf);
+						self.recursionDepth +=1;
+						const data = utils.toNumeric(collectionData, grid), valueOf = self.valueOf.bind(self);//lang.hitch(form, form.valueOf);
 						let firstDate = horizontalAxisDescription.firstdate, firstDateObject, lastDate = horizontalAxisDescription.lastdate, toDate, toDateObject, previousKpiValuesCache = {}, filter = collection.Filter(),
 							expression = expressionEngine.expression(collectionData, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache), previousToDate;
 						try{
@@ -60,23 +61,27 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							previousToDate = dutils.dateString(firstDateObject, [-1, 'day']);
 							horizontalAxisDescription.firstDate = firstDate;// needed by DynamicChart.getLabel
 						}catch(e){
-							Pmg.addFeedback(Pmg.message('errorhorizontalaxis') + ': ' + e.message + ' - ' + Pmg.message('axisdescription') + ': ' + JSON.stringify(horizontalAxisDescription));
+							Pmg.addFeedback(Pmg.message('errorhorizontalaxis') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('axisdescription') + ': ' + JSON.stringify(horizontalAxisDescription));
 						}
 						plotsDescription.forEach(function(plotDescription){
 							try{
 								plots[plotDescription.name] = plotDescription;
 								if (plotDescription.type === 'Indicator'){
 									if (!plotDescription.lineStroke){
-										plotDescription = lang.mixin(plotDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: 'red', style: 'shortDash', width: 2}, labelFunc: function(){
-											return plotDescription.label || this.values;
-										}});
+										plotDescription = lang.mixin(plotDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: plotDescription.indicatorColor || 'red', style: plotDescription.indicatorStyle || 'shortDash', width: 2},
+											labelFunc: function(){
+												return plotDescription.label || this.values;
+											}
+										});
 									}
-									if ((plotDescription.vertical !== false) && typeof (plotDescription.values) === 'string' && plotDescription.values[0] === '@'){
-										plotDescription.values = dutils.difference(dutils.getDayOfWeek(1, firstDateObject), new Date(form.valueOf(plotDescription.values.substring(1))), isWeek ? 'week' : 'day') + 1;
+									if (/*(plotDescription.vertical !== false) && */typeof (plotDescription.values) === 'string' && plotDescription.values.indexOf('(') >= 0){
+										plotDescription.values = dutils.difference(dutils.getDayOfWeek(1, firstDateObject), new Date(expression.expressionToValue(plotDescription.values)), isWeek ? 'week' : 'day') + 1;
+									}else{
+										plotDescription.values = Number(plotDescription.values);
 									}
 								}
 							}catch(e){
-								Pmg.addFeedback(Pmg.message('errorplotdefinition') + ': ' + e.message + ' - ' + Pmg.message('plotdescription') + ': ' + JSON.stringify(plotDescription));
+								Pmg.addFeedback(Pmg.message('errorplotdefinition') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('plotdescription') + ': ' + JSON.stringify(plotDescription));
 							}
 						});
 						let previousKpis = [], index1;
@@ -100,12 +105,14 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 										chartItem[index1] = 0;
 									}
 									chartItem[index1 + 'Tooltip'] = kpiDescription.name + ': ' + (kpiDescription.displayformat ? utils.transform(chartItem[index1], kpiDescription.displayformat) : chartItem[index1]) + ' ' + (kpiDescription.tooltipunit || '') + 
-										(isWeek ? '<br><small>(' + Pmg.message('weekendingon', 'sptplans') + ' ' + dutils.formatDate(toDateObject, 'd MMM') + ')</small>' : '');
+										(isWeek 
+											? '<br><small>(' + Pmg.message('weekendingon', 'sptplans') + ' ' + dutils.formatDate(toDateObject, 'd MMM') + ')</small>' 
+											: '<br><small>(' + dutils.formatDate(firstDateObject, 'd MMM') + ')</small>');
 									if (kpiDescription.scalingfactor){
 										chartItem[index1] = chartItem[index1] * kpiDescription.scalingfactor;
 									}
 								}catch(e){
-									Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
+									Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 								}
 							});
 							tableData.push(tableItem);
@@ -136,7 +143,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							}
 						});
 					    if (!utils.empty(data)){
-						    if (self.recursionDepth > 2){
+						    if (self.recursionDepth > 0){
 								Pmg.addFeedback(Pmg.message('too many recursions') + ': ' + self.recursionDepth + ' (TrendChart)');
 								self.recursionDepth = 0;
 								return;

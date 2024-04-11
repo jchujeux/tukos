@@ -17,12 +17,12 @@ trait EditConfig {
                 'widgetsDescription' => [
                     'chartsperrow' => Widgets::numberTextBox(Widgets::complete( ['label' => $tr('Chartsperrow'), 'constraints' => ['pattern' =>  "0.######"]])),
                     'charts' =>  Widgets::simpleDgrid(Widgets::complete(
-                        ['label' => $tr('Tabcharts'), 'storeArgs' => ['idProperty' => 'idg'],
+                        ['label' => $tr('Tabcharts'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '700px'],
                             'colsDescription' => [
                                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-                                'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('Name')]]), false),
-                                'chartType' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['trend', 'spider', 'pie', 'repartition', 'xy'], $tr)], 'label' => $tr('Charttype')], 'storeedit' => ['width' => 150]]), false),
-                                'colspan' => Widgets::numberTextBox(Widgets::complete( ['edit' => ['label' => $tr('Colspan'), 'constraints' => ['pattern' =>  "0.######"]]]), false),
+                                'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('Name')], 'storeedit' => ['width' => 300]]), false),
+                                'chartType' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['trend', 'spider', 'pie', 'repartition', 'xy'], $tr)], 'label' => $tr('Charttype')], 'storeedit' => ['width' => 200]]), false),
+                                'colspan' => Widgets::numberTextBox(Widgets::complete( ['edit' => ['label' => $tr('Colspan'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 100]]), false),
                             ]])),
                     'apply' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('apply'), 'onClickAction' => $this->editConfigApplyAction()
                     ]],
