@@ -137,6 +137,7 @@ trait Kpis {
                 break;
             case 'timecurve':
             case 'durationcurve':
+            case 'load':
                 $arguments['smoothSeconds'] = $param1 ? $param1 : 1;
         }
         return [self::$functionsMap[$formula], $arguments];
@@ -192,7 +193,7 @@ trait Kpis {
         return $kpis;
     }
     public function getKpis($query, $activitiesKpisToGet){// associated to process action
-        return ['data' => ['kpis' => $this->computeKpis($query['athlete'], $activitiesKpisToGet)]];
+        return ['data' => ['kpis' => $this->computeKpis($query['athleteid'], $activitiesKpisToGet)]];
     }
 }
 ?>

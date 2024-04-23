@@ -36,7 +36,7 @@ function(declare, lang, ready, when, _Plugin, Button, _TagEditDialog, messages) 
                     	{tagname: {type: 'TextBox', atts: {title: messages.tagName, style: {width: '10em'}, disabled: true}}}, 
                     	{headerRow: {tableAtts: {cols: 1, customClass: 'labelsAndValues', label: messages.tagEditor, showLabels: true, orientation: 'horiz'}, widgets: ['tagname']}}, 
                     	['apply', 'close'], {tableAtts: {cols: 3,   customClass: 'labelsAndValues', showLabels: false}, widgets: ['apply', 'close']},
-                    	['width', 'height', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight', 'display', 'objectFit', 'objectPosition', 'margin', 'pageBreakInside']);
+                    	['width', 'height', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight', 'display', 'objectFit', 'objectPosition', 'margin', 'pageBreakInside', 'onclick']);
                 }
         	});
         	dropDown.openDialog = this.openDialog;

@@ -3,7 +3,7 @@ define(["dojo/_base/lang", "dojo/_base/window", "dojo/_base/config", "dojo/ready
 function (lang, win, config, ready, dom, dst, dct, when, topic, focusUtil, Container, Heading, Button, Opener, TukosPane, PostsManager, widgetsLoader, TabOnClick, Pmg) {
 	return {
 		initialize: function(){
-			var self = this, buttonsContainer = new Container({style: {maxWidth: '150px'}}), postsContainer = new Container({style: {backgroundColor: '#d0e9fc', touchAction: 'none'}}), 
+			var self = this, buttonsContainer = new Container({style: {maxWidth: '150px'}}), postsContainer = new Container({style: {backgroundColor: '#d0e9fc'/*, touchAction: 'none'*/}}), 
 				actionWidgets = Pmg.cache.rightPaneDescription.paneContent.widgetsDescription, searchPane, searchButton, homeUrlArgs = {action: 'Tab', mode: 'Tab', object: 'backoffice', view: 'edit', query: {form: 'Show', object: 'blog', name: Pmg.message('blogwelcome', 'backoffice')}};
         	this.heading = new Heading({/*label: Pmg.cache.headerTitle, */style: {height: '65px'}});
 			this.heading.addChild(buttonsContainer);

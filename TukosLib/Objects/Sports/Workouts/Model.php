@@ -103,7 +103,9 @@ class Model extends AbstractModel {
         }
     }
     public function getAllExtended($atts){
-        if ($this->user->isRestrictedUser() && $programId = Utl::getItem('parentid', $atts['where'])){
+        /*
+         * With client strava synchronization approach, the server synchronization for restricted users is not functional anymore
+         * if ($this->user->isRestrictedUser() && $programId = Utl::getItem('parentid', $atts['where'])){
             $mostRecentPerformed = $this->getOne(['where' => ['parentid' => $programId, 'mode' => 'performed'], 'cols' => ['startdate'], 'orderBy' => ['startdate' => 'DESC']]);
             $programModel = Tfk::$registry->get('objectsStore')->objectModel('sptplans');
             $programInfo = $programModel->getOne(['where' => ['id' => $programId], 'cols' => ['id', 'parentid', 'fromdate', 'googlecalid']]);
@@ -111,7 +113,7 @@ class Model extends AbstractModel {
                 $programModel->stravaProgramSynchronize(array_merge($programInfo, ['ignoreworkoutflag' => false, 'synchrostart' => empty($mostRecentPerformed) ? $programInfo['fromdate'] : $mostRecentPerformed['startdate'], 'synchroend' => date('Y-m-d'),
                     'synchrostreams' => true]));
             }
-        }
+        }*/
         //$atts['cols'][] = 'kpiscache';
         $results = parent::getAllExtended($atts);
         foreach ($results as &$workout){
@@ -205,7 +207,7 @@ class Model extends AbstractModel {
         return HUtl::imageUrl($this->getLogoImage($programId));
     }
     public function getKpis($query, $kpisToGet){// associated to process action
-        return ['data' => ['kpis' => $this->computeKpis($query['athlete'], $kpisToGet, 'stravaid')]];
+        return ['data' => ['kpis' => $this->computeKpis($query['athleteid'], $kpisToGet, 'stravaid')]];
     }
 }
 ?>

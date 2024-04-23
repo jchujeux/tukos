@@ -21,7 +21,7 @@ class Model extends AbstractModel {
     
     function __construct($objectName, $translator=null){
         $colsDefinition = [
-            'coach' => 'MEDIUMINT DEFAULT NULL',
+            'coachid' => 'MEDIUMINT DEFAULT NULL',
             'sportsmanemail' => 'VARCHAR(50) DEFAULT NULL',
             'coachemail' => 'VARCHAR(50) DEFAULT NULL',
             'coachorganization' => 'VARCHAR(50) DEFAULT NULL',
@@ -42,7 +42,7 @@ class Model extends AbstractModel {
             'initialhracwr' => 'FLOAT DEFAULT NULL',
             'displayfrom' => 'longtext'
         ];
-        parent::__construct($objectName, $translator, 'sptplans', ['parentid' => ['sptathletes'], 'coach' => ['people']], ['weeklies', 'displayfrom'], $colsDefinition, [], []);
+        parent::__construct($objectName, $translator, 'sptplans', ['parentid' => ['sptathletes'], 'coachid' => ['people']], ['weeklies', 'displayfrom'], $colsDefinition, [], []);
         $this->afterGoogleSync = false;
         $this->setDeleteChildren();
     }
@@ -52,7 +52,7 @@ class Model extends AbstractModel {
         $coachEmail = empty($coach) ? '' : Tfk::$registry->get('objectsStore')->objectModel('people')->getOne(['where' => ['id' => $coach], 'cols' => ['email']])['email'];
         $today = date('Y-m-d', $nextMondayStamp = strtotime('next monday'));
         return parent::initialize(array_merge(
-            ['coach' => $coach, 'coachemail' => $coachEmail, 'fromdate' => $fromDate = $today, 'displayfromdate' => $today, 'duration' =>'[1,"week"]', 'todate' => date('Y-m-d', strtotime('next sunday', $nextMondayStamp)), 'displayeddate' => $fromDate,
+            ['coachid' => $coach, 'coachemail' => $coachEmail, 'fromdate' => $fromDate = $today, 'displayfromdate' => $today, 'duration' =>'[1,"week"]', 'todate' => date('Y-m-d', strtotime('next sunday', $nextMondayStamp)), 'displayeddate' => $fromDate,
                 'synchroweeksbefore' => 0, 'synchroweeksafter' => 0, 'synchnextmonday' => 'YES', 
                 'stsdays' => 7, 'ltsdays' => 42, 'initiallts' => 30, 'initialprogressivity' => 1, 'initialsts' => 30, 'acl'=> ['1' => ['rowId' => 1, 'userid' => Tfk::tukosBackOfficeUserId, 'permission' => '2']]
             ], $init));
@@ -119,7 +119,7 @@ class Model extends AbstractModel {
     public function activityKpis(){
         return ['heartrate_avgload', 'heartrate_load', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'power_avgload', 'power_load'];
     }
-    public function sessionsModel(){
+    public function itemsModel(){
         return Tfk::$registry->get('objectsStore')->objectModel('sptworkouts');
     }
 }

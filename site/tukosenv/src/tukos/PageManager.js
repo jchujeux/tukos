@@ -263,12 +263,40 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
 				domNode.title = translation[object][toTranslate];
 			});
 		},
+		dataURItoBlob: function(dataURI) {
+		  // convert base64 to raw binary data held in a string
+		  // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+		  var byteString = atob(dataURI.split(',')[1]);
+		
+		  // separate out the mime component
+		  var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+		
+		  // write the bytes of the string to an ArrayBuffer
+		  var ab = new ArrayBuffer(byteString.length);
+		
+		  // create a view into the buffer
+		  var ia = new Uint8Array(ab);
+		
+		  // set the bytes of the buffer to the correct values
+		  for (var i = 0; i < byteString.length; i++) {
+		      ia[i] = byteString.charCodeAt(i);
+		  }
+		
+		  // write the ArrayBuffer to a blob, and you're done
+		  var blob = new Blob([ab], {type: mimeString});
+		  return blob;
+		
+		},
 		viewUrlInBrowserWindow: function(url, name, options){
 			if (windows[name] && !windows[name].closed){
 				window.blur();
 				windows[name].focus();
 			}else{
-	        	windows[name] = window.open(url, name, options);
+	        	if (url.length > 10 && url.substring(0,10) === 'data:image'){
+	        		windows[name] = window.open(URL.createObjectURL(this.dataURItoBlob(url)), name, options);
+	        	}else{
+	        		windows[name] = window.open(url, name, options);
+				}
 			}
 		},
 		closeDependingWindows: function(){

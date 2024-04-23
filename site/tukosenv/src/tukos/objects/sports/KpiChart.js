@@ -106,7 +106,7 @@ function(declare, lang, ArrayIterator, utils, dutils, expressionFilter, expressi
 							data[id] = kpiCache[idp];
 							idToIdg[id] = idp;
 						});
-					    Pmg.serverDialog({action: 'Process', object: "sptsessions", view: 'edit', query: {programId: form.valueOf('id'), athlete: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
+					    Pmg.serverDialog({action: 'Process', object: "sptsessions", view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
 					            function(response){
 					           		const kpis = response.data.kpis;
 									const noMarkAsChanged = grid.noMarkAsChanged;

@@ -56,7 +56,7 @@ class Model extends AbstractModel {
     }
     public function getKpis($query, $kpisToGet){// associated to process action
         $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
-        $activitiesKpis = $stravaActivitiesModel->computeKpis($query['athlete'], $kpisToGet, [], 'stravaid');
+        $activitiesKpis = $stravaActivitiesModel->computeKpis($query['athleteid'], $kpisToGet, [], 'stravaid');
         return ['data' => ['kpis' => $activitiesKpis]];
     }
 }

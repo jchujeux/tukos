@@ -9,10 +9,10 @@ define (
     	description = {backgroundColor: 'colorDescription', borderColor: 'colorDescription', color: 'colorDescription', pageBreakInside: 'pageBreakInsideDescription', textAlign: 'hAlignDescription', verticalAlign: 'vAlignDescription', width: 'sizeDescription',
     				   	height: 'sizeDescription', minWidth: 'sizeDescription', maxWidth: 'sizeDescription', minHeight: 'sizeDescription', maxHeight: 'sizeDescription', objectFit: 'objectFitDescription', objectPosition: 'objectPositionDescription',
     				   	margin: 'sizeDescription', display: 'displayDescription', paddingLeft: 'sizeDescription', paddingRight: 'sizeDescription', paddingBottom: 'sizeDescription', paddingTop: 'sizeDescription',
-    				   	placeHolder: 'domAttDescription', border: 'domAttDescription', cellPadding: 'domAttDescription', cellSpacing: 'domAttDescription'},
+    				   	placeHolder: 'domAttDescription', border: 'domAttDescription', cellPadding: 'domAttDescription', cellSpacing: 'domAttDescription', onclick: 'domAttDescription'},
 	    domAttValue = {
 	        get: function(node, att){
-	            return domAttr.get(node, att);
+	            return (node.getAttributeNode(att) && node.getAttributeNode(att).nodeValue) || '';//domAttr.get(node, att);
 	        },
 	        set: function(node, att, value){
 	            value === '' ? domAttr.remove(node, att) : domAttr.set(node, att, value);

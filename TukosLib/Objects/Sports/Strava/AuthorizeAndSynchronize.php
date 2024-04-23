@@ -42,18 +42,18 @@ trait AuthorizeAndSynchronize {
             }
         }
     }
-    public function stravaSynchronize($query, $atts = []){//needs $this->stravaCols(), which must include at least stravaid, startdate, starttime, and $this->activityKpis(), the kpis to compute during synchronization, and $this->sessionsModel() 
+    public function stravaSynchronize($query, $atts = []){//needs $this->stravaCols(), which must include at least stravaid, startdate, starttime, and $this->activityKpis(), the kpis to compute during synchronization, and $this->itemsModel() 
         $athleteId = $query['athleteid'];
         $synchroStreams = $query['synchrostreams'] === 'false' ? false : $query['synchrostreams'];
         $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
         $targetView = Tfk::$registry->get('objectsStore')->objectView('sptworkouts');
         $stravaCols = $this->stravaCols();
-        $sessionsModel = $this->sessionsModel();
+        $itemsModel = $this->itemsModel();
         $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams);
         $stravaActivities = $stravaActivitiesModel->getAllExtended(['where' => [['col' => 'startdate', 'opr' => '>=', 'values' => $query['synchrostart']], ['col' =>'startdate', 'opr' => '<=', 'values' => $query['synchroend']]],
             'cols' => $stravaCols, 'orderBy' => ['startdate' =>  'ASC']]);
         foreach ($stravaActivities as &$activity){
-            $activity = array_merge(Utl::getItem($activity['stravaid'], $sessionsModel->computeKpis($athleteId, [$activity['stravaid'] => $this->activityKpis()], 'stravaid'), [], []), $activity);
+            $activity = array_merge(Utl::getItem($activity['stravaid'], $itemsModel->computeKpis($athleteId, [$activity['stravaid'] => $this->activityKpis()], 'stravaid'), [], []), $activity);
             
         }
         $stravaActivities = Utl::objToEdit($stravaActivities, $targetView->dataWidgets);
@@ -64,6 +64,79 @@ trait AuthorizeAndSynchronize {
         }
         $usersItems = Tfk::$registry->get('objectsStore')->objectModel('users')->getAllExtended(['where' => [['col' => 'parentid', 'opr' => 'IN', 'values' => [$query['athleteid'], $query['coachid']]]], 'cols' => ['id', 'parentid']]);
         return ['stravaActivities' => $stravaActivities, 'usersItems' => $usersItems];
+    }
+    public function activitiesServerSynchronize($query){
+        list('stravaActivities' => $stravaActivitiesToSync, 'usersItems' => $usersItems) = $this->stravaSynchronize($query);
+        list('id' => $programId, 'athleteid' => $athleteId, 'ignoreItemFlag' => $ignoreItemFlag) = $query;
+        if(empty($stravaActivitiesToSync)){
+            if (!$this->user->isRestrictedUser()){
+                Feedback::add($this->tr('Nostravaactivitytosync'));
+            }
+            return;
+        }
+        $acl = ['1' => ['userid' => Tfk::tukosBackOfficeUserId, 'permission' => '3']];
+        foreach($usersItems as $userItem){
+            $acl[] = ['userid' => $userItem['id'], 'permission' => '3'];
+        }
+        $datesToSync = array_unique(array_column($stravaActivitiesToSync, 'startdate'));
+        $itemsModel = $this->itemsModel();
+        $sessionsToSync = $itemsModel->getAll(['where' => ['mode' => 'performed', 'parentid' => $programId, ['col' => 'startdate', 'opr' => 'in', 'values' => $datesToSync]], 'cols' => array_merge($this->stravaCols(), ['id', 'sessionid', 'starttime'])]);
+        $stravaActivitiesToSync = Utl::toAssociativeGrouped($stravaActivitiesToSync, 'startdate');
+        ksort($stravaActivitiesToSync);
+        $sessionsToSync = Utl::toAssociativeGrouped($sessionsToSync, 'startdate');
+        $createdSessions = $updatedSessions = [];
+        foreach($stravaActivitiesToSync as $day => $activities){
+            $times = array_column($activities, 'starttime');
+            array_multisort($times, SORT_ASC, $activities);
+            if ($sessions = Utl::getItem($day, $sessionsToSync)){
+                $existingSessionsId = array_column($sessions, 'sessionid');
+                $nextSessionId = empty($existingSessionsId) ? 1 : (max($existingSessionsId) + 1);
+                $sessions = Utl::toAssociative($sessions, 'starttime');
+                foreach ($activities as $activity){
+                    if ($session = Utl::getItem($activity['starttime'], $sessions)){
+                        if ($updated = $itemsModel->updateOne($this->mergeSession($session, $activity, $ignoreItemFlag))){
+                            $updatedSessions[] = $updated['id'];
+                        }
+                    }else{
+                        if (empty($sessions)){
+                            $createdSessions[] = $itemsModel->insert(array_merge($activity, ['startdate' => $day, 'sessionid' => $nextSessionId, 'mode' => 'performed', 'parentid' => $programId, 'sportsman' => $athleteId, 'acl' => $acl]), true)['id'];
+                                $nextSessionId += 1;
+                        }else{
+                            if ($updated = $itemsModel->updateOne($this->mergeSession(array_shift($sessions), $activity, $ignoreItemFlag))){
+                                $updatedSessions[] = $updated['id'];
+                            }
+                        }
+                    }
+                }
+            }else{
+                $i = 1;
+                foreach($activities as $activity){
+                    $createdSessions[] = $itemsModel->insert(array_merge($activity, ['startdate' => $day, 'sessionid' => $i, 'mode' => 'performed', 'parentid' => $programId, 'sportsman' => $athleteId, 'acl' => $acl]), true)['id'];
+                        $i += 1;
+                }
+            }
+        }
+        if (!empty($updatedSessions)){
+            Feedback::add($this->tr('UpdatedSessions') . ': ' . json_encode($updatedSessions));
+        }
+        if (!empty($createdSessions)){
+            Feedback::add($this->tr('createdSessions') . ': ' . json_encode($createdSessions));
+        }
+        if (empty($updatedSessions) && empty($createdSessions)){
+            Feedback::add($this->tr('Nosessioncreatedorupdated'));
+        }else if (Utl::getItem('googlecalid', $query, false)){
+            $this->googleSynchronize(['id' => $programId], ['synchrostart' => $query['synchrostart'], 'synchroend' => $query['synchroend'], 'googlecalid' => $query['googlecalid'], 'performedonly' => true]);
+        }
+    }
+    function mergeSession($session, $activity, $ignoreSessionValues){
+        if ($ignoreSessionValues){
+            $session = array_merge($session, $activity);
+        }else{
+            foreach($activity as $col => $value){
+                $session[$col] = Utl::getItem($col, $session, $value, $value);
+            }
+        }
+        return $session;
     }
 }
 ?>

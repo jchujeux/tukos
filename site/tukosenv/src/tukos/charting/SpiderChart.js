@@ -126,7 +126,7 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 								self.recursionDepth = 0;
 								return;
 							}
-						    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athlete: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
+						    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
 						            function(response){
 						           		const kpis = response.data.kpis;
 										utils.forEach(kpis, function(kpi, index){

@@ -24,7 +24,7 @@ class View extends EditView{
         $customContents = [
             	'row1' => [
                     'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'labelWidth' => '130'],
-                    'widgets' => ['id', 'parentid', 'coach', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'coachemail', 'coachorganization', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter',
+                    'widgets' => ['id', 'parentid', 'coachid', 'name', 'fromdate', 'duration', 'todate', 'displayeddate', 'googlecalid', 'lastsynctime', 'sportsmanemail', 'coachemail', 'coachorganization', 'synchrostart', 'synchroend', 'synchroweeksbefore', 'synchroweeksafter',
                             'synchnextmonday', 'questionnairetime', 'stsdays', 'ltsdays', 'initialsts', 'initiallts', 'initialhracwr', 'displayfromdate', 'displayfromsts', 'displayfromlts']
                 ],
             	'row2' => [
@@ -220,7 +220,7 @@ class View extends EditView{
 		        'onOpenAction' => $this->googleConfOnOpenAction(),
 		    ]];
         $this->setEditConfigActionWidget();
-        $this->setStravaActionButton(targetObject: 'sptplans', grid: 'sptworkouts', athlete: 'parentid', coach: 'coach', synchrostart: 'synchrostart', synchroend: 'synchroend', daySortCol: 'starttime', dayDateCol: 'startdate');
+        $this->setStravaActionButton(targetObject: 'sptplans', grid: 'sptworkouts', athlete: 'parentid', coach: 'coachid', synchrostart: 'synchrostart', synchroend: 'synchroend', daySortCol: 'starttime', dayDateCol: 'startdate');
         $this->actionWidgets['viewplanned'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewplanned'), 'value' => 'viewplanned', 'onClickAction' => $this->viewModeOptionOnClick('viewplanned')]];
         $this->actionWidgets['viewperformed'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewperformed'), 'value' => 'viewperformed', 'onClickAction' => $this->viewModeOptionOnClick('viewperformed')]];
         $this->actionWidgets['viewall'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewall'), 'value' => 'viewall'/*, 'checked' => true*/, 'onClickAction' => $this->viewModeOptionOnClick('viewall')]];

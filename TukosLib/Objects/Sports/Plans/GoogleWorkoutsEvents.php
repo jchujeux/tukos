@@ -28,7 +28,7 @@ trait GoogleWorkoutsEvents {
             if ($includeTrackingFormUrl){
                 if (is_null($targetDbString)){
                     $targetDbString = "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared', true));
-                    $workoutFeedback = Tfk::$registry->get('translatorsStore')->substituteTranslations($this->tr('WorkoutFeedback'));
+                    $workoutFeedback = Tfk::$registry->get('translatorsStore')->substituteTranslations($this->tr('sessionFeedback'));
                 }
                 $eventDescription['description'] .= $targetDbString . '">'  .  $workoutFeedback . '</a><br>';
             }
@@ -144,7 +144,7 @@ trait GoogleWorkoutsEvents {
             if ($includeTrackingFormUrl){
                 if (is_null($targetDbString)){
                     $targetDbString = "&targetdb=" . rawurlencode($this->user->encrypt(Tfk::$registry->get('appConfig')->dataSource['dbname'], 'shared', true));
-                    $workoutFeedback = Tfk::$registry->get('translatorsStore')->substituteTranslations($this->tr('WorkoutFeedback'));
+                    $workoutFeedback = Tfk::$registry->get('translatorsStore')->substituteTranslations($this->tr('sessionFeedback'));
                 }
                 $eventDescription['description'] .= $targetDbString . '">'  .  $workoutFeedback . '</a><br>';
             }

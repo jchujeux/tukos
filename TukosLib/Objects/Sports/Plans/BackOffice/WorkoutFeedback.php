@@ -102,7 +102,7 @@ class WorkoutFeedback extends ObjectTranslator{
     }
     function getActionWidgets($query){
         $isMobile = $this->isMobile;
-        $title = $this->tr('workouttrackingformtitle');
+        $title = $this->tr('sessiontrackingformtitle');
         $actionWidgets['title'] = ['type' => 'HtmlContent', 'atts' => ['value' => $this->isMobile ?  $title : '<h1>' . $title . '</h1>']];
         Feedback::suspend();
         $actionWidgets['logo'] = ['type' => 'HtmlContent', 'atts' => ['value' => 
@@ -117,7 +117,7 @@ class WorkoutFeedback extends ObjectTranslator{
         return $actionWidgets;
     }
     function getTitle(){
-        return $this->tr('workouttrackingformtitle');
+        return $this->tr('sessiontrackingformtitle');
     }
     function getToTranslate(){
         return $this->view->getToTranslate();
@@ -145,20 +145,20 @@ class WorkoutFeedback extends ObjectTranslator{
                 return [];
             }else if(empty($performedWorkout['starttime'])){
                 Feedback::suspend();
-                $this->plansModel->stravaProgramSynchronize([
-                    'id' => $programId, 'parentid' => $programInformation['parentid'], 'ignoreworkoutflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
+                $this->plansModel->activitiesServerSynchronize([
+                    'id' => $programId, 'athleteid' => $programInformation['parentid'], 'ignoreitemflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
                     'updator' => $programInformation['updator'], 'googlecalid' => $programInformation['googlecalid']]);
                 $performedWorkout = $this->workoutsModel->getOne(['where' => $this->user->filterPrivate(['id' => $id], 'sptworkouts'), 'cols' => $this->version->formObjectWidgets()]);
                 Feedback::resume();
             }
-            Feedback::add($this->tr('Updateworkoutfeedback'));
+            Feedback::add($this->tr('Updatesessionfeedback'));
             $performedWorkout['sportsman'] = $programInformation['parentid'];
         }else{
             $performedWorkout = $this->workoutsModel->getOne(['where' => $this->user->filterPrivate(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'starttime' => $query['starttime'], 'mode' => 'performed']), 'sptworkouts'), 'cols' => $this->version->formObjectWidgets()]);
             if (empty($performedWorkout) || empty($performedWorkout['starttime'])){
                 Feedback::suspend();
-                $this->plansModel->stravaProgramSynchronize([
-                    'id' => $programId, 'parentid' => $programInformation['parentid'], 'ignoreworkoutflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
+                $this->plansModel->activitiesServerSynchronize([
+                    'id' => $programId, 'athleteid' => $programInformation['parentid'], 'ignoreworkoutflag' => false, 'synchrostart' => $query['date'], 'synchroend' => $query['date'], 'synchrostreams' => Utl::getItem('synchrostreams', $query), 
                     'updator' => $programInformation['updator'], 'googlecalid' => $programInformation['googlecalid']]);
                 $performedWorkout = $this->workoutsModel->getOne(['where' => $this->user->filterPrivate(array_filter(['parentid' => $programId, 'startdate' => $query['date'], 'starttime' => $query['starttime'],  'mode' => 'performed']), 'sptworkouts'), 'cols' => $this->version->formObjectWidgets()]);
                 Feedback::resume();
@@ -166,7 +166,7 @@ class WorkoutFeedback extends ObjectTranslator{
                     $performedWorkout = ['id' => '', 'sportsman' => $programInformation['parentid'], 'startdate' => $query['date'], 'starttime' => $query['starttime'], 'name' => rawurldecode($query['name']), 'sport' => rawurldecode($query['sport']), 'duration' => '0', 'distance' => 0, 'elevationgain' => 0];
                 }
             }
-            Feedback::add($this->tr('Provideworkoutfeedback'));
+            Feedback::add($this->tr('Providesessionfeedback'));
         }
         $performedWorkout['sportsman'] = SUtl::translatedExtendedNames([$performedWorkout['sportsman']])[$performedWorkout['sportsman']];
         if ($weeklies = $programInformation['weeklies']){
@@ -190,7 +190,7 @@ class WorkoutFeedback extends ObjectTranslator{
         $savedCount = count($values);
         $id = $query['id'];
         if ($savedCount){
-            $users = Tfk::$registry->get('objectsStore')->objectModel('users')->getAll(['where' => [['col' => 'parentid', 'opr' => 'IN', 'values' => [$programInformation['coach'], $programInformation['parentid']]]], 'cols' => ['id', 'parentid']]);
+            $users = Tfk::$registry->get('objectsStore')->objectModel('users')->getAll(['where' => [['col' => 'parentid', 'opr' => 'IN', 'values' => [$programInformation['coachid'], $programInformation['parentid']]]], 'cols' => ['id', 'parentid']]);
             $values['acl'] = ['1' => ['userid' => Tfk::tukosBackOfficeUserId, 'permission' => '3']];
             foreach($users as $user){
                 $values['acl'][] = ['userid' => $user['id'], 'permission' => '3'];
@@ -255,14 +255,14 @@ class WorkoutFeedback extends ObjectTranslator{
         if ($savedCount){
             $this->plansModel->googleSynchronizeOne($programId, $programInformation['googlecalid'], $id, Utl::getItem('synchroflag', $query), Utl::getItem('synchrostreams', $query), Utl::getItem('logo', $query), Utl::getItem('presentation', $query),
                 Utl::getItem('version', $query));
-            Feedback::add($this->tr('workoutsaved'));
+            Feedback::add($this->tr('sessionsaved'));
         }else{
             Feedback::add($this->tr('noworkoutchange'));
         }
         return $id;
     }
     function getProgramInformation($programId){
-        $programInformation = $this->plansModel->getOne(['where' => ['id' => $programId], 'cols' => ['parentid', 'coach', 'googlecalid', 'weeklies', 'contextid', 'updator']], ['weeklies' => []]);
+        $programInformation = $this->plansModel->getOne(['where' => ['id' => $programId], 'cols' => ['parentid', 'coachid', 'googlecalid', 'weeklies', 'contextid', 'updator']], ['weeklies' => []]);
         return $programInformation;
     }
     function showSynchroFieldsLocalAction(){

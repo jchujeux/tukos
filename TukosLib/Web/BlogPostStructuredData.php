@@ -9,14 +9,14 @@ class BlogPostStructuredData{
 <script type="application/ld+json">
         {
           "@context": "https://schema.org",
-          "@type": "BlogPost",
+          "@type": "BlogPosting",
           "headline": "\${title}",
           "datePublished": "\${datePublished}",
           "dateModified": "\${dateModified}",
-          "author": [{
+          "author": {
               "@type": "Person",
-              "name": "\${postAuthor}",
-            }]
+              "name": "\${postAuthor}"
+            }
         }
         </script>
 

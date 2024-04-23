@@ -114,7 +114,7 @@ define([
 				"dijit/form/ValidationTextBox", // used by template
 				"dojo/i18n!dijit/nls/common"
 			], lang.hitch(this, function(i18n, TooltipDialog, registry, Button, Select, ValidationTextBox, Common){
-				var _this = this, messages = Pmg.messages(['createLink', 'insertImage', 'url', 'description', 'target', 'apply', 'tukos', 'standard', 'cancel']);
+				var _this = this, messages = Pmg.messages(['createLink', 'insertImage', 'url', 'description', 'target', 'apply', 'tukos', 'standard', 'onclick', 'cancel']);
 				this.tag = this.command == 'insertImage' ? 'img' : 'a';
                 var dropDown = (this.dropDown = this.button.dropDown = new TooltipDialog({
 					title: messages[this.command],
@@ -138,6 +138,8 @@ define([
 				dropDown.startup();
 				this._urlInput = registry.byId(this._uniqueId + "_urlInput");
 				this._textInput = registry.byId(this._uniqueId + "_textInput");
+				this._targetSelect = registry.byId(this._uniqueId + "_targetSelect");
+				this._onClickInput = registry.byId(this._uniqueId + "_onClickInput");
 				this._setButton = registry.byId(this._uniqueId + "_setButton");
 				this.own(registry.byId(this._uniqueId + "_cancelButton").on("click", lang.hitch(this.dropDown, "onCancel")));
 				if(this._urlInput){
@@ -145,6 +147,9 @@ define([
 				}
 				if(this._textInput){
 					this.own(this._textInput.on("change", lang.hitch(this, "_checkAndFixInput")));
+				}
+				if (this._targetSelect && this._onClickInput){
+					this.own(this._targetSelect.on("change", lang.hitch(this, "_checkAndFixOnClickInput")));
 				}
 
 				// Build up the dual check for http/https/file:, and mailto formats.
@@ -216,6 +221,10 @@ define([
 			this._delayedCheck = setTimeout(function(){
 				fixupUrl(url);
 			}, 250);
+		},
+		_checkAndFixOnClickInput: function(){
+			const newTargetSelect = this._targetSelect.get('value');
+			this._onClickInput.set('value', newTargetSelect === 'tukos' ? this.tukosOnClickTemplate : this._onClickInput.get('value'));
 		},
 
 		_connectTagEvents: function(){
@@ -452,7 +461,7 @@ define([
 			"<table role='presentation'><tr><td>",
 			"<label for='${id}_urlInput'>${url}</label>",
 			"</td><td>",
-			"<input dojoType='dijit.form.ValidationTextBox' regExp='${urlRegExp}' " +
+			"<input dojoType='dijit.form.TextBox' regExp='${urlRegExp}' " +
 				"required='true' id='${id}_urlInput' name='urlInput' data-dojo-props='intermediateChanges:true'/>",
 			"</td></tr><tr><td>",
 			"<label for='${id}_textInput'>${description}</label>",
@@ -466,6 +475,11 @@ define([
 			"<option value='standard'>${standard}</option>",
 			"<option value='tukos'>${tukos}</option>",
 			"</select>",
+			"</td></tr><tr><td>",
+			"<label for='${id}_onClickInput'>${onclick}</label>",
+			"</td><td>",
+			"<input data-dojo-type='dijit.form.TextBox' required='false' id='${id}_onClickInput' " +
+				"name='onClickInput' style='width:15em;' data-dojo-props='intermediateChanges:true'/>",
 			"</td></tr><tr><td colspan='2'>",
 			"<button data-dojo-type='dijit.form.Button' type='submit' id='${id}_setButton'>${apply}</button>",
 			"<button data-dojo-type='dijit.form.Button' type='button' id='${id}_cancelButton'>${cancel}</button>",
@@ -474,9 +488,10 @@ define([
 
 		// htmlTemplate: [protected] String
 		//		String used for templating the `<img>` HTML to insert at the desired point.
-		dijitHtmlTemplate: "<img src=\"${urlInput}\" _djrealurl=\"${urlInput}\" alt=\"${textInput}\" />",
-		tukosHtmlTemplate: 
-			'<a href="${urlInput}" onclick="parent.tukos.Pmg.viewUrlInBrowserWindow(\'${urlInput}\', \'${urlInput}\', \'popup, left=100, right=100\');return false;" style="width: 100%;"><img alt="${textInput}" src="${urlInput}" style="max-width: 1200px; width: 95%;"></a>',
+		dijitHtmlTemplate: "<img src=\"${urlInput}\" _djrealurl=\"${urlInput}\" alt=\"${textInput}\" onclick=\"${onClickInput}\" />",
+		tukosHtmlTemplate: "<img src=\"${urlInput}\" _djrealurl=\"${urlInput}\" alt=\"${textInput}\" onclick=\"${onClickInput}\" />",
+		tukosOnClickTemplate: "parent.tukos.Pmg.viewUrlInBrowserWindow(this.src, this.src, 'popup, left=100, right=100');",
+		//	'<a href="${urlInput}" onclick="parent.tukos.Pmg.viewUrlInBrowserWindow(\'${urlInput}\', \'${urlInput}\', \'popup, left=100, right=100\');return false;" style="width: 100%;"><img alt="${textInput}" src="${urlInput}" style="max-width: 1200px; width: 95%;"></a>',
 		// tag: [protected] String
 		//		Tag used for the link type (img).
 		tag: "img",
@@ -488,15 +503,27 @@ define([
 			//		The anchor/link to process for data for the dropdown.
 			// tags:
 			//		protected
-			var url, text;
+			var url, text, onClick, tukos;
 			if(img && img.tagName.toLowerCase() === this.tag){
 				url = img.getAttribute('_djrealurl') || img.getAttribute('src');
+				/*if (url.substring(0,10) === 'data:image'){
+					url = "data:image";
+				}*/
 				text = img.getAttribute('alt');
+				onClick = img.getAttribute('onclick');
+				if (onClick && onClick.indexOf('tukos') > 0){
+					tukos = 'tukos';
+				}/*else{
+					if (!img.getAttribute('select')){
+						tukos = 'tukos';
+						onClick = this.tukosOnClickTemplate;
+					}
+				}*/
 				this.editor.selection.selectElement(img, true);
 			}else{
 				text = this.editor.selection.getSelectedText();
 			}
-			return {urlInput: url || '', textInput: text || ''}; //Object
+			return {urlInput: url || '', textInput: text || '', targetSelect : tukos || 'standard', onClickInput: onClick || ''}; //Object
 		},
 
 		_isValid: function(){
@@ -504,7 +531,7 @@ define([
 			//		Over-ride for images.  You can have alt text of blank, it is valid.
 			// tags:
 			//		protected
-			return this._urlInput.isValid();
+			return true; //this._urlInput.isValid();
 		},
 
 		_connectTagEvents: function(){

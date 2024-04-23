@@ -55,7 +55,13 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				if (formulaCache[arg]){
 					return formulaCache[arg];
 				}else{
-					const formulaString = arg.replaceAll(/[$]((?:\w|_)+)/g, '(!Number.isNaN(x=Number(item.$1)) ? x : (item.$1 === undefined ? utils.putInCache("$1", item.' + idProperty + ', cache)  : item.$1))');
+					let  formulaString = arg.replaceAll(/[$]((?:\w|_)+)/g, '(!Number.isNaN(x=Number(item.$1)) ? x : (item.$1 === undefined ? utils.putInCache("$1", item.' + idProperty + ', cache)  : item.$1))');
+					/*
+					* here, if we finc @xxx inside formulaString
+					*/
+					formulaString = formulaString.replace(/@(\w+)/g, function(match, p1){
+						return valueOf(p1);
+					});
 					return formulaCache[arg] = eutils.eval('return ' + formulaString + ';', 'item, cache, ' + idProperty + ', x');
 				}
 			},

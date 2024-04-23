@@ -46,7 +46,7 @@ trait Kpis {
 	
     public function getKpis($query, $kpisToGet){
         $kpis = [];
-        $athlete = Tfk::$registry->get('objectsStore')->objectModel('sptathletes')->getOne(['where' => ['id' => $query['athlete']], 'cols' => ['hrmin', 'hrthreshold', 'ftp', 'speedthreshold', 'sex']]);
+        $athlete = Tfk::$registry->get('objectsStore')->objectModel('sptathletes')->getOne(['where' => ['id' => $query['athleteid']], 'cols' => ['hrmin', 'hrthreshold', 'ftp', 'speedthreshold', 'sex']]);
         foreach($kpisToGet as $sessionId => $sessionKpisToGet){
             $kpisDescription = []; $streamsToGet = [];
             foreach($sessionKpisToGet as $kpiName){

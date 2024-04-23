@@ -32,11 +32,11 @@ class View extends AbstractView {
 		$customDataWidgets = [
 		    'parentid' => ['atts' => ['edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['sportsmanemail' => ['value' => "return sWidget.getItemProperty('email');"], 'parentid' => ['localActionStatus' => $this->programAclLocalAction()]]]]],
 		    'comments' => ['atts' => ['edit' => ['style' => ['height' => '300px']]]],
-		    'coach' => ViewUtils::objectSelect($this, 'Coach', 'people', ['atts' => [
+		    'coachid' => ViewUtils::objectSelect($this, 'coach', 'people', ['atts' => [
 		        'edit' => ['storeArgs' => ['cols' => ['email', 'parentid']],'onWatchLocalAction' => ['value' => [
 		            'coachorganization' => ['value' => ['triggers' => ['server' => true, 'user' => true], 'action' => "return sWidget.getItemProperty('parentid');"]],
 		            'coachemail' => ['value' => ['triggers' => ['server' => false, 'user' => 'true'], 'action' => "return sWidget.getItemProperty('email');"]],
-		            'coach' => ['localActionStatus' => $this->programAclLocalAction()]
+		            'coachid' => ['localActionStatus' => $this->programAclLocalAction()]
 		        ]]],
 		        'overview' => ['hidden' => true]
 		    ]]),
@@ -271,7 +271,7 @@ EOT;
 	public static function programAclLocalAction(){
 	    $tukosBackOfficeUserId = Tfk::tukosBackOfficeUserId;
 	    return <<<EOT
-const form = sWidget.form, acl = form.getWidget('acl'), coachId = form.valueOf('coach'), athleteId = form.valueOf('parentid');
+const form = sWidget.form, acl = form.getWidget('acl'), coachId = form.valueOf('coachid'), athleteId = form.valueOf('parentid');
 if (!coachId){
     Pmg.setFeedback('needtodefinecoach');
     return false;
@@ -404,7 +404,7 @@ EOT
 	    $tukosBackOfficeUserId = Tfk::tukosBackOfficeUserId;
 	    return <<<EOT
 //const self = this;// idp = this.store.idProperty;
-const sportsmanId = this.valueOf('parentid'), coachId = this.valueOf('coach');
+const sportsmanId = this.valueOf('parentid'), coachId = this.valueOf('coachid');
 const setAcls = function(usersItems){
     let acl = {1: {rowId: 1, userid: $tukosBackOfficeUserId, permission:"3"}}, rowId = 2;
     usersItems.forEach(function(item){

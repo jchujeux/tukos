@@ -10,7 +10,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
                 this.setColArgsFunctions(args.columns[i]);
             }
             this.contextMenuItems = Pmg.isRestrictedUser() 
-            ? {row: [], idCol: [], header: []}
+            ? {row: [], idCol: [{atts: {label: Pmg.message('editinnewtab'), onClick: function(evt){self.editInNewTab(self)}}}], header: []}
             : {
                     row: [
                         {atts: {label: Pmg.message('togglerowheight'), onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}, 
@@ -315,7 +315,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
                     }
                 }
             }else{
-                var id = grid.cellValueOf(field);
+                var id = grid.cellValueOf(Pmg.isRestrictedUser() ? 'id' : field);
                 if (id){
                     object = Pmg.objectName(id, grid.form.objectDomain);
                     query.id = id;
@@ -353,7 +353,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 			evt.stopPropagation();
 			const row = (this.clickedRow = this.row(evt)), cell = this.clickedCell = this.cell(evt), column = cell.column;
 			if (Pmg.isRestrictedUser()){
-	            mutils.setContextMenuItems(this, row ? (!row.data.id ||  (row.data.updator && row.data.updator === Pmg.get('userid')) ? this.contextMenuItems.canEdit : this.contextMenuItems.noEdit) : this.contextMenuItems.header);
+	            mutils.setContextMenuItems(this, row ? (!row.data.id ||  (row.data.updator && row.data.updator === Pmg.get('userid')) ? this.contextMenuItems.canEdit || this.contextMenuItems.idCol : this.contextMenuItems.noEdit || this.contextMenuItems.idCol) : this.contextMenuItems.header);
 			}else{
 				let menuItems = lang.clone(this.contextMenuItems), colItems = row ? (column.onClickFilter || utils.in_array(column.field, this.objectIdCols) ? 'idCol' : 'row') : 'header';
 				this.clickedColumn = this.column(evt);

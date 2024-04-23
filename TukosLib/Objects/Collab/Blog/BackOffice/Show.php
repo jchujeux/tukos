@@ -81,6 +81,7 @@ class Show extends ObjectTranslator{
             return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'postedbyandwhen' => $postedByAndWhen, 'comments' => $values['comments']];
         }else{
             $postNotFound = $this->view->tr('postnotfound');
+            Tfk::$registry->blogStructuredDataHeaderScript = '';
             return ['id' => 0, 'name' => '', 'posttitle' => $postNotFound, 'postedbyandwhere' => '', 'comments' => ''];
         }
     }
