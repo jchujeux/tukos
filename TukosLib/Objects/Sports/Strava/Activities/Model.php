@@ -21,6 +21,7 @@ class Model extends AbstractModel {
             'starttime' => 'VARCHAR(15)  DEFAULT NULL',
             'duration' => 'VARCHAR(30)  DEFAULT NULL',
             'sport' =>  'VARCHAR(30) DEFAULT NULL',
+            'gearid' => 'VARCHAR(30) DEFAULT NULL',
             'distance' => 'VARCHAR(10) DEFAULT NULL',
             'elevationgain' => 'VARCHAR(10) DEFAULT NULL',
             'timemoving' => 'VARCHAR(30)  DEFAULT NULL',
@@ -33,6 +34,7 @@ class Model extends AbstractModel {
             'heartratestream' => 'longtext',
             'cadencestream' => 'longtext',
             'wattsstream' => 'longtext',
+            'watts_calcstream' => 'longtext',
             'grade_smoothstream' => 'longtext',
             'velocity_smoothstream' => 'longtext',
             'kpiscache' => 'longtext'
@@ -48,11 +50,12 @@ class Model extends AbstractModel {
             'startdate' => ['stName' => 'start_date'],
             'sport' => ['stName' => 'type', 'format' => ['type' => 'map', 'args' => ['Ride' => 'bicycle', 'VirtualRide' => 'bicycle', 'Run' => 'running', 'Swim' => 'swimming', 'Crossfit' => 'bodybuilding']]],
             'name' => ['stName' => 'name'],
+            'gearid' => ['stName' => 'gear_id'],
             'stravaid' => ['stName' => 'id']
             //'notes' => [],
         ];
         $this->metricsCols = array_keys($this->metrics);
-        $this->streamCols = ['timestream', 'distancestream', 'altitudestream', 'heartratestream', 'cadencestream', 'wattsstream', 'grade_smoothstream', 'velocity_smoothstream'];
+        $this->streamCols = ['timestream', 'distancestream', 'altitudestream', 'heartratestream', 'cadencestream', 'wattsstream', 'watts_calcstream', 'grade_smoothstream', 'velocity_smoothstream'];
         parent::__construct(
             $objectName, $translator, 'stravaactivities',  ['parentid' => ['sptathletes']], ['kpiscache'], $colsDefinition);
     }   
@@ -140,10 +143,9 @@ class Model extends AbstractModel {
         }
         return $tukosStreamData;
     }
-    public function addStreams($activity, $needsStreams, $streamCols, $client){
-        if ($needsStreams){
-            $activity = array_merge($activity, $this->stravaStreamsToTukosStreams($client->getActivityStreams($activity['stravaid'], implode(',', array_map(function($tukosName){return substr($tukosName, 0, -6);}, $streamCols)))));
-        }
+    public function addStreams($activity, $streamCols, $client){
+        $stravaStreamsName = array_map(function($tukosName){return substr($tukosName, 0, -6);}, $streamCols);
+        $activity = array_merge($activity, $this->stravaStreamsToTukosStreams(array_intersect_key($client->getActivityStreams($activity['stravaid'], implode(',', $stravaStreamsName)), array_flip($stravaStreamsName))));
         foreach($streamCols as $col){
             if (!empty($activity[$col])){
                 $activity[$col] = json_encode($activity[$col]);
@@ -152,7 +154,7 @@ class Model extends AbstractModel {
         return $activity;
     }
     public function activitiesToTukos($athleteId, $synchroStart, $synchroEnd, $synchroStreams){
-        $athleteModel = Tfk::$registry->get('objectsStore')->objectModel('people');
+        $athleteModel = Tfk::$registry->get('objectsStore')->objectModel('people'); $itemsValues = [];
         try{
             $client = $this->getAthleteClient($athleteId);
             $stravaActivitiesToSync = $client->getAthleteActivities(strtotime(DUtl::dayAfter($synchroEnd)), strtotime($synchroStart));
@@ -173,16 +175,31 @@ class Model extends AbstractModel {
         foreach ($stravaActivitiesToSync as $activity){
             $tukosActivity = $this->activityToTukos($activity);
             $tukosActivity['parentid'] = $athleteId;
-            $existingTukosActivity = $this->getOne(['where' => ['stravaid' => $activity['id']], 'cols' => ['id', 'timestream']]);
-            if (empty($existingTukosActivity)){
-                $this->updateOne($tukosActivity = $this->addStreams($this->insert($tukosActivity), $synchroStreams, $this->streamCols, $client));
+            $existingTukosActivity = $this->getOne(['where' => ['stravaid' => $activity['id']], 'cols' => ['id', 'timestream', 'watts_calcstream']]);
+            if (empty($existingTukosActivity) && $synchroStreams){
+                $this->updateOne($tukosActivity = $this->addStreams($this->insert($tukosActivity), $this->streamCols, $client));
             }else{
                 $tukosActivity['id'] = $existingTukosActivity['id'];
-                if ($this->updateOne($tukosActivity) || ($synchroStreams && empty($existingTukosActivity['timestream']))){
-                    $this->updateOne($tukosActivity = $this->addStreams($tukosActivity, $synchroStreams, $this->streamCols, $client));
+                $this->updateOne($tukosActivity);
+                if ($synchroStreams){
+                    if (empty($existingTukosActivity['timestream'])){
+                        $this->updateOne($this->addStreams($tukosActivity, $this->streamCols, $client));
+                    }else if (empty($existingTukosActivity['watts_calcstream'])){//temporary: until 10/2024 watt_calcstream was not in streamCols
+                        $this->updateOne($this->addStreams($tukosActivity, ['watts_calcstream'], $client));
+                    }
                 }
             }
+            unset($tukosActivity['parentid']);
+            if ($gearid = Utl::extractItem('gearid', $tukosActivity)){
+                $gearItem = Tfk::$registry->get('objectsStore')->objectModel('sptequipments')->getOne(['where' => ['stravagearid' => $gearid], 'cols' => ['id', 'extraweight', 'frictioncoef', 'dragcoef']]);
+                if (!empty($gearItem)){
+                    $gearItem['equipmentid'] = Utl::extractItem('id', $gearItem);
+                    $tukosActivity = array_merge($tukosActivity, $gearItem);
+                }
+            }
+            $itemsValues[] = $tukosActivity;
         }
+        return $itemsValues;
     }
 }
 ?>

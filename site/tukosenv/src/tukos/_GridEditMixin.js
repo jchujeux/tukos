@@ -1,8 +1,8 @@
 define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "tukos/dgrid/Editor", "tukos/utils", "tukos/dateutils", "tukos/evalutils", "tukos/sheetUtils", 
          "tukos/widgetUtils", "tukos/menuUtils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager", "tukos/TukosTooltipDialog", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
 function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mutils, wcutils, Pmg, TukosTooltipDialog, messages){
-	var copyDialogTooltip, 
-		applyCallback = function(){
+	var copyDialogTooltip, itemsColDialogTooltip, 
+		applyCopyCallback = function(){
 	        var grid = copyDialogTooltip.grid, numberOfCopies = parseInt(copyDialogTooltip.pane.valueOf('copies') || '1'), incrementFrom;
 	        copyDialogTooltip.pane.close();
 	        var data = grid.clickedRowValues(), name = data.name || '', re = /(^.*)([0-9]+$)/g, match = re.exec(name), item = grid.copyItem(data);
@@ -28,18 +28,60 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
 	        	grid.addRow(undefined, item);
 	        }
     	},
-		copyDialog = function(grid){
-			copyDialogTooltip = copyDialogTooltip || new TukosTooltipDialog({paneDescription: {
+        applyItemsColCallback = function(){
+        	var grid = itemsColDialogTooltip.grid, pane = itemsColDialogTooltip.pane, col = grid.untranslateColName(pane.valueOf('col')), newValue = pane.valueOf('newValue');
+        	if (utils.empty(grid.selection)){
+				Pmg.setFeedbackAlert('Needtoselectrows');
+			}else{
+	        	utils.forEach(grid.selection, function(status, id){
+	        		if (status){
+	    				var row = grid.row(id), item = row.data; 
+						if ((typeof item.canEdit === "undefined") || item.canEdit){
+							if (newValue !== "undefined" || typeof item[col] !== 'undefined'){
+								grid.updateDirty(id, col, newValue === "undefined" ? undefined : newValue);
+							}else{
+								Pmg.setFeedbackAlert('Colareadyundefinednothingdone');
+							}
+						}else{
+							grid.deselect(id);
+						}
+	        		}
+	        	});
+        	}
+			this.contextMenu.menu.onExecute();
+        },
+		setItemsColDialog = function(grid){
+			itemsColDialogTooltip = itemsColDialogTooltip || new TukosTooltipDialog({paneDescription: {
 	            widgetsDescription: {
-	                copies: {type: 'TextBox', atts: {title: Pmg.message('numberofcopies'), placeHolder: Pmg.message('numberofcopies') + '  ...', style: {width: '5em'}}},
-	                //incrementfrom: {type: 'TextBox', atts: {title: Pmg.message('incrementfrom'), placeHolder: Pmg.message('incrementfrom') + '  ...', style: {width: '5em'}}},
+	                col: {type: 'TextBox', atts: {label: Pmg.message('Column'), placeHolder: Pmg.message('Column') + '  ...', style: {width: '8em'}}},
+	                newValue: {type: 'TextBox', atts: {label: Pmg.message('NewValue'), placeHolder: Pmg.message('newValue') + '  ...', style: {width: '8em'}}},
 	                cancel: {type: 'TukosButton', atts: {label: Pmg.message('close'), onClickAction:  'this.pane.close();'}},
-	                apply: {type: 'TukosButton', atts: {label: Pmg.message('apply'), onClick:applyCallback}}
+	                apply: {type: 'TukosButton', atts: {label: Pmg.message('apply'), onClick:applyItemsColCallback}}
 	            },
 	            layout:{
 	                tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},
 	                contents: {
-	                   row1: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['copies'/*, 'incrementfrom'*/]},
+	                   row1: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: true, labelWidth: 100},  widgets: ['col', 'newValue']},
+	                   row2: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['cancel', 'apply']}
+	                }
+	            }
+	        }});
+			itemsColDialogTooltip.grid = grid;
+			//itemsColDialogTooltip.pane.setValuesOf({copies: 1, incrementfrom: ''});
+			return itemsColDialogTooltip;
+		},
+		copyDialog = function(grid){
+			copyDialogTooltip = copyDialogTooltip || new TukosTooltipDialog({paneDescription: {
+	            widgetsDescription: {
+	                copies: {type: 'TextBox', atts: {label: Pmg.message('numberofcopies'), placeHolder: Pmg.message('numberofcopies') + '  ...', style: {width: '5em'}}},
+	                //incrementfrom: {type: 'TextBox', atts: {title: Pmg.message('incrementfrom'), placeHolder: Pmg.message('incrementfrom') + '  ...', style: {width: '5em'}}},
+	                cancel: {type: 'TukosButton', atts: {label: Pmg.message('close'), onClickAction:  'this.pane.close();'}},
+	                apply: {type: 'TukosButton', atts: {label: Pmg.message('apply'), onClick:applyCopyCallback}}
+	            },
+	            layout:{
+	                tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},
+	                contents: {
+	                   row1: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: true, labelWidth: 100},  widgets: ['copies'/*, 'incrementfrom'*/]},
 	                   row2: {tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, labelWidth: 100},  widgets: ['cancel', 'apply']}
 	                }
 	            }
@@ -90,6 +132,16 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 }
             }));
         },
+        untranslateColName: function(name){
+			const untranslation = utils.some(this.columns, function(column, field){
+				return name === column.title ? field : false;
+			});
+			if (untranslation){
+				return untranslation;
+			}else{
+				return utils.untranslate(name, this.translations);
+			}
+		},
         newRowPrefixNamedId: function(id){
         	var newRowPrefix = this.newRowPrefix;
         	if (id && newRowPrefix && id.indexOf(newRowPrefix) === 0){
@@ -160,23 +212,39 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             var collection = this.collection, grid = this, idp = collection.idProperty, collectionRow = collection.getSync(idPropertyValue), oldValue;
             //if (isNewRow || ((oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field]) !== value)){
             if (isNewRow || !utils.isEquivalent(oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field], value)){
+                if (!this.nestedRowWatchActions){
+					this.currentUpdateDirtyRow = idPropertyValue;
+				}
                 this.inherited(arguments);
                 collectionRow[field] = value;
-                if (!grid.noRefreshOnUpdateDirty){
-                	sutils.refreshFormulaCells(grid);
-					this.collection.putSync(collectionRow, {overwrite: true});
-                }
                 if (isUserEdit || this.isUserEdit){
-                	if (this.onChangeNotify){
-                		var item = lang.mixin(lang.clone(this.dirty[idPropertyValue]), utils.newObj([[idp, idPropertyValue], ['connectedIds', collection.getSync(idPropertyValue).connectedIds]]));
-                    	this.notifyWidgets({action: 'update',  item: item, sourceWidget: this});            		
-                	}
                     if (this.columns[field]){
                     	this.onCellChangeLocalAction(idPropertyValue, this.columns[field], value, oldValue);
                     }
-                    this.setSummary();
-                    this.isUserEdit = false;
-                }
+				}
+                if (idPropertyValue !== this.currrentUpdateDirtyRow){
+					collectionRow = collection.getSync(this.currentUpdateDirtyRow);
+				}
+                if (!this.nestedRowWatchActions || idPropertyValue !== this.currentUpdateDirtyRow){
+	                if (!grid.noRefreshOnUpdateDirty){
+	                	sutils.refreshFormulaCells(grid);
+						this.collection.putSync(collectionRow, {overwrite: true});
+	                }
+	                if (isUserEdit || this.isUserEdit){
+	                	if (this.onChangeNotify){
+	                		var item = lang.mixin(lang.clone(this.dirty[idPropertyValue]), utils.newObj([[idp, idPropertyValue], ['connectedIds', collectionRow.connectedIds]]));
+	                    	this.notifyWidgets({action: 'update',  item: item, sourceWidget: this});            		
+	                	}
+	                    /*if (this.columns[field]){
+	                    	this.onCellChangeLocalAction(idPropertyValue, this.columns[field], value, oldValue);
+	                    }*/
+	                    if (!this.nestedRowWatchActions){
+							this.setSummary();
+	                   		this.isUserEdit = false;
+	                   	}
+	                }
+					this.currentUpdateDirtyRow = idPropertyValue;
+				}
                 if (!(this.noMarkAsChanged || (this.columns[field] && this.columns[field].noMarkAsChanged))){
                 	wutils.markAsChanged(this, 'noStyle', 'user');    
                 }        	
@@ -207,7 +275,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             var localActionFunctions = column.localDataChangeActionFunctions;
             if (!utils.empty(localActionFunctions)){
             	var sourceCell = this.cell(idPropertyValue, column.field), sourceWidget = this.getEditorInstance(column.field) || sourceCell.element.widget || sourceCell.element.input,
-            		allowedNestedRowWatchActions = this.allowedNestedRowWatchActions/*, needsRefresh = false*/;
+            		allowedNestedRowWatchActions = this.allowedNestedRowWatchActions;
                 this.nestedRowWatchActions = this.nestedRowWatchActions || 0;
                 column.nestedWatchActions = column.nestedWatchActions || 0;
 				when(sourceWidget, lang.hitch(this, function(sourceWidget){
@@ -227,7 +295,6 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
 		                        	var result = widgetActionFunctions[att].action(source, targetCell, newValue, oldValue);
 		                        	if (att === 'value'){
 		                            	this.updateDirty(idPropertyValue, colName, result);
-										needsRefresh = true;
 		                        	}
 		                        	this.nestedRowWatchActions += -1;
 		                        	column.nestedWatchActions += -1;
@@ -331,6 +398,9 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         copyRow: function(evt){
 			copyDialog(this).open({x: evt.clientX, y: evt.clientY, parent: this});
         },
+        setSelectionCol: function(evt){
+			setItemsColDialog(this).open({x: evt.clientX, y: evt.clientY, parent: this});
+        },
         
         deleteRow: function(rowItem, skipDeleteAction, isUserRowEdit){
             this.deleteRowItem(rowItem || this.clickedRow.data, skipDeleteAction, isUserRowEdit);
@@ -367,6 +437,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         	rows.forEach(lang.hitch(this, function(row){
         		this.deleteRowItem(row, skipDeleteAction, isUserRowEdit);
         	}));
+			this.refresh({keepScrollPosition: true});
         },
         moveRow: function(itemToMove, currentRowData, where){
             const idp = this.collection.idProperty;
@@ -405,7 +476,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 dirtyToSend = {};
             	utils.forEach(this.dirty[i], function(value, col){
                 	if (!noSendOnSave.hasOwnProperty(col)){
-                		dirtyToSend[col] = value;
+                		dirtyToSend[col] = value === undefined ? '~delete' : value;
                 	}
                 });
                 if (!utils.empty(dirtyToSend)){

@@ -1,19 +1,6 @@
 "use strict";
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Color", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/PageManager"], 
-function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine, Pmg){
-	const setFilterString = function (description, expression, dateCol){
-		const filterStrings = [];
-		if (description.firstdate){
-			filterStrings.push('"' + dateCol + '" >= "' + expression.expressionToValue(description.firstdate) + '"');
-		}
-		if (description.lastdate){
-			filterStrings.push('"' + dateCol + '" <= "' + expression.expressionToValue(description.lastdate) + '"');
-		}
-		if (description.itemsFilter){
-			filterStrings.push(description.itemsFilter);
-		}
-		return filterStrings.join(' AND ');
-	};
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Color", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/charting/chartsUtils", "tukos/PageManager"], 
+function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine, chartsUtils, Pmg){
 	return declare(null, {
         constructor: function(args){
 			lang.mixin(this, args);
@@ -22,7 +9,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 			this.recursionDepth = 0;
 		},
 		setChartValue: function(chartWidgetName){
-			var self = this, form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex;
+			var self = this, form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {};
 			if (!hidden  && chartWidget.kpisToInclude){
 				dojo.ready(function(){
 					let collection, log10;
@@ -80,7 +67,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 						const white = Color.fromString('white'), yellow = Color.fromString('yellow'), orange = Color.fromString('orange'), red = Color.fromString('red'), darkRed = Color.fromString('darkred');
 						kpisDescription.forEach(function(kpiDescription){
 							try{
-								let filterString = setFilterString(kpiDescription, expression, dateCol), kpiDate = expression.expressionToValue(kpiDescription.kpidate), kpiCollection = collection, kpiData = collectionData, previousToDate, previousData = [];
+								let filterString = chartsUtils.setFilterString(kpiDescription, expression, dateCol), kpiDate = expression.expressionToValue(kpiDescription.kpidate), kpiCollection = collection, kpiData = collectionData, previousToDate, previousData = [];
 								if (filterString){
 									kpiCollection = collection.filter(expFilter.expressionToValue(filterString));
 									kpiData = utils.toNumeric(kpiCollection.fetchSync(), grid);
@@ -91,7 +78,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 								const name = kpiDescription.name, xName = name + ' (x)', yName = name + ' (y)', zName = name + ' (z)', tooltipName = name + 'Tooltip', fillName = name + 'Fill', plotName = kpiDescription.plot, 
 										plot = plots[plotName], xAxis = plot.hAxis, yAxis = plot.vAxis, xAxisIsLogarithmic = axes[xAxis].isLogarithmic, yAxisIsLogarithmic = axes[yAxis].isLogarithmic;
 								tableColumns.push({field: xName, label: xName}, {field: yName, label: yName});
-								series[name] = {value: {x: xName, y: yName, tooltip: tooltipName}, kwArgs: {query: function(item){return item[xName] !== undefined;}}, options: {plot: plotName, label: name, legend: name}};
+								series[name] = {value: {x: xName, y: yName, tooltip: tooltipName}, filter: function(item){return item[xName] !== undefined;}, options: {plot: plotName, label: name, legend: name}};
 								if (plot.type === 'Bubble'){
 									series[name].value.size = zName;
 								}
@@ -103,6 +90,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 								
 								xyValues.forEach && xyValues.forEach(function(xyValue, index){
 									const index1 = index + 1;
+									tableData.id = index1;
 									tableData[index1][xName] = chartData[index][xName] = xyValue[0];
 									tableData[index1][yName] = chartData[index][yName] = xyValue[1];
 									if (plot.type === 'Bubble'){
@@ -127,47 +115,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 							}
 						});
 					}
-					if (missingKpisIndex && !utils.empty(missingItemsKpis)){
-					    let data = {}, indexToIdp = {};
-						utils.forEach(missingItemsKpis, function(value, idp){
-							let index = grid.store.getSync(idp)[missingKpisIndex];
-							if (index){
-								data[index] = missingItemsKpis[idp];
-								indexToIdp[index] = idp;
-							}
-						});
-					    if (!utils.empty(data)){
-						    if (self.recursionDepth > 2){
-								Pmg.addFeedback(Pmg.message('too many recursions') + ': self.recursionDepth (XyChart)');
-								self.recursionDepth = 0;
-								return;
-							}
-						    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
-						            function(response){
-						           		const kpis = response.data.kpis;
-										utils.forEach(kpis, function(kpi, index){
-											let idp = indexToIdp[index], itemKpis = kpis[index];
-											utils.forEach(itemKpis, function(kpi, j){
-												grid.updateDirty(idp, j, kpi);
-												if (kpi === false){
-													Pmg.addFeedback('Pmg.serverKpierror' + ': ' + ' - ' + Pmg.message('col') + ': ' + j + Pmg.message('index') + ': ' + index);
-												}
-											});
-										});
-										self.setChartValue(chartWidgetName);//recursive call. Risk of infinite loop ?
-						            },
-						            function(error){
-						                console.log('error:' + error);
-						            }
-						    );
-						}else{
-							chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
-							self.recursionDepth = 0;
-						}
-					}else{
-						chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
-						self.recursionDepth = 0;
-					}
+					chartsUtils.processMissingKpis(missingItemsKpis, grid, self, chartWidgetName, chartData, tableData, tableColumns, axes, plots, series);
 				});
 			}		  
 		},

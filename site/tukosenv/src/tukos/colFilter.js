@@ -35,15 +35,6 @@ function(declare, lang, dct, Memory, Widget, TextBox, Select, registry, JSON, Pm
                 this.oprWidget.set('disabled', value, false);
                 this.entryWidget.set('disabled', value, false);
         },
-/*        
-        onKeyDown: function(event){
-			if (event.keyCode === 13) {
-				var grid = this.grid;
-				this.onFilterChange(this);
-				grid.set('collection', grid.store.filter({contextpathid: grid.form.tabContextId()}));
-			}        	
-        },
-*/        
         onChange: function(newValue){
         	this.hasChanged = true;
         },

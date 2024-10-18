@@ -1,6 +1,7 @@
 <?php
 namespace TukosLib\Objects\Sports\Strava;
 
+use TukosLib\Objects\Views\Models\ModelsAndViews;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\HtmlUtilities as HUtl;
@@ -8,6 +9,8 @@ use TukosLib\TukosFramework as Tfk;
 
 trait AuthorizeAndSynchronize {
 	
+    use ModelsAndViews;
+    
     public function stravaEmailAuthorize($query, $atts = []){
         $peopleModel = Tfk::$registry->get('objectsStore')->objectModel('people');
         $organizationModel = Tfk::$registry->get('objectsStore')->objectModel('organizations');
@@ -42,28 +45,36 @@ trait AuthorizeAndSynchronize {
             }
         }
     }
-    public function stravaSynchronize($query, $atts = []){//needs $this->stravaCols(), which must include at least stravaid, startdate, starttime, and $this->activityKpis(), the kpis to compute during synchronization, and $this->itemsModel() 
+    public function stravaSynchronize($query, $atts = []){//needs $this->stravaCols(), which must include at least stravaid, startdate, starttime, and $this->activityKpis(), the kpis to compute during synchronization, and $this->itemsModel(), $this->itemsView()
         $athleteId = $query['athleteid'];
         $synchroStreams = $query['synchrostreams'] === 'false' ? false : $query['synchrostreams'];
         $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
-        $targetView = Tfk::$registry->get('objectsStore')->objectView('sptworkouts');
-        $stravaCols = $this->stravaCols();
         $itemsModel = $this->itemsModel();
-        $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams);
-        $stravaActivities = $stravaActivitiesModel->getAllExtended(['where' => [['col' => 'startdate', 'opr' => '>=', 'values' => $query['synchrostart']], ['col' =>'startdate', 'opr' => '<=', 'values' => $query['synchroend']]],
-            'cols' => $stravaCols, 'orderBy' => ['startdate' =>  'ASC']]);
-        foreach ($stravaActivities as &$activity){
-            $activity = array_merge(Utl::getItem($activity['stravaid'], $itemsModel->computeKpis($athleteId, [$activity['stravaid'] => $this->activityKpis()], 'stravaid'), [], []), $activity);
-            
+        $itemsView = $this->itemsView();
+        $itemsValues = $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams);
+        $itemsToProcess = []; $kpisToGet = $this->activityKpis();
+        if ($defaultItemsCols = $itemsModel->synchroDefaultItemsCols()){
+            $presentCols = array_intersect(array_keys($query), $defaultItemsCols);
+            $presentValues = Utl::getItems($presentCols, $query);
+        }else{
+            $presentValues = [];
         }
-        $stravaActivities = Utl::objToEdit($stravaActivities, $targetView->dataWidgets);
-        $stravaActivities = Utl::toAssociativeGrouped($stravaActivities, 'startdate');
-        foreach ($stravaActivities as $activities){
-            $times = array_column($activities, 'starttime');
-            array_multisort($times, SORT_ASC, $activities);
+        foreach ($itemsValues as &$itemValues){
+            $itemsToProcess[] = ['kpisToGet' => &$kpisToGet, 'itemValues' => ($itemValues = array_merge($itemValues, $presentValues))];
+        }
+        $kpis = $itemsModel->computeKpis($athleteId, $itemsToProcess);
+        foreach($kpis as $key => $itemKpis){
+            unset($itemsValues[$key]['id']);
+            $itemsValues[$key] = array_merge($itemsValues[$key], $itemKpis);
+        }
+        $itemsValues = $this->convert($itemsValues, $itemsView->dataWidgets, 'objToStoreEdit', true);
+        $itemsValues = Utl::toAssociativeGrouped($itemsValues, 'startdate');
+        foreach ($itemsValues as $values){
+            $times = array_column($values, 'starttime');
+            array_multisort($times, SORT_ASC, $values);
         }
         $usersItems = Tfk::$registry->get('objectsStore')->objectModel('users')->getAllExtended(['where' => [['col' => 'parentid', 'opr' => 'IN', 'values' => [$query['athleteid'], $query['coachid']]]], 'cols' => ['id', 'parentid']]);
-        return ['stravaActivities' => $stravaActivities, 'usersItems' => $usersItems];
+        return ['stravaActivities' => $itemsValues, 'usersItems' => $usersItems];
     }
     public function activitiesServerSynchronize($query){
         list('stravaActivities' => $stravaActivitiesToSync, 'usersItems' => $usersItems) = $this->stravaSynchronize($query);

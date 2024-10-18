@@ -10,11 +10,22 @@ function(declare, lang, dct, Widget, utils, hiutils, wutils){
 			this._set('value', utils.empty(value) ? '' : JSON.stringify(value));
         	if (this.valueNode){
                     dct.empty(this.valueNode);
-                }
-                this.selectedLeaves = {};
-                this.valueNode =hiutils.objectTable(value, this.hasCheckboxes, this.selectedLeaves, this);
-                this.domNode.appendChild(this.valueNode);
+            }
+            this.selectedLeaves = {};
+            this.valueNode = hiutils.objectTable(value, this.hasCheckboxes, this.selectedLeaves, this);
+            this.domNode.appendChild(this.valueNode);
         },
+        addSelectedLeaves(leaves){
+			this.selectedLeaves = lang.mixin(this.selectedLeaves, leaves);
+			if (!utils.empty(this.selectedLeaves)){
+				wutils.markAsChanged(this);
+			}
+        	if (this.valueNode){
+                    dct.empty(this.valueNode);
+            }
+            this.valueNode = hiutils.objectTable(this.get('value'), this.hasCheckboxes, this.selectedLeaves, this);
+            this.domNode.appendChild(this.valueNode);
+		},
         _getValueAttr: function(){
         	var value = this._get('value');
         	return value ? JSON.parse(value) : {};

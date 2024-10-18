@@ -24,6 +24,11 @@ class Model extends AbstractModel {
             'intensity'  =>  'TINYINT DEFAULT NULL',
             'stress'     =>  'TINYINT DEFAULT NULL',
             'sport'      =>  "ENUM ('" . implode("','", Sports::$sportOptions) . "')",
+            'equipmentid'=> "MEDIUMINT DEFAULT NULL",
+            'extraweight'=> 'FLOAT DEFAULT NULL',
+            'frictioncoef'=> 'FLOAT DEFAULT NULL',
+            'dragcoef'=> 'FLOAT DEFAULT NULL',
+            'windvelocity' => 'FLOAT DEFAULT NULL',
             'warmup'     =>  'longtext',
             'mainactivity' =>  'longtext',
             'warmdown'     =>  'longtext',
@@ -64,16 +69,15 @@ class Model extends AbstractModel {
             'heartrate_avgload', 'power_avgload', 'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'stravaid'];
         $this->plannedCols = ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'warmupdetails', 'mainactivitydetails'];
         
-        $this->streamCols = ['timestream', 'distancestream', 'altitudestream', 'heartratestream', 'cadencestream', 'wattsstream', 'grade_smoothstream', 'velocity_smoothstream'];
-        parent::__construct($objectName, $translator, 'sptworkouts',  ['parentid' => ['sptplans', 'sptworkouts'], 'sportsman' => ['people']], ['kpiscache'], $colsDefinition);
+        parent::__construct($objectName, $translator, 'sptworkouts',  ['parentid' => ['sptplans', 'sptworkouts'], 'sportsman' => ['people'], 'equipmentid' => ['sptequipment']], ['kpiscache'], $colsDefinition);
         $this->removeExtraColsOnSave = false;
         $this->programCache = [];
     }   
     function initialize($init=[]){
         return parent::initialize(array_merge(['warmup' => '', 'mainactivity' => '', 'warmdown' => ''], $init));
     }
-    public function hasStreams($id){
-        return !empty($this->getOne(['where' => ['id' => $id, ['col' => 'timestream', 'opr' => 'IS NOT NULL', 'values' => null]], 'cols' => ['id']]));
+    function synchroDefaultItemsCols(){
+        return [/*'extraweight', 'frictioncoef', 'dragcoef', 'windvelocity'*/];
     }
     public function updateHeartrate_AvgLoad($query, $atts){
         $value = [];
@@ -152,8 +156,8 @@ class Model extends AbstractModel {
     }
     public function delete ($where){
         try{
-            if ($workoutId = Utl::getItem('id', $where)){
-                list('parentid' => $programId, 'googleid' => $googleId) = $this->getOne(['where' => ['id' => $workoutId], 'cols' => ['parentid', 'googleid']]);
+            if ($id = Utl::getItem('id', $where)){
+                list('parentid' => $programId, 'googleid' => $googleId) = $this->getOne(['where' => ['id' => $id], 'cols' => ['parentid', 'googleid']]);
                 if ($googleId && ($calId = Utl::getItem('googlecalid', $this->getProgram($programId)))){
                     Calendar::deleteEvent($calId, $googleId);
                 }
@@ -206,8 +210,8 @@ class Model extends AbstractModel {
     public function getLogoUrl($programId){
         return HUtl::imageUrl($this->getLogoImage($programId));
     }
-    public function getKpis($query, $kpisToGet){// associated to process action
-        return ['data' => ['kpis' => $this->computeKpis($query['athleteid'], $kpisToGet, 'stravaid')]];
+    public function getKpis($query, $itemsToProcess){// associated to process action
+        return ['data' => ['kpis' => $this->computeKpis($query['athleteid'], $itemsToProcess, $this)]];
     }
 }
 ?>

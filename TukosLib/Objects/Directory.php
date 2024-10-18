@@ -68,6 +68,7 @@ class Directory{
         'sptworkoutsstages' => 'Sports\Sessions\Stages',
         'sptexercises'		=> 'Sports\Exercises',
         'sptexerciseslevels' => 'Sports\Exercises\Levels',
+        'sptequipments' => 'Sports\Equipments',
         'stravaactivities' => 'Sports\Strava\Activities',
         'physiopatients'    => 'Physio\Patients',
         'physiopersoquotes' => 'Physio\PersoTrack\Quotes',

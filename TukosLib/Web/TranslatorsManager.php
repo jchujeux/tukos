@@ -202,14 +202,15 @@ class TranslatorsManager {
             if (count($subTranslations) > 1){
                 $unTranslations = [];
                 foreach($subTranslations as $subTranslation){
-                    $unTranslations[$subTranslation] = $subTranslation;
+                    $lastUnTranslation = $subTranslation;
                     foreach($setsPath as $setItem){
                         $unTranslation = array_search($subTranslation, array_map('mb_strtolower', $messages[$setItem]));
                         if (!empty($unTranslation)){
-                            $unTranslations[$subTranslation] = $unTranslation;
+                            $lastUnTranslation = $unTranslation;
                             break;
                         }
                     }
+                    $unTranslations[] = $lastUnTranslation;
                 }
                 return implode('_', $unTranslations);
             }

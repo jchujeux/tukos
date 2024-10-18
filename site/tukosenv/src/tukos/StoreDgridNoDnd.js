@@ -47,7 +47,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
 	            	this.contextMenuItems.canEdit = [
 	            	            	    {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editInPopup)}},
 	            	                    {atts: {label: messages.deleterow,   onClick: function(evt){self.deleteRow(false, false, true)}}},
-	            	                    {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [{atts: {label: messages.deleteselection,   onClick: function(evt){self.deleteSelection(false, true)}}}]}}
+	            	                    {type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [
+											{atts: {label: messages.deleteselection,   onClick: function(evt){self.deleteSelection(true, true)}}}, {atts: {label: Pmg.message('ChangeColValue'),   onClick: lang.hitch(this, this.setSelectionCol)}}
+										]}}
 	            	                ];
 	                this.contextMenuItems.row = this.contextMenuItems.row.concat(addedItems);
 	                this.contextMenuItems.idCol = this.contextMenuItems.idCol.concat(addedItems);

@@ -1,6 +1,6 @@
 "use strict";
-define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils"], 
-function(declare, lang, utils){
+define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/PageManager"], 
+function(declare, lang, utils, Pmg){
 	const classes = {trend: "tukos/charting/TrendChart", spider: "tukos/charting/SpiderChart", pie: "tukos/charting/PieChart", repartition: "tukos/charting/RepartitionChart", xy: "tukos/charting/XyChart"};
 	return declare(null, {
         constructor: function(args){
@@ -21,9 +21,11 @@ function(declare, lang, utils){
 		_setChartsValue: function(){
             const form = this.form;
             if (form.chartWidgets){
+				Pmg.setFeedback(Pmg.message('actionDoing'));
 	            for (let  chartWidgetName in form.chartWidgets){
 					form.chartWidgets[chartWidgetName].setChartValue(chartWidgetName);
 				}
+				Pmg.addFeedback(Pmg.message('actionDone'));
 			}
 		},
 		setChartsValue: function(){
@@ -35,6 +37,7 @@ function(declare, lang, utils){
 		setChartValue: function(chartWidgetName){
 			const form = this.form, chartWidgets = form.chartWidgets;
 			chartWidgets && chartWidgets[chartWidgetName] && chartWidgets[chartWidgetName].setChartValue(chartWidgetName);
+			Pmg.addFeedback(Pmg.message('updatedchart') + chartWidgetName);
 		},
 		valueOf: function(widgetName){
 			const nameAndSubName = widgetName.split('|'), form = this.form;

@@ -8,7 +8,7 @@ use Detection\MobileDetect;
 
 class Registry{
 
-    function __construct($mode, $appName){
+    function __construct($mode, $appName, $rootUrl){
         $this->mode = $mode;
         require Tfk::$phpVendorDir . 'autoload.php';// needed for google
         $auraDir = Tfk::$vendorDir['aura'];
@@ -34,11 +34,12 @@ class Registry{
         }else{
             $this->loader->add('Ifsnop\\'     , Tfk::$phpVendorDir);
             $this->appName = $this->setAppName($appName);
+            $this->rootUrl = $rootUrl;
         }
         
         $this->loader->add('Aura\SqlQuery', Tfk::$vendorDir['auraV2']);
         
-        $this->loader->add('Pear\\'       , Tfk::$vendorDir['pear']);
+        $this->loader->add('Pear\\'       , Tfk::$phpVendorDir);
         $this->loader->add('ManuelLemos\\', Tfk::$phpVendorDir);
         $this->loader->add('Html2Text\\'  , Tfk::$phpVendorDir);        
         $this->loader->add('Dropbox\\', Tfk::$vendorDir['Dropbox']);

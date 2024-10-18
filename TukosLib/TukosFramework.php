@@ -18,7 +18,7 @@ class TukosFramework{
                   $registry = null, $startMicroTime, $tr, $osName, $mode, $extras = [], $environment, $tukosBaseLocation, $dojoBaseLocation, $tukosFormsDojoBaseLocation, $dojoCdnBaseLocation, $tukosFormsTukosBaseLocation, 
                   $tukosDomainName, $tukosFormsDomainName, $htmlToPdfCommand; 
   
-    public static function initialize ($mode, $appName = null, $phpDir = null){
+    public static function initialize ($mode, $appName = null, $phpDir = null, $rootUrl = null){
         self::$publicDir = getenv('tukosPublicDir');// this is the beginnning of the url path, i.e. '/tukos/' is aliased with '/tukos/site/' in apache config
         self::$tukosPhpDir = $phpDir;
         self::$tukosTmpDir = $phpDir . '/tmp/';
@@ -32,7 +32,7 @@ class TukosFramework{
         mb_internal_encoding('UTF-8');
         mb_detect_order(['UTF-8', 'windows-1252', 'ISO-8859-1']);
         require __DIR__ . '/Registry.php';
-        self::$registry = new Registry($mode, $appName);
+        self::$registry = new Registry($mode, $appName, $rootUrl);
         self::$osName = php_uname('s');
         self::$mode = $mode;
         self::$htmlToPdfCommand = getenv('wkHtmlToPdfCommand');

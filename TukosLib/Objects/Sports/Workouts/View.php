@@ -20,8 +20,8 @@ class View extends AbstractView {
         $leftRightTdStyle = [/*'whiteSpace' => 'nowrap', */'verticalAlign' => 'top', 'paddingTop' => '7px', 'fontSize' => '12px', 'fontFamily' => 'Arial, Helvetica, sans-serif', 'width' => $isMobile ? '80px' : '200px', 'wordWrap' => 'break-word'];
         $gaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 1, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 3, 'showValue' => true, 'tickLabel' => '',
             'gradient' => [0, '#B22222', 0.5, '#FF8C00', 1, '#7FFFD4'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
-        $reversedGaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 1, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 3, 'showValue' => true, 'tickLabel' => '',
-            'gradient' => [0, '#7FFFD4', 0.5, '#FF8C00', 1, '#B22222'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];
+        /*$reversedGaugeAtts = ['indicatorColor' => 'black', 'height' => 30, 'minimum' => 1, 'maximum' => 10, 'minorTicksEnabled' => false, 'majorTickInterval' => 3, 'showValue' => true, 'tickLabel' => '',
+            'gradient' => [0, '#7FFFD4', 0.5, '#FF8C00', 1, '#B22222'], 'style' => ['margin' => '0px 0px 0px 0px', 'height' => '50px'], 'useTooltip' => false];*/
         $gaugeStyle = ['height' => '150px', 'width' => 'auto'];
         $gaugeTableStyle = ['tableLayout' => 'fixed', 'width' => '100%'];
         $gaugeDivStyle = ['width' => '100%'];
@@ -45,6 +45,13 @@ class View extends AbstractView {
                         'stress' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => "if (newValue === 'rest'){return '';}else{return undefined;}"]],
                     ]],
             ]]]),
+            'equipmentid' => ViewUtils::objectSelect($this, 'Equipment', 'sptequipments', ['atts' => [
+                'edit' => ['storeArgs' => ['cols' => ['extraweight', 'frictioncoef', 'dragcoef']], 'onChangeLocalAction' => ['equipmentid' => ['localActionStatus' => $this->updateEquipment()]]]]]),
+            'extraweight' => ViewUtils::tukosNumberBox($this, 'extraweight', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.0'], 'onChangeLocalAction' => ['extraweight' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
+            'frictioncoef' => ViewUtils::tukosNumberBox($this, 'frictioncoef', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.0000'], 'onChangeLocalAction' => ['frictioncoef' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]],
+                'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.####']]]]),
+            'dragcoef' => ViewUtils::tukosNumberBox($this, 'dragcoef', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00'], 'onChangeLocalAction' => ['dragcoef' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
+            'windvelocity' => ViewUtils::tukosNumberBox($this, 'windvelocity', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00']]]]),
             'stress'        => ViewUtils::storeSelect('stress', $this, 'Plannedqsm', [true, 'ucfirst', true, true, false]),
             'warmup'    => ViewUtils::lazyEditor($this, 'warmup', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
             'mainactivity'    => ViewUtils::lazyEditor($this, 'mainactivity', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
@@ -96,16 +103,13 @@ class View extends AbstractView {
             'kpiscache' => [
                 'type' => 'objectEditor',
                 'atts' => ['edit' => ['title' => $this->tr('KpisCache'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 'checkedServerValue' => '~delete', 'onCheckMessage' => $this->tr('checkedleaveswillbedeletedonsave'),
-                    'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/,  'overflow' => 'auto']]],
+                    'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/,  'overflow' => 'auto'], 'maxColWidth' => '1200px']],
                 'objToEdit' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]],
                 'editToObj' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $untranslator->tr]],
             ],
         ],
         	$this->filterWidgets()
         );
-
-        //$this->mustGetCols = array_merge($this->mustGetCols, ['name', 'duration', 'intensity', 'stress', 'sport','warmup', 'mainactivity', 'warmdown', 'comments', 'mode', 'athleteweeklyfeeling', 'coachweeklycomments']);
-        //$this->mustGetCols = array_merge($this->mustGetCols, array_keys($customDataWidgets));
         $this->mustGetCols = ['kpiscache'];
         
         $subObjects = $this->templatesSubObjects();
@@ -146,6 +150,45 @@ $performedCols.forEach(function(col){
 });
 form.resize();
 form.resize();//needed twice for edit in a dialog window, or else the horizontal gauges don't show-up when moving from planned to performed
+EOT
+        ;
+    }
+    function updateEquipment(){
+        return <<<EOT
+if (newValue){
+    const equipmentProperties = sWidget.getItem();
+    ['extraweight', 'frictioncoef', 'dragcoef'].forEach(function(name){
+        sWidget.setValueOf(name, equipmentProperties[name]);
+    });
+}
+EOT
+        ;
+    }
+    function removeEstimatedPowerKpis(){
+        return <<<EOT
+const kpisToHandle = ['estimatedrawwattsstream', 'estimatedwattsstream'];
+if ((sWidget.parent || {}).widgetName === 'sptworkouts'){
+    const grid = sWidget.parent;
+    utils.forEach(grid.clickedRow.data, function(value, name){
+        kpisToHandle.forEach(function(kpi){
+            if (name.includes(kpi)){
+                grid.updateDirty(grid.clickedRow.data.idg, name, undefined);
+            }
+        }, true);
+    });
+}else{
+    const kpisCacheWidget = sWidget.form.getWidget('kpiscache'), kpisCacheValue = kpisCacheWidget.get('value'), leavesToAdd = {};
+    utils.forEach(kpisCacheValue, function(value, name){
+        kpisToHandle.forEach(function(kpi){
+            if (name.includes(kpi)){
+                leavesToAdd[name] = '~delete';
+            }
+        });
+    });
+    if (!utils.empty(leavesToAdd)){
+        kpisCacheWidget.addSelectedLeaves(leavesToAdd);
+    };
+}
 EOT
         ;
     }

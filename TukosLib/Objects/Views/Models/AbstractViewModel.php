@@ -3,9 +3,6 @@
 namespace TukosLib\Objects\Views\Models;
 
 use TukosLib\Objects\Views\Models\ModelsAndViews;
-use TukosLib\Utils\Utilities as Utl;
-//use TukosLib\Utils\Feedback;
-use TukosLib\TukosFramework as Tfk;
 
 abstract class AbstractViewModel/* extends ModelsAndViews*/{
 
@@ -19,7 +16,7 @@ abstract class AbstractViewModel/* extends ModelsAndViews*/{
         $this->objectsStore = $controller->objectsStore;
         $this->view     = (empty($params['view'])  ? $controller->view : $params['view']);
         $this->model    = (empty($params['model'])  ? $controller->model : $params['model']);
-        $this->paneMode = $controller->paneMode;
+        $this->paneMode = property_exists($controller, 'paneMode') ? $controller->paneMode : 'Tab';
     }
 
     function modelToView($values, $modelToView, $multiRows = false){

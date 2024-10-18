@@ -12,7 +12,7 @@ class Model extends AbstractModel {
 
         $colsDefinition = [
             'language' =>  "ENUM ('" . implode("','", $this->languageOptions) . "')",
-            'published' => "timestamp"
+            'published' => "timestamp DEFAULT NULL"
         ];
         parent::__construct($objectName, $translator, 'blog', ['parentid' => Tfk::$registry->get('user')->allowedNativeObjects()], [], $colsDefinition, [['language']]);
     }

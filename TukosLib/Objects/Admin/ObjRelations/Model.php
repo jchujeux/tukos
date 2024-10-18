@@ -12,7 +12,7 @@ use TukosLib\TukosFramework as Tfk;
 class Model extends AbstractModel {
 
     protected $relationsOptions = ["is a component of", "is associated with", "uses", "is a new version of", "will be replaced by ", "belongsTo"];
-    protected $_colsDefinition = ['relatedid'     =>  "INT(11) NOT NULL"];
+    protected $_colsDefinition = ['relatedid'     =>  "INT(11) NULL DEFAULT NULL"];
     protected $_colsIndexes =   [['relatedid']];
     
     function __construct($objectName, $translator=null){

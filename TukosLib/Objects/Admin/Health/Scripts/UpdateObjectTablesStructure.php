@@ -19,6 +19,7 @@ class UpdateObjectTablesStructure {
                 'app-s'		=> 'tukos application name (mandatory if run from the command line, not needed in interactive mode)',
                 'db-s'		    => 'tukos application database name (not needed in interactive mode)','class=s'      => 'this class name',
                 'parentid-s'   => 'parent id (optional, default is user->id())',
+                'rootUrl-s'		=> 'https://tukos.site or https://localhost, omit if interactive',
                 'modifycols-s' => 'if "true" the cols definition will be modified as needed',
                 'removecols-s' => 'if "true" the cols will be removed as needed',
             ]);
@@ -45,7 +46,7 @@ class UpdateObjectTablesStructure {
                     	echo "<br>table: $objectName: $col can be removed";
                     	if ($options->removecols === "true"){
                     	    try{
-                    	        $alterStmt = $store->pdo->query("ALTER TABLE `$objectName` DROP ` $col`");
+                    	        $alterStmt = $store->pdo->query("ALTER TABLE `$objectName` DROP `$col`");
                     	        echo " => done";
                     	        $changesWereMade = true;
                     	    } catch (\PDOException $e){
@@ -59,10 +60,11 @@ class UpdateObjectTablesStructure {
                         $dbColStructure = $columnsStructure[$col];
                         $dbColDescription = str_replace(' ', '', $dbColStructure['Type'] . (is_null($default = $dbColStructure['Default']) ? '' : ("default '" . $default) . "'") . ($dbColStructure['Key'] === 'PRI' ? 'primarykey' : ''));
                         if (strcasecmp(substr($dbColDescription, 0, strlen($appColDescription)), $appColDescription) !== 0){
-                            echo "<b>table: $objectName, col: $col, database definition: $dbColDescription, application definition: $appColDescription";
+                            echo "<br>table: $objectName, col: $col, database definition: $dbColDescription, application definition: $appColDescription";
                             if ($options->modifycols === 'true'){
                                 try{
-                                    $alterStmt = $store->pdo->query("ALTER TABLE `$objectName` MODIFY COLUMN `$col` $appColDescription");
+                                    $colDesc = $colsDescription[$col];
+                                    $alterStmt = $store->pdo->query("ALTER TABLE `$objectName` MODIFY COLUMN `$col` $colDesc");
                                     echo " => database column definition modified";
                                     $changesWereMade = true;
                                 } catch (\PDOException $e){

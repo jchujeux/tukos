@@ -10,7 +10,7 @@ use TukosLib\Utils\Feedback;
 use TukosLib\TukosFramework as Tfk; 
 
 class Model extends AbstractModel {
-    protected $runModeOptions       = ['ATTACHED'/*, 'DETACHED'*/];
+    protected $runModeOptions       = ['ATTACHED', 'DETACHED'];
     protected $statusOptions        = ['DISABLED', 'READY', 'RUNNING'];
     public $colsToGet			= ['id', 'parentid', 'status', 'startdate', 'enddate', 'laststart', 'timeinterval', 'path', 'scriptname', 'parameters', 'runmode'];
     function __construct($objectName, $translator=null){

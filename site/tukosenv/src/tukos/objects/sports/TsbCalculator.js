@@ -48,15 +48,18 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 		deleteRowAction: function(grid, row){
 			this.rowAction(grid, row, 'delete');
 		},
+		bulkDeleteAction: function(grid, row){
+			this.rowAction(grid, row, 'bulkDelete');
+		},
 		getCollection: function(){
-			return (this.sessionsStore || this.workoutsStore).filter(this.tsbFilter).sort([{property: 'startdate'}, {property: 'sessionid'}]);
+			return (this.sessionsStore || this.workoutsStore).filter(this.tsbFilter).sort([{property: 'startdate'}, {property: 'starttime'}]);
 		},
 		setDisplayFromStsAndLts: function(displayFromDate){
 			const form = this.form, fromDate = form.valueOf('fromdate');
 			if (displayFromDate <= fromDate){
 				form.setValuesOf({displayfromdate: fromDate, displayfromsts: form.valueOf('initialsts'), displayfromlts: form.valueOf('initiallts')});
 			}else{
-				const truncatedSessions = (this.sessionsStore || this.workoutsStore).filter(this.filter.eq('mode', 'performed').ne('sts', NaN).ne('lts', NaN).lt('startdate', displayFromDate)).sort([{property: 'startdate', descending: true}, {property: 'sessionid', descending: true}]).fetchSync();
+				const truncatedSessions = (this.sessionsStore || this.workoutsStore).filter(this.filter.eq('mode', 'performed').ne('sts', NaN).ne('lts', NaN).lt('startdate', displayFromDate)).sort([{property: 'startdate', descending: true}, {property: 'startdate', descending: true}]).fetchSync();
 				let fromDate, initialSts, initialLts;
 				if (truncatedSessions.length){
 					const lastTruncatedSession = truncatedSessions[0];
@@ -93,6 +96,10 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 								iterator.next();
 							}
 							break;
+						case 'bulkDelete':
+								previousItem = iterator.initialize(data, collection.getSync(row[idp]));
+								item = iterator.next();
+								break;
 						case 'delete':
 							item = iterator.initialize(data, collection.getSync(row[idp]));
 							previousItem = iterator.previous();
@@ -134,7 +141,7 @@ function(declare, lang, when, ArrayIterator, utils, dutils){
 							tsbHasChanged = updateRowOrDirty('tsb', tsb);
 							updateRowOrDirty('hracwr', sts/lts);
 						}
-						if (row === false || (stsHasChanged || ltsHasChanged || tsbHasChanged)){
+						if (row === false || cudMode === 'bulkDelete' || (stsHasChanged || ltsHasChanged || tsbHasChanged)){
 							if (cudMode === 'delete'){
 								previousItem = previousItem || {startdate: self.fromDate, sts: previousSts, lts: previousLts, tsb: previousLts - previousSts * self.stsRatio};
 								iterator.previous();

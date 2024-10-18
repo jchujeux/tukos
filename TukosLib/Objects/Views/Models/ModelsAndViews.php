@@ -1,10 +1,5 @@
 <?php
 namespace TukosLib\Objects\Views\Models;
-
-use TukosLib\Utils\Utilities as Utl;
-use TukosLib\Utils\DateTimeUtilities as Dutl;
-use TukosLib\TukosFramework as Tfk;
-
 /*
  * Class to convert model values into view values and vice-versa
  */

@@ -16,6 +16,8 @@ class View extends AbstractView {
             'name'      => ['atts' => ['edit' =>  ['style' => ['width' => '30em']]],],
             'startdate' => ViewUtils::tukosDateBox($this, 'date'),
             'starttime' => ViewUtils::dateTimeBoxDataWidget($this, 'time', ['atts' => ['edit' => ['dateArgs' => false]]]),
+            'gearid' => ViewUtils::htmlContent($this, 'Gearid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['hidden' => true]],
+                'objToEdit' => ['stravaGearLink' => ['class' => $this]], 'objToStoreEdit' => ['stravaGearLink' => ['class' => $this]], 'objToOverview' => ['stravaGearLink' => ['class' => $this]]]),
             'duration'  => ViewUtils::secondsTextBox($this, 'duration', ['atts' => [
                 'edit' => ['label' => $this->tr('Duration') . ' (hh:mn)', 'constraints' => ['timePattern' => 'HH:mm:ss', 'clickableIncrement' => 'T00:10', 'visibleRange' => 'T01:00']],
             ]]),
@@ -46,6 +48,15 @@ class View extends AbstractView {
     function stravaLink($stravaId){
         if (!empty($stravaId)){
             return "<a href=\"https://www.strava.com/activities/$stravaId\" target=\"_blank\">$stravaId</a>";
+        }
+    }
+    function stravaGearLink($stravaGearId){
+        if (!empty($stravaGearId)){
+            if ($stravaGearId[0] === 'b'){
+                return "<a href=\"https://www.strava.com/bikes/" . substr($stravaGearId, 1) . "\" target=\"_blank\">$stravaGearId</a>";
+            }else{
+                return $stravaGearId;
+            }
         }
     }
 }

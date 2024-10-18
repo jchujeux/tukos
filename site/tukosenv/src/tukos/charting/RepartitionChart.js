@@ -1,19 +1,6 @@
 "use strict";
-define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/PageManager"], 
-function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
-	const setFilterString = function (description, expression, dateCol){
-		const filterStrings = [];
-		if (description.firstdate){
-			filterStrings.push('"' + dateCol + '" >= "' + expression.expressionToValue(description.firstdate) + '"');
-		}
-		if (description.lastdate){
-			filterStrings.push('"' + dateCol + '" <= "' + expression.expressionToValue(description.lastdate) + '"');
-		}
-		if (description.itemsFilter){
-			filterStrings.push(description.itemsFilter);
-		}
-		return filterStrings.join(' AND ');
-	};
+define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/charting/chartsUtils", "tukos/PageManager"], 
+function(declare,lang, utils, dutils, expressionFilter, expressionEngine, chartsUtils, Pmg){
 	return declare(null, {
         constructor: function(args){
 			lang.mixin(this, args);
@@ -22,7 +9,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 			this.recursionDepth = 0;
 		},
 		setChartValue: function(chartWidgetName){
-			var self = this, form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex, xLabels = [];
+			var self = this, form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, xLabels = [];
 			if (!hidden  && chartWidget.kpisToInclude){
 				dojo.ready(function(){
 					let collection, horizontalAxisDescription;
@@ -85,7 +72,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 						kpisDescription.forEach(function(kpiDescription){
 							try{
 								const category = kpiDescription.category;
-								let filterString = setFilterString(kpiDescription, expression, dateCol), kpiDate = expression.expressionToValue(kpiDescription.kpidate), kpiCollection = collection, kpiData = collectionData, previousToDate, previousData = [], kpiValue;
+								let filterString = chartsUtils.setFilterString(kpiDescription, expression, dateCol), kpiDate = expression.expressionToValue(kpiDescription.kpidate), kpiCollection = collection, kpiData = collectionData, previousToDate, previousData = [], kpiValue;
 								if (filterString){
 									kpiCollection = collection.filter(expFilter.expressionToValue(filterString));
 									kpiData = utils.toNumeric(kpiCollection.fetchSync(), grid);
@@ -109,47 +96,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							delete horizontalAxisDescription.max;
 						}
 					}
-					if (missingKpisIndex && !utils.empty(missingItemsKpis)){
-					    let data = {}, indexToIdp = {};
-						utils.forEach(missingItemsKpis, function(value, idp){
-							let index = grid.store.getSync(idp)[missingKpisIndex];
-							if (index){
-								data[index] = missingItemsKpis[idp];
-								indexToIdp[index] = idp;
-							}
-						});
-					    if (!utils.empty(data)){
-						    if (self.recursionDepth > 2){
-								Pmg.addFeedback(Pmg.message('too many recursions') + ': ' + self.recursionDepth + ' (RepartitionChart)');
-								self.recursionDepth = 0;
-								return;
-							}
-						    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
-						            function(response){
-						           		const kpis = response.data.kpis;
-										utils.forEach(kpis, function(kpi, index){
-											let idp = indexToIdp[index], itemKpis = kpis[index];
-											utils.forEach(itemKpis, function(kpi, j){
-												grid.updateDirty(idp, j, kpi);
-												if (kpi === false){
-													Pmg.addFeedback('Pmg.serverKpierror' + ': ' + ' - ' + Pmg.message('col') + ': ' + j + Pmg.message('index') + ': ' + index);
-												}
-											});
-										});
-										self.setChartValue(chartWidgetName);//recursive call. Risk of infinite loop ?
-						            },
-						            function(error){
-						                console.log('error:' + error);
-						            }
-						    );
-						}else{
-							chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
-							self.recursionDepth = 0;
-						}
-					}else{
-						chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
-						self.recursionDepth = 0;
-					}
+					chartsUtils.processMissingKpis(missingItemsKpis, grid, self, chartWidgetName, chartData, tableData, tableColumns, axes, plots, series);
 				});
 			}		  
 		}

@@ -269,7 +269,7 @@ function(kernel, lang, declare, domClass, domConstruct, arrayUtil, domProp, domS
                 addCustomClass(childCell, "valueCell", index);
                 if (widgetCellStyle){
                     utils.forEach(widgetCellStyle, function(value, att){
-                        domStyle.set(childCell, att === 'width' && colspan > 1 ? att * colspan : att, value);
+                        domStyle.set(childCell, att, att === 'width' && colspan > 1 ? utils.sizeMultiplier(value, colspan) : value);
                     });
                 }
                 childCell.appendChild(child.domNode);

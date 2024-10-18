@@ -18,14 +18,24 @@ function(declare, lang, utils, Pmg){
 			}
 		},
 		synchronizeWithStrava: function(pane){
-			var self = this, form = pane.form, athleteid = form.valueOf(this.athlete), coachid = form.valueOf(this.coach), grid = form.getWidget(this.grid), contentMessage = !athleteid ?  ' & <br> '  + Pmg.message('needtodefineathlete') : '';
+			var self = this, form = pane.form, athleteid = form.valueOf(this.athlete), coachid = form.valueOf(this.coach), grid = form.getWidget(this.grid), contentMessage = !athleteid ?  ' & <br> '  + Pmg.message('needtodefineathlete') : '',
+				defaultItemsCols = pane.defaultItemsCols;
 			pane.close();
 			if (contentMessage){
 				Pmg.alert({title: Pmg.message('cannotsynchronizestrava'), content: contentMessage});
 			}else{
             	Pmg.setFeedback(Pmg.message('actionDoing'));
-            	form.serverDialog({action:'Process', query: {athleteid: athleteid, coachid: coachid, synchrostart: pane.valueOf('synchrostart'), synchroend: pane.valueOf('synchroend'), synchrostreams: pane.valueOf('synchrostreams'), 
-            			params:  JSON.stringify({process: 'stravaSynchronize', save: false, noget: true})}}, form.changedValues(), form.get('postElts'), Pmg.message('actionDone')).then(function(response){
+            	let query = {athleteid: athleteid, coachid: coachid, synchrostart: pane.valueOf('synchrostart'), synchroend: pane.valueOf('synchroend'), synchrostreams: pane.valueOf('synchrostreams'), 
+            		params:  JSON.stringify({process: 'stravaSynchronize', save: false, noget: true})};
+            	if (defaultItemsCols){
+					defaultItemsCols.forEach(function(col){
+						const colValue = pane.valueOf(col);
+						if (colValue !== ""){
+							query[col] = colValue;
+						}
+					});
+				}
+            	form.serverDialog({action:'Process', query: query}, form.changedValues(), form.get('postElts'), Pmg.message('actionDone')).then(function(response){
 					if (response.usersItems){
 						grid.usersAclCache = {sportsmanId: athleteid, coachId: coachid, usersItems: response.usersItems};
 					}

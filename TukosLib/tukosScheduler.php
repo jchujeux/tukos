@@ -10,13 +10,15 @@ use TukosLib\TukosFramework as Tfk;
 
 $phpDir = dirname(__DIR__) . '/';
 require $phpDir . 'TukosLib/TukosFramework.php';
+require $phpDir . 'TukosLib/Utils/Utilities.php';
 require $phpDir . 'TukosLib/cmdenv.php';
 
 $params = getopt('', ['app:', 'class:', 'parentid:', 'db:', 'rootUrl:', 'scriptids:']);
 
 $appName = $params['app'];
 $dbName = $params['db'];
-Tfk::initialize('commandLine', $appName, $phpDir);
+$rootUrl = Utl::getItem('rootUrl', $params, null);
+Tfk::initialize('commandLine', $appName, $phpDir, $rootUrl);
 require $phpDir . "$appName/Configure.php";
 
 echo "database: $dbName<br>";

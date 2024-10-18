@@ -15,10 +15,12 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
             }
             args.store = new Request(args.storeArgs);
             args.store.postFetchAction = lang.hitch(this, this.postFetchAction);
-            args.collection = args.store.filter({contextpathid: args.form.tabContextId()});
+            args.storeFilter = {contextpathid: args.form.tabContextId()};
+            args.collection = args.store;//args.store.filter({contextpathid: args.form.tabContextId()});
         },
         postCreate: function(){
 			const self = this;
+			this.set('collection');
 			this.inherited(arguments);
             this.modify = {values: {}, displayedValues: {}};
             this.contextMenuItems.header.push({atts: {label: messages.showhidetargetvalues  , onClick: lang.hitch(this, function(evt){this.showColValues();})}});

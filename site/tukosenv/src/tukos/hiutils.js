@@ -7,9 +7,9 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
 		return theHtml.replace(/<[^>]+>/g, ' ');
 	},
     objectTable: function(object, hasCheckboxes, selectedLeaves, atts){
-        var onCheckMessagzWasDisplayed = false, checkboxPath = [], maxWidth = atts.maxColWidth || '',
+        var onCheckMessageWasDisplayed = false, checkboxPath = [], maxWidth = atts.maxColWidth || '',
             keyToHtml = lang.hitch(this, function(key){
-                return (atts.keyToHtml) ?  this[atts.keyToHtml](key) : key;
+                return (atts.keyToHtml && typeof key === 'string') ?  this[atts.keyToHtml](key) : key;
             });
         var addTableRows = function(object){
             var rowToReturn = {count: 0};
@@ -42,13 +42,13 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
 	                        var checkboxTd = dct.create('td', {style: "border: 1px solid black;padding: 5px;"}, row.tr);
 	                        dct.create(
 	                            'input', 
-	                            {type: 'checkbox', style: {width: '30px'}, onchange: lang.partial(
+	                            {type: 'checkbox', style: {width: '30px'}, checked: (selectedLeaves[stringPath] === (atts.checkedServerValue || true)) ? true : false, onchange: lang.partial(
 	                                    function(stringPath, key, change){
 	                                        const isChecked = change.currentTarget.checked;
 	                                        lang.setObject(stringPath, isChecked ? atts.checkedServerValue || true : false, selectedLeaves);
-	                                        if (atts.onCheckMessage && isChecked && !onCheckMessagzWasDisplayed){
+	                                        if (atts.onCheckMessage && isChecked && !onCheckMessageWasDisplayed){
 												Pmg.setFeedbackAlert(Pmg.message(atts.onCheckMessage));
-												onCheckMessagzWasDisplayed = true;
+												onCheckMessageWasDisplayed = true;
 											}
 	                                        if (!change.currentTarget.checked){
 												utils.filterRecursive(selectedLeaves);

@@ -422,16 +422,16 @@ class Utilities{
         return $reduced;
     }
     public static function xShrinkCallback($item, &$cache, $params){
-        list($x, $y) = $item; $xShrink = $params['xShrink'];
+        $xShrink = $params['xShrink'];
         if (!isset($cache['counter'])){
             $cache['counter'] = 1;
-            return false;
-        }else if ($cache['counter'] < $xShrink){
+        }
+        if ($cache['counter'] < $xShrink){
             $cache['counter'] += 1;
             $cache['lastWasFalse'] = true;
             return false;
         }else{
-            $cache['counter'] = 0;
+            $cache['counter'] = 1;
             $cache['lastWasFalse'] = false;
             return $item;
         }
@@ -471,9 +471,9 @@ class Utilities{
                     $result[] = $shrunkItem;
                 }
             });
-                if ($cache['lastWasFalse']){
-                    $result[] = $numericArray[count($numericArray) - 1];
-                }
+            if ($cache['lastWasFalse']){
+                $result[] = $numericArray[count($numericArray) - 1];
+            }
         }
         return $result;
     }

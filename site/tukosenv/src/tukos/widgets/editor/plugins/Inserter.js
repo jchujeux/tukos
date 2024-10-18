@@ -5,9 +5,10 @@ function(declare, lang, domStyle, ready, when, string, _Plugin, Button, Menu, Me
     	fieldTemplate: '${^@xxx}',
         subfieldTemplate: '${^@xxx|yyy}',
 		clickableCheckbox: '&nbsp;<span class="clickablecheckbox" contenteditable="false" onclick="this.innerHTML = (this.innerHTML == \'☐\' ? \'☑\' : \'☐\')" style="cursor: pointer;">☑</span>&nbsp;',
-		autoCheckbox: '&nbsp;<span class="autocheckbox" style="background-color: #F3F5F6;">${^@variable}☐[value1, value2, ... ]</span>&nbsp;',
+		autoCheckbox: '&nbsp;<span class="autocheckbox" style="background-color: #F3F5F6;">${^@xxx|yyy}☐[value1, value2, ... ]</span>&nbsp;',
 		checkboxTemplate: "<span class=\"checkboxTemplate\" style=\"background-color:aliceblue;\"><span contenteditable=\"false\" onclick=\"this.innerHTML = (this.innerHTML == '☐' ? '☑' : '☐')\" style=\"cursor: pointer;\">☑</span>${selectedHtml}</span><span class=\"checkboxTemplateEnd\" contenteditable=\"false\">■</span>",
-		pageBreak: '&nbsp;<div class="pagebreak" style="width: 100%; height: 20px; border-bottom: 1px solid black; text-align: center"><span style="font-size: 20px; background-color: #F3F5F6; padding: 0 10px;">' + messages.pageBreak + '</span></div>&nbsp;',
+		figureTemplate: "<figure style=\"display:inline-block;\">${selectedHtml}<figcaption>" + Pmg.message('entercaption') + "</figcaption></figure>",
+		pageBreak: '&nbsp;<div class="pagebreak" style="width: 100%; height: 20px; border-bottom: 1px solid black; text-align: center"><span style="font-size: 20px; background-color: #F3F5F6; padding: 0 10px;">' + Pmg.message('pageBreak') + '</span></div>&nbsp;',
         pageNumber: '<span class="pagenumber" style="background-color: #F3F5F6;">xx</span>&nbsp;',
         numberOfPages: '<span class="numberofpages" style="background-color: #F3F5F6">NN</span>&nbsp;',
         tooltip: '<span style="color: blue; cursor: pointer;" title="tooltipcontent">textwithtooltip</span>'},
@@ -47,7 +48,7 @@ function(declare, lang, domStyle, ready, when, string, _Plugin, Button, Menu, Me
 	        		var dropDown = (this.dropDown = this.button.dropDown = new Menu()), editor = this.editor, insert = this._insert, expression = new ExpressionInserter({inserter: this}),
 	        			widgetEditor = new WidgetEditor({editor: editor, button: this.button});
 	            	inserterOptions.forEach(function(option){
-	            		dropDown.addChild(new MenuItem({label: messages[option] || option, onClick: function(){insert(option, editor);}}));
+	            		dropDown.addChild(new MenuItem({label: Pmg.message(option), onClick: function(){insert(option, editor);}}));
 	            	});
         			when(Pmg.serverTranslations(utils.mergeRecursive(utils.mergeRecursive(utils.mergeRecursive({tukos: ['htmlSource', 'expressionEditor', 'widgetEditor', 'inserterName', 'colorParentLabel', 'mustprovideaname']}, _HtmlSourceInserter.translations, true), _ChoiceListInserter.translations, true), _ColorContentInserter.translations, true)), lang.hitch(this, function(){
 		            	const colorContentInserter = new _ColorContentInserter({editor: this.editor, inserter: this}), 
@@ -81,7 +82,7 @@ function(declare, lang, domStyle, ready, when, string, _Plugin, Button, Menu, Me
 	        if(option === 'clipboard'){
 	        	editor.execCommand("paste", false, null);
 	        }else{
-	            editor.execCommand("inserthtml", (option === 'checkboxTemplate' ? string.substitute(htmlTemplate, {selectedHtml: editor.selection.getSelectedHtml() || ' ? '}): htmlTemplate));	        	
+	            editor.execCommand("inserthtml", (['checkboxTemplate', 'figureTemplate'].includes(option) ? string.substitute(htmlTemplate, {selectedHtml: editor.selection.getSelectedHtml() || ' ? '}): htmlTemplate));	        	
 	        }
         },
         

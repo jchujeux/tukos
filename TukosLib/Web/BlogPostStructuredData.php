@@ -16,7 +16,12 @@ class BlogPostStructuredData{
           "author": {
               "@type": "Person",
               "name": "\${postAuthor}"
-            }
+            },
+        "publisher":
+          {
+            "name": "Tukos",
+            "url": "https://tukos.site/blog/post?id=10005"
+          }
         }
         </script>
 

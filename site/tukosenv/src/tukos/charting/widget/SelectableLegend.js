@@ -13,6 +13,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojox/charti
 			this.legends.forEach(function(legendNode){
 				dst.set(legendNode, 'verticalAlign', 'top');
 			});
+		},
+		refresh: function(){
+			this.inherited(arguments);
 		}
     });
 });

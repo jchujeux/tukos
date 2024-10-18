@@ -1,6 +1,6 @@
 "use strict";
-define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/PageManager"], 
-function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
+define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/dateutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/charting/chartsUtils", "tukos/PageManager"], 
+function(declare,lang, utils, dutils, expressionFilter, expressionEngine, chartsUtils, Pmg){
 	return declare(null, {
         constructor: function(args){
 			lang.mixin(this, args);
@@ -9,7 +9,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 			this.recursionDepth = 0;
 		},
 		setChartValue: function(chartWidgetName){
-			var self = this, form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex, xLabels = [];
+			var self = this, form = this.form, chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, xLabels = [];
 			if (!hidden  && chartWidget.kpisToInclude){
 				dojo.ready(function(){
 					let collection, horizontalAxisDescription;
@@ -27,7 +27,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 						}
 					});
 					const xType = horizontalAxisDescription.tickslabel || 'daysinceorigin', xTypePosition = ['daysinceorigin', 'dateofday', 'dayoftheyear', 'weeksinceorigin', 'dateofweek', 'weekoftheyear'].indexOf(xType), isWeek = xTypePosition > 2;
-					tableColumns[0] = {field: 0, label: Pmg.message(xType)};
+					tableColumns[0] = {field: '0', label: Pmg.message(xType), rowsFilters: true};
 					if (chartWidget.chartFilter){
 						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
 					}else{
@@ -86,38 +86,44 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 						});
 						let previousKpis = [], index1;
 						kpisDescription.forEach(function(kpiDescription, index){
-							index1 = index + 1;
-							series[index1] = {value: {y: index1, tooltip: index1 + 'Tooltip'}, options: {plot: kpiDescription.plot, label: kpiDescription.name, legend: kpiDescription.name}};
-							tableColumns[index1] = {field: index1, label: kpiDescription.name}
+							if (kpiDescription.plot){
+								index1 = index + 1;
+								series[index1] = {value: {y: index1, tooltip: index1 + 'Tooltip'}, options: {plot: kpiDescription.plot, label: kpiDescription.name, legend: kpiDescription.name}};
+								tableColumns[index1] = {field: index1, label: kpiDescription.name, rowsFilters: true}
+							}
 						});
 						let i = 1;
 						const previousData = collection.filter(filter.lte(dateCol, previousToDate)).fetchSync();
 						while (firstDate <= lastDate){
 							xLabels[i] = self.xLabelValue(xType, firstDateObject, i);
-							let chartItem = {}, tableItem = {0: xLabels[i]};
+							let chartItem = {}, tableItem = {id: i, 0: xLabels[i]};
 							const periodData = collection.filter(filter.gte(dateCol, firstDate).lte(dateCol, toDate)).fetchSync();
 							expression = expressionEngine.expression(periodData, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache, previousData, toDate);
 							kpisDescription.forEach(function(kpiDescription, index){
-								try{
-									index1 = index + 1
-									tableItem[index1] = chartItem[index1] = previousKpis[index1] = expression.expressionToValue(kpiDescription.kpi);
-									if (isNaN(chartItem[index1]) && kpiDescription.absentiszero){
-										chartItem[index1] = 0;
+								if (kpiDescription.plot){
+									try{
+										index1 = index + 1
+										tableItem[index1] = chartItem[index1] = previousKpis[index1] = expression.expressionToValue(kpiDescription.kpi);
+										if (isNaN(chartItem[index1]) && kpiDescription.absentiszero){
+											chartItem[index1] = 0;
+										}
+										chartItem[index1 + 'Tooltip'] = kpiDescription.name + ': ' + (kpiDescription.displayformat ? utils.transform(chartItem[index1], kpiDescription.displayformat) : chartItem[index1]) + ' ' + (kpiDescription.tooltipunit || '') + 
+											(isWeek 
+												? '<br><small>(' + Pmg.message('weekendingon', 'sptplans') + ' ' + dutils.formatDate(toDateObject, 'd MMM') + ')</small>' 
+												: '<br><small>(' + dutils.formatDate(firstDateObject, 'd MMM') + ')</small>');
+										if (kpiDescription.scalingfactor){
+											chartItem[index1] = chartItem[index1] * kpiDescription.scalingfactor;
+										}
+									}catch(e){
+										Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 									}
-									chartItem[index1 + 'Tooltip'] = kpiDescription.name + ': ' + (kpiDescription.displayformat ? utils.transform(chartItem[index1], kpiDescription.displayformat) : chartItem[index1]) + ' ' + (kpiDescription.tooltipunit || '') + 
-										(isWeek 
-											? '<br><small>(' + Pmg.message('weekendingon', 'sptplans') + ' ' + dutils.formatDate(toDateObject, 'd MMM') + ')</small>' 
-											: '<br><small>(' + dutils.formatDate(firstDateObject, 'd MMM') + ')</small>');
-									if (kpiDescription.scalingfactor){
-										chartItem[index1] = chartItem[index1] * kpiDescription.scalingfactor;
-									}
-								}catch(e){
-									Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 								}
 							});
-							tableData.push(tableItem);
-							previousToDate = toDate;
 							chartData.push(chartItem);
+							if (! chartWidget.tableSkipEmptyPeriods || periodData.length > 0){
+								tableData.push(tableItem);
+							}
+							previousToDate = toDate;
 							i += 1;
 							if (isWeek){
 								firstDateObject.setDate(firstDateObject.getDate() + 7);
@@ -133,47 +139,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, Pmg){
 							delete horizontalAxisDescription.max;
 						}
 					}
-					if (missingKpisIndex && !utils.empty(missingItemsKpis)){
-					    let data = {}, indexToIdp = {};
-						utils.forEach(missingItemsKpis, function(value, idp){
-							let index = grid.store.getSync(idp)[missingKpisIndex];
-							if (index){
-								data[index] = missingItemsKpis[idp];
-								indexToIdp[index] = idp;
-							}
-						});
-					    if (!utils.empty(data)){
-						    if (self.recursionDepth > 0){
-								Pmg.addFeedback(Pmg.message('too many recursions') + ': ' + self.recursionDepth + ' (TrendChart)');
-								self.recursionDepth = 0;
-								return;
-							}
-						    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
-						            function(response){
-						           		const kpis = response.data.kpis;
-										utils.forEach(kpis, function(kpi, index){
-											let idp = indexToIdp[index], itemKpis = kpis[index];
-											utils.forEach(itemKpis, function(kpi, j){
-												grid.updateDirty(idp, j, kpi);
-												if (kpi === false){
-													Pmg.addFeedback('Pmg.serverKpierror' + ': ' + ' - ' + Pmg.message('col') + ': ' + j + Pmg.message('index') + ': ' + index);
-												}
-											});
-										});
-										self.setChartValue(chartWidgetName);//recursive call. Risk of infinite loop ?
-						            },
-						            function(error){
-						                console.log('error:' + error);
-						            }
-						    );
-						}else{
-							chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
-							self.recursionDepth = 0;
-						}
-					}else{
-						chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
-						self.recursionDepth = 0;
-					}
+					chartsUtils.processMissingKpis(missingItemsKpis, grid, self, chartWidgetName, chartData, tableData, tableColumns, axes, plots, series);
 				});
 			}		  
 		},

@@ -88,7 +88,7 @@ class View extends AbstractView {
             'environment' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [
                 'label' => $tr('Environment'), 'style' => $gaugeStyle, 'leftTd' => ['innerHTML' => $tr('Unfavorable'), 'style' => $leftRightTdStyle], 'rightTd' => ['innerHTML' => $tr('Favorable'), 'style' => $leftRightTdStyle], 'gaugeTableStyle' => $gaugeTableStyle, 'gaugeDivStyle' => $gaugeDivStyle,
                 'gaugeAtts' => $reversedGaugeAtts,
-                'checkboxes' => [['title' => $this->tr('Professional'), 'id' => 'professional'], ['title' => $this->tr('Personal'), 'id' => 'personal'], ['title' => $this->tr('Family'), 'id' => 'family'], ['title' => $this->tr('Sports'), 'id' => 'sports'], ['title' => $this->tr('other'), 'id' => 'other']]
+                'checkboxes' => [['title' => $this->tr('Professional'), 'id' => 'professional'], ['title' => $this->tr('Personal'), 'id' => 'personal'], ['title' => $this->tr('Family'), 'id' => 'family'], ['title' => $this->tr('Athletic'), 'id' => 'sports'], ['title' => $this->tr('other'), 'id' => 'other']]
             ]]],
             'environmentdetails' => ViewUtils::lazyEditor($this, 'detailssmall', $detailsAtts),
             'recovery' => ['type' => 'horizontalLinearGauge', 'atts' => ['edit' => [

@@ -190,13 +190,11 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
         },
 
         applyCustom: function(){
-            var widget = this.widget, widgetPane = widget.pane, pane = widgetCustomDialog.pane, attTarget = pane.valueOf('att'), attInfo = this.customAtts[attTarget], att = attInfo.att, attRoot = attInfo.root || att, 
-                oldAtt = widget.get(attRoot), attObject = (oldAtt === '' && attRoot !== att ? {} : oldAtt), oldAttValue = (attRoot === att ? attObject : attObject[att]), newAttValue = this.newAttValue(), newAtt;
-            //if (oldAttValue !== newAttValue){
-                newAtt = attRoot === att ? newAttValue : utils.newObj([[att, newAttValue]]);//{[att]: newAttValue});
-                widget.set(attRoot, newAtt);
-                lang.setObject((widget.itemCustomization || 'customization') + (attRoot === 'value' ? ('.data.value.' + widget.widgetName) : ('.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot)), newAtt, widgetPane);
-            //}
+            var widget = this.widget, widgetPane = widget.pane, pane = widgetCustomDialog.pane, attTarget = pane.valueOf('att'), attInfo = this.customAtts[attTarget], att = attInfo.att, attRoot = attInfo.root || att, newAttValue = this.newAttValue(), newAtt;
+            newAtt = attRoot === att ? newAttValue : utils.newObj([[att, newAttValue]]);//{[att]: newAttValue});
+            widget[attRoot] = '';
+            widget.set(attRoot, newAtt);
+            lang.setObject((widget.itemCustomization || 'customization') + (attRoot === 'value' ? ('.data.value.' + widget.widgetName) : ('.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot)), newAtt, widgetPane);
         },
 
         applyGridEditorCustom: function(){

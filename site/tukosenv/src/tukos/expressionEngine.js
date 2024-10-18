@@ -81,7 +81,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				});
 				return result;
 			},
-			formulaExpAvg = function(arg, initialAvg, initialDate, daysConstant){
+			formulaExpAvg = function(arg, initialAvg, initialDate, daysConstant, kpiItemCol){
 				const formula = getFormula(arg), dailyDecay = Math.exp(-1/getValueOf(daysConstant));
 				let average, previousDate;
 				if (!previousKpiValuesCache[arg + daysConstant]){
@@ -89,19 +89,29 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 					previousItems.forEach(function(item){
 						average =  nanToSecondsOrZero(formula(item, cache, idProperty, x)) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
 						previousDate = item.startdate
+						if (kpiItemCol){
+							item[kpiItemCol] = average;
+						}
 					});
 				}else{
 					[average, previousDate] = previousKpiValuesCache[arg + daysConstant];
 				}
-				items.forEach(function(item){
-					if (previousDate < item.startdate){
-						average =  nanToSecondsOrZero(formula(item, cache, idProperty, x)) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
-						previousDate = item.startdate
-					}
-				});
-				const kpiValue = kpiDate && kpiDate !== previousDate ? average * Math.pow(dailyDecay, dutils.difference(previousDate, kpiDate)) : average;
-				previousKpiValuesCache[arg + daysConstant] = [kpiValue, kpiDate ? kpiDate : previousDate];
-				return kpiValue;
+				if (previousDate === kpiDate){
+					return average;
+				}else{
+					items.forEach(function(item){
+						//if (previousDate < item.startdate){
+							average =  nanToSecondsOrZero(formula(item, cache, idProperty, x)) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
+							previousDate = item.startdate
+							if (kpiItemCol){
+								item[kpiItemCol] = average;
+							}
+						//}
+					});
+					const kpiValue = kpiDate && kpiDate !== previousDate ? average * Math.pow(dailyDecay, dutils.difference(previousDate, kpiDate)) : average;
+					previousKpiValuesCache[arg + daysConstant] = [kpiValue, kpiDate ? kpiDate : previousDate];
+					return kpiValue;
+				}
 			},
 			formulaExpIntensity = function(arg, min, max, a){
 				const valueToIntensity = function(value){
@@ -183,42 +193,6 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 						return (divider ? nanToSecondsOrZero(x) / divider : 0);
 					});
 				},
-				/*'/': function(a, b){
-					const x = a(), y = b();
-					if (Array.isArray(x)){
-						if (Array.isArray(y)){
-							let result = [];
-							for (let i in x){
-								const divider = nanToSecondsOrZero(y[i]);
-								result.push(divider ? nanToSecondsOrZero(x[i]) / divider : 0);
-							}
-							return result;
-						}else{
-							let result = [];
-							for (let i in x){
-								const divider = nanToSecondsOrZero(y), xValue = x[i];
-								if (Array.isArray(xValue)){// assumes it is [a,b] and divider should apply to b 
-									result.push([xValue[0], divider ? nanToSecondsOrZero(xValue[1]) / divider : 0]);									
-								}else{
-									result.push(divider ? nanToSecondsOrZero(xValue) / divider : 0);
-								}
-							}
-							return result;
-						}
-					}else{
-						if (Array.isArray(y)){
-							let result = [];
-							for (let i in y){
-								const divider = nanToSecondsOrZero(y[i]);
-								result.push(divider ? nanToSecondsOrZero(x) / divider : 0);
-							}
-							return result;
-						}else{
-							const divider = nanToSecondsOrZero(y);
-							return divider ? nanToSecondsOrZero(x) / divider : 0;
-						}
-					}
-				},*/
 	            ",": (a, b) => {
 	                const aVal = a();
 	                const aArr = (0, parser.isArgumentsArray)(aVal)
@@ -248,7 +222,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 						}
 						return x;
 					}else{
-						return Number(nanToSecondsOrZero(a()).toFixed(dg));
+						return x === undefined ? '' : Number(nanToSecondsOrZero(a()).toFixed(dg));
 					}
 				}),
 				'JSONPARSE': function(a){
@@ -332,8 +306,8 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				'DAILYAVG': unpackArgs(function(col, durationDays){
 					return formulaSum(col()) / durationDays;
 				}),
-				'EXPAVG': unpackArgs(function(col, initialAvg, initialDate, daysConstant){
-					return formulaExpAvg(col(), initialAvg(), initialDate(), daysConstant());
+				'EXPAVG': unpackArgs(function(col, initialAvg, initialDate, daysConstant, kpiItemCol){
+					return formulaExpAvg(col(), initialAvg(), initialDate(), daysConstant(), kpiItemCol ? kpiItemCol() : undefined);
 				}),
 				'EXPINTENSITY': unpackArgs(function(col, min, max, a){
 					return formulaExpIntensity(col(), min(), max(), a());

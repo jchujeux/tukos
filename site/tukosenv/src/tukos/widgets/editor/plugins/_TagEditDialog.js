@@ -4,7 +4,7 @@ define (
 
     var colorIconClass = "dijitEditorIcon dijitEditorIconHiliteColor",
         sizeUnits = utils.storeData(['auto', 'cm', '%', 'em', 'px']), thicknessUnits = utils.storeData(['cm', 'em', 'px']), hAlignStoreData = Pmg.messageStoreData(['default', 'left', 'center', 'right']),
-        vAlignStoreData = Pmg.messageStoreData(['top', 'middle', 'bottom']), displayStoreData = Pmg.messageStoreData(['block', 'inline', 'inline-table', 'none']), pageBreakInsideStoreData = Pmg.messageStoreData(['auto', 'avoid']), 
+        vAlignStoreData = Pmg.messageStoreData(['top', 'middle', 'bottom']), displayStoreData = Pmg.messageStoreData(['block', 'inline', 'inline-block', 'inline-table', 'none']), pageBreakInsideStoreData = Pmg.messageStoreData(['auto', 'avoid']), 
         objectFitStoreData = Pmg.messageStoreData(['fill', 'contain', 'cover', 'none', 'scale-down']), objectPositionStoreData = Pmg.messageStoreData(['50% 50%', 'right top', 'left bottom', '0px 0px']),
     	description = {backgroundColor: 'colorDescription', borderColor: 'colorDescription', color: 'colorDescription', pageBreakInside: 'pageBreakInsideDescription', textAlign: 'hAlignDescription', verticalAlign: 'vAlignDescription', width: 'sizeDescription',
     				   	height: 'sizeDescription', minWidth: 'sizeDescription', maxWidth: 'sizeDescription', minHeight: 'sizeDescription', maxHeight: 'sizeDescription', objectFit: 'objectFitDescription', objectPosition: 'objectPositionDescription',

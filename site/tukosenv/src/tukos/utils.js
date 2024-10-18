@@ -7,6 +7,10 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 			visualTag: function() {
 				return '<span class="visualTag" style="background-color:lightgrey; font-size: 5px;">¤</span>';
 			},
+			sizeMultiplier: function(size, multiplier){
+				let splittedSize;
+				return Number(size) ? size * multiplier : (splittedSize = size.split('%'))[0] * multiplier + (splittedSize.length === 2 ? '%' : '');
+			},
 			trimExt: function(string) {
 				return string.replace(/^[\s(&nbsp;)]+/g, '').replace(/[\s(&nbsp;)]+$/g, '');
 			},
@@ -62,7 +66,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					return String(value1 || '') == String(value2 || '');
 				}*/
 			},
-			forEach: function(object, callback) {
+			forEach: function(object, callback, inherited) {
 				if (object){
 					switch (typeof(object)){
 						case 'object':
@@ -71,15 +75,20 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 									callback(item, key, object);
 								});
 							}else{
-								const keys = Object.keys(object);
-								for (const key of keys){
-									callback(object[key], key, object);
+								if (inherited){
+									for(const property in object){
+										callback(object[property], property, object);
+									}
+								}else{
+									for (const key of Object.keys(object)){
+										callback(object[key], key, object);
+									}
 								}
 							}
 					}
 				}
 			},
-			some: function(object, callback) {
+			some: function(object, callback, inherited) {
 				var result = false;
 				if (object){
 					switch (typeof(object)){
@@ -91,12 +100,19 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 									}
 								}
 							}else{
-								const keys = Object.keys(object);
-								for (var key of keys){
-									if ((result = callback(object[key], key, object))) {
-										return result;
+								if (inherited){
+									for (const property in object){
+										if ((result = callback(object[property], property, object))) {
+											return result;
+										}
 									}
-								}					
+								}else{
+									for (var key of Object.keys(object)){
+										if ((result = callback(object[key], key, object))) {
+											return result;
+										}
+									}					
+								}
 							} 		
 					}
 				}

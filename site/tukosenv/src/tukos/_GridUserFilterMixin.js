@@ -19,7 +19,8 @@ function(declare, lang, dct, Memory, query, Widget, TextBox, Select, registry, u
 						if (evt.keyCode === 13){
 							var grid = self.grid, store = grid.store;
 							self.onFilterChange(self); 
-							grid.set('collection', typeof store.getRootCollection === 'function' ? store.getRootCollection() : store.filter({contextpathid: self.grid.form.tabContextId()}))
+							//grid.set('collection', typeof store.getRootCollection === 'function' ? store.getRootCollection() : (grid.storeFilter ? store.filter(grid.storeFilter) : (store.getCollectionFilter ? store.filter(store.getCollectionFilter()) : store)))
+							grid.set('collection');
 						}
 					};
         		this.inherited(arguments);
@@ -71,6 +72,14 @@ function(declare, lang, dct, Memory, query, Widget, TextBox, Select, registry, u
             	this.showHideFilters();
             }
         },
+        _setCollection: function(newValue){
+			if (newValue){
+				this.inherited(arguments);
+			}else{
+				const store = this.store;
+				this.inherited(arguments, [typeof store.getRootCollection === 'function' ? store.getRootCollection(this.storeFilter) : (store.getCollectionFilter ? store.filter(store.getCollectionFilter(this.storeFilter)) : store)]);
+			}
+        },
         showHideFilters: function(){
             var grid = this,
                 headerTable = grid.headerNode.firstChild,
@@ -89,7 +98,11 @@ function(declare, lang, dct, Memory, query, Widget, TextBox, Select, registry, u
         buildFiltersRow: function(headerTable){
             var grid = this, pane = grid.form, 
             	onFilterChange = function(filterWidget){
-            		lang.setObject('widgetsDescription.' + grid.widgetName + '.atts.columns.' + filterWidget.col + '.filter', filterWidget.get('value'), pane.customization);
+	                const theNewFilter = filterWidget.get('value');
+	                if (grid.customizationPath){
+	             		lang.setObject(grid.customizationPath + 'columns.' + filterWidget.col + '.filter', theNewFilter, grid.getRootForm());
+	             	}
+            		grid.columns[filterWidget.col].filter = theNewFilter;
         		};
             filtersRow = dct.create('tr', {'class': 'dgrid-filter-row'}, headerTable);
             utils.forEach(grid.columns, function(column, i){
@@ -109,7 +122,8 @@ function(declare, lang, dct, Memory, query, Widget, TextBox, Select, registry, u
             });        	
         },
         userFilters: function(){
-        	var columnsCustomization = lang.getObject('widgetsDescription.' + this.widgetName + '.atts.columns', false, this.form.customization) || {}, userFilters = {};
+        	//var columnsCustomization = lang.getObject('widgetsDescription.' + this.widgetName + '.atts.columns', false, this.form.customization) || {}, userFilters = {};
+        	var columnsCustomization = lang.getObject(this.customizationPath + 'columns', false, this.form) || {}, userFilters = {};
         	utils.forEach(this.columns, function(column, field){
         		var customFilter = (columnsCustomization[field] || {}).filter||{}, customFilterOpr = customFilter[0];
         		if (customFilterOpr && (!utils.in_array(customFilterOpr, ['RLIKE', 'NOT RLIKE', 'BETWEEN']) || customFilter[1])){
@@ -122,6 +136,27 @@ function(declare, lang, dct, Memory, query, Widget, TextBox, Select, registry, u
 				userFilters = lang.mixin(userFilters, this.extraUserFilters);
 			}
         	return userFilters;
+        },
+       _setColumns: function(columns){
+        	if (this.dynamicColumns){
+        		for (var col in columns){
+        			var column = columns[col];
+	                 if (column.filter){
+	                	this.hasFilters = true;
+	                }
+	                if (column.rowsFilters){
+	                	this.mayHaveFilters = true;
+	                }
+        		}
+				if (this.mayHaveFilters && !this.hasShowHideMenuItem){
+					this.contextMenuItems.header.push({atts: {label: Pmg.message('showhidefilters'), onClick: lang.hitch(this, function(evt){this.showHideFilters();})}}); 
+					this.hasShowHideMenuItem = true;
+				}       	 	
+        	}
+    		this.inherited(arguments);
+    		if (this.hasFilters && this.hideServerFilters !== 'yes'){
+            	this.showHideFilters();
+            }
         }
     });
 }); 

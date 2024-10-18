@@ -15,7 +15,8 @@ class Model extends AbstractModel {
             'vobject'       =>  'VARCHAR(50)  DEFAULT NULL',
             'view'          =>  "ENUM ('" . implode("','", $this->viewOptions) . "') DEFAULT NULL",
             'panemode'      =>  "ENUM ('" . implode("','", $this->panemodeOptions) . "') DEFAULT NULL",
-        	'customization' =>  'longtext DEFAULT NULL'
+        	'customization' =>  'longtext DEFAULT NULL',
+            'widgettype'    => 'VARCHAR(50) DEFAULT NULL'
         ];
         parent::__construct($objectName, $translator, 'customviews', ['parentid' => ['users']], ['customization'], $colsDefinition, [], ['vobject', 'view', 'panemode'], [], ['name', 'vobject', 'view', 'panemode']);
         $this->vobjectOptions = $this->user->allowedModules();

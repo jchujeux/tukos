@@ -258,7 +258,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 			grid.collection.sort(grid.sort).fetch().then(function(rows){
 				var element = document.createElement('a'), csvContent, activeColumns = [], headerContent = '';
 				utils.forEach(grid.columns, function(column, col){
-					if (col != "0" && !column.hidden){
+					if (!column.hidden){
 						activeColumns.push(col);
 						headerContent += '"' + column.label.replaceAll('"', '""') +  '"' + ",";							
 					}
@@ -268,7 +268,13 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 					var rowContent = "";
 					csvContent += "\r\n";
 					activeColumns.forEach(function (col){
-						rowContent += '"' + (rowObject[col] ? rowObject[col].replaceAll('"', '""') : '') +  '"' + ",";							
+						//rowContent += '"' + (rowObject[col] ? (typeof rowObject[col] === 'string' ? rowObject[col].replaceAll('"', '""') : rowObject[col]) : '') +  '"' + ",";
+						switch(typeof rowObject[col]){
+							case 'undefined': rowContent += ''; break;
+							case 'string'   : rowContent += rowObject[col].replaceAll('"', '""'); break;
+							default: rowContent += rowObject[col];
+						}
+						rowContent += ',';
 					});
 					csvContent += rowContent.slice(0, -1);
 				});
@@ -365,7 +371,8 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 					menuColItems = (menuColItems || []).concat(this.customContextMenuItems());
 				}                
 	            if (menuColItems){
-	            	mutils.setContextMenuItems(this, menuColItems ? menuColItems.concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this)) : lang.hitch(wcutils, wcutils.customizationContextMenuItems)(this));
+	            	const widgetToCustomize = this.customizableAttsWidget || this;
+	            	mutils.setContextMenuItems(this, menuColItems ? menuColItems.concat(lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widgetToCustomize)) : lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widgetToCustomize));
 				}
 			}
         },
@@ -408,18 +415,19 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
             return this.subRows[0][colId].field;
         },
         _setValue: function(value){
-        	this.collection.setData(value ? value : [])
-        	this.set('collection', this.collection);
+        	this.store.setData(value ? value : [])
+        	this.set('collection');
         	this.setSummary();
         },
         _setColumns: function(columns){
         	var staticColsProperties = this.params.columns;
         	if (this.dynamicColumns){
         		for (var col in columns){
+        			var column = columns[col];
         			if (staticColsProperties){
-            			columns[col] = lang.mixin(columns[col], staticColsProperties[col]);
+            			column = lang.mixin(column, staticColsProperties[col]);
         			}
-        			this.setColArgsFunctions(columns[col]);
+       				this.setColArgsFunctions(column);
         		}
         	}
     		this.inherited(arguments);

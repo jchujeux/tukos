@@ -6,18 +6,18 @@ use TukosLib\TukosFramework as Tfk;
 
 
 trait ChartView {
-
+    
     static  $dateFormulaesToTranslate = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY', 'DAY', 'WEEK', 'MONTH'];
-
+    
     public function functionLabel ($funcName, $dayOrWeekOrMonth){
         return $this->tr($funcName) . '(' . $this->tr($dayOrWeekOrMonth) . ', 1)';
     }
-    public function ChartDescription($chartId, $chartInfo, $dateWidgetNames = ['firstrecorddate'], $namesToTranslate, $missingKpisIndex, $selectedDateWidgetName = null){
+    public function ChartDescription($chartId, $chartInfo, $dateWidgetNames = ['firstrecorddate'], $namesToTranslate, $selectedDateWidgetName = null){
         $kpiFunctions = ['TOFIXED', 'JSONPARSE', 'VECTOR', 'XY', 'SUM', 'EXPAVG', 'EXPINTENSITY', 'DAILYAVG', 'AVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'DATE', 'TIMETOSECONDS'];
         $translations = array_merge(Utl::translations($kpiFunctions, $this->tr, 'uppercasenoaccent'), Utl::translations($namesToTranslate, $this->tr, 'lowercase'), Utl::translations(self::$dateFormulaesToTranslate, $this->tr, 'lowercase'));
         $customizableAtts = $chartInfo['chartType'] . 'ChartCustomizableAtts';
         return ['type' => 'dynamicChart', 'atts' => ['edit' => [
-            'title' => $chartInfo['name'], 
+            'title' => $chartInfo['name'],
             'chartType' => $chartInfo['chartType'],
             'ignoreChanges' => true,
             'style' => ['width' => 'auto'],
@@ -30,13 +30,13 @@ trait ChartView {
             'tooltip' => true,
             'mouseZoomAndPan' => $chartInfo['chartType'] === 'trend' ? true : false,
             'noMarkAsChanged' => true,
-            'missingKpisIndex' => $missingKpisIndex,
             'onWatchLocalAction' => [
                 'hidden' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'hidden')]]],
                 'axesToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'axes')]]],
                 'daytype' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'daytype')]]],
                 'plotsToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'plots')]]],
                 'title' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'title')]]],
+                'tableSkipEmptyPeriods' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'tableSkipEmptyPeriods')]]],
                 'chartFilter' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'chartFilter')]]],
                 'kpisToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'kpis')]]],
                 'itemsSetsToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'itemsSets')]]],
@@ -44,31 +44,31 @@ trait ChartView {
             'customizableAtts' => $this->$customizableAtts($translations, $dateWidgetNames, $selectedDateWidgetName)
         ]]];
     }
-    public function chartPreMergeCustomizationAction(&$response, &$chartLayoutRow, $customMode, $grid, $dateCol, $dateWidgetNames, $namesToTranslate, $missingKpisIndex, $selectedDateWidgetName = null){
+    public function chartPreMergeCustomizationAction(&$response, &$chartLayoutRow, $customMode, $grid, $dateCol, $dateWidgetNames, $namesToTranslate, $selectedDateWidgetName = null){
         if (!empty($response['widgetsDescription'])){
             $editConfig =  $customMode === 'object'
                 ? $this->user->getCustomView($this->objectName, 'edit', 'tab', ['editConfig'])
                 : $this->model->getCombinedCustomization(['id' => Utl::getItem('id', $response['data']['value'])], 'edit', 'tab', ['editConfig']);
-            if (!empty($editConfig)){
-                $chartsPerRow = Utl::getItem('chartsperrow', $editConfig);
-                if ($chartsPerRow){
-                    $chartLayoutRow['tableAtts'] = Utl::array_merge_recursive_replace($chartLayoutRow['tableAtts'], ['cols' => $chartsPerRow, 'widgetCellStyle' => ['verticalAlign' => 'top', 'width' => intval(100/$chartsPerRow) . '%']]);
-                }
-                $charts = Utl::getItem('charts', $editConfig);
-                if ($charts){
-                    $charts = json_decode($charts, true);
-                    foreach ($charts as $chart){
-                        $chartId = 'chart' . $chart['id'];
-                        $response['widgetsDescription'][$chartId] = Widgets::description($this->chartDescription($chartId, $chart, $dateWidgetNames, $namesToTranslate, $missingKpisIndex, $selectedDateWidgetName));
-                        $chartLayoutRow['widgets'][] = $chartId;
+                if (!empty($editConfig)){
+                    $chartsPerRow = Utl::getItem('chartsperrow', $editConfig);
+                    if ($chartsPerRow){
+                        $chartLayoutRow['tableAtts'] = Utl::array_merge_recursive_replace($chartLayoutRow['tableAtts'], ['cols' => $chartsPerRow, 'style' => ['tableLayout' => 'fixed'], 'widgetCellStyle' => ['verticalAlign' => 'top', 'width' => intval(100/$chartsPerRow) . '%']]);
                     }
-                    $response['widgetsDescription'][$grid]['atts'] = Utl::array_merge_recursive_replace($response['widgetsDescription'][$grid]['atts'],
-                        ['onWatchLocalAction' => ['collection' => [$grid => ['chartViewStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->gridWatchAction($dateCol, $selectedDateWidgetName)]]]]]);
-                    $response['widgetsDescription'][$grid]['atts'] = Utl::array_merge_recursive_concat($response['widgetsDescription'][$grid]['atts'], ['afterActions' => [
-                        'createNewRow' => $this->gridRowWatchAction(), 'updateRow' => $this->gridRowWatchAction(), 'deleteRow' => $this->gridRowWatchAction(), 'deleteRows' => $this->gridRowWatchAction()
-                    ]]);
+                    $charts = Utl::getItem('charts', $editConfig);
+                    if ($charts){
+                        $charts = json_decode($charts, true);
+                        foreach ($charts as $chart){
+                            $chartId = 'chart' . $chart['id'];
+                            $response['widgetsDescription'][$chartId] = Widgets::description($this->chartDescription($chartId, $chart, $dateWidgetNames, $namesToTranslate, $selectedDateWidgetName));
+                            $chartLayoutRow['widgets'][] = $chartId;
+                        }
+                        $response['widgetsDescription'][$grid]['atts'] = Utl::array_merge_recursive_replace($response['widgetsDescription'][$grid]['atts'],
+                            ['onWatchLocalAction' => ['collection' => [$grid => ['chartViewStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->gridWatchAction($dateCol, $selectedDateWidgetName)]]]]]);
+                        $response['widgetsDescription'][$grid]['atts'] = Utl::array_merge_recursive_concat($response['widgetsDescription'][$grid]['atts'], ['afterActions' => [
+                            'createNewRow' => $this->gridRowWatchAction(), 'updateRow' => $this->gridRowWatchAction(), 'deleteRow' => $this->gridRowWatchAction(), 'deleteRows' => $this->gridRowWatchAction()
+                        ]]);
+                    }
                 }
-            }
         }
         return $response;
     }
@@ -78,6 +78,7 @@ var form = sWidget.form;
 //form.resize();
 if (!newValue || '$changedAtt' !== 'hidden'){
     setTimeout(function(){//setTimeout needed so that chart render is called after the form has resized
+        Pmg.setFeedback('');
         form.charts.setChartValue('$chartId');
     }, 0);
 }
@@ -91,18 +92,8 @@ if (form.editConfig && form.editConfig.charts){
     const chartsConfig = JSON.parse(form.editConfig.charts);
     if (form.charts){
         form.resize();
-        form.charts.setChartsValue();     
-		/*utils.waitUntil(
-			function(){
-				return form.markIfChanged;
-			}, 
-			function(){
-                form.markIfChanged = form.watchOnChange = false;
-                form.charts.setChartsValue();
-                form.markIfChanged = form.watchOnChange = true;
-			}, 
-			100);*/
-    }else{    
+        form.charts.setChartsValue();
+    }else{
         require(["tukos/charting/Charts"], function(Charts){
             form.charts = new Charts({form: form, grid: sWidget, dateCol: '$dateCol', selectedDate: '$selectedDate', charts: chartsConfig});
         });
@@ -168,13 +159,16 @@ if (grid.clickedCell.column.field === 'rowId'){
         }, 100);
 }
 EOT
-;
+    ;
     }
     public function trendChartCustomizableAtts($translations, $dateWidgetNames, $selectedDateWidgetName){
         $tr = $this->tr;
         $dateFormulaesTranslations = Utl::translations(array_merge(self::$dateFormulaesToTranslate, $dateWidgetNames), $this->tr, 'lowercase');
         return [
             'title' => ['att' => 'title', 'type' => 'TextBox', 'name' => $tr('Title')],
+            //return {att: attName, type: 'StoreSelect', name: Pmg.message(attName), storeArgs: {data: [{id: '', name: ''}, {id: 'yes', name: Pmg.message('yes')}, {id: 'no', name: Pmg.message('no')}]}};
+            
+            'tableSkipEmptyPeriods' => ['att' => 'tableSkipEmptyPeriods', 'type' => 'StoreSelect', 'name' => $tr('TableSkipEmptyPeriods'), 'storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]]],
             'chartFilter' => ['att' => 'chartFilter', 'type' => 'TukosTextarea', 'name' => $tr('chartFilter'), 'atts' => ['translations' => $translations]],
             'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'style' => ['maxWidth' => '1500px'], 'storeArgs' => ['idProperty' => 'idg'],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartAxesTukosTooltip', 'object' => $this->objectName]],
@@ -240,7 +234,7 @@ EOT
                     'scalingfactor' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Scalingfactor'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'absentiszero' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Absentiszero')], 'storeedit' => ['width' => 80]]), false),
                     //'fillColor' => Widgets::description(Widgets::colorPickerTextBox(['edit' => ['label' => $tr('fillcolor')], 'storeedit' => ['width' => 80]]), false),
-                    'kpiFilter' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('itemsfilter'), 'style' => ['width' => '15em'], 'translations' => $translations], 
+                    'kpiFilter' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('itemsfilter'), 'style' => ['width' => '15em'], 'translations' => $translations],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false)
                 ]])), ['att' => 'kpisToInclude', 'type' => 'SimpleDgrid', 'name' => $this->tr('dataToInclude')])
         ];
@@ -274,7 +268,7 @@ EOT
                     'axisMin' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('axisMin'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'axisMax' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('axisMax'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'precision' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('axisPrecision'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
-                    'kpiFilter' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $tr('itemsfilter'), 'style' => ['width' => '15em'], 'translations' => $translations], 
+                    'kpiFilter' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $tr('itemsfilter'), 'style' => ['width' => '15em'], 'translations' => $translations],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false)
                 ]])), ['att' => 'kpisToInclude', 'type' => 'SimpleDgrid', 'name' => $tr('dataToInclude')]),
             'itemsSets' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $tr('itemsSetsToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
@@ -294,11 +288,11 @@ EOT
                     'kpimode' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => '', 'name' => $tr('performed')], ['id' => 'planned', 'name' => $tr('planned')]]], 'label' => $tr('Kpimode')], 'storeedit' => ['width' => 60]]), false),
                     'fillColor' => Widgets::description(Widgets::colorPickerTextBox(['edit' => ['label' => $tr('color')], 'storeedit' => ['width' => 80]]), false),
                     'fill' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => 1, 'name' => $tr('yes')], ['id' => 0, 'name' => $tr('no')]]], 'label' => $tr('hasfill')], 'storeedit' => ['width' => 60]]), false),
-                    'itemsFilter' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $tr('itemsfilter'), 'style' => ['width' => '200px'], 'translations' => $translations], 
+                    'itemsFilter' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $tr('itemsfilter'), 'style' => ['width' => '200px'], 'translations' => $translations],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', ]]), false),
-                        
-             ]])), ['att' => 'itemsSetsToInclude', 'type' => 'SimpleDgrid', 'name' => $tr('itemsSetsToInclude')])
-        ];                          
+                    
+                ]])), ['att' => 'itemsSetsToInclude', 'type' => 'SimpleDgrid', 'name' => $tr('itemsSetsToInclude')])
+        ];
     }
     public function pieChartCustomizableAtts($translations, $dateWidgetNames,  $selectedDate){
         $tr = $this->tr;
@@ -325,7 +319,7 @@ EOT
                         'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $tr('help'), 'name' => 'ChartDateFormulaesTukosTooltip', 'object' => $this->objectName]]],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 100]]), false),
                     'fillColor' => Widgets::description(Widgets::colorPickerTextBox(['edit' => ['label' => $tr('fillcolor')], 'storeedit' => ['width' => 80]]), false),
-                    'kpiFilter' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $tr('itemsfilter'), 'style' => ['width' => '15em'], 'translations' => $translations], 
+                    'kpiFilter' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $tr('itemsfilter'), 'style' => ['width' => '15em'], 'translations' => $translations],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 150]]), false)
                 ]])), ['att' => 'kpisToInclude', 'type' => 'SimpleDgrid', 'name' => $tr('dataToInclude')])
         ];
@@ -444,10 +438,11 @@ EOT
                     'lines' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('ShowLines')], 'storeedit' => ['width' => 60]]), false),
                     'areas' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('ShowAreas')], 'storeedit' => ['width' => 60]]), false),
                     'markers' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('ShowMarkers')], 'storeedit' => ['width' => 60]]), false),
-                    'markersProgressColor' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 
+                    'markersProgressColor' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]],
                         'label' => $tr('MarkersProgressColor')], 'storeedit' => ['width' => 60]]), false),
                     'tension' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => '', 'name' => $tr('Brokenline')], ['id' => 'X', 'name' => $tr('Curved')]]], 'label' => $tr('Linetype')], 'storeedit' => ['width' => 60]]), false),
                     'interpolate' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Interpolate')], 'storeedit' => ['minWidth' => 60]]), false),
+                    'regression' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('regression')], 'storeedit' => ['width' => 60]]), false),
                     'gap' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Barsgap'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'vertical' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('vertical')], ['id' => false, 'name' => $tr('horizontal')]]], 'label' => $tr('indicatororientation')],
                         'storeedit' => ['width' => 80]]), false),

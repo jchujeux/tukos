@@ -15,6 +15,7 @@ class View {
     function __construct($controller){
         $this->controller = $controller;
     	$this->view = $controller->view;
+    	$this->model = $controller->model;
     	$this->objectName = $controller->objectName;
     	$this->user = $controller->user;
     	$this->paneMode = $controller->paneMode;

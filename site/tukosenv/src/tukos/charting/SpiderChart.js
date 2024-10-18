@@ -1,19 +1,6 @@
 "use strict";
-define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/dateutils", "tukos/hiutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/PageManager"], 
-function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngine, Pmg){
-	const setFilterString = function (set, expression, dateCol){
-		const filterStrings = [];
-		if (set.firstdate){
-			filterStrings.push('"' + dateCol + '" >= "' + expression.expressionToValue(set.firstdate) + '"');
-		}
-		if (set.lastdate){
-			filterStrings.push('"' + dateCol + '" <= "' + expression.expressionToValue(set.lastdate) + '"');
-		}
-		if (set.itemsFilter){
-			filterStrings.push(set.itemsFilter);
-		}
-		return filterStrings.join(' AND ');
-	};
+define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/dateutils", "tukos/hiutils", "tukos/dstore/expressionFilter", "tukos/expressionEngine", "tukos/charting/chartsUtils", "tukos/PageManager"], 
+function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngine, chartsUtils, Pmg){
 	return declare(null, {
         constructor: function(args){
 			lang.mixin(this, args);
@@ -22,7 +9,7 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 			this.recursionDepth = 0;
 		},
 		setChartValue: function(chartWidgetName){
-			var self = this, form = this.form, valueOf = self.valueOf.bind(self), chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {}, missingKpisIndex = chartWidget.missingKpisIndex;
+			var self = this, form = this.form, valueOf = self.valueOf.bind(self), chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {};
 			if (!hidden && chartWidget.kpisToInclude){
 				dojo.ready(function(){
 					const grid = self.grid, dateCol = self.dateCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter), chartFilter = chartWidget.get('chartFilter'), precision = {};
@@ -55,19 +42,13 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 					let previousKpiValuesCache = {};
 					for (const set of itemsSets){
 						try{
-							let setName = set.setName, filterString = setFilterString(set, expression, dateCol), kpiDate = expression.expressionToValue(set.kpidate), setCollection = collection, setData = collectionData, previousToDate, previousData = [];
+							let setName = set.setName, filterString = chartsUtils.setFilterString(set, expression, dateCol), kpiDate = expression.expressionToValue(set.kpidate), setCollection = collection, setData = collectionData, previousToDate, previousData = [];
 							if (filterString){
 								setCollection = collection.filter(expFilter.expressionToValue(filterString));
 								setData = utils.toNumeric(setCollection.fetchSync(), grid);
-								if (setData.length > 0){
-									previousToDate = dutils.dateString(setData[setData.length - 1][dateCol], [-1, 'day']);
-									previousData = utils.toNumeric(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
-								}else{
-									previousData = [];
-								}
 							}
 							previousKpiValuesCache[setName] = {};
-							let setExp = expressionEngine.expression(utils.toNumeric(setData, grid), idProperty, missingItemsKpis, valueOf, previousKpiValuesCache[setName], previousData, kpiDate);
+							let setExp = expressionEngine.expression(utils.toNumeric(setData, grid), idProperty, missingItemsKpis, valueOf, previousKpiValuesCache[setName], [], kpiDate);
 							series[setName] = {value: {key: 'kpi', value: setName, tooltip: setName + 'Tooltip'}, 
 								options: {plot: 'theSpider', fill: set.fillColor || 'black', hasFill: set.fill, stroke: {color: set.fillColor || 'black', style: set.kpimode === 'planned' ? 'shortDash' : ''}}};
 							tableColumns[setName] = {label: hiutils.htmlToText(setName), field: setName, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}};
@@ -76,7 +57,7 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 								const kpiName = kpiDescription.name;
 								if (kpiDescription.kpiFilter){
 									setKpiData[kpiName] = utils.toNumeric(setCollection.filter(kpiFilters[kpiName]).fetchSync(), grid);
-									setExpKpi[kpiName] = expressionEngine.expression(setKpiData[kpiName], idProperty, missingItemsKpis, valueOf, previousKpiValuesCache, previousData, kpiDate);
+									setExpKpi[kpiName] = expressionEngine.expression(setKpiData[kpiName], idProperty, missingItemsKpis, valueOf, previousKpiValuesCache[setName], [], kpiDate);
 								}else{
 									setKpiData[kpiName] = setData;
 									setExpKpi[kpiName] = setExp;
@@ -94,6 +75,7 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 								const value = set.kpimode === 'planned' && kpiDescription.plannedkpicol && kpiDescription.plannedkpicol[0] !== '$'
 									? kpiDescription.plannedkpicol 
 									: expKpi[setName][kpiDescription.name].expressionToValue(set.kpimode === 'planned' && kpiDescription.plannedkpicol ? "LAST(kpiDescription.plannedkpicol)" : kpiDescription.kpi);
+								chartData[i].id = i;
 								if (Array.isArray(value)){//this is untested, and potentially not useful for Spiders
 									for (const subValue of value){
 										const subName = kpiDescription.name + subValue[0], yValue = subValue[1];
@@ -111,47 +93,7 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 							}
 						}
 					}
-					if (missingKpisIndex && !utils.empty(missingItemsKpis)){
-					    let data = {}, indexToIdp = {};
-						utils.forEach(missingItemsKpis, function(value, idp){
-							let index = grid.store.getSync(idp)[missingKpisIndex];
-							if (index){
-								data[index] = missingItemsKpis[idp];
-								indexToIdp[index] = idp;
-							}
-						});
-					    if (!utils.empty(data)){
-						    if (self.recursionDepth > 2){
-								Pmg.addFeedback(Pmg.message('too many recursions') + ': ' + self.recursionDepth + ' (SpiderChart)');
-								self.recursionDepth = 0;
-								return;
-							}
-						    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
-						            function(response){
-						           		const kpis = response.data.kpis;
-										utils.forEach(kpis, function(kpi, index){
-											let idp = indexToIdp[index], itemKpis = kpis[index];
-											utils.forEach(itemKpis, function(kpi, j){
-												grid.updateDirty(idp, j, kpi);
-												if (kpi === false){
-													Pmg.addFeedback('Pmg.serverKpierror' + ': ' + ' - ' + Pmg.message('col') + ': ' + j + Pmg.message('index') + ': ' + index);
-												}
-											});
-										});
-										self.setChartValue(chartWidgetName);//recursive call. Risk of infinite loop ?
-						            },
-						            function(error){
-						                console.log('error:' + error);
-						            }
-						    );
-						}else{
-							chartWidget.set('value', {data: chartData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
-							self.recursionDepth = 0;
-						}
-					}else{
-						chartWidget.set('value', {data: chartData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
-						self.recursionDepth = 0;
-					}
+					chartsUtils.processMissingKpis(missingItemsKpis, grid, self, chartWidgetName, chartData, chartData, tableColumns, axes, plots, series);
 				});
 			}		  
 		}

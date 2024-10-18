@@ -364,7 +364,7 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
         },
         serverDialog: function(urlArgs, options, feedback, returnDeferred){//if returnDeferred is true, the returnedDfD.response.getHeader() will be available to extract header information
             var self = this, isObjectFeedback = utils.isObject(feedback), defaultFeedback = isObjectFeedback ? feedback.defaultFeedback : feedback;
-            options = lang.mixin({method: 'POST', timeout: 32000, handleAs: 'json'},  options);
+            options = lang.mixin({method: 'POST', timeout: 64000, handleAs: 'json'},  options);
             if (options.data){
                 options.data = JSON.stringify(options.data);
                 options.method = 'POST';
@@ -469,7 +469,7 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
         addFeedback: function(serverFeedback, clientFeedback, beep){
             this.setFeedback(serverFeedback, clientFeedback, "<br>", beep);
         },
-		setFeedbackAlert(feedback){
+		setFeedbackAlert: function(feedback){
 			this.setFeedback(feedback, null, null, true);
 		},
         namedId: function(id){

@@ -4,9 +4,11 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/on", "tuko
         constructor: function(args){
             lang.mixin(args.storeArgs, {storeParam: Pmg.get('sortParam'), target: Pmg.requestUrl(args.storeArgs)});
             args.store = lang.mixin(new Request(args.storeArgs), {postFetchAction: lang.hitch(this, this.postFetchAction)});
-            args.collection = args.store.filter({contextpathid: args.form.tabContextId});
+            args.storeFilter = {contextpathid: args.form.tabContextId};
+            args.collection = args.store;
         },
         postCreate: function(){
+            this.set('collection');
             this.inherited(arguments);
             this.on(on.selector(".dgrid-row, .dgrid-header", "contextmenu"), lang.hitch(this, this.contextMenuCallback));
             this.contextMenuItems.idCol = lang.hitch(this, wcutils.idColsContextMenuItems)(this).concat([{atts: {label: Pmg.message('togglerowheight'), onClick: lang.hitch(this, function(evt){this.toggleFormatterRowHeight(this);})}}]);

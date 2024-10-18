@@ -7,6 +7,7 @@ trait SynchronizationAction {
     
     public function setStravaActionButton($targetObject, $grid, $athlete, $coach, $synchrostart = 'synchrostart', $synchroend = 'synchroend', $daySortCol = 'sessionid', $dayDateCol = 'startdate', $sportsMapping = null){
         $view = $this->view;
+        $model = $this->model;
         $tr = $view->tr;
         $view->addToTranslate(['bicycle', 'swimming', 'running', 'other', 'noneedtosync', 'needsstravaauthorization', 'isstravaauthorized', 'cannotsynchronizestrava', 'needtodefinecoach', 'needtodefineathlete']);
         $this->actionWidgets['stravasync'] = ['type' => 'ObjectProcess', 'atts' => ['label' => $tr('stravasync'), 'allowSave' => true]];
@@ -24,7 +25,7 @@ trait SynchronizationAction {
                     'stauthorize' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('stauthorize'), 'onClickAction' => 'this.pane.stravaLocalActions.authorizeStrava(this.pane);']],
                     'stsync' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('synchronize'), 'onClickAction' => 'this.pane.stravaLocalActions.synchronizeWithStrava(this.pane);']],
                     'close' => ['type' => 'TukosButton', 'atts' => ['label' => $tr('close'), 'onClickAction' => "this.pane.close();\n"]],
-                    ],
+                ],
                 'layout' => [
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
                     'contents' => [
@@ -57,6 +58,14 @@ trait SynchronizationAction {
                 ],
                 'onOpenAction' => $this->onOpenAction($view, $tr, $targetObject, $grid, $athlete, $coach, $synchrostart, $synchroend, $daySortCol, $dayDateCol, $sportsMapping)
         ]];
+        if(!empty($synchroDefaultItemsCols = $model->itemsModel()->synchroDefaultItemsCols())){
+            $itemsView = $model->itemsView();
+            $this->actionWidgets['stravasync']['atts']['dialogDescription']['paneDescription']['defaultItemsCols'] = $synchroDefaultItemsCols;
+            foreach($synchroDefaultItemsCols as $col){
+                $this->actionWidgets['stravasync']['atts']['dialogDescription']['paneDescription']['widgetsDescription'][$col] = Widgets::description($itemsView->dataWidgets[$col], true);
+                $this->actionWidgets['stravasync']['atts']['dialogDescription']['paneDescription']['layout']['contents']['row1']['widgets'][] = $col;
+            }
+        }
     }
 
     protected function _stravaHtmlContent($view, $tr, $targetObject, $grid, $athlete, $coach, $daySortCol, $dayDateCol, $sportsMapping){

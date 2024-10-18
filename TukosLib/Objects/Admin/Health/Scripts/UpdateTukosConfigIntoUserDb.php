@@ -16,6 +16,7 @@ class UpdateTukosConfigIntoUserDb {
                 'db-s'		    => 'tukos application database name (not needed in interactive mode)',
                 'class=s'      => 'this class name',
                 'parentid-s'   => 'parent id (optional)',
+                'rootUrl-s'		=> 'https://tukos.site or https://localhost, omit if interactive',
                 'forgetuserchanges-s'      => 'override changes to items made in the user database'
             ]);
         $configStore  = new Store(array_merge($appConfig->dataSource, ['dbname' => 'tukosconfig']));
@@ -48,7 +49,7 @@ class UpdateTukosConfigIntoUserDb {
                     if (empty($userItem)){
                         $tempItem = $store->query("SELECT id, object from tukos where id = $id")->fetch(\PDO::FETCH_ASSOC);
                         if (!empty($tempItem)){
-                            $incompatibleObjects[$id] = ['config' => $configItem['object'], 'user' => $tempItem['object']];
+                            $incompatibleObjects[$id] = ['id' => $id, 'config' => $configItem['object'], 'user' => $tempItem['object']];
                             continue;
                         }
                     }
@@ -88,7 +89,9 @@ class UpdateTukosConfigIntoUserDb {
             }
             
             if (!empty($incompatibleObjects)){
-                echo Tfk::tr('incompatibleobjects') . ': ' . var_dump($incompatibleObjects) . '<br>';
+                echo Tfk::tr('incompatibleobjects') . ': ';
+                var_dump($incompatibleObjects);
+                echo '<br>';
             }
             if (!empty($colsToKeepIds)){
                 echo Tfk::tr('modifiedconfigitemskept') . ': ' . implode(',', $colsToKeepIds) . '<br>';

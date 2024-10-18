@@ -11,7 +11,7 @@ class View extends EditView{
         return [
             'row1' => [
                 'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true],
-                'widgets' => ['id', 'parentid', 'name', 'mode', 'startdate', 'starttime', 'sport', 'sportsman', 'googleid']
+                'widgets' => ['id', 'parentid', 'name', 'mode', 'startdate', 'starttime', 'sport', 'sportsman', 'equipmentid', 'extraweight', 'frictioncoef', 'dragcoef', 'googleid']
             ],
             'row2' => [
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true],
@@ -50,7 +50,7 @@ class View extends EditView{
                     'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110'],
             ],
             'rowcomments' => [
-                'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['30%', '70%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
+                'tableAtts' => ['cols' => 2, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0', 'widgetWidths' => ['70%', '30%'], 'widgetCellStyle' => ['verticalAlign' => 'top']],
                 'widgets' => ['kpiscache', 'comments'],
             ],
         ];
