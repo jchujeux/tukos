@@ -5,7 +5,7 @@ function(declare, lang, utils, Pmg){
 	return declare(null, {
         constructor: function(args){
 			lang.mixin(this, args);
-            const self = this, form = self.form, grid = self.grid, dateCol = self.dateCol, charts = self.charts;
+            const self = this, form = self.form, grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol, charts = self.charts;
             this.chartTypeOf = {};
             this.subValuesCache = {};
             form.chartWidgets = {};
@@ -13,7 +13,7 @@ function(declare, lang, utils, Pmg){
                 if (chart.chartType){
                 	chart.widgetName = 'chart' + chart.id;
                 	require([classes[chart.chartType]], function(chartClass){
-						form.chartWidgets[chart.widgetName] = new chartClass({form: form, grid: grid, dateCol: dateCol, valueOf: self.valueOf});
+						form.chartWidgets[chart.widgetName] = new chartClass({form: form, grid: grid, dateCol: dateCol, timeCol: timeCol, valueOf: self.valueOf});
 					})
 				}
             }

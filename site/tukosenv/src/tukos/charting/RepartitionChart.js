@@ -13,7 +13,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 			if (!hidden  && chartWidget.kpisToInclude){
 				dojo.ready(function(){
 					let collection, horizontalAxisDescription;
-					const grid = self.grid, dateCol = self.dateCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter),
+					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter),
 						 kpisDescription = JSON.parse(chartWidget.kpisToInclude), series = {}, chartData = [], tableData = [], axesDescription = JSON.parse(chartWidget.axesToInclude), axes = {},
 						 plotsDescription = JSON.parse(chartWidget.plotsToInclude), plots = {}, tableColumns = {};
 					self.recursionDepth +=1;
@@ -27,9 +27,9 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 						}
 					});
 					if (chartWidget.chartFilter){
-						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: timeCol}]);
 					}else{
-						collection = grid.store.sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.sort([{property: dateCol}, {property: timeCol}]);
 					}
 					const idProperty = collection.idProperty, collectionData = collection.fetchSync();
 					if (collectionData.length > 1){

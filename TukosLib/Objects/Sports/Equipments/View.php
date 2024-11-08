@@ -20,7 +20,7 @@ class View extends AbstractView {
             'dragcoef' => ViewUtils::tukosNumberBox($this, 'dragcoef', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00']]]]),
         ];
 
-        $this->customize($customDataWidgets, [], ['grid' => ['stravalink']]);
+        $this->customize($customDataWidgets, [], ['grid' => ['stravagearlink']]);
     }
     function stravaGearLink($stravaGearId){
         if (!empty($stravaGearId)){

@@ -12,12 +12,12 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 			var self = this, form = this.form, valueOf = self.valueOf.bind(self), chartWidget = form.getWidget(chartWidgetName), hidden = chartWidget.get('hidden'), missingItemsKpis = {};
 			if (!hidden && chartWidget.kpisToInclude){
 				dojo.ready(function(){
-					const grid = self.grid, dateCol = self.dateCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter), chartFilter = chartWidget.get('chartFilter'), precision = {};
+					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter), chartFilter = chartWidget.get('chartFilter'), precision = {};
 					let collection;
 					if (chartFilter){
-						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartFilter)).sort([{property: dateCol}, {property: timeCol}]);
 					}else{
-						collection = grid.store.sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.sort([{property: dateCol}, {property: timeCol}]);
 					}
 					self.recursionDepth +=1;
 					let kpisDescription = JSON.parse(chartWidget.kpisToInclude), itemsSets = (chartWidget.itemsSetsToInclude && JSON.parse(chartWidget.itemsSetsToInclude)) || [{setName: Pmg.message('allitemstodate')}], kpiData = {}, expKpi = {}, chartData = [], axes = {},

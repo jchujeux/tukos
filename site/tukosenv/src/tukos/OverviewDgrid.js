@@ -115,7 +115,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dojo/
         	when (WidgetsLoader.instantiate(widgetDescription.type, widgetDescription.atts), function(widget){
             	var td = grid.colValueParentNodes[field];
         		widget.on('change', function(newValue){
-        			grid.modify.values[field] = newValue;
+        			grid.modify.values[field] = newValue === 'null' ? null : newValue;
         			grid.modify.displayedValues[field] = this.displayedValue || newValue;
         		});
             	grid.colValueWidgets[field] = widget;

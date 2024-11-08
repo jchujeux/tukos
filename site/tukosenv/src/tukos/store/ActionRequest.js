@@ -34,7 +34,7 @@
             if (!query || query == {}){
                 return QueryResults([]);
             }else{
-                var queryOptions = this.queryOptions(query, options), params = this.params || options.params;
+                var queryOptions = this.queryOptions(query, options), params = this.params ? (options.params ? lang.mixin(lang.clone(this.params), options.params) : this.params) : (options.params ? options.params : false);
                 var dfdQuery = lang.mixin(queryOptions ? {storeatts: queryOptions} : {}, params ? {params: params} : {});
 
                 var dfdResponse = Pmg.serverDialog({object: this.object, view: this.view, mode: this.mode, action: this.action, query: dfdQuery}, {}, '', true);

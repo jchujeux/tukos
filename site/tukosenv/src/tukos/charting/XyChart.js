@@ -13,7 +13,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 			if (!hidden  && chartWidget.kpisToInclude){
 				dojo.ready(function(){
 					let collection, log10;
-					const grid = self.grid, dateCol = self.dateCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter),
+					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter),
 						 kpisDescription = JSON.parse(chartWidget.kpisToInclude), series = {}, chartData = [], tableColumns = [], tableData = [{}], axesDescription = JSON.parse(chartWidget.axesToInclude), axes = {},
 						 plotsDescription = JSON.parse(chartWidget.plotsToInclude), plots = {};
 					axesDescription.forEach(function(axisDescription){
@@ -29,9 +29,9 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 						}
 					});
 					if (chartWidget.chartFilter){
-						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.filter(expressionFilter.expression((new grid.store.Filter())).expressionToValue(chartWidget.chartFilter)).sort([{property: dateCol}, {property: timeCol}]);
 					}else{
-						collection = grid.store.sort([{property: dateCol}, {property: 'rowId'}]);
+						collection = grid.store.sort([{property: dateCol}, {property: timeCol}]);
 					}
 					const idProperty = collection.idProperty, collectionData = collection.fetchSync();
 					if (collectionData.length > 1){
@@ -100,8 +100,8 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 										(kpiDescription.tooltipunit === undefined ? '' :  kpiDescription.tooltipunit);
 									if (plot.markersProgressColor){
 										const colorRatio = index / xyLength;
-										chartData[index][fillName] = colorRatio <= 0.25 ? Color.blendColors(white, yellow, colorRatio).toHex() : (colorRatio <= 0.5 ? Color.blendColors(yellow, orange, colorRatio).toHex() : 
-											(colorRatio <= 0.75 ? Color.blendColors(orange, red, colorRatio).toHex() : Color.blendColors(red, darkRed, colorRatio).toHex()));
+										chartData[index][fillName] = colorRatio <= 0.25 ? Color.blendColors(white, yellow, colorRatio * 4).toHex() : (colorRatio <= 0.5 ? Color.blendColors(yellow, orange, (colorRatio - 0.25) *4).toHex() : 
+											(colorRatio <= 0.75 ? Color.blendColors(orange, red, (colorRatio - 0.50) * 4).toHex() : Color.blendColors(red, darkRed, (colorRatio - 0.75) * 4).toHex()));
 									}
 									if (xAxisIsLogarithmic){
 										chartData[index][xName] = Math.log(xyValue[0]) / log10;

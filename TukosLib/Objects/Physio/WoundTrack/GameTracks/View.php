@@ -46,6 +46,7 @@ class View extends AbstractView {
             'recordtype' => ViewUtils::storeSelect('recordtype', $this, 'Recordtype', [true, 'ucfirst', false, true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['recordtype' => ['localActionStatus' => 
                 'Pmg.isMobile() ? sWidget.form.form.localActions.accordionRecordTypeChangeAction(newValue, sWidget.form) : sWidget.form.form.localActions.recordTypeChangeAction(newValue, sWidget.form);']]]]]),
             'recorddate' => ViewUtils::tukosDateBox($this, 'Recorddate'),
+            'starttime' => ViewUtils::dateTimeBoxDataWidget($this, 'time', ['atts' => ['edit' => ['dateArgs' => false]]]),
             'duration'  => ViewUtils::minutesTextBox($this, 'duration', ['atts' => ['edit' => ['label' => $this->tr('Duration') . ' (hh:mn)', 'constraints' => ['timePattern' => 'HH:mm', 'clickableIncrement' => 'T00:10', 'visibleRange' => 'T01:00'], 'style' => $isMobile ? [] : ['width' => '4em'],
                 'onChangeLocalAction' => ['perceivedload' => ['value' =>  "return (sWidget.valueOf('perceivedintensity') || 0) * dutils.timeToSeconds(typeof newValue === 'object' ? dojo.date.stamp.toISOString(newValue, {selector: 'time'}) : newValue) / 36 / 8;"]]]]]),
             'distance' => ViewUtils::tukosNumberBox($this, 'Distance', ['atts' => ['edit' => ['label' => $this->tr('Distance') . ' (km)', 'constraints' => $isMobile ? ['pattern' => '#000.0'] : ['pattern' => '#.##'], 'style' => ['width' => '2em']],
@@ -163,7 +164,7 @@ EOT;
      }
      public function preMergeCustomizationAction($response, $customMode){
          $response =  $this->gameTracksIndicatorsPreMerge($response, $customMode);
-         return $this->chartPreMergeCustomizationAction($response, $response['dataLayout']['contents']['row1']['contents']['col2']['contents']['rowcharts'], $customMode, 'records', 'recorddate',
+         return $this->chartPreMergeCustomizationAction($response, $response['dataLayout']['contents']['row1']['contents']['col2']['contents']['rowcharts'], $customMode, 'records', 'recorddate', 'starttime',
              ['woundstartdate', 'treatmentstartdate', 'firstrecorddate'], [], false);
      }
      public function getRowLabelAction(){

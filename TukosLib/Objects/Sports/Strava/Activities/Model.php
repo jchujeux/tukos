@@ -34,10 +34,10 @@ class Model extends AbstractModel {
             'heartratestream' => 'longtext',
             'cadencestream' => 'longtext',
             'wattsstream' => 'longtext',
-            'watts_calcstream' => 'longtext',
-            'grade_smoothstream' => 'longtext',
-            'velocity_smoothstream' => 'longtext',
-            'kpiscache' => 'longtext'
+            //'watts_calcstream' => 'longtext',
+            //'grade_smoothstream' => 'longtext',
+            //'velocity_smoothstream' => 'longtext',
+            'latlngstream' => 'longtext',
         ];
         $this->metrics = [
             'duration' => ['stName' => 'elapsed_time'],
@@ -52,36 +52,14 @@ class Model extends AbstractModel {
             'name' => ['stName' => 'name'],
             'gearid' => ['stName' => 'gear_id'],
             'stravaid' => ['stName' => 'id']
-            //'notes' => [],
         ];
         $this->metricsCols = array_keys($this->metrics);
-        $this->streamCols = ['timestream', 'distancestream', 'altitudestream', 'heartratestream', 'cadencestream', 'wattsstream', 'watts_calcstream', 'grade_smoothstream', 'velocity_smoothstream'];
+        $this->streamCols = ['timestream', 'distancestream', 'altitudestream', 'heartratestream', 'cadencestream', 'wattsstream'/*, 'watts_calcstream', 'grade_smoothstream', 'velocity_smoothstream*/, 'latlngstream'];
         parent::__construct(
-            $objectName, $translator, 'stravaactivities',  ['parentid' => ['sptathletes']], ['kpiscache'], $colsDefinition);
+            $objectName, $translator, 'stravaactivities',  ['parentid' => ['sptathletes']], [], $colsDefinition);
     }   
     public function hasStreams($id){
         return !empty($this->getOne(['where' => ['id' => $id, ['col' => 'timestream', 'opr' => 'IS NOT NULL', 'values' => null]], 'cols' => ['id']]));
-    }
-    public function getAllExtended ($atts){
-        $results = parent::getAllExtended($atts);
-        foreach ($results as &$activity){
-            if (!empty($kpisCache = Utl::extractItem('kpiscache', $activity))){
-                $activity = array_merge($activity, json_decode($kpisCache, true));
-            }
-        }
-        return $results;
-    }
-    public function updateOne($newValues, $atts=[], $insertIfNoOld = false, $jsonFilter=false, $init = true){
-        if (!$jsonFilter && (!empty($kpisCacheCols = array_diff(array_keys($newValues), $this->allCols)))){
-            $newValues['kpiscache'] = json_encode(Utl::extractItems($kpisCacheCols, $newValues));
-        }
-        return parent::updateOne($newValues, $atts, $insertIfNoOld, true, $init);
-    }
-    public function insert($values, $init = false, $jsonFilter = false, $reference = null){
-        if (!$jsonFilter && (!empty($kpisCacheCols = array_diff(array_keys($values), $this->allCols)))){
-            $values['kpiscache'] = json_encode(Utl::extractItems($kpisCacheCols, $values));
-        }
-        return parent::insert($values, $init, $jsonFilter, $reference);
     }
     public function activityToTukos($activity){
         $tukosActivity = [];
@@ -175,7 +153,7 @@ class Model extends AbstractModel {
         foreach ($stravaActivitiesToSync as $activity){
             $tukosActivity = $this->activityToTukos($activity);
             $tukosActivity['parentid'] = $athleteId;
-            $existingTukosActivity = $this->getOne(['where' => ['stravaid' => $activity['id']], 'cols' => ['id', 'timestream', 'watts_calcstream']]);
+            $existingTukosActivity = $this->getOne(['where' => ['stravaid' => $activity['id']], 'cols' => ['id', 'timestream'/*, 'watts_calcstream'*/]]);
             if (empty($existingTukosActivity) && $synchroStreams){
                 $this->updateOne($tukosActivity = $this->addStreams($this->insert($tukosActivity), $this->streamCols, $client));
             }else{
@@ -184,8 +162,8 @@ class Model extends AbstractModel {
                 if ($synchroStreams){
                     if (empty($existingTukosActivity['timestream'])){
                         $this->updateOne($this->addStreams($tukosActivity, $this->streamCols, $client));
-                    }else if (empty($existingTukosActivity['watts_calcstream'])){//temporary: until 10/2024 watt_calcstream was not in streamCols
-                        $this->updateOne($this->addStreams($tukosActivity, ['watts_calcstream'], $client));
+                    }else if (empty($existingTukosActivity['latlngstream'])){//temporary: until 10/2024 watt_calcstream was not in streamCols
+                        $this->updateOne($this->addStreams($tukosActivity, ['latlngstream'], $client));
                     }
                 }
             }

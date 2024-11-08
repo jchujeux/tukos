@@ -29,6 +29,7 @@ class Model extends AbstractModel {
             'frictioncoef'=> 'FLOAT DEFAULT NULL',
             'dragcoef'=> 'FLOAT DEFAULT NULL',
             'windvelocity' => 'FLOAT DEFAULT NULL',
+            'winddirection' => 'TINYINT DEFAULT NULL',
             'warmup'     =>  'longtext',
             'mainactivity' =>  'longtext',
             'warmdown'     =>  'longtext',
@@ -120,9 +121,11 @@ class Model extends AbstractModel {
         }*/
         //$atts['cols'][] = 'kpiscache';
         $results = parent::getAllExtended($atts);
-        foreach ($results as &$workout){
-            if (!empty($kpisCache = Utl::extractItem('kpiscache', $workout))){
-                $workout = array_merge($workout, json_decode($kpisCache, true));
+        if (Tfk::$registry->request['view'] !== 'Overview'){
+            foreach ($results as &$workout){
+                if (!empty($kpisCache = Utl::extractItem('kpiscache', $workout))){
+                    $workout = array_merge($workout, json_decode($kpisCache, true));
+                }
             }
         }
         return $results;

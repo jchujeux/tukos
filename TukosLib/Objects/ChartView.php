@@ -44,7 +44,7 @@ trait ChartView {
             'customizableAtts' => $this->$customizableAtts($translations, $dateWidgetNames, $selectedDateWidgetName)
         ]]];
     }
-    public function chartPreMergeCustomizationAction(&$response, &$chartLayoutRow, $customMode, $grid, $dateCol, $dateWidgetNames, $namesToTranslate, $selectedDateWidgetName = null){
+    public function chartPreMergeCustomizationAction(&$response, &$chartLayoutRow, $customMode, $grid, $dateCol, $timeCol, $dateWidgetNames, $namesToTranslate, $selectedDateWidgetName = null){
         if (!empty($response['widgetsDescription'])){
             $editConfig =  $customMode === 'object'
                 ? $this->user->getCustomView($this->objectName, 'edit', 'tab', ['editConfig'])
@@ -63,7 +63,7 @@ trait ChartView {
                             $chartLayoutRow['widgets'][] = $chartId;
                         }
                         $response['widgetsDescription'][$grid]['atts'] = Utl::array_merge_recursive_replace($response['widgetsDescription'][$grid]['atts'],
-                            ['onWatchLocalAction' => ['collection' => [$grid => ['chartViewStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->gridWatchAction($dateCol, $selectedDateWidgetName)]]]]]);
+                            ['onWatchLocalAction' => ['collection' => [$grid => ['chartViewStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => $this->gridWatchAction($dateCol, $timeCol, $selectedDateWidgetName)]]]]]);
                         $response['widgetsDescription'][$grid]['atts'] = Utl::array_merge_recursive_concat($response['widgetsDescription'][$grid]['atts'], ['afterActions' => [
                             'createNewRow' => $this->gridRowWatchAction(), 'updateRow' => $this->gridRowWatchAction(), 'deleteRow' => $this->gridRowWatchAction(), 'deleteRows' => $this->gridRowWatchAction()
                         ]]);
@@ -85,7 +85,7 @@ if (!newValue || '$changedAtt' !== 'hidden'){
 EOT
         ;
     }
-    public function gridWatchAction($dateCol, $selectedDate = null){
+    public function gridWatchAction($dateCol, $timeCol, $selectedDate = null){
         return <<<EOT
 const form = sWidget.form;
 if (form.editConfig && form.editConfig.charts){
@@ -95,7 +95,7 @@ if (form.editConfig && form.editConfig.charts){
         form.charts.setChartsValue();
     }else{
         require(["tukos/charting/Charts"], function(Charts){
-            form.charts = new Charts({form: form, grid: sWidget, dateCol: '$dateCol', selectedDate: '$selectedDate', charts: chartsConfig});
+            form.charts = new Charts({form: form, grid: sWidget, dateCol: '$dateCol', timeCol: '$timeCol', selectedDate: '$selectedDate', charts: chartsConfig});
         });
     }
 }

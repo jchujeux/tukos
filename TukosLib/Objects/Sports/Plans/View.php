@@ -26,7 +26,7 @@ class View extends AbstractView {
         $this->namesToTranslate = array_merge(
             ['fromdate', 'duration', 'todate', 'displayeddate', 'stsdays', 'ltsdays', 'initialsts', 'initiallts', 'initialhracwr', 'displayfromdate', 'displayfromsts', 'displayfromlts',
                 'startdate', 'intensity', 'stress', 'distance', 'elevationgain', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'sts', 'lts', 'tsb', 'hracwr', 'timemoving', 'avghr', 'avgpw', 'heartrate_load', 'power_load', 'heartrate_avgload', 'power_avgload',
-                'avgcadence', 'mechload', 'heartrate', 'power', 'slope', 'avgload', 'load', 'timeabove', 'timebelow', 'loadabove', 'loadbelow', 'threshold', 'timecurve', 'durationcurve', 'shrink', 'performed', 'planned'],
+                'powercalcstream_load', 'avgcadence', 'mechload', 'heartrate', 'power', 'slope', 'avgload', 'load', 'timeabove', 'timebelow', 'loadabove', 'loadbelow', 'threshold', 'timecurve', 'durationcurve', 'shrink', 'performed', 'planned', 'estimatedrawpowerstream'],
             Sports::$sportOptions, Sports::$modeOptions);
         $dateChangeLocalAction = function($serverTrigger) {
             return [
@@ -199,7 +199,7 @@ class View extends AbstractView {
                 ],
                 'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@displayfromdate'], ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'],
                     [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
-                'removeCols' => ['sportsman','grade', 'configstatus'],
+                'removeCols' => ['sportsman','grade', 'configstatus', 'kpiscache'],
                 'hiddenCols' => ['parentid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'starttime', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'heartrate_avgload', 'power_avgload', 'heartrate_load', 'power_load',
                     'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'contextid', 'updated'],
                 'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
@@ -217,7 +217,7 @@ class View extends AbstractView {
                 ],
                 'filters' => ['grade' => 'TEMPLATE'],
                 'initialRowValue' => ['mode' => 'planned'],
-                'removeCols' => /*$this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] : */['sportsman','grade', 'configstatus'],
+                'removeCols' => /*$this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] : */['sportsman','grade', 'configstatus', 'kpiscache'],
                 'hiddenCols' => ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'starttime', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'heartrate_avgload', 'power_avgload',
                     'heartrate_load', 'power_load', 'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'contextid', 'updated'],
                 'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'], // temporary: these were suppressed but maybe present in some customization items
@@ -247,7 +247,7 @@ class View extends AbstractView {
 EOT;
     }
     public function preMergeCustomizationAction($response, $customMode){
-        return $this->chartPreMergeCustomizationAction($response, $response['dataLayout']['contents']['row2']['contents']['col1']['contents']['rowcharts'], $customMode, 'sptworkouts', 'startdate', ['fromdate', 'todate', 'displayeddate', 'displayfromdate'],
+        return $this->chartPreMergeCustomizationAction($response, $response['dataLayout']['contents']['row2']['contents']['col1']['contents']['rowcharts'], $customMode, 'sptworkouts', 'startdate', 'starttime', ['fromdate', 'todate', 'displayeddate', 'displayfromdate'],
             $this->namesToTranslate, 'displayeddate');
     }
     

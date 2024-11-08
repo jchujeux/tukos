@@ -30,7 +30,7 @@ define(["dojo/_base/lang", "tukos/utils", "tukos/PageManager"],
 							self.recursionDepth = 0;
 							return;
 						}
-					    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data}).then(
+					    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data, timeout: 64000}).then(
 					            function(response){
 					           		const itemsKpis = response.data.kpis;
 									utils.forEach(itemsKpis, function(itemKpis, idp){

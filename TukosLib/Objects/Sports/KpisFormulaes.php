@@ -48,7 +48,7 @@ class KpisFormulaes {
         }
         return round($load / 36, $precision);
     }
-    public static function pwr_estimatedavg($metrics, $secondsActive, $elevationGain, $weight, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $precision = 0){
+    public static function estimatedpower_avg($metrics, $secondsActive, $elevationGain, $weight, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $precision = 0){
         if (empty($metrics) || empty($secondsActive) || empty($elevationGain)){
             return false;
         }else{
@@ -60,7 +60,7 @@ class KpisFormulaes {
             return round(($frictionForce + $gravityForce + $dragForce) * $velocity, $precision);
         }
     }
-    public static function estimatedWattsStream($metrics, $grade_smoothstream, $weight, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $precision = 0){
+    /*public static function estimatedWattsStream($metrics, $grade_smoothstream, $weight, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $precision = 0){
         if (empty($metrics) || empty($grade_smoothstream)){
             return false;
         }else{
@@ -78,11 +78,10 @@ class KpisFormulaes {
                 $wattsStream[$key] = round(max(0, ($frictionForce + $gravityForce + $dragForce + $accelerationForce) * $velocity), $precision);
                 $previousVelocity = $velocity;
             }
-            //return json_encode($wattsStream);
             return $wattsStream;
         }
-    }
-    public static function estimatedRawWattsStream($metrics, $altitudestream, $weight, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $precision = 0){
+    }*/
+    public static function estimatedRawWattsStream($metrics, $altitudestream, $latlngstream, $weight, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $windDirection = '0', $precision = 0){
         if (empty($metrics) || empty($altitudestream)){
             return false;
         }else{
@@ -90,17 +89,46 @@ class KpisFormulaes {
             $gravity = 10; $distancestream = $metrics; $totalMass = (float)$weight + (float)$extraWeight; $totalWeightForce = $totalMass * $gravity;
             $frictionCoef = (float)$frictionCoef; $dragCoef = (float)$dragCoef; $windVelocity = (float)$windVelocity;
             $frictionForce = $frictionCoef * $totalWeightForce;
-            $previousVelocity = 0.0;
-            $previousDistance = 0.0;
-            $previousAltitude = 0.0;
             $distancestream = Average::exponentialMovingAverage($distancestream, 30);
             $altitudestream = Average::exponentialMovingAverage($altitudestream, 30);
-            foreach($distancestream as $key => $distance){
+            $toRadians = function($degrees){
+                return $degrees * 0.0174533;
+            };
+            $latitudestream = array_map($toRadians, array_column($latlngstream, 0));
+            $longitudestream = array_map($toRadians, array_column($latlngstream, 1));
+            $latitudestream = Average::exponentialMovingAverage($latitudestream, 30);
+            $longitudestream = Average::exponentialMovingAverage($longitudestream, 30);
+            $previousVelocity = 0.0;
+            $previousDistance = $distancestream[0];
+            $previousAltitude = $altitudestream[0];
+            $previousLatitude = $latitudestream[0];
+            $previousLongitude = $longitudestream[0];
+            if (!empty($windDirection)){
+                $windAngle = $windDirection * 2 * pi() / 16;
+            }else{
+                $axialWindFactor = 1.0;
+            }
+            $length = count($distancestream);
+            $wattsStream[0] = 0;
+            $previousDistance = $distancestream[0];
+            $previousAlternateDistance = 0.0;
+            $previousLatitude = $latitudestream[0];
+            $previousLongitude = $longitudestream[0];
+            for ($key = 1; $key < $length; $key++){
+                $distance = $distancestream[$key];
                 $velocity = $distance - $previousDistance;
                 $altitude = $altitudestream[$key];
+                $latitude  = $latitudestream[$key];
+                $longitude = $longitudestream[$key];
+                $deltaY = ($longitude - $previousLongitude) * cos($latitude);
+                $deltaX = $latitude - $previousLatitude;
                 if (!empty($velocity)){
+                    if (!empty($windDirection)){
+                        $directionAngle = atan2($deltaY, $deltaX);
+                        $axialWindFactor = cos($directionAngle - $windAngle);
+                    }
                     $slope =($altitude - $previousAltitude) /  $velocity;
-                    $dragForce = $dragCoef * ($velocity - $windVelocity) ** 2;
+                    $dragForce = $dragCoef * ($velocity + $windVelocity * $axialWindFactor) ** 2;
                     $gravityForce = $slope * $totalWeightForce;
                     $accelerationForce = ($velocity - $previousVelocity) * $totalMass;
                     $wattsStream[$key] = round(max(0, ($frictionForce + $gravityForce + $dragForce + $accelerationForce) * $velocity), $precision);
@@ -110,6 +138,8 @@ class KpisFormulaes {
                 $previousVelocity = $velocity;
                 $previousDistance = $distance;
                 $previousAltitude = $altitude;
+                $previousLatitude = $latitude;
+                $previousLongitude = $longitude;
             }
             //return json_encode($wattsStream);
             return $wattsStream;

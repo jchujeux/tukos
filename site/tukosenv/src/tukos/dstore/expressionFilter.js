@@ -47,6 +47,9 @@ define(['tukos/ExpressionParser', 'tukos/dateutils'], function (parser, dutils) 
 				'IN': function(a, b){
 					return filter.in(a, b);
 				},
+				'RLIKE': function(a, b){
+					return filter.rlike(a, b);
+				},
 	            ",": (a, b) => {
 	                const aVal = a();
 	                const aArr = (0, parser.isArgumentsArray)(aVal)
@@ -75,7 +78,7 @@ define(['tukos/ExpressionParser', 'tukos/dateutils'], function (parser, dutils) 
 					return offset ? dutils.formatDate(dutils.dateAdd(Date(dateVal), 'day', Number(offsetVal))) : dateVal;
 				})
 			},
-			PRECEDENCE:[['ARRAY', 'NEG', 'DATE'], ['+', '-'], ['>=', '>', '<=', '<', '=', 'IN'], ['OR', 'AND'], [',']],
+			PRECEDENCE:[['ARRAY', 'NEG', 'DATE'], ['+', '-'], ['>=', '>', '<=', '<', '=', 'IN', 'RLIKE'], ['OR', 'AND'], [',']],
 			LITERAL_OPEN: '"',
 			LITERAL_CLOSE: '"',
 			GROUP_OPEN: '(',

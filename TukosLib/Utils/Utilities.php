@@ -644,7 +644,7 @@ class Utilities{
      */
     public static function getAncestors($fromId, $store, &$ancestors, $idProperty, $parentIdProperty){
         foreach ($store as $row){
-            if($row[$idProperty] === $fromId){
+            if($row[$idProperty] == $fromId){
                 $ancestors[] = $row[$idProperty];
                 if ($row[$parentIdProperty] === $row[$idProperty] || $row[$parentIdProperty] <= 0/* || $row[$parentIdProperty] == null*/){//reached the root
                     break;

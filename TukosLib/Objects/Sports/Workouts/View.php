@@ -47,11 +47,12 @@ class View extends AbstractView {
             ]]]),
             'equipmentid' => ViewUtils::objectSelect($this, 'Equipment', 'sptequipments', ['atts' => [
                 'edit' => ['storeArgs' => ['cols' => ['extraweight', 'frictioncoef', 'dragcoef']], 'onChangeLocalAction' => ['equipmentid' => ['localActionStatus' => $this->updateEquipment()]]]]]),
-            'extraweight' => ViewUtils::tukosNumberBox($this, 'extraweight', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.0'], 'onChangeLocalAction' => ['extraweight' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
-            'frictioncoef' => ViewUtils::tukosNumberBox($this, 'frictioncoef', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.0000'], 'onChangeLocalAction' => ['frictioncoef' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]],
-                'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.####']]]]),
-            'dragcoef' => ViewUtils::tukosNumberBox($this, 'dragcoef', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00'], 'onChangeLocalAction' => ['dragcoef' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
-            'windvelocity' => ViewUtils::tukosNumberBox($this, 'windvelocity', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00']]]]),
+            'extraweight' => ViewUtils::tukosNumberBox($this, 'Extraweight', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.0'], 'onChangeLocalAction' => ['extraweight' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
+            'frictioncoef' => ViewUtils::tukosNumberBox($this, 'Frictioncoef', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.0000'], 'onChangeLocalAction' => ['frictioncoef' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]],
+                'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.####']], 'overview' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.####']]]]),
+            'dragcoef' => ViewUtils::tukosNumberBox($this, 'Dragcoef', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00'], 'onChangeLocalAction' => ['dragcoef' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
+            'windvelocity' => ViewUtils::tukosNumberBox($this, 'Windvelocity', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00'], 'onChangeLocalAction' => ['windvelocity' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
+            'winddirection' => ViewUtils::storeSelect('direction', $this, 'Winddirection', [true, 'ucfirst', false, true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['winddirection' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
             'stress'        => ViewUtils::storeSelect('stress', $this, 'Plannedqsm', [true, 'ucfirst', true, true, false]),
             'warmup'    => ViewUtils::lazyEditor($this, 'warmup', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
             'mainactivity'    => ViewUtils::lazyEditor($this, 'mainactivity', ['atts' => ['edit' => ['onDropMap' => ['column' => 'summary'], 'style' => ['minHeight' => '1em']]]]),
@@ -114,7 +115,7 @@ class View extends AbstractView {
         
         $subObjects = $this->templatesSubObjects();
 
-        $this->customize($customDataWidgets, $subObjects, Utl::array_merge_recursive_replace(['grid' => ['kpiscache']], $this->filterWidgetsExceptionCols(), false));
+        $this->customize($customDataWidgets, $subObjects, $this->filterWidgetsExceptionCols());
     }
     function modeChangeLocalAction(){
         $plannedCols = json_encode($this->model->plannedCols);
@@ -166,7 +167,7 @@ EOT
     }
     function removeEstimatedPowerKpis(){
         return <<<EOT
-const kpisToHandle = ['estimatedrawwattsstream', 'estimatedwattsstream'];
+const kpisToHandle = ['estimatedrawpowerstream'/*, 'estimatedpowerstream', 'estimatedpower_wattsstream'*/, 'estimatedpower_rawwattsstream'];
 if ((sWidget.parent || {}).widgetName === 'sptworkouts'){
     const grid = sWidget.parent;
     utils.forEach(grid.clickedRow.data, function(value, name){
@@ -174,8 +175,8 @@ if ((sWidget.parent || {}).widgetName === 'sptworkouts'){
             if (name.includes(kpi)){
                 grid.updateDirty(grid.clickedRow.data.idg, name, undefined);
             }
-        }, true);
-    });
+        });
+    }, true);
 }else{
     const kpisCacheWidget = sWidget.form.getWidget('kpiscache'), kpisCacheValue = kpisCacheWidget.get('value'), leavesToAdd = {};
     utils.forEach(kpisCacheValue, function(value, name){

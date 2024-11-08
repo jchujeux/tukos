@@ -12,7 +12,7 @@ class Configure extends AbstractConfigure{
         Tfk::$registry->blogUrl = Tfk::$registry->rootUrl . '/blog';
         Tfk::$registry->blogTitle = 'tukosblogtitle';
 
-        parent::__construct([], [], [], false, 'tukosblog');
+        parent::__construct([], [], [], false, 'tukos20');
     }
 }
 AbstractConfigure::__initialize();

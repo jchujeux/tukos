@@ -11,7 +11,7 @@ class View extends EditView{
         return [
             'row1' => [
                 'tableAtts' => ['cols' => 4, 'customClass' => 'labelsAndValues', 'showLabels' => true],
-                'widgets' => ['id', 'parentid', 'name', 'mode', 'startdate', 'starttime', 'sport', 'sportsman', 'equipmentid', 'extraweight', 'frictioncoef', 'dragcoef', 'googleid']
+                'widgets' => ['id', 'parentid', 'name', 'mode', 'startdate', 'starttime', 'sport', 'sportsman', 'equipmentid', 'extraweight', 'frictioncoef', 'dragcoef', 'windvelocity', 'winddirection', 'googleid']
             ],
             'row2' => [
                 'tableAtts' => ['cols' => 6, 'customClass' => 'labelsAndValues', 'showLabels' => true],

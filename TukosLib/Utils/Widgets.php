@@ -253,9 +253,14 @@ class Widgets{
     public static function navigationTree($atts, $editOnly = true){
         $defAtts = ['edit' => ['title' => '', 'autoExpand' => false]];
         return ['type' => 'NavigationTree', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
+        
+    }
+        public static function blogNavigationTree($atts, $editOnly = true){
+        $defAtts = ['edit' => ['title' => '', 'autoExpand' => false]];
+        return ['type' => 'BlogNavigationTree', 'atts' => ($editOnly ? Utl::array_merge_recursive_replace($defAtts['edit'], $atts) : Utl::array_merge_recursive_replace($defAtts, $atts))];
 
     }
-    /*
+/*
      * Need to provide at least : ['edit']['dropDownWidget']
      */
     public static function dropDownTextBox($atts, $editOnly = true){

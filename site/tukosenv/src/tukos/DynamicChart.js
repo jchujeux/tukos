@@ -100,7 +100,7 @@ function(declare, lang, dct, dst, aspect, Widget, Chart, theme, StoreSeries, Obs
 	                this.chart.setTheme(theme);	
 				    aspect.after(this.chart, 'render', function(){
 		                self.chart.stack.forEach(function(plotter){
-							if ((plots[plotter.name]  || {}).regression){
+							if ((value.plots[plotter.name]  || {}).regression){
 								dojo.ready(function(){// or else on first display the regression line does not show-up
 									chartClasses['regression'].render(plotter);
 								});

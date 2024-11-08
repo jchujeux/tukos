@@ -13,14 +13,16 @@ define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferre
 					const bounds = plotter._vScaler.bounds;
 					return dim.height - offsets.b - (yUser - bounds.from) * bounds.scale;
 				};
-	            plotter.chart.series.forEach(function(serie){
+            plotter.chart.series.forEach(function(serie){
 				if (!serie.hidden){
 					const data = serie.data;
-					let xMin = Number.MAX_VALUE, xMax = - Number.MAX_VALUE, xAvg = 0, yAvg = 0;
+					let xMin = Number.MAX_VALUE, xMax = - Number.MAX_VALUE, yMin = Number.MAX_VALUE, yMax = -Number.MAX_VALUE, xAvg = 0, yAvg = 0;
 					data.forEach(function(item){
 						const x = item.x, y = item.y;
 						xMin = Math.min(xMin, x);
 						xMax = Math.max(xMax, x);
+						yMin = Math.min(yMin, y);
+						yMax = Math.max(yMax, y);
 						xAvg += x;
 						yAvg += y;
 					});
@@ -40,11 +42,11 @@ define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferre
 					});
 					const r2 = sce / sct;
             		serie.group.createLine({x1: xUserToPixels(xMin), y1: yUserToPixels(yRegression(xMin)), x2: xUserToPixels(xMax), y2: yUserToPixels(yRegression(xMax))}).setStroke('blue');
-            		serie.group.createLine({x1: xUserToPixels(xAvg), y1: yUserToPixels(0), x2: xUserToPixels(xAvg), y2: yUserToPixels(yRegression(xAvg))}).setStroke({color: 'blue', style: 'Dash'});
-            		serie.group.createText({x: xUserToPixels(xAvg), y: yUserToPixels(0), text: xAvg.toFixed(0), align: 'middle'}).setStroke('blue');
+            		serie.group.createLine({x1: xUserToPixels(xAvg), y1: yUserToPixels(yMin), x2: xUserToPixels(xAvg), y2: yUserToPixels(yRegression(xAvg))}).setStroke({color: 'blue', style: 'Dash'});
+            		serie.group.createText({x: xUserToPixels(xAvg), y: yUserToPixels(yMin), text: xAvg.toPrecision(3), align: 'middle'}).setStroke('blue');
             		serie.group.createLine({x1: xUserToPixels(xMin), y1: yUserToPixels(yAvg), x2: xUserToPixels(xAvg), y2: yUserToPixels(yAvg)}).setStroke({color: 'blue', style: 'Dash'});
-            		serie.group.createText({x: xUserToPixels(xMin), y: yUserToPixels(yAvg), text: yAvg.toFixed(0), align: 'start'}).setStroke('blue');
-            		serie.group.createText({x: xUserToPixels(xMax), y: yUserToPixels(yRegression(xMax) - 28), text: 'R2 = ' + r2.toFixed(2), align: 'end'}).setStroke('blue');
+            		serie.group.createText({x: xUserToPixels(xMin), y: yUserToPixels(yAvg), text: yAvg.toPrecision(3), align: 'start'}).setStroke('blue');
+            		serie.group.createText({x: xUserToPixels(xMax), y: Math.max(yUserToPixels(yRegression(xMax)), offsets.t + 28), text: 'R2 = ' + r2.toFixed(2), align: 'end'}).setStroke('blue');
 				}else{
 					
 				}
