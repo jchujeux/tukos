@@ -213,7 +213,6 @@ trait Kpis {
                 }
                 foreach($kpisToCompute as $kpiName){
                     $requiredParams = self::requiredActivityParams($kpiName, false);
-                    // empty(array_diff(self::requiredActivityParams($kpiName, false), array_keys($activityColsToGet)));
                     if (empty(array_diff($requiredParams, array_merge(array_keys($activity), $kpisOKtoCompute)))){
                         $kpisOKtoCompute[] = $kpiName;
                     }
@@ -237,9 +236,11 @@ trait Kpis {
                         }
                     }
                     $activity[$kpiName] = KF::$funcName(...$arguments);
-                    $kpis[$key][$kpiName] = is_array($activity[$kpiName]) ? json_encode($activity[$kpiName]) : $activity[$kpiName];
+                    if (in_array($kpiName, $kpisToGet)){
+                        $kpis[$key][$kpiName] = is_array($activity[$kpiName]) ? json_encode($activity[$kpiName]) : $activity[$kpiName];
+                    }
                 }
-                $kpisWhichCouldNotBeComputed = array_diff($kpisToCompute, $kpisOKtoCompute);
+                $kpisWhichCouldNotBeComputed = array_diff($kpisToGet, $kpisOKtoCompute);
                 foreach($kpisWhichCouldNotBeComputed as $kpiName){
                     $kpis[$key][$kpiName] = 0;
                 }

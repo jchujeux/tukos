@@ -8,7 +8,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dijit
                 evt.stopPropagation();
                 evt.preventDefault();
                 setTimeout(function(){
-                    var changedValues = form.changedValues();
+                    form.tukosAction = 'ObjectSave';
+					var changedValues = form.changedValues();
                     if (form.itemCustomization){
                         lang.setObject('custom.' + form.viewMode.toLowerCase() + '.' + form.paneMode.toLowerCase(), form.itemCustomization, changedValues);
                         delete form.itemCustomization;
@@ -24,6 +25,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/on", "dijit
 								if (response !== false){
 									self.postAction();
 								}
+								form.tukosAction = false;
 						}); 
                     }
                 }, 100);

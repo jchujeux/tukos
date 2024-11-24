@@ -12,14 +12,16 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-constr
 			this.inherited(arguments);
     		this.integerPartSlots = [];
     		this.decimalPartSlots = [];
-			this.spinWheel = new SpinWheel({reset: lang.hitch(this, this.resetSpinWheel), style: lang.mixin({height: '40px', width: (32*(this.digits[0].length - 1 + this.digits[1].length) + 10 + (this.digits[1] ? 10 : 0)) + 'px'}, this.params.style)});// set empirically});    		
+			this.spinWheel = new SpinWheel({reset: lang.hitch(this, this.resetSpinWheel), style: lang.mixin({height: '40px', width: (32*(this.digits[0].length + this.digits[1].length) + 10 + (this.digits[1] ? 10 : 0)) + 'px'}, this.params.style)});// set empirically});    		
 			this.domNode.appendChild(this.spinWheel.domNode);
-			for (var i = 0; i < this.digits[0].length-1; i++){
+			for (var i = 0; i < this.digits[0].length; i++){
 				this.integerPartSlots[i] = new SpinWheelSlot({labelFrom:0, labelTo:9, style:{width:"30px", textAlign:"right"}});
 				this.spinWheel.addChild(this.integerPartSlots[i]);
             	aspect.after(this.integerPartSlots[i], "slideTo", function(){
-            		var _self = this;
-					utils.waitUntil(function(){return !_self._duringSlideTo}, function(){self.set('value', self.get('value'));}, 200);
+            		if (self.form.markIfChanged){
+						const _self = this;
+						utils.waitUntil(function(){return !_self._duringSlideTo}, function(){self.set('value', self.get('value'));}, 200);
+					}
             	});
 			}
 			if(this.digits[1].length > 0){
@@ -29,8 +31,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-constr
 					this.decimalPartSlots[i] = new SpinWheelSlot({labelFrom:0, labelTo:9, style:{width:"25px", textAlign:"right"}});
 					this.spinWheel.addChild(this.decimalPartSlots[i]);
 	            	aspect.after(this.decimalPartSlots[i], "slideTo", function(){
-	            		var _self = this;
-						utils.waitUntil(function(){return !_self._duringSlideTo}, function(){self.set('value', self.get('value'));}, 200);
+	            		if (self.form.markIfChanged){
+							const _self = this;
+							utils.waitUntil(function(){return !_self._duringSlideTo}, function(){self.set('value', self.get('value'));}, 200);
+						}
 	            	});
 				}
 			}
@@ -53,21 +57,38 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/aspect", "dojo/dom-constr
 		},
 		_setValueAttr: function(value){
 			this._set('value', value);
-			var decimalDigits = this.digits[1].length, integerDigits = this.digits[0].length-1, digits = integerDigits + decimalDigits, divider = Math.pow(10, digits-1), remainder = parseInt(value * Math.pow(10, decimalDigits)), digit;
-			for (var i = 0; i < digits; i++){
-				digit = Math.trunc(remainder / divider);
-				remainder = remainder - digit * divider;
-				divider = divider / 10;
-				(i < integerDigits ? this.integerPartSlots[i] : this.decimalPartSlots[i-integerDigits]).set('value', digit);
+			if (!this.hidden){
+				var decimalDigits = this.digits[1].length, integerDigits = this.digits[0].length, digits = integerDigits + decimalDigits, divider = Math.pow(10, digits-1), remainder = parseInt(value * Math.pow(10, decimalDigits)), digit;
+				for (var i = 0; i < digits; i++){
+					digit = Math.trunc(remainder / divider);
+					remainder = remainder - digit * divider;
+					divider = divider / 10;
+					(i < integerDigits ? this.integerPartSlots[i] : this.decimalPartSlots[i-integerDigits]).set('value', digit);
+				}
 			}
 		},
 		_getValueAttr: function(){
-			var decimalDigits = this.digits[1].length, integerDigits = this.digits[0].length-1, digits = integerDigits + decimalDigits, value = 0, multiplier = Math.pow(10, digits-1);
-			for (var i = 0; i < digits; i++){
-				value = value + (i < integerDigits ? this.integerPartSlots[i] : this.decimalPartSlots[i-integerDigits]).get('value') * multiplier;
-				multiplier = multiplier / 10;
+			if (this.hidden){
+				return this.value;
+			}else{
+				var decimalDigits = this.digits[1].length, integerDigits = this.digits[0].length, digits = integerDigits + decimalDigits, value = 0, multiplier = Math.pow(10, digits-1);
+				for (var i = 0; i < digits; i++){
+					value = value + (i < integerDigits ? this.integerPartSlots[i] : this.decimalPartSlots[i-integerDigits]).get('value') * multiplier;
+					multiplier = multiplier / 10;
+				}
+				return value / Math.pow(10, decimalDigits);
 			}
-			return value / Math.pow(10, decimalDigits);
+		},
+		_setHiddenAttr: function(newValue){
+			this._set('hidden', newValue);
+			if (!newValue && this.integerPartSlots){
+				this.form.markIfChanged = false;
+				this.set('value', this.value);
+				const form = this.form;
+				setTimeout(function(){
+					form.markIfChanged = true;
+				}, 0);
+			}
 		}
 	});
 });

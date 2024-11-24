@@ -26,6 +26,9 @@ class Main{
             SUtl::instantiate();
             $user = Tfk::$registry->get('user');
             if ($user->setUser(['name' => $username])){/* so as $user has the proper rights and other initialization information*/
+                if ($serverDefaultTimeout = $user->serverDefaultTimeout()){
+                    set_time_limit($serverDefaultTimeout / 1000);
+                }
                 if ($request['controller'] === 'Page'){
                     if (!$user->isPageAllowed($request['object'])){
                         $authentication->session->destroy();

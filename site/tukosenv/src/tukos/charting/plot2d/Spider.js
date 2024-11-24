@@ -39,6 +39,7 @@ define(["dojo/_base/lang", "dojo/_base/declare", "dojo/_base/connect", "dojo/_ba
 		},
 		optionalParams: {
 			radius:		0,
+			maxLabelWidthShift: 0,
 			font:		"",
 			fontColor:	""
 		},
@@ -148,6 +149,7 @@ define(["dojo/_base/lang", "dojo/_base/declare", "dojo/_base/connect", "dojo/_ba
 			//		An object of the form { l, r, t, b }.
 			// returns: dojox/charting/plot2d/Spider
 			//		A reference to this plot for functional chaining.
+			//offsets = {l: -50, t: -50, r: -50, b: -50};
 			if(!this.dirty){ return this; }
 			this.dirty = false;
 			this.cleanGroup();
@@ -191,10 +193,13 @@ define(["dojo/_base/lang", "dojo/_base/declare", "dojo/_base/connect", "dojo/_ba
 						font: font
 					}).w;
 				}, this), "Math.max(a, b)") / 2;
+				if (o.maxLabelWidthShift){
+					shift = Math.min(shift, o.maxLabelWidthShift);
+				}
 				r = Math.min(rx - 2 * shift, ry - asize) + lboffset;
 				labelR = r - lboffset;
 			}
-			if("radius" in o){
+			if(o.radius){
 				r = o.radius;
 				labelR = r - lboffset;
 			}

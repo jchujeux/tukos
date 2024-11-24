@@ -2,11 +2,11 @@
 namespace TukosLib\Objects\Collab\Blog;
 
 use TukosLib\Objects\AbstractModel;
+use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Objects\StoreUtilities as SUtl;
 use TukosLib\TukosFramework as Tfk;
 
 class Model extends AbstractModel {
-    protected $languageOptions = ['en-us', 'fr-fr','es-es'];
     function __construct($objectName, $translator=null){
         $this->languageOptions = Tfk::$registry->get('appConfig')->languages['supported'];
 
@@ -29,10 +29,18 @@ class Model extends AbstractModel {
         return $this->getPosts([], 5);
     }
     function searchPosts($query, $atts){
-        return ['data' => $this->getPosts([[['col' => 'name', 'opr' => 'RLIKE', 'values' => $atts['searchbox']], ['col' => 'comments', 'opr' => 'RLIKE', 'values' => $atts['searchbox'], 'or' => true]]])];
+        return ['data' => $this->getPosts(
+            $this->user->filterPrivate([[['col' => 'name', 'opr' => 'RLIKE', 'values' => $atts['searchbox']], ['col' => 'comments', 'opr' => 'RLIKE', 'values' => $atts['searchbox'], 'or' => true]], 'language' => Tfk::$registry->get('translatorsStore')->getLanguage()])
+        )];
     }
-    function getPosts($where, $limit = 1000){
-        $posts = $this->getAll(['where' => $this->user->filterPrivate($where), 'cols' => ['id', 'name', 'published'], 'orderBy' => ['published' => 'DESC'], 'limit' => $limit]);
+    function getPostsLanguage(){
+        return Utl::getItem('postslanguage', $_COOKIE);
+    }
+    function getPosts($where, $limit = 1000, $includeRoot = true){
+        if ($language = $this->getPostsLanguage()){
+            $where['language'] = $language;
+        }
+        $posts = $this->getAll(['where' => $this->user->filterPrivate($where), 'cols' => ['id', 'name', 'object', 'published'], 'orderBy' => ['published' => 'DESC'], 'limit' => $limit]);
         $rootId = $this->user->getRootId();
         foreach($posts as &$post){
             $post['parentid'] = $rootId;
@@ -40,7 +48,9 @@ class Model extends AbstractModel {
             $post['onClickGotoTab'] = 'edit';
             $post['published'] =  substr($post['published'], 0, 10);
         }
-        $posts[] = ['id' => $rootId, 'name' => 'tukos', 'hasChildren' => true];
+        if ($includeRoot){
+            $posts[] = ['id' => $rootId, 'name' => 'tukos', 'hasChildren' => true];
+        }
         return $posts;
     }
 }

@@ -52,21 +52,28 @@ class View extends AbstractView {
                 //'title'   => $this->tr('User Context'),
                 'paneContent' => [
                     'widgetsDescription' => [
-                        'recentposts' => Widgets::storeTree(['title' => $this->tr('recentposts'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'parentid', 'parentDataProperty' => 'parentid',
-                            'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  'storeArgs' => ['data' => $this->model->getRecentPosts()], 'root' => $this->user->getRootId(), 'openOnClick' => true]),
-                        /*'categories' => Widgets::storeTree(Utl::array_merge_recursive_replace(['title' => $this->tr('categories'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'contextid',
-                            'parentDataProperty' => 'parentid', 'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  
+                        'recentposts' => Widgets::storeTree(['title' => $this->tr('recentposts'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'parentid', 
+                            'parentDataProperty' => 'parentid', 'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  'storeArgs' => ['data' => $this->model->getRecentPosts()], 'root' => $this->user->getRootId(), 'openOnClick' => true]),
+                        /*'categories' => Widgets::storeTree(Utl::array_merge_recursive_replace(['title' => $this->tr('categories'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'],
+                         *  'parentProperty' => 'contextid', 'parentDataProperty' => 'parentid', 'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  
                             'storeArgs' => ['object' => 'BackOffice', 'view' => 'NoView', 'mode' => 'Pane', 'action' => 'Get', 'params' => ['actionModel' => 'GetItems', 'object' => 'Blog', 'form' => 'GetItems']], 'openOnClick' => false],
                             $contextTreeAtts)),*/
                         'categories' => Widgets::blogNavigationTree(['title' => $this->tr('categories'), 'colInLabel' => 'published', 'showRoot' => false, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'],
                             'onClickAction' => $this->onClickAction(), 'storeArgs' => ['object' => 'BackOffice', 'view' => 'NoView', 'mode' => 'Pane', 'action' => 'Get', 'params' => ['actionModel' => 'GetItems', 'object' => 'Blog', 'form' => 'GetContextsAndItems']]]),
                         'searchbox' => ['type' => 'SearchTextBox', 'atts' => Widgets::complete(['title' => $this->tr('pattern'), 'style' => ['width' => '10em'], 'searchAction' => $this->searchAction('this.pane')])],
-                        'searchresults' => Widgets::storeTree(['title' => $this->tr('searchresults'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'hidden' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 'parentProperty' => 'parentid',
-                            'parentDataProperty' => 'parentid', 'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  'storeArgs' => ['data' => [['id' => 1, 'hasChildren' => true, 'name' => 'tukos']]], 'root' => $this->user->getRootId(), 'openOnClick' => true])
+                        'searchresults' => Widgets::storeTree(['title' => $this->tr('searchresults'), 'colInLabel' => 'published', 'showRoot' => false,  'noDnd' => true, 'hidden' => true, 'widgetCellStyle' => ['backgroundColor' => '#d0e9fc', 'color' => 'black'], 
+                            'parentProperty' => 'parentid', 'parentDataProperty' => 'parentid', 'style' => ['overflow' => 'visible'],  'onClickAction' => $this->onClickAction(),  
+                            'storeArgs' => ['data' => [['id' => 1, 'hasChildren' => true, 'name' => 'tukos']]], 'root' => $this->user->getRootId(), 'openOnClick' => true]),
+                        'postslanguage' => Widgets::description(ViewUtils::storeSelect('language', $this, 'Languagefilter', [true, 'ucfirst', false, false, false],
+                            ['atts' => ['edit' => [/*'title' => 'Languagefilter', */'style' => ['width' => '10em'], 'value' => $this->model->getPostsLanguage(), 'onChangeLocalAction' => ['postslanguage' => ['localActionStatus' => $this->setPostsLanguageCookie()]]]]]), true)
                     ],
                     'layout' => [
                         'tableAtts' => ['cols' => 1,  'customClass' => 'labelsAndValues', 'showLabels' => false, 'resizeOnly' => true],
                         'contents' => [
+                            'row0' => [
+                                'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false, 'orientation' => 'vert', 'style' => ['tableLayout' => 'fixed'], 'resizeOnly' => true],
+                                'widgets' => [ 'postslanguage' ]
+                            ],
                             'row1' => [
                                 'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'style' => ['tableLayout' => 'fixed'], 'resizeOnly' => true],
                                 'widgets' => [ 'recentposts' ]
@@ -103,7 +110,7 @@ if (item.onClickGotoTab){
         });
     }
 }
-if (item.hasChildren){
+if (item.children){
     this.__click(arguments[1], arguments[2], true, 'onClick');
 }
 EOT
@@ -113,7 +120,7 @@ EOT
 if (item.onClickGotoTab){
     Pmg.tabs.gotoTab({object: 'backoffice', view:item.onClickGotoTab, mode: 'Tab', action: 'Tab', query:{object: 'blog', form: 'Show', name: item.name}});
 }
-if (item.hasChildren){
+if (item.children){
     this.__click(arguments[1], arguments[2], true, 'onClick');
 }
 EOT
@@ -135,6 +142,19 @@ pane.serverAction({action: 'Process', object: 'Blog', view: 'Edit', query: {para
 });
 EOT
         ;
+    }
+    function setPostsLanguageCookie(){
+        return <<<EOT
+        require (["dojo/cookie"], function(cookie){
+            if (newValue){
+                cookie('postslanguage', newValue, {expires: 5});
+            }else{
+                cookie("postslanguage", null, {expires: -1});
+            }
+            location.reload(true);
+        });
+EOT
+    ;
     }
 }
 ?>

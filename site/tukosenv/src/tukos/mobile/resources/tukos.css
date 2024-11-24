@@ -3,6 +3,7 @@
 }
 .dgrid-row-table {
 	height: auto;
+	font-size: 11px;
 }
 /* === White Left Arrow Button ==*/
 .mblDomButtonWhiteLeftArrow {
@@ -59,4 +60,37 @@
 	display: inline-flex;
 	height: 25px;
 	align-items: center;
+}
+.dojoxCalendarColumnHeaderTable, .dojoxCalendar, .dojoxCalendarYearColumnHeader {
+	font-size: 10px;
+}
+.claro .dojoxCalendarColumnView .dojoxCalendarYearColumnHeader {
+	width: 38px;
+}
+.claro .dojoxCalendarColumnView .dojoxCalendarRowHeader {
+	width: 38px;
+}
+.claro .dojoxCalendarColumnView .dojoxCalendarGrid {
+	left: 40px;
+}
+.claro .dojoxCalendarColumnView .dojoxCalendarContainer {
+		left: 40px;
+}
+.claro .dojoxCalendarColumnView .dojoxCalendarColumnHeader {
+		left: 40px;
+}
+.claro .dojoxCalendarColumnView .dojoxCalendarHScrollBar {
+		left: 40px;
+}
+.claro .dojoxCalendarColumnView .dojoxCalendarMatrixView .dojoxCalendarGrid {
+		left: 40px;
+}
+.claro .dojoxCalendarColumnView .dojoxCalendarMatrixView .dojoxCalendarContainer{
+		left: 40px;
+}
+.claro .dojoxCalendarColumnView .dojoxCalendarMatrixView .dojoxCalendarRowHeader{
+	width: 40px;
+}
+.claro .dojoxCalendarColumnView .dojoxCalendarEventContainerColumn {
+	margin-right: 1px;
 }

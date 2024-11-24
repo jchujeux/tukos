@@ -433,6 +433,9 @@ class UserInformation{
         Feedback::add(Tfk::tr('serveractiondone'));
         return [];*/
     }
+    public function serverDefaultTimeout(){
+        return intval(Utl::getItem('serverDefaultTimeout', $this->pageCustomization()));
+    }
     public function fieldsMaxSize(){
         return intval(Utl::getItem('fieldsMaxSize', $this->pageCustomization()));
     }

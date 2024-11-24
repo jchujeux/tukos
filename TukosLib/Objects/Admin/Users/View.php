@@ -9,6 +9,7 @@ use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Objects\Directory;
 use TukosLib\Utils\Widgets;
+use TukosLib\Objects\ObjectTranslator;
 
 class View extends AbstractView {
 
@@ -20,6 +21,7 @@ class View extends AbstractView {
         foreach ($modules as $module){
             $moduleOptions[$module] = $this->tr($module);
         }*/
+        $untranslator = new ObjectTranslator($objectName, null, 'untranslator');
         $moduleOptions = Directory::getTranslatedModules();
         $customDataWidgets = [
             'parentid' => ['atts' => ['edit' => ['storeArgs' => ['cols' => ['email']], 'onChangeLocalAction' => ['name' => ['value' => "return sWidget.getItemProperty('email');"]]]]],
@@ -40,21 +42,26 @@ class View extends AbstractView {
             'googletranslationaccesskey'   => ViewUtils::textBox($this, 'Googletranlationaccesskey', ['atts' => ['edit' =>  ['type' => 'password']], 'editToObj' => ['encrypt' => ['class' => $this->user, 'private']]]),
             'enableoffline' => ViewUtils::storeSelect('yesOrNo', $this, 'enableoffline'),
             'customviewids' => [
-                'type' => 'objectEditor', 
-                'atts' => ['edit' => ['title' => $this->tr('Custom views'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true*/, 'isEditTabWidget' => true, 
+                'type' => 'objectEditor',
+                'atts' => ['edit' => ['title' => $this->tr('Custom views'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 'checkedServerValue' => '~delete', 'onCheckMessage' => $this->tr('checkedleaveswillbedeletedonsave'),
                     'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/,  'overflow' => 'auto']]],
-                'objToEdit' => [/*'jsonDecode' => ['class' => $utl],  */'map_array_recursive' => ['class' => $utl, $this->tr]],
+                'objToEdit' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]],
+                'editToObj' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $untranslator->tr]],
             ],
-            'customcontexts' => ['type' => 'objectEditor',
-                'atts' => ['edit' =>  ['title' => $this->tr('Custom contexts'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true, 'isEditTabWidget' => true*/,
-                    'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/, 'overflow' => 'auto']]],
-                'objToEdit' => ['map_array_recursive' => ['class' => $utl, $this->tr]
-            ]],
-            'pagecustom' => ['type' => 'objectEditor',    
-                'atts' => ['edit' =>  ['title' => $this->tr('Pagecustom'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true, 'isEditTabWidget' => true*/, 
-                    'style' => ['maxHeight' =>  '500px'/*, 'width' => '100%'*/, 'overflow' => 'auto']]],
-                'objToEdit' => ['map_array_recursive' => ['class' => $utl, $this->tr]
-            ]],
+            'customcontexts' => [
+                'type' => 'objectEditor',
+                'atts' => ['edit' => ['title' => $this->tr('Custom contexts'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 'checkedServerValue' => '~delete', 'onCheckMessage' => $this->tr('checkedleaveswillbedeletedonsave'),
+                    'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/,  'overflow' => 'auto']]],
+                'objToEdit' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]],
+                'editToObj' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $untranslator->tr]],
+            ],
+            'pagecustom' => [
+                'type' => 'objectEditor',
+                'atts' => ['edit' => ['title' => $this->tr('Pagecustom'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 'checkedServerValue' => '~delete', 'onCheckMessage' => $this->tr('checkedleaveswillbedeletedonsave'),
+                    'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/,  'overflow' => 'auto']]],
+                'objToEdit' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]],
+                'editToObj' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $untranslator->tr]],
+            ],
         ];
 
         $this->customize($customDataWidgets, []/*$subObjects*/, ['get' => ['password'], 'grid' => ['password']]);

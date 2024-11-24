@@ -22,16 +22,23 @@ class GetContextsAndItems extends ObjectTranslator{
             if ($where['parentid'] === 0){
                 $where['parentid'] = $this->user->getRootId();
             }
-            $blogItems = $blogModel->getAll(['where' => $this->user->filterPrivate(['contextid' => $where['parentid']]), 'cols' => ['id', 'name', 'object', 'published'], 'orderBy' => ['published' => 'DESC']]);
+            //$language = Tfk::$registry->get('translatorsStore')->getLanguage();
+            //$blogItems = $blogModel->getAll(['where' => $this->user->filterPrivate(['contextid' => $where['parentid'], 'language' => $language]), 'cols' => ['id', 'name', 'object', 'published'], 'orderBy' => ['published' => 'DESC']]);
+            $blogItems = $blogModel->getPosts(['contextid' => $where['parentid']], 1000, false);
             $contextsModel = $this->objectsStore->objectModel('contexts');
             $contextsItems = Utl::toAssociative($contextsModel->getAll(['where' => $where, 'cols' => ['id', 'name', 'object']]), 'id');
-            $blogsCount = Utl::toAssociative(SUtl::$store->getAll([
-                'cols' => ['contextid, count(*) as children'], 
-                'table' => SUtl::$tukosTableName, 
-                'where' => [['col' => 'id', 'opr' => '>', 'values' => 0], 'object' => 'blog'],
+            /*$blogsCount = Utl::toAssociative(SUtl::$store->getAll([
+                'cols' => ['contextid, count(*) as children'],
+                'table' => SUtl::$tukosTableName,
+                'where' => [['col' => 'id', 'opr' => '>', 'values' => 0], ['col' => 'permission', 'opr' => 'NOT IN', 'values' => ['PL', 'PR']], 'object' => 'blog'],
                 'groupBy' => ['contextid']
                 
-            ]), 'contextid');
+            ]), 'contextid');*/
+            $whereCount = [['col' => 'id', 'opr' => '>', 'values' => 0], ['col' => 'permission', 'opr' => 'NOT IN', 'values' => ['PL', 'PR']], 'object' => 'blog'];
+            if ($language = $blogModel->getPostsLanguage()){
+                $whereCount['language']= $language;
+            }
+            $blogsCount = Utl::toAssociative($blogModel->getAll(['cols' => ['contextid, count(*) as children'], 'where' => $whereCount, 'groupBy' => ['contextid']]), 'contextid');
             foreach($contextsItems as $contextid => &$item){
                 $item['children'] = Utl::getItem('children', Utl::extractItem($contextid, $blogsCount, []), 0);
             }
@@ -53,13 +60,13 @@ class GetContextsAndItems extends ObjectTranslator{
                 }
             }
             unset($contextsItem);
-            foreach($blogItems as &$blogItem){
+            /*foreach($blogItems as &$blogItem){
                 $blogItem['onClickGotoTab'] = 'edit';
                 $blogItem['published'] =  substr($blogItem['published'], 0, 10);
-            }
+            }*/
             $items = array_merge($blogItems, $contextsItemsWithBlogs);
         }else{//the parent object is a blog - currently should not happen
-            $items = $blogModel->getAll(['where' => $where, 'cols' => ['id', 'name', 'object']]);
+            $items = $blogModel->getPosts($where);
         }
         return ['items' => $items];
     }

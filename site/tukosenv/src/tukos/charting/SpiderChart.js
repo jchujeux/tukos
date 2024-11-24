@@ -37,8 +37,8 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 						}
 					}
 					const params = chartWidget.plotsToInclude ? JSON.parse(chartWidget.plotsToInclude)[0] : {}, 
-						  plots =  {theSpider: {'type': 'Spider', labelOffset: params.labelOffset || -10, divisions:  params.divisions || 5, precision: precision, seriesFillAlpha: 0.1, seriesWidth: 2, markerSize: params.markerSiwe || 5,
-						  						axisFont: params.axisFont || "normal normal normal 11pt Arial"}};
+						  plots =  {theSpider: {'type': 'Spider', labelOffset: params.labelOffset || -10, radius: params.spiderRadius, maxLabelWidthShift: params.maxLabelWidthShift, divisions:  params.divisions || 5, precision: precision, seriesFillAlpha: 0.1,
+												seriesWidth: 2, markerSize: params.markerSiwe || 5,	axisFont: params.axisFont || "normal normal normal 11pt Arial"}};
 					let previousKpiValuesCache = {};
 					for (const set of itemsSets){
 						try{

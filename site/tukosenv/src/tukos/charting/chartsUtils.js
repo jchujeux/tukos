@@ -30,12 +30,14 @@ define(["dojo/_base/lang", "tukos/utils", "tukos/PageManager"],
 							self.recursionDepth = 0;
 							return;
 						}
-					    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}}}, {data: data, timeout: 64000}).then(
+					    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'),
+							params: {process: 'getKpis', noget: true}}}, {data: data, timeout: Pmg.getCustom('defaultClientTimeout') + data.length * 1000}).then(
 					            function(response){
 					           		const itemsKpis = response.data.kpis;
 									utils.forEach(itemsKpis, function(itemKpis, idp){
 										utils.forEach(itemKpis, function(kpi, j){
-											grid.updateDirty(idp, j, kpi);
+											const ignoreChange = j.includes('shrink'), isUserEdit = !ignoreChange;
+											grid.updateDirty(idp, j, kpi, false, isUserEdit, ignoreChange);
 											if (kpi === false){
 												Pmg.addFeedback('Pmg.serverKpierror' + ': ' + ' - ' + Pmg.message('col') + ': ' + j + Pmg.message('idp') + ': ' + idp);
 											}

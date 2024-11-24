@@ -46,9 +46,10 @@ trait ChartView {
     }
     public function chartPreMergeCustomizationAction(&$response, &$chartLayoutRow, $customMode, $grid, $dateCol, $timeCol, $dateWidgetNames, $namesToTranslate, $selectedDateWidgetName = null){
         if (!empty($response['widgetsDescription'])){
+            $paneMode = Tfk::$registry->isMobile ? 'mobile' : 'tab';
             $editConfig =  $customMode === 'object'
-                ? $this->user->getCustomView($this->objectName, 'edit', 'tab', ['editConfig'])
-                : $this->model->getCombinedCustomization(['id' => Utl::getItem('id', $response['data']['value'])], 'edit', 'tab', ['editConfig']);
+                ? $this->user->getCustomView($this->objectName, 'edit', $paneMode, ['editConfig'])
+                : $this->model->getCombinedCustomization(['id' => Utl::getItem('id', $response['data']['value'])], 'edit', $paneMode, ['editConfig']);
                 if (!empty($editConfig)){
                     $chartsPerRow = Utl::getItem('chartsperrow', $editConfig);
                     if ($chartsPerRow){
@@ -250,6 +251,8 @@ EOT
                     'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                     'axisFont' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('axisFont'), 'style' => ['width' => '10em']], 'storeedit' => ['width' => 100]]), false),
+                    'maxLabelWidthShift' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('maxLabelWidthShift'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
+                    'spiderRadius' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('spiderRadius'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'labelOffset' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('labelOffset'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'divisions' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('divisions'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'markerSize' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('markerSize'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false)

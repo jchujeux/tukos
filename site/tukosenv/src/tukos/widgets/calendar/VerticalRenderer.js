@@ -1,7 +1,7 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/string", "dijit/_WidgetBase", "dijit/_TemplatedMixin", "dijit/form/HorizontalSlider",
-	"dojox/calendar/_RendererMixin", "dojo/text!tukos/widgets/calendar/VerticalRenderer.html", "tukos/utils"],
+	"dojox/calendar/_RendererMixin", "dojo/text!tukos/widgets/calendar/VerticalRenderer.html", "tukos/utils", "tukos/PageManager"],
 	
-	function(declare, lang, dct, domStyle, string, _WidgetBase, _TemplatedMixin, HorizontalSlider, _RendererMixin, template, utils){
+	function(declare, lang, dct, domStyle, string, _WidgetBase, _TemplatedMixin, HorizontalSlider, _RendererMixin, template, utils, Pmg){
 	
 	return declare([_WidgetBase, _TemplatedMixin, _RendererMixin], {
 		
@@ -137,11 +137,15 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
                 		case 'style': 
                             var newAttValue = (fieldValue ? (map[fieldValue] || fieldValue) : defaultStyleValue(customAtts.defaultValue, attr)) || '';
                 			domStyle.set(utils.in_array(attr, ['color', 'fontStyle']) ? this.summaryLabel : this.overallItem, attr, newAttValue);
+							if (Pmg.isMobile()){
+								domStyle.set(this.summaryLabel, 'fontSize', '11px');
+							}
                             domStyle.set(this.startTimeLabel, attr, newAttValue);
                             break;
                 		case 'img':
                             var image = fieldValue ? customAtts.imagesDir + map[fieldValue] : (calendar.customization.defaultItemImage ? calendar.customization.defaultItemImage : undefined);
-                			this.imageTag = image ? '<img src="' + image + '" alt="icon" height="48" width="48" >' :  undefined;
+							const iconSize = Pmg.isMobile() ? '24' : '48';
+                			this.imageTag = image ? '<img src="' + image + '" alt="icon" height="' + iconSize + '" width="' + iconSize + '" >' :  undefined;
                             break;
                 		case 'ruler':
                             var atts = customAtts.atts || {};

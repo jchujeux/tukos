@@ -208,7 +208,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         getLastNewRowPrefixId: function(){
         	return this.newRowPrefix ? this.newRowPrefixId : '';
         },
-        updateDirty: function(idPropertyValue, field, value, isNewRow, isUserEdit){
+        updateDirty: function(idPropertyValue, field, value, isNewRow, isUserEdit, noMarkAsChanged){
             var collection = this.collection, grid = this, idp = collection.idProperty, collectionRow = collection.getSync(idPropertyValue), oldValue;
             //if (isNewRow || ((oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field]) !== value)){
             if (isNewRow || !utils.isEquivalent(oldValue = utils.drillDown(this, ['dirty', idPropertyValue, field], undefined)|| collectionRow[field], value)){
@@ -245,7 +245,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
 	                }
 					this.currentUpdateDirtyRow = idPropertyValue;
 				}
-                if (!(this.noMarkAsChanged || (this.columns[field] && this.columns[field].noMarkAsChanged))){
+                if (!(noMarkAsChanged || this.noMarkAsChanged || (this.columns[field] && this.columns[field].noMarkAsChanged))){
                 	wutils.markAsChanged(this, 'noStyle', 'user');    
                 }        	
             }

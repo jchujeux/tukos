@@ -45,7 +45,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/ready"
 	                            		editorArgs: {label: Pmg.message('associatedtukosid'), fetchProperties: {sort: ['name']}, ignoreCase: true, object: 'calendars', searchAttr: 'name', searchDelay: 500, onWatchLocalAction: onGridWatch('panesConfig')}},
 	                        	}
                         	}},
-                    		fieldsMaxSize: {type: 'TextBox', atts: {label: Pmg.message('fieldsMaxSize'),	onWatchLocalAction: onWatch('fieldsMaxSize', this.watchLocalAction)}},
+							defaultClientTimeout: {type: 'TextBox', atts: {label: Pmg.message('defaultClientTimeout'),	onWatchLocalAction: onWatch('defaultClientTimeout', this.watchLocalAction)}},
+							defaultServerTimeout: {type: 'TextBox', atts: {label: Pmg.message('defaultServerTimeout'),	onWatchLocalAction: onWatch('defaultServerTimeout', this.watchLocalAction)}},
+							fieldsMaxSize: {type: 'TextBox', atts: {label: Pmg.message('fieldsMaxSize'),	onWatchLocalAction: onWatch('fieldsMaxSize', this.watchLocalAction)}},
                     		historyMaxItems: {type: 'TextBox', atts: {label: Pmg.message('historyMaxItems'),	onWatchLocalAction: onWatch('historyMaxItems', this.watchLocalAction)}},
                     		ignoreCustomOnClose: {type: 'StoreSelect', atts: {label: Pmg.message('ignoreCustomOnClose'), storeArgs: {data: Pmg.idsNamesStore(['', 'YES', 'NO'])},	onWatchLocalAction: onWatch('ignoreCustomOnClose', this.watchLocalAction)}},
                     		showTooltips: {type: 'StoreSelect', atts: {label: Pmg.message('showTooltips'), storeArgs: {data: Pmg.idsNamesStore(['', 'YES', 'NO'], true)},	onWatchLocalAction: onWatch('showTooltips', this.watchLocalAction)}},
@@ -58,7 +60,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/ready"
                     contents: {
 						row1: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['newPageCustom']},
 						row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, labelWidth: 250}, widgets: [
-							'pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose', 'showTooltips']},
+							'pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'defaultClientTimeout', 'defaultServerTimeout', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose', 'showTooltips']},
 						row3: {
 							tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false},
 							contents: {
@@ -150,7 +152,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/ready"
     	fillDialogFields: function(mode, sWidget, tWidget, newValue){
 			return function(){
 				var form = (mode === 'open' ? this : sWidget.form), setValueOf = lang.hitch(form, form.setValueOf), 
-		    		widgets = ['pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose', 'showTooltips'];
+		    		widgets = ['pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'fieldsMaxSize', 'defaultClientTimeout', 'defaultServerTimeout', 'historyMaxItems', 'ignoreCustomOnClose', 'showTooltips'];
 				form.watchOnChange = false;
 				form.markIfChanged = false;
 				form.emptyWidgets(widgets);

@@ -102,8 +102,8 @@ class View extends AbstractView {
                 'type' => 'StoreSimpleCalendar',
                 'atts' => ['edit' => [
                     //'date' => date('Y-m-d', strtotime('next monday')),
-                    'columnViewProps' => ['minHours' => 0, 'maxHours' => 4],
-                    'style' => ['height' => '300px', 'minWidth' => '600px'],
+                    'columnViewProps' => ['minHours' => 0, 'maxHours' => 4, 'style' => ['width' => 'auto']],
+                    'style' => ['height' => '320px'],
                     'timeMode' => 'duration', 'durationFormat' => 'time', 'moveEnabled' => true,
                     'customization' => ['items' => [
                         'style' => ['backgroundColor' => ['field' => 'intensity', 'map' => Sports::$intensityColorsMap, 'defaultValue' => 'Peru'],
@@ -191,7 +191,7 @@ class View extends AbstractView {
                         'heartrate_load' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['heartrate_load' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
                         'mode' => ['atts' => ['storeedit' => ['editorArgs' => ['onChangeLocalAction' => ['mode' => ['localActionStatus' => $this->tsbChangeLocalAction()]]]]]],
                     ],
-                    'afterActions' => ['createNewRow' => $this->afterCreateRow(), 'updateRow' => $this->afterUpdateRow(), 'deleteRows' => $this->afterDeleteRows()],
+                    'afterActions' => ['createNewRow' => $this->afterCreateRow(), 'updateRow' => $this->afterUpdateRow(), 'deleteRows' => $this->afterDeleteRows(), '_getValue' => $this->after_getValue()],
                     'beforeActions' => ['createNewRow' => $this->beforeCreateRow(), 'deleteRows' => $this->beforeDeleteRows(), 'updateRow' => $this->beforeUpdateRow()],
                     'noCopyCols' => ['googleid', 'stravaid'],
                     'editActionLayout' => WorkoutsEditView::editDialogLayout(),
@@ -365,6 +365,22 @@ if (Pmg.isRestrictedUser() && this.rowIdpToExpand){
     this.expand(this.row(this.rowIdpToExpand), true);
     delete this.rowIdpToExpand;
 }
+EOT
+        ;
+    }
+    function after_getValue(){
+        return <<<EOT
+if (this.form.tukosAction === 'ObjectSave'){
+    const rows = args;
+    rows && rows.forEach(function(row){
+        utils.forEach(row, function(item, colName){
+            if (colName.includes('shrink')){
+                delete row[colName];
+            }
+        });
+    });
+}
+return args;
 EOT
         ;
     }

@@ -43,7 +43,7 @@ class Sports {
         '3' => 'badmood', '2' => 'verybadmood', '1' => 'extremelybadmood'];
     public static $sessionidOptions = ['1' => '1', '2' => '2', '3' => '3', '4' => '4', '5' => '5'];
     public static $levelOptions = ['1' => 'Bodypart', '2' => 'Exercisetype', '3' => 'Equipment'];
-    public static $directionOptions = ['0' => 'north', '1' => 'northnortheast', '2' => 'northeast', '3' => 'eastnorthest', '4' => 'east', '5' => 'eastsoutheast', '6' => 'southeast', '7' => 'southsoutheast', '8' => 'south', '9' => 'southsouthwest',
+    public static $directionOptions = ['0' => 'north', '1' => 'northnortheast', '2' => 'northeast', '3' => 'eastnortheast', '4' => 'east', '5' => 'eastsoutheast', '6' => 'southeast', '7' => 'southsoutheast', '8' => 'south', '9' => 'southsouthwest',
         '10' => 'southwest', '11' => 'westsouthwest', '12' => 'west', '13' => 'westnorthwest', '14' => 'northwest', '15' => 'northnorthwest'];
 }
 ?>

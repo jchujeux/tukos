@@ -364,7 +364,7 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
         },
         serverDialog: function(urlArgs, options, feedback, returnDeferred){//if returnDeferred is true, the returnedDfD.response.getHeader() will be available to extract header information
             var self = this, isObjectFeedback = utils.isObject(feedback), defaultFeedback = isObjectFeedback ? feedback.defaultFeedback : feedback;
-            options = lang.mixin({method: 'POST', timeout: 64000, handleAs: 'json'},  options);
+            options = lang.mixin({method: 'POST', timeout: self.getCustom('defaultClientTimeout'), handleAs: 'json'},  options);
             if (options.data){
                 options.data = JSON.stringify(options.data);
                 options.method = 'POST';
@@ -404,7 +404,7 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
 						});
 						return returnedString;
 					};
-					request(self.requestUrl({action: 'Process', mode: 'Tab', object: 'tukos',  query: {params: {noget: true, process: 'sendContent'}}, view: 'Edit'}), {handleAs: 'json', method: 'POST', timeout: 32000, 
+					request(self.requestUrl({action: 'Process', mode: 'Tab', object: 'tukos',  query: {params: {noget: true, process: 'sendContent'}}, view: 'Edit'}), {handleAs: 'json', method: 'POST', timeout: self.getCustom('defaultClientTimeout'), 
 						data: JSON.stringify({fromwhere: {name: 'tukosbackoffice'}, to: 'tukosbackoffice@gmail.com', subject: 'tukos bug - ' + window.location, header: headerRows([['ClientErrormessage', error.message],['PageUrl', window.location], ['userid', self.cache.userid], ['UrlSent', error.response.url], ['Datasent', options.data || self.message('noDataSent')]]),
 							   content: '<p><b>' + self.message('Servererrormessage') + '</b><br>' + error.response.text, sendas: 'appendtobody'})}).then(
 							function(){
