@@ -7,6 +7,7 @@ use TukosLib\Objects\ChartView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Objects\Sports\Sports;
 use TukosLib\Objects\Collab\Calendars\CalendarsViewUtils;
+use TukosLib\Utils\Widgets;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
@@ -18,7 +19,6 @@ class View extends AbstractView {
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Sportsman', 'Title');
         $this->doNotEmpty = ['displayeddate', 'synchrostart', 'synchroend'];
-        $tr = $this->tr;
         $this->setGridWidget('sptworkouts');
         $this->allowedNestedWatchActions = 1;
         $this->allowedNestedRowWatchActions = 0;
@@ -162,7 +162,7 @@ class View extends AbstractView {
             'sptworkouts' => [
                 'atts' => [
                     'title' => $this->tr('Workouts'), 'allDescendants' => true, 'allowApplicationFilter' => 'no', 'startDateTimeCol' => 'startdate',
-                    'endDateTimeCol' => 'startdate'/*, 'freezeWidth' => true*/, 'minWidth' => '40',
+                    'endDateTimeCol' => 'startdate'/*, 'freezeWidth' => true*/, 'minWidth' => Widgets::$smallMinWidth,
                     'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
                     'onChangeNotify' => [
                         'calendar' => [
@@ -182,7 +182,7 @@ class View extends AbstractView {
                         'value' => ['sptworkouts' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->sptWorkoutsTsbAction()]]],
                         'collection' => [
                             'sptworkouts' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => false], 'action' => $this->sptWorkoutsTsbAction()]],
-                            'calendar' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => 'tWidget.currentView && tWidget.currentView.invalidateLayout();return true;']],
+                            'calendar' => ['localActionStatus' => ['triggers' => ['server' => true, 'user' => true], 'action' => 'tWidget.currentView && tWidget.currentView.renderData && tWidget.currentView.invalidateLayout();return true;']],
                         ]],
                     'renderCallback' => "if (rowData.mode === 'performed'){domstyle.set(node, 'fontStyle', 'italic');}",
                     'deleteRowAction' => $this->deleteRowAction(),
@@ -200,8 +200,9 @@ class View extends AbstractView {
                 'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@displayfromdate'], ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'],
                     [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],
                 'removeCols' => ['sportsman','grade', 'configstatus', 'kpiscache'],
-                'hiddenCols' => ['parentid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'starttime', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'heartrate_avgload', 'power_avgload', 'heartrate_load', 'power_load',
-                    'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'contextid', 'updated'],
+                'hiddenCols' => ['parentid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'starttime', 'duration', 'googleid', 'mode', 'equipmentid', 'extraweight', 'frictioncoef', 'dragcoef', 'windvelocity', 'winddirection', 'coachcomments', 
+                    'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'athletecomments', 'avghr', 'avgpw', 'heartrate_avgload', 'power_avgload'/*, 'heartrate_load', power_load'*/,'mechload', 'heartrate_timeabove_threshold_90'
+                    /*, 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110'*/, 'contextid', 'sts', 'tsb', 'updated'],
                 'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'] // temporary: these were suppressed but maybe present in some customization items
             ],
             
@@ -218,8 +219,8 @@ class View extends AbstractView {
                 'filters' => ['grade' => 'TEMPLATE'],
                 'initialRowValue' => ['mode' => 'planned'],
                 'removeCols' => /*$this->user->isRestrictedUser() ? ['sportsman','googleid', 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'coachcomments', 'comments', 'grade', 'configstatus'] : */['sportsman','grade', 'configstatus', 'kpiscache'],
-                'hiddenCols' => ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'starttime', 'googleid', 'mode', 'coachcomments', 'sts', 'lts', 'tsb', 'timemoving', 'avghr', 'avgpw', 'hr95', 'heartrate_avgload', 'power_avgload',
-                    'heartrate_load', 'power_load', 'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'contextid', 'updated'],
+                'hiddenCols' => ['parentid'/*, 'stress'*/, 'warmupdetails', 'mainactivitydetails', 'warmdowndetails', 'starttime', 'googleid', 'mode', 'equipmentid', 'extraweight', 'frictioncoef', 'dragcoef', 'windvelocity', 'winddirection', 'coachcomments', 'sts', 'lts', 'tsb',
+                    'timemoving', 'avghr', 'avgpw', 'hr95', 'heartrate_avgload', 'power_avgload', 'heartrate_load', 'power_load', 'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'contextid', 'updated'],
                 'ignorecolumns' => ['athleteweeklycomments', 'coachweeklyresponse'], // temporary: these were suppressed but maybe present in some customization items
                 'allDescendants' => true, 'width' => '400'
             ],

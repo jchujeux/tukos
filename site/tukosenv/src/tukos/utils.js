@@ -475,25 +475,42 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					return '';
 				}
 			},
-			sum: function() {
-				var value, result = 0;
-				for (let item of arguments){
+			iterate: function(contributeFunction, initialResult, functionArguments) {
+				var result = initialResult;
+				for (let item of functionArguments){
 					if (typeof item === 'object') {
 						for (let value of item) {
 							if (typeof value === "object") {
-								result += this.sum(value);
+								result = this.iterate(contributeFunction, result, value);
 							} else {
-								value = parseFloat(value);
-								result += isNaN(value) ? 0 : value;
+								result = contributeFunction(result, value);
 							}
 						}
-						return result;
-					} else {
-						value = parseFloat(item);
-						result += isNaN(value) ? 0 : value;
+					}else{
+						result = contributeFunction(result, item);
 					}					
 				}
 				return result;
+			},
+			sum: function(){
+				const contributeFunction = function(result, value){
+					value = parseFloat(value);
+					result += isNaN(value) ? 0 : value;	
+					return result;				
+				}
+				return this.iterate(contributeFunction, 0, arguments);
+			},
+			max: function(){
+				const contributeFunction = function(result, value){
+					return value > result ? value : result;				
+				}
+				return this.iterate(contributeFunction, Number.NEGATIVE_INFINITY, arguments);
+			},
+			min: function(){
+				const contributeFunction = function(result, value){
+					return value < result ? value : result;				
+				}
+				return this.iterate(contributeFunction, Number.POSITIVE_INFINITY, arguments);
 			},
 			hashId: function() { // see https://gist.github.com/fiznool/73ee9c7a11d1ff80b81c#file-hashid-js-L11
 				var alphabet = '23456789abdegjkmnpqrvwxyz',

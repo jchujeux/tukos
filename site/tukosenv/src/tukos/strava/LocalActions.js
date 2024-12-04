@@ -25,7 +25,7 @@ function(declare, lang, utils, Pmg){
 				Pmg.alert({title: Pmg.message('cannotsynchronizestrava'), content: contentMessage});
 			}else{
             	Pmg.setFeedback(Pmg.message('actionDoing'));
-            	let query = {athleteid: athleteid, coachid: coachid, synchrostart: pane.valueOf('synchrostart'), synchroend: pane.valueOf('synchroend'), synchrostreams: pane.valueOf('synchrostreams'), 
+            	let query = {athleteid: athleteid, coachid: coachid, synchrostart: pane.valueOf('synchrostart'), synchroend: pane.valueOf('synchroend'), synchrostreams: pane.valueOf('synchrostreams'), synchroweatherstation: pane.valueOf('synchroweatherstation'),
             		params:  JSON.stringify({process: 'stravaSynchronize', save: false, noget: true})};
             	if (defaultItemsCols){
 					defaultItemsCols.forEach(function(col){
@@ -36,10 +36,12 @@ function(declare, lang, utils, Pmg){
 					});
 				}
             	form.serverDialog({action:'Process', query: query}, form.changedValues(), form.get('postElts'), Pmg.message('actionDone')).then(function(response){
-					if (response.usersItems){
+					if (response.usersItems.length){
 						grid.usersAclCache = {sportsmanId: athleteid, coachId: coachid, usersItems: response.usersItems};
 					}
-					self.mergeStravaActivities(grid, response.stravaActivities);
+					if (!utils.empty(response.stravaActivities)){
+						self.mergeStravaActivities(grid, response.stravaActivities);
+					}
 				});
 			}
 		},

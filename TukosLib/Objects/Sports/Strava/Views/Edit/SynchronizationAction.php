@@ -17,6 +17,7 @@ trait SynchronizationAction {
                 'widgetsDescription' => [
                         'ignoreitemflag' => Widgets::checkBox(Widgets::complete(['title' => $tr('ignoreitemflag'), 'onWatchLocalAction' => $this->watchCheckboxLocalAction('ignoreitemflag')])),
                     'synchrostreams' => Widgets::checkBox(Widgets::complete(['title' => $tr('synchrostreams'), 'checked' => true,  'onWatchLocalAction' => $this->watchCheckboxLocalAction('synchrostreams')])),
+                    'synchroweatherstation' => Widgets::textBox(Widgets::complete(['title' => $tr('synchrowheatherstation'), 'style' => ['width' => '5em'], 'onWatchLocalAction' => $this->watchLocalAction('synchroweatherstation')])),
                     'synchrostart' => Widgets::tukosDateBox(Widgets::complete(['title' => $tr('synchrostart'), 'onWatchLocalAction' => ['value' => [
                         'synchrostart' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->synchroStartLocalAction()]]]]])),
                     'synchroend' => Widgets::tukosDateBox(Widgets::complete(['title' => $tr('synchroend'), 'onWatchLocalAction' => ['value' => [
@@ -30,8 +31,8 @@ trait SynchronizationAction {
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => false],
                     'contents' => [
                         'row1' => [
-                            'tableAtts' => ['cols' => 4,  'customClass' => 'labelsAndValues', 'label' => $tr('stsynchronization'), 'showLabels' => true, 'labelWidth' => 150],
-                            'widgets' => ['ignoreitemflag', 'synchrostreams', 'synchrostart', 'synchroend']
+                            'tableAtts' => ['cols' => 5,  'customClass' => 'labelsAndValues', 'label' => $tr('stsynchronization'), 'showLabels' => true, 'labelWidth' => 150],
+                            'widgets' => ['ignoreitemflag', 'synchrostreams', 'synchroweatherstation', 'synchrostart', 'synchroend']
                         ],
                         'row2' => [
                             'tableAtts' =>['cols' => 2,  'customClass' => 'labelsAndValues', 'showLabels' => true],

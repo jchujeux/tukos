@@ -3,6 +3,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
 	var expressionReferenceRegExp = /(\b)([a-z][a-z0-9]*)![$]?([A-Z]+)[$]?(\d+)|(\b)([a-z][\w]*)(\b[^.(]|$)|[$]?([A-Z]+)[$]?([0-9]+)/g,
 		expressionNameRegExp = /(\w*)!?([A-Z]*)(\d*)/,
 		cellReferenceRegExp = /([^\w])([$]?)([A-Z]+)([$]?)(\d+)\b/g,
+		cellRangeReferenceRegExp = /([a-z][a-z0-9]*)![$]?([A-Z]+)[$]?(\d+):[$]?([A-Z]+)[$]?(\d+)|[$]?([A-Z]+)[$]?(\d+):[$]?([A-Z]+)[$]?(\d+)/gi,
 		expressionReferenceRegExpTemplate = '(\\b)(${name})!([$]?)(${col})([$]?)(${row})|(\\b)(${name})(\\b[^.(]|$)|([$]?)(${col})([$]?)(${row})\\b',
     	expressionTemplate =
     		'<div class="tukosExpression" id="e_${name}" style="display: inline;" title="${name}" onclick="parent.tukos.onExpClick(this);">${visualPreTag}' +
@@ -16,7 +17,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
 		eval: function(formulaExpression){
     		if (!formulaExpression.hasAttribute('data-formulaCache')){
     			try{
-        			formulaExpression.setAttribute('data-formulaCache', eutils.eval(this.parseFormula(formulaExpression)));
+        			formulaExpression.setAttribute('data-formulaCache', eutils.eval(eutils.nameToFunction(this.parseFormula(formulaExpression))));
         			this.refreshReferencingFormulaes(formulaExpression);    				
     			}
     			catch(error){
@@ -36,6 +37,21 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
             var formula = this.formulaOf(formulaExpression).slice(1), expressionName = formulaExpression.id.slice(2).split('!')[0], doc = formulaExpression.ownerDocument, eval = lang.hitch(this, this.eval),
             	valueOf = lang.hitch(this, this.valueOf);
             formulaExpression.className = formulaExpression.className.replace(/\be_[^ ]*/g, '');
+			formula = formula.replace(cellRangeReferenceRegExp, lang.hitch(this, function(match, name, col1i, row1i, col1f, row1f, col2i, row2i, col2f, row2f){
+				const sheetName = name ? name + '!' : '', rowi = row1i || row2i, coli = col1i || col2i, rowf = row1f || row2f, colf = col1f || col2f, coliPosition = utils.fromAlphabet(coli), colfPosition = utils.fromAlphabet(colf);
+				let result = '[';
+				for (let col = coliPosition; col <= colfPosition; col++){
+					colLabel = utils.alphabet(col);
+					result += '[';
+					for (let row = rowi; row <= rowf; row++){
+						result += sheetName + colLabel + row + ',';
+					}
+					result[result.length-1] = ']';
+					result = result.substring(0, result.length -1) + '],';
+				}
+				result = result.substring(0, result.length -1) + ']';
+				return result;
+			}));
         	return formula.replace(expressionReferenceRegExp, lang.hitch(this, function(match, fPre, fName, fCol, fRow, pre, name, post, col, row){
         		var expressionId = 'e_' + (fName === undefined ? (name === undefined ? expressionName : name) : fName) + (fCol === undefined ? (col === undefined ? '' : '!' + col + row) : '!' + fCol + fRow), 
         			referencedExpression = doc.getElementById(expressionId);

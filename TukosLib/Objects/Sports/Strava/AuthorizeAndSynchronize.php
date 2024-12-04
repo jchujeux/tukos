@@ -5,6 +5,7 @@ use TukosLib\Objects\Views\Models\ModelsAndViews;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Utils\HtmlUtilities as HUtl;
+use TukosLib\Utils\DateTimeUtilities as DUtl;
 use TukosLib\TukosFramework as Tfk;
 
 trait AuthorizeAndSynchronize {
@@ -51,30 +52,66 @@ trait AuthorizeAndSynchronize {
         $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
         $itemsModel = $this->itemsModel();
         $itemsView = $this->itemsView();
-        $itemsValues = $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams);
-        $itemsToProcess = []; $kpisToGet = $this->activityKpis();
-        if ($defaultItemsCols = $itemsModel->synchroDefaultItemsCols()){
-            $presentCols = array_intersect(array_keys($query), $defaultItemsCols);
-            $presentValues = Utl::getItems($presentCols, $query);
+        if ($itemsValues = $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams)){
+            foreach($itemsValues as &$itemValue){
+                if ($libGeo = $query['synchroweatherstation']){
+                    $windData = json_decode(file_get_contents(Utl::substitute(
+                        'https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/donnees-synop-essentielles-omm/records?select=date%2C%20ff%2C%20dd&where=date%20%3E%3D%20date%27${date}T00%3A00%3A00%27%20and%20date%20%3C%3D%20date%27${date}T23%3A59%3A59%27%20and%20libgeo%20%3D%20%22${libgeo}%22&order_by=date%20ASC&limit=20',
+                        ['date' => $itemValue['startdate'], 'libgeo' => $libGeo]
+                    )), true);
+                    if ($dataCount = $windData['total_count']){
+                        $data =$windData['results'];
+                        $midTimeSeconds = DUtl::timeToSeconds(substr($itemValue['starttime'], 0, 8)) + intval($itemValue['duration'] / 2);
+                        $midTime = substr(DUtl::secondsToTime($midTimeSeconds), 1);
+                        $beforeData = $data[0];
+                        $i = 1; $iLast = $dataCount -1;
+                        while(substr($data[$i]['date'], 11, 8) < $midTime && $i <= $iLast){
+                            $beforeData = $data[$i];
+                            $i +=1;
+                        }
+                        $afterData = $i <= $iLast ? $data[$i] : $beforeData;
+                        if ($beforeData !== $afterData){
+                            $secondsBefore = Dutl::timeToSeconds(substr($beforeData['date'], 11, 8));
+                            $secondsAfter = Dutl::timeToSeconds(substr($afterData['date'], 11, 8));
+                            $totalSeconds = $secondsAfter - $secondsBefore;
+                            $beforeWeight = ($secondsAfter - $midTimeSeconds) / $totalSeconds;
+                            $afterWeight = ($midTimeSeconds - $secondsBefore) / $totalSeconds;
+                            $itemValue['windvelocity'] = ($beforeData['ff'] * $beforeWeight + $afterData ['ff'] * $afterWeight) / 2.0;
+                            $itemValue['winddirection'] = intval(round(($beforeData['dd'] * $beforeWeight + $afterData ['dd']* $afterWeight) * 16 / 360));
+                        }else{
+                            $itemValue['windvelocity'] = $beforeData['ff'];
+                            $itemValue['winddirection'] = $beforeData['dd'];
+                        }
+                    }
+                }
+            }
+            reset($itemValue);
+            $itemsToProcess = []; $kpisToGet = $this->activityKpis();
+            if ($defaultItemsCols = $itemsModel->synchroDefaultItemsCols()){
+                $presentCols = array_intersect(array_keys($query), $defaultItemsCols);
+                $presentValues = Utl::getItems($presentCols, $query);
+            }else{
+                $presentValues = [];
+            }
+            foreach ($itemsValues as &$itemValues){
+                $itemsToProcess[] = ['kpisToGet' => &$kpisToGet, 'itemValues' => ($itemValues = array_merge($itemValues, $presentValues))];
+            }
+            $kpis = $itemsModel->computeKpis($athleteId, $itemsToProcess);
+            foreach($kpis as $key => $itemKpis){
+                unset($itemsValues[$key]['id']);
+                $itemsValues[$key] = array_merge(array_diff_key($itemsValues[$key], array_flip($stravaActivitiesModel->streamCols)), $itemKpis);
+            }
+            $itemsValues = $this->convert($itemsValues, $itemsView->dataWidgets, 'objToStoreEdit', true);
+            $itemsValues = Utl::toAssociativeGrouped($itemsValues, 'startdate');
+            foreach ($itemsValues as $values){
+                $times = array_column($values, 'starttime');
+                array_multisort($times, SORT_ASC, $values);
+            }
+            $usersItems = Tfk::$registry->get('objectsStore')->objectModel('users')->getAllExtended(['where' => [['col' => 'parentid', 'opr' => 'IN', 'values' => [$query['athleteid'], $query['coachid']]]], 'cols' => ['id', 'parentid']]);
+            return ['stravaActivities' => $itemsValues, 'usersItems' => $usersItems];
         }else{
-            $presentValues = [];
+            return ['stravaActivities' => [], 'usersItems' => []];
         }
-        foreach ($itemsValues as &$itemValues){
-            $itemsToProcess[] = ['kpisToGet' => &$kpisToGet, 'itemValues' => ($itemValues = array_merge($itemValues, $presentValues))];
-        }
-        $kpis = $itemsModel->computeKpis($athleteId, $itemsToProcess);
-        foreach($kpis as $key => $itemKpis){
-            unset($itemsValues[$key]['id']);
-            $itemsValues[$key] = array_merge(array_diff_key($itemsValues[$key], array_flip($stravaActivitiesModel->streamCols)), $itemKpis);
-        }
-        $itemsValues = $this->convert($itemsValues, $itemsView->dataWidgets, 'objToStoreEdit', true);
-        $itemsValues = Utl::toAssociativeGrouped($itemsValues, 'startdate');
-        foreach ($itemsValues as $values){
-            $times = array_column($values, 'starttime');
-            array_multisort($times, SORT_ASC, $values);
-        }
-        $usersItems = Tfk::$registry->get('objectsStore')->objectModel('users')->getAllExtended(['where' => [['col' => 'parentid', 'opr' => 'IN', 'values' => [$query['athleteid'], $query['coachid']]]], 'cols' => ['id', 'parentid']]);
-        return ['stravaActivities' => $itemsValues, 'usersItems' => $usersItems];
     }
     public function activitiesServerSynchronize($query){
         list('stravaActivities' => $stravaActivitiesToSync, 'usersItems' => $usersItems) = $this->stravaSynchronize($query);

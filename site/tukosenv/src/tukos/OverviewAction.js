@@ -160,7 +160,7 @@ function(declare, lang, ready, string, Button, registry, Pmg, utils, download, J
         },
 
         resetAction: function(options){
-            var form = this.form, parent = form.parent, title = parent.get('title'), url = require.toUrl('tukos/resources/images/loadingAnimation.gif'), grid = form.getWidget(this.grid), queryParams = this.queryParams;
+            var form = this.form, grid = form.getWidget(this.grid), queryParams = this.queryParams;
 			var label = this.get('label'), self = this;	                    						
 			this.set('label', Pmg.loading(label));
         	if (queryParams){

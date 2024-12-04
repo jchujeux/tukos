@@ -10,12 +10,6 @@ class DateTimeUtilities{
     						'day' => self::dayInSeconds, 'hour' => 3600, 'minute' => 60, 'second' => 1];// corresponds to intersection of php strToTime & dojo.date supported intervals
     const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
     
-    public static function seconds($duration){
-        if (is_string($duration)){
-            $duration = json_decode($duration, true);
-        }
-        return isset($duration[0]) ? $duration[0] * self::timeIntervals[$duration[1]] : 0;
-    }
     public static function duration($value, $possibleUnits = ['hour', 'minute'], $round = 'ceiling', $tolerance = 0.01){
 		foreach ($possibleUnits as $unit){
 			$newValue = $value / self::timeIntervals[$unit];

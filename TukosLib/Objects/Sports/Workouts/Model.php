@@ -66,8 +66,8 @@ class Model extends AbstractModel {
             'stravaid' => 'VARCHAR(30) DEFAULT NULL',
             'kpiscache' => 'longtext'
         ];
-        $this->performedCols = ['timemoving', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr', 'avgpw', 'avgcadence', 'heartrate_load', 'power_load',
-            'heartrate_avgload', 'power_avgload', 'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'stravaid'];
+        $this->performedCols = ['timemoving', 'equipmentid', 'extraweight', 'frictioncoef', 'dragcoef', 'windvelocity', 'winddirection', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'athletecomments', 'coachcomments','sts', 'lts' ,  'tsb', 'avghr',
+            'avgpw', 'avgcadence', 'heartrate_load', 'power_load', 'heartrate_avgload', 'power_avgload', 'mechload', 'heartrate_timeabove_threshold_90', 'heartrate_timeabove_threshold', 'heartrate_timeabove_threshold_110', 'stravaid', 'hracwr'];
         $this->plannedCols = ['intensity',  'stress', 'warmup', 'mainactivity', 'warmdown', 'warmupdetails', 'mainactivitydetails'];
         
         parent::__construct($objectName, $translator, 'sptworkouts',  ['parentid' => ['sptplans', 'sptworkouts'], 'sportsman' => ['people'], 'equipmentid' => ['sptequipment']], ['kpiscache'], $colsDefinition);

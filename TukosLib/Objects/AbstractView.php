@@ -33,8 +33,8 @@ abstract class AbstractView extends ObjectTranslator{
             'id' => ViewUtils::textBox($this, 'Id', [
                     'atts' => [
                         'edit' =>  ['readonly' => true, 'style' => ['width' => '6em', 'backgroundColor' => 'WhiteSmoke']],
-                        'storeedit' => ['width' => 80, 'minWidth' => '', 'maxWidth' => '','renderExpando' => true, 'formatter' => 'formatId', 'renderCell' => '', 'editOn' => 'dblClick'],
-                        'overview'  => ['width' => 60, 'minWidth' => '', 'maxWidth' => ''],
+                        'storeedit' => ['width' => Widgets::$mediumMinWidth, 'minWidth' => Widgets::$smallMinWidth, 'maxWidth' => Widgets::$mediumMinWidth,'renderExpando' => true, 'formatter' => 'formatId', 'renderCell' => '', 'editOn' => 'dblClick'],
+                        'overview'  => ['width' => Widgets::$smallMinWidth, 'minWidth' => Widgets::$smallMinWidth, 'maxWidth' => Widgets::$mediumMinWidth],
                     ]
                 ]
             ), 

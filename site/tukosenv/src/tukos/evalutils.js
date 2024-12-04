@@ -1,7 +1,7 @@
 define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferred", "dojo/when", "dojo/string", "dijit/registry", "dijit/focus",  "tukos/utils", "tukos/hiutils", "tukos/dateutils", "tukos/widgetUtils", "tukos/PageManager"], 
 	function(dct, domstyle, lang, Deferred, when, string, registry, focusUtil, utils, hiutils, dutils, wutils, Pmg){
     return {
-           functionNamePattern: "([^.]?)([a-zA-Z0-9]+)(\\()",
+           functionNamePattern: "([.]?)([^.]?)([a-zA-Z0-9]+)(\\()",
            
           eval: function(body, args){
             if (args !== undefined){
@@ -11,9 +11,9 @@ define(["dojo/dom-construct", "dojo/dom-style", "dojo/_base/lang", "dojo/Deferre
             }
         },
         nameToFunction: function(name){
-            return name.replace(new RegExp(this.functionNamePattern), function(match, p1, p2, p3){
-                var name = p1 + p2;
-            	return (p1 === '.'  
+            return name.replace(new RegExp(this.functionNamePattern), function(match, p0, p1, p2, p3){
+                var name = p0 + p1 + p2;
+            	return p0 + (p0 === '.'  
                 	? '' 
                 	: (typeof window[name] === 'function'
                 		? '' 
