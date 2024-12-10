@@ -52,7 +52,7 @@ abstract class AbstractView extends ObjectTranslator{
                 ],
                 ['type' => 'simpleDgrid', 'atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]
             ),
-            'grade' => ViewUtils::storeSelect('grade', $this, 'Grade', null, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
+            'grade' => ViewUtils::storeSelect('grade', $this, 'Classification', null, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             'contextid'  => [
                 'type' => 'objectSelectDropDown', 
                 'atts' => [

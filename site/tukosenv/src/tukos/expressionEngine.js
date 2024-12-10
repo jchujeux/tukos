@@ -135,18 +135,26 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 			},
 			formulaMin = function(arg){
 				const formula = getFormula(arg, cache);
-				let result = MAX_VALUE;
-				items.forEach(function(item){
-					result = Math.min(result, nanToSecondsOrZero(formula(item, cache, idProperty, x)));
-				});
+				const rawResult = formula(items[0], cache, idProperty, x), numberResult = Number(rawResult);
+				let result = isNaN(numberResult) ? rawResult : numberResult;
+				for (let i = 1; i < items.length; i++){
+					const minCandidate = formula(items[i], cache, idProperty, x);
+					if (minCandidate < result){
+						result = minCandidate;
+					}
+				};
 				return result;
 			},
 			formulaMax = function(arg){
-				const formula = getFormula(arg);
-				let result = MIN_VALUE;
-				items.forEach(function(item){
-					result = Math.max(result, nanToSecondsOrZero(formula(item, cache, idProperty, x)));
-				});
+				const formula = getFormula(arg, cache);
+				const rawResult = formula(items[0], cache, idProperty, x), numberResult = Number(rawResult);
+				let result = isNaN(numberResult) ? rawResult : numberResult;
+				for (let i = 1; i < items.length; i++){
+					const maxCandidate = formula(items[i], cache, idProperty, x);
+					if (maxCandidate > result){
+						result = maxCandidate;
+					}
+				};
 				return result;
 			},
 			formulaFirst = function(arg){
@@ -163,12 +171,6 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				}else{
 					return undefined;
 				}
-			},
-			formulaTimeToSeconds = function(timeString){//if timeString is a number, we assume it is seconds, so no need to convert
-				return timeString && isNaN(timeString) ? dutils.timeToSeconds(timeString) : timeString;
-			},
-			formulaDate = function(formulaString){
-				return dutils.formulaStringToDate(formulaString, valueOf);
 			};
 		return {
 			INFIX_OPS: {
@@ -312,12 +314,28 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				'EXPINTENSITY': unpackArgs(function(col, min, max, a){
 					return formulaExpIntensity(col(), min(), max(), a());
 				}),
-				'MIN': function(col){
-					return formulaMin(col());
-				},
-				'MAX': function(col){
-					return formulaMax(col());
-				},
+				'MIN': unpackArgs(function(){
+					const col = arguments[0](), rawResult = col.includes('$') ? formulaMin(col) : col, numberResult = Number(rawResult);
+					let result = isNaN(numberResult) ? rawResult : numberResult;
+					for (let i = 1; i < arguments.length; i++){
+						const col = arguments[i](), minCandidate = col.includes('$') ? formulaMin(col) : nanToSecondsOrZero(col);
+						if (minCandidate < result){
+							result = minCandidate;
+						}
+					}
+					return result;
+				}),
+				'MAX': unpackArgs(function(){
+					const col = arguments[0](), rawResult = col.includes('$') ? formulaMax(col) : col, numberResult = Number(rawResult);
+					let result = isNaN(numberResult) ? rawResult : numberResult;
+					for (let i = 1; i < arguments.length; i++){
+						const col = arguments[i](), maxCandidate = col.includes('$') ? formulaMax(col) : nanToSecondsOrZero(col);
+						if (maxCandidate > result){
+							result = maxCandidate;
+						}
+					}
+					return result;
+				}),
 				'FIRST': function(col){
 					return formulaFirst(col());
 				},
@@ -328,10 +346,11 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 					return formulaItem(col(), index());
 				}),
 				'TIMETOSECONDS': function(timeString){
-					return formulaTimeToSeconds(timeString());
+					const time = timeString();
+					return time && isNaN(time) ? dutils.timeToSeconds(time) : time;
 				},
 				'DATE': function(formulaString){
-					return formulaDate(formulaString());
+					return dutils.formulaStringToDate(formulaString(), valueOf);
 				}
 			},
 			PRECEDENCE:[['ARRAY', 'VECTOR', 'NEG', 'TOFIXED', 'JSONPARSE', 'XY', 'SUM', 'AVG', 'EXPINTENSITY', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'TIMETOSECONDS', 'DATE'], ['*', '/'], ['+', '-'], [',']],

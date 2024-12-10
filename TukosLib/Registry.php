@@ -28,7 +28,6 @@ class Registry{
             Tfk::$tukosFormsDomainName = Tfk::$tukosDomainName = getenv('tukosDomainName');
             Tfk::$tukosFormsTukosBaseLocation = 'https://' . Tfk::$tukosDomainName . '/tukos/tukosenv/release/';
             $this->loader->add('Aura\Web\\'      , $auraDir . 'package/Aura.Web/src/');
-            $this->loader->add('Aura\Http\\'     , $auraDir . 'package/Aura.Http/src/');
             $this->setHttpServices();
             $this->loader->add($this->appName . '\\', Tfk::$tukosPhpDir);
         }else{
@@ -38,6 +37,7 @@ class Registry{
         }
         
         $this->loader->add('Aura\SqlQuery', Tfk::$vendorDir['auraV2']);
+        $this->loader->add('Aura\Http\\'     , $auraDir . 'package/Aura.Http/src/');
         
         $this->loader->add('Pear\\'       , Tfk::$phpVendorDir);
         $this->loader->add('ManuelLemos\\', Tfk::$phpVendorDir);
