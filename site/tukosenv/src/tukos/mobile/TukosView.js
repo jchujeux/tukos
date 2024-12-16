@@ -5,6 +5,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "tukos/mobile/Sw
     	postCreate: function (){    
     		this.inherited(arguments);
     		this.widgetType = "TukosMobileView";
+			if (this.formContent !== undefined){
+				this.serverFormContent = lang.clone(this.formContent);
+			}
     		this.createPane();
         },
         refresh: function(viewPaneContent){
@@ -78,6 +81,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "tukos/mobile/Sw
 			}
 			require([paneModules[this.paneModuleType]], function(PaneModule){
             	self.form = new PaneModule(viewPaneContent);
+				self.form.parent = self;
 				if (/*self.heading && */self.actionsHeading){
 					new ToolBarButton({icon: "mblDomButtonWhiteCross", style: "float: right", onClick: function(){
 	             		self.destroy();

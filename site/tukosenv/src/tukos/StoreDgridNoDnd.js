@@ -58,47 +58,33 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
             }
             this.revert();//Necessary for the children rows expansion / collapse to work (!)
         },
-        resize: function(){
-			var self = this, previousScrollPosition = this.getScrollPosition(), viewNode;
-			if (!this.isBulk && !this.hidden){
-				var customizationPath = this.customizationPath;// so that personnalization is not changed if a column has a width change during resize
+		resize: function(){
+			if (!(this.isBulk || this.hidden)){
+				var self = this, previousScrollPosition = this.getScrollPosition(), customizationPath = this.customizationPath;// so that personnalization is not changed if a column has a width change during resize
 				this.customizationPath = '';
-				if (this.freezeWidth){
-					if (this.layoutHandle.unfreezeWidth){
-						dst.set(this.domNode, 'width', 'auto');
-						this.layoutHandle.unfrozenWidths += 1;
-					}else{
-						if (this.form.needsToFreezeWidth){
-							dst.set(this.domNode, 'width', Math.max(parseInt(dst.getComputedStyle(this.domNode).width), (this.minGridWidth || 0)) + 'px');
-							this.enforceMinWidth = true;
+				if (this.freezeWidth && !this.enforceMinWidth){
+					let tableWidth = parseInt(dst.getComputedStyle(this.domNode).width);
+					if (!isNaN(tableWidth)){
+						if (!Pmg.isMobile()){
+							tableWidth = tableWidth - 35;
 						}
-						if (this.enforceMinWidth){
-							this.adjustMinWidthAutoColumns(5);
-						}
+						dst.set(this.domNode, 'width', tableWidth + 'px');
+						this.enforceMinWidth = true;
 					}
 				}
+				if (!this.adjustMinWidthAutoColumnsDone){
+					this.adjustMinWidthAutoColumns(1);
+					this.adjustMinWidthAutoColumnsDone = true;
+				}
 				this.inherited(arguments);
-		    	if (viewNode = this.form.domNode.parentNode){
-			    	var bodyNode = this.bodyNode, style = bodyNode.style, bodyHeight = parseInt(window.getComputedStyle(document.body).getPropertyValue('height')), viewHeight = parseInt(window.getComputedStyle(viewNode).getPropertyValue('height')), oldMaxHeight = style.maxHeight,
-			    		maxHeight, newMaxHeight, maxWidth = parseInt(window.getComputedStyle(viewNode).getPropertyValue('width')), oldMaxWidth = style.maxWidth, scrollWidth = bodyNode.scrollWidth;
-					style.maxWidth = maxWidth + 'px';
-					if (!style.maxHeight && viewHeight !== this.previousViewHeight){
-				    	maxHeight = style.maxHeight === '' ? 0 : parseInt(style.maxHeight);
-				    	style.maxHeight = (maxHeight + bodyHeight - viewHeight) + 'px';
-				    	newMaxHeight = parseInt(style.maxHeight);
-				    	this.previousViewHeight = viewHeight;
-					}
-					if (oldMaxWidth !== style.maxWidth || oldMaxHeight !== style.maxHeight){
-						this.inherited(arguments);
-					}
-					setTimeout(function(){
-						style.maxWidth = '';
-						self.scrollTo(previousScrollPosition);
-					}, 100);
-		    	}
+				setTimeout(function(){
+					self.scrollTo(previousScrollPosition);
+				}, 100);
+				var style = this.bodyNode.style;
+				style.maxHeight = (parseInt(this.parentContentPane.domNode.style.height) - parseInt(style.marginTop) - parseInt(style.marginBottom)- 2) + 'px';
 				this.customizationPath = customizationPath;
 			}
-        },
+		},
         deleteSelection: function(skipDeleteAction, isUserRowEdit){
         	var grid = this, toDelete = [];
         	utils.forEach(this.selection, function(status, id){

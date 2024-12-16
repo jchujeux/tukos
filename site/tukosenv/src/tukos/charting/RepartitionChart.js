@@ -81,6 +81,9 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 								}
 								expression = expressionEngine.expression(kpiData, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache, previousData, kpiDate);
 								kpiValue = expression.expressionToValue(kpiDescription.kpi);
+								if (typeof kpiValue === 'string'){
+									kpiValue = JSON.parse(kpiValue);
+								}
 								if (Array.isArray(kpiValue)){
 									for (const subValue of kpiValue){
 										fillChartAndDataTables(kpiDescription, category + ' ' + subValue[0], subValue[1]);

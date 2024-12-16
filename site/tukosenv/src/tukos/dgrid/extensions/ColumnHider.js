@@ -389,9 +389,11 @@ define([
 				hidden: hidden,
 				bubbles: true
 			});
+			if (!this.isBulk){
 
 			// Adjust the size of the header.
-			this.resize();
+				this.resize();
+			}
 		},
 
 		toggleColumnHiddenState: function (id, hidden) {

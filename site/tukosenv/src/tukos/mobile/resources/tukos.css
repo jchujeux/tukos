@@ -61,6 +61,10 @@
 	height: 25px;
 	align-items: center;
 }
+.claro .dijitButton .dijitButtonNode {
+	padding: 2px 0px 2px 0px;
+	font-size: 10px;
+}
 .dojoxCalendarColumnHeaderTable, .dojoxCalendar, .dojoxCalendarYearColumnHeader {
 	font-size: 10px;
 }

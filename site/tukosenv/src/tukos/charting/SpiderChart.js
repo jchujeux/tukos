@@ -51,7 +51,7 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 							let setExp = expressionEngine.expression(utils.toNumeric(setData, grid), idProperty, missingItemsKpis, valueOf, previousKpiValuesCache[setName], [], kpiDate);
 							series[setName] = {value: {key: 'kpi', value: setName, tooltip: setName + 'Tooltip'}, 
 								options: {plot: 'theSpider', fill: set.fillColor || 'black', hasFill: set.fill, stroke: {color: set.fillColor || 'black', style: set.kpimode === 'planned' ? 'shortDash' : ''}}};
-							tableColumns[setName] = {label: hiutils.htmlToText(setName), field: setName, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}};
+							tableColumns[setName] = {label: hiutils.htmlToText(setName), field: setName/*, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}*/};
 							let setKpiData = (kpiData[setName] = {}), setExpKpi = (expKpi[setName] = {});
 							for (const kpiDescription of kpisDescription){
 								const kpiName = kpiDescription.name;

@@ -162,7 +162,7 @@ class View extends AbstractView {
             'sptworkouts' => [
                 'atts' => [
                     'title' => $this->tr('Workouts'), 'allDescendants' => true, 'allowApplicationFilter' => 'no', 'startDateTimeCol' => 'startdate',
-                    'endDateTimeCol' => 'startdate'/*, 'freezeWidth' => true*/, 'minWidth' => Widgets::$smallMinWidth,
+                    'endDateTimeCol' => 'startdate', 'minWidth' => Widgets::$smallWidth,
                     'dndParams' => ['selfAccept' => false, 'copyOnly' => true],
                     'onChangeNotify' => [
                         'calendar' => [
@@ -195,7 +195,8 @@ class View extends AbstractView {
                     'beforeActions' => ['createNewRow' => $this->beforeCreateRow(), 'deleteRows' => $this->beforeDeleteRows(), 'updateRow' => $this->beforeUpdateRow()],
                     'noCopyCols' => ['googleid', 'stravaid'],
                     'editActionLayout' => WorkoutsEditView::editDialogLayout(),
-                    'translations' => Utl::translations($this->namesToTranslate, $this->tr, 'lowercase')
+                    'translations' => Utl::translations($this->namesToTranslate, $this->tr, 'lowercase'),
+                    'freezeWidth' => true
                 ],
                 'filters' => ['parentid' => '@id', ['col' => 'startdate', 'opr' => '>=', 'values' => '@displayfromdate'], ['col' => 'startdate', 'opr' => '>=', 'values' => '@fromdate'],
                     [['col' => 'grade',  'opr' => '<>', 'values' => 'TEMPLATE'], ['col' => 'grade', 'opr' => 'IS NULL', 'values' => null, 'or' => true]]],

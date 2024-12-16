@@ -1,6 +1,6 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-style", "dojo/when", "dojo/aspect", "dijit/registry", "dojox/mobile/Container", 
-		"dojox/mobile/ToolBarButton", "tukos/widgets/WidgetsLoader", "tukos/_ObjectPaneMixin", "tukos/_TukosLayoutMixin", "tukos/utils", "tukos/widgetUtils", "tukos/PageManager"], 
-    function(declare, lang, dct, dst, when, aspect, registry, Container, ToolBarButton, widgetsLoader, _ObjectPaneMixin, _TukosLayoutMixin, utils, wutils, Pmg){
+		"dojox/mobile/ToolBarButton", "tukos/widgets/WidgetsLoader", "tukos/_ObjectPaneMixin", "tukos/_TukosLayoutMixin", "tukos/utils", "tukos/evalutils", "tukos/widgetUtils", "tukos/PageManager"], 
+    function(declare, lang, dct, dst, when, aspect, registry, Container, ToolBarButton, widgetsLoader, _ObjectPaneMixin, _TukosLayoutMixin, utils, eutils, wutils, Pmg){
 	return declare([Container, _ObjectPaneMixin, _TukosLayoutMixin], {
         postCreate: function(){
             var self = this;
@@ -9,6 +9,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
             this.widgetType = "MobileObjectPane";
             this.widgetsName = [];
             this.customization = {};
+			if (this.beforeInstantiationAction){
+				eutils.actionFunction(this, 'beforeInstantiation', this.beforeInstantiationAction);
+			}
             this.widgets = [];
             this.instantiatingWidgets = {};
             this.tableLayout(this.dataLayout, this, lang.hitch(wutils, wutils.setWatchers), this.commonWidgetsAtts);
@@ -75,9 +78,9 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
 								}
 							}
 	                    }), 0);
-						this.needsToFreezeWidth = true;
+						/*this.needsToFreezeWidth = true;
 						this.resize();
-						this.needsToFreezeWidth = false;
+						this.needsToFreezeWidth = false;*/
 	                }));
 				}));
             }));

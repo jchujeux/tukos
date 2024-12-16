@@ -323,9 +323,9 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             sutils.updateRowReferences(this, newRows);
             collection.forEach(function(object){
                 if (object.rowId >= fromRowId){
-                    object.rowId +=increment;
-                    collection.putSync(object, {overwrite: true});//can be removed ?
-                    self.updateDirty(object[idp], 'rowId', object.rowId);
+                    //object.rowId +=increment;
+                    //collection.putSync(object, {overwrite: true});//can be removed ?
+                    self.updateDirty(object[idp], 'rowId', object.rowId + increment);
                 }
             });
             this.noRefreshOnUpdateDirty = noRefresh;
@@ -440,28 +440,29 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
 			this.refresh({keepScrollPosition: true});
         },
         moveRow: function(itemToMove, currentRowData, where){
-            const idp = this.collection.idProperty;
+            const self = this, idp = this.collection.idProperty;
             if ('rowId' in this.columns){
                 var noRefresh = this.noRefreshOnUpdateDirty;
             	this.noRefreshOnUpdateDirty = true;
-            	this.offsetRowsId(itemToMove.rowId, -1);
-                if (where === 'before'){
-                    targetRowId = currentRowData.rowId;
-                    this.offsetRowsId(targetRowId, 1);
-                    itemToMove.rowId = targetRowId;
-                }else{
-                    itemToMove.rowId = this.lastRowId()+1;
-                }
-                this.collection.putSync(itemToMove, (where === 'before' ? {beforeId: currentRowData[idp], overwrite: true}: {}));
+				let lowRowId, highRowId, increment;
+				const newItemToMoveRowId = currentRowData.rowId;		
+				if (itemToMove.rowId > newItemToMoveRowId){
+					lowRowId = newItemToMoveRowId - 1; highRowId = itemToMove.rowId; increment = 1;
+				}else{
+					lowRowId = itemToMove.rowId; highRowId = newItemToMoveRowId - 1; increment = -1;					
+				}
+				this.collection.forEach(function(object){
+				    if (object.rowId > lowRowId && object.rowId < highRowId){
+				        self.updateDirty(object[idp], 'rowId', object.rowId + increment);
+				    }
+				});
                 this.noRefreshOnUpdateDirty = noRefresh;
-                this.updateDirty(itemToMove[idp], 'rowId', itemToMove.rowId);
+				this.updateDirty(itemToMove[idp], 'rowId', newItemToMoveRowId);
             } 
         },
-
         addColumn: function(){
             sutils.insertColumn(this, this.clickedCell.column);
         },
-
         deleteColumn: function(){
             if (this.clickedCell.column.cannotDelete){
                 Pmg.setFeedback(messages.cannotdeletecolumn, undefined, true);
@@ -469,7 +470,6 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 columns = sutils.deleteColumn(this, this.clickedCell.column);
             }
         },
-
         _getValue: function(){// Caution: only returns modified (from dirty) and deleted (from deleted) to send back those modified values to the server
             var rowCount = 0, result = new Array, j = 0, sendOnSave = this.sendOnSave || [], noSendOnSave = utils.flip(this.noSendOnSave || []), dirtyToSend;
             for (var i in this.dirty){

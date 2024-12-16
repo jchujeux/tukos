@@ -85,9 +85,9 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 								Pmg.setFeedback(Pmg.message('actionDone'));
 							}
 	                    }), 0);
-						this.needsToFreezeWidth = true;
+						/*this.needsToFreezeWidth = true;
 						this.resize();
-						this.needsToFreezeWidth = false;
+						this.needsToFreezeWidth = false;*/
 	                }));
 				}));
             }));

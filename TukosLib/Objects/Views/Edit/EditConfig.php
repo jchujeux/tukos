@@ -17,7 +17,7 @@ trait EditConfig {
                 'widgetsDescription' => [
                     'chartsperrow' => Widgets::numberTextBox(Widgets::complete( ['label' => $tr('Chartsperrow'), 'constraints' => ['pattern' =>  "0.######"]])),
                     'charts' =>  Widgets::simpleDgrid(Widgets::complete(
-                        ['label' => $tr('Tabcharts'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '700px'],
+                        ['label' => $tr('Tabcharts'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '700px'],'sort' => [['property' => 'rowId', 'descending' => false]],
                             'colsDescription' => [
                                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                                 'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('Name')], 'storeedit' => ['width' => 300]]), false),

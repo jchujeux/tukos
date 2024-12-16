@@ -62,7 +62,6 @@ function(declare, lang, dct, dst, popup, TooltipDialog, focus, Pmg){
                 }
                 if (widget.layoutHandle){
                 	widget.layoutHandle.unfreezeWidth = true;
-					widget.layoutHandle.unfrozenWidths = 0;
 					widget.layoutHandle.resize();
 					widget.layoutHandle.unfreezeWidth = false;
 					//widget.layoutHandle.resize();

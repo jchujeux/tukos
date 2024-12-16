@@ -100,7 +100,7 @@ class View extends AbstractView {
             'hracwr' => ViewUtils::tukosNumberBox($this, 'hracwr', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'sts' => ViewUtils::tukosNumberBox($this, 'sts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'tsb' => ViewUtils::tukosNumberBox($this, 'tsb', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
-            'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['hidden' => true, 'renderCell' => 'renderStravaLink'], 'overview' => ['hidden' => true, 'renderCell' => 'renderStravaLink']]]),
+            'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['renderCell' => 'renderStravaLink'], 'overview' => ['hidden' => true, 'renderCell' => 'renderStravaLink']]]),
             'kpiscache' => [
                 'type' => 'objectEditor',
                 'atts' => ['edit' => ['title' => $this->tr('KpisCache'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 'checkedServerValue' => '~delete', 'onCheckMessage' => $this->tr('checkedleaveswillbedeletedonsave'),

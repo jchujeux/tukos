@@ -230,9 +230,33 @@ class View extends EditView{
             $this->actionLayout['contents']);
 	}
 	public function beforeInstantiationAction(){
+	    $workoutsModel = Tfk::$registry->get('objectsStore')->objectModel('sptworkouts');
+	    $plannedCols = json_Encode($workoutsModel->plannedCols);
+	    $performedCols = json_Encode($workoutsModel->performedCols);
 	    return <<<EOT
 const form = this;
 form.openActionCompleted = false;
+form.plannedColumns = {$plannedCols};
+form.performedColumns = {$performedCols};
+const workoutColumns = form.widgetsDescription.sptworkouts.atts.columns;
+switch (form.viewModeOption){
+    case 'viewplanned':
+        form.performedColumns.forEach(function(col){
+            if ((column = workoutColumns[col]) && !column.hidden){
+                column.hidden = true;
+            }
+        });
+        break;
+    case 'viewperformed':
+        form.plannedColumns.forEach(function(col){
+            if ((column = workoutColumns[col]) && !column.hidden){
+                column.hidden = true;
+            }
+        });
+		form.dataLayout.contents.row2.contents.col2.tableAtts.hidden = true;
+        break;
+}
+
 EOT
 	    ;
 	}

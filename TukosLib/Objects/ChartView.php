@@ -57,7 +57,8 @@ trait ChartView {
                     }
                     $charts = Utl::getItem('charts', $editConfig);
                     if ($charts){
-                        $charts = json_decode($charts, true);
+                        $charts = Utl::toAssociative(json_decode($charts, true), 'rowId');
+                        ksort($charts);
                         foreach ($charts as $chart){
                             $chartId = 'chart' . $chart['id'];
                             $response['widgetsDescription'][$chartId] = Widgets::description($this->chartDescription($chartId, $chart, $dateWidgetNames, $namesToTranslate, $selectedDateWidgetName));
