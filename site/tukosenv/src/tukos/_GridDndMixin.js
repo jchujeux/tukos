@@ -40,7 +40,6 @@ function(declare, lang, when, Dnd, utils){
                     }
                 });
             });
-            grid.refresh({keepScrollPosition: true});
         },
         onDropExternal: function (sourceSource, nodes, copy, targetItem) {
             var tGrid = this.grid, sGrid = sourceSource.grid, noRefresh = this.noRefreshOnUpdateDirty, idp = tGrid.collection.idProperty;

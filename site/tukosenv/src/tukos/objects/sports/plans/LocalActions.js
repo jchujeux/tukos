@@ -37,21 +37,6 @@ function(declare, lang, utils, Pmg){
 				}
 				sessionsWidget.customizationPath = customizationPath;
 			}
-		},
-		programsConfigApplyAction: function(pane){
-			const form = this.form, changedValues = pane.changedValues();
-			if (!utils.empty(changedValues)){				
-				const sessionsWidget = form.getWidget('sptworkouts');
-				if (changedValues.equivalentDistance){
-					form.programsConfig.equivalentDistance = JSON.stringify(pane.getWidget('equivalentDistance').get('collection').fetchSync());
-					lang.setObject('customization.programsConfig.equivalentDistance', form.programsConfig.equivalentDistance, form);
-				}
-				if (changedValues.spiders){
-					form.programsConfig.spiders = JSON.stringify(pane.getWidget('spiders').get('collection').fetchSync());
-					Pmg.setFeedback(Pmg.message('savecustomtoupdatespiders'), null, null, true);
-					lang.setObject('customization.programsConfig.spiders', form.programsConfig.spiders, form);
-				}
-			}
-		},
+		}
 	});
 });

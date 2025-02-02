@@ -14,10 +14,10 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 				dojo.ready(function(){
 					let collection, horizontalAxisDescription;
 					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter),
-						 kpisDescription = JSON.parse(chartWidget.kpisToInclude), series = {}, chartData = [], tableData = [], axesDescription = JSON.parse(chartWidget.axesToInclude), axes = {},
-						 plotsDescription = JSON.parse(chartWidget.plotsToInclude), plots = {}, tableColumns = {};
+						 kpisDescription = chartWidget.kpisToInclude, series = {}, chartData = [], tableData = [], axesDescription = chartWidget.axesToInclude, axes = {},
+						 plotsDescription = chartWidget.plotsToInclude, plots = {}, tableColumns = {};
 					self.recursionDepth +=1;
-					axesDescription.forEach(function(axisDescription){
+					utils.forEach(axesDescription, function(axisDescription){
 						axes[axisDescription.name] = axisDescription;
 						if (!axisDescription.vertical){
 							horizontalAxisDescription = axisDescription;
@@ -33,14 +33,14 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 					}
 					const idProperty = collection.idProperty, collectionData = collection.fetchSync();
 					if (collectionData.length > 1){
-						const data = utils.toNumeric(collectionData, grid), valueOf = self.valueOf.bind(self);
+						const data = utils.toNumericValues(collectionData, grid), valueOf = self.valueOf.bind(self);
 						let previousKpiValuesCache = {}, filter = collection.Filter(), expression = expressionEngine.expression(data, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache);
-						plotsDescription.forEach(function(plotDescription){
+						utils.forEach(plotsDescription, function(plotDescription){
 							plots[plotDescription.name] = plotDescription;
 						});
 						let kpiIndex = 0, categoryIndex = 0, kpiNames = {}, categories = {};
 						tableColumns[0] = {field: 0, label: Pmg.message('Category')};
-						kpisDescription.forEach(function(kpiDescription, index){
+						utils.forEach(kpisDescription, function(kpiDescription, index){
 							const name = kpiDescription.name, category = kpiDescription.category;
 							if(typeof kpiNames[name] === "undefined"){
 								kpiNames[name] = kpiIndex;
@@ -69,15 +69,15 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 							}
 							chartData[kpiDescription.categoryIndex][kpiDescription.kpiIndex] = value;
 						}
-						kpisDescription.forEach(function(kpiDescription){
+						utils.forEach(kpisDescription, function(kpiDescription){
 							try{
 								const category = kpiDescription.category;
 								let filterString = chartsUtils.setFilterString(kpiDescription, expression, dateCol), kpiDate = expression.expressionToValue(kpiDescription.kpidate), kpiCollection = collection, kpiData = collectionData, previousToDate, previousData = [], kpiValue;
 								if (filterString){
 									kpiCollection = collection.filter(expFilter.expressionToValue(filterString));
-									kpiData = utils.toNumeric(kpiCollection.fetchSync(), grid);
+									kpiData = utils.toNumericValues(kpiCollection.fetchSync(), grid);
 									previousToDate = dutils.dateString(kpiData[kpiData.length - 1][dateCol], [-1, 'day']);
-									previousData = utils.toNumeric(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
+									previousData = utils.toNumericValues(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
 								}
 								expression = expressionEngine.expression(kpiData, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache, previousData, kpiDate);
 								kpiValue = expression.expressionToValue(kpiDescription.kpi);

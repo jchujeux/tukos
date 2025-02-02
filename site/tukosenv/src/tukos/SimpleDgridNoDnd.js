@@ -1,6 +1,6 @@
 define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/on",
-         "tukos/BasicGrid", "tukos/dstore/MemoryTreeObjects", "tukos/_GridUserFilterMixin", "tukos/_GridEditMixin", "dgrid/Tree", "dojo/i18n!tukos/nls/messages", "dojo/domReady!"], 
-    function(declare, lang, on, BasicGrid, MemoryTreeObjects, _GridUserFilterMixin, _GridEditMixin, Tree, messages){
+         "tukos/BasicGrid", "tukos/dstore/MemoryTreeObjects", "tukos/_GridUserFilterMixin", "tukos/_GridEditMixin", "dgrid/Tree", "tukos/PageManager", "dojo/i18n!tukos/nls/messages"], 
+    function(declare, lang, on, BasicGrid, MemoryTreeObjects, _GridUserFilterMixin, _GridEditMixin, Tree, Pmg, messages){
     var widget = declare([BasicGrid, Tree, _GridUserFilterMixin, _GridEditMixin], {
 
         constructor: function(args){
@@ -34,9 +34,12 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/on",
 		                const addedItems = [
 		                        {atts: {label: messages.insertrowbefore  ,   onClick: function(evt){self.addRow('before')}}}, 
 		                        {atts: {label: messages.addrow    ,   onClick: function(evt){self.addRow('append')}}}, 
-		                        {atts: {label: messages.copyrow,   onClick: function(evt){self.copyRow(evt)}}}
+								{atts: {label: messages.copyrow,   onClick: function(evt){self.copyRow(evt)}}}
 		                ];
-		                if (!self.noDeleteRow){
+		                if ('rowId' in self.columns){
+							addedItems.push({atts: {label:Pmg.message('UpdateRowIds'),   onClick: function(){self.updateRowIds()}}});
+						}
+						if (!self.noDeleteRow){
 		                	addedItems.push({atts: {label:messages.deleterow,   onClick: function(evt){self.deleteRow()}}});
 		                }
 		                self.contextMenuItemsWithEdit.row = self.contextMenuItemsWithoutEdit.row.concat(addedItems);

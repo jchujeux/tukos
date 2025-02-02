@@ -28,10 +28,17 @@ define(["dojo/_base/lang", "tukos/utils", "tukos/PageManager"],
 					    if (self.recursionDepth > 2){
 							Pmg.addFeedback(Pmg.message('too many recursions') + ': ' + self.recursionDepth + ' (' + chartWidgetName + ')');
 							self.recursionDepth = 0;
+							form.isCharting = false;
 							return;
 						}
-					    Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'),
-							params: {process: 'getKpis', noget: true}}}, {data: data, timeout: Pmg.getCustom('defaultClientTimeout') + data.length * 1000}).then(
+					    const defaultTimeout = Pmg.getCustom('defaultClientTimeout', 32000), requiredTimeout = utils.count(data) * 2000, query = {programId: form.valueOf('id'), athleteid: form.valueOf('parentid'), params: {process: 'getKpis', noget: true}},
+							options = {data: data};
+						if (requiredTimeout > defaultTimeout){
+							query.timeout = requiredTimeout;
+							options.timeout = requiredTimeout;
+							Pmg.addFeedback(Pmg.message('adjustedTimeout') + ': ' + requiredTimeout, null, ' ', true);
+						}
+						Pmg.serverDialog({action: 'Process', object: grid.object, view: 'edit', query: query}, options).then(
 					            function(response){
 					           		const itemsKpis = response.data.kpis;
 									utils.forEach(itemsKpis, function(itemKpis, idp){
@@ -48,15 +55,20 @@ define(["dojo/_base/lang", "tukos/utils", "tukos/PageManager"],
 					            function(error){
 					                console.log('error:' + error);
 									self.recursionDepth = 0;
+									form.isCharting = false;
 					            }
 					    );
 					}else{
 						chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
 						self.recursionDepth = 0;
+						form.isCharting = false;
+						Pmg.addFeedback(Pmg.message('updatedchart') + ' ' + chartWidget.title + ' (' + chartWidgetName + ')');
 					}
 				}else{
 					chartWidget.set('value', {data: chartData, tableData: tableData, tableColumns: tableColumns, axes: axes, plots: plots, series: series, title: chartWidget.title});
 					self.recursionDepth = 0;
+					form.isCharting = false;
+					Pmg.addFeedback(Pmg.message('updatedchart') + ' '  + chartWidget.title + ' (' + chartWidgetName + ')');
 				}
 			}
 		};

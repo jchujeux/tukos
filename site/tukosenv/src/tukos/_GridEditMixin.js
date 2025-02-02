@@ -323,13 +323,24 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             sutils.updateRowReferences(this, newRows);
             collection.forEach(function(object){
                 if (object.rowId >= fromRowId){
-                    //object.rowId +=increment;
-                    //collection.putSync(object, {overwrite: true});//can be removed ?
                     self.updateDirty(object[idp], 'rowId', object.rowId + increment);
                 }
             });
             this.noRefreshOnUpdateDirty = noRefresh;
+			this.refresh();
         },
+		updateRowIds: function(){
+			const self = this, idp = this.collection.idProperty;
+			 newRowId = 1;
+			self.noRefreshOnUpdateDirty = true;
+			self.collection.sort(self.get('sort')).forEach(function(object){
+			    self.updateDirty(object[idp], 'rowId', newRowId);
+				newRowId += 1;
+			});
+			self.noRefreshOnUpdateDirty = false;
+			this.set('sort', 'rowId');
+			this.refresh();
+		},
         lastRowId: function(){
             var maxRowId = 0;
             this.collection.forEach(function(object){
@@ -458,7 +469,8 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
 				});
                 this.noRefreshOnUpdateDirty = noRefresh;
 				this.updateDirty(itemToMove[idp], 'rowId', newItemToMoveRowId);
-            } 
+            }
+			this.refresh({keepScrollPosition: true});
         },
         addColumn: function(){
             sutils.insertColumn(this, this.clickedCell.column);
@@ -495,7 +507,6 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 }
                 j++;
             }
-            //result = result.concat(this.deleted);
             return this.deleted.concat(result);            
         },
         

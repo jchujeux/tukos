@@ -99,7 +99,7 @@ trait AuthorizeAndSynchronize {
             $kpis = $itemsModel->computeKpis($athleteId, $itemsToProcess);
             foreach($kpis as $key => $itemKpis){
                 unset($itemsValues[$key]['id']);
-                $itemsValues[$key] = array_merge(array_diff_key($itemsValues[$key], array_flip($stravaActivitiesModel->streamCols)), $itemKpis);
+                $itemsValues[$key] = array_merge(array_diff_key($itemsValues[$key], array_flip($stravaActivitiesModel->tukosStreamCols())), $itemKpis);
             }
             $itemsValues = $this->convert($itemsValues, $itemsView->dataWidgets, 'objToStoreEdit', true);
             $itemsValues = Utl::toAssociativeGrouped($itemsValues, 'startdate');

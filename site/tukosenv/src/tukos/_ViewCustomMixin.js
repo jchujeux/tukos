@@ -14,7 +14,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 				require(["tukos/TukosTooltipDialog"], function(TukosTooltipDialog){
 					customDialog = targetPane.customDialog = new TukosTooltipDialog({paneDescription: {form: form, 
 	                    widgetsDescription: {
-	                        newCustomContent: {type: 'ObjectEditor', atts: lang.mixin({label: Pmg.message('newCustomContent')}, self.objectEditorCommonAtts(false, '600px'))},
+	                        newCustomContent: {type: 'ObjectEditor', atts: lang.mixin({label: Pmg.message('newCustomContent')}, self.objectEditorCommonAtts(true, '600px'))},
 	                        tukosCustomViewButton: {type: 'RadioButton', atts: {name: 'saveOption', value: 'tukosCustomView', hidden: true}}, 
 	                        tukosCustomViewLabel: {type: 'HtmlContent', atts: {value: Pmg.message('tukosCustomView'), hidden: true, disabled: true}},
 	                        tukosCustomView: {type: 'ObjectSelect', atts: {object: 'customviews', dropdownFilters: {vobject: form.object, view: form.viewMode, panemode: form.paneMode}, hidden: true,
@@ -40,7 +40,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 	                        customContentDelete: {type: 'TukosButton', atts: {title: Pmg.message('For selected items'), label: Pmg.message('customContentDelete'),  hidden: true, onClick: lang.hitch(self, self.deleteCallback)}}
 	                    },
 	                    layout:{
-	                        tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: false, orientation: 'vert'},
+	                        tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false, orientation: 'vert'},
 	                        contents: {
 	                            col1: {
 	                                tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'},
@@ -54,11 +54,11 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 	                                    row3: {
 	                                        tableAtts: {cols: 5, customClass: 'labelsAndValues', showLabels: false, label: Pmg.message('selectAction')},  
 	                                        widgets: ['save', 'close', 'newCustomView', 'more', 'less']
-	                                    }
+	                                    },
+										row4: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: false, orientation: 'vert'}, widgets: ['customContentDelete']}
 	                                }
 	                            },
 	                            col2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['tukosCustomViewContent', 'defaultCustomViewContent', 'itemCustomViewContent', 'itemCustomContent']},
-	                            col3: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['customContentDelete']}
 	                        }      
 	                    },
 	                    style: {width: "auto"}
@@ -74,7 +74,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             }
         },
         objectEditorCommonAtts: function(hasCheckBoxes, maxHeight){
-			const self = this, maxCustomContentWidth = (dojo.window.getBox().w*0.5) + 'px', maxColWidth  = '6em';
+			const self = this, maxCustomContentWidth = (dojo.window.getBox().w*0.9) + 'px', maxColWidth  = '30em';
 			return {hasCheckboxes: hasCheckBoxes, style: {maxHeight: maxHeight || '400px', maxWidth: maxCustomContentWidth, overflow: 'auto', paddingRight: '25px'}, keyToHtml: 'capitalToBlank', maxColWidth: maxColWidth, checkBoxChangeCallback: function(){
 				const form = this.form, customToDelete = this.form.getWidget('customContentDelete'), isHidden = customToDelete.get('hidden'), willBeHidden = utils.empty(self.leavesToDelete(lang.hitch(form, form.getWidget)));
 				if (willBeHidden !== isHidden){
@@ -235,7 +235,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
         },
         leavesToDelete: function(getWidget){
             var toDelete = {};
-            ['tukosCustomView', 'defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
+            ['newCustom', 'tukosCustomView', 'defaultCustomView', 'itemCustomView', 'itemCustom'].forEach(function(customSet){
                 var contentName = customSet + 'Content'
                 var selectedLeaves = getWidget(contentName).get('selectedLeaves');
                 if (selectedLeaves && !utils.empty(selectedLeaves)){
@@ -251,7 +251,17 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
             if (utils.empty(toDelete)){
                 Pmg.alert({title: Pmg.message('missingEntry'), content: Pmg.message('noCustomToDelete')}, this.blurCallback);
             }else{
-                if (toDelete.tukosCustomView){toDelete.tukosCustomView.viewId = form.tukosviewid;}
+                if (toDelete.newCustom){
+					utils.drillDownDelete(form.customization, toDelete.newCustom.items);
+					pane.getWidget('newCustomContent').set('value', form.customization);
+					delete(toDelete.newCustom);
+					if (utils.empty(toDelete)){
+						getWidget('customContentDelete').set('hidden', true);
+						pane.resize();
+						return;
+					}
+				}
+				if (toDelete.tukosCustomView){toDelete.tukosCustomView.viewId = form.tukosviewid;}
                 if (toDelete.defaultCustomView){toDelete.defaultCustomView.viewId = form.customviewid;}
                 if (toDelete.itemCustomView){toDelete.itemCustomView.viewId = form.itemcustomviewid;}                   
                 Pmg.tabs.refresh('TabCustomDelete', toDelete, {values: true, customization: true}).then(
@@ -261,7 +271,7 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
                             getWidget(customSet + 'Content').set('value', customContent[customSet]);
                         }
                         getWidget('customContentDelete').set('hidden', true);
-                        form.resize();
+                        pane.resize();
                     }
                 );
             }

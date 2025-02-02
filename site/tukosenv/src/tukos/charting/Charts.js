@@ -9,23 +9,38 @@ function(declare, lang, utils, Pmg){
             this.chartTypeOf = {};
             this.subValuesCache = {};
             form.chartWidgets = {};
-            for (const chart of charts){
-                if (chart.chartType){
-                	chart.widgetName = 'chart' + chart.id;
-                	require([classes[chart.chartType]], function(chartClass){
+			form.isCharting = false;
+            utils.forEach(charts, function(chart, id){
+				if (chart.chartType){
+					chart.widgetName = 'chart' + id;
+					require([classes[chart.chartType]], function(chartClass){
 						form.chartWidgets[chart.widgetName] = new chartClass({form: form, grid: grid, dateCol: dateCol, timeCol: timeCol, valueOf: self.valueOf});
 					})
 				}
-            }
+			});
         },
 		_setChartsValue: function(){
             const form = this.form;
+			let lastChartWidgetToProcess = '', lastChartWidgetInProcess = '';
             if (form.chartWidgets){
-				Pmg.setFeedback(Pmg.message('actionDoing'));
+				Pmg.addFeedback(Pmg.message('processingcharts'));
 	            for (let  chartWidgetName in form.chartWidgets){
-					form.chartWidgets[chartWidgetName].setChartValue(chartWidgetName);
+					if (!form.getWidget(chartWidgetName).get('hidden')){
+						utils.waitUntil(
+							function(){return !form.isCharting;}, 
+							function(){
+								form.isCharting = true;
+								lastChartWidgetInProcess = chartWidgetName;
+								form.chartWidgets[chartWidgetName].setChartValue(chartWidgetName);},
+							100
+						);
+						lastChartWidgetToProcess = chartWidgetName;
+					}
 				}
-				Pmg.addFeedback(Pmg.message('actionDone'));
+				utils.waitUntil(
+					function(){return lastChartWidgetToProcess === lastChartWidgetInProcess && form.isCharting === false},
+					function(){Pmg.addFeedback(Pmg.message('allchartsprocessed'))}
+				);
 			}
 		},
 		setChartsValue: function(){
@@ -37,7 +52,6 @@ function(declare, lang, utils, Pmg){
 		setChartValue: function(chartWidgetName){
 			const form = this.form, chartWidgets = form.chartWidgets;
 			chartWidgets && chartWidgets[chartWidgetName] && chartWidgets[chartWidgetName].setChartValue(chartWidgetName);
-			Pmg.addFeedback(Pmg.message('updatedchart') + chartWidgetName);
 		},
 		valueOf: function(widgetName){
 			const nameAndSubName = widgetName.split('|'), form = this.form;

@@ -31,8 +31,8 @@ class View extends AbstractView {
         $dateChangeLocalAction = function($serverTrigger) {
             return [
                 'synchrostart' => ['localActionStatus'=> ['triggers' => ['server' => true, 'user' => true], 'action' => $this->synchroStartLocalAction('newValue', '#synchnextmonday'),]],
-                'weeklies' => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter'),
-                'displayeddate' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => "return true;"]]
+                'weeklies' => $this->dateChangeGridLocalAction('newValue', 'tWidget', 'tWidget.allowApplicationFilter')/*,
+                'displayeddate' => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => "return true;"]]*/
             ];
         };
         $customDataWidgets = [
@@ -65,10 +65,7 @@ class View extends AbstractView {
                 'onChangeLocalAction' => [
                     'duration'  => ['value' => "if (!newValue){return '';}else{return dutils.durationString(sWidget.valueOf('#fromdate'), newValue, sWidget.valueOf('#duration'),false)}" ],
                 ],
-            ]
-            ]
-            ]
-                ),
+            ]]]),
             'displayeddate' => $this->displayedDateDescription(['atts' => ['edit' => ['onWatchLocalAction' => ['value' => $dateChangeLocalAction(true)]]]]),
             'googlecalid' => ViewUtils::textBox($this, 'Googlecalid', ['atts' => ['edit' => ['disabled' => true]]]),
             'sportsmanemail' => ViewUtils::textBox($this, 'SportsmanEmail', ['atts' => ['edit' => ['disabled' => true, 'hidden' => true], 'overview' => ['hidden' => true]]]),
@@ -119,11 +116,11 @@ class View extends AbstractView {
                     'onWatchLocalAction' => ['date' => $dateChangeLocalAction(false)]]]],
                 'fromdate', 'todate'),
             'weeklies' => ViewUtils::JsonGrid($this, 'Weeklies', [
-                'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-                'weekof' => viewUtils::tukosDateBox($this, 'Weekof'),
-                'athleteweeklyfeeling'    => ViewUtils::textArea($this, 'AthleteWeeklyFeeling'),
-                'coachweeklycomments'  => ViewUtils::lazyEditor($this, 'CoachWeeklyComments'),
-            ],
+                    'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'weekof' => viewUtils::tukosDateBox($this, 'Weekof'),
+                    'athleteweeklyfeeling'    => ViewUtils::textArea($this, 'AthleteWeeklyFeeling'),
+                    'coachweeklycomments'  => ViewUtils::lazyEditor($this, 'CoachWeeklyComments'),
+                ],
                 ['atts' => ['edit' => [
                     'sort' => [['property' => 'weekof', 'descending' => true]], 'allowApplicationFilter' => 'yes', 'startDateTimeCol' => 'weekof', 'endDateTimeCol' => 'weekof',
                     'onWatchLocalAction' => ['allowApplicationFilter' => ['weeklies' => $this->dateChangeGridLocalAction("tWidget.form.valueOf('displayeddate')", 'tWidget', 'newValue')]],

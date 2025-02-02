@@ -51,7 +51,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-class", "dojo/when",
                 urlArgs.mode = urlArgs.mode || this.paneMode;
                 urlArgs.query = utils.mergeRecursive(urlArgs.query, {contextpathid: this.tabContextId(), timezoneOffset: (new Date()).getTimezoneOffset()});
                 return all(data).then(lang.hitch(this, function(data){
-                    return Pmg.serverDialog(urlArgs, {data: data, timeout: clientTimeout ? clientTimeout : Pmg.getCustom('defaultClientTimeout')}, noLoadingIcon ? defaultDoneMessage : (this.parent ? {widget: this.parent, att: 'title', defaultFeedback: defaultDoneMessage} : defaultDoneMessage)).then(lang.hitch(this, function(response){
+                    return Pmg.serverDialog(urlArgs, {data: data, timeout: clientTimeout ? clientTimeout : Pmg.getCustom('defaultClientTimeout', 32000)}, noLoadingIcon ? defaultDoneMessage : (this.parent ? {widget: this.parent, att: 'title', defaultFeedback: defaultDoneMessage} : defaultDoneMessage)).then(lang.hitch(this, function(response){
 	                    	if (response['data'] === false){
 	    	                        this.inServerDialog = false;
 	    	                		return response;

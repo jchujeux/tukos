@@ -73,7 +73,7 @@ class View {
                 ],
                 'rowhistory' => [
                     'tableAtts' => ['cols' => 1, 'customClass' => 'labelsAndValues', 'showLabels' => true, 'orientation' => 'vert', 'spacing' => '0',],
-                    'widgets' =>  (in_array('history', $this->view->model->allCols) ? ['history'] : []),
+                    'widgets' =>  (in_array('history', $this->view->model->allCols) ? ['custom', 'history'] : ['custom']),
                 ]
             ],
         ];

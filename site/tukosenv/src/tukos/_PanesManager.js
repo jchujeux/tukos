@@ -71,7 +71,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
 									ready(function(){
 										currentPane.resize();
 		                				ready(function(){
-											Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'));
+											Pmg.setFeedback(response['feedback'], Pmg.message('refreshed'), ' ');
 										});
 									});
 								}, 
@@ -119,7 +119,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
 							ready(function(){
 								currentPane.resize();
                 				ready(function(){
-									Pmg.setFeedback(Pmg.message('refreshed'));
+									Pmg.setFeedback(Pmg.message('refreshed'), null, ' ');
 								});
 							});
 						}, 
@@ -128,7 +128,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
 					setTimeout(function(){
                 		currentPane.set('title', title);
 						currentPane.inLocalRefresh = false;
-                		Pmg.setFeedback(Pmg.message('refreshed'));
+                		Pmg.setFeedback(Pmg.message('refreshed'), null, ' ');
 					}, 0);
 				}
             });

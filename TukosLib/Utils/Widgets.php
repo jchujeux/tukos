@@ -125,7 +125,7 @@ class Widgets{
     }
     public static function tukosDateBox($atts, $editOnly = true){
         $defAtts = [
-            'edit' => ['style' => ['width' => '6em']],
+            'edit' => ['style' => ['width' => '7em']],
             'storeedit' => ['minWidth' => Widgets::$largeWidth, 'editOn' => 'click'],
             'overview'  => ['minWidth' => Widgets::$largeWidth],
         ];

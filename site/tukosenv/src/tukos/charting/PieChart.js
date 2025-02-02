@@ -20,21 +20,21 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, chart
 						collection = grid.store.sort([{property: dateCol}, {property: timeCol}]);
 					}
 					self.recursionDepth +=1;
-					let kpisDescription = JSON.parse(chartWidget.kpisToInclude), kpiData = {}, expKpi = {}, chartData = [], axes = {},
-						series = {}, kpiFilters = {}, tableColumns = {name: {label: Pmg.message('name', form.object), field: 'name', renderCell: 'renderContent'}, value: {label: Pmg.message('value', form.object), field: 'value', renderCell: 'renderContent'}},
-						idProperty = collection.idProperty, collectionData = utils.toNumeric(collection.fetchSync(), grid),
+					let kpisDescription = chartWidget.kpisToInclude, kpiData = {}, expKpi = {}, chartData = [], axes = {},
+						series = {}, tableColumns = {name: {label: Pmg.message('name', form.object), field: 'name', renderCell: 'renderContent'}, value: {label: Pmg.message('value', form.object), field: 'value', renderCell: 'renderContent'}},
+						idProperty = collection.idProperty, collectionData = utils.toNumericValues(collection.fetchSync(), grid),
 						expression = expressionEngine.expression(collectionData, idProperty, missingItemsKpis, valueOf);
 					const plots =  {thePie: {'type': 'Pie', labelOffset: -10}};
 					let previousKpiValuesCache = {}, i = 0;
 					series[0] = {value: {text: 'name', y: 'value', tooltip: 'tooltip'}, options: {plot: 'thePie'/*, fill: set.fillColor || 'black'*/}};
-					for (const kpiDescription of kpisDescription){
+					utils.forEach(kpisDescription, function(kpiDescription){
 						try{
 							let filterString = chartsUtils.setFilterString(kpiDescription, expression, dateCol), kpiDate = expression.expressionToValue(kpiDescription.kpidate), kpiCollection, previousToDate, previousData = [], expKpi;
 							if (filterString){
 								kpiCollection = collection.filter(expFilter.expressionToValue(filterString));
-								kpiData = utils.toNumeric(kpiCollection.fetchSync(), grid);
+								kpiData = utils.toNumericValues(kpiCollection.fetchSync(), grid);
 								previousToDate = dutils.dateString(kpiData[kpiData.length - 1][dateCol], [-1, 'day']);
-								previousData = utils.toNumeric(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
+								previousData = utils.toNumericValues(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
 							}else{
 								kpiCollection = collection;
 								kpiData = collectionData;
@@ -55,7 +55,7 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, chart
 						}catch(e){
 							Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 						}
-					}
+					});
 					chartsUtils.processMissingKpis(missingItemsKpis, grid, self, chartWidgetName, chartData, chartData, tableColumns, axes, plots, series);
 				});
 			}		  

@@ -124,11 +124,11 @@ class ViewUtils{
             return Utl::array_merge_recursive_replace(['type' => 'objectSelectMulti', 'atts' => ['edit' =>  $editAtts]], $custom);
         }
     }
-
     static public function storeSelect($optionsName, $view, $label, $storeOptions=[true, 'ucfirst', false, false, false], $custom=[]){
         return Utl::array_merge_recursive_replace([
             'type' => 'storeSelect',
             'atts' => ['edit' =>  ['storeArgs' => ['data' => Utl::idsNamesStore($view->model->options($optionsName), $view->tr, $storeOptions)], 'label' => $view->tr($label)]/*, 'style' => ['maxWith' => '10em']*/],
+            'editToObj' => ['blankToNull' => ['class' => self::utl]], 'storeEditToObj' => ['blankToNull' => ['class' => self::utl]], 'overviewToObj' => ['blankToNull' => ['class' => self::utl]],           
         ],
             $custom
             );

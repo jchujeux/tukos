@@ -14,10 +14,10 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 				dojo.ready(function(){
 					let collection, horizontalAxisDescription;
 					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol,
-						 kpisDescription = JSON.parse(chartWidget.kpisToInclude), series = {}, chartData = [], tableData = [], axesDescription = JSON.parse(chartWidget.axesToInclude), axes = {},
-						 plotsDescription = JSON.parse(chartWidget.plotsToInclude), plots = {}, tableColumns = {};
+						 kpisDescription = chartWidget.kpisToInclude, series = {}, chartData = [], tableData = [], axesDescription = chartWidget.axesToInclude, axes = {},
+						 plotsDescription = chartWidget.plotsToInclude, plots = {}, tableColumns = {};
 						
-					axesDescription.forEach(function(axisDescription){
+					utils.forEach(axesDescription, function(axisDescription){
 						axes[axisDescription.name] = axisDescription;
 						if (!axisDescription.vertical){
 							horizontalAxisDescription = axisDescription;
@@ -36,7 +36,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 					const idProperty = collection.idProperty, collectionData = collection.fetchSync();
 					if (collectionData.length > 1){
 						self.recursionDepth +=1;
-						const data = utils.toNumeric(collectionData, grid), valueOf = self.valueOf.bind(self);//lang.hitch(form, form.valueOf);
+						const data = utils.toNumericValues(collectionData, grid), valueOf = self.valueOf.bind(self);//lang.hitch(form, form.valueOf);
 						let firstDate = horizontalAxisDescription.firstdate, firstDateObject, lastDate = horizontalAxisDescription.lastdate, toDate, toDateObject, previousKpiValuesCache = {}, filter = collection.Filter(),
 							expression = expressionEngine.expression(collectionData, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache), previousToDate;
 						try{
@@ -63,21 +63,22 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 						}catch(e){
 							Pmg.addFeedback(Pmg.message('errorhorizontalaxis') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('axisdescription') + ': ' + JSON.stringify(horizontalAxisDescription));
 						}
-						plotsDescription.forEach(function(plotDescription){
+						utils.forEach(plotsDescription, function(plotDescription){
 							try{
-								plots[plotDescription.name] = plotDescription;
-								if (plotDescription.type === 'Indicator'){
-									if (!plotDescription.lineStroke){
-										plotDescription = lang.mixin(plotDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: plotDescription.indicatorColor || 'red', style: plotDescription.indicatorStyle || 'shortDash', width: 2},
+								let theDescription = lang.clone(plotDescription);
+								plots[theDescription.name] = theDescription;
+								if (theDescription.type === 'Indicator'){
+									if (!theDescription.lineStroke){
+										theDescription = lang.mixin(theDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: theDescription.indicatorColor || 'red', style: theDescription.indicatorStyle || 'shortDash', width: 2},
 											labelFunc: function(){
-												return plotDescription.label || this.values;
+												return theDescription.label || this.values;
 											}
 										});
 									}
-									if (/*(plotDescription.vertical !== false) && */typeof (plotDescription.values) === 'string' && plotDescription.values.indexOf('(') >= 0){
-										plotDescription.values = dutils.difference(dutils.getDayOfWeek(1, firstDateObject), new Date(expression.expressionToValue(plotDescription.values)), isWeek ? 'week' : 'day') + 1;
+									if (/*(plotDescription.vertical !== false) && */typeof (theDescription.values) === 'string' && theDescription.values.indexOf('(') >= 0){
+										theDescription.values = dutils.difference(dutils.getDayOfWeek(1, firstDateObject), new Date(expression.expressionToValue(theDescription.values)), isWeek ? 'week' : 'day') + 1;
 									}else{
-										plotDescription.values = Number(plotDescription.values);
+										theDescription.values = Number(theDescription.values);
 									}
 								}
 							}catch(e){
@@ -85,7 +86,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 							}
 						});
 						let previousKpis = [], index1;
-						kpisDescription.forEach(function(kpiDescription, index){
+						utils.forEach(kpisDescription, function(kpiDescription, index){
 							if (kpiDescription.plot){
 								index1 = index + 1;
 								series[index1] = {value: {y: index1, tooltip: index1 + 'Tooltip'}, options: {plot: kpiDescription.plot, label: kpiDescription.name, legend: kpiDescription.name}};
@@ -99,7 +100,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 							let chartItem = {}, tableItem = {id: i, 0: xLabels[i]};
 							const periodData = collection.filter(filter.gte(dateCol, firstDate).lte(dateCol, toDate)).fetchSync();
 							expression = expressionEngine.expression(periodData, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache, previousData, toDate);
-							kpisDescription.forEach(function(kpiDescription, index){
+							utils.forEach(kpisDescription, function(kpiDescription, index){
 								if (kpiDescription.plot){
 									try{
 										index1 = index + 1

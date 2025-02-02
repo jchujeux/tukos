@@ -382,9 +382,9 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
                     self.addExtrasToCache(response.extras);
                     if (defaultFeedback !== false){
                         if (defaultFeedback && defaultFeedback[0] === '~'){
-							self.addFeedback(response.feedback, defaultFeedback.substring(1));
+							self.addFeedback(response.feedback, defaultFeedback.substring(1), ' ');
 						}else{
-							 self.setFeedback(response.feedback, defaultFeedback);
+							 self.addFeedback(response.feedback, defaultFeedback, ' ');
 						}
                     }
                     if (isObjectFeedback){
@@ -426,7 +426,7 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
             if (beep){
                 this.beep();
             }
-            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object" && serverFeedback.length > 0) ? serverFeedback.join(separator || '<br>') : (typeof serverFeedback === 'string' ? serverFeedback  : (clientFeedback || '')), widget,
+            var newFeedback = (serverFeedback != null && typeof serverFeedback == "object" && serverFeedback.length > 0) ? serverFeedback.join('<br> ... ') : (typeof serverFeedback === 'string' ? serverFeedback  : (clientFeedback || '')), widget,
                   currentTab = this.tabs ? this.tabs.currentPane() : false, self = this;
 			if (this.focusedPanel === "leftPanel"){
 				var currentPane = this.accordion ? this.accordion.currentPane() : false, form = currentPane.form || {};
@@ -448,6 +448,7 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
 					newFeedback = '<div style="color: red; font-weight: 500;">' + newFeedback + '</div>';
 				}
                 widget.set('value', separator ? widget.get('value') + separator + newFeedback : newFeedback);
+				widget.domNode.scrollTop = widget.domNode.scrollHeight;
             }
             if (this.logWidget){
             	this.logWidget.set('value', this.logWidget.get('value') + (separator ? separator : '<br>') + newFeedback);
@@ -466,8 +467,8 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
             	}
             }
         },
-        addFeedback: function(serverFeedback, clientFeedback, beep){
-            this.setFeedback(serverFeedback, clientFeedback, "<br>", beep);
+        addFeedback: function(serverFeedback, clientFeedback, separator, beep){
+            this.setFeedback(serverFeedback, clientFeedback, separator || "<br>", beep);
         },
 		setFeedbackAlert: function(feedback){
 			this.setFeedback(feedback, null, null, true);

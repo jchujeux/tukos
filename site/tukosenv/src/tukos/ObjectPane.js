@@ -72,7 +72,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 				                        if (form.offlineChangedValues){
 											form.setWidgets({value: form.offlineChangedValues});
 										}
-										Pmg.setFeedback(Pmg.message('actionDone'));
+										Pmg.setFeedback(Pmg.message('actionDone'), null, ' ');
 									}, 
 									100);
 							}else{
@@ -82,7 +82,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 		                        if (this.offlineChangedValues){
 									this.setWidgets({value: this.offlineChangedValues});
 								}
-								Pmg.setFeedback(Pmg.message('actionDone'));
+								Pmg.setFeedback(Pmg.message('actionDone'), null, ' ');
 							}
 	                    }), 0);
 						/*this.needsToFreezeWidth = true;

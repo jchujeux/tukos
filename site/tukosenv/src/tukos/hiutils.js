@@ -16,7 +16,7 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
             for (var key in object){
                 if (key !== '#tKey'){
 	                checkboxPath.push(key);
-	                if (typeof object[key] === 'object' && !Object.hasOwn(object[key], "#leafValue")){
+	                if (object[key] !== null && typeof object[key] === 'object' && !Object.hasOwn(object[key], "#leafValue")){
 	                    var row = addTableRows(object[key]), rowCount = row.count;
 	                    if (rowCount > 0){
 	                        var keyTd = dct.create('td', {style: "border: 1px solid black; padding: 5px; vertical-align:top;", rowspan: rowCount});
@@ -27,7 +27,7 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
 	                    }
 	                }else{
 	                    let tKey, leafValue;
-	                    if (Object.hasOwn(object[key], "#leafValue")){
+	                    if (object[key] !== null && Object.hasOwn(object[key], "#leafValue")){
 							tKey = object[key]["#tKey"];
 							leafValue = object[key]["#leafValue"];
 						}else{

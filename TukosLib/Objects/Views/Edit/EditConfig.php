@@ -52,15 +52,16 @@ trait EditConfig {
     protected function editConfigOnOpenAction(){
         return <<<EOT
 const form = this.form, pane = this, editConfig = form.editConfig;
-if (editConfig){
+if (editConfig  && !this.isInitialized){
     pane.markIfChanged = false;
     if (editConfig.chartsperrow){
         pane.setValueOf('chartsperrow', editConfig.chartsperrow);
     }
     if (editConfig.charts){
-        pane.setValueOf('charts', JSON.parse(editConfig.charts));
+        pane.setValueOf('charts', utils.toNumeric(editConfig.charts, 'id'));
     }
     pane.markIfChanged = true;
+    this.isInitialized = true;
 }
 EOT;
     }
@@ -70,12 +71,16 @@ const pane = this.form, form = pane.form, changedValues = pane.changedValues();
 if (!utils.empty(changedValues)){
 	form.editConfig = form.editConfig || {};
 	if (changedValues.chartsperrow){
-		form.editConfig.chartsperrow = pane.valueOf('chartsperrow');
 		lang.setObject('customization.editConfig.chartsperrow', form.editConfig.chartsperrow, form);
 	}
 	if (changedValues.charts){
-		form.editConfig.charts = JSON.stringify(pane.getWidget('charts').get('collection').fetchSync());
-		lang.setObject('customization.editConfig.charts', form.editConfig.charts, form);
+		const newChartsValue = utils.toObject(lang.clone(pane.getWidget('charts').get('value')), 'id', false, true);
+        lang.setObject('customization.editConfig.charts', newChartsValue, form);
+        utils.forEach(newChartsValue, function(value, id){
+            if (JSON.stringify(value) === '{"~delete":true}'){
+                lang.setObject('customization.widgetsDescription.' + 'chart' + id, value, form);
+            }
+        });
 	}
 	Pmg.setFeedback(Pmg.message('savecustomtoupdatecharts'), null, null, true);
 }

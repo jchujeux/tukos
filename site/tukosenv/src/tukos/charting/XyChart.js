@@ -14,9 +14,9 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 				dojo.ready(function(){
 					let collection, log10;
 					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter),
-						 kpisDescription = JSON.parse(chartWidget.kpisToInclude), series = {}, chartData = [], tableColumns = [], tableData = [{}], axesDescription = JSON.parse(chartWidget.axesToInclude), axes = {},
-						 plotsDescription = JSON.parse(chartWidget.plotsToInclude), plots = {};
-					axesDescription.forEach(function(axisDescription){
+						 kpisDescription = chartWidget.kpisToInclude, series = {}, chartData = [], tableColumns = [], tableData = [{}], axesDescription = chartWidget.axesToInclude, axes = {},
+						 plotsDescription = chartWidget.plotsToInclude, plots = {};
+					utils.forEach(axesDescription, function(axisDescription){
 						axes[axisDescription.name] = axisDescription;
 						if (axisDescription.scaletype){
 							log10 = Math.log(10);
@@ -36,9 +36,9 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 					const idProperty = collection.idProperty, collectionData = collection.fetchSync();
 					if (collectionData.length > 1){
 						self.recursionDepth +=1;
-						const data = utils.toNumeric(collectionData, grid), valueOf = self.valueOf.bind(self);//lang.hitch(form, form.valueOf);
+						const data = utils.toNumericValues(collectionData, grid), valueOf = self.valueOf.bind(self);//lang.hitch(form, form.valueOf);
 						let previousKpiValuesCache = {}, filter = collection.Filter(), expression = expressionEngine.expression(data, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache);
-						plotsDescription.forEach(function(plotDescription){
+						utils.forEach(plotsDescription, function(plotDescription){
 							plots[plotDescription.name] = plotDescription;
 							if (plotDescription.markersProgressColor){
 								plotDescription.styleFunc = function(item){
@@ -65,14 +65,14 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 							}
 						};
 						const white = Color.fromString('white'), yellow = Color.fromString('yellow'), orange = Color.fromString('orange'), red = Color.fromString('red'), darkRed = Color.fromString('darkred');
-						kpisDescription.forEach(function(kpiDescription){
+						utils.forEach(kpisDescription, function(kpiDescription){
 							try{
 								let filterString = chartsUtils.setFilterString(kpiDescription, expression, dateCol), kpiDate = expression.expressionToValue(kpiDescription.kpidate), kpiCollection = collection, kpiData = collectionData, previousToDate, previousData = [];
 								if (filterString){
 									kpiCollection = collection.filter(expFilter.expressionToValue(filterString));
-									kpiData = utils.toNumeric(kpiCollection.fetchSync(), grid);
+									kpiData = utils.toNumericValues(kpiCollection.fetchSync(), grid);
 									previousToDate = dutils.dateString(kpiData[kpiData.length - 1][dateCol], [-1, 'day']);
-									previousData = utils.toNumeric(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
+									previousData = utils.toNumericValues(collection.filter(filter.lte(dateCol, previousToDate)).fetchSync(), grid);
 									expression = expressionEngine.expression(kpiData, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache, previousData, kpiDate);
 								}
 								const name = kpiDescription.name, xName = name + ' (x)', yName = name + ' (y)', zName = name + ' (z)', tooltipName = name + 'Tooltip', fillName = name + 'Fill', plotName = kpiDescription.plot, 

@@ -99,6 +99,8 @@ define(['tukos/ExpressionParser', 'tukos/dateutils'], function (parser, dutils) 
 						return dutils.formatDate(new Date());
 					case 'MONDAY': x = 1; case 'TUESDAY': x = 2; case 'WEDNESDAY': x = 3; case 'THURSDAY': x = 4; case 'FRIDAY': x = 5; case 'SATURDAY': x = 6; case 'SUNDAY': x = 7;						
 						return dutils.formatDate(dutils.getDayOfWeek(x, new Date()));
+					case 'undefined':
+						return undefined;
 					default:
 						return term;
 				}

@@ -15,8 +15,8 @@ class View extends AbstractView {
             'widgettype'       => ViewUtils::textBox($this, 'Widgettype'),
             'customization' => [
                 'type' => 'objectEditor',
-                'atts' => ['edit' => ['title' => $this->tr('Customization'), 'keyToHtml' => 'capitalToBlank'/*, 'hasCheckboxes' => true*/, 'isEditTabWidget' => true,
-                    'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/,  'overflow' => 'auto']]],
+                'atts' => ['edit' => ['title' => $this->tr('Customization'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 'checkedServerValue' => '~delete',
+                    'onCheckMessage' => $this->tr('checkedleaveswillbedeletedonsave'), 'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/,  'overflow' => 'auto']]],
                 //'objToEdit' => ['map_array_recursive' => ['class' => 'TukosLib\Utils\Utilities', $this->tr]],
             ],
         ];

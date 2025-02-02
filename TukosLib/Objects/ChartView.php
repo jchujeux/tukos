@@ -35,7 +35,6 @@ trait ChartView {
                 'axesToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'axes')]]],
                 'daytype' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'daytype')]]],
                 'plotsToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'plots')]]],
-                'title' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'title')]]],
                 'tableSkipEmptyPeriods' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'tableSkipEmptyPeriods')]]],
                 'chartFilter' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'chartFilter')]]],
                 'kpisToInclude' => [$chartId => ['localActionStatus' => ['triggers' => ['server' => false, 'user' => true], 'action' => $this->chartChangeAction($chartId, 'kpis')]]],
@@ -57,10 +56,9 @@ trait ChartView {
                     }
                     $charts = Utl::getItem('charts', $editConfig);
                     if ($charts){
-                        $charts = Utl::toAssociative(json_decode($charts, true), 'rowId');
-                        ksort($charts);
-                        foreach ($charts as $chart){
-                            $chartId = 'chart' . $chart['id'];
+                        uasort($charts, fn($a, $b) => $a['rowId'] <=> $b['rowId']);
+                        foreach ($charts as $id => $chart){
+                            $chartId = 'chart' . $id;
                             $response['widgetsDescription'][$chartId] = Widgets::description($this->chartDescription($chartId, $chart, $dateWidgetNames, $namesToTranslate, $selectedDateWidgetName));
                             $chartLayoutRow['widgets'][] = $chartId;
                         }
@@ -91,13 +89,12 @@ EOT
         return <<<EOT
 const form = sWidget.form;
 if (form.editConfig && form.editConfig.charts){
-    const chartsConfig = JSON.parse(form.editConfig.charts);
     if (form.charts){
         form.resize();
         form.charts.setChartsValue();
     }else{
         require(["tukos/charting/Charts"], function(Charts){
-            form.charts = new Charts({form: form, grid: sWidget, dateCol: '$dateCol', timeCol: '$timeCol', selectedDate: '$selectedDate', charts: chartsConfig});
+            form.charts = new Charts({form: form, grid: sWidget, dateCol: '$dateCol', timeCol: '$timeCol', selectedDate: '$selectedDate', charts: form.editConfig.charts});
         });
     }
 }
@@ -167,9 +164,6 @@ EOT
         $tr = $this->tr;
         $dateFormulaesTranslations = Utl::translations(array_merge(self::$dateFormulaesToTranslate, $dateWidgetNames), $this->tr, 'lowercase');
         return [
-            'title' => ['att' => 'title', 'type' => 'TextBox', 'name' => $tr('Title')],
-            //return {att: attName, type: 'StoreSelect', name: Pmg.message(attName), storeArgs: {data: [{id: '', name: ''}, {id: 'yes', name: Pmg.message('yes')}, {id: 'no', name: Pmg.message('no')}]}};
-            
             'tableSkipEmptyPeriods' => ['att' => 'tableSkipEmptyPeriods', 'type' => 'StoreSelect', 'name' => $tr('TableSkipEmptyPeriods'), 'storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]]],
             'chartFilter' => ['att' => 'chartFilter', 'type' => 'TukosTextarea', 'name' => $tr('chartFilter'), 'atts' => ['translations' => $translations]],
             'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'style' => ['maxWidth' => '1500px'], 'storeArgs' => ['idProperty' => 'idg'],
@@ -244,7 +238,6 @@ EOT
     public function spiderChartCustomizableAtts($translations, $dateWidgetNames,  $selectedDate){
         $tr = $this->tr;
         return [
-            'title' => ['att' => 'title', 'type' => 'TextBox', 'name' => $tr('Title')],
             'chartFilter' => ['att' => 'chartFilter', 'type' => 'TukosTextarea', 'name' => $tr('chartFilter'), 'atts' => ['translations' => $translations]],
             'plots' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartDiagramsTukosTooltip', 'object' => $this->objectName]],
@@ -301,8 +294,6 @@ EOT
     public function pieChartCustomizableAtts($translations, $dateWidgetNames,  $selectedDate){
         $tr = $this->tr;
         return [
-            'title' => ['att' => 'title', 'type' => 'TextBox', 'name' => $tr('Title')],
-            'chartFilter' => ['att' => 'chartFilter', 'type' => 'TukosTextarea', 'name' => $tr('chartFilter'), 'atts' => ['translations' => $translations]],
             'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $tr('kpisToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $tr('help'), 'name' => 'pieChartKpisTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
@@ -332,7 +323,6 @@ EOT
         $tr = $this->tr;
         $dateFormulaesTranslations = Utl::translations(array_merge(self::$dateFormulaesToTranslate, $dateWidgetNames), $this->tr, 'lowercase');
         return [
-            'title' => ['att' => 'title', 'type' => 'TextBox', 'name' => $tr('Title')],
             'chartFilter' => ['att' => 'chartFilter', 'type' => 'TukosTextarea', 'name' => $tr('chartFilter'), 'atts' => ['translations' => $translations]],
             'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartAxesTukosTooltip', 'object' => $this->objectName]],
@@ -405,9 +395,7 @@ EOT
     }
     public function xyChartCustomizableAtts($translations, $dateWidgetNames, $selectedDateWidgetName){
         $tr = $this->tr;
-        $dateFormulaesTranslations = Utl::translations(array_merge(self::$dateFormulaesToTranslate, $dateWidgetNames), $this->tr, 'lowercase');
         return [
-            'title' => ['att' => 'title', 'type' => 'TextBox', 'name' => $tr('Title')],
             'chartFilter' => ['att' => 'chartFilter', 'type' => 'TukosTextarea', 'name' => $tr('chartFilter'), 'atts' => ['translations' => $translations]],
             'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartAxesTukosTooltip', 'object' => $this->objectName]],

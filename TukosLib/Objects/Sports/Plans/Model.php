@@ -42,7 +42,7 @@ class Model extends AbstractModel {
             'initialhracwr' => 'FLOAT DEFAULT NULL',
             'displayfrom' => 'longtext'
         ];
-        parent::__construct($objectName, $translator, 'sptplans', ['parentid' => ['sptathletes'], 'coachid' => ['people']], ['weeklies', 'displayfrom'], $colsDefinition, [], []);
+        parent::__construct($objectName, $translator, 'sptplans', ['parentid' => ['sptathletes'], 'coachid' => ['people']], ['weeklies', 'displayfrom'], $colsDefinition, [], [], ['custom']);
         $this->afterGoogleSync = false;
         $this->setDeleteChildren();
     }

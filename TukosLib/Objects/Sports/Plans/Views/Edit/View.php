@@ -56,7 +56,7 @@ class View extends EditView{
                     'widgets' => ['sptworkouts'],
                 ]
         ];
-        $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl'], $this->dataLayout['contents']));
+        $this->dataLayout['contents'] = array_merge($customContents, Utl::getItems(['rowbottom', 'rowacl', 'rowhistory'], $this->dataLayout['contents']));
         $this->beforeInstantiationAction = $this->beforeInstantiationAction();
         $this->onOpenAction =  "setTimeout(function(){Pmg.setFeedback(Pmg.message('actionDoing'));},0);" . $this->view->OpenEditAction() . $this->viewModeOptionOpenAction() .
         $this->view->gridOpenAction('weeklies') .  $this->view->gridOpenAction($this->view->gridWidgetName) .  "this.openActionCompleted = true;";
@@ -226,7 +226,7 @@ class View extends EditView{
         $this->actionWidgets['viewall'] = ['type' => 'TukosRadioButton', 'atts' => ['name' => 'modeOption', 'label' => $tr('viewall'), 'value' => 'viewall'/*, 'checked' => true*/, 'onClickAction' => $this->viewModeOptionOnClick('viewall')]];
         $this->actionLayout['tableAtts']['cols'] = 3;
         $this->actionLayout['contents'] = array_merge(array_splice($this->actionLayout['contents'], 0, 1), 
-            ['workoutViewOptions' => ['tableAtts' => ['cols' => 1, 'customClass' => 'actionTable', 'showLabels' => true,  'label' => '<b>' . $this->view->tr('WorkoutsMode') . ':</b>'], 'widgets' => [ 'viewplanned',  'viewperformed', 'viewall']]],
+            ['workoutViewOptions' => ['tableAtts' => ['cols' => 1, 'customClass' => 'actionTable', 'showLabels' => true,  'label' => '<b>' . $this->view->tr('SessionsMode') . ':</b>'], 'widgets' => [ 'viewplanned',  'viewperformed', 'viewall']]],
             $this->actionLayout['contents']);
 	}
 	public function beforeInstantiationAction(){

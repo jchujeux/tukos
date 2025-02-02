@@ -5,14 +5,15 @@ use TukosLib\Objects\Sports\KpisFormulaes as KF;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
-trait Kpis {
+trait Kpis {//self::$thresholdsMap[$name] self::$athleteParamsDescription[$name]['threshold']
 
-    public static $beta = 2.6, $refCadence = 180, $thresholdsMap = ['heartrate' => 'hrthreshold', 'power' => 'ftp', 'speed' => 'speedthreshold'], $minsMap = ['heartrate' => 'hrmin'],
-        $functionsMap = ['avgload' => 'avgLoad', 'avg' => 'estimatedpower_avg', 'estimatedavg' => 'power_estimatedavg'/*, 'wattsstream' => 'estimatedWattsStream'*/, 'rawwattsstream' => 'estimatedRawWattsStream', 'load' => 'load', 'timeinzones' => 'timeInZones',
+    public static $beta = 2.6, $refCadence = 180/*, $thresholdsMap = ['heartrate' => 'hrthreshold', 'power' => 'ftp', 'speed' => 'speedthreshold']*/, $minsMap = ['heartrate' => 'hrmin'],
+        $functionsMap = ['avgload' => 'avgLoad', 'avg' => 'estimatedpower_avg', 'estimatedavg' => 'power_estimatedavg', 'rawwattsstream' => 'estimatedRawWattsStream', 'load' => 'load', 'timeinzones' => 'timeInZones',
             'timeabove' => 'timeAbove', 'timebelow' => 'timeBelow', 'loadinzones' => 'loadInZones', 'loadabove' => 'loadAbove', 'loadbelow' => 'loadBelow', 'timecurve' => 'timeCurve', 'durationcurve' => 'durationCurve', 'shrink' => 'shrink'],
-        $streamsMap = ['heartrate' => 'heartrate', 'power' => 'watts'/*, 'powercalcstream' => 'watts_calc'*/, 'distance' => 'distance', 'cadence' => 'cadence'/*, 'slope' => 'grade_smooth', 'speed' => 'velocity_smooth'*/, 'estimatedpowerstream' => 'estimatedpower_watts',
-                'estimatedrawpowerstream' => 'estimatedpower_rawwatts'],
-        $metricsPrecision = ['heartrate' => 0, 'power' => 0, 'watts' => 0, 'estimatedpower' => 0/*, 'estimatedpowerstream' => 0*/, 'estimatedrawpowerstream' => 0, 'distance' => 1, 'elevationgain' => 0,  'cadence' => 0, 'slope' => 1, 'speed' => 2, 'powercalcstream' => 0],
+        $streamsMap = ['heartrate' => 'heartrate', 'power' => 'watts'/*, 'powercalcstream' => 'watts_calc'*/, 'distance' => 'distance', 'cadence' => 'cadence'/*, 'slope' => 'grade_smooth', 'speed' => 'velocity_smooth'*/,
+            'estimatedpowerstream' => 'estimatedpower_watts', 'estimatedrawpowerstream' => 'estimatedpower_rawwatts'],
+        $metricsPrecision = ['heartrate' => 0, 'power' => 0, 'watts' => 0, 'estimatedpower' => 0/*, 'estimatedpowerstream' => 0*/, 'estimatedrawpowerstream' => 0, 'distance' => 1, 'elevationgain' => 0,  'cadence' => 0, 'slope' => 1, 
+            'speed' => 2, 'powercalcstream' => 0],
         $athleteParamsDescription = ['heartrate' => ['threshold' => 'hrthreshold', 'sex' => 'sex', 'min' => 'hrmin'], 'power' => ['threshold' => 'ftp', 'sex' => 'sex'], 'estimatedpowerstream' => ['threshold' => 'ftp', 'sex' => 'sex'],
             'estimatedrawpowerstream' => ['threshold' => 'ftp', 'sex' => 'sex'], 'powercalcstream' => ['threshold' => 'ftp', 'sex' => 'sex'], 'mechanical' => ['threshold' => 'speedthreshold'], 'estimatedpower' => ['weight' => 'weight']
         ],
@@ -22,10 +23,9 @@ trait Kpis {
                 'optionalActivityParams' => ['extraWeight' => 'extraweight', 'frictionCoef' => 'frictioncoef', 'dragCoef' => 'dragcoef', 'windVelocity' => 'windvelocity']],
             'heartrate_avgload' => ['metrics' => 'avghr', 'activityParams' => ['secondsActive' => 'timemoving']],
             'power_avgload' => ['metrics' => 'avgpw', 'activityParams' => ['secondsActive' => 'timemoving']],
-            //'power_estimatedavgload' => ['metrics' => 'power_estimatedavg', 'activityParams' => ['secondsActive' => 'timemoving']],
             'estimatedpower_wattsstream' => ['metrics' => 'velocity_smoothstream', 'activityParams' => ['grade_smoothstream' => 'grade_smoothstream'],
                 'optionalActivityParams' => ['extraWeight' => 'extraweight', 'frictionCoef' => 'frictioncoef', 'dragCoef' => 'dragcoef', 'windVelocity' => 'windvelocity']],
-            'estimatedpower_rawwattsstream' => ['metrics' => 'distancestream', 'activityParams' => ['altitudestream' => 'altitudestream', 'latlngstream' => 'latlngstream'],
+            'estimatedpower_rawwattsstream' => ['metrics' => 'distancestream', 'activityParams' => ['altitudestream' => 'altitudestream', 'latitudestream' => 'latitudestream', 'longitudestream' => 'longitudestream'],
                 'optionalActivityParams' => ['extraWeight' => 'extraweight', 'frictionCoef' => 'frictioncoef', 'dragCoef' => 'dragcoef', 'windVelocity' => 'windvelocity', 'windDirection' => 'winddirection']],
             'load' => ['metrics' => 'stream'],
             'mechanical_load' => ['metrics' => 'velocity_smoothstream', 'activityParams' => ['cadencestream' => 'cadencestream'], 'otherParams' => ['b' => ['cadenceCorrection']]],
@@ -74,7 +74,8 @@ trait Kpis {
     }
     public static function hasRequiredAthleteParams($kpiName, $athlete){
         [$name, $formula, $param1, $param2] = array_pad(explode('_', $kpiName), 4, '');
-        return empty(array_diff(Utl::getItem('athleteParams', self::getDescription($name, $formula, $param1), []), array_keys($athlete))) && ($param1 === 'threshold' || $param2 === 'threshold')? !empty($athlete[self::$thresholdsMap[$name]]) : true;
+        return empty(array_diff(Utl::getItem('athleteParams', self::getDescription($name, $formula, $param1), []), 
+            array_keys($athlete))) && ($param1 === 'threshold' || $param2 === 'threshold')? !empty($athlete[self::$athleteParamsDescription[$name]['threshold']]) : true;
     }
     public static function requiredActivityParams($kpiName, $includeOptional = true){
         [$name, $formula, $param1] = array_pad(explode('_', $kpiName), 3, '');
@@ -125,7 +126,7 @@ trait Kpis {
             case 'loadbelow':
                 if ($$thresholdParam === 'threshold'){
                     $thresholdRatio = empty($$nextParam) ? 100 : $$nextParam;
-                    $thresholdValue = round($athlete[self::$thresholdsMap[$name]], $description['precision']);
+                    $thresholdValue = round($athlete[self::$athleteParamsDescription[$name]['threshold']], $description['precision']);
                     $minValue = empty($minIndex = Utl::getItem($name, self::$minsMap)) ? 0 : $athlete[$minIndex];
                     $arguments['kpiThreshold'] = $thresholdValue * $thresholdRatio / 100;
                     $arguments['kpiThreshold'] = round(($thresholdValue - $minValue) * $thresholdRatio / 100 + $minValue, $description['precision']);
@@ -137,7 +138,7 @@ trait Kpis {
             case 'loadinzones':
                 if ($$thresholdParam === 'threshold'){
                     $minValue = empty($minIndex = Utl::getItem($name, self::$minsMap)) ? 0 : $athlete[$minIndex];
-                    $thresholdValue = round($athlete[self::$thresholdsMap[$name]], $description['precision']);
+                    $thresholdValue = round($athlete[self::$athleteParamsDescription[$name]['threshold']], $description['precision']);
                     $kpiThresholds = array_slice(explode('_', $kpiName), $sliceValue);
                     foreach($kpiThresholds as &$threshold){
                         $threshold = round(($thresholdValue - $minValue) * $threshold / 100 + $minValue, $description['precision']);
@@ -205,7 +206,7 @@ trait Kpis {
                         }
                         if(!empty($activityColsToGet = array_diff($activityColsToGet, array_keys($activity))) && ($stravaColsToGet = array_intersect($activityColsToGet, $stravaActivitiesModel->allCols))){
                             if ($stravaId){
-                                $activity = array_merge($activity, $stravaActivityValues = array_filter($stravaActivitiesModel->getOne(['where' => ['stravaid' => $stravaId], 'cols' => $stravaColsToGet])));
+                                $activity = array_merge($activity, $stravaActivityValues = array_filter($stravaActivitiesModel->getOneCorrected(['where' => ['stravaid' => $stravaId], 'cols' => $stravaColsToGet])));
                             }
                             $kpisToCompute = array_diff($kpisToCompute, $stravaColsToGet);
                         }
@@ -219,7 +220,7 @@ trait Kpis {
                 }
                 foreach($activity as $col => &$param){
                     if (substr($col, -6) === 'stream' && is_string($param)){
-                        $param = json_decode($param);
+                        $param = json_decode($param, true);
                     }
                 }
                 foreach ($kpisOKtoCompute as $kpiName){

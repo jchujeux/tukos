@@ -2,11 +2,11 @@
 namespace TukosLib\Objects\Sports\Strava\Activities;
 
 use TukosLib\Objects\AbstractModel;
+use TukosLib\Objects\Sports\Strava\Activities\StreamsCorrection;
 use TukosLib\Strava\API\Client;
 use TukosLib\Strava\API\Service\REST;
 use League\OAuth2\Client\Token\AccessToken as AccessToken;
 use Strava\API\OAuth;
-use TukosLib\Objects\Sports\KpisFormulaes as KF;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
 use TukosLib\Utils\Utilities as Utl;
@@ -14,6 +14,8 @@ use TukosLib\TukosFramework as TFK;
 
 class Model extends AbstractModel {
 
+    use StreamsCorrection;
+    
     function __construct($objectName, $translator=null){
         $colsDefinition = [
             'stravaid' => 'VARCHAR(30) DEFAULT NULL',
@@ -38,6 +40,16 @@ class Model extends AbstractModel {
             //'grade_smoothstream' => 'longtext',
             //'velocity_smoothstream' => 'longtext',
             'latlngstream' => 'longtext',
+            'latitudestream' => 'longtext',
+            'longitudestream' => 'longtext',
+            'timestreamc' => 'longtext',
+            'distancestreamc' => 'longtext',
+            'altitudestreamc' => 'longtext',
+            'heartratestreamc' => 'longtext',
+            'cadencestreamc' => 'longtext',
+            'wattsstreamc' => 'longtext',
+            'latitudestreamc' => 'longtext',
+            'longitudestreamc' => 'longtext',
         ];
         $this->metrics = [
             'duration' => ['stName' => 'elapsed_time'],
@@ -60,6 +72,36 @@ class Model extends AbstractModel {
     }   
     public function hasStreams($id){
         return !empty($this->getOne(['where' => ['id' => $id, ['col' => 'timestream', 'opr' => 'IS NOT NULL', 'values' => null]], 'cols' => ['id']]));
+    }
+    public function originalStreamCols(){
+        return isset($this->originalStreamCols) ? $this->originalStreamCols : $this->originalStreamCols = array_merge(array_filter($this->streamCols, function($col){return $col !== 'latlngstream';}), ['latitudestream', 'longitudestream']);
+    }
+    public function correctedStreamCols(){
+        return isset($this->correctedStreamCols) ? $this->correctedStreamCols : $this->correctedStreamCols = array_map(function($col){return $col . 'c';}, $this->originalStreamCols());
+    }
+    public function tukosStreamCols(){
+        return isset($this->tukosStreamCols) ? $this->tukosStreamCols : $this->tukosStreamCols = array_merge($this->originalStreamCols(), $this->correctedStreamCols());
+    }
+    public function getOneCorrected ($atts, $jsonColsPaths = [], $jsonNotFoundValue=null, $absentColsFlag = 'forbid'){
+        $isCorrected = false;
+        if (!empty($this->getOne(['where' => array_merge($atts['where'], [['col' => 'timestreamc', 'opr' => 'IS NOT NULL', 'values' => null]]), 'cols' => ['id']]))){
+            $isCorrected = true;
+            foreach($atts['cols'] as &$col){
+                if (substr($col, -6) === 'stream'){
+                    $col = $col . 'c';
+                }
+            }
+        }
+        $result = $this->getOne($atts, $jsonColsPaths, $jsonNotFoundValue, $absentColsFlag);
+        if ($isCorrected){
+            foreach($result as $col => $value){
+                if (substr($col, -7) === 'streamc'){
+                    unset($result[$col]);
+                    $result[substr($col, 0, -1)] = $value;
+                }
+            }
+        }
+        return $result;
     }
     public function activityToTukos($activity){
         $tukosActivity = [];
@@ -106,27 +148,13 @@ class Model extends AbstractModel {
         }
         return $tukosStreams;
     }
-    public function stravaStreamToElapsedValue($times, $stravaStreamData, $delta = 1){// transforms in [elapsedTime, value], eliminating consecutive pairs with same value
-        $tukosStreamData = []; $inactiveDuration = 0; $initialIntervalValue = 0;
-        foreach ($times as $activeTime => $elapsedTime){
-            if ($activeTime + $inactiveDuration < $elapsedTime){
-                $tukosStreamData[] = [$activeTime + $inactiveDuration, 0];
-                $tukosStreamData[] = [$elapsedTime - 1, 0];
-                $inactiveDuration = $elapsedTime - $activeTime;
-                $initialIntervalValue = 0;
-            }
-            if (abs($stravaStreamData[$activeTime] - $initialIntervalValue) >= $delta){
-                $tukosStreamData[] = [$elapsedTime, ($initialIntervalValue = $stravaStreamData[$activeTime])];
-            }
-        }
-        return $tukosStreamData;
-    }
     public function addStreams($activity, $streamCols, $client){
         $stravaStreamsName = array_map(function($tukosName){return substr($tukosName, 0, -6);}, $streamCols);
         $activity = array_merge($activity, $this->stravaStreamsToTukosStreams(array_intersect_key($client->getActivityStreams($activity['stravaid'], implode(',', $stravaStreamsName)), array_flip($stravaStreamsName))));
-        foreach($streamCols as $col){
-            if (!empty($activity[$col])){
-                $activity[$col] = json_encode($activity[$col]);
+        $this->addCorrectedStreams($activity);
+        foreach($activity as $col => $value){
+            if (!empty($activity[$col]) && (substr($col, -6) === 'stream' || substr($col, -7) === 'streamc')){
+                $activity[$col] = json_encode($value);
             }
         }
         return $activity;
@@ -162,7 +190,7 @@ class Model extends AbstractModel {
                 if ($synchroStreams){
                     if (empty($existingTukosActivity['timestream'])){
                         $this->updateOne($this->addStreams($tukosActivity, $this->streamCols, $client));
-                    }else if (empty($existingTukosActivity['latlngstream'])){//temporary: until 10/2024 watt_calcstream was not in streamCols
+                    }else if (empty($existingTukosActivity['latlngstream'])){//temporary: added stream to save in tukos
                         $this->updateOne($this->addStreams($tukosActivity, ['latlngstream'], $client));
                     }
                 }
@@ -174,6 +202,15 @@ class Model extends AbstractModel {
                     $gearItem['equipmentid'] = Utl::extractItem('id', $gearItem);
                     $tukosActivity = array_merge($tukosActivity, $gearItem);
                 }
+            }
+            if (!empty($tukosActivity['timestreamc'])){
+                foreach($tukosActivity as $col => $value){
+                    if (substr($col, -7) === 'streamc'){
+                        unset($tukosActivity[$col]);
+                        $tukosActivity[substr($col, 0, -1)] = $value;
+                    }
+                }
+                unset($tukosActivity['comments']);
             }
             $itemsValues[] = $tukosActivity;
         }

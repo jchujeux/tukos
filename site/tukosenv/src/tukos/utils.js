@@ -182,6 +182,22 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				}
 				return pointer;
 			},
+			drillDownDelete: function(object, objectFilter){
+				const self = this;
+				let pointer = object;
+				self.forEach(objectFilter, function(subFilter, key){
+					if (pointer.hasOwnProperty(key)){
+						if (subFilter === true){
+							delete(pointer[key]);
+						}else{
+							self.drillDownDelete(pointer[key], subFilter);
+							if (self.count(pointer[key]) === 0){
+								delete pointer[key];
+							}
+						}
+					}
+				});
+			},
 			replace: function(comparisonOperator, arrayToSearch, searchProperty, searchValue, returnProperty, cache, ignoreCase, ignoreAccent) {
 				var search = function(row) {
 					var targetValue = String(row[searchProperty]),
@@ -252,17 +268,36 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					return self.indexOf(value) === index;
 				});
 			},
-			toObject: function(theArray, theIndexKeyName, theTargetKeyName){
+			toObject: function(theArray, theIndexKeyName, theTargetKeyName, deleteFlag, keepIndexKey){
 				var theObject = {};
 				if(theArray){
 					theArray.forEach(function(item){
-						theObject[item[theIndexKeyName]] = theTargetKeyName ? item[theTargetKeyName] : item;
+						theObject[item[theIndexKeyName]] = theTargetKeyName ? item[theTargetKeyName] : (deleteFlag && item['~deleted'] ? '~deleted' : item);
+						if (!keepIndexKey){
+							delete item[theIndexKeyName];
+						}
 					});
 					return theObject;
 				}else{
 					return undefined;
 				}
 				
+			},
+			toNumeric: function(object, keyName, asString){
+				const self = this, theResult = [];
+				self.forEach(object, function(item, keyValue){
+					let theItem = lang.clone(item);
+					if (asString){
+						keyValue = keyValue.toString();
+					}
+					if (typeof theItem === 'object'){
+						theItem[keyName] = keyValue;
+					}else{
+						theItem = self.newObj([[keyName, keyValue]])
+					}
+					theResult.push(theItem);
+				});
+				return theResult;
 			},
 			merge: function(target, source) { //Use the returned value to be sure to get the modified value in all cases
 				this.wasModified = false;
@@ -619,7 +654,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 						return value;
 				}
 			},
-	        toNumeric: function(data, grid){
+	        toNumericValues: function(data, grid){
 				let self = this, transformedData = [];
 				data.forEach(function(row){
 					let transformedRow = {};

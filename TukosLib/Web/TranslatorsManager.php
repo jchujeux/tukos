@@ -72,19 +72,25 @@ class TranslatorsManager {
         };
     }
     function substituteTranslations($template){
-        $names = []; $setNames = []; $pattern = "/[#]{([^}][^@]*)}@/";
+        $names = []; $setNames = []; $pattern = "/[#]{(.*?)}@/";
         preg_match_all($pattern, $template, $matches);
         if (!empty($matches[1])){
             $matchesToTranslate = array_unique($matches[1]);
             array_walk($matchesToTranslate, function($placeHolder, $key) use (&$names, &$setNames){
-                list($name, $mode, $translatorName) = explode('|', $placeHolder);
+                //list($name, $mode, $translatorName) = explode('|', $placeHolder);
+                $splitted = [];
+                preg_match('/(.*)\|[^|]*\|([^|]*)$/', $placeHolder, $splitted);
+                $name = $splitted[1]; $translatorName = $splitted[2];
                 $names[$name] = true;
                 $setNames = array_unique(array_merge($setNames, $this->translatorPaths[$translatorName]));
             });
             $names = array_keys($names);
             $translations = $this->_getTranslations($names, $setNames);
             foreach($matchesToTranslate as &$match){
-                list($name, $mode, $translatorName) = explode('|', $match);
+                //list($name, $mode, $translatorName) = explode('|', $match);
+                $splitted = [];
+                preg_match('/(.*)\|([^|]*)\|([^|]*)$/', $match, $splitted);
+                $name = $splitted[1]; $mode = $splitted[2]; $translatorName = $splitted[3];
                 $getTranslation = function($name, $translations, $translatorPaths, $translatorName){
                     if (empty($nameTranslations = Utl::getItem(strtolower($name), $translations))|| empty($activeSets = array_intersect($translatorPaths[$translatorName], array_keys($nameTranslations))) || empty($nameTranslation = $nameTranslations[reset($activeSets)])){
                         $subNames = explode('_', $name); $translatedSubNames = [];

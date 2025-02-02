@@ -44,6 +44,9 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
 	            	                    mutils.newObjectPopupMenuItemDescription(this.object, messages.addsubrow, lang.hitch(this, this.addSubRow, false), lang.hitch(this, this.getTemplate, 'addSubRow')),
 	            	                    {atts: {label: messages.copyrow,   onClick: function(evt){self.copyRow(evt)}}}
 	            	                ];
+					if ('rowId' in this.columns){
+						addedItems.push({atts: {label:Pmg.message('UpdateRowIds'),   onClick: function(){self.updateRowIds()}}});
+					}
 	            	this.contextMenuItems.canEdit = [
 	            	            	    {atts: {label: messages.editinpopup, onClick: lang.hitch(this, this.editInPopup)}},
 	            	                    {atts: {label: messages.deleterow,   onClick: function(evt){self.deleteRow(false, false, true)}}},

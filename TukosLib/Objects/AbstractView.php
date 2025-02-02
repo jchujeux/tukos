@@ -97,18 +97,17 @@ abstract class AbstractView extends ObjectTranslator{
             $this->subObjects = $subObjects;
         }
         $this->_exceptionCols = array_merge($this->_exceptionCols, $exceptionCols);
-        //$this->jsonColsPathsView     = array_merge(['acl' => []], $jsonColsPathsView);
-        /*$processJsonCols = function($jsonCol, $key) use ($jsonColsPathsView) {
-            $this->jsonColsPathsView[$jsonCol] =  Utl::getItem($jsonCol, $jsonColsPathsView, []);
-        }*/
         array_walk($this->model->jsonCols, function($jsonCol, $key) use ($jsonColsPathsView) {
             $this->jsonColsPathsView[$jsonCol] =  Utl::getItem($jsonCol, $jsonColsPathsView, []);
         });
         if (in_array('custom', $this->model->allCols)){
-            $this->dataWidgets['custom'] = ['type' => 'textArea', 'atts' => ['edit' => ['label' => $this->tr('itemcustom')], 'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]];
-            $this->_exceptionCols['edit'][] = 'custom';
-            $this->_exceptionCols['post'][] = 'custom';
-            $this->_exceptionCols['get'][] = 'custom';
+            $this->dataWidgets['custom'] = [
+                'type' => 'objectEditor',
+                'atts' => [
+                    'edit' => ['title' => $this->tr('Customization'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 'checkedServerValue' => '~delete', 
+                        'onCheckMessage' => $this->tr('checkedleaveswillbedeletedonsave'), 'hidden' => true, 'style' => ['maxHeight' =>  '500px'/*, 'maxWidth' => '400px'*/,  'overflow' => 'auto'], 'maxColWidth' => '1200px'],
+                    'storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]],
+            ];
         }
         if (in_array('worksheet', $this->model->allCols)){
             $this->dataWidgets['worksheet'] = [
@@ -174,7 +173,6 @@ abstract class AbstractView extends ObjectTranslator{
         if (empty($values['id'])){
         	return $this->tr($this->objectName) . ' (' . $this->tr('new') . ')';
         }else{
-            //$name = SUtl::translatedExtendedNames([$values['id']])[$values['id']];
             $name = Utl::getItem($id = $values['id'], SUtl::translatedExtendedNames([$id]), $id);
         }
         return $name . ' (' . ucfirst($this->tr($this->objectName)) . '  '  . $values['id'] . ')';

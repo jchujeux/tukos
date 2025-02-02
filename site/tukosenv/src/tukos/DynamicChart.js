@@ -220,13 +220,6 @@ function(declare, lang, dct, dst, aspect, Widget, Chart, theme, StoreSeries, Obs
 	                    }catch(err){
 	                        console.log('error while rendering or resizing chart for widget: ' + this.widgetName + ' - ' + err.message);
 	                    }
-	                    /*this.chart.stack.forEach(function(plotter){
-							if (plots[plotter.name].regression){
-								dojo.ready(function(){// or else on first display the regression line does not show-up
-									chartClasses['regression'].render(plotter);
-								});
-							}
-						})*/
 	                    if (self.legend){
 							if (!self.legendWidget){
 								self.legendWidget = new chartClasses[self.legend.type](lang.mixin({chart: chart, 
@@ -239,9 +232,6 @@ function(declare, lang, dct, dst, aspect, Widget, Chart, theme, StoreSeries, Obs
 							}
 						}
 	                    chart.resize(showTable ==='yes' ? width - dst.get(this.tableWidget.domNode, "width") : width, dst.get(this.chartNode, "height"));
-	                    /*if (showTable === 'YES'){
-							this.tableWidget.resize(this.tableWidget.domNode, 'width', dst.get(this.tableNode.parentNode, "height"));
-						}*/
 					}
 	            }));
             }

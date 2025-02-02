@@ -192,9 +192,10 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
         applyCustom: function(){
             var widget = this.widget, widgetPane = widget.pane, pane = widgetCustomDialog.pane, attTarget = pane.valueOf('att'), attInfo = this.customAtts[attTarget], att = attInfo.att, attRoot = attInfo.root || att, newAttValue = this.newAttValue(), newAtt;
             newAtt = attRoot === att ? newAttValue : utils.newObj([[att, newAttValue]]);//{[att]: newAttValue});
-            widget[attRoot] = '';
+			widget[attRoot] = '';
             widget.set(attRoot, newAtt);
-            lang.setObject((widget.itemCustomization || 'customization') + (attRoot === 'value' ? ('.data.value.' + widget.widgetName) : ('.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot)), newAtt, widgetPane);
+			const attChange =  this.attValueWidget.widgetType === 'SimpleDgrid' ? utils.toObject(this.attValueWidget.get('value'), 'id', false, true) : newAtt;
+            lang.setObject((widget.itemCustomization || 'customization') + (attRoot === 'value' ? ('.data.value.' + widget.widgetName) : ('.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot)), attChange, widgetPane);
         },
 
         applyGridEditorCustom: function(){
@@ -203,11 +204,13 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
             	newAttValue = this.newAttValue(), newAttObject = {};
             if (oldAttValue !== newAttValue){
                 if (attRoot !== att){
-                     newAttObject[att] = attObject[att] = newAttValue;
+                     attObject[att] = newAttValue;
                 }else{
-                     newAttObject[att] = attObject = newAttValue;
-                    }
+                     attObject = newAttValue;
+                }
                 widget.set(attRoot, attObject);
+				const attChange =  this.attValueWidget.widgetType === 'SimpleDgrid' ? utils.toObject(this.attValueWidget.get('value'), 'id', false, true) : newAtt;
+				newAttObject[att] = attChange;
                 lang.setObject((grid.itemCustomization || 'customization') + '.widgetsDescription.' + grid.widgetName + '.atts.columns.' + column.field + '.editorArgs' + (attRoot === att ? '' : ('.' + attRoot)), newAttObject, gridPane);
             }
         },
@@ -225,7 +228,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 	    	                default: return '';
 	    	            }
 					case 'SimpleDgrid':
-						return oldAttValue ? JSON.parse(oldAttValue) : oldAttValue;
+						return oldAttValue ? utils.toNumeric(oldAttValue, 'id') : oldAttValue;
 					default:
 						return oldAttValue || '';
         		}
@@ -285,14 +288,14 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 				case 'MultiSelect': 
 					return attValueWidget.get('serverValue');
 				case 'SimpleDgrid':
-					return JSON.stringify(attValueWidget.collection.fetchSync().filter(function(row){
+					return utils.toObject(attValueWidget.collection.fetchSync().filter(function(row){
 						utils.forEach(row, function(value, property){
 							if (value === undefined || value === null || Number.isNaN(value)){
 								delete row[property];
 							}
 						});
 						return row;
-					}));
+					}), 'id', false, true, true);
 				default:
 					return attValueWidget.get('serverValue') || attValueWidget.get('value');
 			}
