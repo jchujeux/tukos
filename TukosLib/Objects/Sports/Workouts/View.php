@@ -51,6 +51,7 @@ class View extends AbstractView {
             'frictioncoef' => ViewUtils::tukosNumberBox($this, 'Frictioncoef', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.0000'], 'onChangeLocalAction' => ['frictioncoef' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]],
                 'storeedit' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.####']], 'overview' => ['formatType' => 'number', 'formatOptions' => ['pattern' => '#.####']]]]),
             'dragcoef' => ViewUtils::tukosNumberBox($this, 'Dragcoef', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00'], 'onChangeLocalAction' => ['dragcoef' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
+            'geosource'      => ViewUtils::textBox($this, 'Geosource'),
             'windvelocity' => ViewUtils::tukosNumberBox($this, 'Windvelocity', ['atts' => ['edit' => ['style' => ['width' => '5em'], 'constraints' => ['pattern' => '#0.00'], 'onChangeLocalAction' => ['windvelocity' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
             'winddirection' => ViewUtils::storeSelect('direction', $this, 'Winddirection', [true, 'ucfirst', false, true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['winddirection' => ['localActionStatus' => $this->removeEstimatedPowerKpis()]]]]]),
             'stress'        => ViewUtils::storeSelect('stress', $this, 'Plannedqsm', [true, 'ucfirst', true, true, false]),

@@ -43,13 +43,18 @@ if (!empty($params['class'])){
     $scriptsOutputs  = $objectsStore->objectModel('scriptsoutputs');
     $colsToGet = ['id', 'status', 'path', 'scriptname', 'parameters', 'startdate', 'enddate', 'laststart', 'timeinterval'];
     if ($scriptIds = Utl::getItem('scriptids', $params)){
-        $scriptsToConsider = $scripts->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => json_decode($scriptIds)]], 'cols' => $colsToGet]);
+        $scriptsToConsider = $scripts->getAll(['where' => [['col' => 'id', 'opr' => 'IN', 'values' => json_decode($scriptIds, true)]], 'cols' => $colsToGet]);
+        $ignoreOkToStart = true;
     }else{
         $scriptsToConsider = $scripts->getAll(['where' => [['col' => 'status', 'opr' => 'IN', 'values' => ['READY']], ['col' => 'timeinterval', 'opr' => 'IS NOT NULL', 'values' => null], ['col' => 'timeinterval', 'opr' => '<>', 'values' => '["",""]']], 'cols' => $colsToGet]);
+        $ignoreOkToStart = false;
     }
     $feedback = [];
     foreach ($scriptsToConsider as $scriptInfo){
         $scriptInfo['runmode'] = 'ATTACHED';
+        if ($ignoreOkToStart){
+            $scriptInfo['timeinterval'] = null;
+        }
         $feedback[$scriptInfo['id']] = $scripts->processScript($scriptInfo);
     }
     $runningIds = '';

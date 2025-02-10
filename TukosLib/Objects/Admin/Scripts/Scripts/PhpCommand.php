@@ -5,14 +5,14 @@ use TukosLib\TukosFramework as Tfk;
 use TukosLib\Utils\Feedback;
 
 class PhpCommand extends CommandLine{
-    function __construct($id, $parameters, $scriptObj){
+    function __construct($id, $parameters, $scriptObj, $runMode="ATTACHED"){
         if (is_array($parameters)){
             $phpScript = Tfk::$tukosPhpDir . array_shift($parameters);
             $parameters = array_unshift($parameters, 'php', $phpScript);
         }else{
              $parameters = 'php' . ' ' . Tfk::$tukosPhpDir . $parameters;
         }
-        parent::__construct($id, $parameters, $scriptObj);
+        parent::__construct($id, $parameters, $scriptObj, $runMode);
     }
 } 
 

@@ -126,5 +126,59 @@ class Model extends AbstractModel {
     public function itemsView(){
         return Tfk::$registry->get('objectsStore')->objectView('sptworkouts');
     }
+    public function updateCorrectedStreamsAndKpis ($planId, $options){
+        $planInformation = $this->getOne(['where' => ['id' => $planId], 'cols' => ['id', 'parentid', 'fromdate', 'todate']]);
+        $workoutsModel = $this->itemsModel();
+        $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
+        $workouts = $workoutsModel->getAll(['where' => ['parentid' => $planId, ['col' => 'startdate', 'opr' => '>=', 'values' => Utl::getItem('fromdate', $options, $planInformation['fromdate'], $planInformation['fromdate'])], 
+            ['col' => 'startdate', 'opr' => '<=', 'values' => Utl::getItem('todate', $options, $planInformation['todate'], $planInformation['todate'])]], 'cols' => array_merge($this->stravaCols(), ['id'])]);
+        $itemsToProcess = []; $kpisToGet = $this->activityKpis();
+        $correctionMode = Utl::getItem('corrections', $options, true, true);
+        foreach($workouts as $workoutItem){
+            if (!empty($stravaId = Utl::getItem('stravaid', $workoutItem)) && $correctionMode !== 'skip'){
+                if ($correctionMode === true){
+                    echo 'Applying streams correction<br>';
+                    $stravaItem = $stravaActivitiesModel->getOne(['where' => ['stravaid' => $stravaId], 'cols' => array_merge($stravaActivitiesModel->streamCols, ['latitudestream', 'longitudestream', 'id'])]);
+                    if (!empty($stravaItem)){
+                        foreach ($stravaItem as $col => $value){
+                            if (!empty($stravaItem[$col]) && substr($col, -6) === 'stream'){
+                                $stravaItem[$col] = json_decode($value, true);
+                            }
+                        }
+                        $stravaActivitiesModel->addCorrectedStreams($stravaItem, true);
+                        foreach($stravaItem as $col => $value){
+                            if (!empty($stravaItem[$col]) && (substr($col, -6) === 'stream' || substr($col, -7) === 'streamc')){
+                                $stravaItem[$col] = json_encode($value);
+                            }
+                        }
+                        if($stravaActivitiesModel->updateOne($stravaItem)){
+                            echo 'updated strava id ' . $stravaItem['id'] . '<br>';
+                        }
+                    }
+                }else if ($correctionMode === 'remove'){
+                    $stravaItem = $stravaActivitiesModel->getOne(['where' => ['stravaid' => $stravaId], 'cols' => ['id', 'timestreamc']]);
+                    if (!empty($stravaItem['timestreamc'])){
+                        $colsToProcess = $stravaActivitiesModel->streamCols;
+                        unset($colsToProcess[array_search('latlngstream', $colsToProcess)]);
+                        foreach ($colsToProcess as $key => $col){
+                            $stravaItem[$colsToProcess[$key] .'c'] = null;
+                        }
+                        $stravaItem['timemovingc'] = null;
+                        if ($stravaActivitiesModel->updateOne($stravaItem)){
+                            echo 'corrections removed for strava id ' . $stravaItem['id'] . '<br>';
+                        }
+                    }
+                }
+            }
+            $itemsToProcess[] = ['kpisToGet' => &$kpisToGet, 'itemValues' => $workoutItem];
+        }
+        echo 'Recomputing workouts kpis<br>';
+        $kpis = $workoutsModel->computeKpis($planInformation['parentid'], $itemsToProcess);
+        foreach($kpis as $key => $itemKpis){
+            if ($workoutsModel->updateOne(array_merge($workouts[$key], $itemKpis))){
+                echo 'updated workoutid ' . $workouts[$key]['id'] . '<br>';
+            }
+        }
+    }
 }
 ?>

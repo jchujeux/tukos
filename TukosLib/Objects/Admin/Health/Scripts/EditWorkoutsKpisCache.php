@@ -15,16 +15,29 @@ class EditWorkoutsKpisCache {
             $options = new \Zend_Console_Getopt(
                 ['app-s'		  => 'tukos application name (default provided in interactive mode)',
                  'rootUrl-s'     => 'tukos root url (default provided in interactive mode)',
-                  'parentid-s'     => 'tukos application database name (default provided in interactive mode)',
+                  'parentid-s'     => '(default provided in interactive mode)',
                   'db-s'		      => 'tukos application database name (default provided in interactive mode)',
                  'class=s'        => 'this class name (mandatory)',
-                 'searchstring=s' => 'string to search in kpis names to eliminate (mandatory)',
+                    'planid-s'   => 'The training plan for which applying this script (optional)',
+                    'fromdate-s' => 'optional',
+                    'todate-s'   => 'optional',
+                    'searchstring=s' => 'string to search in kpis names to eliminate (mandatory)',
                 ]);
             $searchString = $options->getOption('searchstring');
             $workoutsModel = $objectsStore->objectModel('sptworkouts');
-            $workoutsToEdit = $workoutsModel->getAll(['cols' => ['id', 'kpiscache'], 'where' => [
-                ['col' => 'kpiscache', 'opr' => 'IS NOT NULL', 'values' => null], ['col' => 'kpiscache', 'opr' => 'RLIKE', 'values' => $searchString]
-            ]], ['kpiscache' => []]);
+            $planId = $options->getOption('planid'); $fromDate = $options->getOption('fromdate'); $toDate = $options->getOption('todate');
+            $where = [['col' => 'kpiscache', 'opr' => 'IS NOT NULL', 'values' => null], ['col' => 'kpiscache', 'opr' => 'RLIKE', 'values' => $searchString]];
+            if ($planId){
+                $where['parentid'] = $planId;
+            }
+            if ($fromDate){
+                $where[] = ['col' => 'startdate', 'opr' => '>=', 'values' => $fromDate];
+            }
+            if ($toDate){
+                $where[] = ['col' => 'startdate', 'opr' => '<=', 'values' => $toDate];
+            }
+            
+            $workoutsToEdit = $workoutsModel->getAll(['cols' => ['id', 'kpiscache'], 'where' => $where], ['kpiscache' => []]);
             array_walk($workoutsToEdit, function(&$item) use ($workoutsModel, $searchString) {
                 foreach ($item['kpiscache'] as $kpi => $value){
                     if (str_contains($kpi, $searchString)){

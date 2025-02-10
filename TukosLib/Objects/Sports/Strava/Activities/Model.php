@@ -9,6 +9,7 @@ use League\OAuth2\Client\Token\AccessToken as AccessToken;
 use Strava\API\OAuth;
 use TukosLib\Utils\Feedback;
 use TukosLib\Utils\DateTimeUtilities as DUtl;
+use TukosLib\Utils\ConversionUtilities as CUtl;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as TFK;
 
@@ -42,6 +43,7 @@ class Model extends AbstractModel {
             'latlngstream' => 'longtext',
             'latitudestream' => 'longtext',
             'longitudestream' => 'longtext',
+            'timemovingc' => 'VARCHAR(30)  DEFAULT NULL',
             'timestreamc' => 'longtext',
             'distancestreamc' => 'longtext',
             'altitudestreamc' => 'longtext',
@@ -87,7 +89,7 @@ class Model extends AbstractModel {
         if (!empty($this->getOne(['where' => array_merge($atts['where'], [['col' => 'timestreamc', 'opr' => 'IS NOT NULL', 'values' => null]]), 'cols' => ['id']]))){
             $isCorrected = true;
             foreach($atts['cols'] as &$col){
-                if (substr($col, -6) === 'stream'){
+                if (substr($col, -6) === 'stream' || $col === 'timemoving'){
                     $col = $col . 'c';
                 }
             }
@@ -95,7 +97,7 @@ class Model extends AbstractModel {
         $result = $this->getOne($atts, $jsonColsPaths, $jsonNotFoundValue, $absentColsFlag);
         if ($isCorrected){
             foreach($result as $col => $value){
-                if (substr($col, -7) === 'streamc'){
+                if (substr($col, -7) === 'streamc' || $col === 'timemovingc'){
                     unset($result[$col]);
                     $result[substr($col, 0, -1)] = $value;
                 }
@@ -159,7 +161,7 @@ class Model extends AbstractModel {
         }
         return $activity;
     }
-    public function activitiesToTukos($athleteId, $synchroStart, $synchroEnd, $synchroStreams){
+    public function activitiesToTukos($athleteId, $synchroStart, $synchroEnd, $geoSource, $synchroStreams){
         $athleteModel = Tfk::$registry->get('objectsStore')->objectModel('people'); $itemsValues = [];
         try{
             $client = $this->getAthleteClient($athleteId);
@@ -203,6 +205,10 @@ class Model extends AbstractModel {
                     $tukosActivity = array_merge($tukosActivity, $gearItem);
                 }
             }
+            if ($geoSource){
+                $tukosActivity['geosource'] = $geoSource;
+                $this->addGeoDataToItem($tukosActivity, $this->latitude, $this->longitude);
+            }
             if (!empty($tukosActivity['timestreamc'])){
                 foreach($tukosActivity as $col => $value){
                     if (substr($col, -7) === 'streamc'){
@@ -215,6 +221,70 @@ class Model extends AbstractModel {
             $itemsValues[] = $tukosActivity;
         }
         return $itemsValues;
+    }
+    public function addGeoDataToItem(&$itemValue, $latitude, $longitude){
+        if (($libGeo = $itemValue['geosource']) && ($libGeo !== 'auto' || !empty($latitude))){
+            $geoUrl = 'https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/donnees-synop-essentielles-omm/records?' .
+                'select=date%2C%20coordonnees%2C%20libgeo%2C%20ff%2C%20dd&where=date%20%3E%3D%20date%27${date}T00%3A00%3A00%27%20and%20date%20%3C%3D%20date%27${date}T23%3A59%3A59%27%20and%20${libgeowhere}&order_by=date%20ASC';
+            if ($libGeo === 'auto'){
+                $targetDistance = 50; $windData = [];
+                while (empty($windData) && $targetDistance <= 200){
+                    $libGeoWhere = Utl::substitute('within_distance(coordonnees%2C%20geom\'POINT(${longitude}%20${latitude})\'%2C%20${targetdistance}km)',
+                        ['latitude' => CUtl::radiansToDegrees($latitude), 'longitude' => CUtl::radiansToDegrees($longitude), 'targetdistance' => $targetDistance]);
+                    $windData = json_decode(file_get_contents(Utl::substitute($geoUrl, ['date' => $itemValue['startdate'], 'libgeowhere' => $libGeoWhere])), true);
+                    $targetDistance = $targetDistance * 2;
+                }
+                if (!empty($windData['results'])){
+                    $data = Utl::toAssociative($windData['results'], 'libgeo');
+                    if (count($data) === 1){
+                        $data = $windData['results'];
+                    }else{
+                        $nearestDistance = INF;
+                        foreach($data as $libGeo => $values){
+                            $distance = CUtl::latlngRadiansToMeters($latitude, $longitude, $values[0]['coordonnees']['lat'], $values[0]['coordonnees']['lon']);
+                            if ($distance < $nearestDistance){
+                                $nearestLibGeo = $libGeo;
+                                $nearestDistance = $distance;
+                            }
+                        }
+                        $data = array_filter($windData['results'], function($item) use ($nearestLibGeo) {return $item['libgeo'] === $nearestLibGeo;});
+                    }
+                }
+                
+            }else{
+                $libGeoWhere = Utl::substitute('libgeo%20%3D%20%22${libgeo}%22', ['libgeo' => $libGeo]);
+                $windData = json_decode(file_get_contents(Utl::substitute($geoUrl, ['date' => $itemValue['startdate'], 'libgeowhere' => $libGeoWhere])), true);
+                $data = $windData['results'];
+            }
+            if (!empty($data)){
+                $dataCount = count($data);
+                $midTimeSeconds = DUtl::timeToSeconds(substr($itemValue['starttime'], 0, 8)) + intval($itemValue['duration'] / 2);
+                $midTime = substr(DUtl::secondsToTime($midTimeSeconds), 1);
+                $beforeData = $data[0];
+                $i = 1; $iLast = $dataCount -1;
+                while(substr($data[$i]['date'], 11, 8) < $midTime && $i <= $iLast){
+                    $beforeData = $data[$i];
+                    $i +=1;
+                }
+                $afterData = $i <= $iLast ? $data[$i] : $beforeData;
+                if ($beforeData !== $afterData){
+                    $secondsBefore = Dutl::timeToSeconds(substr($beforeData['date'], 11, 8));
+                    $secondsAfter = Dutl::timeToSeconds(substr($afterData['date'], 11, 8));
+                    $totalSeconds = $secondsAfter - $secondsBefore;
+                    $beforeWeight = ($secondsAfter - $midTimeSeconds) / $totalSeconds;
+                    $afterWeight = ($midTimeSeconds - $secondsBefore) / $totalSeconds;
+                    $itemValue['windvelocity'] = ($beforeData['ff'] * $beforeWeight + $afterData ['ff'] * $afterWeight) / 2.0;
+                    $itemValue['winddirection'] = intval(round(($beforeData['dd'] * $beforeWeight + $afterData ['dd']* $afterWeight) * 16 / 360));
+                }else{
+                    $itemValue['windvelocity'] = $beforeData['ff'];
+                    $itemValue['winddirection'] = $beforeData['dd'];
+                }
+            }
+        }else{
+            $itemValue['windvelocity'] = null;
+            $itemValue['winddirection'] = null;
+        }
+        
     }
 }
 ?>

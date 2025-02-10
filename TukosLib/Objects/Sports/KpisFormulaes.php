@@ -126,10 +126,7 @@ class KpisFormulaes {
                     $gravityForce = $slope * $totalWeightForce;
                     $accelerationForce = ($velocity - $previousVelocity) * $totalMass;
                     $watts = ($frictionForce + $gravityForce + $dragForce + $accelerationForce) * $velocity;
-                    if ($watts > 1000){
-                        $watts = 0.0;
-                    }
-                    $wattsStream[$key] = round(min(max(0, $watts), 2500), $precision);
+                    $wattsStream[$key] = round(min(max(0, $watts), 1000), $precision);
                 }else{
                     $wattsStream[$key] = 0;
                 }

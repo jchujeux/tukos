@@ -34,11 +34,11 @@ class Model extends AbstractModel {
     }
 
     function runModeOptions(){
-        return ['ATTACHED', 'DETACHED'];
+        return $this->runModeOptions;;
     }
 
     function statusOptions(){
-        return ['DISABLED', 'READY', 'RUNNING'];
+        return $this->statusOptions;
     }
 
     function addTimeInterval ($date, $interval){
@@ -88,11 +88,13 @@ class Model extends AbstractModel {
                             foreach ([' --db ' => Tfk::$registry->get('appConfig')->dataSource['dbname'], ' --parentid ' => $scriptInfo['id'], ' --app ' => Tfk::$registry->appName, ' --rootUrl ' => Tfk::$registry->rootUrl] as $parameter => $value){
                                 if (!strpos($scriptInfo['parameters'], $parameter)){
                                     $scriptInfo['parameters'] = substr_replace($scriptInfo['parameters'],  $parameter . $value, $position, 0);
-                                    //$scriptInfo['parameters'] .= $parameter . $value;
                                 }
                             }
                         }
-                    $script = new $scriptName($scriptInfo['id'], $scriptInfo['parameters'], true);
+                        if ($scriptInfo['runmode'] === 'DETACHED'){
+                            $scriptInfo['parameters'] = preg_replace('/--class[^-]*/', '--scriptids [' . $scriptInfo['id'] . '] ', $scriptInfo['parameters']);
+                        }
+                    $script = new $scriptName($scriptInfo['id'], $scriptInfo['parameters'], true, $scriptInfo['runmode']);
                     Feedback::add($this->tr('Scriptisrunning'));
                     return 'SCRIPTISRUNNING';
                 }else{

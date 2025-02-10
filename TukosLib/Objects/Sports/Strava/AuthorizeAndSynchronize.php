@@ -52,40 +52,7 @@ trait AuthorizeAndSynchronize {
         $stravaActivitiesModel = Tfk::$registry->get('objectsStore')->objectModel('stravaactivities');
         $itemsModel = $this->itemsModel();
         $itemsView = $this->itemsView();
-        if ($itemsValues = $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $synchroStreams)){
-            foreach($itemsValues as &$itemValue){
-                if ($libGeo = $query['synchroweatherstation']){
-                    $windData = json_decode(file_get_contents(Utl::substitute(
-                        'https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/donnees-synop-essentielles-omm/records?select=date%2C%20ff%2C%20dd&where=date%20%3E%3D%20date%27${date}T00%3A00%3A00%27%20and%20date%20%3C%3D%20date%27${date}T23%3A59%3A59%27%20and%20libgeo%20%3D%20%22${libgeo}%22&order_by=date%20ASC&limit=20',
-                        ['date' => $itemValue['startdate'], 'libgeo' => $libGeo]
-                    )), true);
-                    if ($dataCount = $windData['total_count']){
-                        $data =$windData['results'];
-                        $midTimeSeconds = DUtl::timeToSeconds(substr($itemValue['starttime'], 0, 8)) + intval($itemValue['duration'] / 2);
-                        $midTime = substr(DUtl::secondsToTime($midTimeSeconds), 1);
-                        $beforeData = $data[0];
-                        $i = 1; $iLast = $dataCount -1;
-                        while(substr($data[$i]['date'], 11, 8) < $midTime && $i <= $iLast){
-                            $beforeData = $data[$i];
-                            $i +=1;
-                        }
-                        $afterData = $i <= $iLast ? $data[$i] : $beforeData;
-                        if ($beforeData !== $afterData){
-                            $secondsBefore = Dutl::timeToSeconds(substr($beforeData['date'], 11, 8));
-                            $secondsAfter = Dutl::timeToSeconds(substr($afterData['date'], 11, 8));
-                            $totalSeconds = $secondsAfter - $secondsBefore;
-                            $beforeWeight = ($secondsAfter - $midTimeSeconds) / $totalSeconds;
-                            $afterWeight = ($midTimeSeconds - $secondsBefore) / $totalSeconds;
-                            $itemValue['windvelocity'] = ($beforeData['ff'] * $beforeWeight + $afterData ['ff'] * $afterWeight) / 2.0;
-                            $itemValue['winddirection'] = intval(round(($beforeData['dd'] * $beforeWeight + $afterData ['dd']* $afterWeight) * 16 / 360));
-                        }else{
-                            $itemValue['windvelocity'] = $beforeData['ff'];
-                            $itemValue['winddirection'] = $beforeData['dd'];
-                        }
-                    }
-                }
-            }
-            reset($itemValue);
+        if ($itemsValues = $stravaActivitiesModel->activitiesToTukos($athleteId, $query['synchrostart'], $query['synchroend'], $query['synchroweatherstation'], $synchroStreams)){
             $itemsToProcess = []; $kpisToGet = $this->activityKpis();
             if ($defaultItemsCols = $itemsModel->synchroDefaultItemsCols()){
                 $presentCols = array_intersect(array_keys($query), $defaultItemsCols);

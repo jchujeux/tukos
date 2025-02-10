@@ -28,6 +28,7 @@ class Model extends AbstractModel {
             'extraweight'=> 'FLOAT DEFAULT NULL',
             'frictioncoef'=> 'FLOAT DEFAULT NULL',
             'dragcoef'=> 'FLOAT DEFAULT NULL',
+            'geosource' => 'VARCHAR(30) DEFAULT NULL',
             'windvelocity' => 'FLOAT DEFAULT NULL',
             'winddirection' => 'TINYINT DEFAULT NULL',
             'warmup'     =>  'longtext',

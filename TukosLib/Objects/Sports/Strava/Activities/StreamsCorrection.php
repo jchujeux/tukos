@@ -3,12 +3,13 @@ namespace TukosLib\Objects\Sports\Strava\Activities;
 
 use TukosLib\Objects\Sports\KpisFormulaes as KF;
 use TukosLib\Utils\Utilities as Utl;
+use TukosLib\Utils\ConversionUtilities as CUtl;
 use TukosLib\TukosFramework as Tfk;
 
 trait StreamsCorrection {
 
-    public function addCorrectedStreams(&$activity){
-        $earthRadius = 6371E3; $massInMovement = 85;
+    public function addCorrectedStreams(&$activity, $forceCorrection = false){
+        $massInMovement = 85;
         if (!empty($missingStreamCols = array_keys(array_diff_key(array_flip($this->streamCols), $activity)))){
             $missingStreams = array_filter($this->getOne(['where' => ['stravaid' => $activity['stravaid']], 'cols' => $missingStreamCols]));
             foreach($missingStreams as &$stream){
@@ -19,13 +20,18 @@ trait StreamsCorrection {
             $missingStreams = [];
         }
         if ($latlngstream = Utl::extractItem('latlngstream', $activity)){// if latlngstream is not present, addCorrectedStreams has already been applied
+            $firstTimeCorrection = true;
             unset($missingStreams['latlngstream']);
             $streams = array_merge (array_intersect_key($activity, array_flip($this->streamCols)), $missingStreams);
-            $toRadians = function($degrees){
-                return $degrees * 0.0174533;
-            };
-            $streams['latitudestream'] = array_map($toRadians, array_column($latlngstream, 0));
-            $streams['longitudestream'] = array_map($toRadians, array_column($latlngstream, 1));
+            $streams['latitudestream'] = CUtl::degreesToRadians(array_column($latlngstream, 0));
+            $streams['longitudestream'] = CUtl::degreesToRadians(array_column($latlngstream, 1));
+        }else{
+            $streams = array_intersect_key($activity, array_flip(array_merge($this->streamCols, ['latitudestream', 'longitudestream'])));
+        }
+        if (!empty($streams['latitudestream']) && ($forceCorrection || $firstTimeCorrection)){
+            $this->latitude = $streams['latitudestream'][0];
+            $this->longitude = $streams['longitudestream'][0];
+            $streams = array_filter($streams);
             $streamsLength = count($streams['timestream']);
             $streamsToCorrect = $presentStreams = array_keys($streams);
             unset($streamsToCorrect[array_search('timestream', $streamsToCorrect)]); 
@@ -35,9 +41,7 @@ trait StreamsCorrection {
             $deltaPreviousDistance = 0.0;
             $activity['comments'] = '';
             for ($key = 1; $key < $streamsLength; $key++){
-                $deltaY = ($streams['longitudestream'][$key] - $streams['longitudestream'][$key-1]) * cos($streams['latitudestream'][$key]);
-                $deltaX = $streams['latitudestream'][$key] - $streams['latitudestream'][$key-1];
-                $deltaDistance = $earthRadius * sqrt($deltaX **2 + $deltaY **2);
+                $deltaDistance = CUtl::latlngRadiansToMeters($streams['latitudestream'][$key-1], $streams['longitudestream'][$key-1], $streams['latitudestream'][$key], $streams['longitudestream'][$key]);
                 $deltaTime = $streams['timestream'][$key] - $streams['timestream'][$key-1];
                 $deltaAltitude = $streams['altitudestream'][$key]-$streams['altitudestream'][$key-1];
                 $powerJump = max(KF::estimatedpower_avg($deltaDistance/1000, 1, $deltaAltitude, $massInMovement, 0.0, 0.015, 0.2) + ($deltaDistance - $deltaPreviousDistance) * $massInMovement * $deltaDistance,0.0);
@@ -45,7 +49,8 @@ trait StreamsCorrection {
                     $activity['comments'] .= 'Time: ' . $streams['timestream'][$key] . ' powerJump: ' . $powerJump . ' timestream index: ' . $key . ' deltaTime: ' . $deltaTime . ' deltaDistance: ' . $deltaDistance
                     . ' deltaPreviousDistance: ' . $deltaPreviousDistance . ' deltaAltitude: ' . $deltaAltitude . ' distance: ' . $streams['distancestream'][$key] . ' altitude: ' . $streams['altitudestream'][$key] . ' velocity: ' . $deltaDistance / $deltaTime . '<br>';
                 }
-                if($powerJump > ($powerThreshold = 10000 && $deltaDistance / $deltaTime > 1.0)/* && $deltaTime === 1*/){
+                if($powerJump > 10000 && $deltaDistance / $deltaTime > 1.0){
+                    $activity['comments'] .= '=> correction applied<br>';
                     for ($backKey = $key - 2; $backKey > $previousJumpKey; $backKey--){
                         if($streams['altitudestream'][$backKey] !== $streams['altitudestream'][$backKey+1] || $streams['latitudestream'][$backKey] !== $streams['latitudestream'][$backKey+1] || 
                                 $streams['longitudestream'][$backKey] !== $streams['longitudestream'][$backKey+1]){
@@ -96,6 +101,13 @@ trait StreamsCorrection {
                     }
                 }
                 $deltaPreviousDistance = $deltaDistance;
+            }
+            if (empty($streams['timestreamc'])){
+                foreach ($presentStreams as $col){
+                    $streams[$col . 'c'] = null;
+                }
+            }else{
+                $activity['timemovingc'] = count($streams['timestreamc']);
             }
             $activity = array_merge($activity, $streams);
         }
