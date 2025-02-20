@@ -60,7 +60,7 @@ class KpisFormulaes {
             return round(($frictionForce + $gravityForce + $dragForce) * $velocity, $precision);
         }
     }
-    /*public static function estimatedWattsStream($metrics, $grade_smoothstream, $weight, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $precision = 0){
+    /*public static function estimatedWattsStream($metrics, $grade_smoothstream, $weight, $ftp, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $precision = 0){
      if (empty($metrics) || empty($grade_smoothstream)){
      return false;
      }else{
@@ -81,7 +81,7 @@ class KpisFormulaes {
      return $wattsStream;
      }
      }*/
-    public static function estimatedRawWattsStream($metrics, $altitudestream, $latitudestream, $longitudestream,  $weight, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $windDirection = '0', $precision = 0){
+    public static function estimatedRawWattsStream($metrics, $altitudestream, $latitudestream, $longitudestream,  $weight, $ftp, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $windDirection = '0', $precision = 0){
         if (empty($metrics) || empty($altitudestream)){
             return false;
         }else{
@@ -126,7 +126,7 @@ class KpisFormulaes {
                     $gravityForce = $slope * $totalWeightForce;
                     $accelerationForce = ($velocity - $previousVelocity) * $totalMass;
                     $watts = ($frictionForce + $gravityForce + $dragForce + $accelerationForce) * $velocity;
-                    $wattsStream[$key] = round(min(max(0, $watts), 1000), $precision);
+                    $wattsStream[$key] = round(min(max(0, $watts), $ftp * 3), $precision);
                 }else{
                     $wattsStream[$key] = 0;
                 }
@@ -136,7 +136,6 @@ class KpisFormulaes {
                 $previousLatitude = $latitude;
                 $previousLongitude = $longitude;
             }
-            //return json_encode($wattsStream);
             return $wattsStream;
         }
     }
@@ -226,6 +225,7 @@ class KpisFormulaes {
     public static function _advancedLoadInZones($metrics, $metricsZoneThreshold, $loadMetrics, $loadIntensityThreshold, $sex, $smoothSeconds = 1, $min = 0, $b = null, $uncertainty = 3, $fuzzyType = 'absolute', $belowLowest = true, $aboveHighest = true, $precision = 0){
         if ($smoothSeconds > 1){
             $loadMetrics = Average::exponentialMovingAverage($loadMetrics, intval($smoothSeconds));
+            $metrics = Average::exponentialMovingAverage($metrics, intval($smoothSeconds));
         }
         $loadInZones = [];
         for ($i = 0; $i <= count($metricsZoneThreshold); $i++){
@@ -267,6 +267,8 @@ class KpisFormulaes {
     public static function timeCurve($metrics, $smoothSeconds = 1, $precision = 0){
         if ($smoothSeconds > 1){
             $metrics = Average::exponentialMovingAverage($metrics, intval($smoothSeconds));
+        }else{
+            $metrics = Average::simpleMovingAverage($metrics, 2);
         }
         $metrics = array_map(function($value) use ($precision){return self::valueToString($value, $precision);}, $metrics);
         $distinctMetrics = array_count_values($metrics);

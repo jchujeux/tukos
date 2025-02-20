@@ -5,7 +5,7 @@ use TukosLib\Objects\Sports\KpisFormulaes as KF;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
-trait Kpis {//self::$thresholdsMap[$name] self::$athleteParamsDescription[$name]['threshold']
+trait Kpis {
 
     public static $beta = 2.6, $refCadence = 180/*, $thresholdsMap = ['heartrate' => 'hrthreshold', 'power' => 'ftp', 'speed' => 'speedthreshold']*/, $minsMap = ['heartrate' => 'hrmin'],
         $functionsMap = ['avgload' => 'avgLoad', 'avg' => 'estimatedpower_avg', 'estimatedavg' => 'power_estimatedavg', 'rawwattsstream' => 'estimatedRawWattsStream', 'load' => 'load', 'timeinzones' => 'timeInZones',
@@ -15,7 +15,7 @@ trait Kpis {//self::$thresholdsMap[$name] self::$athleteParamsDescription[$name]
         $metricsPrecision = ['heartrate' => 0, 'power' => 0, 'watts' => 0, 'estimatedpower' => 0/*, 'estimatedpowerstream' => 0*/, 'estimatedrawpowerstream' => 0, 'distance' => 1, 'elevationgain' => 0,  'cadence' => 0, 'slope' => 1, 
             'speed' => 2, 'powercalcstream' => 0],
         $athleteParamsDescription = ['heartrate' => ['threshold' => 'hrthreshold', 'sex' => 'sex', 'min' => 'hrmin'], 'power' => ['threshold' => 'ftp', 'sex' => 'sex'], 'estimatedpowerstream' => ['threshold' => 'ftp', 'sex' => 'sex'],
-            'estimatedrawpowerstream' => ['threshold' => 'ftp', 'sex' => 'sex'], 'powercalcstream' => ['threshold' => 'ftp', 'sex' => 'sex'], 'mechanical' => ['threshold' => 'speedthreshold'], 'estimatedpower' => ['weight' => 'weight']
+            'estimatedrawpowerstream' => ['threshold' => 'ftp', 'sex' => 'sex'], 'powercalcstream' => ['threshold' => 'ftp', 'sex' => 'sex'], 'mechanical' => ['threshold' => 'speedthreshold'], 'estimatedpower' => ['weight' => 'weight', 'ftp' => 'ftp']
         ],
         $namesMap = [/*'estimatedpowerstream' => 'estimatedpower_wattsstream', */'estimatedrawpowerstream' => 'estimatedpower_rawwattsstream'/*, 'powercalcstream' => 'watts_calcstream'*/],
         $kpisDescription = [
@@ -33,13 +33,13 @@ trait Kpis {//self::$thresholdsMap[$name] self::$athleteParamsDescription[$name]
             'durationcurve' => ['metrics' => 'stream'],
             'timeinzones' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
             'timeabove' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
-            'timebelow' => ['metrics' => 'streCoefam', 'otherParams' => ['fuzzyType' => 'absolute']],
+            'timebelow' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
             'loadinzones' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
             'loadabove' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
             'loadbelow' => ['metrics' => 'stream', 'otherParams' => ['fuzzyType' => 'absolute']],
             'shrink' => ['metrics' => 'stream'],
             'heartrate' => ['otherParams' => ['uncertainty' => 3]],
-            'power' => ['otherParams' => ['uncertainty' => 10]],
+            'power' => ['otherParams' => ['uncertainty' => 6]],
             'slope' => ['otherParams' => ['uncertainty' => 0.1]],
         ];
     public static function metricStream($name){

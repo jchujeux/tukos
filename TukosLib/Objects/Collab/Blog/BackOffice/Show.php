@@ -78,7 +78,7 @@ class Show extends ObjectTranslator{
                 $postedByAndWhen .= "&nbsp;&nbsp;<i>{$this->view->tr('updatedon')}</i> " . $dateUpdated;
             }
             Tfk::$registry->blogStructuredDataHeaderScript = BlogPostStructuredData::headerScript($values['name'], $datePublished, $dateUpdated, $publisherName);
-            return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'postedbyandwhen' => $postedByAndWhen, 'comments' => $values['comments']];
+            return ['id' => $values['id'], 'name' => $values['name'],  'posttitle' => '<h2 style="margin-bottom: 0px; margin-top: 0px;">' . $values["name"] . '</h2>', 'author' => $publisherName, 'postedbyandwhen' => $postedByAndWhen, 'comments' => $values['comments']];
         }else{
             $postNotFound = $this->view->tr('postnotfound');
             Tfk::$registry->blogStructuredDataHeaderScript = '';

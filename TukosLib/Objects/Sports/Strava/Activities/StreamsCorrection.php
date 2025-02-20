@@ -35,7 +35,6 @@ trait StreamsCorrection {
             $streamsLength = count($streams['timestream']);
             $streamsToCorrect = $presentStreams = array_keys($streams);
             unset($streamsToCorrect[array_search('timestream', $streamsToCorrect)]); 
-            $streams['latlngstream'] = null;
             $previousJumpKey = 0;
             $keyOffset = 0;
             $deltaPreviousDistance = 0.0;
@@ -49,8 +48,7 @@ trait StreamsCorrection {
                     $activity['comments'] .= 'Time: ' . $streams['timestream'][$key] . ' powerJump: ' . $powerJump . ' timestream index: ' . $key . ' deltaTime: ' . $deltaTime . ' deltaDistance: ' . $deltaDistance
                     . ' deltaPreviousDistance: ' . $deltaPreviousDistance . ' deltaAltitude: ' . $deltaAltitude . ' distance: ' . $streams['distancestream'][$key] . ' altitude: ' . $streams['altitudestream'][$key] . ' velocity: ' . $deltaDistance / $deltaTime . '<br>';
                 }
-                if($powerJump > 10000 && $deltaDistance / $deltaTime > 1.0){
-                    $activity['comments'] .= '=> correction applied<br>';
+                if($powerJump > 2500 && /*$deltaDistance / */$deltaTime > 1.0){
                     for ($backKey = $key - 2; $backKey > $previousJumpKey; $backKey--){
                         if($streams['altitudestream'][$backKey] !== $streams['altitudestream'][$backKey+1] || $streams['latitudestream'][$backKey] !== $streams['latitudestream'][$backKey+1] || 
                                 $streams['longitudestream'][$backKey] !== $streams['longitudestream'][$backKey+1]){
@@ -58,7 +56,9 @@ trait StreamsCorrection {
                         }
                     }
                     $backKey +=1; // $backKey is the first key from which we need to spread the jump, up to $key included
-                    if (($duration = $streams['timestream'][$key] - $streams['timestream'][$backKey]) > 1){
+                    $duration = $streams['timestream'][$key] - $streams['timestream'][$backKey];
+                    $activity['comments'] .= "=> applying correction (id duration > 1):  backKey:  $backKey; duration: $duration<br>" ;
+                    if ($duration > 1){
                         forEach ($streamsToCorrect as $col){
                             $increment[$col] = ($streams[$col][$key] - $streams[$col][$backKey]) / $duration;
                         }
@@ -108,6 +108,9 @@ trait StreamsCorrection {
                 }
             }else{
                 $activity['timemovingc'] = count($streams['timestreamc']);
+            }
+            if ($keyOffset > 0){
+                $activity['comments'] .= '=> Added records: ' . $keyOffset . '<br>';
             }
             $activity = array_merge($activity, $streams);
         }

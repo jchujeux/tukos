@@ -175,7 +175,7 @@ class Model extends AbstractModel {
         echo 'Recomputing workouts kpis<br>';
         $kpis = $workoutsModel->computeKpis($planInformation['parentid'], $itemsToProcess);
         foreach($kpis as $key => $itemKpis){
-            if ($workoutsModel->updateOne(array_merge($workouts[$key], $itemKpis))){
+            if ($workoutsModel->updateOne(array_merge($workouts[$key], $itemKpis, ['kpiscache' => null]))){
                 echo 'updated workoutid ' . $workouts[$key]['id'] . '<br>';
             }
         }

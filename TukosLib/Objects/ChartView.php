@@ -439,7 +439,7 @@ EOT
                     'vertical' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('vertical')], ['id' => false, 'name' => $tr('horizontal')]]], 'label' => $tr('indicatororientation')],
                         'storeedit' => ['width' => 80]]), false),
                     'indicatorColor' => Widgets::description(Widgets::colorPickerTextBox(['edit' => ['label' => $tr('indicatorcolor')], 'storeedit' => ['width' => 80]]), false),
-                    'indicatorStyle' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['Solid', 'ShortDash', 'Short-Dot', 'ShortDashDot'], $tr)], 'label' => $tr('ShowLines')], 'storeedit' => ['width' => 60]]), false),
+                    'indicatorStyle' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['Solid', 'ShortDash', 'Short-Dot', 'ShortDashDot'], $tr)], 'label' => $tr('Indicatorstyle')], 'storeedit' => ['width' => 60]]), false),
                     'values' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Indicatorvalue')], 'storeedit' => ['width' => 60]]), false),
                     'label' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Label'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                     'xlabeloffset' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('xlabeloffset')], 'storeedit' => ['width' => 60]]), false),

@@ -25,8 +25,8 @@ class View extends AbstractView {
         $this->addToTranslate(['w', 'dateofday', 'dayofweek', 'weekoftheyear', 'weekofprogram', 'weekendingon', 'newevent', 'sportsmanhasnouserassociatednoacl']);
         $this->namesToTranslate = array_merge(
             ['fromdate', 'duration', 'todate', 'displayeddate', 'stsdays', 'ltsdays', 'initialsts', 'initiallts', 'initialhracwr', 'displayfromdate', 'displayfromsts', 'displayfromlts',
-                'startdate', 'intensity', 'stress', 'distance', 'elevationgain', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'sts', 'lts', 'tsb', 'hracwr', 'timemoving', 'avghr', 'avgpw', 'heartrate_load', 'power_load', 'heartrate_avgload', 'power_avgload',
-                'powercalcstream_load', 'avgcadence', 'mechload', 'heartrate', 'power', 'slope', 'avgload', 'load', 'timeabove', 'timebelow', 'loadabove', 'loadbelow', 'threshold', 'timecurve', 'durationcurve', 'shrink', 'performed', 'planned', 'estimatedrawpowerstream'],
+                'startdate', 'intensity', 'stress', 'distance', 'elevationgain', 'sensations', 'perceivedeffort', 'perceivedmechload', 'mood', 'sts', 'lts', 'tsb', 'hracwr', 'timemoving', 'avghr', 'avgpw'/*, 'heartrate_load', 'power_load', 'heartrate_avgload', 'power_avgload',
+                'powercalcstream_load'*/, 'avgcadence', 'mechload', 'heartrate', 'power', 'slope', 'avgload', 'load', 'timeabove', 'timebelow', 'loadabove', 'loadbelow', 'threshold', 'timecurve', 'durationcurve', 'shrink', 'performed', 'planned', 'estimatedrawpowerstream'],
             Sports::$sportOptions, Sports::$modeOptions);
         $dateChangeLocalAction = function($serverTrigger) {
             return [

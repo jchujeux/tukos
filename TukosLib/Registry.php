@@ -34,6 +34,7 @@ class Registry{
             $this->loader->add('Ifsnop\\'     , Tfk::$phpVendorDir);
             $this->appName = $this->setAppName($appName);
             $this->rootUrl = $rootUrl;
+            $this->isMobile = false;
         }
         
         $this->loader->add('Aura\SqlQuery', Tfk::$vendorDir['auraV2']);
@@ -44,7 +45,6 @@ class Registry{
         $this->loader->add('Html2Text\\'  , Tfk::$phpVendorDir);        
         $this->loader->add('Dropbox\\', Tfk::$vendorDir['Dropbox']);
         $this->isRestrictedUser = false;
-        $this->isMobile = false;
     }
 
     protected function setHttpServices(){

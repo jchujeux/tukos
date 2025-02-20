@@ -47,7 +47,7 @@ class BlogView extends Translator{
         if (Tfk::$registry->isCrawler){
             $blogTemplate = "CrawlerBlogTemplate.php";
             $view->title = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['name'];
-            $view->content = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['comments'];
+            $view->content = $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['author'] . ' ' . $this->pageManagerArgs['tabsDescription'][0]['formContent']['data']['value']['comments'];
             $view->structuredDataHeaderScript = Tfk::$registry->blogStructuredDataHeaderScript;
             
         }else{
@@ -71,8 +71,6 @@ class BlogView extends Translator{
             if ($this->pageManagerArgs['isMobile'] = Tfk::$registry->isMobile){
                 $blogTemplate = "MobileBlogTemplate.php";
                 $this->pageManagerArgs['headerTitle'] = $blogTitle;
-                $this->pageManagerArgs['contactSpan'];
-                '</div>';
             }else{
                 $blogTemplate = "BlogTemplate.php";
                 $this->pageManagerArgs['headerContent'] = <<<EOT
