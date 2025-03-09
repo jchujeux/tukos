@@ -20,8 +20,9 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 						collection = grid.store.sort([{property: dateCol}, {property: timeCol}]);
 					}
 					self.recursionDepth +=1;
-					let kpisDescription = chartWidget.kpisToInclude, itemsSets = (chartWidget.itemsSetsToInclude || {1: {setName: Pmg.message('allitemstodate')}}), kpiData = {}, expKpi = {}, chartData = [], axes = {},
-						series = {}, kpiFilters = {}, tableColumns = {kpi: {label: Pmg.message('kpi', form.object), field: 'kpi', renderCell: 'renderContent'}}, idProperty = collection.idProperty, collectionData = utils.toNumericValues(collection.fetchSync(), grid),
+					let kpisDescription = utils.toObject(utils.toNumeric(chartWidget.kpisToInclude, 'id'), 'rowId'), kpiData = {}, expKpi = {}, chartData = [], axes = {}, series = {}, kpiFilters = {}, 
+						itemsSets = (chartWidget.itemsSetsToInclude ? utils.toObject(utils.toNumeric(chartWidget.itemsSetsToInclude, 'id'), 'rowId') : {1: {setName: Pmg.message('allitemstodate')}}), 
+						tableColumns = {kpi: {label: Pmg.message('kpi', form.object), field: 'kpi', renderCell: 'renderContent'}}, idProperty = collection.idProperty, collectionData = utils.toNumericValues(collection.fetchSync(), grid),
 						expression = expressionEngine.expression(collectionData, idProperty, missingItemsKpis, valueOf);
 					utils.forEach(kpisDescription, function(kpiDescription){
 						try{

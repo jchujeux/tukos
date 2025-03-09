@@ -20,7 +20,7 @@ function(declare, lang, utils, dutils, expressionFilter, expressionEngine, chart
 						collection = grid.store.sort([{property: dateCol}, {property: timeCol}]);
 					}
 					self.recursionDepth +=1;
-					let kpisDescription = chartWidget.kpisToInclude, kpiData = {}, expKpi = {}, chartData = [], axes = {},
+					let kpisDescription = utils.toObject(utils.toNumeric(chartWidget.kpisToInclude, 'id'), 'rowId'), kpiData = {}, expKpi = {}, chartData = [], axes = {},
 						series = {}, tableColumns = {name: {label: Pmg.message('name', form.object), field: 'name', renderCell: 'renderContent'}, value: {label: Pmg.message('value', form.object), field: 'value', renderCell: 'renderContent'}},
 						idProperty = collection.idProperty, collectionData = utils.toNumericValues(collection.fetchSync(), grid),
 						expression = expressionEngine.expression(collectionData, idProperty, missingItemsKpis, valueOf);

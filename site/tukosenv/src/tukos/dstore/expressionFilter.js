@@ -1,7 +1,5 @@
 define(['tukos/ExpressionParser', 'tukos/dateutils'], function (parser, dutils) {
 
-//"trimphr >= 130 OR (h4time > 600 AND h5time > 10) into filter.or(filter.ge('trimphr', 130), filter.and(filter.gt('h4time', 600), filter.gt('h5time', 10))
-
     var unpackArgs = function(f){
 		return function(expr){
 			let result = expr();

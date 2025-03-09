@@ -14,7 +14,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 				dojo.ready(function(){
 					let collection, horizontalAxisDescription;
 					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol,
-						 kpisDescription = chartWidget.kpisToInclude, series = {}, chartData = [], tableData = [], axesDescription = chartWidget.axesToInclude, axes = {},
+						 kpisDescription = utils.toObject(utils.toNumeric(chartWidget.kpisToInclude, 'id'), 'rowId'), series = {}, chartData = [], tableData = [], axesDescription = chartWidget.axesToInclude, axes = {},
 						 plotsDescription = chartWidget.plotsToInclude, plots = {}, tableColumns = {};
 						
 					utils.forEach(axesDescription, function(axisDescription){
@@ -66,20 +66,50 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 						utils.forEach(plotsDescription, function(plotDescription){
 							try{
 								let theDescription = lang.clone(plotDescription);
-								plots[theDescription.name] = theDescription;
 								if (theDescription.type === 'Indicator'){
-									if (!theDescription.lineStroke){
-										theDescription = lang.mixin(theDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: theDescription.indicatorColor || 'red', style: theDescription.indicatorStyle || 'shortDash', width: 2},
-											labelFunc: function(){
-												return theDescription.label || this.values;
+									theDescription = lang.mixin(theDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: theDescription.indicatorColor || 'red', style: theDescription.indicatorStyle || 'shortDash', width: 2},
+										labelFunc: function(){
+											return theDescription.label || this.values;
+										}
+									});
+									if (isNaN(theDescription.values)){//if isNaN, implicitly assumes it is a vertical axis
+										if (theDescription.values.includes('(')){
+											theDescription.values = dutils.difference(dutils.getDayOfWeek(1, firstDateObject), new Date(expression.expressionToValue(theDescription.values)), isWeek ? 'week' : 'day') + 1;
+											plots[theDescription.name] = theDescription;
+										}else{
+											const lastDateObject = new Date(lastDate), period = theDescription.values.toLowerCase();
+											let i = 0, targetIndicatorDate;
+											switch (period){
+												case 'week':
+													targetIndicatorDate = dutils.getDayOfWeek(1, firstDateObject);	
+													break;
+												case 'quarter':
+												case 'month':
+													targetIndicatorDate = dutils.getDayOfMonth(1, firstDateObject);
+													break;
+												default:
+													Pmg.setFeedbackAlert();
+													throw new Error(Pmg.message('wrongindicatorvalue'));
 											}
-										});
-									}
-									if (/*(plotDescription.vertical !== false) && */typeof (theDescription.values) === 'string' && theDescription.values.indexOf('(') >= 0){
-										theDescription.values = dutils.difference(dutils.getDayOfWeek(1, firstDateObject), new Date(expression.expressionToValue(theDescription.values)), isWeek ? 'week' : 'day') + 1;
+											while (targetIndicatorDate <= lastDateObject){
+												const indicatorName = theDescription.name + i;
+												theDescription.values = dutils.difference(dutils.getDayOfWeek(1, firstDateObject), targetIndicatorDate, isWeek ? 'week' : 'day') + 1;
+												theDescription.label = dutils.formatDate(targetIndicatorDate, 'd MMM yy');
+												plots[indicatorName] = lang.clone(theDescription);
+												plots[indicatorName].name = indicatorName;
+												plots[indicatorName].labelFunc = function(){
+													return plots[indicatorName].label;
+												};
+												targetIndicatorDate = dutils.dateAdd(targetIndicatorDate, period, 1);
+												i += 1;
+											}
+										}
 									}else{
 										theDescription.values = Number(theDescription.values);
+										plots[theDescription.name] = theDescription;
 									}
+								}else{
+									plots[theDescription.name] = theDescription;
 								}
 							}catch(e){
 								Pmg.addFeedback(Pmg.message('errorplotdefinition') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('plotdescription') + ': ' + JSON.stringify(plotDescription));
@@ -110,8 +140,8 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 										}
 										chartItem[index1 + 'Tooltip'] = kpiDescription.name + ': ' + (kpiDescription.displayformat ? utils.transform(chartItem[index1], kpiDescription.displayformat) : chartItem[index1]) + ' ' + (kpiDescription.tooltipunit || '') + 
 											(isWeek 
-												? '<br><small>(' + Pmg.message('weekendingon', 'sptplans') + ' ' + dutils.formatDate(toDateObject, 'd MMM') + ')</small>' 
-												: '<br><small>(' + dutils.formatDate(firstDateObject, 'd MMM') + ')</small>');
+												? '<br><small>(' + Pmg.message('weekendingon', 'sptplans') + ' ' + dutils.formatDate(toDateObject, 'd MMM yy') + ')</small>' 
+												: '<br><small>(' + dutils.formatDate(firstDateObject, 'd MMM yy') + ')</small>');
 										if (kpiDescription.scalingfactor){
 											chartItem[index1] = chartItem[index1] * kpiDescription.scalingfactor;
 										}

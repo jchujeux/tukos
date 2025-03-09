@@ -249,14 +249,14 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/json", "tukos/utils",  "tu
                 	switch (oldField) {
                     	case '*-': 
 	                        if (typeof oldValue !== "undefined"){
-	                            newRowDirty[field] = '';//'~delete';
+	                            newRowDirty[field] = '';
 	                        }
 	                        break;
                     	default:
                             var newValue = valueOf(oldField);
 	                        if (typeof newValue === "undefined"){
 	                        	if (typeof oldValue !== "undefined"){
-	                        		newRowDirty[field] = '';//~delete';
+	                        		newRowDirty[field] = '';
 	                        	}
 	                        }else if (newValue !== oldValue){
 	                            newRowDirty[field] = newValue;

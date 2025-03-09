@@ -176,7 +176,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 			INFIX_OPS: {
 				'+': function(a, b){
 					return _operation(a, b, function(x, y){
-						return x + y;
+						return isNaN(x) || isNaN(y) ? x + y : Number(x) + Number(y);
 					});
 				},
 				'-': function(a, b){
@@ -203,7 +203,10 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 	                const args = aArr.concat([b]);
 	                args.isArgumentsArray = true;
 	                return args;
-	            }
+	            },
+				'=': (a,b) => {
+					return a() == b();
+				}
 			},
 			PREFIX_OPS: {
 				'ARRAY': function(a){
@@ -351,15 +354,25 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				},
 				'DATE': function(formulaString){
 					return dutils.formulaStringToDate(formulaString(), valueOf);
-				}
+				},
+				"VALUEOF": function(propertyString){
+					return getValueOf(propertyString());
+				},
+				'IF': unpackArgs(function(condition, whenTrue, whenFalse){
+					if (condition()){
+						return whenTrue();
+					}else{
+						return whenFalse();
+					}
+				})
 			},
-			PRECEDENCE:[['ARRAY', 'VECTOR', 'NEG', 'TOFIXED', 'JSONPARSE', 'XY', 'SUM', 'AVG', 'EXPINTENSITY', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'TIMETOSECONDS', 'DATE'], ['*', '/'], ['+', '-'], [',']],
+			PRECEDENCE:[['ARRAY', 'VECTOR', 'NEG', 'TOFIXED', 'JSONPARSE', 'XY', 'SUM', 'AVG', 'EXPINTENSITY', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'TIMETOSECONDS', 'DATE', 'VALUEOF', 'IF'], ['*', '/'], ['+', '-'], ['='], [',']],
 			LITERAL_OPEN: '"',
 			LITERAL_CLOSE: '"',
 			GROUP_OPEN: '(',
 			GROUP_CLOSE: ')',
 			SEPARATOR: ' ',
-			SYMBOLS: ['*', '/', '+', '-', '(', ')', '[', ']', ','],
+			SYMBOLS: ['*', '/', '+', '-', '(', ')', '[', ']', ',','='],
 			AMBIGUOUS: {'-': 'NEG'},
             SURROUNDING: {
                 XARRAY: {

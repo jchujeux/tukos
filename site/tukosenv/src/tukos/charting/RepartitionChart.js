@@ -14,7 +14,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 				dojo.ready(function(){
 					let collection, horizontalAxisDescription;
 					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter),
-						 kpisDescription = chartWidget.kpisToInclude, series = {}, chartData = [], tableData = [], axesDescription = chartWidget.axesToInclude, axes = {},
+						 kpisDescription = utils.toObject(utils.toNumeric(chartWidget.kpisToInclude, 'id'), 'rowId'), series = {}, chartData = [], tableData = [], axesDescription = chartWidget.axesToInclude, axes = {},
 						 plotsDescription = chartWidget.plotsToInclude, plots = {}, tableColumns = {};
 					self.recursionDepth +=1;
 					utils.forEach(axesDescription, function(axisDescription){

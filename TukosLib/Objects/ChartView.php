@@ -7,7 +7,7 @@ use TukosLib\TukosFramework as Tfk;
 
 trait ChartView {
     
-    static  $dateFormulaesToTranslate = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY', 'DAY', 'WEEK', 'MONTH'];
+    static  $dateFormulaesToTranslate = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY', 'DAY', 'WEEK', 'MONTH', 'QUARTER'];
     
     public function functionLabel ($funcName, $dayOrWeekOrMonth){
         return $this->tr($funcName) . '(' . $this->tr($dayOrWeekOrMonth) . ', 1)';
@@ -166,10 +166,10 @@ EOT
         return [
             'tableSkipEmptyPeriods' => ['att' => 'tableSkipEmptyPeriods', 'type' => 'StoreSelect', 'name' => $tr('TableSkipEmptyPeriods'), 'storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]]],
             'chartFilter' => ['att' => 'chartFilter', 'type' => 'TukosTextarea', 'name' => $tr('chartFilter'), 'atts' => ['translations' => $translations]],
-            'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'style' => ['maxWidth' => '1500px'], 'storeArgs' => ['idProperty' => 'idg'],
+            'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'style' => ['maxWidth' => '1500px'], 'storeArgs' => ['idProperty' => 'idg'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartAxesTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 60]]), false),
                     'title' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Title')], 'storeedit' => ['width' => 100]]), false),
                     'titleOrientation' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['axis', 'away'], $tr)], 'label' => $tr('titleorientation')], 'storeedit' => ['width' => 80]]), false),
@@ -194,10 +194,10 @@ EOT
                     'adjustmax' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Adjustmax')], 'storeedit' => ['width' => 80]]), false),
                 ]])), ['att' => 'axesToInclude', 'type' => 'SimpleDgrid', 'name' => $this->tr('AxesToInclude'), 'atts' => ['initialRowValue' => ['vertical' => true, 'minorTicks' => false],
                     'columns' => ['titleOrientation' => ['hidden' => true], 'titleGap' => ['hidden' => true], 'majorTicks' => ['hidden' => true], 'minorTicks' => ['hidden' => true]]]]),
-            'plots' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
+            'plots' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartDiagramsTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                     'type' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['Curves', 'ClusteredColumns', 'Indicator'], $tr)], 'label' => $tr('plottype'),
                         'onChangeLocalAction' => ['type' => ['localActionStatus' => $this->onPlotTypeChangeLocalAction()]]], 'storeedit' => ['minWidth' => 60]]), false),
@@ -213,13 +213,14 @@ EOT
                         'storeedit' => ['width' => 80]]), false),
                     'indicatorColor' => Widgets::description(Widgets::colorPickerTextBox(['edit' => ['label' => $tr('indicatorcolor')], 'storeedit' => ['width' => 80]]), false),
                     'indicatorStyle' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['Solid', 'ShortDash', 'Short-Dot', 'ShortDashDot'], $tr)], 'label' => $tr('ShowLines')], 'storeedit' => ['width' => 60]]), false),
-                    'values' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('Indicatorvalue'), 'translations' => $dateFormulaesTranslations], 'storeedit' => ['width' => 60]]), false),
+                    'values' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('Indicatorvalue'), 'translations' => $dateFormulaesTranslations],
+                        'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 60]]), false),
                     'label' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Label'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                 ]])), ['att' => 'plotsToInclude', 'type' => 'SimpleDgrid', 'name' => $this->tr('plotsToInclude'), 'atts' => ['initialRowValue' => ['lines' => true, 'markers' => true], 'onCellClickAction' => $this->onPlotRowIdClickAction()]]),
-            'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('seriesToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
+            'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('seriesToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartKpisTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name')], 'storeedit' => ['width' => 150]]), false),
                     'kpi' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('Kpiformula'), 'style' => ['width' => '20em'], 'translations' => $translations],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false),
@@ -239,10 +240,10 @@ EOT
         $tr = $this->tr;
         return [
             'chartFilter' => ['att' => 'chartFilter', 'type' => 'TukosTextarea', 'name' => $tr('chartFilter'), 'atts' => ['translations' => $translations]],
-            'plots' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
+            'plots' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartDiagramsTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                     'axisFont' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('axisFont'), 'style' => ['width' => '10em']], 'storeedit' => ['width' => 100]]), false),
                     'maxLabelWidthShift' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('maxLabelWidthShift'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
@@ -251,10 +252,10 @@ EOT
                     'divisions' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('divisions'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false),
                     'markerSize' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $tr('markerSize'), 'constraints' => ['pattern' =>  "0.######"]], 'storeedit' => ['width' => 60]]), false)
                 ]])), ['att' => 'plotsToInclude', 'type' => 'SimpleDgrid', 'name' => $this->tr('plotsToInclude'), 'atts' => ['initialRowValue' => ['lines' => true, 'markers' => true], 'onCellClickAction' => $this->onPlotRowIdClickAction()]]),
-            'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $tr('kpisToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
+            'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $tr('kpisToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $tr('help'), 'name' => 'SpiderChartKpisTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'hidden' => true, 'className' => 'dgrid-header-col'],
+                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('Name')], 'storeedit' => ['width' => 200]]), false),
                     'kpi' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $tr('Kpiformula'), 'style' => ['width' => '20em'], 'translations' => $translations],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false),
@@ -268,10 +269,10 @@ EOT
                     'kpiFilter' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $tr('itemsfilter'), 'style' => ['width' => '15em'], 'translations' => $translations],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false)
                 ]])), ['att' => 'kpisToInclude', 'type' => 'SimpleDgrid', 'name' => $tr('dataToInclude')]),
-            'itemsSets' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $tr('itemsSetsToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
+            'itemsSets' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $tr('itemsSetsToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $tr('help'), 'name' => 'SpiderChartItemsSetsTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'hidden' => true, 'className' => 'dgrid-header-col'],
+                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'setName' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('Label')], 'storeedit' => ['width' => 150]]), false),
                     'firstdate' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $tr('firstdate'), 'style' => ['width' => '15em'], 'translations' => $translations,
                         'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $tr('help'), 'name' => 'ChartDateFormulaesTukosTooltip', 'object' => $this->objectName]]],
@@ -294,10 +295,10 @@ EOT
     public function pieChartCustomizableAtts($translations, $dateWidgetNames,  $selectedDate){
         $tr = $this->tr;
         return [
-            'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $tr('kpisToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
+            'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $tr('kpisToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $tr('help'), 'name' => 'pieChartKpisTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $tr('Name')], 'storeedit' => ['width' => 150]]), false),
                     'kpi' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $tr('Kpiformula'), 'style' => ['width' => '20em'], 'translations' => $translations],
                         'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 200]]), false),
@@ -324,10 +325,10 @@ EOT
         $dateFormulaesTranslations = Utl::translations(array_merge(self::$dateFormulaesToTranslate, $dateWidgetNames), $this->tr, 'lowercase');
         return [
             'chartFilter' => ['att' => 'chartFilter', 'type' => 'TukosTextarea', 'name' => $tr('chartFilter'), 'atts' => ['translations' => $translations]],
-            'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
+            'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartAxesTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 60]]), false),
                     'title' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Title')], 'storeedit' => ['width' => 100]]), false),
                     'titleOrientation' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['axis', 'away'], $tr)], 'label' => $tr('titleorientation')], 'storeedit' => ['width' => 80]]), false),
@@ -344,10 +345,10 @@ EOT
                     'adjustmax' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Adjustmax')], 'storeedit' => ['width' => 80]]), false),
                 ]])), ['att' => 'axesToInclude', 'type' => 'SimpleDgrid', 'name' => $this->tr('AxesToInclude'), 'atts' => ['initialRowValue' => ['vertical' => true, 'minorTicks' => false],
                     'columns' => ['titleOrientation' => ['hidden' => true], 'titleGap' => ['hidden' => true], 'majorTicks' => ['hidden' => true], 'minorTicks' => ['hidden' => true]]]]),
-            'plots' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
+            'plots' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartDiagramsTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                     'type' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['Curves', 'ClusteredColumns', 'Indicator'], $tr)], 'label' => $tr('plottype'),
                         'onChangeLocalAction' => ['type' => ['localActionStatus' => $this->onPlotTypeChangeLocalAction()]]], 'storeedit' => ['minWidth' => 60]]), false),
@@ -364,10 +365,10 @@ EOT
                     'values' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('Indicatorvalue'), 'translations' => $dateFormulaesTranslations], 'storeedit' => ['width' => 60]]), false),
                     'label' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Label'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                 ]])), ['att' => 'plotsToInclude', 'type' => 'SimpleDgrid', 'name' => $this->tr('plotsToInclude'), 'atts' => ['initialRowValue' => ['lines' => true, 'markers' => true], 'onCellClickAction' => $this->onPlotRowIdClickAction()]]),
-            'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('seriesToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
+            'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('seriesToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartKpisTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Nom')], 'storeedit' => ['width' => 70]]), false),
                     'category' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('CategoryLabel')], 'storeedit' => ['width' => 70]]), false),
                     'plot' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Plot'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 80]]), false),
@@ -397,10 +398,10 @@ EOT
         $tr = $this->tr;
         return [
             'chartFilter' => ['att' => 'chartFilter', 'type' => 'TukosTextarea', 'name' => $tr('chartFilter'), 'atts' => ['translations' => $translations]],
-            'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'],
+            'axes' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('Axes'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1200px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartAxesTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 60]]), false),
                     'title' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Title')], 'storeedit' => ['width' => 100]]), false),
                     'titleOrientation' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['axis', 'away'], $tr)], 'label' => $tr('titleorientation')], 'storeedit' => ['width' => 80]]), false),
@@ -418,10 +419,10 @@ EOT
                     'adjustmax' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => [['id'  => true, 'name' => $tr('yes')], ['id' => false, 'name' => $tr('no')]]], 'label' => $tr('Adjustmax')], 'storeedit' => ['width' => 80]]), false),
                 ]])), ['att' => 'axesToInclude', 'type' => 'SimpleDgrid', 'name' => $this->tr('AxesToInclude'), 'atts' => ['initialRowValue' => ['vertical' => true, 'minorTicks' => false],
                     'columns' => ['titleOrientation' => ['hidden' => true], 'titleGap' => ['hidden' => true], 'majorTicks' => ['hidden' => true], 'minorTicks' => ['hidden' => true]]]]),
-            'plots' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1500px'],
+            'plots' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1500px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartDiagramsTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name'), 'style' => ['width' => '10em']], 'storeedit' => ['width' => 100]]), false),
                     'type' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['Curves', 'Bubble', 'ClusteredColumns', 'Indicator'], $tr)], 'label' => $tr('plottype'),
                         'onChangeLocalAction' => ['type' => ['localActionStatus' => $this->onPlotTypeChangeLocalAction()]]], 'storeedit' => ['minWidth' => 60]]), false),
@@ -440,15 +441,16 @@ EOT
                         'storeedit' => ['width' => 80]]), false),
                     'indicatorColor' => Widgets::description(Widgets::colorPickerTextBox(['edit' => ['label' => $tr('indicatorcolor')], 'storeedit' => ['width' => 80]]), false),
                     'indicatorStyle' => Widgets::description(Widgets::storeSelect(['edit' => ['storeArgs' => ['data' => Utl::idsNamesStore(['Solid', 'ShortDash', 'Short-Dot', 'ShortDashDot'], $tr)], 'label' => $tr('Indicatorstyle')], 'storeedit' => ['width' => 60]]), false),
-                    'values' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('Indicatorvalue')], 'storeedit' => ['width' => 60]]), false),
+                    'values' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('Indicatorvalue'), 'translations' => $translations],
+                        'storeedit' => ['formatType' => 'translate', 'renderContentAction' => 'if (!this.formatOptions){this.formatOptions = {translations: this.editorArgs.translations};}', 'width' => 60]]), false),
                     'label' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Label'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 100]]), false),
                     'xlabeloffset' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('xlabeloffset')], 'storeedit' => ['width' => 60]]), false),
                     'ylabeloffset' => Widgets::description(Widgets::numberTextBox(['edit' => ['label' => $this->tr('ylabeloffset')], 'storeedit' => ['width' => 60]]), false),
                 ]])), ['att' => 'plotsToInclude', 'type' => 'SimpleDgrid', 'name' => $this->tr('plotsToInclude'), 'atts' => ['initialRowValue' => ['lines' => true, 'markers' => true], 'onCellClickAction' => $this->onPlotRowIdClickAction()]]),
-            'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['label' => $this->tr('seriesToInclude'), 'storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1500px'],
+            'kpis' => Utl::array_merge_recursive_replace(Widgets::simpleDgrid(Widgets::complete(['storeArgs' => ['idProperty' => 'idg'], 'style' => ['width' => '1500px'], 'sort' => [['property' => 'rowId', 'descending' => false]],
                 'tukosTooltip' => ['label' => '', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'TrendChartKpisTukosTooltip', 'object' => $this->objectName]],
                 'colsDescription' => [
-                    'rowId' => ['field' => 'rowId', 'label' => 'id', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
+                    'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col'],
                     'name' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Name')], 'storeedit' => ['width' => 80]]), false),
                     'plot' => Widgets::description(Widgets::textBox(['edit' => ['label' => $this->tr('Plot'), 'style' => ['width' => '5em']], 'storeedit' => ['width' => 80]]), false),
                     'kpi' => Widgets::description(Widgets::tukosTextArea(['edit' => ['label' => $this->tr('Kpiformula'), 'style' => ['width' => '20em'], 'translations' => $translations],

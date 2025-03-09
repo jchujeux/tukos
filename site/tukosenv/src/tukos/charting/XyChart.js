@@ -14,7 +14,7 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 				dojo.ready(function(){
 					let collection, log10;
 					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol, filter = new grid.store.Filter(), expFilter = expressionFilter.expression(filter),
-						 kpisDescription = chartWidget.kpisToInclude, series = {}, chartData = [], tableColumns = [], tableData = [{}], axesDescription = chartWidget.axesToInclude, axes = {},
+						 kpisDescription = utils.toObject(utils.toNumeric(chartWidget.kpisToInclude, 'id'), 'rowId'), series = {}, chartData = [], tableColumns = [], tableData = [{}], axesDescription = chartWidget.axesToInclude, axes = {},
 						 plotsDescription = chartWidget.plotsToInclude, plots = {};
 					utils.forEach(axesDescription, function(axisDescription){
 						axes[axisDescription.name] = axisDescription;
@@ -39,20 +39,21 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 						const data = utils.toNumericValues(collectionData, grid), valueOf = self.valueOf.bind(self);//lang.hitch(form, form.valueOf);
 						let previousKpiValuesCache = {}, filter = collection.Filter(), expression = expressionEngine.expression(data, idProperty, missingItemsKpis, valueOf, previousKpiValuesCache);
 						utils.forEach(plotsDescription, function(plotDescription){
-							plots[plotDescription.name] = plotDescription;
-							if (plotDescription.markersProgressColor){
-								plotDescription.styleFunc = function(item){
+							const theDescription = lang.clone(plotDescription);
+							plots[plotDescription.name] = theDescription;
+							if (theDescription.markersProgressColor){
+								theDescription.styleFunc = function(item){
 									return item.fill ? {fill: item.fill, stroke:{color: item.fill, width: 2}} : {};
 								}
 							}
-							if (plotDescription.type === 'Indicator'){
-								if (!plotDescription.lineStroke){
-									plotDescription = lang.mixin(plotDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: 'red', style: 'shortDash', width: 2}, 
-											offset: {x:plotDescription.xlabeloffset || 0, y: plotDescription.ylabeloffset || 0}, labelFunc: function(){
-										return plotDescription.label || this.values;
+							if (theDescription.type === 'Indicator'){
+								if (!theDescription.lineStroke){
+									lang.mixin(theDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: 'red', style: 'shortDash', width: 2}, 
+											offset: {x:theDescription.xlabeloffset || 0, y: theDescription.ylabeloffset || 0}, labelFunc: function(){
+										return theDescription.label || this.values;
 									}});
 								}
-								plotDescription.values = Number(plotDescription.values);
+								theDescription.values = Number(isNaN(theDescription.values) ? expression.expressionToValue(theDescription.values) : theDescription.values);
 							}
 						});
 						const adjustTableAndChartToXYlength = function(xyArray){

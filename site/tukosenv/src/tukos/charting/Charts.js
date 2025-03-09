@@ -1,20 +1,19 @@
 "use strict";
 define(["dojo/_base/declare", "dojo/_base/lang", "tukos/utils", "tukos/PageManager"], 
 function(declare, lang, utils, Pmg){
-	const classes = {trend: "tukos/charting/TrendChart", spider: "tukos/charting/SpiderChart", pie: "tukos/charting/PieChart", repartition: "tukos/charting/RepartitionChart", xy: "tukos/charting/XyChart"};
+	const classes = {trend: "tukos/charting/TrendChart", spider: "tukos/charting/SpiderChart", pie: "tukos/charting/PieChart", repartition: "tukos/charting/RepartitionChart", xy: "tukos/charting/XyChart"},
+		  subValuesCache = {};
 	return declare(null, {
         constructor: function(args){
 			lang.mixin(this, args);
             const self = this, form = self.form, grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol, charts = self.charts;
-            this.chartTypeOf = {};
-            this.subValuesCache = {};
             form.chartWidgets = {};
 			form.isCharting = false;
             utils.forEach(charts, function(chart, id){
 				if (chart.chartType){
 					chart.widgetName = 'chart' + id;
 					require([classes[chart.chartType]], function(chartClass){
-						form.chartWidgets[chart.widgetName] = new chartClass({form: form, grid: grid, dateCol: dateCol, timeCol: timeCol, valueOf: self.valueOf});
+						form.chartWidgets[chart.widgetName] = new chartClass({form: form, grid: grid, dateCol: dateCol, timeCol: timeCol, valueOf: self.valueOf, updateSubValuesCache: self.updateSubValuesCache});
 					})
 				}
 			});
@@ -59,15 +58,45 @@ function(declare, lang, utils, Pmg){
 				case 1:
 					return form.valueOf(widgetName);
 				case 2:
-					const name = nameAndSubName[0], subName = nameAndSubName[1], subValuesCache = this.subValuesCache;
-					if (subValuesCache[name] && subValuesCache[name][subName] !== undefined){
-						return subValuesCache[name][subName];
+					const id = form.valueOf(nameAndSubName[0]), property = nameAndSubName[1];
+					if (!subValuesCache[id]){
+						subValuesCache[id] = {};
+					}
+					if (subValuesCache[id][property] !== undefined){
+						return subValuesCache[id][property];
 					}else{
-						lang.setObject(name, subName, subValuesCache);
-						return undefined;
+						return subValuesCache[id][property] = undefined;
 					}
 				default:
 					Pmg.setFeedbackAlert(Pmg.message('wrongwidgetsubname'));
+			}
+		},
+		updateSubValuesCache: function(){
+			const missingSubValues = {};
+			utils.forEach(subValuesCache, function(properties, id){
+				utils.forEach(properties, function(value, property){
+					if (value === undefined){
+						if(!missingSubValues[id]){
+							missingSubValues[id] = [property];
+						}else{
+							missingSubValues[id].push(property);
+						}
+					}
+				});
+			});
+			if (utils.empty(missingSubValues)){
+				return false;
+			}else{
+				return Pmg.serverDialog({object: 'users', view: 'NoView', mode: 'Tab', action: 'Get', query: {params: {actionModel: 'GetItems'}}}, {data: missingSubValues}).then(
+				    function (response){
+				        utils.forEach(response.data, function(properties, id){
+							utils.forEach(properties, function(propertyValue, propertyName){
+								subValuesCache[id][propertyName] = propertyValue;
+							});
+						});
+						return true;
+				    }
+				);
 			}
 		}
     });

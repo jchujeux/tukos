@@ -488,7 +488,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 dirtyToSend = {};
             	utils.forEach(this.dirty[i], function(value, col){
                 	if (!noSendOnSave.hasOwnProperty(col)){
-                		dirtyToSend[col] = value === undefined ? '~delete' : value;
+                		dirtyToSend[col] = value === undefined ? {'~delete': true} : value;
                 	}
                 });
                 if (!utils.empty(dirtyToSend)){

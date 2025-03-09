@@ -39,16 +39,21 @@ trait StreamsCorrection {
             $keyOffset = 0;
             $deltaPreviousDistance = 0.0;
             $activity['comments'] = '';
+            $athleteModel = Tfk::$registry->get('objectsStore')->objectModel('people');
+            ['ftp' => $ftp] = $athleteModel->getOne(['where' => ['id' => $activity['parentid']], 'cols' => ['ftp']]);
+            if (empty($ftp)){
+                $ftp = 220;
+            }
             for ($key = 1; $key < $streamsLength; $key++){
                 $deltaDistance = CUtl::latlngRadiansToMeters($streams['latitudestream'][$key-1], $streams['longitudestream'][$key-1], $streams['latitudestream'][$key], $streams['longitudestream'][$key]);
                 $deltaTime = $streams['timestream'][$key] - $streams['timestream'][$key-1];
                 $deltaAltitude = $streams['altitudestream'][$key]-$streams['altitudestream'][$key-1];
                 $powerJump = max(KF::estimatedpower_avg($deltaDistance/1000, 1, $deltaAltitude, $massInMovement, 0.0, 0.015, 0.2) + ($deltaDistance - $deltaPreviousDistance) * $massInMovement * $deltaDistance,0.0);
-                if ($powerJump > 2500 || $deltaTime > 1){
+                if ($powerJump > 10 * $ftp || $deltaTime > 1){
                     $activity['comments'] .= 'Time: ' . $streams['timestream'][$key] . ' powerJump: ' . $powerJump . ' timestream index: ' . $key . ' deltaTime: ' . $deltaTime . ' deltaDistance: ' . $deltaDistance
                     . ' deltaPreviousDistance: ' . $deltaPreviousDistance . ' deltaAltitude: ' . $deltaAltitude . ' distance: ' . $streams['distancestream'][$key] . ' altitude: ' . $streams['altitudestream'][$key] . ' velocity: ' . $deltaDistance / $deltaTime . '<br>';
                 }
-                if($powerJump > 2500 && /*$deltaDistance / */$deltaTime > 1.0){
+                if($powerJump > 5000 && $powerJump / $deltaTime > 0.5 * $ftp){
                     for ($backKey = $key - 2; $backKey > $previousJumpKey; $backKey--){
                         if($streams['altitudestream'][$backKey] !== $streams['altitudestream'][$backKey+1] || $streams['latitudestream'][$backKey] !== $streams['latitudestream'][$backKey+1] || 
                                 $streams['longitudestream'][$backKey] !== $streams['longitudestream'][$backKey+1]){
@@ -56,11 +61,17 @@ trait StreamsCorrection {
                         }
                     }
                     $backKey +=1; // $backKey is the first key from which we need to spread the jump, up to $key included
-                    $duration = $streams['timestream'][$key] - $streams['timestream'][$backKey];
+                    $duration = intval(min($streams['timestream'][$key] - $streams['timestream'][$backKey], $deltaDistance));
                     $activity['comments'] .= "=> applying correction (id duration > 1):  backKey:  $backKey; duration: $duration<br>" ;
                     if ($duration > 1){
                         forEach ($streamsToCorrect as $col){
                             $increment[$col] = ($streams[$col][$key] - $streams[$col][$backKey]) / $duration;
+                        }
+                        if (in_array('wattsstream', $streamsToCorrect)){
+                            $increment['wattsstream'] = 0.0;
+                            $constantWattsToAdd = min($powerJump / $duration, 0.8 * $ftp);
+                        }else{
+                            $constantWattsToAdd = false;
                         }
                         if (empty($streams['timestreamc'])){
                             foreach ($presentStreams as $col){
@@ -75,17 +86,27 @@ trait StreamsCorrection {
                                 $streams[$colc] = array_merge($streams[$colc], array_slice($streams[$col], $previousJumpKey, $countToPush));
                             }
                         }
-                        for ($forwardKey = $backKey+1; $forwardKey <= $key; $forwardKey++){
-                            $offsettedKey = $forwardKey + $keyOffset;
-                            for ($i = $streams['timestream'][$forwardKey-1] + 1; $i <= $streams['timestream'][$forwardKey]; $i++){
-                                $streams['timestreamc'][$offsettedKey] = $streams['timestreamc'][$offsettedKey-1] + 1;
-                                forEach ($streamsToCorrect as $col){
-                                    $streams[$col . 'c'][$offsettedKey] = $streams[$col . 'c'][$offsettedKey-1] + $increment[$col];
-                                }
-                                $keyOffset += 1;
-                                $offsettedKey = $forwardKey + $keyOffset;
+                        $i = 1;
+                        $forwardKey = $backKey + 1;
+                        $forwardKeyDuration = $streams['timestream'][$forwardKey] - $streams['timestream'][$forwardKey-1];
+                        while ($i <= $duration){
+                            $offsettedKey = $backKey + $keyOffset + $i;
+                            $streams['timestreamc'][$offsettedKey] = $streams['timestreamc'][$offsettedKey-1] + 1;
+                            forEach ($streamsToCorrect as $col){
+                                $streams[$col . 'c'][$offsettedKey] = $streams[$col . 'c'][$offsettedKey-1] + $increment[$col];
                             }
-                            $keyOffset += -1;
+                            if ($constantWattsToAdd){
+                                $streams['wattsstreamc'][$offsettedKey] = $constantWattsToAdd;
+                            }
+                            if ($i === $forwardKeyDuration){
+                                $forwardKey +=1;
+                                $forwardKeyDuration += $streams['timestream'][$forwardKey] - $streams['timestream'][$forwardKey-1];
+                            }
+                            $i +=1;
+                        }
+                        $keyOffset = $offsettedKey - $forwardKey;
+                        if ($leftForwardKeyDuration = $forwardKeyDuration - $duration){
+                            $streams['timestreamc'][$offsettedKey] += $leftForwardKeyDuration;
                         }
                         $previousJumpKey = $key;
                     }else if (!empty($streams['timestreamc'])){

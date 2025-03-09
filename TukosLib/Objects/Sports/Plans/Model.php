@@ -138,7 +138,7 @@ class Model extends AbstractModel {
             if (!empty($stravaId = Utl::getItem('stravaid', $workoutItem)) && $correctionMode !== 'skip'){
                 if ($correctionMode === true){
                     echo 'Applying streams correction<br>';
-                    $stravaItem = $stravaActivitiesModel->getOne(['where' => ['stravaid' => $stravaId], 'cols' => array_merge($stravaActivitiesModel->streamCols, ['latitudestream', 'longitudestream', 'id'])]);
+                    $stravaItem = $stravaActivitiesModel->getOne(['where' => ['stravaid' => $stravaId], 'cols' => array_merge($stravaActivitiesModel->streamCols, ['latitudestream', 'longitudestream', 'id', 'parentid'])]);
                     if (!empty($stravaItem)){
                         foreach ($stravaItem as $col => $value){
                             if (!empty($stravaItem[$col]) && substr($col, -6) === 'stream'){
@@ -169,8 +169,8 @@ class Model extends AbstractModel {
                         }
                     }
                 }
+                $itemsToProcess[] = ['kpisToGet' => &$kpisToGet, 'itemValues' => $workoutItem];
             }
-            $itemsToProcess[] = ['kpisToGet' => &$kpisToGet, 'itemValues' => $workoutItem];
         }
         echo 'Recomputing workouts kpis<br>';
         $kpis = $workoutsModel->computeKpis($planInformation['parentid'], $itemsToProcess);

@@ -280,38 +280,40 @@ define (["dojo/_base/array", "dojo/_base/declare", "dojo/_base/lang", "dojo/on",
 			let columnsDescription;
 			const translateContent = function(customContent, description){
 				utils.forEach(customContent, function(subContent, key){
-					const subDescription = typeof description === 'object' ? description[key] || {} : {};
-					if (typeof subContent === 'object'){
-						switch (key){
-							case 'widgetsDescription':
-								utils.forEach(subContent, function(widgetContent, widgetName){
-									translateContent(widgetContent, (subDescription || {})[widgetName]);
-									widgetContent["#tKey"] = columnsDescription ? columnsDescription[widgetName].label : (((subDescription || {})[widgetName] || {}).atts || {}).label;
-								});
-								break;
-							case 'columns':
-								utils.forEach(subContent, function(widgetContent, widgetName){
-									translateContent(widgetContent, subDescription && subDescription[widgetName]);
-									widgetContent["#tKey"] = subDescription && subDescription[widgetName] ? subDescription[widgetName].label : widgetName;//For DynamicChart series do not correspond to a widgetName and should not be translated (user entry)
-								});
-								break;
-							case 'series':
-								utils.forEach(subContent, function(widgetContent, widgetName){
-									translateContent(widgetContent, subDescription && subDescription[widgetName]);
-									widgetContent["#tKey"] = subDescription && subDescription[widgetName] ? subDescription[widgetName].options.label : widgetName;//For DynamicChart series do not correspond to a widgetName and should not be translated (user entry)
-								});
-								break;
-							case 'editDialogAtts':
-								columnsDescription = description.columns;
-								translateContent(subContent, subDescription);
-								columnsDescription = false;
-								break;
-							default:
-								translateContent(subContent, subDescription);
+					if (subContent !== null){
+						const subDescription = typeof description === 'object' ? description[key] || {} : {};
+						if (typeof subContent === 'object'){
+							switch (key){
+								case 'widgetsDescription':
+									utils.forEach(subContent, function(widgetContent, widgetName){
+										translateContent(widgetContent, (subDescription || {})[widgetName]);
+										widgetContent["#tKey"] = columnsDescription ? columnsDescription[widgetName].label : (((subDescription || {})[widgetName] || {}).atts || {}).label;
+									});
+									break;
+								case 'columns':
+									utils.forEach(subContent, function(widgetContent, widgetName){
+										translateContent(widgetContent, subDescription && subDescription[widgetName]);
+										widgetContent["#tKey"] = subDescription && subDescription[widgetName] ? subDescription[widgetName].label : widgetName;//For DynamicChart series do not correspond to a widgetName and should not be translated (user entry)
+									});
+									break;
+								case 'series':
+									utils.forEach(subContent, function(widgetContent, widgetName){
+										translateContent(widgetContent, subDescription && subDescription[widgetName]);
+										widgetContent["#tKey"] = subDescription && subDescription[widgetName] ? subDescription[widgetName].options.label : widgetName;//For DynamicChart series do not correspond to a widgetName and should not be translated (user entry)
+									});
+									break;
+								case 'editDialogAtts':
+									columnsDescription = description.columns;
+									translateContent(subContent, subDescription);
+									columnsDescription = false;
+									break;
+								default:
+									translateContent(subContent, subDescription);
+							}
+							subContent["#tKey"] = Pmg.message(key, form.object);
+						}else{
+							customContent[key] = {"#tKey": Pmg.message(key, form.object), "#leafValue": subContent};
 						}
-						subContent["#tKey"] = Pmg.message(key, form.object);
-					}else{
-						customContent[key] = {"#tKey": Pmg.message(key, form.object), "#leafValue": subContent};
 					}
 				});
 				return customContent;			

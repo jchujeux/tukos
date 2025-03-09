@@ -79,7 +79,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/store/Memory",  "dojo/st
 		editInTab: function(){
 			var grid = this.getGrid(), item = grid.collection.getSync(this.selectedItem.connectedIds[grid.widgetName]);
             if (item.id){
-            	Pmg.tabs.gotoTab({object: grid.object, view: 'Edit', query: {id: item.id, googlecalid: item.googlecalid}});
+            	Pmg.tabs.gotoTab({object: grid.object, view: 'Edit', query: {id: item.id}});
 			}else{
 				Pmg.setFeedback(Pmg.message('needtosavebeforeeditinnewtab'), null, null, true);
 			}

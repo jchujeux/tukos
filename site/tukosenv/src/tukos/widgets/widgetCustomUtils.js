@@ -145,21 +145,25 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 							widget.set('options', atts.options);
 							break;
 						case 'SimpleDgrid':
-							widget.set('columns', atts.atts.columns);
-							widget.set('store', atts.atts.storeArgs);
-							//if (atts.atts.style){
-								dst.set(widget.domNode, atts.atts.style || widget.style);
-							//}
-							if (atts.atts.initialRowValue){
-								widget.set('initialRowValue', atts.atts.initialRowValue);
-							}else{
-								delete widget.initialRowValue;
+						['columns', 'storeArgs', 'style', 'initialRowValue', 'onCellClickAction', 'sort'].forEach(function(name){
+							switch(name){
+								case 'style':
+									dst.set(widget.domNode, atts.atts.style || widget.style);
+									break;
+								case 'storeArgs':
+									widget.set('store', atts.atts.storeArgs);
+									break;
+								case 'sort':
+									widget.set('sort', atts.atts.sort || []);
+									break;
+									default:
+									if (atts.atts[name]){
+										widget.set(name, atts.atts[name]);
+									}else{
+										delete widget[name];
+									}
 							}
-							if (atts.atts.onCellClickAction){
-								widget.set('onCellClickAction', atts.atts.onCellClickAction);
-							}else{
-								delete widget.onCellClickAction;
-							}
+						});
             		}
             		if (atts && atts.atts && atts.atts.tukosTooltip){
 						//widget.form = self.widget.form;
@@ -288,7 +292,8 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 				case 'MultiSelect': 
 					return attValueWidget.get('serverValue');
 				case 'SimpleDgrid':
-					return utils.toObject(attValueWidget.collection.fetchSync().filter(function(row){
+				const collection = attValueWidget.sort ? attValueWidget.collection.sort(attValueWidget.sort) : attValueWidget.collection;
+				return utils.toObject(collection.filter(function(row){
 						utils.forEach(row, function(value, property){
 							if (value === undefined || value === null || Number.isNaN(value)){
 								delete row[property];
@@ -332,7 +337,17 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 			const widget = this.widget, widgetTypeFilter = widget.widgetType + (widget.chartType ? '_' + widget.chartType : ''),  customAtts = {};
 			utils.forEach(widget.customizableAtts, function(customAtt){
 				if (widget.hasOwnProperty(customAtt.att)){
-					customAtts[customAtt.att] = widget[customAtt.att];
+					let  customization = widget[customAtt.att];
+					if (typeof customization === 'object'){
+						const reIndexedCustomization = {};
+						let i = 1;
+						utils.forEach(customization, function(item){
+							reIndexedCustomization[i] = item;
+							i += 1;
+						});
+						customization = reIndexedCustomization;
+					}
+					customAtts[customAtt.att] = customization;
 				}
 			});
 			if (utils.empty(customAtts)){
@@ -347,10 +362,11 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 					function(){
 						const theResponse = Pmg.dialogConfirm.get('value');
 						if (theResponse.id || theResponse.name){
+							Pmg.setFeedback(' ');
 							Pmg.serverDialog({action: 'Save', object: 'customwidgets', view: 'edit', query: {id: theResponse.id, timezoneOffset: (new Date()).getTimezoneOffset()}}, 
 								{data: theResponse.id 
-									? (theResponse.name	? {name: theResponse.name, customization: customAtts}	: {customization: customAtts})
-									: {parentid: Pmg.get('userid'), name: theResponse.name, vobject: widget.form.object, widgettype: widget.widgetType + (widget.chartType ? '_' + widget.chartType : ''), customization: customAtts}
+									? (theResponse.name	? {name: theResponse.name, customization: customAtts}	: {customization: JSON.stringify(customAtts)})
+									: {parentid: Pmg.get('userid'), name: theResponse.name, vobject: widget.form.object, widgettype: widget.widgetType + (widget.chartType ? '_' + widget.chartType : ''), customization: JSON.stringify(customAtts)}
 							},Pmg.message('ActionDone'));
 						}else{
 							Pmg.setFeedbackAlert(Pmg.message('YouneedtoselectExistingorenternew'));
