@@ -69,7 +69,7 @@ trait StreamsCorrection {
                         }
                         if (in_array('wattsstream', $streamsToCorrect)){
                             $increment['wattsstream'] = 0.0;
-                            $constantWattsToAdd = min($powerJump / $duration, 0.8 * $ftp);
+                            $constantWattsToAdd = min($powerJump / $duration, 0.5 * $ftp);
                         }else{
                             $constantWattsToAdd = false;
                         }
@@ -88,7 +88,7 @@ trait StreamsCorrection {
                         }
                         $i = 1;
                         $forwardKey = $backKey + 1;
-                        $forwardKeyDuration = $streams['timestream'][$forwardKey] - $streams['timestream'][$forwardKey-1];
+                        $forwardKeyDuration = $streams['timestream'][$key] - $streams['timestream'][$forwardKey-1];
                         while ($i <= $duration){
                             $offsettedKey = $backKey + $keyOffset + $i;
                             $streams['timestreamc'][$offsettedKey] = $streams['timestreamc'][$offsettedKey-1] + 1;
@@ -104,7 +104,7 @@ trait StreamsCorrection {
                             }
                             $i +=1;
                         }
-                        $keyOffset = $offsettedKey - $forwardKey;
+                        $keyOffset = $offsettedKey - $key;
                         if ($leftForwardKeyDuration = $forwardKeyDuration - $duration){
                             $streams['timestreamc'][$offsettedKey] += $leftForwardKeyDuration;
                         }

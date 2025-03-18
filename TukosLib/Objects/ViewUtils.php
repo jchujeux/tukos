@@ -235,7 +235,7 @@ class ViewUtils{
         return  Utl::array_merge_recursive_replace([
                 'type' => 'SimpleDgrid',
                 'atts' => ['edit' =>  [
-                    'label' => $view->tr($label), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'], 'initialId' => true,
+                    'label' => $view->tr($label), 'storeType' => 'MemoryTreeObjects', 'storeArgs' => ['idProperty' => 'idg'],
                     'colsDescription' => self::widgetsArrayDescription($colsDescription, false),
                 ]],
                 'objToEdit' => ['toNumeric' => ['class' => 'TukosLib\Utils\Utilities', 'id'], 'objToEdit' => ['class' => 'TukosLib\Utils\Utilities', $colsDescription]],

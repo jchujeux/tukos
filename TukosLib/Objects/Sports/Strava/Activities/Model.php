@@ -228,7 +228,7 @@ class Model extends AbstractModel {
                 'select=date%2C%20coordonnees%2C%20libgeo%2C%20ff%2C%20dd&where=date%20%3E%3D%20date%27${date}T00%3A00%3A00%27%20and%20date%20%3C%3D%20date%27${date}T23%3A59%3A59%27%20and%20${libgeowhere}&order_by=date%20ASC';
             if ($libGeo === 'auto'){
                 $targetDistance = 50; $windData = [];
-                while (empty($windData) && $targetDistance <= 200){
+                while (empty($windData) || $targetDistance <= 200){
                     $libGeoWhere = Utl::substitute('within_distance(coordonnees%2C%20geom\'POINT(${longitude}%20${latitude})\'%2C%20${targetdistance}km)',
                         ['latitude' => CUtl::radiansToDegrees($latitude), 'longitude' => CUtl::radiansToDegrees($longitude), 'targetdistance' => $targetDistance]);
                     $windData = json_decode(file_get_contents(Utl::substitute($geoUrl, ['date' => $itemValue['startdate'], 'libgeowhere' => $libGeoWhere])), true);
@@ -241,13 +241,13 @@ class Model extends AbstractModel {
                     }else{
                         $nearestDistance = INF;
                         foreach($data as $libGeo => $values){
-                            $distance = CUtl::latlngRadiansToMeters($latitude, $longitude, $values[0]['coordonnees']['lat'], $values[0]['coordonnees']['lon']);
+                            $distance = CUtl::latlngRadiansToMeters($latitude, $longitude, CUtl::degreesToRadians($values['coordonnees']['lat']), CUtl::degreesToRadians($values['coordonnees']['lon']));
                             if ($distance < $nearestDistance){
                                 $nearestLibGeo = $libGeo;
                                 $nearestDistance = $distance;
                             }
                         }
-                        $data = array_filter($windData['results'], function($item) use ($nearestLibGeo) {return $item['libgeo'] === $nearestLibGeo;});
+                        $data = array_values(array_filter($windData['results'], function($item) use ($nearestLibGeo) {return $item['libgeo'] === $nearestLibGeo;}));
                     }
                 }
                 
@@ -262,7 +262,7 @@ class Model extends AbstractModel {
                 $midTime = substr(DUtl::secondsToTime($midTimeSeconds), 1);
                 $beforeData = $data[0];
                 $i = 1; $iLast = $dataCount -1;
-                while(substr($data[$i]['date'], 11, 8) < $midTime && $i <= $iLast){
+                while($i <= $iLast && substr($data[$i]['date'], 11, 8) < $midTime){
                     $beforeData = $data[$i];
                     $i +=1;
                 }
@@ -274,10 +274,10 @@ class Model extends AbstractModel {
                     $beforeWeight = ($secondsAfter - $midTimeSeconds) / $totalSeconds;
                     $afterWeight = ($midTimeSeconds - $secondsBefore) / $totalSeconds;
                     $itemValue['windvelocity'] = ($beforeData['ff'] * $beforeWeight + $afterData ['ff'] * $afterWeight) / 2.0;
-                    $itemValue['winddirection'] = intval(round(($beforeData['dd'] * $beforeWeight + $afterData ['dd']* $afterWeight) * 16 / 360));
+                    $itemValue['winddirection'] = intval(round(($beforeData['dd'] * $beforeWeight + $afterData ['dd']* $afterWeight) * 16 / 360)) % 16;
                 }else{
                     $itemValue['windvelocity'] = $beforeData['ff'];
-                    $itemValue['winddirection'] = $beforeData['dd'];
+                    $itemValue['winddirection'] = intval(round(($beforeData['dd']) * 16 / 360)) % 16;
                 }
             }
         }else{

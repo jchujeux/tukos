@@ -71,7 +71,7 @@ const pane = this.form, form = pane.form, changedValues = pane.changedValues();
 if (!utils.empty(changedValues)){
 	form.editConfig = form.editConfig || {};
 	if (changedValues.chartsperrow){
-		lang.setObject('customization.editConfig.chartsperrow', form.editConfig.chartsperrow, form);
+		lang.setObject('customization.editConfig.chartsperrow', changedValues.chartsperrow, form);
 	}
 	if (changedValues.charts){
 		const newChartsValue = utils.toObject(lang.clone(pane.getWidget('charts').get('value')), 'id', false, true);

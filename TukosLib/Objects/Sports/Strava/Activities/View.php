@@ -29,10 +29,6 @@ class View extends AbstractView {
             'sport'         => ViewUtils::storeSelect('sport', $this, 'Sport'),
             'avghr' => ViewUtils::numberTextBox($this,'Average Heart Rate', ['atts' => ['edit' => []]]),
             'avgpw' => ViewUtils::numberTextBox($this, 'Average Power', ['atts' => []]),
-            'trimpavghr' => ViewUtils::numberTextBox($this, 'Heartrate_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
-            'trimpavgpw' => ViewUtils::numberTextBox($this, 'Power_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
-            'heartrate_avgload' => ViewUtils::numberTextBox($this, 'Heartrate_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
-            'power_avgload' => ViewUtils::numberTextBox($this, 'Power_avgload', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '##0.']]]]),
             'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['hidden' => true]],
                 'objToEdit' => ['stravaLink' => ['class' => $this]], 'objToStoreEdit' => ['stravaLink' => ['class' => $this]], 'objToOverview' => ['stravaLink' => ['class' => $this]]]),
         ];

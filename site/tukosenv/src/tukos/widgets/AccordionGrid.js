@@ -250,7 +250,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/when",
 			this.setAccordion();
 			this.buildAccordion();
 			this.deleted = [];
-            var maxId = this.maxId = 0;
+            var maxId = 0;
             this.store.forEach(function(row){
                 if (row.id > maxId){
                     maxId = row.id;

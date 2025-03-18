@@ -27,7 +27,7 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
 	                    }
 	                }else{
 	                    let tKey, leafValue;
-	                    if (object[key] !== null && Object.hasOwn(object[key], "#leafValue")){
+	                    if (object[key] && Object.hasOwn(object[key], "#leafValue")){
 							tKey = object[key]["#tKey"];
 							leafValue = object[key]["#leafValue"];
 						}else{

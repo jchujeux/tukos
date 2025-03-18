@@ -7,7 +7,11 @@ class Configure extends AbstractConfigure{
     
     function __construct(){
                
-        parent::__construct([],  ['users', 'people', 'organizations', 'sptathletes', 'sptplans', 'sptworkouts', 'sptprograms', 'sptsessions'], []);
+        parent::__construct(
+            ['#sptathletes' => [], '#sptplans' => [['#sptworkouts' => []]], '#sptequipments' => [], '#stravaactivities' => []],  
+            ['users', 'people', 'organizations', 'sptathletes', 'sptplans', 'sptworkouts'],
+            []
+        );
         
     }
 }

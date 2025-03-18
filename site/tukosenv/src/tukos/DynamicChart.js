@@ -1,11 +1,11 @@
 "use strict";
-define(["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom-construct",  "dojo/dom-style",  "dojo/aspect", "dijit/_WidgetBase", "dojox/charting/Chart",
+define(["dojo/_base/declare", "dojo/_base/lang",  "dojo/dom-construct",  "dojo/dom-style",  "dojo/aspect", "dijit/_WidgetBase", "tukos/charting/Chart",
         "dojox/charting/themes/ThreeD", "dstore/charting/StoreSeries", "dojo/store/Observable", "dstore/Memory", "tukos/dstore/MemoryUserFilter", "tukos/utils", "tukos/menuUtils", "tukos/evalutils", "tukos/widgets/widgetCustomUtils", "tukos/PageManager"], 
 function(declare, lang, dct, dst, aspect, Widget, Chart, theme, StoreSeries, Observable, Memory, MemoryUserFilter, utils, mutils, evalutils, wcutils, Pmg){
     var classesPath = {
         Curves:  "*dojoFixes/dojox/charting/plot2d/Default", Columns: "dojox/charting/plot2d/", ClusteredColumns: "dojox/charting/plot2d/", Lines: "dojox/charting/plot2d/", Areas: "dojox/charting/plot2d/", Bubble: "dojox/charting/plot2d/", Pie: "dojox/charting/plot2d/", 
         Spider: "tukos/charting/plot2d/", Indicator: "dojox/charting/plot2d/", Legend: "dojox/charting/widget/", SelectableLegend: "tukos/charting/widget/", axis2dDefault:  "*dojox/charting/axis2d/Default", axis2dBase: "*dojox/charting/axis2d/Base",
-        Tooltip: "dojox/charting/action2d/", BasicGridUserFilter: "tukos/", MouseIndicator: "dojox/charting/action2d/", MouseZoomAndPan: "dojox/charting/action2d/", regression: "tukos/charting/"
+        Tooltip: "dojox/charting/action2d/", BasicGridUserFilter: "tukos/", MouseIndicator: "dojox/charting/action2d/", MouseZoomAndPan: "tukos/charting/action2d/", regression: "tukos/charting/"
     };
 	return declare(Widget, {
         
@@ -160,19 +160,26 @@ function(declare, lang, dct, dst, aspect, Widget, Chart, theme, StoreSeries, Obs
                         const axisOptions = axes[axisName];
                          chart.addAxis(axisName, axisOptions);
                     }
+					let mouseZoomAndPanIsInstantiated = false;
                     for (let plotName in plots){
-                        const plotOptions = plots[plotName];
+                        const plotOptions = plots[plotName], plotType = plotOptions.type;
                         plotOptions.type = chartClasses[plotOptions.type];
 						if (typeof plotOptions.styleFunc === 'string'){
 							plotOptions.styleFunc = evalutils.eval(plotOptions.styleFunc);
 						}
               			chart.addPlot(plotName, plotOptions);
-	                    if (chartClasses['Tooltip']){
-	                    	plotOptions.tooltip = new chartClasses['Tooltip'](chart, plotName);
-	                    }
-	                    if (chartClasses['MouseZoomAndPan']){
-	                    	plotOptions.mouseZoomAndPan = new chartClasses['MouseZoomAndPan'](chart, plotName/*, {axis: "x", scaleFactor: 1.0, maxScale: 20}*/);
-	                    }
+	                    if (plotType !== 'Indicator'){
+							if (chartClasses['Tooltip']){
+								plotOptions.tooltip = new chartClasses['Tooltip'](chart, plotName);
+							}
+		                    if (this.mouseZoomAndPan && !mouseZoomAndPanIsInstantiated){
+		                    	plotOptions.mouseZoomAndPan = new chartClasses['MouseZoomAndPan'](chart, plotName, {axis: "x", scaleFactor: 1.05, maxScale: 10, keyZoomModifier: 'alt'});
+								mouseZoomAndPanIsInstantiated = true;
+		                    }
+							if (this.connectToPlot){
+								chart.connectToPlot(plotName, lang.hitch(this, plotOptions.connectToPlot));
+							}
+						}
                     }
                     const showTable = this.showTable, tableNode = this.tableNode, chartNode = this.chartNode, width = parseInt(this.chartWidth) || dst.get(this.domNode, "width"), height = this.chartHeight || dst.get(this.chartNode, "height"),
                     	tableHeight = (parseInt(height)) + 'px';

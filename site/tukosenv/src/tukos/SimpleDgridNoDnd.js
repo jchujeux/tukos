@@ -24,6 +24,16 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/on",
             	this.disabled = newValue;
 			}
 		},
+		_setColumns: function(){
+			this.inherited(arguments);
+			delete this.contextMenuItemsWithEdit;
+			this.setEditContextMenuItems(!this.disabled);
+			/*if ('rowId' in this.columns){
+				const self = this;
+				this.contextMenuItems.idCol.push({atts: {label:Pmg.message('UpdateRowIds'),   onClick: function(){self.updateRowIds()}}});
+				this.contextMenuItems.row.push({atts: {label:Pmg.message('UpdateRowIds'),   onClick: function(){self.updateRowIds()}}});
+			}*/
+		},
 		setEditContextMenuItems: function(canEdit){
             if (canEdit){
 	            this.contextMenuItemsWithoutEdit = this.contextMenuItemsWithoutEdit || lang.clone(this.contextMenuItems);

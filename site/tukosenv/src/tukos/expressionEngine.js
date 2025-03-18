@@ -364,15 +364,19 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 					}else{
 						return whenFalse();
 					}
-				})
+				}),
+				"DQUOTE": function(value){
+					return '"' + value() + '"';
+				}
 			},
-			PRECEDENCE:[['ARRAY', 'VECTOR', 'NEG', 'TOFIXED', 'JSONPARSE', 'XY', 'SUM', 'AVG', 'EXPINTENSITY', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'TIMETOSECONDS', 'DATE', 'VALUEOF', 'IF'], ['*', '/'], ['+', '-'], ['='], [',']],
+			PRECEDENCE:[['ARRAY', 'VECTOR', 'NEG', 'TOFIXED', 'JSONPARSE', 'XY', 'SUM', 'AVG', 'EXPINTENSITY', 'EXPAVG', 'MIN', 'MAX', 'FIRST', 'LAST', 'ITEM', 'TIMETOSECONDS', 'DATE', 'VALUEOF', 'IF', 'DQUOTE'], ['*', '/'], ['+', '-'], ['='], [',']],
 			LITERAL_OPEN: '"',
 			LITERAL_CLOSE: '"',
 			GROUP_OPEN: '(',
 			GROUP_CLOSE: ')',
 			SEPARATOR: ' ',
 			SYMBOLS: ['*', '/', '+', '-', '(', ')', '[', ']', ',','='],
+			SEPARATORSYMBOLS: [','],
 			AMBIGUOUS: {'-': 'NEG'},
             SURROUNDING: {
                 XARRAY: {

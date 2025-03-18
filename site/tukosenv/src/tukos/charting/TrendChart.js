@@ -13,7 +13,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 			if (!hidden  && chartWidget.kpisToInclude){
 				dojo.ready(function(){
 					let collection, horizontalAxisDescription;
-					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol,
+					const grid = self.grid, dateCol = self.dateCol, timeCol = self.timeCol, selectedDate = self.selectedDate,
 						 kpisDescription = utils.toObject(utils.toNumeric(chartWidget.kpisToInclude, 'id'), 'rowId'), series = {}, chartData = [], tableData = [], axesDescription = chartWidget.axesToInclude, axes = {},
 						 plotsDescription = chartWidget.plotsToInclude, plots = {}, tableColumns = {};
 						
@@ -24,6 +24,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 							axisDescription.labelFunc = function(textValue, rawValue){
 								return xLabels[rawValue];
 							}
+							axisDescription.enableCache = true;
 						}
 					});
 					const xType = horizontalAxisDescription.tickslabel || 'daysinceorigin', xTypePosition = ['daysinceorigin', 'dateofday', 'dayoftheyear', 'weeksinceorigin', 'dateofweek', 'weekoftheyear'].indexOf(xType), isWeek = xTypePosition > 2;
@@ -66,6 +67,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 						utils.forEach(plotsDescription, function(plotDescription){
 							try{
 								let theDescription = lang.clone(plotDescription);
+								theDescription.enableCache = true;
 								if (theDescription.type === 'Indicator'){
 									theDescription = lang.mixin(theDescription, {stroke: null, outline: null, fill: null, labels: 'none', lineStroke: {color: theDescription.indicatorColor || 'red', style: theDescription.indicatorStyle || 'shortDash', width: 2},
 										labelFunc: function(){
@@ -109,6 +111,15 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 										plots[theDescription.name] = theDescription;
 									}
 								}else{
+									if (chartWidget.connectToPlot){
+										theDescription.connectToPlot = function(event){
+											if (event.type === 'onclick'){
+												event.event.preventDefault();
+												event.event.stopPropagation();
+												this.form.setValueOf(selectedDate, event.run.data[event.x].targetDate);
+											}
+										};
+									}
 									plots[theDescription.name] = theDescription;
 								}
 							}catch(e){
@@ -119,7 +130,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 						utils.forEach(kpisDescription, function(kpiDescription, index){
 							if (kpiDescription.plot){
 								index1 = index + 1;
-								series[index1] = {value: {y: index1, tooltip: index1 + 'Tooltip'}, options: {plot: kpiDescription.plot, label: kpiDescription.name, legend: kpiDescription.name}};
+								series[index1] = {value: {y: index1, tooltip: index1 + 'Tooltip', targetDate: index1 + 'TargetDate'}, options: {plot: kpiDescription.plot, label: kpiDescription.name, legend: kpiDescription.name, enableCache: true}};
 								tableColumns[index1] = {field: index1, label: kpiDescription.name, rowsFilters: true}
 							}
 						});
@@ -142,6 +153,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 											(isWeek 
 												? '<br><small>(' + Pmg.message('weekendingon', 'sptplans') + ' ' + dutils.formatDate(toDateObject, 'd MMM yy') + ')</small>' 
 												: '<br><small>(' + dutils.formatDate(firstDateObject, 'd MMM yy') + ')</small>');
+										chartItem[index1 + 'TargetDate'] = isWeek ? toDate	: firstDate;
 										if (kpiDescription.scalingfactor){
 											chartItem[index1] = chartItem[index1] * kpiDescription.scalingfactor;
 										}

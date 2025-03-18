@@ -287,9 +287,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				const self = this, theResult = [];
 				self.forEach(object, function(item, keyValue){
 					let theItem = lang.clone(item);
-					if (asString){
-						keyValue = keyValue.toString();
-					}
+					keyValue = asString ? keyValue.toString() : parseInt(keyValue);
 					if (typeof theItem === 'object'){
 						theItem[keyName] = keyValue;
 					}else{
@@ -572,33 +570,53 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 			inject: function(valueOrArrayToInject, intoArray, atIndex) {
 				return intoArray.slice(0, atIndex).concat(valueOrArrayToInject).concat(intoArray.slice(atIndex));
 			},
-			debounce: function(func, wait, immediate) {
-				var timeout, result;
-				return function() {
-					var context = this,
-						args = arguments;
-					var later = function() {
-						timeout = null;
-						if (!immediate) result = func.apply(context, args);
-					};
-					var callNow = immediate && !timeout;
-					clearTimeout(timeout);
-					timeout = setTimeout(later, wait);
-					if (callNow) result = func.apply(context, args);
-					return result;
-				};
+			debounce: function(func, wait, immediate, context) {
+			    var result;
+			    var timeout = null;
+			    return function() {
+			        var ctx = context || this, args = arguments;
+			        var later = function() {
+			            timeout = null;
+			            if (!immediate) result = func.apply(ctx, args);
+			        };
+			        var callNow = immediate && !timeout;
+			        // Tant que la fonction est appelée, on reset le timeout.
+			        clearTimeout(timeout);
+			        timeout = setTimeout(later, wait);
+			        if (callNow) result = func.apply(ctx, args);
+			        return result;
+				}
 			},
-			throttle: function(func, limit) {
-				var wait = false;
-				return function() {
-					if (!wait) {
-						func.apply(this, arguments);
-						wait = true;
-						setTimeout(function() {
-							wait = false;
-						}, limit);
-					}
-				};
+			throttle: function(func, wait, leading, trailing, context) {
+			    var ctx, args, result;
+			    var timeout = null;
+			    var previous = 0;
+			    var later = function() {
+			        previous = new Date;
+			        timeout = null;
+			        result = func.apply(ctx, args);
+			    };
+			    return function() {
+			        var now = new Date;
+			        if (!previous && !leading) previous = now;
+			        var remaining = wait - (now - previous);
+			        ctx = context || this;
+			        args = arguments;
+			        // Si la période d'attente est écoulée
+			        if (remaining <= 0) {
+			            // Réinitialiser les compteurs
+			            clearTimeout(timeout);
+			            timeout = null;
+			            // Enregistrer le moment du dernier appel
+			            previous = now;
+			            // Appeler la fonction
+			            result = func.apply(ctx, args);
+			        } else if (!timeout && trailing) {
+			            // Sinon on s’endort pendant le temps restant
+			            timeout = setTimeout(later, remaining);
+			        }
+			        return result;
+			    };
 			},
 			waitUntil: function(untilCallback, actionCallback, delay) {
 				if (untilCallback()) {

@@ -97,6 +97,10 @@ define(["require", "exports"], function (require, exports) {
             this.options.SYMBOLS.forEach((symbol) => {
                 this.symbols[symbol] = symbol;
             });
+			this.separatorSymbols = {};
+			this.options.SEPARATORSYMBOLS.forEach((symbol) => {
+				this.separatorSymbols[symbol] = symbol;
+			});
         }
         resolveCase(key) {
             return this.options.isCaseInsensitive ? key.toUpperCase() : key;
@@ -104,9 +108,12 @@ define(["require", "exports"], function (require, exports) {
         resolveAmbiguity(token) {
             return this.options.AMBIGUOUS[this.resolveCase(token)];
         }
-        isSymbol(char) {
-            return this.symbols[char] === char;
-        }
+		isSymbol(char) {
+		    return this.symbols[char] === char;
+		}
+		isSeparatorSymbol(char) {
+		    return this.separatorSymbols[char] === char;
+		}
         getPrefixOp(op) {
             if (this.options.termTyper && this.options.termTyper(op) === "function") {
                 const termValue = this.options.termDelegate(op);
@@ -217,6 +224,11 @@ define(["require", "exports"], function (require, exports) {
                     state.startedWithSep = currChar in this.surroundingOpen;
                     tokens.push(currChar);
                 }
+				else if (this.isSeparatorSymbol(currChar)){
+					endWord(true);
+					state.startedWithSep = true;
+					tokens.push(currChar);
+				}
                 else if ((this.isSymbol(currChar) && !state.scanningSymbols) ||
                     (!this.isSymbol(currChar) && state.scanningSymbols)) {
                     endWord(false);

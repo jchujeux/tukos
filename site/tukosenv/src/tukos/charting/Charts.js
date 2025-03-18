@@ -13,7 +13,7 @@ function(declare, lang, utils, Pmg){
 				if (chart.chartType){
 					chart.widgetName = 'chart' + id;
 					require([classes[chart.chartType]], function(chartClass){
-						form.chartWidgets[chart.widgetName] = new chartClass({form: form, grid: grid, dateCol: dateCol, timeCol: timeCol, valueOf: self.valueOf, updateSubValuesCache: self.updateSubValuesCache});
+						form.chartWidgets[chart.widgetName] = new chartClass({form: form, grid: grid, dateCol: dateCol, timeCol: timeCol, selectedDate: self.selectedDate, valueOf: self.valueOf, updateSubValuesCache: self.updateSubValuesCache});
 					})
 				}
 			});

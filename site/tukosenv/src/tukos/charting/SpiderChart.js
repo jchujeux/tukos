@@ -40,19 +40,16 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 					const params = chartWidget.plotsToInclude ? chartWidget.plotsToInclude[1] : {}, 
 						  plots =  {theSpider: {'type': 'Spider', labelOffset: params.labelOffset || -10, radius: params.spiderRadius, maxLabelWidthShift: params.maxLabelWidthShift, divisions:  params.divisions || 5, precision: precision, seriesFillAlpha: 0.1,
 												seriesWidth: 2, markerSize: params.markerSiwe || 5,	axisFont: params.axisFont || "normal normal normal 11pt Arial"}};
-					let previousKpiValuesCache = {};
+					let previousKpiValuesCache = {}, setsExp = {};
 					utils.forEach(itemsSets, function(set){
 						try{
-							let setName = set.setName, filterString = chartsUtils.setFilterString(set, expression, dateCol), kpiDate = expression.expressionToValue(set.kpidate), setCollection = collection, setData = collectionData, previousToDate, previousData = [];
+							let setName = set.setName, filterString = chartsUtils.setFilterString(set, expression, dateCol), kpiDate = expression.expressionToValue(set.kpidate), setCollection = collection, setData = collectionData;
 							if (filterString){
 								setCollection = collection.filter(expFilter.expressionToValue(filterString));
 								setData = utils.toNumericValues(setCollection.fetchSync(), grid);
 							}
 							previousKpiValuesCache[setName] = {};
-							let setExp = expressionEngine.expression(utils.toNumericValues(setData, grid), idProperty, missingItemsKpis, valueOf, previousKpiValuesCache[setName], [], kpiDate);
-							series[setName] = {value: {key: 'kpi', value: setName, tooltip: setName + 'Tooltip'}, 
-								options: {plot: 'theSpider', fill: set.fillColor || 'black', hasFill: set.fill, stroke: {color: set.fillColor || 'black', style: set.kpimode === 'planned' ? 'shortDash' : ''}}};
-							tableColumns[setName] = {label: hiutils.htmlToText(setName), field: setName/*, renderCell: 'renderContent', formatType: 'number', formatOptions: {places: 1}*/};
+							let setExp = setsExp[setName] = expressionEngine.expression(utils.toNumericValues(setData, grid), idProperty, missingItemsKpis, valueOf, previousKpiValuesCache[setName], [], kpiDate);
 							let setKpiData = (kpiData[setName] = {}), setExpKpi = (expKpi[setName] = {});
 							utils.forEach(kpisDescription, function(kpiDescription){
 								const kpiName = kpiDescription.name;
@@ -69,7 +66,11 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 						}
 					});
 					utils.forEach(itemsSets, function(set){
-						let i = 0, setName = set.setName;
+						const setName = set.setName, setLabel = setName.includes('$') || setName.includes('@') ? setsExp[setName].expressionToValue(setName) : setName;
+						series[setLabel] = {value: {key: 'kpi', value: setName, tooltip: setName + 'Tooltip'}, 
+							options: {plot: 'theSpider', fill: set.fillColor || 'black', hasFill: set.fill, stroke: {color: set.fillColor || 'black', style: set.kpimode === 'planned' ? 'shortDash' : ''}}};
+						tableColumns[setName] = {label: hiutils.htmlToText(setLabel), field: setName};
+						let i = 0;
 						utils.forEach(kpisDescription, function(kpiDescription){
 							try{
 								//const value = expKpi[setName][kpiDescription.name].expressionToValue(set.kpimode === 'planned' && kpiDescription.plannedkpicol ? "LAST('$' + kpiDescription.plannedkpicol)" : kpiDescription.kpi);
@@ -92,7 +93,7 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 							}catch(e){
 								Pmg.addFeedback(Pmg.message('errorkpieval') + ': ' + e.message + ' - ' + Pmg.message('chart') + ': ' + chartWidget.title + ' - ' + Pmg.message('kpi') + ': ' + kpiDescription.name);
 							}
-						})
+						});
 					});
 					chartsUtils.processMissingKpis(missingItemsKpis, grid, self, chartWidgetName, chartData, chartData, tableColumns, axes, plots, series);
 				});
