@@ -461,5 +461,8 @@ class UserInformation{
     public function showTooltips(){
         return Utl::getItem('showTooltips', $this->pageCustomization(), 'YES', 'YES');
     }
+    public function translationsEditor(){
+        return Utl::getItem('translationsEditor', $this->pageCustomization(), 'basic', 'basic');
+    }
 }
 ?>

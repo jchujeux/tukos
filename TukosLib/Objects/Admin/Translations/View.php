@@ -14,6 +14,7 @@ class View extends AbstractView {
         $this->objectName = $objectName;
         $this->model = Tfk::$registry->get('objectsStore')->objectModel($this->objectName, $this->tr);
         $this->user  = Tfk::$registry->get('user');
+        $translationsEditor = $this->user->translationsEditor();
         $this->sendOnSave = $this->sendOnDelete = [];
         $this->mustGetCols = ['id'];
         $this->tr = Tfk::$tr;//so that admin in setname is translated as administration, not administrator
@@ -31,15 +32,15 @@ class View extends AbstractView {
             'name'      => ViewUtils::textArea($this, 'Translation key', ['atts' => ['storeedit' => ['onClickFilter' => ['id']], 'overview'  => ['onClickFilter' => ['id']]]]),
         	'setname'  => ViewUtils::storeSelect('setName', $this, 'Translation set'),
             'en_us'    => ViewUtils::lazyEditor($this, 'English', ['atts' => ['edit' => [
-                'height' => '550px', 'editorType' => 'basic',
+                'height' => '550px', 'editorType' => $translationsEditor,
                 'customizableAtts' => $customizableAtts
             ]]]),
             'fr_fr'    => ViewUtils::lazyEditor($this, 'fr_fr', ['atts' => ['edit' => [
-                'height' => '550px', 'editorType' => 'basic',
+                'height' => '550px', 'editorType' => $translationsEditor,
                 'customizableAtts' => $customizableAtts
             ]]]),
             'es_es'    => ViewUtils::lazyEditor($this, 'Spanish', ['atts' => ['edit' => [
-                'height' => '550px', 'editorType' => 'basic',
+                'height' => '550px', 'editorType' => $translationsEditor,
                 'customizableAtts' => $customizableAtts
             ]]])
         ];

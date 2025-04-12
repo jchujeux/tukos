@@ -24,7 +24,7 @@ define(["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dijit/registry
             if (typeof widget.setStyleToUnchanged === 'function'){
                 widget.setStyleToUnchanged();
             }else if (widget.domNode.style.backgroundColor === this.changeColor){
-                this.changeStyle(widget, 'backgroundColor', 'White');
+                this.changeStyle(widget, 'backgroundColor', '');
             }
         },
 

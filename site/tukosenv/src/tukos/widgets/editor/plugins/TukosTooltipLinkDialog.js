@@ -12,13 +12,16 @@ define([
 ], function(dojo, dijit, domAttr, _Plugin, registry, lang, on, has, string, Pmg) {
 
     var TukosTooltipLinkDialog = dojo.declare(_Plugin, {
+
         htmlTemplateBrowser: 
-        	"<span onclick=\"event.stopImmediatePropagation();(opener||parent||window).tukos.Pmg.viewTranslatedInBrowserWindow('${tukosNameInput}', '${tukosObjectInput}', '${languageInput}');\" style=\"color: blue; cursor: pointer; text-decoration: underline;\">${textInput}</span>",
+        	"<a nohref class=\"dijitEditorPluginTukosLinkDialogStyle\" style=\"color: blue; cursor: pointer; text-decoration: underline;\"" +
+			" onclick=\"event.stopImmediatePropagation();(opener||parent||window).tukos.Pmg.viewTranslatedInBrowserWindow('${tukosNameInput}', '${tukosObjectInput}', '${languageInput}');\">${textInput}</a> ",
         htmlTemplateTooltip: 
-        	"<span onmouseover=\"var node=this, delay=setTimeout(function(){(opener||parent||window).tukos.Pmg.viewTranslatedInTooltipWindow(node, '${tukosNameInput}', '${tukosObjectInput}', '${languageInput}');}, 500);node.onmouseout=function(){clearTimeout(delay);node.removeAttribute('title');};\" style=\"color: blue; cursor: pointer;\">${textInput}</span>",
+        	"<a nohref class=\"dijitEditorPluginTukosLinkDialogStyle\" style=\"color: blue; cursor: pointer; text-decoration: underline;\"" +
+			" onmouseover=\"var node=this, delay=setTimeout(function(){(opener||parent||window).tukos.Pmg.viewTranslatedInTooltipWindow(node, '${tukosNameInput}', '${tukosObjectInput}', '${languageInput}');}, 500);node.onmouseout=function(){clearTimeout(delay);node.removeAttribute('title');};\">${textInput}</a> ",
         // tag: [protected] String
         //		Tag used for the link type.
-        tag: "span",
+        tag: "a",
     
         // iconClassPrefix: [const] String
         //		The CSS class name for the button node icon.
@@ -187,11 +190,12 @@ define([
                 this.editor.focus();
             }
         },
-        _getCurrentValues: function(tag){
+
+	_getCurrentValues: function(a){
             var tukosName, tukosObject, text, language, isTooltip;
-            if(tag && tag.tagName.toLowerCase() === "span"){
+            if(a && a.tagName.toLowerCase() === "a"){
             	const regExp = /(viewTranslatedInBrowserWindow|viewTranslatedInTooltipWindow)[^']*'([^']*)[' ,]*([^']*)[, ']*([^')]*)'?\)/g,
-            		  matchArray = regExp.exec(tag.outerHTML);
+            		  matchArray = regExp.exec(a.outerHTML);
                 if (matchArray){
                 	if (matchArray[1] !== 'viewTranslatedInBrowserWindow'){
 						isTooltip = 'on';
@@ -200,7 +204,8 @@ define([
                 	tukosObject = matchArray[3];
                 	language = matchArray[4];
 				}
-                text = tag.innerHTML;
+                text = a.innerHTML;
+				this.editor.selection.selectElement(a, true);
             }else{
                 text = this.editor.selection.getSelectedText();
             }

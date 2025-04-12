@@ -1,0 +1,11 @@
+
+.vscode/settings.json
+.nyc_output
+coverage
+node_modules
+dist
+/package-lock.json
+/package.json
+/Readme.md
+/tsconfig.json
+/yarn.lock

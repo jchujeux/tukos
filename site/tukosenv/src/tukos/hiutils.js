@@ -4,7 +4,7 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
     return {
       
 	htmlToText(theHtml){
-		return theHtml.replace(/<[^>]+>/g, ' ');
+		return theHtml ? theHtml.replace(/<[^>]+>/g, ' ') : theHtml;
 	},
     objectTable: function(object, hasCheckboxes, selectedLeaves, atts){
         var onCheckMessageWasDisplayed = false, checkboxPath = [], maxWidth = atts.maxColWidth || '',

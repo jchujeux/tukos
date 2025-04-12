@@ -182,9 +182,6 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
 			const pValue = value ? JSON.parse(value) : value;
 			return this.grid._renderContent(this, object, node, (pValue && typeof pValue === 'object') ? (pValue.gauge ? pValue.gauge.toString() : '') : (pValue ? pValue.toString() : ''));
 		},
-        renderStravaLink: function(object, value, node){
-			return this.grid._renderContent(this, object, node,  value ? "<a href=\"https://www.strava.com/activities/" + value + "\" target=\"_blank\">" + value + "</a>" : value)
-		},
         renderContent: function(object, value, node, options, noCreate){
             var grid = this.grid, row = grid.row(object), idp = grid.collection.idProperty, args = {object: object, value: sutils.evalFormula(grid, value, this.field, row.data[idp])}, result;
             eutils.actionFunction(this, 'renderContent', this.renderContentAction, 'args', args);

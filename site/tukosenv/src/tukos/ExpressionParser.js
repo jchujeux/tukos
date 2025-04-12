@@ -12,11 +12,9 @@ define(["require", "exports"], function (require, exports) {
         return false;
     };
     const mapValues = (mapper) => (obj) => {
-        //const result = {};
         Object.keys(obj).forEach((key) => {
             obj[key] = mapper(obj[key]);
         });
-        //return result;
         return obj;
     };
     const convertKeys = (converter) => (obj) => {
@@ -53,7 +51,12 @@ define(["require", "exports"], function (require, exports) {
         }
     };
     const thunk = (delegate, ...args) => () => delegate(...args);
-    ;
+    const isOptionsLegacy = (options) => {
+        return options.hasOwnProperty("SEPARATOR");
+    };
+    const isOptionsAmmended = (options) => {
+        return options.hasOwnProperty("SEPARATORS");
+    };
     class ExpressionParser {
         constructor(options) {
             this.options = options;
@@ -81,8 +84,12 @@ define(["require", "exports"], function (require, exports) {
                 const upperCaser = (key) => key.toUpperCase();
                 const upperCaseKeys = convertKeys(upperCaser);
                 const upperCaseVals = mapValues(upperCaser);
-                upperCaseKeys(this.options.INFIX_OPS);
-                upperCaseKeys(this.options.PREFIX_OPS);
+                if (!(this.options.PREFIX_OPS instanceof Function)) {
+                    upperCaseKeys(this.options.PREFIX_OPS);
+                }
+                if (!(this.options.INFIX_OPS instanceof Function)) {
+                    upperCaseKeys(this.options.INFIX_OPS);
+                }
                 upperCaseKeys(this.options.AMBIGUOUS);
                 upperCaseVals(this.options.AMBIGUOUS);
                 this.options.PRECEDENCE = this.options.PRECEDENCE.map((arr) => arr.map((val) => val.toUpperCase()));
@@ -97,10 +104,6 @@ define(["require", "exports"], function (require, exports) {
             this.options.SYMBOLS.forEach((symbol) => {
                 this.symbols[symbol] = symbol;
             });
-			this.separatorSymbols = {};
-			this.options.SEPARATORSYMBOLS.forEach((symbol) => {
-				this.separatorSymbols[symbol] = symbol;
-			});
         }
         resolveCase(key) {
             return this.options.isCaseInsensitive ? key.toUpperCase() : key;
@@ -108,12 +111,9 @@ define(["require", "exports"], function (require, exports) {
         resolveAmbiguity(token) {
             return this.options.AMBIGUOUS[this.resolveCase(token)];
         }
-		isSymbol(char) {
-		    return this.symbols[char] === char;
-		}
-		isSeparatorSymbol(char) {
-		    return this.separatorSymbols[char] === char;
-		}
+        isSymbol(char) {
+            return this.symbols[char] === char;
+        }
         getPrefixOp(op) {
             if (this.options.termTyper && this.options.termTyper(op) === "function") {
                 const termValue = this.options.termDelegate(op);
@@ -131,10 +131,20 @@ define(["require", "exports"], function (require, exports) {
                     }
                 };
             }
-            return this.options.PREFIX_OPS[this.resolveCase(op)];
+            if (this.options.PREFIX_OPS instanceof Function) {
+                return this.options.PREFIX_OPS(op);
+            }
+            else {
+                return this.options.PREFIX_OPS[this.resolveCase(op)];
+            }
         }
         getInfixOp(op) {
-            return this.options.INFIX_OPS[this.resolveCase(op)];
+            if (this.options.INFIX_OPS instanceof Function) {
+                return this.options.INFIX_OPS(op);
+            }
+            else {
+                return this.options.INFIX_OPS[this.resolveCase(op)];
+            }
         }
         getPrecedence(op) {
             let i, len, casedOp;
@@ -148,6 +158,36 @@ define(["require", "exports"], function (require, exports) {
                 }
             }
             return i;
+        }
+        isSeparator(char) {
+            const options = this.options;
+            let isSep = false;
+            if (this.isWhitespace(char)) {
+                isSep = true;
+            }
+            else if (isOptionsAmmended(options)) {
+                isSep = options.SEPARATORS.includes(char);
+            }
+            return isSep;
+        }
+        isWhitespace(char) {
+            const options = this.options;
+            let isSpace = false;
+            if (isOptionsAmmended(options)) {
+                isSpace = options.WHITESPACE_CHARS.includes(char);
+            }
+            else {
+                isSpace = char === options.SEPARATOR;
+            }
+            return isSpace;
+        }
+        defaultWhitespaceSeparator() {
+            if (isOptionsLegacy(this.options)) {
+                return this.options.SEPARATOR;
+            }
+            else {
+                return this.options.WHITESPACE_CHARS[0];
+            }
         }
         tokenize(expression) {
             let token = "";
@@ -208,9 +248,12 @@ define(["require", "exports"], function (require, exports) {
                 else if (state.scanningLiteral) {
                     token += currChar;
                 }
-                else if (currChar === this.options.SEPARATOR) {
+                else if (this.isSeparator(currChar)) {
                     endWord(true);
                     state.startedWithSep = true;
+                    if (!this.isWhitespace(currChar)) {
+                        tokens.push(currChar);
+                    }
                 }
                 else if (currChar === this.options.GROUP_OPEN ||
                     currChar === this.options.GROUP_CLOSE) {
@@ -224,11 +267,6 @@ define(["require", "exports"], function (require, exports) {
                     state.startedWithSep = currChar in this.surroundingOpen;
                     tokens.push(currChar);
                 }
-				else if (this.isSeparatorSymbol(currChar)){
-					endWord(true);
-					state.startedWithSep = true;
-					tokens.push(currChar);
-				}
                 else if ((this.isSymbol(currChar) && !state.scanningSymbols) ||
                     (!this.isSymbol(currChar) && state.scanningSymbols)) {
                     endWord(false);
@@ -352,12 +390,12 @@ define(["require", "exports"], function (require, exports) {
         rpnToExpression(stack) {
             const infixExpr = (term, lhs, rhs) => this.options.GROUP_OPEN +
                 lhs +
-                this.options.SEPARATOR +
+                this.defaultWhitespaceSeparator() +
                 term +
-                this.options.SEPARATOR +
+                this.defaultWhitespaceSeparator() +
                 rhs +
                 this.options.GROUP_CLOSE;
-            const prefixExpr = (term, rhs) => (this.isSymbol(term) ? term : term + this.options.SEPARATOR) +
+            const prefixExpr = (term, rhs) => (this.isSymbol(term) ? term : term + this.defaultWhitespaceSeparator()) +
                 this.options.GROUP_OPEN +
                 rhs +
                 this.options.GROUP_CLOSE;
@@ -388,7 +426,9 @@ define(["require", "exports"], function (require, exports) {
                         .replace(this.LIT_CLOSE_REGEX, "");
                 }
                 else {
-                    return (terms && term in terms) ? (() => terms[term]) : thunk(this.options.termDelegate, term);
+                    return terms && term in terms
+                        ? () => terms[term]
+                        : thunk(this.options.termDelegate, term);
                 }
             };
             return this.evaluateRpn(stack, infixExpr, prefixExpr, termExpr, terms);

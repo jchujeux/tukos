@@ -34,12 +34,12 @@ class View extends AbstractView {
         ];
         $this->customize($customDataWidgets);
     }
-    function stravaLink($stravaId){
+    public static function stravaLink($stravaId){
         if (!empty($stravaId)){
             return "<a href=\"https://www.strava.com/activities/$stravaId\" target=\"_blank\">$stravaId</a>";
         }
     }
-    function stravaGearLink($stravaGearId){
+    public static function stravaGearLink($stravaGearId){
         if (!empty($stravaGearId)){
             if ($stravaGearId[0] === 'b'){
                 return "<a href=\"https://www.strava.com/bikes/" . substr($stravaGearId, 1) . "\" target=\"_blank\">$stravaGearId</a>";

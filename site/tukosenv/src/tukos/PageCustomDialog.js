@@ -50,7 +50,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/ready"
 							fieldsMaxSize: {type: 'TextBox', atts: {label: Pmg.message('fieldsMaxSize'),	onWatchLocalAction: onWatch('fieldsMaxSize', this.watchLocalAction)}},
                     		historyMaxItems: {type: 'TextBox', atts: {label: Pmg.message('historyMaxItems'),	onWatchLocalAction: onWatch('historyMaxItems', this.watchLocalAction)}},
                     		ignoreCustomOnClose: {type: 'StoreSelect', atts: {label: Pmg.message('ignoreCustomOnClose'), storeArgs: {data: Pmg.idsNamesStore(['', 'YES', 'NO'])},	onWatchLocalAction: onWatch('ignoreCustomOnClose', this.watchLocalAction)}},
-                    		showTooltips: {type: 'StoreSelect', atts: {label: Pmg.message('showTooltips'), storeArgs: {data: Pmg.idsNamesStore(['', 'YES', 'NO'], true)},	onWatchLocalAction: onWatch('showTooltips', this.watchLocalAction)}},
+							showTooltips: {type: 'StoreSelect', atts: {label: Pmg.message('showTooltips'), storeArgs: {data: Pmg.idsNamesStore(['', 'YES', 'NO'], true)},	onWatchLocalAction: onWatch('showTooltips', this.watchLocalAction)}},
+							translationsEditor: {type: 'StoreSelect', atts: {label: Pmg.message('translationsEditor'), storeArgs: {data: Pmg.idsNamesStore(['', 'normal', 'simple', 'basic'])},	onWatchLocalAction: onWatch('translationsEditor', this.watchLocalAction)}},
                     		close: {type: 'TukosButton', atts: {label: Pmg.message('close'), onClickAction: this.closeOnClickAction}},
                     		saveuser: {type: 'TukosButton', atts: {label: Pmg.message('saveForCurrentUser'), onClickAction: this.saveOnClickAction('user')}},
                     		saveall: {type: 'TukosButton', atts: {label: Pmg.message('saveForAllUsers'), onClickAction: this.saveOnClickAction('tukos')}},
@@ -60,7 +61,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dojo/ready"
                     contents: {
 						row1: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['newPageCustom']},
 						row2: {tableAtts: {cols: 1, customClass: 'labelsAndValues', showLabels: true, labelWidth: 250}, widgets: [
-							'pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'defaultClientTimeout', 'defaultServerTimeout', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose', 'showTooltips']},
+							'pageCustomForAll', 'contextCustomForAll', 'defaultTukosUrls', 'hideLeftPane', 'leftPaneWidth', 'panesConfig', 'defaultClientTimeout', 'defaultServerTimeout', 'fieldsMaxSize', 'historyMaxItems', 'ignoreCustomOnClose', 'showTooltips', 'translationsEditor']},
 						row3: {
 							tableAtts: {cols: 2, customClass: 'labelsAndValues', showLabels: false},
 							contents: {

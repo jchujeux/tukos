@@ -109,8 +109,8 @@ class TranslatorsManager {
                         return $nameTranslation;
                     }
                 };
-                $translatedName = preg_replace('/([^\\\\])"/', '$1\\"', $getTranslation($name, $translations, $this->translatorPaths, $translatorName));
-                //$translatedName = $getTranslation($name, $translations, $this->translatorPaths, $translatorName);
+                $controlPatterns = ['/([^\\\\])"/', '/([^\\\\])\\n/']; $controlReplacements = ['$1\\"', '$1\\\\n'];
+                $translatedName = preg_replace($controlPatterns, $controlReplacements, $getTranslation($name, $translations, $this->translatorPaths, $translatorName));
                 $mode = json_decode(json_decode('"' . $mode . '"', true), true);// because $mode is a substring of $template which is json encoded
                 $isPlural = is_array($mode) ? in_array('plural', $mode) : $mode === 'plural';
                 $translatedNames = explode('¤', $translatedName);

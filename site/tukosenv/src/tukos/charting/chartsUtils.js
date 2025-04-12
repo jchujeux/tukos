@@ -1,5 +1,5 @@
-define(["dojo/_base/lang", "dojo/when", "tukos/utils", "tukos/PageManager"],
-	function(lang, when, utils, Pmg) {
+define(["dojo/_base/lang", "dojo/when", "tukos/utils", "tukos/hiutils", "tukos/PageManager"],
+	function(lang, when, utils, hiutils, Pmg) {
 		return {
 			setFilterString: function (description, expression, dateCol){
 				const filterStrings = [];
@@ -34,6 +34,7 @@ define(["dojo/_base/lang", "dojo/when", "tukos/utils", "tukos/PageManager"],
 							delete dirtyToSend.connectedIds;
 							delete dirtyToSend.acl;
 							data[idp] = {'kpisToGet': missingItemKpis, 'itemValues': lang.mixin({'id': item.id || '', 'stravaid' : item.stravaid}, dirtyToSend)};
+							data[idp].itemValues.stravaid = parseInt(hiutils.htmlToText(data[idp].itemValues.stravaid));
 						});
 					    if (!utils.empty(data)){
 						    if (self.recursionDepth > 2){

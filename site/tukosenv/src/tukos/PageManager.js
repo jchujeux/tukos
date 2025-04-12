@@ -134,7 +134,12 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
 					if (objectMessages){
 						const foundIndexes = [];
 						objectExpressions.forEach(function(expression, index){
-							const translation = objectMessages[expression];
+							let translation;
+							if (language){
+								translation = objectMessages[language] && objectMessages[language][expression];
+							}else{
+								translation = objectMessages[expression];
+							}
 							if (translation){
 								const objectResults = results[objectName] || (results[objectName] = {}); 
 								objectResults[expression] = translation;
@@ -161,6 +166,9 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
                 return self.serverDialog({object: 'tukos', view: 'NoView', action: 'Get', query: query}, {data: expressions}, self.message('actionDone')).then(function (response){
                         utils.forEach(response.data, function(translations, objectName){
                             var objectUntranslations = self.cache.objectsUntranslations[objectName] || (self.cache.objectsUntranslations[objectName] = {}), objectTranslations = self.cache.objectsMessages[objectName] || (self.cache.objectsMessages[objectName] = {});
+							if (language){
+								objectTranslations = objectTranslations[language] || (objectTranslations[language] = {});
+							}
                             results[objectName] = results[objectName] || {};
                             utils.forEach(translations, function(translation, expression){
                                 objectTranslations[expression] = translation;

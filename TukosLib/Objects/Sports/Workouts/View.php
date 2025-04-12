@@ -5,7 +5,6 @@ use TukosLib\Objects\AbstractView;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\Objects\ObjectTranslator;
 use TukosLib\Objects\Sports\Sports;
-use TukosLib\Utils\Utilities as Utl;
 use TukosLib\TukosFramework as Tfk;
 
 class View extends AbstractView {
@@ -101,7 +100,11 @@ class View extends AbstractView {
             'hracwr' => ViewUtils::tukosNumberBox($this, 'hracwr', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'sts' => ViewUtils::tukosNumberBox($this, 'sts', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
             'tsb' => ViewUtils::tukosNumberBox($this, 'tsb', ['atts' => ['edit' => ['disabled' => true, 'style' => ['width' => '5em'], 'constraints' => ['pattern' => '#00.0']]]]),
-            'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => ['renderCell' => 'renderStravaLink'], 'overview' => ['hidden' => true, 'renderCell' => 'renderStravaLink']]]),
+            'stravaid' => ViewUtils::htmlContent($this, 'Stravaid', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => []],
+                'objToEdit' => ['stravaLink' => ['class' => 'TukosLib\Objects\Sports\Strava\Activities\View']], 'objToStoreEdit' => ['stravaLink' => ['class' => 'TukosLib\Objects\Sports\Strava\Activities\View']],
+                'objToOverview' => ['stravaLink' => ['class' => 'TukosLib\Objects\Sports\Strava\Activities\View']],
+                'editToObj' => ['htmlToText' => ['class' => 'TukosLib\Utils\HtmlUtilities']], 'storeEditToObj' => ['htmlToText' => ['class' => 'TukosLib\Utils\HtmlUtilities']], 'overviewToObj' => ['htmlToText' => ['class' => 'TukosLib\Utils\HtmlUtilities']]
+            ]),
             'kpiscache' => [
                 'type' => 'objectEditor',
                 'atts' => ['edit' => ['title' => $this->tr('KpisCache'), 'keyToHtml' => 'capitalToBlank', 'hasCheckboxes' => true, 'isEditTabWidget' => true, 'checkedServerValue' => '~delete', 'onCheckMessage' => $this->tr('checkedleaveswillbedeletedonsave'),
@@ -179,17 +182,20 @@ if ((sWidget.parent || {}).widgetName === 'sptworkouts'){
         });
     }, true);
 }else{
-    const kpisCacheWidget = sWidget.form.getWidget('kpiscache'), kpisCacheValue = kpisCacheWidget.get('value'), leavesToAdd = {};
-    utils.forEach(kpisCacheValue, function(value, name){
-        kpisToHandle.forEach(function(kpi){
-            if (name.includes(kpi)){
-                leavesToAdd[name] = '~delete';
-            }
+    const kpisCacheWidget = sWidget.form.getWidget('kpiscache');
+    if (kpisCacheWidget){    
+        const kpisCacheValue = kpisCacheWidget.get('value'), leavesToAdd = {};
+        utils.forEach(kpisCacheValue, function(value, name){
+            kpisToHandle.forEach(function(kpi){
+                if (name.includes(kpi)){
+                    leavesToAdd[name] = '~delete';
+                }
+            });
         });
-    });
-    if (!utils.empty(leavesToAdd)){
-        kpisCacheWidget.addSelectedLeaves(leavesToAdd);
-    };
+        if (!utils.empty(leavesToAdd)){
+            kpisCacheWidget.addSelectedLeaves(leavesToAdd);
+        };
+    }
 }
 EOT
         ;
@@ -227,11 +233,6 @@ if (sportsman && timemoving && avgpw){
 return true;
 EOT
         ;
-    }
-    function stravaLink($stravaId){
-        if (!empty($stravaId)){
-            return "<a href=\"https://www.strava.com/activities/$stravaId\" target=\"_blank\">$stravaId</a>";
-        }
     }
 }
 ?>

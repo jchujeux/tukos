@@ -374,9 +374,9 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 			LITERAL_CLOSE: '"',
 			GROUP_OPEN: '(',
 			GROUP_CLOSE: ')',
-			SEPARATOR: ' ',
+			SEPARATORS: ',',
+			WHITESPACE_CHARS: [" "],
 			SYMBOLS: ['*', '/', '+', '-', '(', ')', '[', ']', ',','='],
-			SEPARATORSYMBOLS: [','],
 			AMBIGUOUS: {'-': 'NEG'},
             SURROUNDING: {
                 XARRAY: {

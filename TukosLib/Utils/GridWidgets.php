@@ -162,6 +162,11 @@ trait  GridWidgets{
                 $atts['editor'] = $type;
                 $atts['widgetType'] = $atts['editor'];
                 $atts['canEdit'] = (!empty($element['atts'][$mode]['canEdit']) ? $element['atts'][$mode]['canEdit'] : 'canEditRow');
+            }else{
+                if (!$type = Utl::getItem('type', $atts)){
+                    $type = $element['type'];
+                }
+                $atts['widgetType'] = $type;
             }
         }
         $atts = Utl::array_merge_recursive_replace($defColAtts, $atts);

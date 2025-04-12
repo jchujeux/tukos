@@ -81,9 +81,9 @@ define(['tukos/ExpressionParser', 'tukos/dateutils'], function (parser, dutils) 
 			LITERAL_CLOSE: '"',
 			GROUP_OPEN: '(',
 			GROUP_CLOSE: ')',
-			SEPARATOR: ' ',
+			SEPARATORS: ',',
+			WHITESPACE_CHARS: [" "],
 			SYMBOLS: ['+', '-', '>', '<', '=', '(', ')', '[', ']', ','],
-			SEPARATORSYMBOLS: [,],
 			AMBIGUOUS: {'-': 'NEG'},
             SURROUNDING: {
                 ARRAY: {

@@ -87,7 +87,7 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 									}
 								}else{
 									chartData[i][setName] = value;
-									chartData[i][setName + 'Tooltip'] = setName + "<br/>" + kpiDescription.name + ":<br/>" + (kpiDescription.displayformat ? utils.transform(value, kpiDescription.displayformat) : value) + ' ' + (kpiDescription.tooltipunit || '');
+									chartData[i][setName + 'Tooltip'] = setLabel + "<br/>" + kpiDescription.name + ":<br/>" + (kpiDescription.displayformat ? utils.transform(value, kpiDescription.displayformat) : value) + ' ' + (kpiDescription.tooltipunit || '');
 									i += 1;
 								}
 							}catch(e){

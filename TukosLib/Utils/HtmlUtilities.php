@@ -1,6 +1,5 @@
 <?php
 namespace TukosLib\Utils;
-use TukosLib\TukosFramework as Tfk;
 
 class HtmlUtilities{
     private static $domDocument = null;
@@ -146,6 +145,9 @@ class HtmlUtilities{
         }else{
             return $imageTag;
         }
+    }
+    public static function htmlToText($theHtml){
+        return preg_replace('/<[^>]+>/', ' ', $theHtml);
     }
 }
 ?>
