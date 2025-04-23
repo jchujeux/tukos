@@ -240,7 +240,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         	return this.columns[colName].title;
         },
         loadContentOnClick: function(evt){
-        	var clickedCell = this.clickedCell, field = clickedCell.column.field, data = clickedCell.row.data, source = RegExp("#tukos{id:([^,]*),object:([^,]*),col:([^}]*)}", "g").exec(data[field]), targetCol = source[3],
+        	var clickedCell = this.clickedCell, field = clickedCell.column.field, data = this.collection.getSync(this.clickedRowIdPropertyValue()), source = RegExp("#tukos{id:([^,]*),object:([^,]*),col:([^}]*)}", "g").exec(data[field]), targetCol = source[3],
         		node = evt.currentTarget;
 			evt.stopPropagation();
 			evt.preventDefault();

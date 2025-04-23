@@ -50,7 +50,7 @@ abstract class AbstractView extends ObjectTranslator{
                     'userid' => ViewUtils::objectSelect($this, 'User', 'users'),
                 'permission'  => ViewUtils::storeSelect('acl', $this, 'Permission', [true, 'ucfirst', false, true, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['acl' => ['localActionStatus' => "if (!sWidget.valueOf('userid')){Pmg.alert({title: '$missingUser', content: '$needsUser'})}; return true;"]]]]])
                 ],
-                ['type' => 'simpleDgrid', 'atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]
+                ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]
             ),
             'grade' => ViewUtils::storeSelect('grade', $this, 'Classification', null, ['atts' => ['storeedit' => ['hidden' => true], 'overview' => ['hidden' => true]]]),
             'contextid'  => [

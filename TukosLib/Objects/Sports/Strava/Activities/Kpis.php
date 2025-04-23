@@ -10,9 +10,9 @@ trait Kpis {
     public static $beta = 2.6, $refCadence = 180/*, $thresholdsMap = ['heartrate' => 'hrthreshold', 'power' => 'ftp', 'speed' => 'speedthreshold']*/, $minsMap = ['heartrate' => 'hrmin'],
         $functionsMap = ['avgload' => 'avgLoad', 'avg' => 'estimatedpower_avg', 'estimatedavg' => 'power_estimatedavg', 'rawwattsstream' => 'estimatedRawWattsStream', 'load' => 'load', 'timeinzones' => 'timeInZones',
             'timeabove' => 'timeAbove', 'timebelow' => 'timeBelow', 'loadinzones' => 'loadInZones', 'loadabove' => 'loadAbove', 'loadbelow' => 'loadBelow', 'timecurve' => 'timeCurve', 'durationcurve' => 'durationCurve', 'shrink' => 'shrink'],
-        $streamsMap = ['heartrate' => 'heartrate', 'power' => 'watts'/*, 'powercalcstream' => 'watts_calc'*/, 'distance' => 'distance', 'cadence' => 'cadence'/*, 'slope' => 'grade_smooth', 'speed' => 'velocity_smooth'*/,
+        $streamsMap = ['heartrate' => 'heartrate', 'power' => 'watts'/*, 'powercalcstream' => 'watts_calc'*/, 'distance' => 'distance', 'altitude' => 'altitude', 'cadence' => 'cadence'/*, 'slope' => 'grade_smooth', 'speed' => 'velocity_smooth'*/,
             'estimatedpowerstream' => 'estimatedpower_watts', 'estimatedrawpowerstream' => 'estimatedpower_rawwatts'],
-        $metricsPrecision = ['heartrate' => 0, 'power' => 0, 'watts' => 0, 'estimatedpower' => 0/*, 'estimatedpowerstream' => 0*/, 'estimatedrawpowerstream' => 0, 'distance' => 1, 'elevationgain' => 0,  'cadence' => 0, 'slope' => 1, 
+        $metricsPrecision = ['heartrate' => 0, 'power' => 0, 'watts' => 0, 'estimatedpower' => 0/*, 'estimatedpowerstream' => 0*/, 'estimatedrawpowerstream' => 0, 'distance' => 1, 'altitude' => 1, 'elevationgain' => 0,  'cadence' => 0, 'slope' => 1, 
             'speed' => 2, 'powercalcstream' => 0],
         $athleteParamsDescription = ['heartrate' => ['threshold' => 'hrthreshold', 'sex' => 'sex', 'min' => 'hrmin'], 'power' => ['threshold' => 'ftp', 'sex' => 'sex'], 'estimatedpowerstream' => ['threshold' => 'ftp', 'sex' => 'sex'],
             'estimatedrawpowerstream' => ['threshold' => 'ftp', 'sex' => 'sex'], 'powercalcstream' => ['threshold' => 'ftp', 'sex' => 'sex'], 'mechanical' => ['threshold' => 'speedthreshold'], 'estimatedpower' => ['weight' => 'weight', 'ftp' => 'ftp']

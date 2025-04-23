@@ -28,7 +28,7 @@ trait ChartView {
             'tableAtts' => ['dynamicColumns' => true],
             'legend' => $chartInfo['chartType'] === 'pie' ? ['type' => 'Legend'] : ['type' => 'SelectableLegend', 'options' => ['style' => ['verticalAlign' => 'top']]],
             'tooltip' => true,
-            'mouseZoomAndPan' => $chartInfo['chartType'] === 'trend' ? true : false,
+            'mouseZoomAndPan' => in_array($chartInfo['chartType'], ['trend', 'xy']) ? true : false,
             'connectToPlot'   => $chartInfo['chartType'] === 'trend' ? true : false,
             'noMarkAsChanged' => true,
             'onWatchLocalAction' => [

@@ -145,7 +145,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 							widget.set('options', atts.options);
 							break;
 						case 'SimpleDgrid':
-						['columns', 'storeArgs', 'style', 'initialRowValue', 'onCellClickAction', 'sort'].forEach(function(name){
+						['columns', 'storeArgs', 'style', 'initialRowValue', 'onCellClickAction', 'sort', 'initialId'].forEach(function(name){
 							switch(name){
 								case 'style':
 									dst.set(widget.domNode, atts.atts.style || widget.style);
@@ -156,7 +156,7 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 								case 'sort':
 									widget.set('sort', atts.atts.sort || []);
 									break;
-									default:
+								default:
 									if (atts.atts[name]){
 										widget.set(name, atts.atts[name]);
 									}else{
@@ -171,13 +171,31 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 					}else{
 						widget.set('tukosTooltip', {});
 					}
-            		widget.set('value', self.currentAttValue());
+            		widget.form.markIfChanged = false;
+					widget.set('value', self.currentAttValue());
+					widget.form.markIfChanged = true;
+					if (widgetType === 'SimpleDgrid'){
+						self.setCurrentAttProperties(widget, ['dirty', 'maxServerId']);
+					}
             	}
             });
 			pane.resize();
 			if (attValueType === 'SimpleDgrid'){setTimeout(function(){pane.resize();}, 0);}//for dgrid's noDataMessage not to overlap header
         },
-        attValueUnitWatchCallback: function(attr, oldValue, newValue){
+		setCurrentAttProperties: function(widget, properties){
+			let needsRefresh = false;
+			for (const property of properties){
+				const propertyValue = this.currentAttProperty(property);
+				if (propertyValue){
+					widget.set(property, propertyValue);
+					needsRefresh = true;
+				}
+			}
+			if (needsRefresh){
+				widget.refresh();
+			}
+		},
+		attValueUnitWatchCallback: function(attr, oldValue, newValue){
             var attValueWidget = this.attValueWidget;
             if (newValue === ''){
                 attValueWidget.numberField.set('value','');
@@ -197,8 +215,15 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
             var widget = this.widget, widgetPane = widget.pane, pane = widgetCustomDialog.pane, attTarget = pane.valueOf('att'), attInfo = this.customAtts[attTarget], att = attInfo.att, attRoot = attInfo.root || att, newAttValue = this.newAttValue(), newAtt;
             newAtt = attRoot === att ? newAttValue : utils.newObj([[att, newAttValue]]);//{[att]: newAttValue});
 			widget[attRoot] = '';
-            widget.set(attRoot, newAtt);
-			const attChange =  this.attValueWidget.widgetType === 'SimpleDgrid' ? utils.toObject(this.attValueWidget.get('value'), 'id', false, true) : newAtt;
+			widget.set(attRoot, newAtt);
+			/*const attChange =  this.attValueWidget.widgetType === 'SimpleDgrid' ? utils.toObject(this.attValueWidget.get('value'), 'id', false, true) : newAtt;*/
+			if (this.attValueWidget.widgetType === 'SimpleDgrid'){
+				widget.set(attRoot + 'dirty', this.attValueWidget.dirty);
+				widget.set(attRoot + 'maxServerId', this.attValueWidget.maxServerId);
+				attChange = utils.toObject(this.attValueWidget.get('value'), 'id', false, true);
+			}else{
+				attChange = newAtt;
+			}
             lang.setObject((widget.itemCustomization || 'customization') + (attRoot === 'value' ? ('.data.value.' + widget.widgetName) : ('.widgetsDescription.' + widget.widgetName + '.atts.' + attRoot)), attChange, widgetPane);
         },
 
@@ -240,7 +265,15 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
         	   	return '';
            }
         },
-                    
+		currentAttProperty: function(property){
+			const widget = this.widget, pane = widgetCustomDialog.pane, attTarget = pane.valueOf('att');
+			if (attTarget){
+				const att = this.customAtts[attTarget].att + property;
+				return widget[att];
+			}else{
+				return '';
+			}
+		},
         customDialogCallback: function(widget, evt, column){
             var self = this;
 			evt.preventDefault();
@@ -266,7 +299,6 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
                 const importExportHideValue = utils.empty(widget.customizableAtts);
                 self.widget = widget;
                 self.column = column;
-                
                 paneGetWidget('apply').onClickFunction = (column ? lang.hitch(self, self.applyGridEditorCustom) : lang.hitch(self, self.applyCustom));
                 paneGetWidget('import').onClickFunction = lang.hitch(self, self.importAction);
                 paneGetWidget('export').onClickFunction = lang.hitch(self, self.exportAction);
@@ -292,15 +324,16 @@ define (["dojo/_base/array", "dojo/_base/lang", "dojo/dom-style", "dojo/ready", 
 				case 'MultiSelect': 
 					return attValueWidget.get('serverValue');
 				case 'SimpleDgrid':
-				const collection = attValueWidget.sort ? attValueWidget.collection.sort(attValueWidget.sort) : attValueWidget.collection;
-				return utils.toObject(collection.filter(function(row){
+					const collection = attValueWidget.sort ? attValueWidget.collection.sort(attValueWidget.sort) : attValueWidget.collection, data = collection.fetchSync();
+					data.forEach(function(row){
 						utils.forEach(row, function(value, property){
 							if (value === undefined || value === null || Number.isNaN(value)){
 								delete row[property];
 							}
 						});
 						return row;
-					}), 'id', false, true, true);
+					});
+					return data;
 				default:
 					return attValueWidget.get('serverValue') || attValueWidget.get('value');
 			}

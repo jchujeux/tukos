@@ -552,7 +552,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 this.store.setData([]); 
                 this.dirty = {};
             }else if(value instanceof Array){//a new  memory store needs to be filled in with the array value
-            	if (this.form.markIfChanged && this.initialId){// is to be considered as a change, not reflecting then server store content
+            	/*if (this.form.markIfChanged && this.initialId){// is to be considered as a change, not reflecting then server store content
             		var rowsToDelete = [];
             		this.store.forEach(lang.hitch(this, function(row){
             			for (var r in value){
@@ -571,7 +571,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             			this.addRow(null, value[r]);
             		}
             		resetCounters = false;
-            	}else{
+            	}else{*/
                 	this.store.setData(value); 
                     if (this.onChangeNotify/* && this.isUserEdit*/){
                         this.notifyWidgets({action: 'create'});
@@ -588,7 +588,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                             }
                         }));
                     }          		
-            	}
+//            	}
             }else{//current memory store needs to be updated with contents of current object, then saved (to empty dirty)
                 this.store.setData([]);
                 this.dirty = {};

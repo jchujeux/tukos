@@ -97,7 +97,9 @@ function(declare, lang, utils, dutils, hiutils, expressionFilter, expressionEngi
 					});
 					chartsUtils.processMissingKpis(missingItemsKpis, grid, self, chartWidgetName, chartData, chartData, tableColumns, axes, plots, series);
 				});
-			}		  
+			}else{
+				form.isCharting = false;
+			}	  
 		}
     });
 }); 

@@ -118,6 +118,8 @@ function(declare,lang, Color, utils, dutils, expressionFilter, expressionEngine,
 					}
 					chartsUtils.processMissingKpis(missingItemsKpis, grid, self, chartWidgetName, chartData, tableData, tableColumns, axes, plots, series);
 				});
+			}else{
+				form.isCharting = false;
 			}		  
 		},
     });
