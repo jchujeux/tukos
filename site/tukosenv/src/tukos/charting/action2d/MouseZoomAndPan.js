@@ -52,11 +52,7 @@ define(["dojo/_base/declare", "dojo/_base/window", "dojo/_base/array", "dojo/_ba
 			// kwArgs: __MouseZoomAndPanCtorArgs?
 			//		Optional arguments for the chart action.
 			this._listeners = [];
-			on(this.chart.node, 'wheel', lang.hitch(this, this.onMouseWheel));
-			on(this.chart.node,'DOMMouseScroll', function(event){
-				event.preventDefault();
-				event.stopPropagation();
-			});
+			this.onWheelHandle = on(this.chart.node, 'wheel', lang.hitch(this, this.onMouseWheel));
 			if(!kwArgs){ kwArgs = {}; }
 			this.axis = kwArgs.axis ? kwArgs.axis : "x";
 			this.scaleFactor = kwArgs.scaleFactor ? kwArgs.scaleFactor : 1.2;
@@ -84,6 +80,7 @@ define(["dojo/_base/declare", "dojo/_base/window", "dojo/_base/array", "dojo/_ba
 			}
 			arr.forEach(this._handles, connect.disconnect);
 			this._handles = [];
+			this.onWheelHandle.remove();
 		},
 		
 		connect: function(){
@@ -162,8 +159,7 @@ define(["dojo/_base/declare", "dojo/_base/window", "dojo/_base/array", "dojo/_ba
 		onMouseWheel: function(event){
 			// summary:
 			//		Called when mouse wheel is used on the chart.
-			//eventUtil.stop(event);
-			event.preventDefault();
+			event.preventDefault();//does stop scrollling under CHrome, not on Firefox (!)
 			event.stopPropagation();
 			var scroll = event.wheelDelta / sUnit;
 			// on Mozilla the sUnit might actually not always be 3

@@ -1,5 +1,6 @@
 .mobile body {
 	color: black;
+	font-size: 14px;
 }
 .dgrid-row-table {
 	height: auto;
@@ -97,4 +98,10 @@
 }
 .claro .dojoxCalendarColumnView .dojoxCalendarEventContainerColumn {
 	margin-right: 1px;
+}
+blockquote{
+	margin-left: 10px;
+}
+ul{
+	padding-left: 10px;
 }

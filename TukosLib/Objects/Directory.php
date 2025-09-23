@@ -18,9 +18,6 @@ class Directory{
         'mailsmtps'         => 'Admin\Mail\Smtps',
         'mailservers'       => 'Admin\Mail\Servers',
         'mailaccounts'      => 'Admin\Mail\Accounts',
-        /*'mailboxes'         => 'Admin\Mail\Boxes',
-        'mailmessages'      => 'Admin\Mail\Messages',
-        'mailtukosmessages' => 'Admin\Mail\TukosMessages',*/
         'scripts'           => 'Admin\Scripts',
         'scriptsoutputs'    => 'Admin\Scripts\Outputs',
         'health'            => 'Admin\Health',
@@ -33,13 +30,6 @@ class Directory{
         'calendarsentries'   => 'Collab\Calendars\Entries',
         'tasks'             => 'Collab\Tasks',
         'blog'              => 'Collab\Blog',
-        //'deals'             => 'deals',
-        //'dealsstatus'       => 'deals\status',
-        //'dealsteams'        => 'deals\teams',
-        //'dealsrevenue'      => 'deals\revenue',
-        //'projects'          => 'projects',
-        //'projectsstatus'    => 'projects\status',
-        //'projectsteams'     => 'projects\teams',
         'wines'             => 'Wine\Wines',
         'wineappellations'  => 'Wine\Appellations',
         'wineregions'       => 'Wine\Regions',
@@ -101,10 +91,13 @@ class Directory{
         'bustrackdashboardssuppliers' => 'BusTrack\Dashboards\Suppliers',
         'bustrackreconciliationscustomers' => 'BusTrack\Reconciliations\Customers',
         'bustrackreconciliationssuppliers' => 'BusTrack\Reconciliations\Suppliers',
-        //'help'              => 'Help'
+        'mdlmeshes' => 'Modeling\Meshes',
+        'mdlproblems' => 'Modeling\Problems',
+        'mdlsimulations' => '%odeling\Simulations'
         ];
-    private static $objectsDomainAliases = ['people' => ['bustrack' => 'bustrackpeople', 'sports' => 'sptathletes', 'physio' => 'physiopatients'], 'organizations' => ['bustrack' => 'bustrackorganizations', 'wine' => 'winegrowers'], 'bustrackquotes' => ['physio' => 'physiopersoquotes']];
-    private static $configStatusRange = ['tukos' => 16, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'users' => 10001];
+    private static $objectsDomainAliases = ['people' => ['bustrack' => 'bustrackpeople', 'sports' => 'sptathletes', 'physio' => 'physiopatients'], 'organizations' => ['bustrack' => 'bustrackorganizations', 'wine' => 'winegrowers'], 
+                        'bustrackquotes' => ['physio' => 'physiopersoquotes']];
+    private static $configStatusRange = ['tukos' => 16, 'bustrack' => 2001, 'wine' => 3001, 'itm' => 4001, 'sports' => 5001, 'physio' => 6001, 'modeling' => '7001', 'users' => 10001];
     private static $translatedModules = [];
     
     public static function objectsDomainAliases(){
@@ -135,7 +128,7 @@ class Directory{
         return self::$translatedModules;
     }
     public static function getNativeObjs(){
-        return array_diff(array_keys(self::$directory), ['tukos', 'navigation', 'backoffice'/*, 'mailboxes', 'mailmessages'*/, 'translations']);
+        return array_diff(array_keys(self::$directory), ['tukos', 'navigation', 'backoffice', 'translations']);
     }
     public static function getDomains(){
         $domains = [];

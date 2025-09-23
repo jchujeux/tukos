@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dojo/dom-style", "dijit/layout/ContentPane", "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dojo/dom-style", "dijit/layout/ContentPane", "dijit/popup", "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
         "tukos/widgets/HtmlContent", "tukos/widgets/DnDWidget", "tukos/widgets/widgetCustomUtils"], 
-  function(declare, lang, ready, when, domStyle, ContentPane, Pmg, WidgetsLoader, HtmlContent, DnD, wcutils){
+  function(declare, lang, ready, when, domStyle, ContentPane, popup, Pmg, WidgetsLoader, HtmlContent, DnD, wcutils){
 	var editors = {}, isPlaced = false, editorTypes = {normal: 'Editor', simple: 'MobileEditor', basic: 'TukosTextarea'};
 	return declare([ContentPane, DnD], {
 		postCreate: function(){
@@ -84,7 +84,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			this.onBlurHandle.remove();
 			if (editor && this.getIndexOfChild(editor) > -1/* && editor.isFullscreen !== true*/){//case where focus not via onClick, e.g. onDrop
 				//htmlContent.set('style', {height: this.editorToContentHeight(editor.get('height'))});
-				if (editor.isInViewSOurce){
+				if (editor.isInViewSource){
 					this.viewSource = editor.isInViewSource();
 				}
 				editor.set('value', (newValue = editor.get('value')));// to make sure the Editor onWatch is triggered, that untranslates if needed into serverValue
@@ -94,7 +94,10 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 						self.set('value', serverValue);
 					}
 				})
-
+				if (editor.symbolsPalette){
+					popup.close(editor.symbolsPalette);
+					editor.symbolsPalette.parent._popupStateNode.popupActive = false;
+				}
 				this.removeChild(editor);
 				this.addChild(htmlContent);
 				this.resize();

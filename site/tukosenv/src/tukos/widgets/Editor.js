@@ -179,7 +179,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/h
         pasteAndRefresh: function(htmlFragment){
         	var eSelection = this.selection, selectedClass = 'tukosLastSelected';
         	this.pasteHtmlAtCaret(htmlFragment, true);
-			var pastedNode = eSelection.getSelectedElement();
+			var pastedNode = eSelection.getSelectedElement() || eSelection.getParentElement();//getParentElement added for MathMLEdit.modownup
             dcl.add(pastedNode, selectedClass);	
             this.set('value', this.get('value'));
             Array.apply(null, this.document.getElementsByClassName(selectedClass)).forEach(function(node){

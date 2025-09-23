@@ -22,11 +22,16 @@ var profile = {
 	// This defaults to "shrinksafe" if not provided.
 	layerOptimize: 'closure',
 
+	optimizeOptions: {
+		languageIn: "ECMASCRIPT6",
+		languageOut: "NO_TRANSPILE"
+	},
 	// A list of packages that will be built. The same packages defined in the loader should be defined here in the
 	// build profile.
 	packages: [
 		// Using a string as a package is shorthand for `{ name: 'app', location: 'app' }`
 		'tukos',
+        'dojo',
 		'dojoFixes',
 	],
 
@@ -84,6 +89,23 @@ var profile = {
 		'dojo-xhr-factory': false,
 
 		// We are not loading tests in production, so we can get rid of some test sniffing code.
-		'dojo-test-sniff': false
-	}
+		'dojo-test-sniff': false,
+		// tukos added optimizations
+		'dojo-guarantee-console': false,
+		'host-node': false,
+		'host-rhino': false,
+		'ie-event-behavior': false,
+		'jscript': false,
+		'ios': undefined,
+		'android': undefined,
+		'opera': undefined,
+		'ie': undefined,
+		'quirks': undefined,
+		'webkit': undefined,
+		'wii': false,
+		'air': false,
+		'mac': false,
+		'dijit-legacy-requires': false,
+	},
+	useSourceMaps: false
 };

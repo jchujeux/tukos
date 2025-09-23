@@ -83,7 +83,7 @@ function(declare,lang, utils, dutils, expressionFilter, expressionEngine, charts
 											let i = 0, targetIndicatorDate;
 											switch (period){
 												case 'week':
-													targetIndicatorDate = dutils.getDayOfWeek(1, firstDateObject);	
+													targetIndicatorDate = dutils.getDayOfWeek(0, firstDateObject);	
 													break;
 												case 'quarter':
 												case 'month':

@@ -4,6 +4,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/Editor
     	
     	constructor: function(args){
     		args.extraPlugins = ['fullScreen', 'statusBar'];
+			args.styleSheets =  require.toUrl('tukos/mobile/resources/tukos.css');
     	},
     	postCreate: function(){
 			this.inherited(arguments);

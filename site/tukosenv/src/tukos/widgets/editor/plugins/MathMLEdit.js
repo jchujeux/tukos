@@ -1,13 +1,15 @@
 define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom-class", "dojo/ready", "dojo/when", "dojo/string", "dojo/keys", "dijit/_editor/_Plugin", "dijit/form/DropDownButton", "dijit/layout/ContentPane",
-	"dijit/registry", "dijit/popup", "dojox/editor/plugins/EntityPalette", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/hiutils", "tukos/menuUtils", "tukos/PageManager"/*, "tukos/widgets/editor/plugins/_HtmlSourceInserter"*/], 
-function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, ContentPane, registry, popup, EntityPalette, TooltipDialog, utils, hiutils, mutils, Pmg/*, _HtmlSourceInserter*/) {
+	"dijit/registry", "dijit/popup", "tukos/TukosTooltipDialog", "tukos/utils", "tukos/hiutils", "tukos/PageManager", 	"dojo/i18n!dojox/editor/plugins/nls/latinEntities"
+], 
+function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, ContentPane, registry, popup, TooltipDialog, utils, hiutils, Pmg) {
 	var textTags = ['mi','mo', 'mn', 'mtext'], openingParenthesis = {')': '(', ']': '[', '}': '{', '|': '|'},
 		isTextTag = function(tag){
 			return textTags.indexOf(tag) > -1;
 		},
+		placeHolderTag = '<mtext class="tukosPlaceHolder">??</mtext>',
 		htmlTagTemplate =  "<${tagName}${atts}>${innerHTML}</${tagName}>",
 		htmlTag = function(tagName, atts, innerHTML){
-			return string.substitute(htmlTagTemplate, {tagName: tagName, atts: atts ? (' ' + atts) : '', innerHTML: innerHTML || '<mtext class="tukosPlaceHolder">??</mtext>'});
+			return string.substitute(htmlTagTemplate, {tagName: tagName, atts: atts ? (' ' + atts) : '', innerHTML: innerHTML || placeHolderTag});
 		},
 		htmlTagN = function(tagName, n, atts, innerHTML){
 			var tags = '';
@@ -30,20 +32,20 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
 		mfenced = function(open, close, key, atts, innerHTML, label){
 			//return tag('mfenced', key || {chr: open}, string.substitute("open='${open}' close='${close}'", {open: open, close: close}) + (atts ? (' ' + atts) : ''), htmlTag('mrow', null, innerHTML));
 			if (open){
-				return tag('mrow', key || {chr: open}, atts, htmlTag('mo', null, open) + htmlTag('mrow', null, innerHTML) + (close ? htmlTag('mo', null, close) : ''));
+				return tag('mrow', key || {chr: open}, atts, htmlTag('mo', null, open) + placeHolderTag + (close ? htmlTag('mo', null, close) : ''));
 			}else{
 				return tag('mo', {chr: close}, atts, close, label);
 			}
 		},
-		mfrac = function(key, atts, innerHTML, label){
+		/*mfrac = function(key, atts, innerHTML, label){
 			return tag('mfrac', key || 'f', atts, htmlTag('mrow', null, innerHTML) + htmlTag('mrow', null, innerHTML), label);
-		},
+		},*/
 		modownup = function(tagName, operator, key, atts, innerHTML, label){
 			return html(htmlTag(tagName, null, '<mo>' + operator + '</mo>' + htmlTagN('mrow', 2)) + htmlTag('mrow'), key, atts, innerHTML, label);
 		},
-		midownup = function(tagName, identifier, key, atts, innerHTML, label){
+		/*midownup = function(tagName, identifier, key, atts, innerHTML, label){
 			return html(htmlTag(tagName, null, '<mi>' + identifier + '</mi>' + htmlTagN('mrow', 2)) + htmlTag('mrow'), key, atts, innerHTML, label);
-		},
+		},*/
 		braket = function(key, atts, innerHTML, label){
 			return mfenced('&langle;', '&rangle;', key || 'b', null, htmlTag('mrow', null, innerHTML) + '<mo>&verbar;</mo>' + htmlTag('mrow', null, innerHTML), label);
 		},
@@ -52,41 +54,33 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
 			for (var r = 1; r <= rows; r++){
 				rowInnerHTML = '';
 				for (var c = 1; c <= columns; c++){
-					rowInnerHTML += htmlTag('mtd', null, htmlTag('mrow', null, innerHTML));
+					rowInnerHTML += htmlTag('mtd', null);
 				}
 				tableInnerHTML += htmlTag('mtr', null, rowInnerHTML);
 			}
 			return tag('mtable', key, atts, tableInnerHTML, label);
 		};
 	var mls = {
-			blockSingle: tag('math', {chr: 's', ctrl: true, shift: true, alt: false}, "display='block'", htmlTag('mrow')),
-			blockMultiple: tag('math', {chr: 'm', ctrl: true, shift: true, alt: false}, "display='block'", htmlTag('mtable', "columnAlign='left' linebreak='true'", htmlTag('mtr', null, htmlTag('mtd')) + htmlTag('mtr', null, htmlTag('mtd')))),
-			inline: tag('math', {chr: 'l', ctrl: true, shift: true, alt: false}, "display='inline'", htmlTag('mrow')),
-			mtr: tag('mtr', {chr: 'r', ctrl: true, shift: true, alt: false}, null, htmlTag('mtd')),
+			block: tag('math', {chr: 'b', ctrl: true, shift: true, alt: false}, "display='block'", placeHolderTag, 'block'),
+			inline: tag('math', {chr: 'l', ctrl: true, shift: true, alt: false}, "display='inline'", placeHolderTag, 'inline'),
+			mrow: tag('mrow', 'r', null, placeHolderTag, 'mrow'), mi: tag('mi', 'i', null, placeHolderTag, 'mi'), mo: tag('mo', 'o', null, placeHolderTag, 'mo'), mn: tag('mn', 'n', null, placeHolderTag, 'mn'), mtext: tag('mtext', 't', null, placeHolderTag, 'mtext'),
+			mtable: tag('mtable', {chr: 't', ctrl: true, shift: true, alt: false}, null, htmlTag('mtr'), 'mtable'),
+			mtr: tag('mtr', {chr: 'r', ctrl: true, shift: true, alt: false}, null, htmlTag('mtd'), 'mtr'),
+			mtd: tag('mtd', {chr: 'd', ctrl: true, shift: true, alt: false}, null, placeHolderTag, 'mtd'),
 			parentheses:  mfenced('(', ')'), sqBrackets: mfenced('[', ']'), clBrackets: mfenced('{', '}'), leftClBrackets: mfenced('{', ''), doubleVertBrackets: mfenced('&Verbar;', '&Verbar;', {chr: '|', shift: true}),
 			angleBrackets: mfenced('&langle;', '&rangle;', {chr: '<', ctrl: true}), ket: mfenced('&verbar;', '&rangle;',{chr: '<', shift: true}), bra: mfenced('&langle;', '&verbar;', '<'), braket: braket(),
 			frac: tagN('mfrac', 2, 'f'), msup: tagN('msup', 2, {chr: 's', shift: true}), msub: tagN('msub', 2, 's'), mover: tagN('mover', 2, {chr: 'o', shift: true}), sqrt: tagN('msqrt', 1, {chr: 'r', shift: true}),
 			msubsup: tagN('msubsup', 3, {chr: 's', ctrl: true, shift: true}), 'int': modownup('msubsup', '&int;', {chr: 'i', shift: true}),
 			sum: modownup('msubsup', '&sum;', 'z'),
-			mrow: tag('mrow', 'r'), mi: tag('mi', 'i'), mo: tag('mo', 'o'), mn: tag('mn', 'n'), mtext: tag('mtext', 't'),
-			table21: table(2, 1, {chr: 't', shift: true}, "rowalign='center'"),
+			table21: table(2, 1, {chr: '1', shift: true}, "rowalign='center'"), table22: table(2, 2, {chr: '2', shift: true}, "rowalign='center'"),
 			hamilt: tag("mi", {chr: 'h'}, null, "&hamilt;"), lagran: tag("mi", {chr: 'l'}, null, "&lagran;"), planckh: tag("mi", {chr: 'h'}, null, "&planckh;"), hbar: tag("mi", {chr: 'h', shift: true}, null, "&hbar;"),
+			reals: tag("mi", {chr: 'r'}, null, "&reals;"), rationals: tag("mi", {chr: 'q'}, null, "&rationals;"), naturals: tag("mi", {chr: 'n'}, null, "&naturals;"),
 			part: tag("mi", 'p', null, '&part;'), kro: tag("mi", {chr: 'p', shift: true}, null, '&delta;'),thinsp: tag('mi', {chr: ' ', shift: true, alt: false}, null, '&thinsp;', 'thinsp')
 		},
-		constructs = ['blockSingle', 'blockMultiple', 'inline', 'mrow', 'mtr', 'mi', 'mo', 'mn', 'mtext'],
-		symbols = [['parentheses', 'sqBrackets', 'clBrackets', 'leftClBrackets', 'doubleVertBrackets', 'angleBrackets', 'ket', 'bra', 'braket'], ['frac', 'msup', 'msub', 'msubsup', 'mover', 'sum', 'int', 'sqrt'], ['table21'], 
-			['hamilt', 'lagran', 'planckh', 'hbar', 'part', 'kro', 'thinsp']];
+		symbols = [['block', 'inline'],['mrow', 'mi', 'mo', 'mn', 'mtext', 'mtable', 'mtr', 'mtd'], ['parentheses', 'sqBrackets', 'clBrackets', 'leftClBrackets', 'doubleVertBrackets', 'angleBrackets', 'ket', 'bra', 'braket'], 
+					['frac', 'msup', 'msub', 'msubsup', 'mover', 'sum', 'int', 'sqrt'], ['table21', 'table22'], ['reals', 'rationals', 'naturals'], ['hamilt', 'lagran', 'planckh', 'hbar', 'part', 'kro', 'thinsp']];
 
-    var MathMLEdit = declare([_Plugin/*, _HtmlSourceInserter*/], {
-        menuDescription: function(){
-        	return {type: 'Menu',
-            	items: [
-            		{type: 'PopupMenuItem', atts: {label: Pmg.message('MathMLConstructs')}, popup: {type: 'DropDownMenu', items: this.buildDropDownItems(constructs)}},
-            		{type: 'PopupMenuItem', atts: {label: Pmg.message('Symbols')}, popup: this.buildTablePopup(symbols)},
-            		{type: 'PopupMenuItem', atts: {label: Pmg.message('entities')  + '  ' + this.shortCutLabel(['e', false, false, true])}, popup: this.entityPalette}
-            	]
-            };
-        },
+    var MathMLEdit = declare([_Plugin], {
         setKeyHandlers: function(){
         	var editor = this.editor, self = this;
     		editor.addKeyHandler("c", true, true, lang.hitch(this, function(){
@@ -94,24 +88,25 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
     			this.button.dropDown.focus();
     		}));
     		editor.addKeyHandler("e", false, false, lang.hitch(this, function(){
-    			var entityPalette = this.entityPalette;
+    			var symbolsPalette = this.editor.symbolsPalette;
     			if (!this.button.dropDown){
     				this.button.loadAndOpenDropDown();
     			}
-    			popup.open({parent: this.button, popup: entityPalette, around: this.button.domNode, 
-    				onExecute: function(){
-    					popup.close(entityPalette);
-    				}, 
-    				onCancel: function(){
-    					popup.close(entityPalette);}
-    				});
-    		}), true);
-    		editor.addKeyHandler("e", false, true, lang.hitch(this, function(){
-    			if (this.lastEntity){
-        			this.handleEntity(this.lastEntity);
-    			}else{
-    				Pmg.message('entityCacheIsEmpty', null, null, true);
-    			}
+				if (this.button._popupStateNode.popupActive){
+					popup.close(symbolsPalette);
+					this.button._popupStateNode.popupActive = false;
+				}else{
+					popup.open({parent: this.button, popup: symbolsPalette, around: this.button.domNode, 
+						/*onExecute: function(){
+							popup.close(symbolsPalette);
+						}, */
+						onCancel: function(){
+							popup.close(symbolsPalette);
+							this.button._popupStateNode.popupActive = false;
+						}
+					});
+					this.button._popupStateNode.popupActive = true;
+				}
     		}), true);
     		editor.addKeyHandler(keys.RIGHT_ARROW, false, false, lang.hitch(this, function(){
     			var eSelection = editor.selection, wSelection = editor.document.getSelection(), parentNode = wSelection.anchorNode.parentNode;
@@ -142,8 +137,8 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
         	});
         	return description;
         },
-	    buildTablePopup: function(items){
-	    	var self = this, insert = lang.hitch(this, this._insert), pane = new ContentPane({style: {backgroundColor: 'white'}}), table = dct.create('table', {'class': 'dijitPaletteTable'}, pane.domNode);
+	    buildSymbolsPalette: function(items){
+	    	var self = this, insert = lang.hitch(this, this._insert), pane = new ContentPane({style: {backgroundColor: 'white'}}), div = dct.create('div', null, pane.domNode), table = dct.create('table', {'class': 'dijitPaletteTable'}, div);
 	    	items.forEach(function(row){
 	    		var tr = dct.create('tr', null, table);
 	    		row.forEach(function(item){
@@ -151,6 +146,26 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
 	    			dct.create('td', {"class": "dojoxEntityPaletteCell", style: {width: 'auto'}, onclick: function(){insert(ml.s);self.button.closeDropDown();}, innerHTML: ml.label || ml.s, title: self.shortCutLabel(ml.k)}, tr);
 	    		});
 	    	});
+			dct.create('br', null, div);			
+			table = dct.create('table', {'class': 'dijitPaletteTable'}, div);
+			const entities = Object.getPrototypeOf(dojo.i18n.getLocalization("dojox.editor.plugins", "latinEntities")), numberOfEntities = Object.keys(entities).length, entitiesPerRow = Math.floor(Math.sqrt(numberOfEntities));
+			let currentCol = 0, currentEntityIndex = 0;
+			for (let entity in entities){
+				if (currentCol > entitiesPerRow){
+					currentCol = 0;
+					tr = dct.create('tr', null, table);
+				}
+				currentCol +=1;
+				currentEntityIndex +=1;
+				if (currentEntityIndex === numberOfEntities){// to eliminate &locale;
+					continue;
+				}
+				if (currentCol === 1){
+					tr = dct.create('tr', null, table);
+				}
+				let entityHtml = '&' + entity + ';';
+				dct.create('td', {"class": "dojoxEntityPaletteCell", style: {width: 'auto'}, onclick: function(){insert(entityHtml);}, innerHTML: entityHtml, title: entities[entity]}, tr);
+			}
 	    	return pane;
 	    },
         iconClassPrefix: "dijitAdditionalEditorIcon",
@@ -165,14 +180,8 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
         	this.setKeyHandlers();
             this.editor.handleMathML = lang.hitch(this, this.handleMathML);
         	this.editor.selectNextMathPlaceHolder = lang.hitch(this, this.selectNextMathPlaceHolder);
-        	this.entityPalette = new EntityPalette({showCode: false, showEntityName: false, 
-        		onChange: lang.hitch(this, function(entity){
-					this.button.closeDropDown();
-					this.editor.focus();
-					this.handleEntity(entity);
-					this.lastEntity = entity;
-				})
-			});
+			this.editor.symbolsPalette = this.buildSymbolsPalette(symbols);
+			this.editor.symbolsPalette.parent = this.button;
         },
         updateState: function(){
             this.button.set("disabled", this.get("disabled"));
@@ -182,20 +191,8 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
             this._initButton();
         },
         _loadDropDown: function(callback){
-        	var self = this;
-        	when (mutils.buildMenu(this.menuDescription()),function(dropDown){
-        		self.button.dropDown = dropDown;
-        		ready(callback);
-        	});
-        },
-        handleEntity: function(entity){
-    		var editor = this.editor, eSelection = editor.selection, wSelection = editor.document.getSelection(), anchorNode = wSelection.anchorNode, parent = eSelection.getParentElement(anchorNode), enclosingTagName = parent.tagName,
-				idx, _insert = lang.hitch(this, this._insert);
-			if (isTextTag(enclosingTagName) || !eSelection.hasAncestorElement('math')){
-				editor.pasteHtmlAtCaret(entity);						
-			}else{
-				_insert(htmlTag(((idx = this.entityPalette._currentFocus.idx) >= 130 && idx < 157) ? 'mi' : 'mo', null, entity));
-			}
+			this.button.dropDown = this.editor.symbolsPalette;
+			ready(callback);
         },
         handleMathML: function(e){
         	var key = e.key, handled = false;
@@ -316,7 +313,7 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
             }else{
             	editor.pasteHtmlAtCaret(htmlFragment);
             }
-            editor.focus();
+			editor.focus();
         },
         selectNextMathPlaceHolder: function(){
 			var eSelection = this.editor.selection, mathNode = eSelection.getAncestorElement('math'), placeHolders;// = Array.apply(null, mathNode.getElementsByClassName('tukosPlaceHolder'));

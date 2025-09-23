@@ -93,6 +93,7 @@ function(declare, lang, dct, dst, aspect, Widget, Chart, theme, StoreSeries, Obs
 		},
         _setValueAttr: function(value){
             const self = this, chartClasses = {};
+			let zoomAxis;
             this._set("value", value || '');
             if (value){
             	if (!this.hasOwnProperty('chart')){
@@ -115,6 +116,10 @@ function(declare, lang, dct, dst, aspect, Widget, Chart, theme, StoreSeries, Obs
 					utils.forEach(chart.plots, function(plot, name){
 						chart.removePlot(name);
 					});
+					if (chart.mouseZoomAndPan){
+						chart.mouseZoomAndPan.destroy();
+						delete chart.mouseZoomAndPan;
+					}
 				}
             	if (value.title){
 					this.set('tableContainerLabel', value.title);
@@ -144,6 +149,9 @@ function(declare, lang, dct, dst, aspect, Widget, Chart, theme, StoreSeries, Obs
 	            utils.forEach(axes, function(axis){
 	            	const requiredType = axis.type || 'Default';
 	            	requiredClasses[requiredType] = self.classLocation('axis2d' + requiredType);
+					if (axis.wheelzoom){
+						zoomAxis = axis.name;
+					}
 	            });
 				if (this.hasOwnProperty('showTable') && this.showTable === 'yes' && !this.hasOwnProperty('tableWidget')){
                     requiredClasses['BasicGridUserFilter'] = this.classLocation('BasicGridUserFilter');
@@ -172,8 +180,8 @@ function(declare, lang, dct, dst, aspect, Widget, Chart, theme, StoreSeries, Obs
 							if (chartClasses['Tooltip']){
 								plotOptions.tooltip = new chartClasses['Tooltip'](chart, plotName);
 							}
-		                    if (this.mouseZoomAndPan && !mouseZoomAndPanIsInstantiated){
-		                    	plotOptions.mouseZoomAndPan = new chartClasses['MouseZoomAndPan'](chart, plotName, {axis: "x", scaleFactor: 1.05, maxScale: 10, keyZoomModifier: 'alt'});
+		                    if (this.mouseZoomAndPan && zoomAxis && !mouseZoomAndPanIsInstantiated){
+		                    	chart.mouseZoomAndPan = new chartClasses['MouseZoomAndPan'](chart, plotName, {axis: zoomAxis, scaleFactor: 1.05, maxScale: 10, keyZoomModifier: 'alt'});
 								mouseZoomAndPanIsInstantiated = true;
 		                    }
 							if (this.connectToPlot){

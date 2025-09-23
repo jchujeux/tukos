@@ -38,7 +38,7 @@ define (["dojo/_base/lang", "dojo/dom-class", "dojo/dom-attr", "dojo/keys", "doj
             	valueOf = lang.hitch(this, this.valueOf);
             formulaExpression.className = formulaExpression.className.replace(/\be_[^ ]*/g, '');
 			formula = formula.replace(cellRangeReferenceRegExp, lang.hitch(this, function(match, name, col1i, row1i, col1f, row1f, col2i, row2i, col2f, row2f){
-				const sheetName = name ? name + '!' : '', rowi = row1i || row2i, coli = col1i || col2i, rowf = row1f || row2f, colf = col1f || col2f, coliPosition = utils.fromAlphabet(coli), colfPosition = utils.fromAlphabet(colf);
+				const sheetName = name ? name + '!' : '', rowi = parseInt(row1i || row2i), coli = col1i || col2i, rowf = parseInt(row1f || row2f), colf = col1f || col2f, coliPosition = utils.fromAlphabet(coli), colfPosition = utils.fromAlphabet(colf);
 				let result = '[';
 				for (let col = coliPosition; col <= colfPosition; col++){
 					colLabel = utils.alphabet(col);

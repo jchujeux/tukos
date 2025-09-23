@@ -32,7 +32,7 @@ class Configure extends AbstractConfigure{
             'physio' => [['#physiopatients' => [], 'physiopersotrack' => [['#physiopersoquotes' => [], '#physiopersoplans' => [], '#physiopersotreatments' => [], '#physiopersodailies' => [['#physiopersosessions' => []]], '#physiopersoexercises' => []]],
                 'physiowoundtrack' => [['#physiogameplans' => [], '#physiogametracks' => []]],
                 '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
-            //'helptukosapp' => ['type' => 'MenuBarItem', 'atts' => ['onclick' => 'tukos.Pmg.viewTranslatedInBrowserWindow("tukosAppTukosTooltip", "Tukos");', 'style' => ['fontStyle' => 'italic']]]
+            'modeling' => [['#meshes' => [], '#problems' => [], '#simulations' => []]]
         ];
         
         $accordion = [
