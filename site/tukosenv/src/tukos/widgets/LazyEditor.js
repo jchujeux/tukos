@@ -7,7 +7,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			this.inherited(arguments);
         	this.customizableAtts = lang.mixin({height: wcutils.sizeAtt('height')}, this.customizableAtts);
 			this.set('style', {padding: 0});    		
-			this.htmlContent = new HtmlContent({noMathJax: true, style: {width: '100%', height: this.height || "auto"}, value: this.value || ''});   
+			this.htmlContent = new HtmlContent({noMathJax: true, style: {width: this.width || '100%', height: this.height || "auto"}, value: this.value || ''});   
 			if (this.disabled){
 				this.htmlContent.set('style', {backgroundColor: '#F0F0F0'});				
 			}        	
@@ -68,7 +68,8 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 				domStyle.set(editor.editingArea, {height: height, width: "auto"});
 				domStyle.set(editor.domNode, {height: "auto", width: "auto"});
 			}
-			editor.set('value', htmlContent.get('value'));
+			//editor.set('value', htmlContent.get('value'));
+			editor.set('value', htmlContent.domNode.innerHTML);
 			this.removeChild(htmlContent);
 			this.addChild(editor);
 			if (editor.isInViewSource && (this.viewSource !== editor.isInViewSource())){
@@ -118,7 +119,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "doj
 			}
 		},
 		_getServerValueAttr: function(){
-			return this.serverValue;
+			return /*this.serverValue || */this.htmlContent.domNode.innerHTML;
 		},
 		_getDisplayedValueAttr: function(){
 			var result = this.inherited(arguments);

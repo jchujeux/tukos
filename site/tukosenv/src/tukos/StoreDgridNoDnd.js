@@ -88,23 +88,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/_Grid
 				this.customizationPath = customizationPath;
 			}
 		},
-        deleteSelection: function(skipDeleteAction, isUserRowEdit){
-        	var grid = this, toDelete = [];
-        	utils.forEach(this.selection, function(status, id){
-        		if (status){
-    				var row = grid.row(id), item = row.data; 
-					if ((typeof item.canEdit === "undefined") || item.canEdit){
-						toDelete.push(item);
-					}else{
-						grid.deselect(id);
-					}
-        		}
-        	});
-			if (toDelete.length > 0){
-				grid.deleteRows(toDelete, skipDeleteAction, isUserRowEdit);
-			}
-			this.contextMenu.menu.onExecute();
-        },
         
         getTemplate: function(mode, newValue){
         	if (newValue !== ''){

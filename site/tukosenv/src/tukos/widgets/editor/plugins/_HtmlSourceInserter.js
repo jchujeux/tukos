@@ -16,7 +16,7 @@ function(declare, lang, dct, htmlFormat, TooltipDialog, Pmg) {
                    sourcelang: {type: 'StoreComboBox', atts: {label: Pmg.message('sourceLang', 'tukos'), style: {width: '5em'}, storeArgs: {data: [{id: 'en', name: 'english'}, {id: 'es', name: 'Español'}, {id: 'fr', name: 'français'}]}}},
                    targetlang: {type: 'StoreComboBox', atts: {label: Pmg.message('targetLang', 'tukos'), style: {width: '5em'}, storeArgs: {data: [{id: 'en', name: 'english'}, {id: 'es', name: 'Español'}, {id: 'fr', name: 'français'}]}}}
             };
-            ['srcAncestor', 'srcGeminiResponse', 'srcTranslate', 'srcInsert', 'remove', 'close'].forEach(lang.hitch(this, function(action){
+            ['srcAncestor', 'srcGeminiResponse', 'srcLeChatResponse', 'svgForeignObject', 'svgClean', 'srcTranslate', 'srcInsert', 'remove', 'close'].forEach(lang.hitch(this, function(action){
                     widgetsDescription[action] = {type: 'TukosButton', atts: {label: Pmg.message(action, 'tukos'), onClick: lang.hitch(this, this[action])}};
             }));
         	return {
@@ -33,7 +33,7 @@ function(declare, lang, dct, htmlFormat, TooltipDialog, Pmg) {
                         			col2: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: false}, widgets: ['srcAncestor']},
                         			col3: {tableAtts: {cols: 3, customClass: 'labelsAndValues', showLabels: true, orientation: 'vert'}, widgets: ['sourcelang', 'targetlang']},
                         			col4: {tableAtts: {cols: 5, showLabels: false}, widgets: ['srcTranslate']},
-                        			col6: {tableAtts: {cols: 5, showLabels: false}, widgets: ['srcGeminiResponse']}
+                        			col6: {tableAtts: {cols: 2, showLabels: false}, widgets: ['srcGeminiResponse', 'srcLeChatResponse', 'svgForeignObject', 'svgClean']}
                         		}
                         	},
                         	row3: {tableAtts: {cols: 3, showLabels: false}, widgets: ['srcInsert', 'remove', 'close']}
@@ -77,17 +77,40 @@ function(declare, lang, dct, htmlFormat, TooltipDialog, Pmg) {
     
         	paneGetWidget('content').set('value', htmlFormat.prettyPrint(ancestorElement/*.outerHTML*/, 2));
         },
-        srcGeminiResponse: function(){
+		svgForeignObject: function(){
+			var pane = this.srcDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget),  contentWidget = paneGetWidget('content'), content = contentWidget.get('value');
+			if (content){
+				if (content.includes('<math ') && !content.includes('xmlns')){
+					content = content.replace(/(<math [^>]*)(>)/, '$1 xmlns="http://www.w3.org/1998/Math/MathML"$2');
+				}
+				content = '<foreignObject x="10" y="10" width="60" height="40">' + content + '</foreignObject>';
+			}
+			contentWidget.set('value', content);
+		},
+		svgClean: function(){
+			var pane = this.srcDialog.pane, paneGetWidget = lang.hitch(pane, pane.getWidget),  contentWidget = paneGetWidget('content'), content = contentWidget.get('value');
+			if (content){
+				content = content.replace('&nbsp;', ' ');
+			}
+			contentWidget.set('value', content);
+		},
+        srcAIResponse: function(serverAction){
 	    	const  pane = this.srcDialog.pane, valueOf = lang.hitch(pane, pane.valueOf), sourceContent = valueOf('content'); 
 			let targetContent = 'to be done';
-			Pmg.serverDialog({object: 'users', view: 'NoView', action: 'GetGeminiResponse'}, {data: {request: sourceContent}}).then(function(response){
+			Pmg.serverDialog({object: 'users', view: 'NoView', action: serverAction}, {data: {request: sourceContent}}).then(function(response){
 				if (response.generatedContent){
 					pane.setValueOf('content', response.generatedContent);
 				}else{
-					Pmg.alert('No content from Gemini');
+					Pmg.alert('No content from ' + serverAction);
 				}
 			});
             
+		},
+		srcGeminiResponse: function(){
+			this.srcAIResponse('getGeminiResponse');
+		},
+		srcLeChatResponse: function(){
+			this.srcAIResponse('getLeChatResponse');
 		},
         srcTranslate: function(){//thanks to https://www.googlecloudcommunity.com/gc/AI-ML/Can-the-Google-Translate-API-v2-be-used-in-the-frontend/m-p/598403
 	    	var pane = this.srcDialog.pane, valueOf = lang.hitch(pane, pane.valueOf), content = valueOf('content'), sourceLang = (pane.getWidget('sourcelang').get('item') || {}).id, targetLang = (pane.getWidget('targetlang').get('item') || {}).id;

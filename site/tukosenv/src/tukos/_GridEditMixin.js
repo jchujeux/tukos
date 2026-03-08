@@ -133,8 +133,8 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             }));
         },
         untranslateColName: function(name){
-			const untranslation = utils.some(this.columns, function(column, field){
-				return name === column.title ? field : false;
+			const untranslation = utils.some(this.columns, function(column){
+				return name === column.title ? column.field : false;
 			});
 			if (untranslation){
 				return untranslation;
@@ -240,6 +240,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
 	                    }*/
 	                    if (!this.nestedRowWatchActions){
 							this.setSummary();
+							wutils.watchCallback(this, 'updateDirty', null, []);
 	                   		this.isUserEdit = false;
 	                   	}
 	                }
@@ -409,6 +410,23 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
         copyRow: function(evt){
 			copyDialog(this).open({x: evt.clientX, y: evt.clientY, parent: this});
         },
+		deleteSelection: function(skipDeleteAction, isUserRowEdit){
+			var grid = this, toDelete = [];
+			utils.forEach(this.selection, function(status, id){
+				if (status){
+					var row = grid.row(id), item = row.data; 
+					if ((typeof item.canEdit === "undefined") || item.canEdit){
+						toDelete.push(item);
+					}else{
+						grid.deselect(id);
+					}
+				}
+			});
+			if (toDelete.length > 0){
+				grid.deleteRows(toDelete, skipDeleteAction, isUserRowEdit);
+			}
+			this.contextMenu.menu.onExecute();
+		},
         setSelectionCol: function(evt){
 			setItemsColDialog(this).open({x: evt.clientX, y: evt.clientY, parent: this});
         },
@@ -423,7 +441,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
 			if (!skipDeleteAction){
 				eutils.actionFunction(this, 'deleteRow', this.deleteRowAction, 'row', item);
 			}
-        	if (item.id != undefined && (this.newRowPrefix ? item.id.substring(0,3) !== this.newRowPrefix : true) && (this.initialId ? item.id <= this.maxServerId : true)){
+        	if (this.valueOf('id') && item.id != undefined && (this.newRowPrefix ? item.id.substring(0,3) !== this.newRowPrefix : true) && (this.initialId ? item.id <= this.maxServerId : true)){
                 var toSendOnDelete = {id: item.id, '~delete': true};
             	if (this.sendOnDelete){
             		this.sendOnDelete.forEach(function(col){
@@ -509,7 +527,9 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             }
             return this.deleted.concat(result);            
         },
-        
+		_getDisplayedValue: function(){
+			return this.collection.fetchSync();
+		},
         keepChanges: function(){
             return {/*data: this.store.fetchSync(), */dirty: this.dirty, deleted: this.deleted};
         },
@@ -552,7 +572,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                 this.store.setData([]); 
                 this.dirty = {};
             }else if(value instanceof Array){//a new  memory store needs to be filled in with the array value
-            	/*if (this.form.markIfChanged && this.initialId){// is to be considered as a change, not reflecting then server store content
+            	if (this.form.markIfChanged && this.initialId){// is to be considered as a change, not reflecting then server store content
             		var rowsToDelete = [];
             		this.store.forEach(lang.hitch(this, function(row){
             			for (var r in value){
@@ -571,7 +591,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             			this.addRow(null, value[r]);
             		}
             		resetCounters = false;
-            	}else{*/
+            	}else{
                 	this.store.setData(value); 
                     if (this.onChangeNotify/* && this.isUserEdit*/){
                         this.notifyWidgets({action: 'create'});
@@ -588,7 +608,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
                             }
                         }));
                     }          		
-//            	}
+            	}
             }else{//current memory store needs to be updated with contents of current object, then saved (to empty dirty)
                 this.store.setData([]);
                 this.dirty = {};

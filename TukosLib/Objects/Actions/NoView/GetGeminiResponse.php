@@ -9,13 +9,13 @@ class GetGeminiResponse extends AbstractAction{
         $key = getenv('GEMINI_API_KEY');
         $client = \Gemini::factory()
         ->withApiKey($key)
-        ->withBaseUrl('https://generativelanguage.googleapis.com/v1/') // default: https://generativelanguage.googleapis.com/v1/
+        ->withBaseUrl('https://generativelanguage.googleapis.com/v1beta/') // default: https://generativelanguage.googleapis.com/v1/
         ->withHttpHeader('X-My-Header', 'foo')
         ->withQueryParam('my-param', 'bar')
         ->withHttpClient(new \GuzzleHttp\Client([]))
         ->make();
         $request = $this->dialogue->getValues()['request'];
-        $result = $client->geminiPro()->generateContent(mb_convert_encoding($request, 'UTF-8'));
+        $result = $client->generativeModel(model: 'gemini-2.0-flash')->generateContent(mb_convert_encoding($request, 'UTF-8'));
         if ($result){
             $parseDown = new \Parsedown();
             $content = $result->text();

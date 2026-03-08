@@ -52,6 +52,9 @@ define (["dojo/_base/declare", "dojo/_base/lang",  "dojo/on",
 						if (!self.noDeleteRow){
 		                	addedItems.push({atts: {label:messages.deleterow,   onClick: function(evt){self.deleteRow()}}});
 		                }
+						addedItems.push({type: 'PopupMenuItem', atts: {label: messages.forselection}, popup: {type: 'DropDownMenu', items: [
+							{atts: {label: messages.deleteselection,   onClick: function(){self.deleteSelection(true, true)}}}, {atts: {label: Pmg.message('ChangeColValue'),   onClick: function(evt){self.setSelectionCol(evt)}}}
+						]}});
 		                self.contextMenuItemsWithEdit.row = self.contextMenuItemsWithoutEdit.row.concat(addedItems);
 		                self.contextMenuItemsWithEdit.idCol = self.contextMenuItemsWithoutEdit.idCol.concat(addedItems);
 		                self.contextMenuItemsWithEdit.header.push({atts: {label: messages.addrow   ,   onClick: function(evt){self.addRow('append')}}});

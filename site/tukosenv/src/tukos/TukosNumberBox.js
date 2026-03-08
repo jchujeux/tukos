@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dijit/form/NumberTextBox"], 
-    function(declare, NumberTextBox){
+define(["dojo/_base/declare", "dijit/form/NumberTextBox", "dojox/string/sprintf"], 
+    function(declare, NumberTextBox, sprintf){
     return declare([NumberTextBox], {
 
         _setValueAttr: function(value){
@@ -13,6 +13,18 @@ define(["dojo/_base/declare", "dijit/form/NumberTextBox"],
         _getValueAttr: function(){
             var value = this.inherited(arguments);
             return isNaN(value) ? '' : value;
-        }
+        },
+		format: function(value){
+			return  this.constraints.type === 'scientific' ? value.toExponential() : this.inherited(arguments);
+		},
+		parse: function(value, constraints){
+			return constraints.type === 'scientific' ? parseFloat(value) : this.inherited(arguments);
+		},
+		isValid: function(){
+			return true;
+		},
+		filter: function(/*Number*/ value){
+			return value;
+		}
     });
 });

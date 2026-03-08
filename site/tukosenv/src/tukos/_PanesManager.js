@@ -1,6 +1,6 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "dijit/registry", "dijit/Dialog", 
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "dijit/registry", 
          "tukos/utils", "tukos/menuUtils", "tukos/PageManager", "tukos/_ViewCustomMixin", "dojo/json"], 
-  function(declare, lang, ready, on, registry, Dialog, utils, mutils, Pmg, _ViewCustomMixin, JSON ){
+  function(declare, lang, ready, on, registry, utils, mutils, Pmg, _ViewCustomMixin, JSON ){
     return declare([ _ViewCustomMixin], {
     	constructor: function(args){
     		declare.safeMixin(this, args);
@@ -169,6 +169,32 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
 			}
             target.action = target.action || 'Tab';
             this.request(target);
-        }
+        },
+		getTab: function(id, object, inBackground){
+			const urlArgs = {action: "Tab", mode: "Tab", object: object, query: {id: id}, view: "Edit", inBackground: inBackground}, tab = Pmg.tabs.tabExists(urlArgs);
+			if (!tab){
+				return Pmg.tabs.request(urlArgs).then(function(theTab){
+					return theTab;
+				});
+			}else{
+				return tab;
+			}
+		},
+		tabExists: function(target){
+			if (target.view === "Overview" || (id = (target.query || {}).id) || (name = (target.query || {}).name) || (storeAtts = (target.query || {}).storeatts)){
+				var openedTabs = this.container.getChildren();
+			    if (!name && typeof storeAtts === 'string'){
+					name = ((JSON.parse(storeAtts).where || {}).name || [])[1];
+				}
+				for (var i in openedTabs){
+			        var tab = openedTabs[i];
+					if ((target.view === "Overview" && (tab.formContent || {}).viewMode === "Overview" && tab.formContent.object === target.object) || (id && tab.contentId == id) || (name && tab.contentName === name) || (id && (tab.get('title').match(/(\d+)\)$/) || {} )[1] === id)){
+			            return tab;
+			        }
+			    }
+			}else{
+				return false;
+			}
+		}
     }); 
 });

@@ -66,6 +66,17 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					return String(value1 || '') == String(value2 || '');
 				}*/
 			},
+			haveSameValues: function(array1, array2){
+				if (array1.length === array2.length){
+					const  set2 = new Set(array2);
+					return array1.every(item => set2.has(item));
+				}else{
+					return false;
+				}
+			},
+			sortIndexesByValues: function(indexesArray, valuesArray){
+				return valuesArray.map((x, i) => ({index: i, value: x})).sort((a,b) => a.value - b.value).map((x) => indexesArray[x.index]);
+			},
 			forEach: function(object, callback, inherited) {
 				if (object){
 					switch (typeof(object)){
@@ -228,7 +239,17 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				}
 				return true;
 			},
-
+			getSubObject:  function(properties, fromObject, includeAbsent, absentValue){
+				const result = {};
+				properties.forEach(function(property){
+					if (typeof fromObject[property] !== "undefined"){
+						result[property] = fromObject[property];
+					}else if(includeAbsent){
+						result[property] = absentValue;
+					}
+				});
+				return result;
+			},
 			in_array: function(needle, haystack /*, argStrict*/ ) {
 				return haystack && haystack.indexOf(needle) > -1;
 			},
@@ -248,7 +269,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				return result;
 			},
 			array_unique_push: function(newValue, array) {
-				if (!this.in_array(newValue)) {
+				if (!this.in_array(newValue, array)) {
 					array.push(newValue);
 				}
 			},
@@ -443,7 +464,10 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 						case 'number':
 							value = number.format(value, formatOptions);
 							break;
-						case 'translate':
+						case 'scientific':
+							value = Math.abs(value) <= formatOptions.zeroThreshold || 0 ? '0' : value.toExponential((formatOptions || {}).places || undefined);
+							break;
+							case 'translate':
 							if (formatOptions.translations){
 								value = this.translate(value, formatOptions.translations);
 							}else{
@@ -508,7 +532,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					return '';
 				}
 			},
-			iterate: function(contributeFunction, initialResult, functionArguments) {
+			/*iterate: function(contributeFunction, initialResult, functionArguments) {
 				var result = initialResult;
 				for (let item of functionArguments){
 					if (typeof item === 'object') {
@@ -544,6 +568,19 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 					return value < result ? value : result;				
 				}
 				return this.iterate(contributeFunction, Number.POSITIVE_INFINITY, arguments);
+			},*/
+			sum: function(arr){
+				return arr.reduce((a,b) => a + b, 0);
+			},
+			sumProd: function(a,b){
+				if (a && a.length){
+					let result = 0;
+					for (let i in a){
+						result += a[i] * b[i];
+					}
+				}else{
+					return undefined;
+				}
 			},
 			hashId: function() { // see https://gist.github.com/fiznool/73ee9c7a11d1ff80b81c#file-hashid-js-L11
 				var alphabet = '23456789abdegjkmnpqrvwxyz',
@@ -556,7 +593,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				return rtn;
 			},
 			uniqueId: function(previous) { // see https://gist.github.com/fiznool/73ee9c7a11d1ff80b81c#file-hashid-js-L11             
-				var unique_retries = 9999, retries = 0, id, previousUniqueIds;
+				var unique_retries = 9999, retries = 0, id;
 				previous = previous || previousUniqueIds;
 				while (!id && retries < unique_retries) {
 					id = this.hashId();
@@ -736,6 +773,9 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 			},
 			untranslate: function(value, translations){
 				return this._translate(value, translations, 'untranslate');
+			},
+			vector: function(length, initialValueCallback){
+				return Array.from({length: length}, initialValueCallback);
 			}
 		};
 	});

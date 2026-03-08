@@ -28,6 +28,7 @@
                     map: {'dojo' : {'dojo/dnd/Selector': "dojoFixes/dojo/dnd/Selector"}, 'dijit/Menu': {'dijit/popup': 'dojoFixes/dijit/popup'}, dgrid: {'dgrid/List': 'dojoFixes/dgrid/List', 'dgrid/Selection': 'dojoFixes/dgrid/Selection'}, 
                           'dojox/charting/plot2d': {'dojox/charting/plot2d/Default': 'dojoFixes/dojox/charting/plot2d/Default'},
                     	  'dojox/mobile': {'dojox/mobile/SpinWheel': 'dojoFixes/dojox/mobile/SpinWheel', 'dojox/mobile/SpinWheelSlot': 'dojoFixes/dojox/mobile/SpinWheelSlot'},
+                    	  'dojox/gfx': {'dojox/gfx/_base': 'dojoFixes/dojox/gfx/_base', 'dojox/gfx/svg': 'dojoFixes/dojox/gfx/svg'},
                     	  'tukos/mobile': {'dojox/mobile/SpinWheel': 'dojoFixes/dojox/mobile/SpinWheel', 'dojox/mobile/SpinWheelSlot': 'dojoFixes/dojox/mobile/SpinWheelSlot'}}
                 };
         </script>

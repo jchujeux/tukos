@@ -485,6 +485,22 @@ function(ready, has, lang, Deferred, when, string, request, _WidgetBase, _FormVa
             //return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].name + '(' + id + ')' : '(' + id + ')') : '');
             return id ? (utils.drillDown(this.cache.extendedIds, [id, 'name']) || utils.drillDown(this.cache.extras, [id, 'name'], '')) + '(' + id + ')' : '';
         },
+        getNamedId: function(id){
+           if (typeof id == "undefined" || id == '' || !id || id == 0 ){
+               return {id: '', name: ''};
+           }else{
+               var namedId = this.namedId(id);
+               if (namedId.substring(1,namedId.length-1) != id){
+                   return {id: id, name: namedId};
+               }else{
+                const self = this;   
+				return this.serverDialog({object: 'Tukos', view: 'noView', mode: 'Tab', action: 'getExtendedIds', query: {storeatts: {where: {ids: [id]}, cols: ['id', 'name']}}}).then(function(response){
+                       return self.namedId(id);
+                   });
+               }
+           }
+        },
+   
         itemName: function(id){
             return (id && id != 0 ? (this.cache.extendedIds[id] ? this.cache.extendedIds[id].name : '') : '');
         },

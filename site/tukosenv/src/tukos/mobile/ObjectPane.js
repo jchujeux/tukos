@@ -57,6 +57,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
 								const form = this;
 								utils.waitUntil(
 									function(){
+										form.initialWidgetsValuesSet.resolve();
 										return form.openActionCompleted;
 									}, 
 									function(){
@@ -76,6 +77,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-construct", "dojo/dom
 		                        if (this.offlineChangedValues){
 									this.setWidgets({value: this.offlineChangedValues});
 								}
+								this.initialWidgetsValuesSet.resolve();
 							}
 	                    }), 0);
 						/*this.needsToFreezeWidth = true;

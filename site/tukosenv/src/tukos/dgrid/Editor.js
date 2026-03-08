@@ -616,7 +616,7 @@ define([
 					// input again).  IE<9 needs to wait longer, otherwise the cell loses
 					// focus after we've set it.
 					setTimeout(function () {
-						self.focus(element);
+						self.focus(/*element*/);
 					}, isWidget && has('ie') < 9 ? 15 : 0);
 				}
 			}
@@ -669,6 +669,14 @@ define([
 							blur();
 							break;
 						}
+					case keys.DOWN_ARROW:
+					case keys.UP_ARROW:
+					case keys.RIGHT_ARROW:
+					case keys.LEFT_ARROW:
+						evt.preventDefault();
+						evt.stopPropagation();
+						blur();	
+						lang.hitch(self, self.keyMap[key])(evt);
 				}
 			}
 

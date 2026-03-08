@@ -21,6 +21,7 @@ class Directory{
         'scripts'           => 'Admin\Scripts',
         'scriptsoutputs'    => 'Admin\Scripts\Outputs',
         'health'            => 'Admin\Health',
+        'jstesting'         => 'Admin\JsTesting',
         'people'            => 'Collab\People',
         'organizations'     => 'Collab\Organizations',
         'teams'             => 'Collab\Teams',
@@ -92,8 +93,8 @@ class Directory{
         'bustrackreconciliationscustomers' => 'BusTrack\Reconciliations\Customers',
         'bustrackreconciliationssuppliers' => 'BusTrack\Reconciliations\Suppliers',
         'mdlmeshes' => 'Modeling\Meshes',
-        'mdlproblems' => 'Modeling\Problems',
-        'mdlsimulations' => '%odeling\Simulations'
+        'mdlmaterials' => 'Modeling\Materials',
+        'mdlsimulations' => 'Modeling\Simulations'
         ];
     private static $objectsDomainAliases = ['people' => ['bustrack' => 'bustrackpeople', 'sports' => 'sptathletes', 'physio' => 'physiopatients'], 'organizations' => ['bustrack' => 'bustrackorganizations', 'wine' => 'winegrowers'], 
                         'bustrackquotes' => ['physio' => 'physiopersoquotes']];

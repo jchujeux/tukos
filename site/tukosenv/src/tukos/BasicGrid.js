@@ -37,7 +37,10 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         postCreate: function(){
             var self = this, form = this.form;
         	this.inherited(arguments);
-        	this.minHeightFormatter = this.minHeightFormatter || '5em';
+        	if (this.tukosTooltip){
+				this.set('tukosTooltip', this.tukosTooltip);
+			}
+			this.minHeightFormatter = this.minHeightFormatter || '5em';
         	this.maxHeightFormatter = this.maxHeightFormatter || '30em';
         	if (!this.collection){
         		require(["dstore/Memory"], function(Memory){
@@ -143,8 +146,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         	return this.formatType ? utils.transform(value, this.formatType, this.formatOptions, Pmg) : value;
         },
         renderNamedId: function(object, value, node){
-            var grid = this.grid, newRowPrefixGridName = utils.drillDown(this, ['editorArgs', 'storeArgs', 'storeDgrid']);
-        	return this.grid._renderContent(this, object, node, newRowPrefixGridName ? grid.form.getWidget(newRowPrefixGridName).newRowPrefixNamedId(value) : Pmg.namedId(value));
+        	return this.grid._renderContent(this, object, node, Pmg.namedId(value));
         },
         renderNamedIdExtra: function(object, value, node){
             return this.grid._renderContent(this, object, Pmg.namedIdExtra(value));
@@ -185,7 +187,7 @@ function(declare, lang, dct, dst, on, ready, Grid, Keyboard, Selector, DijitRegi
         renderContent: function(object, value, node, options, noCreate){
             var grid = this.grid, row = grid.row(object), idp = grid.collection.idProperty, args = {object: object, value: sutils.evalFormula(grid, value, this.field, row.data[idp])}, result;
             eutils.actionFunction(this, 'renderContent', this.renderContentAction, 'args', args);
-            result = utils.transform(args.value, this.formatType, this.formatOptions, Pmg);
+            result = utils.transform(args.value, this.formatType || (this.constraints ||{}).type, this.formatOptions || this.constraints, Pmg);
             return grid._renderContent(this, object, node, result, utils.in_array(this.formatType, ['currency', 'percent']) ? {textAlign: 'right'} : {}, noCreate);
         },
         _renderContent: function(column, storeRow, tdCell, innerHTML, styleAtts, noCreate){

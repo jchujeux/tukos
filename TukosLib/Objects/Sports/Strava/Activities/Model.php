@@ -228,7 +228,7 @@ class Model extends AbstractModel {
                 'select=date%2C%20coordonnees%2C%20libgeo%2C%20ff%2C%20dd&where=date%20%3E%3D%20date%27${date}T00%3A00%3A00%27%20and%20date%20%3C%3D%20date%27${date}T23%3A59%3A59%27%20and%20${libgeowhere}&order_by=date%20ASC';
             if ($libGeo === 'auto'){
                 $targetDistance = 50; $windData = [];
-                while (empty($windData) || $targetDistance <= 200){
+                while (empty($windData) && $targetDistance <= 200){
                     $libGeoWhere = Utl::substitute('within_distance(coordonnees%2C%20geom\'POINT(${longitude}%20${latitude})\'%2C%20${targetdistance}km)',
                         ['latitude' => CUtl::radiansToDegrees($latitude), 'longitude' => CUtl::radiansToDegrees($longitude), 'targetdistance' => $targetDistance]);
                     $windData = json_decode(file_get_contents(Utl::substitute($geoUrl, ['date' => $itemValue['startdate'], 'libgeowhere' => $libGeoWhere])), true);
@@ -276,7 +276,7 @@ class Model extends AbstractModel {
                     $itemValue['windvelocity'] = ($beforeData['ff'] * $beforeWeight + $afterData ['ff'] * $afterWeight) / 2.0;
                     $itemValue['winddirection'] = intval(round(($beforeData['dd'] * $beforeWeight + $afterData ['dd']* $afterWeight) * 16 / 360)) % 16;
                 }else{
-                    $itemValue['windvelocity'] = $beforeData['ff'];
+                    $itemValue['windvelocity'] = $beforeData['ff'] / 2;
                     $itemValue['winddirection'] = intval(round(($beforeData['dd']) * 16 / 360)) % 16;
                 }
             }

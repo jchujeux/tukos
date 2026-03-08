@@ -146,9 +146,31 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
 	    			dct.create('td', {"class": "dojoxEntityPaletteCell", style: {width: 'auto'}, onclick: function(){insert(ml.s);self.button.closeDropDown();}, innerHTML: ml.label || ml.s, title: self.shortCutLabel(ml.k)}, tr);
 	    		});
 	    	});
-			dct.create('br', null, div);			
 			table = dct.create('table', {'class': 'dijitPaletteTable'}, div);
-			const entities = Object.getPrototypeOf(dojo.i18n.getLocalization("dojox.editor.plugins", "latinEntities")), numberOfEntities = Object.keys(entities).length, entitiesPerRow = Math.floor(Math.sqrt(numberOfEntities));
+			const maxCols = 21;
+			let  colCount = maxCols, tr;
+			for (let i = 119964; i <= 120067; i++){
+				if (colCount === maxCols){
+					tr = dct.create('tr', null, table);
+					colCount = 1;
+				}
+				const entityHtml =  '<mi>&#' + i + ';</mi>';
+				dct.create('td', {"class": "dojoxEntityPaletteCell", style: {width: 'auto'}, onclick: function(){
+					insert(entityHtml);}, innerHTML: entityHtml, title: 'decimal ' + i}, tr);
+				colCount += 1;
+			}
+			/*var tr = dct.create('tr', null, table), hexArray = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
+			hexArray.forEach(function(code){
+				const entityHtml = '&#' + Number('0x1D4D' + code) + ';'
+				dct.create('td', {"class": "dojoxEntityPaletteCell", style: {width: 'auto'}, onclick: function(){insert(entityHtml);}, innerHTML: entityHtml, title: 'cursive' + code}, tr);
+			});
+			tr = dct.create('tr', null, table), hexArray = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
+			hexArray.forEach(function(code){
+				const entityHtml = '&#' + Number('0x1D4E' + code) + ';'
+				dct.create('td', {"class": "dojoxEntityPaletteCell", style: {width: 'auto'}, onclick: function(){insert(entityHtml);}, innerHTML: entityHtml, title: 'cursive' + code}, tr);
+			});*/
+			table = dct.create('table', {'class': 'dijitPaletteTable'}, div);
+			const entities = Object.getPrototypeOf(dojo.i18n.getLocalization("dojox.editor.plugins", "latinEntities")), numberOfEntities = Object.keys(entities).length, entitiesPerRow = 21;//Math.floor(Math.sqrt(numberOfEntities));
 			let currentCol = 0, currentEntityIndex = 0;
 			for (let entity in entities){
 				if (currentCol > entitiesPerRow){
@@ -163,7 +185,7 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
 				if (currentCol === 1){
 					tr = dct.create('tr', null, table);
 				}
-				let entityHtml = '&' + entity + ';';
+				let entityHtml = '<mi>&' + entity + ';</i>';
 				dct.create('td', {"class": "dojoxEntityPaletteCell", style: {width: 'auto'}, onclick: function(){insert(entityHtml);}, innerHTML: entityHtml, title: entities[entity]}, tr);
 			}
 	    	return pane;
@@ -180,6 +202,7 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
         	this.setKeyHandlers();
             this.editor.handleMathML = lang.hitch(this, this.handleMathML);
         	this.editor.selectNextMathPlaceHolder = lang.hitch(this, this.selectNextMathPlaceHolder);
+			symbols.push();
 			this.editor.symbolsPalette = this.buildSymbolsPalette(symbols);
 			this.editor.symbolsPalette.parent = this.button;
         },

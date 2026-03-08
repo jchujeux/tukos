@@ -20,8 +20,7 @@ define (["dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "tukos/PageManag
                 MobileSliderSelect: "tukos/mobile/SliderSelect*", MobileTimePicker: "tukos/mobile/TimePicker*", MobileNumberBox: "tukos/mobile/DecimalNumberPicker*", MobileStoreCalendar: "tukos/mobile/StoreCalendar,*"/*, TukosCheckBox: "tukos/Widgets/Checkbox*"*/,
 				MobileTukosPane: "tukos/mobile/TukosPane*", MobileAccordionGrid: "tukos/mobile/AccordionGrid*", DecimalNumberPicker: "tukos/mobile/DecimalNumberPicker*"
             },
-			mobileWidgetTypes: {TextBox: 'MobileTextBox', FormattedTextBox: 'MobileFormattedTextBox'/*, LazyEditor: 'LazyEditor', ObjectReset: 'MobileObjectReset', ObjectSave: 'MobileObjectAction', ObjectNew: 'MobileObjectAction', StoreSimpleCalendar: "MobileStoreCalendar",
-				StoreCalendar: "MobileStoreCalendar"*/, OverviewDgrid: 'MobileOverviewGrid'/*, OverviewAction: 'MobileOverviewAction'*/, Textarea: 'MobileTextBox'/*, StoreSelect: "MobileStoreSelect"*/, TimeTextBox: "MobileTimePicker", TukosNumberBox: "MobileNumberBox", StoreDgrid: "StoreDgridNoDnd",
+			mobileWidgetTypes: {TextBox: 'MobileTextBox', FormattedTextBox: 'MobileFormattedTextBox', OverviewDgrid: 'MobileOverviewGrid'/*, OverviewAction: 'MobileOverviewAction'*/, Textarea: 'MobileTextBox', TimeTextBox: "MobileTimePicker", TukosNumberBox: "MobileNumberBox", StoreDgrid: "StoreDgridNoDnd",
 				SimpleDgrid: "SimpleDgridNoDnd"},
             loadedWidgets: {}, loadingWidgets: {},
 			instantiationCompleted: function(){

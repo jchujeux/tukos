@@ -11,14 +11,14 @@
 		<div id='Gauss integration'></div>
         <script>var dojoConfig ={
                     baseUrl: "", isDebug: true, async: true, locale: "en-en",
-                    packages: [{"name": "dojo", "location": "tukosenv/src/dojo/dojo"},   {"name": "dijit", "location": "tukosenv/src/dijit"},  
+                    packages: [{"name": "dojo", "location": "tukosenv/src/dojo"},   {"name": "dijit", "location": "tukosenv/src/dijit"},  
                                {"name": "tukos", "location": "tukosenv/src/tukos"}
                     ],
                 };
         </script>
         <script src="tukosenv/src/dojo/dojo.js"></script>
 		<script>
-		    require(['tukos/mathUtils'], function (mathUtils) {
+		    require(['tukos/maths/utils'], function (mathUtils) {
 				const func1 = function(x){
 					return 7* x**3 - 8 * x**2 - 3 * x + 3;
 				}

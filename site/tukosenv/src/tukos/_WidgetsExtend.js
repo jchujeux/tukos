@@ -30,7 +30,7 @@ define (["dojo/_base/lang", "dijit/Tooltip", "tukos/widgetUtils"],
         		}
         	}
         },
-        _setTukosTooltipAttr: function(atts){
+       _setTukosTooltipAttr: function(atts){
 			if (atts.onClickLink){
 				const self = this, name = tukos.Pmg.tukosTooltipName(atts.onClickLink.name);
 				if (name){

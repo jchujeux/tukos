@@ -156,6 +156,14 @@ abstract class AbstractModel extends ObjectTranslator {
         $value = $this->getOne($atts, $jsonColsPaths, $jsonNotFoundValue);
         if (!empty($value)){
             $this->addItemIdCols($value);
+            if (isset($this->jsonColsIdCols)){
+                $presentJsonColsIdCols = array_intersect_key($this->jsonColsIdCols, $jsonColsPaths);
+                foreach ($presentJsonColsIdCols as $key => $jsonColIdCols){
+                    if (!empty($value[$key])){
+                        SUtl::addItemsIdCols($value[$key], $jsonColIdCols);
+                    }
+                }
+            }
         }
         return $value;
     }

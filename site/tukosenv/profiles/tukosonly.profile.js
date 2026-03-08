@@ -23,7 +23,7 @@ var profile = {
 	layerOptimize: 'closure',
 
 	optimizeOptions: {
-		languageIn: "ECMASCRIPT6",
+		languageIn: "ECMASCRIPT_2017",
 		languageOut: "NO_TRANSPILE"
 	},
 	// A list of packages that will be built. The same packages defined in the loader should be defined here in the

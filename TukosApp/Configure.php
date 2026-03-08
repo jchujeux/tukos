@@ -13,7 +13,7 @@ class Configure extends AbstractConfigure{
                 'mail' => [[
                     '#mailsmtps' => [], '#mailservers' => [], '#mailaccounts' => [],
                 ]],
-                '#scripts' => [['#scriptsoutputs' => []]], '#health' => [],
+                '#scripts' => [['#scriptsoutputs' => []]], '#health' => [], '#jstesting' => []
             ]],
             'collab' => [['#people' => [], '#organizations' => [], '#teams' => [], '#notes' => [], '#documents' => [], '#calendars' => [['#calendarsentries' => []]], '#tasks' => [], '#blog' => []]],
             'bustrack' => [
@@ -32,7 +32,7 @@ class Configure extends AbstractConfigure{
             'physio' => [['#physiopatients' => [], 'physiopersotrack' => [['#physiopersoquotes' => [], '#physiopersoplans' => [], '#physiopersotreatments' => [], '#physiopersodailies' => [['#physiopersosessions' => []]], '#physiopersoexercises' => []]],
                 'physiowoundtrack' => [['#physiogameplans' => [], '#physiogametracks' => []]],
                 '#physioprescriptions' => [], '#physioassesments' => [], '#physiocdcs' => [], '#physiotemplates' => []]],
-            'modeling' => [['#meshes' => [], '#problems' => [], '#simulations' => []]]
+            'modeling' => [['#mdlmeshes' => [], '#mdlmaterials' => [], '#mdlsimulations' => []]]
         ];
         
         $accordion = [

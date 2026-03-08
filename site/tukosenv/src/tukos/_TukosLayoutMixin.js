@@ -1,11 +1,12 @@
-define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all",  "dojo/has!mobileTukos?tukos/mobile/TableContainer:dojoFixes/dojox/layout/TableContainer", "tukos/PageManager", "tukos/utils", "tukos/widgetUtils", "tukos/widgets/WidgetsLoader"], 
-    function(declare, lang, all, TableContainer, Pmg, utils, wutils, widgetsLoader){
+define (["dojo/_base/declare", "dojo/_base/lang", "dojo/promise/all", "dojo/Deferred",  "dojo/has!mobileTukos?tukos/mobile/TableContainer:dojoFixes/dojox/layout/TableContainer", "tukos/utils", "tukos/widgets/WidgetsLoader"], 
+    function(declare, lang, all, Deferred, TableContainer, utils, widgetsLoader){
     return declare(null, {
 
         constructor: function(){
             this.instantiatingWidgets = {};
+			this.initialWidgetsValuesSet = new Deferred(true);
         },
-        tableLayout:    function(layout, fromParent, optionalWidgetInstantiationCallback, optionalCommonWidgetsAtts){
+        tableLayout:function(layout, fromParent, optionalWidgetInstantiationCallback, optionalCommonWidgetsAtts){
             var self = this, instantiatingWidgets = {}, widgets = [], commonAtts = {pane: this, form: this};
 			if (typeof optionalCommonWidgetsAtts === 'object'){
 				commonAtts = utils.mergeRecursive(commonAtts, optionalCommonWidgetsAtts);

@@ -35,6 +35,34 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dijit/Editor", "
             }
         },
 
+		_postFilterContent: function(/*DomNode|DomNode[]|String?*/ dom, /*Boolean?*/ nonDestructive){// overrides RichText._postFilterCOntent dur to &nbsp; being removed 
+			var ec;
+			if(!lang.isString(dom)){
+				dom = dom || this.editNode;
+				if(this.contentDomPostFilters.length){
+					if(nonDestructive){
+						dom = lang.clone(dom);
+					}
+					this.contentDomPostFilters.forEach(function(ef){
+						dom = ef(dom);
+					});
+				}
+				ec = dom.innerHTML;//htmlapi.getChildrenHtml(dom); this is the change to avoid removing &nbsp; inside the html
+			}else{
+				ec = dom;
+			}
+
+			if(!lang.trim(ec.replace(/^\xA0\xA0*/, '').replace(/\xA0\xA0*$/, '')).length){
+				ec = "";
+			}
+
+			this.contentPostFilters.forEach(function(ef){
+				ec = ef(ec);
+			});
+
+			return ec;
+		},
+
         _getValueAttr: function(){
                var value = this.inherited(arguments), forceSpace = '';//this.isInViewSource && this.isInViewSource() ? '' : '&nbsp;';
                return value ? forceSpace + value.replace(/<span><\/span>|colspan="1"|rowspan="1"/g, '')/*.replace(/[\n\t ]+/g, ' ')*/.trim() + forceSpace : value;

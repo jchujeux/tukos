@@ -78,14 +78,14 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
             return Pmg.serverDialog(urlArgs, {}, false).then(
                 function(response){
                     var theNewTab = self.create(response);
-                    if (response.focusOnOpen){
+                    if (!urlArgs.inBackground && response.focusOnOpen){
                         ready(function(){
                             self.container.selectChild(theNewTab);
                             Pmg.setFeedback(response['feedback'], '');
                             tukosHeaderLoading.innerHTML = '';
                         });
                     }
-                    return response;
+                    return theNewTab;
                 },
 				function(){
                 	tukosHeaderLoading.innerHTML = '';					
