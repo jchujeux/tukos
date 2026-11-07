@@ -2,6 +2,7 @@
 namespace TukosLib\Objects\Modeling\Simulations;
 
 use TukosLib\Objects\AbstractView;
+use TukosLib\Utils\Widgets;
 use TukosLib\Utils\Utilities as Utl;
 use TukosLib\Objects\ViewUtils;
 use TukosLib\TukosFramework as Tfk;
@@ -20,7 +21,7 @@ class View extends AbstractView {
             ];
         $customDataWidgets = [
             'name' => ['atts' => ['edit' => ['style' => ['width' => '20em']]]],
-            'comments' => ['atts' => ['edit' => ['width' => '500px', 'height' => '100px']]],
+            'comments' => ['atts' => ['edit' => ['width' => '500px', 'height' => '150px']]],
             'dimension'=> ViewUtils::tukosNumberBox($this, 'dimension', ['atts' => ['edit' => ['style' => ['width' => '3em'], 'onChangeLocalAction' => ['nodalsolution' => ['value' => 'return [];']]]]]),
             'ndof'=> ViewUtils::tukosNumberBox($this, 'ndof', ['atts' => ['edit' => ['style' => ['width' => '3em'], 'disabled' => true]]]),
             'linearity' => ViewUtils::storeSelect('linearity', $this, 'Linearity', [true, 'ucfirst', false, false, false], ['atts' => ['edit' => ['onChangeLocalAction' => ['nodalsolution' => ['value' => 'return [];']]]]]),
@@ -30,7 +31,7 @@ class View extends AbstractView {
             'properties'=> ViewUtils::textArea($this, 'Globalproperties', ['atts' => ['edit' => ['style' => ['width' => '20em'], 'onChangeLocalAction' => ['nodalsolution' => ['value' => 'return [];']]]]]),
             'dofnames' => ViewUtils::JsonGrid($this, 'Dofnames', [
                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-                'constraints'=> ViewUtils::textBox($this, 'consraintsname', ['atts' => ['storeedit' => ['width' => 90, 'editorArgs' => ['style' => ['width' => '8em'], 'onChangeLocalAction' => ['type' => ['localActionStatus' => $this->onDofNamesChangeAction()]]]]]]),
+                'constraints'=> ViewUtils::textBox($this, 'constraintsname', ['atts' => ['storeedit' => ['width' => 90, 'editorArgs' => ['style' => ['width' => '8em'], 'onChangeLocalAction' => ['type' => ['localActionStatus' => $this->onDofNamesChangeAction()]]]]]]),
                 'rhs'=> ViewUtils::textBox($this, 'rhsname', ['atts' => ['storeedit' => ['width' => 90, 'editorArgs' => ['style' => ['width' => '8em'], 'onChangeLocalAction' => ['type' => ['localActionStatus' => $this->onDofNamesChangeAction()]]]]]]),
                 'solution'=> ViewUtils::textBox($this, 'solutionname', ['atts' => ['storeedit' => ['width' => 90, 'editorArgs' => ['style' => ['width' => '8em'], 'onChangeLocalAction' => ['type' => ['localActionStatus' => $this->onDofNamesChangeAction()]]]]]]),
             ], ['atts' => ['edit' => ['afterActions' => ['deleteRow' =>$this->onDofNamesRowChangeAction(), 'addRow' =>$this->onDofNamesRowChangeAction()], 'maxHeight' => '150px']]]),
@@ -48,49 +49,48 @@ class View extends AbstractView {
                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                 'boundaryId'=> ViewUtils::textbox($this, 'boundaryid', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '8em']]]]]),
             ], ['atts' => [
-                'edit' => ['maxHeight' => '300px', 'dofColPrefix' => 'rhs', 'dirColTemplate' => $dirColTemplateScientific, 'onWatchLocalAction' => ['updateDirty' => ['nodalsolution' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' =>  'return [];']]]]]]]),
+                'edit' => ['maxHeight' => '300px', 'dofColPrefix' => 'rhs', 'dirColTemplate' => $dirColTemplateScientific, 'onWatchLocalAction' => ['updateDirty' => ['nodalsolution' => ['value' => ['triggers' => ['server' => false, 'user' => true],
+                    'action' =>  'return [];']]]]]]]),
             'nodalrhs' => ViewUtils::JsonGrid($this, 'Nodalrhs', [
                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                 'nodeId'=> ViewUtils::tukosNumberBox($this, 'nodeid', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em']]]]]),
             ], ['atts' => [
-                    'edit' => ['maxHeight' => '300px', 'dofColPrefix' => 'rhs', 'dirColTemplate' => $dirColTemplateScientific, 'onWatchLocalAction' => ['updateDirty' => ['nodalsolution' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' =>  'return [];']]]]]]]),
+                    'edit' => ['maxHeight' => '300px', 'dofColPrefix' => 'rhs', 'dirColTemplate' => $dirColTemplateScientific, 'onWatchLocalAction' => ['updateDirty' => ['nodalsolution' => ['value' => ['triggers' => ['server' => false, 'user' => true], 
+                        'action' =>  'return [];']]]]]]]),
             'nodalsolution' => ViewUtils::JsonGrid($this, 'Nodalsolution', [
                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                 'nodeId'=> ViewUtils::tukosNumberBox($this, 'nodeid', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em']]]]]),
             ], ['atts' => ['edit' => ['maxHeight' => '300px', 'dofColPrefix' => 'solution', 'dirColTemplate' => $dirColTemplateScientific]]]),
             'groups' => ViewUtils::JsonGrid($this, 'groups', [
-                'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
-                'groupId'=> ViewUtils::textBox($this, 'groupId', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em']]]]]),
-                'dimension'=> ViewUtils::tukosNumberBox($this, 'dimension', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em']]]]]),
-                'globalDirections'=> ViewUtils::textBox($this, 'globaldirections', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '6em']]]]]),
-                'ndof'=> ViewUtils::tukosNumberBox($this, 'ndof', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '6em']]]]]),
-                'globalDofs'=> ViewUtils::textBox($this, 'globalDofs', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em']]]]]),
-                'problemType' => ViewUtils::storeSelect('problem', $this, 'Problemtype', [true, 'ucfirst', false, false, false], ['atts' => ['storeedit' => ['width' => 200, 'editorArgs' => ['style' => ['width' => '10em']]]]]),
-                'elementType' => ViewUtils::storeSelect('elementType', $this, 'ElementType'),
-                'rheologyType' => ViewUtils::storeSelect('rheology', $this, 'rheologyType', [true, 'ucfirst', false, false, false], ['atts' => ['storeedit' => ['width' => 200, 'editorArgs' => ['style' => ['width' => '10em']]]]]),
-                'materialId' => ViewUtils::objectSelect($this, 'materialId', 'mdlmaterials', ['atts' => ['storeedit' => ['width' => 100]]]),
+                'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 30, 'className' => 'dgrid-header-col', 'hidden' => true],
+                'groupId'=> ViewUtils::textBox($this, 'groupId', ['atts' => ['storeedit' => ['width' => Widgets::width('verysmall'), 'editorArgs' => ['style' => ['width' => Widgets::width('verysmall', 'px')]]]]]),
+                'dimension'=> ViewUtils::tukosNumberBox($this, 'dimension', ['atts' => ['storeedit' => ['width' => Widgets::width('verysmall'), 'editorArgs' => ['style' => ['width' => Widgets::width('verysmall', 'px')]]]]]),
+                'globalDirections'=> ViewUtils::textBox($this, 'globaldirections', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '5em']]]]]),
+                'ndof'=> ViewUtils::tukosNumberBox($this, 'ndof', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '2em']]]]]),
+                'globalDofs'=> ViewUtils::textBox($this, 'globalDofs', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '2em']]]]]),
+                'problemType' => ViewUtils::storeSelect('problem', $this, 'Problemtype', [true, 'ucfirst', false, false, false], ['atts' => ['storeedit' => ['width' => Widgets::width('medium'), 'editorArgs' => ['style' => ['width' => Widgets::width('medium', 'px')]]]]]),
+                'elementType' => ViewUtils::storeSelect('elementType', $this, 'ElementType', [true, 'ucfirst', false, false, false], ['atts' => ['storeedit' => ['width' => Widgets::width('medium'), 'editorArgs' => ['style' => ['width' => Widgets::width('medium', 'px')]]]]]),
+                'rheologyType' => ViewUtils::storeSelect('rheology', $this, 'rheologyType', [true, 'ucfirst', false, false, false], ['atts' => ['storeedit' => ['width' => Widgets::width('medium'), 'editorArgs' => ['style' => ['width' => Widgets::width('medium', 'px')]]]]]),
+                'materialId' => ViewUtils::objectSelect($this, 'materialId', 'mdlmaterials', ['atts' => ['storeedit' => ['width' => Widgets::width('medium'), 'editorArgs' => ['style' => ['width' => Widgets::width('medium', 'px')]]]]]),
                 'properties'=> ViewUtils::textArea($this, 'Otherproperties', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '8em']]]]]),
                 'integrationOrder'=> ViewUtils::textBox($this, 'integrationOrder(s)', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '6em']]]]]),
-            ], ['atts' => ['edit' => ['maxHeight' => '300px', 'objectIdCols' => ['materialId'], 'onWatchLocalAction' => ['updateDirty' => ['nodalsolution' => ['value' => ['triggers' => ['server' => false, 'user' => true], 'action' =>  'return [];']]]]]]]),
+                'backgroundColor' => viewUtils::colorPickerTextBox($this, 'BackgroundColor', ['atts' => ['storeedit' => ['width' => Widgets::width('small'), 'editorArgs' => ['style' => ['width' => Widgets::width('small', 'px')]]]]]),
+                'opacity'=> ViewUtils::tukosNumberBox($this, 'opacity', ['atts' => ['storeedit' => ['width' => Widgets::width('verysmall'), 'editorArgs' => ['style' => ['width' => Widgets::width('verysmall', 'px')], 'constraints' => ['pattern' => '#.#']]]]]),
+            ], ['atts' => ['edit' => ['maxHeight' => '300px', 'objectIdCols' => ['materialId'], 'noOnWatchCols' => ['backgroundColor', 'opacity'], 'onWatchLocalAction' => ['updateDirty' => ['nodalsolution' => ['value' => ['triggers' => ['server' => false, 'user' => true], 
+                'action' =>  'return [];']]]]]]]),
             'gmeshdiagram' => ViewUtils::lazyEditor($this, 'SolutionDiagram', ['atts' => ['edit' => ['width' => '400px', 'height' => '400px', 'customizableAtts' => $customizableAtts], 'overview' => ['hidden' => true]]]),
         ];
         $this->customize($customDataWidgets);
     }
     public function onDofNamesChangeAction(){
         return <<<EOT
-sWidget.form.localActions.setNodalConstraintsColumns();
+sWidget.form.localActions.setNodalDofColumns();
 EOT
         ;
     }
     public function onDofNamesRowChangeAction(){
         return <<<EOT
-this.form.localActions.setNodalConstraintsColumns();
-EOT
-        ;
-    }
-    public function solutionRemoveAction(){
-        return <<<EOT
-sWidget.form.setValueOf('nodalsolution', []);
+this.form.localActions && this.form.localActions.setNodalDofColumns();
 EOT
         ;
     }

@@ -14,6 +14,11 @@ class Widgets{
     use GridWidgets;
     
     public static $isMobile, $smallWidth, $mediumWidth, $largeWidth, $veryLargeWidth, $extraLargeWidth;
+    public static $widths = ['verylarge' => 400, 'large' => 200, 'medium' => 150, 'small' => 100, 'verysmall' => 60, 'tiny' => 40];
+    
+    public static function width($size, $append = ''){
+        return self::$widths[$size] . $append;
+    }
     
     public static function init(){
         self::$isMobile = Tfk::$registry->isMobile;

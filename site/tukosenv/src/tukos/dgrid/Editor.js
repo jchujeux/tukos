@@ -729,7 +729,7 @@ define([
 					}, this);
 
 					// Also update dirty data for rows that are not currently rendered
-					for (id in this.dirty) {
+					for (var id in this.dirty) {
 						if (editedRow.id.toString() !== id && this.dirty[id][column.field]) {
 							this.updateDirty(id, column.field, false);
 						}

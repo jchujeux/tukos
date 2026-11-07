@@ -1,23 +1,8 @@
 "use strict";
-define(["dojo/_base/declare", "dojo/json5", "tukos/objects/BaseClass", "tukos/objects/modeling/modeling", "tukos/objects/modeling/Element",  "tukos/objects/modeling/isoparametricElementUtils", "tukos/utils", "tukos/maths/utils", "tukos/PageManager"], 
-function(declare, JSON5, BaseClass, modeling, Element, isoUtils, utils, mathUtils, Pmg){
+define(["dojo/_base/declare", "dojo/json5", "tukos/objects/BaseClass", "tukos/objects/modeling/modeling", "tukos/objects/modeling/Element", "tukos/objects/modeling/rheologies/rheologiesLoader",  "tukos/objects/modeling/isoparametricElementUtils", 
+		"tukos/utils", "tukos/maths/utils"], 
+function(declare, JSON5, BaseClass, modeling, Element, rheologiesLoader, isoUtils, utils, mathUtils){
 	return declare([BaseClass], {
-		/*dimension, // usually the same as global.dimension
-		globalDirections, // usually globalDirection[] = i
-		ndof, //: usually the same as unknowns
-		globalDofs, //  ususally groupToGlobal[i] = i.
-		problemType, //: the type of partial differential equation to solve
-		    //diffusion => equation de Laplace, diffusion de la chaleur, mais aussi écoulement en milieux porerux
-		    //solidmechanics => milieux déformables, équilibre, contraintes - déformations
-		    //fluidmechanics: => tbd
-		elementType, // the environmental restrictions that impact the elementy matrices and rhs, context: {type: 'truss'|'planestrain'|'planestress'|'planeflow'|..., properties: {'area': ...}}
-		material,//  the material for the elements in the group. Optional. If absent, a material must be provided for each element
-		rheologyType, // general | linearisotropic | linearorthotropic | rheological model name
-		integrationOrder,//: integrationOrder[d] is the order of integration in the direction d for the reference element
-		refEltsDimension,
-		cSky,//: the C matrix in B(T).C.B, in skyline format, default value for lements and integration points, optional
-		elements,// the array of elements descriptions
-		global,	// the global object for thhis problem to solve	*/
 
 		constructor: function constructor(args){
 			this.inherited(constructor, arguments);
@@ -38,12 +23,15 @@ function(declare, JSON5, BaseClass, modeling, Element, isoUtils, utils, mathUtil
 			if (Number.isInteger(this.integrationOrder)){
 				this.integrationOrder = utils.vector(this.refEltsDimension, () => this.integrationOrder);
 			}
+			const rheologyClass = rheologiesLoader.module(this.problemType, this.rheologyType, this.elementType);
+			this.material = new rheologyClass(this.materialProperties);
+			this.material.group = this;
 			if (this.material){
-				this.cSky = this.material.cSky(this.refEltsDimension, this.problemType, this.elementType, this.rheologyType);
+				this.cSky = this.material.cSky(this.refEltsDimension);
 				if (this.properties){
 					this.properties = JSON5.parse(this.properties);
 					if (this.properties.rhs === 'gravity' && !this.gravityDirection){
-						Pmg.addFeedback(Pmg.message('grouprhsgravitynoglobalgravitydirection'), null, null, true);
+						//Pmg.addFeedback(Pmg.message('grouprhsgravitynoglobalgravitydirection'), null, null, true);
 					}
 				}
 				this.rhs = this.material.rhs(this);
@@ -62,7 +50,7 @@ function(declare, JSON5, BaseClass, modeling, Element, isoUtils, utils, mathUtil
 		initializeRefElt: function(element){
 			const refElt = [];
 			this.integrationPoints.points.forEach(function(rst){
-				refElt.push({refH: isoUtils.refH(rst, element.optionalNodes), dHRefDXRef: isoUtils.dHRefDXRef(rst, element.optionalNodes)});
+				refElt.push(isoUtils.rstReferenceInformation(rst, element.optionalNodes));
 			});
 			return refElt;
 		}

@@ -74,10 +74,15 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/ready", "tuk
 
         request: function(urlArgs){
             var self = this, tukosHeaderLoading = dom.byId('tukosHeaderLoading');            
-    		tukosHeaderLoading.innerHTML = Pmg.loading('', true);
+    		if (!urlArgs.inBackground){
+				tukosHeaderLoading.innerHTML = Pmg.loading('', true);
+			}
             return Pmg.serverDialog(urlArgs, {}, false).then(
                 function(response){
-                    var theNewTab = self.create(response);
+					var theNewTab = self.create(response);
+					if (urlArgs.noFeedback){
+						theNewTab.form.noFeedback = urlArgs.noFeedback;
+					}
                     if (!urlArgs.inBackground && response.focusOnOpen){
                         ready(function(){
                             self.container.selectChild(theNewTab);

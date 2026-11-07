@@ -89,5 +89,17 @@ define(["tukos/utils"],
 		quadraticBezierControlPoint: function(origin, middle, end){// found here: https://stackoverflow.com/questions/6711707/draw-a-quadratic-b%C3%A9zier-curve-through-three-given-points
 			return [2*middle[0] - origin[0] / 2 - end[0] / 2, 2*middle[1] - origin[1] / 2 - end[1] / 2];
 		},
+		newton: function(x0, f, fPrime, tolerance, maxIterations){
+			let i = 0, x_i = x0, x_i1;
+			while (i < maxIterations){
+				x_i1 = x_i - f(x_i) / fPrime(x_i);
+				if (Math.abs(x_i1-x_i) <= tolerance){
+					return x_i1;
+				}else{
+					i += 1;
+				}
+			}
+			return false;
+		}
 	};
 });
