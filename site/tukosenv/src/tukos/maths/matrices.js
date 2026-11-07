@@ -6,15 +6,6 @@ define(["tukos/utils"],
 		dotProduct: function(a,b){
 			return a.reduce((r, a, i) => r += a*b[i], 0);
 		},
-		norm: function(a){
-			return Math.sqrt(a.reduce((r,a) => a**2, 0));
-		},
-		squareDistance: function(a,b){
-			return a.reduce((r, a, i) => r += (a - b[i])**2, 0);
-		},
-		distance: function(a,b){
-			return Math.sqrt(this.squareDistance(a,b));
-		},
 		vectorOperation: function(a, b, callback){
 			const result = [];
 			for (let i = 0; i < a.length; i++){
@@ -140,11 +131,11 @@ define(["tukos/utils"],
 		},
 		asyMultiply: function(a, b){
 		  let res = [];
-		  for (let r = 0; r < a.length; r++) {
+		  for (let r = 0; r < a.length; ++r) {
 		    res[r] = [];
-		    for (let c = 0; c < b[0].length; c++) {
+		    for (let c = 0; c < b[0].length; ++c) {
 		      res[r][c] = 0;
-		      for (let i = 0; i < a[0].length; i++)
+		      for (let i = 0; i < a[0].length; ++i)
 		        res[r][c] += a[r][i] * b[i][c];
 		    }
 		  }
@@ -152,9 +143,9 @@ define(["tukos/utils"],
 		},
 		asyMultiplyVector: function(a, b){
 		  let res = [];
-		  for (let r = 0; r < a.length; r++) {
+		  for (let r = 0; r < a.length; ++r) {
 		    res[r] = 0;
-		    for (let i = 0; i < a[0].length; i++){
+		    for (let i = 0; i < a[0].length; ++i){
 		        res[r] += a[r][i] * b[i];
 			}
 		  }
@@ -163,15 +154,15 @@ define(["tukos/utils"],
 		symMultiply: function(a,b){
 			const length = a.length;
 			let res = new Array(length);
-			for (let r = 0; r < length; r++) {
+			for (let r = 0; r < length; ++r) {
 			  res[r] = new Array(r+1);
-			  for (let c = 0; c <= r; c++) {
+			  for (let c = 0; c <= r; ++c) {
 			    res[r][c] = 0;
-				for (let i = 0; i <= c; i++)
+				for (let i = 0; i <= c; ++i)
 				  res[r][c] += a[r][i] * b[c][i];
-				for (let i = c+1; i <= r; i++)
+				for (let i = c+1; i <= r; ++i)
 					res[r][c] += a[r][i] * b[i][c];
-				for (let i = r+1; i < length; i++)
+				for (let i = r+1; i < length; ++i)
 					res[r][c] += a[i][r] * b[i][c];
 			  }
 			}
@@ -382,14 +373,14 @@ define(["tukos/utils"],
 			}
 			return {pivot: pivot, lu: a};
 		},
-		symLLDecompose: function(a){// LL* inspired from here: https://jamesmccaffreyblog.com/2023/09/18/matrix-cholesky-decomposition-and-inverse-using-javascript/
+		symDecompose: function(a){// LL* inspired from here: https://jamesmccaffreyblog.com/2023/09/18/matrix-cholesky-decomposition-and-inverse-using-javascript/
 		  const n = a.length;
 		  let result = [], det = 1.0;
-		  for (let i = 0; i < n; i++) {
+		  for (let i = 0; i < n; ++i) {
 		    result.push([]);
-			for (let j = 0; j <= i; j++) {
+			for (let j = 0; j <= i; ++j) {
 		      let sum = 0.0;
-		      for (let k = 0; k < j; k++){
+		      for (let k = 0; k < j; ++k){
 				sum += result[i][k] * result[j][k];
 			  }
 	      	  if (i == j) {
@@ -405,10 +396,10 @@ define(["tukos/utils"],
 		  }
 		  return {lower: result, determinant: det};
 		},
-		skyLLDecompose: function(sky){// Cholesky decomposition: LL*
+		skyDecompose: function(sky){// Cholesky decomposition: LL*
 		  const {diagIndexes, upper} = sky, n = diagIndexes.length;
 		  let iDiagIndex = 0, det = 1.0;
-		  for (let i = 0; i < n; i++) {
+		  for (let i = 0; i < n; ++i) {
 			let iDiagIndexNext = diagIndexes[i];
 			const iRowMin = i + 1 - (iDiagIndexNext - iDiagIndex);
 			let jDiagIndex = iRowMin > 0 ? diagIndexes[iRowMin-1] : 0;
@@ -434,10 +425,41 @@ define(["tukos/utils"],
 		  }
 		  return {diagIndexes: diagIndexes, upper: upper, determinant: det};
 		},
+		skyColsolDecompose: function(sky){
+			const {diagIndexes, upper} = sky, length = diagIndexes.length;
+			let diagIndex = 0;
+			for (let c = 0; c < length; c++){ // loop 140
+				const lowS = diagIndex + 1, nextDiagIndex = diagIndexes[c], highS = nextDiagIndex - 1, minCRMin = c + 1 - nextDiagIndex + diagIndex;
+				if (highS > lowS){
+					for (let pC = 1; pC < c; pC++){ // loop 80
+						let sum = 0.0, pCRMax = pC - 1, pCI = diagIndexes[pC-1], cI = diagIndex + c - pC, cItoUpdate = cI;
+						const rMin = Math.max(pC - diagIndexes[pC] + pCI, minCRMin);
+						for (let r = pCRMax; r >= rMin; r--){ // loop
+							pCI += 1; cI += 1; 
+							sum += upper[pCI] * upper [cI];
+						}
+						upper[cItoUpdate] -= sum; 
+					}
+				}
+				if (highS >= lowS){//label 90
+					let sum = 0.0, r = c - 1, temp;
+					for (let s = lowS; s <= highS; s++){
+						temp = upper[s] / upper[r >= 1 ? diagIndexes[r-1] : 0];
+						sum += temp * upper[s];
+						upper[s] = temp;
+						r -= 1;
+					}
+					upper[diagIndex] -= sum;
+				}
+				if (upper[diagIndex] <= 0.0) throw "fatal error: inskyColsolDecompose, matrix is not positive definite ";//label 110
+				diagIndex = nextDiagIndex;
+			}
+			return sky;
+		},
 		skyLDLDecompose: function(sky){
 		  const {diagIndexes, upper} = sky, n = diagIndexes.length;
 		  let iDiagIndex = 0, det = 1.0;
-		  for (let i = 0; i < n; i++) {
+		  for (let i = 0; i < n; ++i) {
 			let iDiagIndexNext = diagIndexes[i];
 			const iRowMin = i + 1 - (iDiagIndexNext - iDiagIndex);
 			let jDiagIndex = iRowMin > 0 ? diagIndexes[iRowMin-1] : 0;
@@ -446,10 +468,11 @@ define(["tukos/utils"],
 			  const jRowMin = j + 1 - (jDiagIndexNext - jDiagIndex);
 			  const kMin = Math.max(iRowMin, jRowMin);
 		      for (let k = kMin; k < j; k++){
-				sum += upper[iDiagIndex+i-k] * upper[jDiagIndex+j-k] * upper[k > 0 ? diagIndexes[k-1] : 0];//Quel est l'index de Dkk dans upper ?
+				sum += upper[iDiagIndex+i-k] * upper[jDiagIndex+j-k];//result[i][k] * result[j][k];
 			  }
 		  	  if (i == j) {
 		    	upper[iDiagIndex] = upper[iDiagIndex] - sum;
+				det *= upper[iDiagIndex];
 		      }else{
 		        if (upper[jDiagIndex] == 0.0) throw "matCholeskyDecomp fatal error ";
 		        upper[iDiagIndex+i-j] = (upper[iDiagIndex+i-j] - sum) / upper[jDiagIndex];
@@ -458,9 +481,9 @@ define(["tukos/utils"],
 		    }
 			iDiagIndex = iDiagIndexNext;
 		  }
-		  return {diagIndexes: diagIndexes, upper: upper};
+		  return {diagIndexes: diagIndexes, upper: upper, determinant: det};
 		},
-		skyLDLForwardSubstitution: function(skyLDL, b){// s = diagIndexes[c-1] + c-r
+		skyColsolForwardSubstitution: function(skyLDL, b){// s = diagIndexes[c-1] + c-r
 			const {diagIndexes, upper} = skyLDL;
 			let diagIndex = 0;
 			for (let r = 0; r < b.length; r++){
@@ -475,7 +498,22 @@ define(["tukos/utils"],
 			}
 			return b;
 		},
-		skyLDLBackwardSubstitution: function(skyLDL, b){
+		skyLDLForwardSubstitution: function(skyLDL, b){// s = diagIndexes[c-1] + c-r
+			const {diagIndexes, upper} = skyLDL;
+			let diagIndex = 0;
+			for (let r = 0; r < b.length; r++){// loop 180
+				const nextDiagIndex = diagIndexes[r];
+				let sum = 0.0, c = r;
+				for (let s = diagIndex + 1; s < nextDiagIndex; s++){ // loop 170
+					c -= 1;
+					sum += upper[s] * b[c];
+				}
+				result[r] = b[r] - sum;
+				diagIndex = nextDiagIndex;
+			}
+			return b;
+		},
+		skyColsolBackwardSubstitution: function(skyLDL, b){
 			const {diagIndexes, upper} = skyLDL;
 			let diagIndex = 0;
 			for (let r = 0; r < diagIndexes.length; r++){//loop 200
@@ -492,8 +530,26 @@ define(["tukos/utils"],
 			}
 			return b;
 		},
+		skyLineLDLBackwardSubstitution: function(skyLDL, y){
+			const {diagIndexes, upper} = skyLDL;
+			for (let r = diagIndexes.length-1; r >= 0; r--){
+				let sum = 0.0, diagIndex = diagIndexes[r];
+				for (let c = diagIndexes.length - 1; c > r; c--){// in https://algowiki-project.org/en/Backward_substitution, it is stated that not decreasing c implies severe degradation of parallel properties of the algorithm (?)
+					const nextDiagIndex = diagIndexes[c], s = diagIndex + c - r;
+					if (s < nextDiagIndex){
+						sum += upper[s] * y[c];
+					}
+					diagIndex = nextDiagIndex;
+				}
+				y[r] = (y[r] - sum) / (r === 0 ? upper[0] : upper[diagIndexes[r-1]]);
+			}
+			return y;
+		},
+		skyColsolSolve: function(skyLDL, b){
+			return this.skyColsolBackwardSubstitution(skyLDL, this.skyColsolForwardSubstitution(skyLDL, b));
+		},
 		skyLDLSolve: function(skyLDL, b){
-			return this.skyLDLBackwardSubstitution(skyLDL, this.skyLDLForwardSubstitution(skyLDL, b));
+			return this.skyLineLDLBackwardSubstitution(skyLDL, this.skyLDLForwardSubstitution(skyLDL, b));
 		},
 		sqrDeterminant: function(sqr, sqrDecomposed){
 			switch (sqr.length){
@@ -539,14 +595,14 @@ define(["tukos/utils"],
 			}
 			return sqrDecomposed.determinant;
 		},
-		symLLDeterminant: function(sym, symLLDecomposed){
+		symDeterminant: function(sym, symDecomposed){
 			switch (sym.length){
 				case 1: return sym[0][0];
 				case 2: return this.symDeterminant2by2(sym);
 				case 3: return this.symDeterminant3by3(sym);
 				default:
-					if (typeof symLLDecomposed === 'undefined') throw "sqrDeterminant needs symLLDecomposed defined if dimension is 3 or more";
-					return this.symLLDecomposedDeterminant(symLLDecomposed);
+					if (typeof symDecomposed === 'undefined') throw "sqrDeterminant needs symDecomposed defined if dimension is 3 or more";
+					return this.symDecomposedDeterminant(symDecomposed);
 			}
 		},
 		symDeterminant2by2: function(sym){
@@ -572,17 +628,17 @@ define(["tukos/utils"],
 			}
 			return det;
 		},
-		symLLDecomposedDeterminant: function(symLLDecomposed){
-			return symLLDecomposed.determinant;
+		symDecomposedDeterminant: function(symDecomposed){
+			return symDecomposed.determinant;
 		},
-		skyLLDeterminant: function(sky, skyLLDecomposed){
+		skyDeterminant: function(sky, skyDecomposed){
 			switch (sky.length){
 				case 1: return sky[0];
 				case 2: return this.skyDeterminant2by2(sky);
 				case 3: return this.skyDeterminant3by3(sky);
 				default:
-					if (typeof skyLLDecomposed === 'undefined') throw "sqrDeterminant needs skyLLDecomposed defined if dimension is 3 or more";
-					return this.skyLLDecomposedDeterminant(skyLLDecomposed);
+					if (typeof skyDecomposed === 'undefined') throw "sqrDeterminant needs skyDecomposed defined if dimension is 3 or more";
+					return this.skyDecomposedDeterminant(skyDecomposed);
 			}
 		},
 		skyDeterminant2by2: function(sky){
@@ -606,8 +662,8 @@ define(["tukos/utils"],
 					return LUPInverse(LUP);
 			}
 		},
-		skyLLDecomposedDeterminant: function(skyLLDecomposed){
-			return skyLLDecomposed.determinant;
+		skyDecomposedDeterminant: function(skyDecomposed){
+			return skyDecomposed.determinant;
 		},
 		inverse2by2: function(a/* [[a,b], [c,d]]*/, determinant/* if undefined, will be computed*/){
 			if (typeof determinant === 'undefined'){

@@ -103,8 +103,8 @@ function(declare, lang, dct, Memory, query, Widget, TextBox, Select, registry, u
 	             		lang.setObject(grid.customizationPath + 'columns.' + filterWidget.col + '.filter', theNewFilter, grid.getRootForm());
 	             	}
             		grid.columns[filterWidget.col].filter = theNewFilter;
-        		},
-            	filtersRow = dct.create('tr', {'class': 'dgrid-filter-row'}, headerTable);
+        		};
+            filtersRow = dct.create('tr', {'class': 'dgrid-filter-row'}, headerTable);
             utils.forEach(grid.columns, function(column, i){
                 var colId = column.field;
                 var td  = dct.create('td', {className: "dgrid-filter-cell dgrid-column-" + i + " field-" + colId}, filtersRow);

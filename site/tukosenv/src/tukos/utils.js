@@ -56,7 +56,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 				}
 			},
 			isEquivalent: function(value1, value2) {
-				const emptyValues = ['undefined'/*, 'null'*/, ''];
+				const emptyValues = ['undefined', 'null', ''];
 				return value1 === value2 || String(value1) === String(value2) || (this.in_array(String(value1), emptyValues) && this.in_array(String(value2), emptyValues));
 				/*if (typeof value1 === "number" && typeof value2 === "number") {
 					return value1 === value2;
@@ -594,7 +594,7 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 			},
 			uniqueId: function(previous) { // see https://gist.github.com/fiznool/73ee9c7a11d1ff80b81c#file-hashid-js-L11             
 				var unique_retries = 9999, retries = 0, id;
-				previous = previous || this.previousUniqueIds;
+				previous = previous || previousUniqueIds;
 				while (!id && retries < unique_retries) {
 					id = this.hashId();
 					if (previous.indexOf(id) !== -1) {
@@ -667,13 +667,6 @@ define(["dojo", "dojo/_base/lang", "dojo/_base/Color", "dojo/date/stamp", "dojo/
 						};
 					waiter = setInterval(wait, delay);
 				}
-			},
-			waitDelay: function(actionCallback, delay){
-				var waiter, wait = function() {
-						clearInterval(waiter);
-						actionCallback();
-					};
-				waiter = setInterval(wait, delay);
 			},
 	        viewInBrowserWindow: function(windowName, htmlContent, screenX, screenY, innerWidth, innerHeight){
 	            const newWindow = window.open('', windowName, 'screenX=' + (screenX || 50) + ',screenY=' + (screenY || 50) + ',innerWidth=' + (innerWidth || 800) + ',innerHeight=' + (innerHeight || 800));

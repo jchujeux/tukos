@@ -159,6 +159,16 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
 					insert(entityHtml);}, innerHTML: entityHtml, title: 'decimal ' + i}, tr);
 				colCount += 1;
 			}
+			/*var tr = dct.create('tr', null, table), hexArray = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
+			hexArray.forEach(function(code){
+				const entityHtml = '&#' + Number('0x1D4D' + code) + ';'
+				dct.create('td', {"class": "dojoxEntityPaletteCell", style: {width: 'auto'}, onclick: function(){insert(entityHtml);}, innerHTML: entityHtml, title: 'cursive' + code}, tr);
+			});
+			tr = dct.create('tr', null, table), hexArray = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
+			hexArray.forEach(function(code){
+				const entityHtml = '&#' + Number('0x1D4E' + code) + ';'
+				dct.create('td', {"class": "dojoxEntityPaletteCell", style: {width: 'auto'}, onclick: function(){insert(entityHtml);}, innerHTML: entityHtml, title: 'cursive' + code}, tr);
+			});*/
 			table = dct.create('table', {'class': 'dijitPaletteTable'}, div);
 			const entities = Object.getPrototypeOf(dojo.i18n.getLocalization("dojox.editor.plugins", "latinEntities")), numberOfEntities = Object.keys(entities).length, entitiesPerRow = 21;//Math.floor(Math.sqrt(numberOfEntities));
 			let currentCol = 0, currentEntityIndex = 0;
@@ -175,7 +185,7 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
 				if (currentCol === 1){
 					tr = dct.create('tr', null, table);
 				}
-				let entityHtml = '<mi>&' + entity + ';</mi>';
+				let entityHtml = '<mi>&' + entity + ';</i>';
 				dct.create('td', {"class": "dojoxEntityPaletteCell", style: {width: 'auto'}, onclick: function(){insert(entityHtml);}, innerHTML: entityHtml, title: entities[entity]}, tr);
 			}
 	    	return pane;
@@ -320,9 +330,7 @@ function(declare, lang, dct, dcl, ready, when, string, keys, _Plugin, Button, Co
                 	editor.pasteAndRefresh(htmlFragment);
                 }else if(tagName === 'math'){
             		editor.pasteAndRefresh(htmlFragment);
-            	}else if (tagName === 'mi'){//assumes it is a symbol from the symbol palette outside a math tag
-					editor.pasteHtmlAtCaret(htmlFragment.match(/^<mi>(.*)<\/mi>$/i)[1]);
-				}else{
+            	}else{
             		Pmg.setFeedback(Pmg.message('notinmathtag'), null, null, true);
             	}
             }else{

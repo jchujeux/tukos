@@ -50,7 +50,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dijit/form/Button", "dijit/re
         },
 
         needToSaveBeforeProcess: function(){
-            for (let widgetName in this.form.changedWidgets){
+            for (widgetName in this.form.changedWidgets){
                 if (!this.noSaveBeforeProcess ||! this.noSaveBeforeProcess[widgetName]){
                     return true;
                 }

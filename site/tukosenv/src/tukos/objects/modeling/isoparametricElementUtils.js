@@ -82,48 +82,33 @@ define(["tukos/utils", "tukos/maths/matrices"],
 						*/
 						let correction = - 0.5 * dFunct;
 						for (let j of currentFunctionsIndexes){
-							dFunction[j] += correction;
+							dFunction[j] += correction;//am I doing the right thing here ?
 						}
 					}
 				});
 			}
 			return dFunctions;
 		},
-		rstReferenceInformation: function(rst, optionalNodes){
-			return {rst: rst, refH: this.refH(rst, optionalNodes), dHRefDXRef: this.dHRefDXRef(rst, optionalNodes)};
+		jacobian: function(dHRefDXRef, nodalCoordinates){
+			return nodalCoordinates.map((a, i) => dHRefDXRef.map((b, j) => matrices.dotProduct(a,b)));
 		},
-		rstElementInformation(rstReferenceInformation, element){
-			return {reference: rstReferenceInformation, element: element};
-		},
-		jacobian: function(rstElementInformation){
-			return rstElementInformation.jacobian || (rstElementInformation.jacobian = rstElementInformation.element.nodalCoordinates().map((a) => rstElementInformation.reference.dHRefDXRef.map((b) => matrices.dotProduct(a,b))));
-		},
-		_jacobian: function(dHRefDXRef, nodalCoordinates){
-			return nodalCoordinates.map((a) => dHRefDXRef.map((b) => matrices.dotProduct(a,b)));
-		},
-		jacobianDeterminant: function(rstElementInformation){
-			return rstElementInformation.jacobianDeterminant || (rstElementInformation.jacobianDeterminant = matrices.sqrDeterminant(this.jacobian(rstElementInformation)));
-		},
-		jacobianInverse: function(rstElementInformation){
-			return matrices.sqrInverse(this.jacobian(rstElementInformation), this.jacobianDeterminant(rstElementInformation));
-		},
-		_dHDX: function(rst, optionalNodes, nodalCoordinates){//used in diagramUtils for solutionGradient, as nodal coordinates are in the svg space in that case, and not global coordinates.
-			const dHRefDXRef = this.dHRefDXRef(rst, optionalNodes), jacobian = this._jacobian(dHRefDXRef, nodalCoordinates), jacobianInverse = matrices.sqrInverse(jacobian, matrices.sqrDeterminant(jacobian));
+		dHDX: function(rst, optionalNodes, nodalCoordinates){
+			const dHRefDXRef = this.dHRefDXRef(rst, optionalNodes), jacobian = this.jacobian(dHRefDXRef, nodalCoordinates), jacobianInverse = matrices.sqrInverse(jacobian, matrices.sqrDeterminant(jacobian));
 			return  matrices.asyMultiply(jacobianInverse, dHRefDXRef);
 		},
-		dHDX: function(rstElementInformation){
-			const {reference, element} = rstElementInformation, dHDX = matrices.asyMultiply(this.jacobianInverse(rstElementInformation), reference.dHRefDXRef);
-			if (element.group.elementType === 'axisymmetric'){
-				const radius = this.refHValue(reference.refH, element.nodes, element.group.global.nodes.coordinates[0]);
-				dHDX.concat(reference.refH.map((h) => h / radius));
-			}
-			return dHDX;
-		},
 		refHValue: function(refH, globalNodesIndexes, globalNodalValue){
-			return refH.reduce((value, h, index) => value + h * globalNodalValue[globalNodesIndexes[index]], 0.0);
+			let  result = 0.0;
+			for (let n = 0; n < refH.length; n++){
+				result += globalNodalValue[globalNodesIndexes[n]] * refH[n];
+			}
+			return result;
 		},
 		refHValues: function(refH, globalNodesIndexes, globalNodalValues){
-			return globalNodalValues.map((globalNodalValue) => this.refHValue(refH, globalNodesIndexes, globalNodalValue))
+			const resultLength = globalNodalValues.length, result = [];
+			for (let i = 0; i < resultLength; i++){
+				result[i] = this.refHValue(refH, globalNodesIndexes, globalNodalValues[i]);
+			}
+			return result;
 		},
 		rstValue: function(rst, globalNodesIndexes, optionalNodes, globalNodalValue){
 			const refH = this.refH(rst, optionalNodes);
@@ -143,9 +128,6 @@ define(["tukos/utils", "tukos/maths/matrices"],
 		},
 		maxNumberOfNodes: function(dimension){
 			return this.numberOfMandatoryNodes(dimension) + this.numberOfOptionalNodes(dimension);
-		},
-		edge: function(optionalNode, dimension){
-			return optionalNode - this.numberOfMandatoryNodes(dimension);
 		},
 		edgeIndex: function(nodeIndex1, nodeIndex2, dimension){
 			const factorsAndFunctionIndexes = optionalFactorsAndFunctionsIndexes[dimension];
@@ -181,18 +163,12 @@ define(["tukos/utils", "tukos/maths/matrices"],
 			return  optionalIndex !== -1 ? element.nodes[optionalIndex + offset] : false;
 		},
 		valueIntersections: function(value, element, globalNodalValue, dimension){//only valid for dimension 2
-			const self = this, nodalValue = element.nodes.map((globalNodeIndex) => globalNodalValue[globalNodeIndex]), intersections = [];
+			const nodalValue = element.nodes.map((globalNodeIndex) => globalNodalValue[globalNodeIndex]), intersections = [];
 			const getIntersection = function(value, edge, firstNodeIndex, lastNodeIndex, rOffset, rFactor){// assumes linear, so could be improved
 				if (nodalValue[firstNodeIndex] !== nodalValue[lastNodeIndex]){
 					const [lowValueIndex, highValueIndex] = utils.sortIndexesByValues([firstNodeIndex, lastNodeIndex], [nodalValue[firstNodeIndex], nodalValue[lastNodeIndex]]);
 					if (value >= nodalValue[lowValueIndex] && value < nodalValue[highValueIndex]){
-						const rRatio = (value - nodalValue[firstNodeIndex]) / (nodalValue[lastNodeIndex] - nodalValue[firstNodeIndex]);
-						let rIntersection = rOffset + rFactor * rRatio;
-						const edgeElement = self.edgeElement(edge, element, dimension);
-						let intersectionValue = self.refHValue(self.refH([rIntersection], edgeElement.optionalNodes), edgeElement.nodes, globalNodalValue);
-						if (edgeElement.optionalNodes.length){
-							rIntersection += (value - intersectionValue) / (nodalValue[firstNodeIndex] - nodalValue[lastNodeIndex]); // correction for nonlinearity
-						}
+						const rRatio = (value - nodalValue[firstNodeIndex]) / (nodalValue[lastNodeIndex] - nodalValue[firstNodeIndex]), rIntersection = rOffset + rFactor * rRatio;
 						intersections.push({id: JSON.stringify([element.nodes[lowValueIndex], element.nodes[highValueIndex]]), element: element, edge: edge, rIntersection: rIntersection});
 					}				
 				}
@@ -201,6 +177,7 @@ define(["tukos/utils", "tukos/maths/matrices"],
 			if (value >= (minNodalValue = Math.min(...nodalValue)) && value <= (maxNodalValue = Math.max(...nodalValue))){
 				const edges = this.numberOfMandatoryNodes(dimension);
 				for (let edge = 1; edge <= edges; edge++){
+					const optionalNode = edge + edges;
 					let firstNodeIndex = edge - 1, lastNodeIndex;
 					if (lastNodeIndex = this.optionalNodeIndex(edge, element, dimension)){// an optional node is present, search in the two sub-edges
 						getIntersection(value, edge, firstNodeIndex, lastNodeIndex, 1.0, -1.0);
@@ -220,15 +197,6 @@ define(["tukos/utils", "tukos/maths/matrices"],
 		intersectionCoordinates: function(intersection, globalCoordinates){
 			const {element, edge, rIntersection: r} = intersection, dimension = globalCoordinates.length, edgeElement = this.edgeElement(edge, element, dimension);
 			return this.rstValues([r], edgeElement.nodes, edgeElement.optionalNodes, globalCoordinates);
-		},
-		intersectionRst: function(intersection){
-			const {edge, rIntersection} = intersection;
-			switch (edge){
-				case 1: return [rIntersection, 1];
-				case 2: return [-1, rIntersection];
-				case 3: return [- rIntersection, -1]
-				case 4: return [1, - rIntersection];
-			}
 		}
 	}
 });

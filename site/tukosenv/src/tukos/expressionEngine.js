@@ -50,57 +50,26 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 		const nanToSecondsOrZero = function(value){
 			return value === _lastNaNtoSecondsInput ? _lastNaNtoSecondsReturned : _lastNaNtoSecondsReturned = (isNaN(value) ? (typeof value === 'string' ? dutils.timeToSeconds(value) : 0) : value);
 		}
-		let hasMissingKpis = false, hasNaNKpis;
 		const formulaCache = {}, 
-			formulaNaN = function(){
-				return 0;
-			},
-			getFormula = function(arg){
-				const trimArg = arg.trim();
-				if (formulaCache[trimArg]){
-					return formulaCache[trimArg];
+			  getFormula = function(arg){
+				if (formulaCache[arg]){
+					return formulaCache[arg];
 				}else{
-					if (arg.includes('||')){
-						return formulaCache[trimArg] = eutils.eval('return getKpiMultiple("' + trimArg + '" ,item, getKpi);', 'item, getKpi, getKpiMultiple');
-					}else{
-						let formulaString = trimArg.replaceAll(/[$]((?:\w|_)+)/g, 'getKpi("$1", item)');
-						formulaString = formulaString.replace(/@(\w+)/g, function(match, p1){
-							return valueOf(p1);
-						});
-						hasNaNKpis = false;
-						let result = eutils.eval('return ' + formulaString + ';', 'item, getKpi');
-						return formulaCache[trimArg] = hasNaNKpis ? formulaNaN : result;
-					}
+					let  formulaString = arg.replaceAll(/[$]((?:\w|_)+)/g, '(!Number.isNaN(x=Number(item.$1)) ? x : (item.$1 === undefined ? utils.putInCache("$1", item.' + idProperty + ', cache)  : item.$1))');
+					/*
+					* here, if we finc @xxx inside formulaString
+					*/
+					formulaString = formulaString.replace(/@(\w+)/g, function(match, p1){
+						return valueOf(p1);
+					});
+					return formulaCache[arg] = eutils.eval('return ' + formulaString + ';', 'item, cache, ' + idProperty + ', x');
 				}
-			},
-			getKpi = function(kpiName, item){
-				let kpiValue = item[kpiName], kpiNumberValue;
-				if (kpiValue === undefined){
-					hasMissingKpis = true;
-					return utils.putInCache(kpiName, item[idProperty], cache);
-				}else if (kpiValue === null){
-					hasNaNKpis = true;
-					return 0;
-				}else{
-					return (Number.isNaN(kpiNumberValue=Number(item[kpiName])) ? kpiValue : kpiNumberValue);
-				}
-			},
-			getKpiMultiple = function(formulaString, item, getKpi){
-				const formulaSubstrings = formulaString.split('||');
-				for (let i = 0; i < formulaSubstrings.length; i++){ 
-					const kpiValue = getFormula(formulaSubstrings[i])(item, getKpi);
-					if (hasMissingKpis || kpiValue){
-						hasMissingKpis = false;
-						return kpiValue;
-					}
-				}
-				return 0;
 			},
 			formulaVector = function(arg){
 				const formula = getFormula(arg);
 				let result = [];
 				items.forEach(function(item){
-					result.push(formula(item, getKpi, getKpiMultiple));
+					result.push(formula(item, cache, idProperty, x));
 				});
 				return result;
 			},
@@ -108,7 +77,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				const formula = getFormula(arg);
 				let result = 0;
 				items.forEach(function(item){
-					result += nanToSecondsOrZero(formula(item, getKpi, getKpiMultiple));
+					result += nanToSecondsOrZero(formula(item, cache, idProperty, x));
 				});
 				return result;
 			},
@@ -118,7 +87,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				if (!previousKpiValuesCache[arg + daysConstant]){
 					average = Number(getValueOf(initialAvg)); previousDate = getValueOf(initialDate);
 					previousItems.forEach(function(item){
-						average =  nanToSecondsOrZero(formula(item, getKpi, getKpiMultiple)) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
+						average =  nanToSecondsOrZero(formula(item, cache, idProperty, x)) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
 						previousDate = item.startdate
 						if (kpiItemCol){
 							item[kpiItemCol] = average;
@@ -132,7 +101,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				}else{
 					items.forEach(function(item){
 						//if (previousDate < item.startdate){
-							average =  nanToSecondsOrZero(formula(item, getKpi, getKpiMultiple)) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
+							average =  nanToSecondsOrZero(formula(item, cache, idProperty, x)) * (1 - dailyDecay) + average * Math.pow(dailyDecay, dutils.difference(previousDate, item.startdate));
 							previousDate = item.startdate
 							if (kpiItemCol){
 								item[kpiItemCol] = average;
@@ -166,10 +135,10 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 			},
 			formulaMin = function(arg){
 				const formula = getFormula(arg, cache);
-				const rawResult = formula(items[0], getKpi, getKpiMultiple), numberResult = Number(rawResult);
+				const rawResult = formula(items[0], cache, idProperty, x), numberResult = Number(rawResult);
 				let result = isNaN(numberResult) ? rawResult : numberResult;
 				for (let i = 1; i < items.length; i++){
-					const minCandidate = formula(items[i], getKpi, getKpiMultiple);
+					const minCandidate = formula(items[i], cache, idProperty, x);
 					if (minCandidate < result){
 						result = minCandidate;
 					}
@@ -178,10 +147,10 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 			},
 			formulaMax = function(arg){
 				const formula = getFormula(arg, cache);
-				const rawResult = formula(items[0], getKpi, getKpiMultiple), numberResult = Number(rawResult);
+				const rawResult = formula(items[0], cache, idProperty, x), numberResult = Number(rawResult);
 				let result = isNaN(numberResult) ? rawResult : numberResult;
 				for (let i = 1; i < items.length; i++){
-					const maxCandidate = formula(items[i], getKpi, getKpiMultiple);
+					const maxCandidate = formula(items[i], cache, idProperty, x);
 					if (maxCandidate > result){
 						result = maxCandidate;
 					}
@@ -189,16 +158,16 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 				return result;
 			},
 			formulaFirst = function(arg){
-				return items.length ? getFormula(arg)(items[0], getKpi, getKpiMultiple) : undefined;
+				return items.length ? getFormula(arg)(items[0], cache, idProperty, x) : undefined;
 			},
 			formulaLast = function(arg){
-				return items.length ? getFormula(arg)(items[items.length-1], getKpi, getKpiMultiple) : undefined;
+				return items.length ? getFormula(arg)(items[items.length-1], cache, idProperty, x) : undefined;
 			},
 			formulaItem = function(arg, index){
 				const formula = getFormula(arg);
 				if (items.length){
 					const targetIndex = index < 0 ? items.length+index -1 : index - 1;
-					return items[targetIndex] ? formula(items[targetIndex], getKpi, getKpiMultiple) : undefined;
+					return items[targetIndex] ? formula(items[targetIndex], cache, idProperty, x) : undefined;
 				}else{
 					return undefined;
 				}
@@ -262,8 +231,7 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 					}
 				}),
 				'JSONPARSE': function(a){
-					const aValue = a();
-					return typeof aValue === 'string' ? JSON.parse(aValue) : aValue;
+					return JSON.parse(a());
 				},
 				'VECTOR': function(col){
 					return formulaVector(col());
@@ -274,69 +242,65 @@ define(['tukos/ExpressionParser', 'tukos/utils', 'tukos/dateutils', 'tukos/evalu
 						return x;
 					}
 					const bValue = b(), y = typeof bValue === "string" ? JSON.parse(bValue) : bValue;
-					if (Array.isArray(x) && Array.isArray(y)){
-						const cValue = !c ? undefined : c(), z = utils.in_array(cValue, [undefined, 'index', 'xValue', 'xTime']) ? null : (typeof cValue === 'string' ? JSON.parse(cValue) : cValue);
-						let thePoint;
-						if (Array.isArray(x[0])){
-							switch(cValue){
-								case undefined:
-									thePoint = function(i, x, y){
-										return [x[i][1], y[i][1]];
-									};
-									break;
-								case 'index':
-									thePoint = function(i, x, y, z){
-										return [x[i][1], y[i][1], i];
-									}
-									break;
-								case 'xValue':
-									thePoint = function(i, x, y){
-										return [x[i][1], y[i][1], x[i][0]];
-									}
-									break;
-								case 'xTime':
-									thePoint = function(i, x, y){
-										return [x[i][1], y[i][1], dutils.secondsToTime(x[i][0]).substring(1)];
-									}
-									break;
-								default:
-									thePoint = function(i, x, y, z){
-										return [x[i][1], y[i][1], z[i][1]];
-									}
-							}
-						}else{
-							switch(cValue){
-								case undefined:
-									thePoint = function(i, x, y){
-										return [x[i], y[i]];
-									};
-									break;
-								case 'index':
-									thePoint = function(i, x, y, z){
-										return [x[i], y[i], i];
-									}
-									break;
-								case 'xValue'://should not happen, fallback to undefined
-								case 'xTime':
-									thePoint = function(i, x, y){
-										return [x[i], y[i]];
-									}
-									break;
-								default:
-									thePoint = function(i, x, y, z){
-										return [x[i], y[i], z[i]];
-									}
-							}
+					const cValue = !c ? undefined : c(), z = utils.in_array(cValue, [undefined, 'index', 'xValue', 'xTime']) ? null : (typeof cValue === 'string' ? JSON.parse(cValue) : cValue);
+					let thePoint;
+					if (Array.isArray(x[0])){
+						switch(cValue){
+							case undefined:
+								thePoint = function(i, x, y){
+									return [x[i][1], y[i][1]];
+								};
+								break;
+							case 'index':
+								thePoint = function(i, x, y, z){
+									return [x[i][1], y[i][1], i];
+								}
+								break;
+							case 'xValue':
+								thePoint = function(i, x, y){
+									return [x[i][1], y[i][1], x[i][0]];
+								}
+								break;
+							case 'xTime':
+								thePoint = function(i, x, y){
+									return [x[i][1], y[i][1], dutils.secondsToTime(x[i][0]).substring(1)];
+								}
+								break;
+							default:
+								thePoint = function(i, x, y, z){
+									return [x[i][1], y[i][1], z[i][1]];
+								}
 						}
-
-						let result = [];
-						for (let i in x){
-							result.push(thePoint(i, x, y, z));
-						}
-						return result;
 					}else{
-						return [];
+						switch(cValue){
+							case undefined:
+								thePoint = function(i, x, y){
+									return [x[i], y[i]];
+								};
+								break;
+							case 'index':
+								thePoint = function(i, x, y, z){
+									return [x[i], y[i], i];
+								}
+								break;
+							case 'xValue'://should not happen, fallback to undefined
+							case 'xTime':
+								thePoint = function(i, x, y){
+									return [x[i], y[i]];
+								}
+								break;
+							default:
+								thePoint = function(i, x, y, z){
+									return [x[i], y[i], z[i]];
+								}
+						}
 					}
+
+					let result = [];
+					for (let i in x){
+						result.push(thePoint(i, x, y, z));
+					}
+					return result;
 				}),
 				'SUM': function(col){
 					return formulaSum(col());

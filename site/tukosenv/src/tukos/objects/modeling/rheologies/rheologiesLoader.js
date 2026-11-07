@@ -1,10 +1,10 @@
 "use strict";
-define (["dojo/_base/lang", "dojo/_base/Deferred", "dojo/when"],
-		function(lang, Deferred, when){
+define (["dojo/_base/lang", "dojo/_base/Deferred", "dojo/when", "tukos/PageManager"],
+		function(lang, Deferred, when, Pmg){
 		let rheologiesBeingInstantiated = 0;
 		const rheologiesPath = "tukos/objects/modeling/rheologies/",
-			  problemTypesPath = {hydraulicspressure: 'diffusion/hydraulics/pressure/', hydraulicshead:  'diffusion/hydraulics/head/', solidmechanics: 'solidmechanics/'},
-			  rheologiesTypesPath = {linearisotropic: 'isotropic/Linear', linearorthotropic: 'orthotropic/linear', thresholdcorrection: 'isotropic/ThresholdCorrection'};
+			  problemTypesPath = {hydraulicspressure: 'diffusion/hydraulics/pressure/', hydraulicshead:  'diffusion/hydraulics/head', solidmechanics: 'solidmechanics/'},
+			  rheologiesTypesPath = {linearisotropic: 'isotropic/Linear', Linearorthotropic: 'orthotropic/linear', thresholdcorrection: 'isotropic/ThresholdCorrection'};
 		return {
             loadedRheologies: {}, loadingRheologies: {},
 			instantiationCompleted: function(){

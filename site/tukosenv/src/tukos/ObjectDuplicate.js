@@ -27,7 +27,7 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/dom", "dojo/promise/all"
                                 	});
                                 }
                                 all(changedValues).then(function(changedValues){
-                                    for (let widgetName in changedValues){
+                                    for (widgetName in changedValues){
                                         if (widgetName !== 'id' && widgetName != 'updated'){
                                             form.setValueOf(widgetName, changedValues[widgetName]);
                                         }

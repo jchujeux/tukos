@@ -1,15 +1,30 @@
 "use strict"
-define(["dojo/_base/declare", "tukos/objects/BaseClass", "tukos/objects/modeling/Group", "tukos/utils"], 
-function(declare, BaseClass, Group, utils){
+define(["dojo/_base/declare", "tukos/objects/BaseClass", "tukos/objects/modeling/Group", "tukos/objects/modeling/rheologies/rheologiesLoader", "tukos/maths/matrices", "tukos/utils"], 
+function(declare, BaseClass, Group, rheologiesLoader, matrices, utils){
 	return declare([BaseClass], {
+		/*dimension,// the dimension of the geometrical space
+		ndof, // the number of unknowns (of degrees of freedom) per node
+		nodal, /
+			Coordinates: coordinates[d][n] : row d is the direction index (x,y or z), coordinates[i][n] is the value of the coordinate for node n in the direction i.
+			equations: equations[i][n]: row i is the direction index. equation[i][n] = 0 if the node is blocked in the direction i, else it is the equation index associated to node n in the direction i
+		neq, //numberOfEquations
+		materials, // array of materials
+		groups, // array of groups
+		matrices, // an object {name1, sky1, name2: sky2, ...}*/
 
 		constructor: function constructor(args){
 			this.inherited(constructor, arguments);
-			const self = this;
+			const self = this/*, materials = []*/;
+			/*utils.forEach(this.materials, function(material){
+				materials.push(material.Material = new Material(material));
+			});*/
 			const groups = [];
 			utils.forEach(this.groups, function(group){
+				//group.material = self.materials[group.materialId].Material;
+				const rheologyClass = rheologiesLoader.module(group.problemType, group.rheologyType);
+				group.material = new rheologyClass(group.materialProperties);
 				group.global = self;
-				groups.push(new Group(group));
+				groups.push(group.Group = new Group(group));
 			});
 			this.groups = groups;
 		},
@@ -33,7 +48,7 @@ function(declare, BaseClass, Group, utils){
 			return {globalMatrix: mode.matrix ? this.colsToSky(globalMatrix) : globalMatrix, globalRhs: globalRhs};
 		},
 		createMatrix: function(neq){
-			return {cols: utils.vector(neq, () => [0.0]), sky: {diagIndexes: [], upper: []}};
+			return {cols: utils.vector(neq, () => [0.0]), sky: {diagIndexes: utils.vector(neq, () => []), upper: []}};
 		},
 		// the (global) equation associated to element dof i and node n is global.nodal.equationsIndexes[group.globalDofs[i]], [element.nodes[n]]
 		addToMatrix: function(matrix, skyContribution, skyEquationsIndexes){
@@ -73,46 +88,12 @@ function(declare, BaseClass, Group, utils){
 					for (let r = 0; r < col.length; r++){
 						upper.push(col[r] === undefined ? 0.0 : col[r]);
 					}
+					col = null;
 					diagIndexes[c] = (diagIndex = diagIndex + cols[c].length);
-					cols[c] = null;
 				}
-				delete matrix.cols;
+				cols = [];
 			}
 			return matrix.sky;
-		},
-		nodalSolution: function(equationsSolution){
-			let nodalSolution;
-			const nodal = this.nodal, solution = equationsSolution || this.solution, imposedValues = this.imposedValues;
-			if (solution){
-				nodalSolution = [];
-				for (let i = 0; i < nodal.equationsIndexes.length; i++){
-					const dofSolution = [];
-					nodal.equationsIndexes[i].forEach(function(equationIndex, n){
-						dofSolution.push(equationIndex === -1 ? 0 : solution[equationIndex]);
-					});
-					nodalSolution.push(dofSolution);
-				}
-				if (imposedValues){
-					imposedValues.forEach(function(row, d){
-						row.forEach(function(imposedValue, n){
-							nodalSolution[d][n] = imposedValue;
-						});
-					});
-				}
-			}
-			return nodalSolution;
-		},
-		equationsSolution: function(nodalSolution){
-			const equationsIndexes = this.nodal.equationsIndexes, equationsSolution = [];
-			nodalSolution.forEach(function(dofSolution, dof){
-				dofSolution.forEach(function(solution, node){
-					const equationIndex = equationsIndexes[dof][node];
-					if (equationIndex != -1){
-						equationsSolution[equationIndex] = nodalSolution[dof][node];
-					}
-				});
-			});
-			return equationsSolution;
 		}
 	});
 });

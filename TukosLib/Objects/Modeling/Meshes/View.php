@@ -10,16 +10,15 @@ class View extends AbstractView {
 
     function __construct($objectName, $translator=null){
         parent::__construct($objectName, $translator, 'Parent', 'Description');
-        $isMobile = Tfk::$registry->isMobile;
         $customDataWidgets = [
             'name' => ['atts' => ['edit' => ['style' => ['width' => '40em']]]],
             'comments' => ['atts' => ['edit' => ['width' => '800px', 'height' => '100px']]],
             'snodes' => ViewUtils::JsonGrid($this, 'Nodes', [
                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                 'nodeId'=> ViewUtils::tukosNumberBox($this, 'nodeid', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em']]]]]),
-                'coord1'=> ViewUtils::tukosNumberBox($this, 'xcoord', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em'], 'constraints' => $isMobile ? ['pattern' => '#000.0'] : ['pattern' => '#.##']]]]]),
-                'coord2'=> ViewUtils::tukosNumberBox($this, 'ycoord', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em'], 'constraints' => $isMobile ? ['pattern' => '#000.0'] : ['pattern' => '#.##']]]]]),
-                'coord3'=> ViewUtils::tukosNumberBox($this, 'zcoord', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em'], 'constraints' => $isMobile ? ['pattern' => '#000.0'] : ['pattern' => '#.##']]]]])
+                'coord1'=> ViewUtils::tukosNumberBox($this, 'xcoord', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em']]]]]),
+                'coord2'=> ViewUtils::tukosNumberBox($this, 'ycoord', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em']]]]]),
+                'coord3'=> ViewUtils::tukosNumberBox($this, 'zcoord', ['atts' => ['storeedit' => ['editorArgs' => ['style' => ['width' => '3em']]]]])
             ], ['atts' => ['edit' => ['maxHeight' => '300px', 'tukosTooltip' => ['label' => 'Hello', 'onClickLink' => ['label' => $this->tr('help'), 'name' => 'ModelingMeshesSnodesTukosTooltip']],
             ]]]),
             's1dgroups' => ViewUtils::JsonGrid($this, '1dgroups', [
@@ -91,7 +90,7 @@ class View extends AbstractView {
                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],
                 'boundaryId'=> ['field' => 'boundaryId', 'label' => $this->tr('boundaryid'), 'width' => 80],
                 'type '=> ['field' => 'type', 'label' => $this->tr('boundarytype'), 'width' => 80],
-                'nodes' => ViewUtils::textArea($this, 'Boundarydescription', ['atts' => ['storeedit' => ['width' => '600', 'editorArgs' => ['style' => ['width' => '600px']]]]]),
+                'nodes' => ViewUtils::htmlContent($this, 'Boundarydescription', ['atts' => ['edit' => ['disabled' => true], 'storeedit' => []]]),
                 ], ['atts' => ['edit' => ['maxHeight' => '300px']]]),
             'g1dgroups' => ViewUtils::JsonGrid($this, 'Generated1dgroups', [
                 'rowId' => ['field' => 'rowId', 'label' => '', 'width' => 40, 'className' => 'dgrid-header-col', 'hidden' => true],

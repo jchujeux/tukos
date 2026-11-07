@@ -1,6 +1,6 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/dom-style", "dijit/layout/ContentPane", "dijit/popup", "tukos/utils", "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/ready", "dojo/when", "dojo/dom-style", "dijit/layout/ContentPane", "dijit/popup", "tukos/PageManager", "tukos/widgets/WidgetsLoader", 
         "tukos/widgets/HtmlContent", "tukos/widgets/DnDWidget", "tukos/widgets/widgetCustomUtils"], 
-  function(declare, lang, when, domStyle, ContentPane, popup, utils, Pmg, WidgetsLoader, HtmlContent, DnD, wcutils){
+  function(declare, lang, ready, when, domStyle, ContentPane, popup, Pmg, WidgetsLoader, HtmlContent, DnD, wcutils){
 	var editors = {}, isPlaced = false, editorTypes = {normal: 'Editor', simple: 'MobileEditor', basic: 'TukosTextarea'};
 	return declare([ContentPane, DnD], {
 		postCreate: function(){
@@ -45,10 +45,7 @@ define(["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/dom-style", 
 		},
 		customContextMenuItems: function(){
 			var self = this;    		
-			return [
-				{atts: {label: Pmg.message('resetEditor')  , onClick: function(){self.resetEditor()}}},
-				{atts: {label: Pmg.message('viewInSeparateWindow'), 'onClick': function(){utils.viewInBrowserWindow(utils.uniqueId(), self.htmlContent.domNode.innerHTML, 800, 600)}}}
-			];
+			return [{atts: {label: Pmg.message('resetEditor')  , onClick: function(){self.resetEditor()}}}];
 		},
 		editorToContentHeight: function(editorHeight){
 			return editorHeight ? (parseInt(editorHeight) + 78) + 'px' : undefined;

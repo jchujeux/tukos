@@ -60,7 +60,28 @@ class KpisFormulaes {
             return round(($frictionForce + $gravityForce + $dragForce) * $velocity, $precision);
         }
     }
-    public static function estimatedWattsStream($metrics, $altitudestream, $latitudestream, $longitudestream,  $weight, $maxWatts = 1000, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $windDirection = '0', $precision = 0){
+    /*public static function estimatedWattsStream($metrics, $grade_smoothstream, $weight, $ftp, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $precision = 0){
+     if (empty($metrics) || empty($grade_smoothstream)){
+     return false;
+     }else{
+     $wattsStream = [];
+     $gravity = 10; $velocity_smoothStream = $metrics; $totalMass = (float)$weight + (float)$extraWeight; $totalWeightForce = $totalMass * $gravity;
+     $frictionCoef = (float)$frictionCoef; $dragCoef = (float)$dragCoef; $windVelocity = (float)$windVelocity;
+     $frictionForce = $frictionCoef * $totalWeightForce;
+     $previousVelocity = 0.0;
+     $velocity_smoothStream = Average::exponentialMovingAverage($velocity_smoothStream, 30);
+     $grade_smoothstream = Average::exponentialMovingAverage($grade_smoothstream, 30);
+     foreach($velocity_smoothStream as $key => $velocity){
+     $dragForce = $dragCoef * ($velocity - $windVelocity) ** 2;
+     $gravityForce = $grade_smoothstream[$key] * $totalWeightForce / 100;
+     $accelerationForce = ($velocity - $previousVelocity) * $totalMass;
+     $wattsStream[$key] = round(max(0, ($frictionForce + $gravityForce + $dragForce + $accelerationForce) * $velocity), $precision);
+     $previousVelocity = $velocity;
+     }
+     return $wattsStream;
+     }
+     }*/
+    public static function estimatedRawWattsStream($metrics, $altitudestream, $latitudestream, $longitudestream,  $weight, $ftp, $extraWeight = 0.0, $frictionCoef = 0.0, $dragCoef = 0.0, $windVelocity = 0.0, $windDirection = '0', $precision = 0){
         if (empty($metrics) || empty($altitudestream)){
             return false;
         }else{
@@ -105,7 +126,7 @@ class KpisFormulaes {
                     $gravityForce = $slope * $totalWeightForce;
                     $accelerationForce = ($velocity - $previousVelocity) * $totalMass;
                     $watts = ($frictionForce + $gravityForce + $dragForce + $accelerationForce) * $velocity;
-                    $wattsStream[$key] = round(min(max(0, $watts), $maxWatts), $precision);
+                    $wattsStream[$key] = round(min(max(0, $watts), $ftp * 3), $precision);
                 }else{
                     $wattsStream[$key] = 0;
                 }
@@ -263,6 +284,21 @@ class KpisFormulaes {
         }
         return json_encode(Utl::array_shrink($result, ['TukosLib\Utils\Utilities', 'minXmaxYWeightShrinkCallback']));
     }
+    /*    public static function durationCurve($metrics, $smoothSeconds = 1){
+     $totalDuration = count($metrics);
+     if ($smoothSeconds > 1){
+     $metrics = Average::exponentialMovingAverage($metrics, intval($smoothSeconds));
+     }
+     $metrics = array_map(function($value){return intval($value);}, $metrics);
+     $result = [];
+     $secondsSmooth = 1;
+     while ($secondsSmooth < $totalDuration){
+     $result[] = [$secondsSmooth, intval(max(Average::exponentialMovingAverage($metrics, intval($secondsSmooth))))];
+     $secondsSmooth = $secondsSmooth * 2;
+     }
+     $result[] = [$totalDuration, intval(max(Average::exponentialMovingAverage($metrics, $totalDuration)))];
+     return json_encode($result);
+     }*/
     public static function longestDuration($threshold, $values){
         $duration = 0; $i = 0; $totalDuration = count($values);
         while ($i < $totalDuration){
@@ -335,4 +371,5 @@ class KpisFormulaes {
         return !( !$belowLowest && $metric <= $lowestThreshold || !$aboveHighest && $metric >= $highestThreshold );
     }
 }
+//KpisFormulaes::init();
 ?>

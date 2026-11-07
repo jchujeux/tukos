@@ -302,10 +302,6 @@ class Utilities{
         }
         foreach ($paArray2 as $sKey2 => $sValue2){
         	if(!empty($sValue2[$delete])){
-        	    if ($sKey2 === '~all'){//is request to replace paArray1 with paArray2
-        	        unset($paArray2[$sKey2]);
-        	        return $paArray2;
-        	    }
         		unset($paArray1[$sKey2]);
         	}else if ($sKey2 === $replace){
             		return $sValue2;

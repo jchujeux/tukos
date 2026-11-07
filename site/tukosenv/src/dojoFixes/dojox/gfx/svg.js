@@ -1,5 +1,5 @@
 define(["dojo/_base/lang", "dojo/_base/sniff", "dojo/_base/window", "dojo/dom", "dojo/_base/declare", "dojo/_base/array",
-  "dojo/dom-geometry", "dojo/dom-attr", "dojo/_base/Color", "dojox/gfx/_base", "dojox/gfx/shape", "dojox/gfx/path"],
+  "dojo/dom-geometry", "dojo/dom-attr", "dojo/_base/Color", "dojox/gfx//_base", "dojox/gfx/shape", "dojox/gfx/path"],
 function(lang, has, win, dom, declare, arr, domGeom, domAttr, Color, g, gs, pathLib){
 
 	var svg = g.svg = {

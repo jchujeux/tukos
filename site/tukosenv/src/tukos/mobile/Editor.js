@@ -1,4 +1,4 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "tukos/widgets/SimpleEditor", "dijit/_editor/plugins/FullScreen", "dojox/editor/plugins/StatusBar", "tukos/utils"], 
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/dom-style", "dijit/Editor", "dijit/_editor/plugins/FullScreen", "dojox/editor/plugins/StatusBar", "tukos/utils"], 
     function(declare, lang, dst, Editor, FullScreen, StatusBar, utils){
     return declare([Editor], {
     	

@@ -7,7 +7,7 @@ function(declare, lang, testUtils, matrices){
 		test: function(){
 			/* implement here your testing procedure*/
 			const a = testUtils.matrixSymmetric3by3, aa = lang.clone(a);
-			const {lower, determinant} = matrices.symLLDecompose(aa);
+			const {lower, determinant} = matrices.symDecompose(aa);
 			const inverse = matrices.symCholeskyInverse(lower);
 			const expectedIdentity = matrices.symMultiply(a, inverse);
 			return 	'<b>a matrix</b>: ' + JSON.stringify(a) +

@@ -170,8 +170,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
             target.action = target.action || 'Tab';
             this.request(target);
         },
-		getTab: function(id, object, inBackground, noFeedback){
-			const urlArgs = {action: "Tab", mode: "Tab", object: object, query: {id: id}, view: "Edit", inBackground: inBackground, noFeedback: noFeedback}, tab = Pmg.tabs.tabExists(urlArgs);
+		getTab: function(id, object, inBackground){
+			const urlArgs = {action: "Tab", mode: "Tab", object: object, query: {id: id}, view: "Edit", inBackground: inBackground}, tab = Pmg.tabs.tabExists(urlArgs);
 			if (!tab){
 				return Pmg.tabs.request(urlArgs).then(function(theTab){
 					return theTab;
@@ -181,7 +181,6 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/ready",  "dojo/on",  "di
 			}
 		},
 		tabExists: function(target){
-			let id;
 			if (target.view === "Overview" || (id = (target.query || {}).id) || (name = (target.query || {}).name) || (storeAtts = (target.query || {}).storeatts)){
 				var openedTabs = this.container.getChildren();
 			    if (!name && typeof storeAtts === 'string'){

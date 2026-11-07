@@ -240,9 +240,7 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
 	                    }*/
 	                    if (!this.nestedRowWatchActions){
 							this.setSummary();
-							if (this.noOnWatchCols && !this.noOnWatchCols.includes(field)){
-								wutils.watchCallback(this, 'updateDirty', null, []);
-							}
+							wutils.watchCallback(this, 'updateDirty', null, []);
 	                   		this.isUserEdit = false;
 	                   	}
 	                }
@@ -589,9 +587,6 @@ function(declare, lang, when, Editor, utils, dutils, eutils, sutils, wutils, mut
             			rowsToDelete.push(row);
             		}));
             		this.deleteRows(rowsToDelete, true);
-					this.deleted = [];
-					this.maxId = this.maxServerId = this.newRowPrefixId = 0;
-					this.deleted = [{'id': '~all', '~delete': true}];
             		for (var r in value){
             			this.addRow(null, value[r]);
             		}
