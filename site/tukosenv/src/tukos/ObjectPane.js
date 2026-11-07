@@ -59,8 +59,8 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 	                        this.openAction(this.onOpenAction);
 	                    }
 	                    setTimeout(lang.hitch(this, function(){// needed due to a setTimeout in _WidgetBase.defer causing problem of markIfChanged being true in the onCHange event of SliderSelect (at least)
+							const form = this;
 							if (this.hasOwnProperty('openActionCompleted')){
-								const form = this;
 								utils.waitUntil(
 									function(){
 										form.initialWidgetsValuesSet.resolve();
@@ -73,7 +73,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 				                        if (form.offlineChangedValues){
 											form.setWidgets({value: form.offlineChangedValues});
 										}
-										Pmg.setFeedback(Pmg.message('actionDone'), null, ' ');
+										if (!form.noFeedback) Pmg.setFeedback(Pmg.message('actionDone'), null, ' ');
 									}, 
 									100);
 							}else{
@@ -84,7 +84,7 @@ define (["dojo/_base/declare",  "dojo/_base/lang", "dojo/when", "dojo/dom-constr
 									this.setWidgets({value: this.offlineChangedValues});
 								}
 								this.initialWidgetsValuesSet.resolve();
-								Pmg.setFeedback(Pmg.message('actionDone'), null, ' ');
+								if (!form.noFeedback) Pmg.setFeedback(Pmg.message('actionDone'), null, ' ');
 							}
 	                    }), 0);
 						/*this.needsToFreezeWidth = true;

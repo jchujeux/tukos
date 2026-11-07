@@ -8,6 +8,8 @@ function(declare, JSON5, BaseClass, matrices, isoUtils, IntegrationPoint, utils)
 		refElt,
 		group,*/
 		
+		dofNodesSolutionCache: {}, nodalCoordinatesCache: {},
+
 		constructor: function constructor(args){
 			this.inherited(constructor, arguments);
 			const self = this, group = this.group,  iPoints = group.integrationPoints;
@@ -26,6 +28,12 @@ function(declare, JSON5, BaseClass, matrices, isoUtils, IntegrationPoint, utils)
 				truss.length = Math.sqrt(truss.length);
 				truss.projections = projectedLengths.map((x) => x / Length);
 			}
+		},
+		pressure: function(rstElementInformation){
+			const element = rstElementInformation.element, nodesPressure = this.dofNodesPressureCache.element === element 
+				? this.dofNodesPressureCache.dofNodesPressure 
+				: (this.dofNodesPressureCache = {element: element, dofNodesPressure: element.nodalDofSolution(element.group.global.solution)}).dofNodesPressure;
+			return rstElementInformation.reference.refH.map((x, n) => x * nodesPressure[n]);
 		},
 		equationsIndexes: function(){
 			const self = this, equationsIndexes = [];
@@ -56,22 +64,44 @@ function(declare, JSON5, BaseClass, matrices, isoUtils, IntegrationPoint, utils)
 				}
 			}
 		},
-		setSolutionValues: function(globalSolution, equationIndexes){
+		nodalCoordinates: function(){
+			const dimension = this.group.refEltsDimension, nodesLength = this.nodes.length, cache = this.nodalCoordinatesCache;
+			if (cache.element === this){
+				return cache.nodalCoordinates;
+			}else{
+				const nodalCoordinates = [];
+				for (let d = 0; d < dimension; d++){
+					nodalCoordinates.push([]);
+					for (let n = 0; n < nodesLength; n++){
+						 nodalCoordinates[d][n] = this.group.global.nodal.coordinates[d][this.nodes[n]];
+					}
+				}
+				this.dofNodesSolutionCache = {element: this, nodalCoordinates: nodalCoordinates};
+				return nodalCoordinates;
+			}
+		},
+		nodalDofSolution: function(){
+			const globalSolution = this.group.global.solution;
 			if (globalSolution){
-				const self = this, group = this.group, solutionValues = [];
-				self.nodes.forEach(function(nGlobal, nLocal){
-					group.globalDofs.forEach(function(dGlobal, dLocal){
-						const index = dLocal+nLocal*group.ndof, equationIndex = equationIndexes[index];
-						solutionValues[index] = equationIndex >= 0 ? (globalSolution && globalSolution[equationIndex] || 0.0) : (self.imposedValues ? (self.imposedValues[index] || 0.0) : 0.0);
+				const cache = this.dofNodesSolutionCache;
+				if (cache.element === this && cache.globalSolution === globalSolution){
+					return cache.dofNodesSolution;
+				}else{
+					const self = this, group = this.group, solutionValues = [], equationsIndexes = this.equationsIndexes();
+					self.nodes.forEach(function(nGlobal, nLocal){
+						group.globalDofs.forEach(function(dGlobal, dLocal){
+							const index = dLocal+nLocal*group.ndof, equationIndex = equationsIndexes[index];
+							solutionValues[index] = equationIndex >= 0 ? (globalSolution && globalSolution[equationIndex] || 0.0) : (self.imposedValues ? (self.imposedValues[index] || 0.0) : 0.0);
+						});
 					});
-				});
-				return solutionValues;
+					this.dofNodesSolutionCache = {element: this, globalSolution: globalSolution, dofNodesSolution: solutionValues};
+					return solutionValues;
+				}
 			}else{
 				return undefined;
 			}
 		},
-		contributions: function(mode, equationIndexes){
-			this.solutionNodalValues = mode.rhs === 'unbalanced' ? this.setSolutionValues(this.group.global.solution, equationIndexes) : undefined;
+		contributions: function(mode){
 			let contributions = this.points[0].contributions(mode);
 			for (let p = 1; p < this.points.length; p++){
 				const newContributions = this.points[p].contributions(mode);
@@ -83,33 +113,44 @@ function(declare, JSON5, BaseClass, matrices, isoUtils, IntegrationPoint, utils)
 					});
 				}
 			}
-			if (this.imposedValues && !this.solutionNodalValues){// linear analysis
+			if (this.imposedValues && mode.rhs !== 'unbalanced'){// linear analysis
 				const imposedValuesRhs = matrices.skyMultiplyVector(contributions.matrix, utils.vector(contributions.matrix.diagIndexes.length, (x, i) => {return -this.imposedValues[i] ||  0.0}));
 				contributions.rhs = imposedValuesRhs.map((x,i) => x + ((contributions.rhs && contributions.rhs[i]) || 0.0));
 			}
 			return contributions;
 		},
-		iPointValue: function(iPoint, globalNodalValue){
+		refHValueFromGlobal: function(refH, globalNodalValue){
+			return isoUtils.refHValue(refH, this.nodes, globalNodalValue);
+		},
+		refHValuesFromGlobal: function(refH, globalNodalValues){
+			return isoUtils.refHValues(refH, this.nodes, globalNodalValue);
+		},
+		iPointValueFromGlobal: function(iPoint, globalNodalValue){
 			return isoUtils.refHValue(this.refElt[iPoint].refH, this.nodes, globalNodalValue);
 		},
-		iPointCoordinates: function(iPoint){
-			return isoUtils.refHValues(this.refElt[iPoint].refH, this.nodes, this.group.global.nodal.coordinates);	
+		iPointValuesFromGlobal: function(iPoint, globalNodalValues){
+			return isoUtils.refHValues(this.refElt[iPoint].refH, this.nodes, globalNodalValues);
 		},
-		iPointSolutionValue(iPoint, elementNodalSolution){
-			const self = this, refH = self.refElt[iPoint].refH;
+		iPointCoordinates: function(iPoint){
+			return this.iPointValuesFromGlobal(iPoint, this.group.global.nodal.coordinates);
+		},
+		refHValuesFromElement: function(refH, dofNodesValues){
 			if (this.group.ndof === 1){
-				return matrices.dotProduct(elementNodalSolution, refH);
+				return matrices.dotProduct(dofNodesValues, refH);
 			}else{
-				let iPointSolutionArray = [];
+				let refHValuesArray = [];
 				for (let d = 0; d < this.group.ndof; d++){
-					iPointSolution = 0.0;
+					let refHValue = 0.0;
 					for (let n = 0; n < this.nodes.length; n++){
-						iPointSolution += elementNodalSolution[d+n*this.group.ndof] * this.refElt[iPoint].refH[index];
+						refHValue += elementNodalSolution[d+n*this.group.ndof] * refH[n];
 					}
-					iPointSolutionArray[d] = iPointSolution;
+					refHValuesArray[d] = iPointSolution;
 				}
-				return iPointSolutionArray;
+				return refHValuesArray;
 			}
+		},
+		iPointValuesFromElement: function(iPoint, dofNodesValues){
+			return this.refHValuesFromElement(this.refElt[iPoint].refH, dofNodesValues);
 		}
 	});
 });

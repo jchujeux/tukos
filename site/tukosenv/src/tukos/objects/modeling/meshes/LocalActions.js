@@ -1,6 +1,9 @@
-define(["dojo/_base/declare", "dojo/string", "tukos/utils", "tukos/widgetUtils", "tukos/objects/modeling/isoparametricElementUtils", "tukos/objects/modeling/localActionsUtils", "tukos/PageManager"], 
-function(declare, string, utils, wutils, isoUtils, localActionsUtils, Pmg){
-		downstreamRefNodes = {
+define(["dojo/_base/declare", "dojo/string", "tukos/utils", "tukos/widgetUtils", "tukos/maths/matrices", "tukos/objects/modeling/isoparametricElementUtils", "tukos/objects/modeling/localActionsUtils", "tukos/objects/modeling/localActionsHiUtils", "tukos/PageManager"], 
+function(declare, string, utils, wutils, matrices, isoUtils, localActionsUtils, localActionsHiUtils, Pmg){
+	/*
+	* the first node is at reference coordinates (rst) -1;
+	*/	
+	const downstreamRefNodes = {
 			1: [{mandatory: [2]}],
 			2: [{mandatory: [1,4], optional: [8]}, {mandatory: [1,2], optional: [5]}],
 			3: [{mandatory: [2,3,7,5], optional: [10,19,14,18]}, {mandatory: [7,3,4,8], optional: [19,11,20,15]}, {mandatory: [5,6,7,8], optional: [13,14,15,16]}]
@@ -49,9 +52,9 @@ function(declare, string, utils, wutils, isoUtils, localActionsUtils, Pmg){
 								}
 								element.nodes[nodeIndex] = newNodesCoordinates[0].length - 1;
 								if (boundariesConditions && nodeGroupRst.some((x) => x === 1 || x === -1)){
-									boundariesConditions.forEach(function(boundaryCondition){//{"s": -1, "type": "natural", "value": [0]}
+									boundariesConditions.forEach(function(boundaryCondition){
 									if (!boundariesConditionsNodes[boundaryCondition.type][boundaryCondition.id]) boundariesConditionsNodes[boundaryCondition.type][boundaryCondition.id] = [];
-									for (d = 0; d < groupDescription.dimension; d++){
+									for (let d = 0; d < groupDescription.dimension; d++){
 											const dir = referenceDirections[d];
 											if (boundaryCondition[dir] === nodeGroupRst[d]){
 												boundariesConditionsNodes[boundaryCondition.type][boundaryCondition.id].push(element.nodes[nodeIndex] + 1);
@@ -61,6 +64,38 @@ function(declare, string, utils, wutils, isoUtils, localActionsUtils, Pmg){
 								}
 							}
 						}
+						/*
+						* Here include the "middle-node" correction for the element optional nodes newNodesCoordinates
+						*/
+						element.optionalNodes.forEach(function(optionalNode, optionalNodeIndex){
+							const maxIterations = 10;
+							let edge = isoUtils.edge(optionalNode, dimension), rEdgeMiddle = 0.0, edgeElement = isoUtils.edgeElement(edge, element, dimension), middleGlobalCoordinates = [], firstGlobalCoordinates = [], lastGlobalCoordinates = [], 
+								lastGlobalNodeIndex = 1;// 1d element, 2 mandatory nodes
+							for (let d = 0; d < dimension;d++){
+								firstGlobalCoordinates.push(newNodesCoordinates[d][edgeElement.nodes[0]]);
+								lastGlobalCoordinates.push(newNodesCoordinates[d][edgeElement.nodes[lastGlobalNodeIndex]]);
+							}
+							let firstToLast = matrices.distance(firstGlobalCoordinates, lastGlobalCoordinates);
+							let hasConverged = false, numIterations = 0;
+							while (!hasConverged){
+								middleGlobalCoordinates = isoUtils.rstValues([rEdgeMiddle], edgeElement.nodes, edgeElement.optionalNodes, newNodesCoordinates);
+								let fromFirst = matrices.distance(middleGlobalCoordinates, firstGlobalCoordinates), fromLast = matrices.distance(middleGlobalCoordinates, lastGlobalCoordinates);
+								if (Math.abs(fromFirst - fromLast)/firstToLast < 0.05 || numIterations === maxIterations){
+									hasConverged = true;
+									console.log('converged - numIterations: ' + numIterations);
+									if (numIterations >= 1){
+										let globalNodeIndex = element.nodes[isoUtils.numberOfMandatoryNodes(dimension) + optionalNodeIndex];
+										for (let d = 0; d < dimension; d++){
+											newNodesCoordinates[d][globalNodeIndex] = middleGlobalCoordinates[d];
+										}
+									}
+								}else{
+									console.log('watch step - we are not at the middle');
+									numIterations += 1;
+									rEdgeMiddle += (fromFirst - fromLast) / firstToLast;
+								}
+							}
+						})
 						elements.push(element);
 					}
 				}
@@ -73,40 +108,51 @@ function(declare, string, utils, wutils, isoUtils, localActionsUtils, Pmg){
 			this.processgMeshDiagram(newNodesCoordinates, groupsDescription);
 		},
 		preProcessParentsNodes: function(){
-			return localActionsUtils.preProcessNodes(this.form, 'snodes', 'coord');
+			return localActionsUtils.preProcessNodes(this.form.getWidget('snodes').collection.fetchSync(), 'coord');
 		},
 		preProcessGroupsDescriptions: function(){
-			return localActionsUtils.preProcessElementsDescriptions(this.form, ['s1dgroups', 's2dgroups', 's3dgroups'], true);
+			const form = this.form;
+			return localActionsUtils.preProcessElementsDescriptions(['s1dgroups', 's2dgroups', 's3dgroups'].map(groupWidgetName => form.getWidget(groupWidgetName).collection.fetchSync()), true);
 		},
 		postProcessNewNodes: function(newNodesCoordinates, boundariesConditionsNodes){
-			localActionsUtils.postProcessNodes(this.form, 'gnodes', newNodesCoordinates, 'coord');
-			localActionsUtils.postProcessBoundariesNodes(this.form, 'gboundaries', boundariesConditionsNodes);
+			const form = this.form, generatedBoundaries = [];
+			form.setValueOf('gnodes', localActionsUtils.postProcessNodes(newNodesCoordinates, 'coord'));
+			utils.forEach(boundariesConditionsNodes, function(perType, type){
+				utils.forEach(perType, function(gNodes, id){
+					generatedBoundaries.push({type: type, boundaryId: id, nodes: JSON.stringify(gNodes)});
+				});
+			});
+			form.setValueOf('gboundaries', generatedBoundaries);
 		},
 		postProcessGroupsDescriptions: function(groupsDescription){
-			const gGroupsGrids = {};
-			for (let index = 1; index <= 3; index++){
-				gGroupsGrids[index] = this.form.getWidget('g' + index + 'dgroups');
-				gGroupsGrids[index].set('value', []);
-			}
+			const groupsElementsIds = {}, newGridsValues = {1: [], 2: [], 3: []};
 			for (const groupDescription of groupsDescription){
-				const dimension = groupDescription.dimension, numberOfMandatoryNodes = isoUtils.numberOfMandatoryNodes(dimension);
-				groupDescription.elements.forEach(function(element, index){
-					const newElement = {groupId: groupDescription.groupId, elementId: index+1};
+				const dimension = groupDescription.dimension, numberOfMandatoryNodes = isoUtils.numberOfMandatoryNodes(dimension), groupId = groupDescription.groupId;
+				let elementId = groupsElementsIds[groupId] = groupsElementsIds[groupId] || 0;
+				groupDescription.elements.forEach(function(element){
+					elementId += 1;
+					const newElement = {groupId: groupDescription.groupId, elementId: elementId};
 					for (let i = 0; i < numberOfMandatoryNodes; i++){
 						newElement['node' + (i+1)] = element.nodes[i] + 1;
 					}
 					for (let i = numberOfMandatoryNodes; i < element.nodes.length; i++){
 						newElement['node' + element.optionalNodes[i - numberOfMandatoryNodes]] = element.nodes[i] + 1;
 					}
-					gGroupsGrids[dimension].addRow(undefined, newElement);
+					newGridsValues[dimension].push(newElement);
 				});
+				groupsElementsIds[groupId] += elementId;
+			}
+			for (let dimension = 1; dimension <= 3; dimension++){
+				if (newGridsValues[dimension].length){
+					this.form.setValueOf('g' + dimension + 'dgroups', newGridsValues[dimension]);
+				}
 			}
 		},
 		processsMeshDiagram: function(nodesCoordinates, groupsDescription){
-			localActionsUtils.processDiagram(this.form, nodesCoordinates, groupsDescription, 'smeshdiagram', true);
+			localActionsHiUtils.processDiagram(this.form, nodesCoordinates, groupsDescription, 'smeshdiagram', true);
 		},
 		processgMeshDiagram: function(newNodesCoordinates, groupsDescription){
-			localActionsUtils.processDiagram(this.form, newNodesCoordinates, groupsDescription, 'gmeshdiagram', false);
+			localActionsHiUtils.processDiagram(this.form, newNodesCoordinates, groupsDescription, 'gmeshdiagram', false);
 		},
 		buildGroupsSharedNodes: function(groupsDescription){
 			const groupsShared = [];
@@ -171,15 +217,16 @@ function(declare, string, utils, wutils, isoUtils, localActionsUtils, Pmg){
 				}else{
 					for (const shared of groupSharedNodes){//this only works for groups with same dimension
 						const sharingGroup = shared.groups[1], sharingNodes = shared.nodes[1], sharedNodes = shared.nodes[0];
-						if (utils.haveSameValues(sharedNodes, downstreamNodes.mandatory) && utils.haveSameValues(sharingNodes, upstreamNodes.mandatory)){// we are at a downstream shared interface for that direction: add optional node if needed, and if the other group has odes defined, reus
-							sharingGroup.optionalNodes.forEach(function(node, index){
-								const optionalNodeIndex = upstreamNodes.optional.indexOf(node)
-								if (optionalNodeIndex > -1){
-									const optionalNode = downstreamNodes.optional[optionalNodeIndex];
-									if (!element.optionalNodes.includes(optionalNode))
+						if (sharingGroup.elements && utils.haveSameValues(sharedNodes, downstreamNodes.mandatory) && utils.haveSameValues(sharingNodes, upstreamNodes.mandatory)){// we are at a downstream shared interface for that direction: add optional node if needed, and if the other group has odes defined, reus
+							upstreamNodes.optional.forEach(function(node, index){
+								if (sharingGroup.optionalNodes.includes(node)){
+									const optionalNode = downstreamNodes.optional[index];
+									if (!element.optionalNodes.includes(optionalNode)){
 										element.optionalNodes.push(optionalNode);
+									}
 								}
 							});
+							self.setSharedNodesValues(element, sharedNodes, sharingGroup, sharingNodes, rstIndexes, directionIndex, false);
 						}
 					}
 				}
@@ -213,7 +260,7 @@ function(declare, string, utils, wutils, isoUtils, localActionsUtils, Pmg){
 				}else{
 					for (const shared of groupSharedNodes){//this only works for groups with same dimension
 						const sharingGroup = shared.groups[1], sharingNodes = shared.nodes[1], sharedNodes = shared.nodes[0];
-						if (utils.haveSameValues(sharedNodes, upstreamNodes.mandatory) && utils.haveSameValues(sharingNodes, downstreamNodes.mandatory)){//we are at a downstream shared interface for that direction: add optional node if needed, and if the other group has nodes defined, reus
+						if (sharingGroup.elements && utils.haveSameValues(sharedNodes, upstreamNodes.mandatory) && utils.haveSameValues(sharingNodes, downstreamNodes.mandatory)){//we are at a downstream shared interface for that direction: add optional node if needed, and if the other group has nodes defined, reus
 							downstreamNodes.optional.forEach(function(node, index){
 								if (sharingGroup.optionalNodes.includes(node)){
 									const optionalNode = upstreamNodes.optional[index];
@@ -222,7 +269,7 @@ function(declare, string, utils, wutils, isoUtils, localActionsUtils, Pmg){
 									}
 								}
 							});
-							self.setSharedNodesValues(element, sharedNodes, sharingGroup, sharingNodes, rstIndexes, directionIndex);
+							self.setSharedNodesValues(element, sharedNodes, sharingGroup, sharingNodes, rstIndexes, directionIndex, true);
 						}
 					}
 				}
@@ -244,7 +291,7 @@ function(declare, string, utils, wutils, isoUtils, localActionsUtils, Pmg){
 			}
 			return elementIndex;
 		},
-		setSharedNodesValues(element, sharedNodes, sharingGroup, sharingNodes, rstIndexes, directionIndex){
+		setSharedNodesValues(element, sharedNodes, sharingGroup, sharingNodes, rstIndexes, directionIndex, sharesWithUpstream){
 			const self = this, dimension = rstIndexes.length, sharingRstIndexes = rstIndexes.slice();
 			sharingRstIndexes[directionIndex] = rstIndexes[directionIndex] === 0 ? sharingGroup.steps[directionIndex] - 1 : 0;
 			const sharingElement = sharingGroup.elements[this.elementIndex(sharingGroup.steps, sharingRstIndexes)];
@@ -252,7 +299,7 @@ function(declare, string, utils, wutils, isoUtils, localActionsUtils, Pmg){
 				element.nodes[sharedNode - 1] = sharingElement.nodes[sharingNodes[index] - 1];
 			});
 			element.optionalNodes.forEach(function(node, index){
-				if (rstIndexes[directionIndex] === 0){//we share with an upstream element
+				if (sharesWithUpstream){
 					if (upstreamRefNodes[dimension][directionIndex].optional.includes(node)){
 						sharingElement.optionalNodes.forEach(function(optionalNode, sharingIndex){
 							if (downstreamRefNodes[dimension][directionIndex].optional.includes(optionalNode)){
@@ -260,7 +307,7 @@ function(declare, string, utils, wutils, isoUtils, localActionsUtils, Pmg){
 							}
 						});
 					}
-				}else{//we share with a downstream element
+				}else{
 					if (downstreamRefNodes[dimension][directionIndex].optional.includes(node)){
 						sharingElement.optionalNodes.forEach(function(optionalNode, sharingIndex){
 							if (upstreamRefNodes[dimension][directionIndex].optional.includes(optionalNode)){

@@ -41,7 +41,9 @@ if (modulePath){
         }
         setTimeout(function(){
             const outcome = self.localActions[functionToExecute](parameters);
-            form.setValueOf('outcome', outcome);
+            if (outcome !== undefined){
+                form.setValueOf('outcome', outcome);
+            }
             Pmg.addFeedback(Pmg.message('actionDone'), null, ' ');
         }, 0);
     });

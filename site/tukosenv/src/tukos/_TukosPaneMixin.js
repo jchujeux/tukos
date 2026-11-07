@@ -38,8 +38,8 @@ define (["dojo/_base/declare", "dojo/_base/lang", "dojo/_base/Deferred", "dojo/w
 			}
 			require(["tukos/menuUtils", "tukos/widgets/widgetCustomUtils"], function(mutils, wcutils){
                 if (!Pmg.isRestrictedUser()){
-	                menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget), widgetName = widget.widgetName;
-	                if(utils.in_array(widgetName, self.objectIdCols)){
+	                menuItemsArgs = lang.hitch(wcutils, wcutils.customizationContextMenuItems)(widget);
+	                if(utils.in_array(widget.widgetName, self.objectIdCols)){
 	                    menuItemsArgs = menuItemsArgs.concat(lang.hitch(self, wcutils.idColsContextMenuItems)(widget));
 	                }
 				}

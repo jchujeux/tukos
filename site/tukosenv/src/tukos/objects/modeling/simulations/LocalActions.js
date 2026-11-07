@@ -1,8 +1,9 @@
-define(["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/json5", "tukos/objects/modeling/localActionsUtils", "tukos/objects/modeling/Global", "tukos/utils",  "tukos/PageManager"], 
-function(declare, lang, when, JSON5, localActionsUtils, Global, utils, Pmg){
+define(["dojo/_base/declare", "dojo/_base/lang", "dojo/when", "dojo/json5", "tukos/objects/modeling/localActionsUtils", "tukos/objects/modeling/localActionsHiUtils", "tukos/utils",  "tukos/PageManager"], 
+function(declare, lang, when, JSON5, localActionsUtils, localActionsHiUtils, utils, Pmg){
 	    return declare(null, {
 		constructor: function(args){
 			declare.safeMixin(this, args);
+			this.onReadyMessageObject = {};
 		},
 		setNodalDofColumns: function(){
 			const form = this.form, dofNames = form.getWidget('dofnames').collection.fetchSync();
@@ -26,15 +27,16 @@ function(declare, lang, when, JSON5, localActionsUtils, Global, utils, Pmg){
 			form.setValueOf('ndof', dofNames.length);
 		},
 		getMeshDiagram: function(){
-			const  form = this.form, currentTab = Pmg.tabs.currentPane(), meshId = form.valueOf('meshid');
-			return Pmg.tabs.getTab(meshId, 'mdlmeshes', true);
+			const  form = this.form, meshId = form.valueOf('meshid');
+			return Pmg.tabs.getTab(meshId, 'mdlmeshes', true, true);
 		},
 		runSimulation: function(mode){
-			Pmg.setFeedback(Pmg.message('Starting simulation ...'));
-			const form = this.form;
+			Pmg.setFeedback(Pmg.message('Preparing  simulation ...'));
+			const self = this, form = this.form;
 			when(this.getMeshDiagram(), function(meshTab){
-				const meshForm = meshTab.form, groupsMaterialsElements = localActionsUtils.preProcessGroupsMaterialsElements(form, meshForm), nodalCoordinates = localActionsUtils.preProcessNodes(meshForm, 'gnodes', 'coord'), numNodes = nodalCoordinates[0].length,
-					  ndof = form.valueOf('ndof'), {neq, equationsIndexes, imposedValues} = localActionsUtils.preProcessEquationsAndImposedValues(form, meshForm, numNodes, ndof), nodalRhs = localActionsUtils.preProcessNodalRhs(form, meshForm, numNodes, ndof, equationsIndexes);
+				const meshForm = meshTab.form, groupsMaterialsElements = localActionsHiUtils.preProcessGroupsMaterialsElements(form, meshForm), nodalCoordinates = localActionsUtils.preProcessNodes(meshForm.getWidget('gnodes').collection.fetchSync(), 'coord'), 
+					  numNodes = nodalCoordinates[0].length, ndof = form.valueOf('ndof'), {neq, equationsIndexes, imposedValues} = localActionsHiUtils.preProcessEquationsAndImposedValues(form, meshForm, numNodes, ndof),
+					  nodalRhs = localActionsHiUtils.preProcessNodalRhs(form, meshForm, numNodes, ndof, equationsIndexes);
 				let globalProperties = form.valueOf('properties'), nonlinearOptions = form.valueOf('nonlinearoptions');
 				if (globalProperties){
 					globalProperties = JSON5.parse(globalProperties);
@@ -46,18 +48,41 @@ function(declare, lang, when, JSON5, localActionsUtils, Global, utils, Pmg){
 				}
 				when(groupsMaterialsElements, function(groups){
 					const globalArgs = {dimension: form.valueOf('dimension'), ndof: form.valueOf('ndof'), nodal: {coordinates: nodalCoordinates, equationsIndexes: equationsIndexes}, neq: neq, imposedValues: imposedValues, 
-						groups: groups, nodalRhs: nodalRhs, properties: globalProperties, nonlinearOptions: nonlinearOptions},
-						  global = new Global(globalArgs);
-					if (mode === 'run'){
-							  const timeDependency = form.valueOf('timedependency'), linearity = form.valueOf('linearity'), simulator = timeDependency + utils.capitalize(linearity);
-						require(["tukos/objects/modeling/simulations/" + simulator], function(simulator){
-							simulator.run(global);
-							localActionsUtils.postProcessSolution(form, global, 'nodalsolution', 'dof');
-							Pmg.addFeedback(Pmg.message('Simulation completed'));
-						});
+						groups: groups, nodalRhs: nodalRhs, properties: globalProperties, nonlinearOptions: nonlinearOptions};
+					const timeDependency = form.valueOf('timedependency'), linearity = form.valueOf('linearity'), simulator = timeDependency + utils.capitalize(linearity);
+					const diagramEditor = form.getWidget('gmeshdiagram'), diagramOptions = diagramEditor.get('diagramOptions');
+					let simulationWorker;
+					self.onReadyMessageObject = Object.assign(self.onReadyMessageObject, {action: 'run', simulator: simulator, globalArgs: globalArgs, mode: mode, dofNames: form.getWidget('dofnames').collection.fetchSync().map(x => x),
+						diagramOptions: diagramOptions ? JSON5.parse(diagramOptions) : {}, nodalSolution: mode === "run" ? [] : localActionsUtils.preProcessNodes(form.getWidget('nodalsolution').collection.fetchSync(), 'dof')});
+					if (this.simulationWorker){
+						simulationWorker = this.simulationWorker;
 					}else{
-						localActionsUtils.updateSolutionDiagram(form, global, 'nodalsolution', 'dof');
+						simulationWorker = this.simulationWorker = new Worker(require.toUrl("tukos/objects/modeling/simulations/simulationWorker"));
 					}
+					simulationWorker.onmessage = function(e){
+						//console.log('message received from worker: ', e.data);
+						switch(e.data.status){
+							case 'notReady':
+								console.log('not ready');
+								break;
+							case 'ready': 
+								simulationWorker.postMessage(self.onReadyMessageObject);
+								break;
+							case 'nodalSolutionDone':
+								form.setValueOf('nodalsolution', localActionsUtils.postProcessNodes(e.data.nodalSolution, 'dof'));
+								break;
+							case 'svgDiagramStringDone':
+								localActionsHiUtils.postProcessDiagram(form, 'gmeshdiagram', e.data.svgString);
+								break;
+							case 'addFeedback':
+								Pmg.addFeedback(Pmg.message(e.data.message));
+								break;
+							default:
+								console.log('unknown status' + e.data);
+								//myWorker.terminate();
+						}
+					}
+					simulationWorker.postMessage({action: 'isReady?'});
 				});
 			});
 		}

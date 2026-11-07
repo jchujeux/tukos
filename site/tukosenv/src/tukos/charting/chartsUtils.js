@@ -58,7 +58,7 @@ define(["dojo/_base/lang", "dojo/when", "tukos/utils", "tukos/hiutils", "tukos/P
 												const ignoreChange = j.includes('shrink'), isUserEdit = !ignoreChange;
 												grid.updateDirty(idp, j, kpi, false, isUserEdit, ignoreChange);
 												if (kpi === false){
-													Pmg.addFeedback('Pmg.serverKpierror' + ': ' + ' - ' + Pmg.message('col') + ': ' + j + Pmg.message('idp') + ': ' + idp);
+													Pmg.addFeedback('Pmg.serverKpierror' + ': ' + ' - ' + Pmg.message('col') + ': ' + j + Pmg.message(' idp') + ': ' + idp);
 												}
 											});
 										});

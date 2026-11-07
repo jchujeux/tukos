@@ -3,7 +3,7 @@ define(["dojo/_base/lang", "dojo/dom-construct", "dojo/string", "dojo/when", "do
 	var separator = '|';
     return {
       
-	htmlToText(theHtml){
+	htmlToText: function(theHtml){
 		return theHtml ? theHtml.replace(/<[^>]+>/g, ' ') : theHtml;
 	},
     objectTable: function(object, hasCheckboxes, selectedLeaves, atts){
