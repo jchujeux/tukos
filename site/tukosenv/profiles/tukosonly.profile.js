@@ -75,6 +75,8 @@ var profile = {
 	// <http://dojotoolkit.org/reference-guide/dojo/has.html>.
 	staticHasFeatures: {
 		// The trace & log APIs are used for debugging the loader, so we do not need them in the build.
+		'dojo-cdn': false,
+		'dojo-sniff': false,
 		'dojo-trace-api': false,
 		'dojo-log-api': false,
 

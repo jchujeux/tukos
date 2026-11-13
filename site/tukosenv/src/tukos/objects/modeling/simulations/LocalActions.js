@@ -51,13 +51,11 @@ function(declare, lang, when, JSON5, localActionsUtils, localActionsHiUtils, uti
 						groups: groups, nodalRhs: nodalRhs, properties: globalProperties, nonlinearOptions: nonlinearOptions};
 					const timeDependency = form.valueOf('timedependency'), linearity = form.valueOf('linearity'), simulator = timeDependency + utils.capitalize(linearity);
 					const diagramEditor = form.getWidget('gmeshdiagram'), diagramOptions = diagramEditor.get('diagramOptions');
-					let simulationWorker;
 					self.onReadyMessageObject = Object.assign(self.onReadyMessageObject, {action: 'run', simulator: simulator, globalArgs: globalArgs, mode: mode, dofNames: form.getWidget('dofnames').collection.fetchSync().map(x => x),
 						diagramOptions: diagramOptions ? JSON5.parse(diagramOptions) : {}, nodalSolution: mode === "run" ? [] : localActionsUtils.preProcessNodes(form.getWidget('nodalsolution').collection.fetchSync(), 'dof')});
-					if (this.simulationWorker){
-						simulationWorker = this.simulationWorker;
-					}else{
-						simulationWorker = this.simulationWorker = new Worker(require.toUrl("tukos/objects/modeling/simulations/simulationWorker"));
+					if (!this.simulationWorker){//simulationWorker is in the Window space: allows simulationWorker to be shared across LocalActions instantiations
+						simulationWorker = new Worker(require.toUrl("tukos/objects/modeling/simulations/simulationWorker.js"));
+						simulationWorker.postMessage({action: 'initialize', baseUrl: require.toUrl("dojo").slice(0, -4), environment: Pmg.cache.environment});
 					}
 					simulationWorker.onmessage = function(e){
 						//console.log('message received from worker: ', e.data);

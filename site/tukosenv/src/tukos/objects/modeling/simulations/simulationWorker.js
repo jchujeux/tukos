@@ -1,8 +1,11 @@
-self.dojoConfig = {async: 1, packages: [{"name":"dojo","location":"/tukos/tukosenv/src/dojo"}, {"name":"tukos","location":"/tukos/tukosenv/src/tukos"}]};
-importScripts("https://localhost/tukos/tukosenv/src/dojo/dojo.js");
-this.isReady = true;
 onmessage = (e) => {
 	switch(e.data.action){
+		case 'initialize':
+			const baseUrl = e.data.baseUrl, dojoUrl = baseUrl + (e.data.environment === 'production' ? 'workerdojo/' : '');
+			self.dojoConfig = {async: 1, packages: [{"name":"dojo","location":`${dojoUrl}dojo`}, {"name":"tukos","location":`${baseUrl}tukos`}], has: {"dom": false, "host-browser": false}};
+			importScripts(`${self.origin}${dojoUrl}dojo/dojo.js`);
+			self.isReady = true;
+			break;
 		case 'isReady?':
 			if (self.isReady){
 				self.postMessage({status: 'ready'});			

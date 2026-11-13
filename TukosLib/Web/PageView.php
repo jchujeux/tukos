@@ -185,6 +185,7 @@ class PageView extends Translator{
             $view->enableOffline = $this->user->isOfflineEnabled();
             $view->loadingMessage = $this->tr('Loading') . '...';
             $this->pageManagerArgs['appName'] = Tfk::$registry->appName;
+            $this->pageManagerArgs['environment'] = Tfk::$environment;
             $this->pageManagerArgs['menuBarDescription'] = $this->menuBarDescription($modulesMenuLayout);
             $this->pageManagerArgs['objectsDomainAliases'] = Directory::objectsDomainAliases();
             $this->pageManagerArgs['userRights'] = $this->user->rights();
